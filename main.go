@@ -3,19 +3,11 @@ package main
 import (
 	"log"
 	"os"
+	"sort"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/dev/command"
-)
-
-var (
-	machineFlag = cli.StringFlag{
-		Name:        "machine, m",
-		Value:       "dev",
-		Usage:       "Provide a machine name",
-		DefaultText: "dev",
-	}
 )
 
 func main() {
@@ -36,8 +28,10 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	sort.Sort(cli.FlagsByName(app.Flags))
+	sort.Sort(cli.CommandsByName(app.Commands))
+
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

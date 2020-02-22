@@ -52,7 +52,7 @@ func Prepare(c *cli.Context) error {
 
 	fmt.Println("Preparing the machine:", machine)
 
-	args := []string{"multipass", "transfer", installScript, machine + ":/tmp/install.sh"}
+	args := []string{"multipass", "transfer", installDir, machine + ":/tmp/install.sh"}
 	execErr := syscall.Exec(multipass, args, os.Environ())
 	if execErr != nil {
 		fmt.Println(execErr)
