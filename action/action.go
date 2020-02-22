@@ -37,11 +37,11 @@ func Prepare(c *cli.Context) error {
 	machine := c.String("machine")
 	phpVersion := c.String("php")
 
-	installScript := "./scripts/php" + phpVersion + "/install.sh"
+	installDir := "./scripts/php" + phpVersion
 
-	_, err := os.Stat(installScript)
+	_, err := os.Stat(installDir)
 	if os.IsNotExist(err) {
-		return errors.New("unable to find the file " + installScript)
+		return errors.New("unable to find the file " + installDir)
 	}
 
 	multipass, err := exec.LookPath("multipass")
