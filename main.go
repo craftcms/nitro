@@ -29,10 +29,10 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(),
-			command.Update(),
-			command.SSH(),
 			command.Prepare(),
 			command.Build(),
+			command.SSH(),
+			command.Update(),
 		},
 	}
 

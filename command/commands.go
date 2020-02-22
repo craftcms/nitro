@@ -3,7 +3,7 @@ package command
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/dev/actions"
+	"github.com/pixelandtonic/dev/action"
 )
 
 var (
@@ -21,7 +21,7 @@ func Initialize() *cli.Command {
 		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
-			if err := actions.Initialize(c); err != nil {
+			if err := action.Initialize(c); err != nil {
 				return err
 			}
 			return nil
@@ -36,7 +36,7 @@ func Update() *cli.Command {
 		Aliases: []string{"u"},
 		Usage:   "Update a machine with the latest software",
 		Action: func(c *cli.Context) error {
-			if err := actions.Update(c); err != nil {
+			if err := action.Update(c); err != nil {
 				return err
 			}
 			return nil
@@ -48,10 +48,10 @@ func Update() *cli.Command {
 func SSH() *cli.Command {
 	return &cli.Command{
 		Name:    "ssh",
-		Aliases: []string{"ssh"},
+		Aliases: []string{"s"},
 		Usage:   "SSH into a machine as administrator",
 		Action: func(c *cli.Context) error {
-			if err := actions.SSH(c); err != nil {
+			if err := action.SSH(c); err != nil {
 				return err
 			}
 			return nil
@@ -66,7 +66,7 @@ func Prepare() *cli.Command {
 		Aliases: []string{"p"},
 		Usage:   "Prepare the machine for PHP development",
 		Action: func(c *cli.Context) error {
-			if err := actions.Prepare(c); err != nil {
+			if err := action.Prepare(c); err != nil {
 				return err
 			}
 			return nil
@@ -89,7 +89,7 @@ func Build() *cli.Command {
 		Aliases: []string{"b"},
 		Usage:   "Build the machine for PHP development",
 		Action: func(c *cli.Context) error {
-			if err := actions.Build(c); err != nil {
+			if err := action.Build(c); err != nil {
 				return err
 			}
 			return nil
