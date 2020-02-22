@@ -1,0 +1,15 @@
+{
+    "name": "craftcms/dev",
+    "description": "A better way to develop locally without Docker or Vagrant",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jason McCallister",
+            "email": "jason@craftcms.com"
+        }
+    ],
+   "bin": [
+       "bin/dev"
+   ]
+}

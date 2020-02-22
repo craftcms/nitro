@@ -1,0 +1,13 @@
+# ignore the following for composer archive
+action export-ignore
+command export-ignore
+scripts export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+go.mod export-ignore
+go.sum export-ignore
+main.go export-ignore
+Makefile export-ignore
+
+# Auto detect text files and perform LF normalization
+* text=auto
