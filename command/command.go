@@ -61,6 +61,7 @@ func Install() *cli.Command {
 			installPHP(),
 			installNginx(),
 			installMariaDB(),
+			installRedis(),
 		},
 	}
 }
@@ -110,6 +111,21 @@ func installMariaDB() *cli.Command {
 		Usage:   "Install MariaDb Server on a machine",
 		Action: func(c *cli.Context) error {
 			if err := action.InstallMariaDB(c); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+}
+
+func installRedis() *cli.Command {
+	return &cli.Command{
+		Name:    "redis",
+		Aliases: []string{"r"},
+		Usage:   "Install Redis on a machine",
+		Action: func(c *cli.Context) error {
+			if err := action.InstallRedis(c); err != nil {
 				return err
 			}
 
