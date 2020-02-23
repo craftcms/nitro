@@ -63,14 +63,16 @@ func SSH() *cli.Command {
 
 func Install() *cli.Command {
 	return &cli.Command{
-		Name:  "install",
-		Usage: "Install offers common options for installing packages on a machine",
+		Name:        "install",
+		Usage:       "",
+		Description: "Install offers common options for installing packages on a machine",
 		Action: func(c *cli.Context) error {
 			return nil
 		},
 		Flags: []cli.Flag{&machineFlag},
 		Subcommands: []*cli.Command{
 			installPHP(),
+			installNginx(),
 		},
 	}
 }
@@ -89,12 +91,30 @@ func installPHP() *cli.Command {
 		Flags: []cli.Flag{
 			&machineFlag,
 			&cli.StringFlag{
-				Name:        "php",
-				Aliases:     []string{"p"},
+				Name:        "version",
+				Aliases:     []string{"v"},
 				Usage:       "Select which version of PHP to install",
 				Value:       "7.4",
 				DefaultText: "7.4",
 			},
+		},
+	}
+}
+
+func installNginx() *cli.Command {
+	return &cli.Command{
+		Name:    "nginx",
+		Aliases: []string{"n"},
+		Usage:   "Install nginx on a machine",
+		Action: func(c *cli.Context) error {
+			if err := action.InstallNginx(c); err != nil {
+				return err
+			}
+
+			return nil
+		},
+		Flags: []cli.Flag{
+			&machineFlag,
 		},
 	}
 }

@@ -79,7 +79,7 @@ func SSH(c *cli.Context) error {
 
 func InstallPHP(c *cli.Context) error {
 	machine := c.String("machine")
-	version := c.String("php")
+	version := c.String("version")
 
 	multipass, err := exec.LookPath("multipass")
 	if err != nil {
@@ -99,6 +99,28 @@ func InstallPHP(c *cli.Context) error {
 	}
 
 	fmt.Println("Installing PHP on machine:", machine)
+
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}
+
+func InstallNginx(c *cli.Context) error {
+	machine := c.String("machine")
+
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "nginx"}
+
+	fmt.Println("Installing Nginx on machine:", machine)
 
 	execErr := syscall.Exec(multipass, args, os.Environ())
 	if execErr != nil {
