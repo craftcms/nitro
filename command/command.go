@@ -55,7 +55,7 @@ func Install() *cli.Command {
 		Usage:       "Install common tools such as PHP, web servers, and databases",
 		Description: "Install offers common options for installing packages on a machine",
 		Action: func(c *cli.Context) error {
-			return nil
+			return cli.ShowSubcommandHelp(c)
 		},
 		Subcommands: []*cli.Command{
 			installPHP(),
