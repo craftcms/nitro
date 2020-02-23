@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/exec"
 	"sort"
 
 	"github.com/urfave/cli/v2"
@@ -45,10 +47,17 @@ func main() {
 		},
 	}
 
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.WithValue(context.Background(), "multipass", multipass)
+
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.RunContext(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
