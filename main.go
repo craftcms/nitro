@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/dev/command"
+	"github.com/pixelandtonic/phpdev/command"
 )
 
 // Runner is an interface that handles

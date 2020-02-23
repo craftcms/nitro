@@ -8,7 +8,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/dev/install"
+	"github.com/pixelandtonic/phpdev/install"
 )
 
 // Initialize is used to create a new machine and setup any dependencies

@@ -1,4 +1,4 @@
-module github.com/pixelandtonic/dev
+module github.com/pixelandtonic/phpdev
 
 go 1.13
 

@@ -1,14 +1,9 @@
 package command
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/urfave/cli/v2"
 
-	"bufio"
-
-	"github.com/pixelandtonic/dev/action"
+	"github.com/pixelandtonic/phpdev/action"
 )
 
 func Initialize() *cli.Command {
@@ -91,12 +86,6 @@ func Delete() *cli.Command {
 		Usage:       "Delete a machine",
 		Description: "Delete a machine when no longer needed",
 		Action: func(c *cli.Context) error {
-			reader := bufio.NewReader(os.Stdin)
-
-			fmt.Println("What is your name?")
-			confirm, _ := reader.ReadString("\n")
-
-
 			if err := action.Delete(c); err != nil {
 				return err
 			}

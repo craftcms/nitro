@@ -1,5 +1,5 @@
 {
-    "name": "craftcms/dev",
+    "name": "craftcms/phpdev",
     "description": "A better way to develop locally without Docker or Vagrant",
     "type": "project",
     "license": "MIT",
@@ -10,6 +10,6 @@
         }
     ],
    "bin": [
-       "bin/dev"
+       "bin/phpdev"
    ]
 }
