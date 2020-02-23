@@ -35,13 +35,13 @@ func Initialize(c *cli.Context) error {
 // Prepare will prepare a machine for development work
 func Prepare(c *cli.Context) error {
 	machine := c.String("machine")
-	phpVersion := c.String("php")
+	php := c.String("php")
 
-	installDir := "./scripts/php" + phpVersion
+	installScript := "./scripts/php" + php + "/install.sh"
 
-	_, err := os.Stat(installDir)
+	_, err := os.Stat(installScript)
 	if os.IsNotExist(err) {
-		return errors.New("unable to find the file " + installDir)
+		return errors.New("unable to find the file " + installScript)
 	}
 
 	multipass, err := exec.LookPath("multipass")
@@ -52,7 +52,7 @@ func Prepare(c *cli.Context) error {
 
 	fmt.Println("Preparing the machine:", machine)
 
-	args := []string{"multipass", "transfer", installDir, machine + ":/tmp/install.sh"}
+	args := []string{"multipass", "transfer", installScript, machine + ":/tmp/install.sh"}
 	execErr := syscall.Exec(multipass, args, os.Environ())
 	if execErr != nil {
 		fmt.Println(execErr)
