@@ -5,3 +5,5 @@ run: build
 clean:
 	multipass delete dev
 	multipass purge
+test:
+	go test ./...
