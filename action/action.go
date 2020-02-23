@@ -174,3 +174,47 @@ func InstallRedis(c *cli.Context) error {
 
 	return nil
 }
+
+func Delete(c *cli.Context) error {
+	machine := c.String("machine")
+
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	args := []string{"multipass", "delete", machine}
+
+	fmt.Println("Deleting machine:", machine)
+
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}
+
+func Stop(c *cli.Context) error {
+	machine := c.String("machine")
+
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	args := []string{"multipass", "stop", machine}
+
+	fmt.Println("Stopping machine:", machine)
+
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}

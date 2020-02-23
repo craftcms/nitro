@@ -1,9 +1,11 @@
 build:
-	go build -o dev .
+	go build -o phpdev .
 run: build
-	./dev init
+	./phpdev init
 clean:
-	multipass delete dev
+	multipass delete phpdev
 	multipass purge
 test:
 	go test ./...
+install:
+	go install

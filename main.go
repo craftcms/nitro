@@ -19,7 +19,7 @@ type Runner interface {
 
 func main() {
 	app := &cli.App{
-		Name:        "dev",
+		Name:        "phpdev",
 		Usage:       "Quickly create new machines to develop PHP applications and websites",
 		Version:     "1.0.0",
 		Description: "A better way to develop PHP applications without Docker or Vagrant",
@@ -30,9 +30,9 @@ func main() {
 			&cli.StringFlag{
 				Name:        "machine",
 				Aliases:     []string{"m"},
-				Value:       "dev",
+				Value:       "phpdev",
 				Usage:       "Provide a machine name",
-				DefaultText: "dev",
+				DefaultText: "phpdev",
 			},
 		},
 		Commands: []*cli.Command{
@@ -40,6 +40,8 @@ func main() {
 			command.SSH(),
 			command.Update(),
 			command.Install(),
+			command.Delete(),
+			command.Stop(),
 		},
 	}
 

@@ -1,7 +1,12 @@
 package command
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/urfave/cli/v2"
+
+	"bufio"
 
 	"github.com/pixelandtonic/dev/action"
 )
@@ -62,6 +67,40 @@ func Install() *cli.Command {
 			installNginx(),
 			installMariaDB(),
 			installRedis(),
+		},
+	}
+}
+
+func Stop() *cli.Command {
+	return &cli.Command{
+		Name:        "stop",
+		Usage:       "Stop a machine",
+		Description: "Stop a machine when not in use",
+		Action: func(c *cli.Context) error {
+			if err := action.Stop(c); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+}
+
+func Delete() *cli.Command {
+	return &cli.Command{
+		Name:        "delete",
+		Usage:       "Delete a machine",
+		Description: "Delete a machine when no longer needed",
+		Action: func(c *cli.Context) error {
+			reader := bufio.NewReader(os.Stdin)
+
+			fmt.Println("What is your name?")
+			confirm, _ := reader.ReadString("\n")
+
+
+			if err := action.Delete(c); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 }
