@@ -11,3 +11,24 @@ packages:
   - git
   - vim
   - openssl
+write_files:
+  - content: |
+      server {
+          listen 80 default_server;
+
+          root CHANGEPATH;
+
+          index index.html index.htm index.php;
+
+          server_name CHANGESERVERNAME;
+
+          location / {
+              try_files $uri $uri/ /index.php$is_args$args;
+          }
+
+          location ~ \.php$ {
+             include snippets/fastcgi-php.conf;
+             fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
+          }
+      }
+    path: /etc/dev-templates/nginx_site.conf
