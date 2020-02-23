@@ -1,6 +1,5 @@
 #!/bin/bash
-# add ppas
-sudo add-apt-repository -y ppa:nginx/development
+sudo add-apt-repository -y ppa:nginx/stable
 sudo add-apt-repository -y ppa:ondrej/php
 sudo apt-get update
 
@@ -20,7 +19,3 @@ export MYSQL_ROOT=$(sudo cat /etc/dev/.mysql_root_password)
 export USER_PASS=$(openssl rand -base64 8)
 echo "$USER_PASS" | sudo tee /etc/dev/.mysql_user_password
 export MYSQL_USER=$(cat /etc/dev/.mysql_user_password)
-
-# run the setup script
-sudo sed -i 's|CHANGEME|'$MYSQL_USER'|g' /etc/dev/setup.sql
-mysql --user=root --password="$MYSQL_ROOT" < /etc/dev/setup.sql
