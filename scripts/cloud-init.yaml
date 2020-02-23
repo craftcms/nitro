@@ -29,4 +29,22 @@ write_files:
              fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
           }
       }
-    path: /etc/dev-templates/nginx_site.conf
+    path: /etc/phpdev/templates/nginx_site.conf
+  - content: |
+      #!/bin/bash
+      SITE="$1"
+      PATH="$2"
+
+      add_nginx_site() {
+        // check the number of args
+        // get the name of the site
+        // get the path to index.php
+        // get the php version
+        // cp /etc/phpdev/templates/nginx_site.conf /etc/nginx/sites-available/$1.conf
+        // sed servername
+        // sed phpversion
+        // sed pathtoindex.php
+        echo "created new site $SITE at $PATH"
+      }
+    path: /usr/sbin/add-nginx-site
+    permissions: '+770'
