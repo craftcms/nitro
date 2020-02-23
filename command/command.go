@@ -1,8 +1,6 @@
 package command
 
 import (
-	"log"
-
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/dev/action"
@@ -24,7 +22,6 @@ func Initialize() *cli.Command {
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
 			if err := action.Initialize(c); err != nil {
-				log.Println("testing")
 				return err
 			}
 
@@ -64,10 +61,24 @@ func SSH() *cli.Command {
 	}
 }
 
-func InstallPHP() *cli.Command {
+func Install() *cli.Command {
 	return &cli.Command{
-		Name:    "php-install",
-		Aliases: []string{"php"},
+		Name:  "install",
+		Usage: "Install offers common options for installing packages on a machine",
+		Action: func(c *cli.Context) error {
+			return nil
+		},
+		Flags: []cli.Flag{&machineFlag},
+		Subcommands: []*cli.Command{
+			installPHP(),
+		},
+	}
+}
+
+func installPHP() *cli.Command {
+	return &cli.Command{
+		Name:    "php",
+		Aliases: []string{"p"},
 		Usage:   "Install PHP on a machine",
 		Action: func(c *cli.Context) error {
 			if err := action.InstallPHP(c); err != nil {

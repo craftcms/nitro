@@ -87,14 +87,14 @@ func InstallPHP(c *cli.Context) error {
 		return err
 	}
 
-	phpCommands, cmdErr := install.PHP(version)
+	phpArgs, cmdErr := install.PHP(version)
 	if cmdErr != nil {
 		fmt.Println(err)
 		return err
 	}
 
 	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y"}
-	for _, v := range phpCommands {
+	for _, v := range phpArgs {
 		args = append(args, v)
 	}
 

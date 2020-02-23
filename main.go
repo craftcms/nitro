@@ -30,7 +30,7 @@ func main() {
 			command.Initialize(),
 			command.SSH(),
 			command.Update(),
-			command.InstallPHP(),
+			command.Install(),
 		},
 	}
 
