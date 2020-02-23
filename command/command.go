@@ -1,6 +1,8 @@
 package command
 
 import (
+	"log"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/dev/action"
@@ -22,8 +24,10 @@ func Initialize() *cli.Command {
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
 			if err := action.Initialize(c); err != nil {
+				log.Println("testing")
 				return err
 			}
+
 			return nil
 		},
 		Flags: []cli.Flag{&machineFlag},
@@ -60,13 +64,13 @@ func SSH() *cli.Command {
 	}
 }
 
-func Prepare() *cli.Command {
+func InstallPHP() *cli.Command {
 	return &cli.Command{
-		Name:    "prepare",
-		Aliases: []string{"p"},
-		Usage:   "Prepare the machine for PHP development",
+		Name:    "php-install",
+		Aliases: []string{"php"},
+		Usage:   "Install PHP on a machine",
 		Action: func(c *cli.Context) error {
-			if err := action.Prepare(c); err != nil {
+			if err := action.InstallPHP(c); err != nil {
 				return err
 			}
 			return nil
@@ -75,27 +79,11 @@ func Prepare() *cli.Command {
 			&machineFlag,
 			&cli.StringFlag{
 				Name:        "php",
+				Aliases:     []string{"p"},
+				Usage:       "Select which version of PHP to install",
 				Value:       "7.4",
-				Usage:       "Select a PHP version to install",
 				DefaultText: "7.4",
 			},
-		},
-	}
-}
-
-func Build() *cli.Command {
-	return &cli.Command{
-		Name:    "build",
-		Aliases: []string{"b"},
-		Usage:   "Build the machine for PHP development",
-		Action: func(c *cli.Context) error {
-			if err := action.Build(c); err != nil {
-				return err
-			}
-			return nil
-		},
-		Flags: []cli.Flag{
-			&machineFlag,
 		},
 	}
 }

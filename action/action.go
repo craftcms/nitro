@@ -1,13 +1,14 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/pixelandtonic/dev/install"
 )
 
 // Initialize is used to create a new machine and setup any dependencies
@@ -22,63 +23,11 @@ func Initialize(c *cli.Context) error {
 	}
 
 	// create the machine
-	args := []string{"multipass", "launch", "--name", machine}
+	args := []string{"multipass", "launch", "--name", machine, "--cloud-init", "./scripts/cloud-init.yaml"}
 	launchErr := syscall.Exec(multipass, args, os.Environ())
 	if launchErr != nil {
 		fmt.Println(launchErr)
 		return launchErr
-	}
-
-	return nil
-}
-
-// Prepare will prepare a machine for development work
-func Prepare(c *cli.Context) error {
-	machine := c.String("machine")
-	php := c.String("php")
-
-	installScript := "./scripts/php" + php + "/install.sh"
-
-	_, err := os.Stat(installScript)
-	if os.IsNotExist(err) {
-		return errors.New("unable to find the file " + installScript)
-	}
-
-	multipass, err := exec.LookPath("multipass")
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	fmt.Println("Preparing the machine:", machine)
-
-	args := []string{"multipass", "transfer", installScript, machine + ":/tmp/install.sh"}
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
-	}
-
-	return nil
-}
-
-// Build will prepare a machine for development work
-func Build(c *cli.Context) error {
-	machine := c.String("machine")
-
-	multipass, err := exec.LookPath("multipass")
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	fmt.Println("Building the machine:", machine)
-
-	args := []string{"multipass", "exec", machine, "bash", "/tmp/install.sh"}
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
 	}
 
 	return nil
@@ -119,6 +68,38 @@ func SSH(c *cli.Context) error {
 	fmt.Println("Connecting to machine:", machine)
 
 	args := []string{"multipass", "shell", machine}
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}
+
+func InstallPHP(c *cli.Context) error {
+	machine := c.String("machine")
+	version := c.String("php")
+
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	phpCommands, cmdErr := install.PHP(version)
+	if cmdErr != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y"}
+	for _, v := range phpCommands {
+		args = append(args, v)
+	}
+
+	fmt.Println("Installing PHP on machine:", machine)
+
 	execErr := syscall.Exec(multipass, args, os.Environ())
 	if execErr != nil {
 		fmt.Println(execErr)

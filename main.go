@@ -10,6 +10,13 @@ import (
 	"github.com/pixelandtonic/dev/command"
 )
 
+// Runner is an interface that handles
+// running commands, the real use case
+// is to call syscall.Exec
+type Runner interface {
+	Exec(argv0 string, argv []string, envv []string) (err error)
+}
+
 func main() {
 	app := &cli.App{
 		Name:        "dev",
@@ -21,10 +28,9 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(),
-			command.Prepare(),
-			command.Build(),
 			command.SSH(),
 			command.Update(),
+			command.InstallPHP(),
 		},
 	}
 
