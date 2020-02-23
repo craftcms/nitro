@@ -64,7 +64,7 @@ func SSH() *cli.Command {
 func Install() *cli.Command {
 	return &cli.Command{
 		Name:        "install",
-		Usage:       "",
+		Usage:       "Install common tools such as PHP, web servers, and databases",
 		Description: "Install offers common options for installing packages on a machine",
 		Action: func(c *cli.Context) error {
 			return nil
@@ -73,6 +73,7 @@ func Install() *cli.Command {
 		Subcommands: []*cli.Command{
 			installPHP(),
 			installNginx(),
+			installMariaDB(),
 		},
 	}
 }
@@ -108,6 +109,24 @@ func installNginx() *cli.Command {
 		Usage:   "Install nginx on a machine",
 		Action: func(c *cli.Context) error {
 			if err := action.InstallNginx(c); err != nil {
+				return err
+			}
+
+			return nil
+		},
+		Flags: []cli.Flag{
+			&machineFlag,
+		},
+	}
+}
+
+func installMariaDB() *cli.Command {
+	return &cli.Command{
+		Name:    "maria",
+		Aliases: []string{"m"},
+		Usage:   "Install MariaDb Server on a machine",
+		Action: func(c *cli.Context) error {
+			if err := action.InstallMariaDB(c); err != nil {
 				return err
 			}
 

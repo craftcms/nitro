@@ -130,3 +130,25 @@ func InstallNginx(c *cli.Context) error {
 
 	return nil
 }
+
+func InstallMariaDB(c *cli.Context) error {
+	machine := c.String("machine")
+
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "mariadb-server"}
+
+	fmt.Println("Installing MariaDB on machine:", machine)
+
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}
