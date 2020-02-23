@@ -3,13 +3,11 @@ runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php
 packages:
-  - tmux
   - curl
   - wget
   - zip
   - unzip
   - git
-  - vim
   - openssl
 write_files:
   - content: |
