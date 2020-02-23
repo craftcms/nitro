@@ -6,15 +6,6 @@ import (
 	"github.com/pixelandtonic/dev/action"
 )
 
-var (
-	machineFlag = cli.StringFlag{
-		Name:        "machine, m",
-		Value:       "dev",
-		Usage:       "Provide a machine name",
-		DefaultText: "dev",
-	}
-)
-
 func Initialize() *cli.Command {
 	return &cli.Command{
 		Name:    "init",
@@ -27,7 +18,6 @@ func Initialize() *cli.Command {
 
 			return nil
 		},
-		Flags: []cli.Flag{&machineFlag},
 	}
 }
 
@@ -42,7 +32,6 @@ func Update() *cli.Command {
 			}
 			return nil
 		},
-		Flags: []cli.Flag{&machineFlag},
 	}
 }
 
@@ -57,7 +46,6 @@ func SSH() *cli.Command {
 			}
 			return nil
 		},
-		Flags: []cli.Flag{&machineFlag},
 	}
 }
 
@@ -69,7 +57,6 @@ func Install() *cli.Command {
 		Action: func(c *cli.Context) error {
 			return nil
 		},
-		Flags: []cli.Flag{&machineFlag},
 		Subcommands: []*cli.Command{
 			installPHP(),
 			installNginx(),
@@ -90,7 +77,6 @@ func installPHP() *cli.Command {
 			return nil
 		},
 		Flags: []cli.Flag{
-			&machineFlag,
 			&cli.StringFlag{
 				Name:        "version",
 				Aliases:     []string{"v"},
@@ -114,9 +100,6 @@ func installNginx() *cli.Command {
 
 			return nil
 		},
-		Flags: []cli.Flag{
-			&machineFlag,
-		},
 	}
 }
 
@@ -131,9 +114,6 @@ func installMariaDB() *cli.Command {
 			}
 
 			return nil
-		},
-		Flags: []cli.Flag{
-			&machineFlag,
 		},
 	}
 }

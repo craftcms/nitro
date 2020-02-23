@@ -26,6 +26,15 @@ func main() {
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
 		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "machine",
+				Aliases:     []string{"m"},
+				Value:       "dev",
+				Usage:       "Provide a machine name",
+				DefaultText: "dev",
+			},
+		},
 		Commands: []*cli.Command{
 			command.Initialize(),
 			command.SSH(),
