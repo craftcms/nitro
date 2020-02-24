@@ -42,8 +42,8 @@ func TestPHPVersionFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := PHPVersionFlag(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("PHPVersionFlag() error = %v, wantErr %v", err, tt.wantErr)
+			if err := PHPVersion(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("PHPVersion() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -91,8 +91,8 @@ func TestDatabaseFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := DatabaseFlag(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("DatabaseFlag() error = %v, wantErr %v", err, tt.wantErr)
+			if err := Database(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("Database() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
