@@ -1,9 +1,16 @@
 package command
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/phpdev/action"
+	"github.com/pixelandtonic/phpdev/validate"
 )
 
 func Initialize() *cli.Command {
@@ -87,10 +94,99 @@ func Delete() *cli.Command {
 		Usage:       "Delete a machine",
 		Description: "Delete a machine when no longer needed",
 		Action: func(c *cli.Context) error {
+			rdr := bufio.NewReader(os.Stdin)
+			fmt.Print("WARNING: Are you sure you wish to perform this task (y/N)? ")
+
+			answer, err := rdr.ReadString(' ')
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(answer, "n") {
+				fmt.Println("Skipping the deletion of", c.String("machine"))
+				return nil
+			}
+
 			if err := action.Delete(c); err != nil {
 				return err
 			}
 			return nil
+		},
+	}
+}
+
+func Create() *cli.Command {
+	return &cli.Command{
+		Name:    "create",
+		Aliases: []string{"c", "up"},
+		Usage:   "Create a new machine for development",
+		Action: func(context *cli.Context) error {
+			// get the PHP version
+			if err := validate.PHPVersionFlag(context.String("php")); err != nil {
+				return err
+			}
+
+			// get the database to install
+			if err := validate.DatabaseFlag(context.String("database")); err != nil {
+				return err
+			}
+
+			// move a phpinfo file into the root site
+			// get the machine ip
+			// print the help to set domain name to ip address
+			// ? add phpdev --machine=phpdev hosts
+
+			return errors.New("not yet implemented")
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "php",
+				Aliases:     []string{"p"},
+				Usage:       "The PHP version to install",
+				Value:       "7.4",
+				DefaultText: "7.4",
+			},
+			&cli.StringFlag{
+				Name:        "database",
+				Aliases:     []string{"d", "db"},
+				Usage:       "The database to install",
+				Required:    false,
+				Value:       "mariadb or postgres",
+				DefaultText: "mariadb",
+			},
+		},
+	}
+}
+
+func Mount() *cli.Command {
+	return &cli.Command{
+		Name:        "mount",
+		Aliases:     []string{"m", "mnt"},
+		Usage:       "Mount a folder to a machine",
+		Description: "Mount a folder to use as a site in the machine",
+		Action: func(c *cli.Context) error {
+
+			// check if the path exists
+			if _, err := os.Stat(c.String("path")); os.IsNotExist(err) {
+				return err
+			}
+
+			return nil
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "path",
+				Aliases:     []string{"p"},
+				Usage:       "The path to the folder to mount",
+				DefaultText: "dummy",
+				Required:    true,
+			},
+			&cli.StringFlag{
+				Name:     "domain",
+				Aliases:  []string{"d"},
+				Usage:    "The domain name to mount into the machine",
+				Required: true,
+			},
 		},
 	}
 }
