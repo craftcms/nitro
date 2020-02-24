@@ -3,7 +3,7 @@ package action
 import (
 	"fmt"
 	"os"
-	"syscall"
+	"os/exec"
 
 	"github.com/urfave/cli/v2"
 
@@ -13,17 +13,38 @@ import (
 // Initialize is used to create a new machine and setup any dependencies
 func Initialize(c *cli.Context) error {
 	machine := c.String("machine")
-
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+	phpVersion := c.String("php")
 
 	fmt.Println("Creating a new machine:", machine)
 
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+
 	// create the machine
-	args := []string{"multipass", "launch", "--name", machine, "--cloud-init", "./scripts/cloud-init.yaml"}
-	launchErr := syscall.Exec(multipass, args, os.Environ())
-	if launchErr != nil {
-		fmt.Println(launchErr)
-		return launchErr
+	cmd := exec.Command(multipass, "launch", "--name", machine, "--cloud-init", "./scripts/cloud-init.yaml")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	// update the machine
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "update"}); err != nil {
+		return err
+	}
+
+	// install the PHP version request
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "php", "--version", phpVersion}); err != nil {
+		return err
+	}
+
+	// install redis
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "redis"}); err != nil {
+		return err
+	}
+
+	// login to the machine
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "ssh"}); err != nil {
+		return err
 	}
 
 	return nil
@@ -32,15 +53,15 @@ func Initialize(c *cli.Context) error {
 // Update will perform system updates on a given machine
 func Update(c *cli.Context) error {
 	machine := c.String("machine")
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	fmt.Println("Updating machine:", machine)
 
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "update", "-y"}
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "update", "-y")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -53,11 +74,11 @@ func SSH(c *cli.Context) error {
 	fmt.Println("Connecting to machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	args := []string{"multipass", "shell", machine}
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "shell", machine)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -72,7 +93,6 @@ func InstallPHP(c *cli.Context) error {
 		return err
 	}
 
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y"}
 	for _, v := range phpArgs {
 		args = append(args, v)
@@ -80,10 +100,12 @@ func InstallPHP(c *cli.Context) error {
 
 	fmt.Println("Installing PHP on machine:", machine)
 
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+	cmd := exec.Command(multipass, "shell", machine)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -95,11 +117,11 @@ func InstallNginx(c *cli.Context) error {
 	fmt.Println("Installing Nginx on machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "nginx"}
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "nginx")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -110,12 +132,12 @@ func InstallMariaDB(c *cli.Context) error {
 
 	fmt.Println("Installing MariaDB on machine:", machine)
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "mariadb-server"}
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "mariadb-server")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -126,12 +148,12 @@ func InstallRedis(c *cli.Context) error {
 
 	fmt.Println("Installing redis on machine:", machine)
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "redis"}
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "redis")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -140,14 +162,14 @@ func InstallRedis(c *cli.Context) error {
 func InstallPostgres(c *cli.Context) error {
 	machine := c.String("machine")
 
-	fmt.Println("Installing postgres on machine:", machine)
+	fmt.Println("Installing PostgreSQL on machine:", machine)
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "postgresql", "postgresql-contrib"}
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "postgresql", "postgresql-contrib")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -158,12 +180,12 @@ func Delete(c *cli.Context) error {
 
 	fmt.Println("Deleting machine:", machine)
 
-	args := []string{"multipass", "delete", machine}
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "delete", machine)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
@@ -174,12 +196,12 @@ func Stop(c *cli.Context) error {
 
 	fmt.Println("Stopping machine:", machine)
 
-	args := []string{"multipass", "stop", machine}
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	execErr := syscall.Exec(multipass, args, os.Environ())
-	if execErr != nil {
-		fmt.Println(execErr)
-		return execErr
+	cmd := exec.Command(multipass, "stop", machine)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil
