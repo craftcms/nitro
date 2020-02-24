@@ -27,6 +27,11 @@ func Initialize(c *cli.Context) error {
 		return err
 	}
 
+	// should we bootstrap the machine?
+	if c.Bool("bootstrap") == false {
+		return nil
+	}
+
 	// update the machine
 	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "update"}); err != nil {
 		return err

@@ -25,10 +25,11 @@ func Initialize() *cli.Command {
 			return nil
 		},
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "quick",
-				Aliases: []string{"q"},
-				Usage:   "Only create the machine, do not bootstrap the installation",
+			&cli.BoolFlag{
+				Name:    "bootstrap",
+				Aliases: []string{"b"},
+				Usage:   "Bootstrap the machine with installation defaults",
+				Value:   true,
 			},
 		},
 	}
