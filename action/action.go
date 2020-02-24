@@ -6,14 +6,13 @@ import (
 	"os/exec"
 
 	"github.com/urfave/cli/v2"
-
-	"github.com/pixelandtonic/phpdev/install"
 )
 
 // Initialize is used to create a new machine and setup any dependencies
 func Initialize(c *cli.Context) error {
 	machine := c.String("machine")
-	phpVersion := c.String("php")
+	php := c.String("php")
+	database := c.String("database")
 
 	fmt.Println("Creating a new machine:", machine)
 
@@ -33,7 +32,18 @@ func Initialize(c *cli.Context) error {
 	}
 
 	// install the PHP version request
-	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "php", "--version", phpVersion}); err != nil {
+	if php == "" {
+		fmt.Println("ERROR")
+		fmt.Println("php is empty")
+		fmt.Println("ERROR")
+		php = "7.4"
+	}
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "php", "--version", php}); err != nil {
+		return err
+	}
+
+	// install the database
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", database}); err != nil {
 		return err
 	}
 
@@ -86,22 +96,23 @@ func SSH(c *cli.Context) error {
 
 func InstallPHP(c *cli.Context) error {
 	machine := c.String("machine")
-	version := c.String("version")
+	//version := c.String("version")
 
-	phpArgs, err := install.PHP(version)
-	if err != nil {
-		return err
-	}
+	//phpArgs, err := install.PHP(version)
+	//if err != nil {
+	//	return err
+	//}
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y"}
-	for _, v := range phpArgs {
-		args = append(args, v)
-	}
+	// TODO fix this to return a string, not a slice
+	//args := ""
+	//for _, v := range phpArgs {
+	//	args =
+	//}
 
 	fmt.Println("Installing PHP on machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	cmd := exec.Command(multipass, "shell", machine)
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "php7.4-cli")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
