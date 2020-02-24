@@ -1,6 +1,9 @@
 package install
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestPHPReturnsCommands(t *testing.T) {
 	// Arrange
@@ -9,7 +12,7 @@ func TestPHPReturnsCommands(t *testing.T) {
 
 	// Act
 	commands, err := PHP(v)
-	total := len(commands)
+	total := len(strings.Split(commands, " "))
 
 	// Assert
 	if err != nil {
@@ -23,17 +26,12 @@ func TestPHPReturnsCommands(t *testing.T) {
 func TestPHPReturnsError(t *testing.T) {
 	// Arrange
 	v := "nothere"
-	expected := 0
 
 	// Act
-	commands, err := PHP(v)
-	total := len(commands)
+	_, err := PHP(v)
 
 	// Assert
 	if err == nil {
 		t.Errorf("expected the error to NOT be nil, got %v", err.Error())
-	}
-	if total != expected {
-		t.Errorf("expected total number of commands to be %v, got %v instead", expected, total)
 	}
 }
