@@ -53,4 +53,3 @@ write_files:
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php
-  - sudo chmod u+x /usr/sbin/phpdev-add-nginx-site

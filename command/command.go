@@ -18,14 +18,6 @@ func Initialize() *cli.Command {
 		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
-			if err := validate.PHPVersion(c.String("php")); err != nil {
-				return nil
-			}
-
-			if err := validate.Database(c.String("database")); err != nil {
-				return nil
-			}
-
 			if err := action.Initialize(c); err != nil {
 				return err
 			}
@@ -34,18 +26,9 @@ func Initialize() *cli.Command {
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:        "php",
-				Aliases:     []string{"p"},
-				Usage:       "The PHP version to install",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-			&cli.StringFlag{
-				Name:        "database",
-				Aliases:     []string{"d", "db", "data"},
-				Usage:       "The database to install",
-				Value:       "mariadb",
-				DefaultText: "mariadb",
+				Name:    "quick",
+				Aliases: []string{"q"},
+				Usage:   "Only create the machine, do not bootstrap the installation",
 			},
 		},
 	}
@@ -184,6 +167,7 @@ func installPHP() *cli.Command {
 			if err := action.InstallPHP(c); err != nil {
 				return err
 			}
+
 			return nil
 		},
 		Flags: []cli.Flag{

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/urfave/cli/v2"
 
@@ -13,9 +14,6 @@ import (
 // Initialize is used to create a new machine and setup any dependencies
 func Initialize(c *cli.Context) error {
 	machine := c.String("machine")
-	php := c.String("php")
-	// TODO remove the hardcoding
-	database := "mariadb"
 
 	fmt.Println("Creating a new machine:", machine)
 
@@ -35,18 +33,12 @@ func Initialize(c *cli.Context) error {
 	}
 
 	// install the PHP version request
-	if php == "" {
-		fmt.Println("ERROR")
-		fmt.Println("php is empty")
-		fmt.Println("ERROR")
-		php = "7.4"
-	}
-	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "php", "--version", php}); err != nil {
-		return err
-	}
+	//if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "php", "--version", php}); err != nil {
+	//	return err
+	//}
 
 	// install the database
-	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", database}); err != nil {
+	if err := c.App.RunContext(c.Context, []string{c.App.Name, "--machine", machine, "install", "mariadb"}); err != nil {
 		return err
 	}
 
@@ -87,10 +79,9 @@ func SSH(c *cli.Context) error {
 	fmt.Println("Connecting to machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	cmd := exec.Command(multipass, "shell", machine)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	args := []string{"multipass", "shell", machine}
+	err := syscall.Exec(multipass, args, os.Environ())
+	if err != nil {
 		return err
 	}
 
@@ -109,6 +100,7 @@ func InstallPHP(c *cli.Context) error {
 	fmt.Println("Installing PHP on machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+
 	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", phpCmds)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
