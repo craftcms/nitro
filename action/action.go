@@ -6,13 +6,16 @@ import (
 	"os/exec"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/pixelandtonic/phpdev/install"
 )
 
 // Initialize is used to create a new machine and setup any dependencies
 func Initialize(c *cli.Context) error {
 	machine := c.String("machine")
 	php := c.String("php")
-	database := c.String("database")
+	// TODO remove the hardcoding
+	database := "mariadb"
 
 	fmt.Println("Creating a new machine:", machine)
 
@@ -96,23 +99,17 @@ func SSH(c *cli.Context) error {
 
 func InstallPHP(c *cli.Context) error {
 	machine := c.String("machine")
-	//version := c.String("version")
+	version := c.String("version")
 
-	//phpArgs, err := install.PHP(version)
-	//if err != nil {
-	//	return err
-	//}
-
-	// TODO fix this to return a string, not a slice
-	//args := ""
-	//for _, v := range phpArgs {
-	//	args =
-	//}
+	phpCmds, err := install.PHP(version)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Installing PHP on machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", "php7.4-cli")
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt-get", "install", "-y", phpCmds)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
