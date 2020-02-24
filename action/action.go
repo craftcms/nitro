@@ -137,6 +137,22 @@ func InstallRedis(c *cli.Context) error {
 	return nil
 }
 
+func InstallPostgres(c *cli.Context) error {
+	machine := c.String("machine")
+
+	fmt.Println("Installing postgres on machine:", machine)
+
+	args := []string{"multipass", "exec", machine, "--", "sudo", "apt-get", "install", "-y", "postgresql", "postgresql-contrib"}
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+	execErr := syscall.Exec(multipass, args, os.Environ())
+	if execErr != nil {
+		fmt.Println(execErr)
+		return execErr
+	}
+
+	return nil
+}
+
 func Delete(c *cli.Context) error {
 	machine := c.String("machine")
 

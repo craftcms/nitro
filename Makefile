@@ -1,3 +1,5 @@
+.PHONY: install
+
 build:
 	go build -o phpdev .
 run: build

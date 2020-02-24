@@ -62,6 +62,7 @@ func Install() *cli.Command {
 			installNginx(),
 			installMariaDB(),
 			installRedis(),
+			installPostgres(),
 		},
 	}
 }
@@ -135,7 +136,7 @@ func installNginx() *cli.Command {
 func installMariaDB() *cli.Command {
 	return &cli.Command{
 		Name:    "maria",
-		Aliases: []string{"m"},
+		Aliases: []string{"m", "mariadb"},
 		Usage:   "Install MariaDb Server on a machine",
 		Action: func(c *cli.Context) error {
 			if err := action.InstallMariaDB(c); err != nil {
@@ -154,6 +155,21 @@ func installRedis() *cli.Command {
 		Usage:   "Install Redis on a machine",
 		Action: func(c *cli.Context) error {
 			if err := action.InstallRedis(c); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+}
+
+func installPostgres() *cli.Command {
+	return &cli.Command{
+		Name:    "postgres",
+		Aliases: []string{"postgresql", "pgsql"},
+		Usage:   "Install PostgreSQL on a machine",
+		Action: func(c *cli.Context) error {
+			if err := action.InstallPostgres(c); err != nil {
 				return err
 			}
 
