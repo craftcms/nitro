@@ -1,7 +1,4 @@
 #cloud-config
-runcmd:
-  - sudo add-apt-repository -y ppa:nginx/stable
-  - sudo add-apt-repository -y ppa:ondrej/php
 packages:
   - curl
   - wget
@@ -35,7 +32,7 @@ write_files:
       SITE="$1"
       PATH="$2"
 
-      add_nginx_site() {
+      add_nginx_site () {
         // check the number of args
         // get the name of the site
         // get the path to index.php
@@ -46,5 +43,14 @@ write_files:
         // sed pathtoindex.php
         echo "created new site $SITE at $PATH"
       }
-    path: /usr/sbin/add-nginx-site
+    path: /usr/sbin/phpdev-add-nginx-site
     permissions: '+770'
+  - content: |
+      #!/bin/bash
+      php -r "readfile('http://getcomposer.org/installer');" | sudo php -- --install-dir=/usr/bin/ --filename=composer
+    path: /usr/sbin/phpdev-install-composer
+    permissions: '+770'
+runcmd:
+  - sudo add-apt-repository -y ppa:nginx/stable
+  - sudo add-apt-repository -y ppa:ondrej/php
+  - sudo chmod u+x /usr/sbin/phpdev-add-nginx-site
