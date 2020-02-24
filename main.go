@@ -22,9 +22,9 @@ type Runner interface {
 func main() {
 	app := &cli.App{
 		Name:        "phpdev",
-		Usage:       "Quickly create new machines to develop PHP applications and websites",
+		Usage:       "Develop Craft CMS websites locally with ease",
 		Version:     "1.0.0",
-		Description: "A better way to develop PHP applications without Docker or Vagrant",
+		Description: "A better way to develop Craft CMS applications without Docker or Vagrant",
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
 		},
@@ -44,6 +44,8 @@ func main() {
 			command.Install(),
 			command.Delete(),
 			command.Stop(),
+			command.Mount(),
+			command.Create(),
 		},
 	}
 
