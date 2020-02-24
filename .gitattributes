@@ -1,4 +1,5 @@
 # ignore the following for composer archive
+.github export-ignore
 action export-ignore
 command export-ignore
 scripts export-ignore
