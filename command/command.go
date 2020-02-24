@@ -9,7 +9,6 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/phpdev/action"
-	"github.com/pixelandtonic/phpdev/install"
 	"github.com/pixelandtonic/phpdev/validate"
 )
 
@@ -38,7 +37,6 @@ func Initialize() *cli.Command {
 				Name:        "php",
 				Aliases:     []string{"p"},
 				Usage:       "The PHP version to install",
-				Required:    true,
 				Value:       "7.4",
 				DefaultText: "7.4",
 			},
@@ -46,7 +44,6 @@ func Initialize() *cli.Command {
 				Name:        "database",
 				Aliases:     []string{"d", "db", "data"},
 				Usage:       "The database to install",
-				Required:    true,
 				Value:       "mariadb",
 				DefaultText: "mariadb",
 			},
@@ -141,62 +138,6 @@ func Delete() *cli.Command {
 	}
 }
 
-func Create() *cli.Command {
-	return &cli.Command{
-		Name:    "create",
-		Aliases: []string{"c", "up"},
-		Usage:   "Create a new machine for development",
-		Action: func(context *cli.Context) error {
-			// get the PHP version
-			if err := validate.PHPVersion(context.String("php")); err != nil {
-				return err
-			}
-
-			_, err := install.PHP(context.String("php"))
-			if err != nil {
-				return err
-			}
-
-			// get the database to install
-			if err := validate.Database(context.String("database")); err != nil {
-				return err
-			}
-
-			// move a phpinfo file into the root site
-			// get the machine ip
-			// print the help to set domain name to ip address
-			// ? add phpdev --machine=phpdev hosts
-
-			return nil
-		},
-		After: func(c *cli.Context) error {
-			fmt.Println("========================================================")
-			fmt.Println("We just finished the setup of a new machine for developing your next Craft CMS website!")
-			fmt.Println("")
-			fmt.Println("Your machine `phpdev` is available at the following IP address: 192.168.18.19")
-			fmt.Println("========================================================")
-			return nil
-		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "php",
-				Aliases:     []string{"p"},
-				Usage:       "The PHP version to install",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-			&cli.StringFlag{
-				Name:        "database",
-				Aliases:     []string{"d", "db"},
-				Usage:       "The database to install",
-				Required:    false,
-				Value:       "mariadb",
-				DefaultText: "mariadb",
-			},
-		},
-	}
-}
-
 func Mount() *cli.Command {
 	return &cli.Command{
 		Name:        "mount",
@@ -236,7 +177,7 @@ func installPHP() *cli.Command {
 		Aliases: []string{"p"},
 		Usage:   "Install PHP on a machine",
 		Action: func(c *cli.Context) error {
-			if err := validate.PHPVersion(c.String("php")); err != nil {
+			if err := validate.PHPVersion(c.String("version")); err != nil {
 				return err
 			}
 

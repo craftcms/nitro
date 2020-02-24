@@ -45,7 +45,6 @@ func main() {
 			command.Delete(),
 			command.Stop(),
 			command.Mount(),
-			command.Create(),
 		},
 	}
 
