@@ -35,6 +35,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(),
+			command.Bootstrap(executor),
 			command.SSH(executor),
 			command.Delete(),
 			command.Stop(),

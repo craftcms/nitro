@@ -5,7 +5,7 @@ build:
 run: build
 	./nitro init
 clean:
-	multipass delete nitro
+	multipass delete nitro-dev
 	multipass purge
 test:
 	go test ./...

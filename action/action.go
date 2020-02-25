@@ -28,15 +28,17 @@ func Initialize(c *cli.Context) error {
 		return err
 	}
 
-	// should we bootstrap the machine?
-	if c.Bool("bootstrap") == false {
-		return nil
+	return nil
+}
+
+func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
+	machine := c.String("machine")
+
+	args := []string{"multipass", "exec", "--machine", machine, "--", "sudo", "bash", "/etc/nitro/bootstrap-74-mariadb.sh"}
+	err := e.Exec(e.Path(), args, os.Environ())
+	if err != nil {
+		return err
 	}
-
-	// bootstrap the installation
-
-	// heres the IP
-	// run this comamnd to edit for domain
 
 	return nil
 }

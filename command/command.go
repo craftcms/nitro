@@ -9,7 +9,6 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/nitro/action"
-	"github.com/pixelandtonic/nitro/validate"
 )
 
 func Initialize() *cli.Command {
@@ -18,8 +17,14 @@ func Initialize() *cli.Command {
 		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
+			// initialize that machine
 			if err := action.Initialize(c); err != nil {
 				return err
+			}
+
+			// if we are bootstrapping, call that command
+			if c.Bool("bootstrap") {
+				return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
 			}
 
 			return nil
@@ -35,6 +40,21 @@ func Initialize() *cli.Command {
 	}
 }
 
+func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
+	return &cli.Command{
+		Name:    "bootstrap",
+		Aliases: []string{"b", "boot"},
+		Usage:   "Bootstrap the installation of a new machine",
+		Action: func(context *cli.Context) error {
+			if err := action.Bootstrap(context, executor); err != nil {
+				return err
+			}
+
+			return nil
+		},
+		// TODO add flags for version and database
+	}
+}
 func Update() *cli.Command {
 	return &cli.Command{
 		Name:    "update",
@@ -84,6 +104,7 @@ func Install() *cli.Command {
 func Stop() *cli.Command {
 	return &cli.Command{
 		Name:        "stop",
+		Aliases:     []string{"shutdown"},
 		Usage:       "Stop a machine",
 		Description: "Stop a machine when not in use",
 		Action: func(c *cli.Context) error {
@@ -116,127 +137,6 @@ func Delete() *cli.Command {
 			}
 
 			if err := action.Delete(c); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
-}
-
-func Mount() *cli.Command {
-	return &cli.Command{
-		Name:        "mount",
-		Aliases:     []string{"m", "mnt"},
-		Usage:       "Mount a folder to a machine",
-		Description: "Mount a folder to use as a site in the machine",
-		Action: func(c *cli.Context) error {
-
-			// check if the path exists
-			if _, err := os.Stat(c.String("path")); os.IsNotExist(err) {
-				return err
-			}
-
-			return nil
-		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "path",
-				Aliases:     []string{"p"},
-				Usage:       "The path to the folder to mount",
-				DefaultText: "dummy",
-				Required:    true,
-			},
-			&cli.StringFlag{
-				Name:     "domain",
-				Aliases:  []string{"d"},
-				Usage:    "The domain name to mount into the machine",
-				Required: true,
-			},
-		},
-	}
-}
-
-func installPHP() *cli.Command {
-	return &cli.Command{
-		Name:    "php",
-		Aliases: []string{"p"},
-		Usage:   "Install PHP on a machine",
-		Action: func(c *cli.Context) error {
-			if err := validate.PHPVersion(c.String("version")); err != nil {
-				return err
-			}
-
-			if err := action.InstallPHP(c); err != nil {
-				return err
-			}
-
-			return nil
-		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "version",
-				Aliases:     []string{"v"},
-				Usage:       "Select which version of PHP to install",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-		},
-	}
-}
-
-func installNginx() *cli.Command {
-	return &cli.Command{
-		Name:    "nginx",
-		Aliases: []string{"n"},
-		Usage:   "Install nginx on a machine",
-		Action: func(c *cli.Context) error {
-			if err := action.InstallNginx(c); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
-}
-
-func installMariaDB() *cli.Command {
-	return &cli.Command{
-		Name:    "maria",
-		Aliases: []string{"m", "mariadb"},
-		Usage:   "Install MariaDb Server on a machine",
-		Action: func(c *cli.Context) error {
-			if err := action.InstallMariaDB(c); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
-}
-
-func installRedis() *cli.Command {
-	return &cli.Command{
-		Name:    "redis",
-		Aliases: []string{"r"},
-		Usage:   "Install Redis on a machine",
-		Action: func(c *cli.Context) error {
-			if err := action.InstallRedis(c); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
-}
-
-func installPostgres() *cli.Command {
-	return &cli.Command{
-		Name:    "postgres",
-		Aliases: []string{"postgresql", "pgsql"},
-		Usage:   "Install PostgreSQL on a machine",
-		Action: func(c *cli.Context) error {
-			if err := action.InstallPostgres(c); err != nil {
 				return err
 			}
 
