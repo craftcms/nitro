@@ -28,6 +28,11 @@ func Initialize(c *cli.Context) error {
 		return err
 	}
 
+	// if we are bootstrapping, call that command
+	if c.Bool("bootstrap") {
+		return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
+	}
+	
 	return nil
 }
 

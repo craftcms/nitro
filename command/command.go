@@ -22,11 +22,6 @@ func Initialize() *cli.Command {
 				return err
 			}
 
-			// if we are bootstrapping, call that command
-			if c.Bool("bootstrap") {
-				return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
-			}
-
 			return nil
 		},
 		Flags: []cli.Flag{
@@ -55,6 +50,7 @@ func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
 		// TODO add flags for version and database
 	}
 }
+
 func Update() *cli.Command {
 	return &cli.Command{
 		Name:    "update",
