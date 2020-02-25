@@ -9,17 +9,14 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/pixelandtonic/phpdev/action"
 	"github.com/pixelandtonic/phpdev/command"
 )
 
-// Runner is an interface that handles
-// running commands, the real use case
-// is to call syscall.Exec
-type Runner interface {
-	Exec(argv0 string, argv []string, envv []string) (err error)
-}
-
 func main() {
+
+	executor := action.NewSyscallExecutor("multipass")
+
 	app := &cli.App{
 		Name:        "phpdev",
 		Usage:       "Develop Craft CMS websites locally with ease",
@@ -39,7 +36,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(),
-			command.SSH(),
+			command.SSH(executor),
 			command.Update(),
 			command.Install(),
 			command.Delete(),
@@ -48,11 +45,11 @@ func main() {
 		},
 	}
 
+	// find the path to multipass and set value in context
 	multipass, err := exec.LookPath("multipass")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
 	sort.Sort(cli.FlagsByName(app.Flags))

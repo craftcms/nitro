@@ -49,13 +49,13 @@ func Update() *cli.Command {
 	}
 }
 
-func SSH() *cli.Command {
+func SSH(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
 		Name:    "ssh",
 		Aliases: []string{"s"},
 		Usage:   "SSH into a machine as administrator",
 		Action: func(c *cli.Context) error {
-			if err := action.SSH(c); err != nil {
+			if err := action.SSH(c.String("machine"), e); err != nil {
 				return err
 			}
 			return nil
