@@ -15,7 +15,7 @@ import (
 func Initialize() *cli.Command {
 	return &cli.Command{
 		Name:    "init",
-		Aliases: []string{"i", "pour"},
+		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
 			if err := action.Initialize(c); err != nil {

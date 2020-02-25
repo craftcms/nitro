@@ -28,9 +28,9 @@ func main() {
 			&cli.StringFlag{
 				Name:        "machine",
 				Aliases:     []string{"m"},
-				Value:       "nitro",
+				Value:       "nitro-dev",
 				Usage:       "Provide a machine name",
-				DefaultText: "nitro",
+				DefaultText: "nitro-dev",
 			},
 		},
 		Commands: []*cli.Command{
