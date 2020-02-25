@@ -32,14 +32,14 @@ func Initialize(c *cli.Context) error {
 	if c.Bool("bootstrap") {
 		return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
 	}
-	
+
 	return nil
 }
 
 func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
 	machine := c.String("machine")
 
-	args := []string{"multipass", "exec", "--machine", machine, "--", "sudo", "bash", "/etc/nitro/bootstrap-74-mariadb.sh"}
+	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/etc/nitro/bootstrap-74-mariadb.sh"}
 	err := e.Exec(e.Path(), args, os.Environ())
 	if err != nil {
 		return err
