@@ -17,7 +17,7 @@ func Initialize() *cli.Command {
 		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
-			// initialize that machine
+			// initialize the machine
 			if err := action.Initialize(c); err != nil {
 				return err
 			}
