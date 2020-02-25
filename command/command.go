@@ -8,14 +8,14 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/phpdev/action"
-	"github.com/pixelandtonic/phpdev/validate"
+	"github.com/pixelandtonic/nitro/action"
+	"github.com/pixelandtonic/nitro/validate"
 )
 
 func Initialize() *cli.Command {
 	return &cli.Command{
 		Name:    "init",
-		Aliases: []string{"i"},
+		Aliases: []string{"i", "pour"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
 			if err := action.Initialize(c); err != nil {
@@ -52,7 +52,7 @@ func Update() *cli.Command {
 func SSH(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
 		Name:    "ssh",
-		Aliases: []string{"s"},
+		Aliases: []string{"s", "connect", "login"},
 		Usage:   "SSH into a machine as administrator",
 		Action: func(c *cli.Context) error {
 			if err := action.SSH(c.String("machine"), e); err != nil {
@@ -90,6 +90,7 @@ func Stop() *cli.Command {
 			if err := action.Stop(c); err != nil {
 				return err
 			}
+
 			return nil
 		},
 	}
@@ -117,6 +118,7 @@ func Delete() *cli.Command {
 			if err := action.Delete(c); err != nil {
 				return err
 			}
+
 			return nil
 		},
 	}

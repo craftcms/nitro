@@ -1,4 +1,4 @@
-module github.com/pixelandtonic/phpdev
+module github.com/pixelandtonic/nitro
 
 go 1.13
 

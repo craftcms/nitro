@@ -1,13 +1,15 @@
 .PHONY: install
 
 build:
-	go build -o phpdev .
+	go build -o nitro .
 run: build
-	./phpdev init
+	./nitro init
 clean:
-	multipass delete phpdev
+	multipass delete nitro
 	multipass purge
 test:
 	go test ./...
 install:
 	go install
+release: test
+	go build -o bin/nitro

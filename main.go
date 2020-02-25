@@ -9,16 +9,15 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/phpdev/action"
-	"github.com/pixelandtonic/phpdev/command"
+	"github.com/pixelandtonic/nitro/action"
+	"github.com/pixelandtonic/nitro/command"
 )
 
 func main() {
-
 	executor := action.NewSyscallExecutor("multipass")
 
 	app := &cli.App{
-		Name:        "phpdev",
+		Name:        "nitro",
 		Usage:       "Develop Craft CMS websites locally with ease",
 		Version:     "1.0.0",
 		Description: "A better way to develop Craft CMS applications without Docker or Vagrant",
@@ -29,19 +28,16 @@ func main() {
 			&cli.StringFlag{
 				Name:        "machine",
 				Aliases:     []string{"m"},
-				Value:       "phpdev",
+				Value:       "nitro",
 				Usage:       "Provide a machine name",
-				DefaultText: "phpdev",
+				DefaultText: "nitro",
 			},
 		},
 		Commands: []*cli.Command{
 			command.Initialize(),
 			command.SSH(executor),
-			command.Update(),
-			command.Install(),
 			command.Delete(),
 			command.Stop(),
-			command.Mount(),
 		},
 	}
 

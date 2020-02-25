@@ -1,6 +1,7 @@
 package action
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,7 +9,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/phpdev/install"
+	"github.com/pixelandtonic/nitro/install"
 )
 
 // Initialize is used to create a new machine and setup any dependencies
@@ -31,6 +32,11 @@ func Initialize(c *cli.Context) error {
 	if c.Bool("bootstrap") == false {
 		return nil
 	}
+
+	// bootstrap the installation
+
+	// heres the IP
+	// run this comamnd to edit for domain
 
 	return nil
 }
@@ -62,6 +68,21 @@ func SSH(m string, e CommandLineExecutor) error {
 		return err
 	}
 
+	return nil
+}
+
+func Attach(path, machine string, exec CommandLineExecutor) error {
+	// verify the path
+	dir, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+
+	if dir.IsDir() == false {
+		return errors.New("path must be a directory")
+	}
+
+	// mount the path
 	return nil
 }
 
