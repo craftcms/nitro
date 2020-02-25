@@ -37,8 +37,9 @@ func main() {
 			command.Initialize(),
 			command.Bootstrap(executor),
 			command.SSH(executor),
-			command.Delete(),
 			command.Stop(),
+			command.Delete(),
+			command.Update(),
 		},
 	}
 
@@ -47,10 +48,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
+
+	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
 	if err := app.RunContext(ctx, os.Args); err != nil {
 		log.Fatal(err)
