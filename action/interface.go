@@ -21,19 +21,19 @@ type CommandLineExecutor interface {
 // MockExecutor is used for successful mocking
 type MockExecutor struct {
 	path      string
-	argv0     string
-	arguments []string
-	env       []string
+	Argv0     string
+	Arguments []string
+	Env       []string
 }
 
-func (m *MockExecutor) Path() string {
-	return "testing"
+func (m MockExecutor) Path() string {
+	return m.path
 }
 
-func (s *MockExecutor) Exec(argv0 string, argv []string, envv []string) (err error) {
-	s.argv0 = argv0
-	s.arguments = argv
-	s.env = envv
+func (m MockExecutor) Exec(argv0 string, argv []string, envv []string) (err error) {
+	m.Argv0 = argv0t
+	m.Arguments = argv
+	m.Env = envv
 	return nil
 }
 
@@ -42,11 +42,11 @@ type SyscallExecutor struct {
 	path string
 }
 
-func (s *SyscallExecutor) Path() string {
+func (s SyscallExecutor) Path() string {
 	return s.path
 }
 
-func (s *SyscallExecutor) Exec(argv0 string, argv []string, envv []string) (err error) {
+func (s SyscallExecutor) Exec(argv0 string, argv []string, envv []string) (err error) {
 	return syscall.Exec(argv0, argv, envv)
 }
 
