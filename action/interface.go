@@ -31,7 +31,7 @@ func (m MockExecutor) Path() string {
 }
 
 func (m MockExecutor) Exec(argv0 string, argv []string, envv []string) (err error) {
-	m.Argv0 = argv0t
+	m.Argv0 = argv0
 	m.Arguments = argv
 	m.Env = envv
 	return nil
