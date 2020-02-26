@@ -6,7 +6,6 @@ write_files:
   - path: /etc/nitro/bootstrap.sh
     content: |
       #!/usr/bin/env bash
-
       phpversion="$1"
       database="$2"
 
@@ -37,16 +36,11 @@ write_files:
       # install nginx
       sudo bash /etc/nitro/nginx/install.sh
 
-      # TODO
-      # move info.php into the nginx directory /var/www/html/index.php
-      # sudo cp /etc/nitro/php/info.php /var/www/html/index.php
-      # copy the nitro nginx template into sites-available/default
-      # sudo cp /etc/nitro/nginx/template.conf /etc/nginx/sites-available/info.conf
-      # enable the nginx site
-      # reload nginx
-      # sudo systemctl restart nginx
+      # remove the default site
+      sudo rm /etc/nginx/sites-enabled/default
 
-
+      # add the info site
+      sudo bash /etc/nitro/nginx/add-site.sh info $phpversion
     permissions: '770'
   # create the php install scripts
   - path: /etc/nitro/php/php-74.sh
@@ -102,7 +96,7 @@ write_files:
       server {
           listen 80;
 
-          root CHANGEPATH;
+          root /var/www/CHANGEPATH;
 
           index index.html index.htm index.php;
 
@@ -118,6 +112,33 @@ write_files:
           }
       }
     permissions: '770'
+  - path: /etc/nitro/nginx/add-site.sh
+    content: |
+      #!/usr/bin/env bash
+      sitename="$1"
+      phpversion="$2"
+
+      # move info.php into the nginx directory /var/www/html/index.php
+      sudo mkdir -p /var/www/$sitename
+      sudo cp /etc/nitro/php/info.php /var/www/$sitename/index.php
+
+      # set permissions for www-data to new directory
+      sudo chown -R www-data:www-data /var/www/$sitename
+
+      # copy the nitro nginx template into sites-available/default
+      sudo cp /etc/nitro/nginx/template.conf /etc/nginx/sites-available/$sitename
+
+      # change the variables
+      sudo sed -i 's|CHANGEPATH|'$sitename'|g' /etc/nginx/sites-available/$sitename
+      sudo sed -i 's|CHANGESERVERNAME|'$sitename'|g' /etc/nginx/sites-available/$sitename
+      sudo sed -i 's|CHANGEPHPVERSION|'$phpversion'|g' /etc/nginx/sites-available/$sitename
+
+      # enable the nginx site
+      sudo ln -s /etc/nginx/sites-available/$sitename /etc/nginx/sites-enabled/
+
+      # reload nginx
+      sudo service nginx reload
+    permissions: '0770'
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php
