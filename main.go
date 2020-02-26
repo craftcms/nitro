@@ -41,6 +41,7 @@ func main() {
 			command.Stop(),
 			command.Delete(),
 			command.Update(),
+			command.AddSite(),
 		},
 	}
 

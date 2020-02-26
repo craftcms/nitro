@@ -2,6 +2,7 @@ package command
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -17,12 +18,7 @@ func Initialize() *cli.Command {
 		Aliases: []string{"i"},
 		Usage:   "Initialize a new machine",
 		Action: func(c *cli.Context) error {
-			// initialize the machine
-			if err := action.Initialize(c); err != nil {
-				return err
-			}
-
-			return nil
+			return action.Initialize(c)
 		},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
@@ -41,11 +37,7 @@ func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
 		Aliases: []string{"b", "boot"},
 		Usage:   "Bootstrap the installation of a new machine",
 		Action: func(context *cli.Context) error {
-			if err := action.Bootstrap(context, executor); err != nil {
-				return err
-			}
-
-			return nil
+			return action.Bootstrap(context, executor)
 		},
 		// TODO add flags for version and database
 	}
@@ -57,10 +49,7 @@ func Update() *cli.Command {
 		Aliases: []string{"u"},
 		Usage:   "Update a machine with the latest software",
 		Action: func(c *cli.Context) error {
-			if err := action.Update(c); err != nil {
-				return err
-			}
-			return nil
+			return action.Update(c)
 		},
 	}
 }
@@ -71,10 +60,33 @@ func SSH(e action.CommandLineExecutor) *cli.Command {
 		Aliases: []string{"s", "connect", "login"},
 		Usage:   "SSH into a machine as administrator",
 		Action: func(c *cli.Context) error {
-			if err := action.SSH(c.String("machine"), e); err != nil {
-				return err
+			return action.SSH(c.String("machine"), e)
+		},
+	}
+}
+
+func AddSite() *cli.Command {
+	return &cli.Command{
+		Name:    "add-site",
+		Aliases: []string{"add", "site"},
+		Usage:   "Add a new site to a machine",
+		Action: func(context *cli.Context) error {
+			return errors.New("not implemented yet")
+		},
+		Before: func(context *cli.Context) error {
+			if context.NArg() != 1 {
+				return errors.New("you must pass a domain and php version")
 			}
+
 			return nil
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "php-version",
+				Aliases:     []string{"php", "version"},
+				Usage:       "Provide the version of PHP",
+				DefaultText: "7.4",
+			},
 		},
 	}
 }
@@ -104,11 +116,7 @@ func Stop() *cli.Command {
 		Usage:       "Stop a machine",
 		Description: "Stop a machine when not in use",
 		Action: func(c *cli.Context) error {
-			if err := action.Stop(c); err != nil {
-				return err
-			}
-
-			return nil
+			return action.Stop(c)
 		},
 	}
 }
@@ -132,11 +140,7 @@ func Delete() *cli.Command {
 				return nil
 			}
 
-			if err := action.Delete(c); err != nil {
-				return err
-			}
-
-			return nil
+			return action.Delete(c)
 		},
 	}
 }
