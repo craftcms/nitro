@@ -5,23 +5,48 @@ write_files:
   # create the main bootstrap script
   - path: /etc/nitro/bootstrap.sh
     content: |
-      #!/bin/bash
+      #!/usr/bin/env bash
 
-      # TODO allow passing args for the bootstrap script for
-      # phpversion="$1"
-      # database="$2"
+      phpversion="$1"
+      database="$2"
 
-      # install php 7.4
-      sudo bash /etc/nitro/php/php-74.sh
+      # run the correct script depending on the version of PHP
+      if [ "$phpversion" == '7.3' ]; then
+        sudo bash /etc/nitro/php/php-73.sh
+      elif [ "$phpversion" == '7.2' ]; then
+        sudo bash /etc/nitro/php/php-72.sh
+      else
+        sudo bash /etc/nitro/php/php-74.sh
+      fi
+
+      # run the correct script depending on the database
+      if [ "$database" == 'postgres' ]; then
+        # install postgres
+        sudo bash /etc/nitro/postgres/install.sh
+
+        # run the postgres setup
+        sudo bash /etc/nitro/postgres/setup.sh
+      else
+        # install mariadb
+        sudo bash /etc/nitro/mariadb/install.sh
+
+        # run the mariadb setup
+        sudo bash /etc/nitro/mariadb/setup.sh
+      fi
 
       # install nginx
       sudo bash /etc/nitro/nginx/install.sh
 
-      # install mariadb
-      sudo bash /etc/nitro/mariadb/install.sh
+      # TODO
+      # move info.php into the nginx directory /var/www/html/index.php
+      # sudo cp /etc/nitro/php/info.php /var/www/html/index.php
+      # copy the nitro nginx template into sites-available/default
+      # sudo cp /etc/nitro/nginx/template.conf /etc/nginx/sites-available/info.conf
+      # enable the nginx site
+      # reload nginx
+      # sudo systemctl restart nginx
 
-      # run the mariadb setup
-      sudo bash /etc/nitro/mariadb/setup.sh
+
     permissions: '770'
   # create the php install scripts
   - path: /etc/nitro/php/php-74.sh
@@ -29,6 +54,10 @@ write_files:
       #!/bin/bash
       apt install -y php7.4 php7.4-mbstring php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-intl php7.4-json \
       php7.4-mysql php7.4-opcache php7.4-pgsql php7.4-zip php7.4-xml
+  - path: /etc/nitro/php/info.php
+    content: |
+      <?php phpinfo();
+    permissions: '770'
   # create the composer install script
   - path: /etc/nitro/composer-install.sh
     content: |
@@ -71,7 +100,7 @@ write_files:
   - path: /etc/nitro/nginx/template.conf
     content: |
       server {
-          listen 80 default_server;
+          listen 80;
 
           root CHANGEPATH;
 
