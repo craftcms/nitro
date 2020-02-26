@@ -1,17 +1,27 @@
 {
-    "name": "craftcms/craft-nitro",
-    "description": "A better way to develop locally without Docker or Vagrant",
-    "type": "project",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Jason McCallister",
-            "email": "jason@craftcms.com"
-        }
-    ],
-   "bin": [
-       "bin/nitro-darwin-amd64",
-       "bin/nitro-linux-amd64",
-       "bin/nitro-windows-amd64"
-   ]
+  "name": "craftcms/craft-nitro",
+  "description": "A better way to develop Craft CMS applications locally without Docker or Vagrant",
+  "type": "project",
+  "keywords": [
+    "craft",
+    "craft cms",
+    "local",
+    "development",
+    "php",
+    "multipass",
+    "virtual machine"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jason McCallister",
+      "email": "jason@craftcms.com"
+    }
+  ],
+  "bin": [
+    "src/nitro",
+    "bin/nitro-darwin-amd64",
+    "bin/nitro-linux-amd64",
+    "bin/nitro-windows-amd64"
+  ]
 }
