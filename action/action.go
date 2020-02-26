@@ -39,7 +39,8 @@ func Initialize(c *cli.Context) error {
 func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
 	machine := c.String("machine")
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/etc/nitro/bootstrap-74-mariadb.sh"}
+	// TODO make this pass a PHP version and database
+	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/etc/nitro/bootstrap.sh"}
 	err := e.Exec(e.Path(), args, os.Environ())
 	if err != nil {
 		return err
