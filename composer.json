@@ -10,6 +10,8 @@
         }
     ],
    "bin": [
-       "bin/nitro"
+       "bin/nitro-darwin-amd64",
+       "bin/nitro-linux-amd64",
+       "bin/nitro-windows-amd64"
    ]
 }
