@@ -18,6 +18,7 @@ func main() {
 
 	app := &cli.App{
 		Name:        "nitro",
+		UsageText:   "nitro [global options] command [command options] [arguments...]",
 		Usage:       "Develop Craft CMS websites locally with ease",
 		Version:     "1.0.0",
 		Description: "A better way to develop Craft CMS applications without Docker or Vagrant",
