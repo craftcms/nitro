@@ -43,6 +43,7 @@ func main() {
 			command.Update(),
 			command.AddHost(executor),
 			command.Logs(executor),
+			command.Database(executor),
 		},
 	}
 

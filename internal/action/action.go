@@ -93,3 +93,7 @@ func Stop(c *cli.Context) error {
 
 	return cmd.Run()
 }
+
+func DatabasePassword(c *cli.Context, e CommandLineExecutor) error {
+	return e.Exec(e.Path(), []string{"multipass", "exec", c.String("machine"), "--", "cat", "/home/ubuntu/.db_password"}, os.Environ())
+}

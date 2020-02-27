@@ -99,8 +99,8 @@ func Logs(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
 		Name:        "logs",
 		Description: "Show a machines logs",
-		Action: func(context *cli.Context) error {
-			return cli.ShowSubcommandHelp(context)
+		Action: func(c *cli.Context) error {
+			return cli.ShowSubcommandHelp(c)
 		},
 		Subcommands: []*cli.Command{
 			{
@@ -113,6 +113,30 @@ func Logs(e action.CommandLineExecutor) *cli.Command {
 		},
 	}
 }
+
+func Database(e action.CommandLineExecutor) *cli.Command {
+	return &cli.Command{
+		Name:        "database",
+		Description: "Perform actions related to the database",
+		Action: func(c *cli.Context) error {
+			return cli.ShowSubcommandHelp(c)
+		},
+		Subcommands: []*cli.Command{
+			databasePassword(e),
+		},
+	}
+}
+
+func databasePassword(e action.CommandLineExecutor) *cli.Command {
+	return &cli.Command{
+		Name:        "password",
+		Description: "Show the user password for the database",
+		Action: func(c *cli.Context) error {
+			return action.DatabasePassword(c, e)
+		},
+	}
+}
+
 func Stop() *cli.Command {
 	return &cli.Command{
 		Name:        "stop",
