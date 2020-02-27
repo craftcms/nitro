@@ -1,7 +1,9 @@
 .PHONY: install
 
+MACHINE ?= demo-app
+
 build:
-	go build -o nitro .
+	go build -o nitro ./cmd/nitro
 run: build
 	./nitro init
 clean:
@@ -12,6 +14,10 @@ test:
 install:
 	go install
 release: test
-	GOOS=linux GOARCH=amd64 go build -o bin/nitro-linux-amd64
-	GOOS=darwin GOARCH=amd64 go build -o bin/nitro-darwin-amd64
-	GOOS=windows GOARCH=amd64 go build -o bin/nitro-windows-amd64
+	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/nitro-linux-amd64
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o bin/nitro-darwin-amd64
+	GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/nitro-windows-amd64
+demo: build
+	composer create-project craftcms/craft ${MACHINE}
+	./nitro --machine ${MACHINE} init
+	./nitro --machine ${MACHINE} add-host ${MACHINE}.nitro
