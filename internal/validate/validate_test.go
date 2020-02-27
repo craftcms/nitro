@@ -66,7 +66,7 @@ func TestDatabaseFlag(t *testing.T) {
 		{
 			name:    "maria",
 			args:    args{v: "maria"},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name:    "postgres",
@@ -76,12 +76,12 @@ func TestDatabaseFlag(t *testing.T) {
 		{
 			name:    "postgresql",
 			args:    args{v: "postgresql"},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name:    "pgsql",
 			args:    args{v: "pgsql"},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name:    "cockroach",

@@ -42,7 +42,7 @@ func main() {
 			command.Delete(),
 			command.Update(),
 			command.AddHost(executor),
-			command.Logs(),
+			command.Logs(executor),
 		},
 	}
 

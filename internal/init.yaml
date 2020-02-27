@@ -135,6 +135,11 @@ write_files:
       # reload nginx
       sudo service nginx reload
     permissions: '0770'
+  - path: /opt/nitro/nginx/tail-logs.sh
+    content: |
+      #!/usr/bin/env bash
+      sudo tail -f /var/log/nginx/access.log -f /var/log/nginx/error.log
+    permissions: '0770'
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php

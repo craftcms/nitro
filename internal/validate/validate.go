@@ -11,13 +11,7 @@ func Database(v string) error {
 	switch v {
 	case "mariadb":
 		return nil
-	case "maria":
-		return nil
 	case "postgres":
-		return nil
-	case "postgresql":
-		return nil
-	case "pgsql":
 		return nil
 	}
 

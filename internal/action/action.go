@@ -18,19 +18,12 @@ func Initialize(c *cli.Context) error {
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	// create the machine
-	cmd := exec.Command(multipass, "launch", "--name", machine, "--cloud-init", "./cloud-init.yaml")
+	// TODO move the yaml file into the binary as stdin
+	cmd := exec.Command(multipass, "launch", "--name", machine, "--cloud-init", "./internal/init.yaml")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return err
-	}
 
-	// if we are bootstrapping, call that command
-	if c.Bool("bootstrap") {
-		return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
-	}
-
-	return nil
+	return cmd.Run()
 }
 
 func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
@@ -82,13 +75,7 @@ func AddHost(c *cli.Context, e CommandLineExecutor) error {
 func SSH(m string, e CommandLineExecutor) error {
 	fmt.Println("Connecting to machine:", m)
 
-	args := []string{"multipass", "shell", m}
-	err := e.Exec(e.Path(), args, os.Environ())
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return e.Exec(e.Path(), []string{"multipass", "shell", m}, os.Environ())
 }
 
 func Delete(c *cli.Context) error {
@@ -97,14 +84,12 @@ func Delete(c *cli.Context) error {
 	fmt.Println("Deleting machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+
 	cmd := exec.Command(multipass, "delete", machine)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return err
-	}
 
-	return nil
+	return cmd.Run()
 }
 
 func Stop(c *cli.Context) error {
@@ -113,12 +98,10 @@ func Stop(c *cli.Context) error {
 	fmt.Println("Stopping machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+
 	cmd := exec.Command(multipass, "stop", machine)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return err
-	}
 
-	return nil
+	return cmd.Run()
 }

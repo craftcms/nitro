@@ -14,14 +14,12 @@ import (
 
 var (
 	bootstrapFlag = &cli.BoolFlag{
-		Name:    "bootstrap",
-		Aliases: []string{"b"},
-		Usage:   "Bootstrap the machine with installation defaults",
-		Value:   true,
+		Name:  "bootstrap",
+		Usage: "Bootstrap the machine with defaults",
+		Value: true,
 	}
 	phpVersionFlag = &cli.StringFlag{
 		Name:        "php-version",
-		Aliases:     []string{"php", "version"},
 		Usage:       "Provide version of PHP",
 		DefaultText: "7.4",
 	}
@@ -29,11 +27,18 @@ var (
 
 func Initialize() *cli.Command {
 	return &cli.Command{
-		Name:    "init",
-		Aliases: []string{"i"},
-		Usage:   "Initialize a new machine",
+		Name:  "init",
+		Usage: "Initialize a new machine",
 		Action: func(c *cli.Context) error {
 			return action.Initialize(c)
+		},
+		After: func(c *cli.Context) error {
+			// if we are bootstrapping, call the command
+			if c.Bool("bootstrap") {
+				return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
+			}
+
+			return nil
 		},
 		Flags: []cli.Flag{bootstrapFlag},
 	}
@@ -41,26 +46,19 @@ func Initialize() *cli.Command {
 
 func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
-		Name:    "bootstrap",
-		Aliases: []string{"b", "boot"},
-		Usage:   "Bootstrap the installation of a new machine",
+		Name:  "bootstrap",
+		Usage: "Bootstrap the installation of a new machine",
 		Action: func(context *cli.Context) error {
 			return action.Bootstrap(context, executor)
 		},
 		Flags: []cli.Flag{phpVersionFlag},
-		Before: func(context *cli.Context) error {
-			// if bootstrap, add-site
-			fmt.Println("add validation")
-			return nil
-		},
 	}
 }
 
 func Update() *cli.Command {
 	return &cli.Command{
-		Name:    "update",
-		Aliases: []string{"u"},
-		Usage:   "Update a machine with the latest software",
+		Name:  "update",
+		Usage: "Update a machine with the latest software",
 		Action: func(c *cli.Context) error {
 			return action.Update(c)
 		},
@@ -79,9 +77,8 @@ func SSH(e action.CommandLineExecutor) *cli.Command {
 
 func AddHost(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
-		Name:    "add-host",
-		Aliases: []string{"add", "host"},
-		Usage:   "Add a new virtual host to a machine",
+		Name:  "add-host",
+		Usage: "Add a new virtual host to a machine",
 		Action: func(context *cli.Context) error {
 			return action.AddHost(context, e)
 		},
@@ -98,10 +95,9 @@ func AddHost(e action.CommandLineExecutor) *cli.Command {
 	}
 }
 
-func Logs() *cli.Command {
+func Logs(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
 		Name:        "logs",
-		Aliases:     []string{"log", "l"},
 		Description: "Show a machines logs",
 		Action: func(context *cli.Context) error {
 			return cli.ShowSubcommandHelp(context)
@@ -110,10 +106,8 @@ func Logs() *cli.Command {
 			{
 				Name:        "nginx",
 				Description: "Show logs from nginx",
-				Action: func(context *cli.Context) error {
-					// TODO tail multiple files at once with
-					// tail -f /var/log/syslog -f /var/log/auth.log
-					return errors.New("not implemented")
+				Action: func(c *cli.Context) error {
+					return action.LogsNginx(c, e)
 				},
 			},
 		},
@@ -122,9 +116,8 @@ func Logs() *cli.Command {
 func Stop() *cli.Command {
 	return &cli.Command{
 		Name:        "stop",
-		Aliases:     []string{"shutdown"},
 		Usage:       "Stop a machine",
-		Description: "Stop a machine when not in use",
+		Description: "Stop a machine when not in use (this does not delete the machine)",
 		Action: func(c *cli.Context) error {
 			return action.Stop(c)
 		},
