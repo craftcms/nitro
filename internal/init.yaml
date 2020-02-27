@@ -39,6 +39,11 @@ write_files:
       # remove the default site
       sudo rm /etc/nginx/sites-enabled/default
     permissions: '770'
+  - path: /opt/nitro/update.sh
+    content: |
+      #!/usr/bin/env bash
+      sudo apt update && sudo apt upgrade -y
+    permissions: '770'
   # create the php install scripts
   - path: /opt/nitro/php/php-74.sh
     content: |
@@ -65,8 +70,8 @@ write_files:
 
       # create the database and user
       export USER_PASS=$(openssl rand -base64 16)
-      echo "$USER_PASS" > /opt/nitro/.mysql_password
-      export MYSQL_USER=$(cat /opt/nitro/.mysql_password)
+      echo "$USER_PASS" > /home/ubuntu/.db_password
+      export MYSQL_USER=$(cat /home/ubuntu/.db_password)
 
       sudo sed -i 's|CHANGEME|'$MYSQL_USER'|g' /opt/nitro/mariadb/init.sql
 

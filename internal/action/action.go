@@ -9,11 +9,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Initialize is used to create a new machine and setup any dependencies
+// Initialize is used to create a new machine
 func Initialize(c *cli.Context) error {
 	machine := c.String("machine")
-
-	fmt.Println("Creating a new machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
@@ -41,9 +39,7 @@ func Update(c *cli.Context) error {
 	machine := c.String("machine")
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
-	fmt.Println("Updating machine:", machine)
-
-	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "apt", "update", "-y")
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/update.sh")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -64,8 +60,6 @@ func AddHost(c *cli.Context, e CommandLineExecutor) error {
 		php = "7.4"
 	}
 
-	fmt.Println("Connecting to machine:", machine)
-
 	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php}
 
 	return e.Exec(e.Path(), args, os.Environ())
@@ -73,15 +67,11 @@ func AddHost(c *cli.Context, e CommandLineExecutor) error {
 
 // SSH will login a user to a specific machine
 func SSH(m string, e CommandLineExecutor) error {
-	fmt.Println("Connecting to machine:", m)
-
 	return e.Exec(e.Path(), []string{"multipass", "shell", m}, os.Environ())
 }
 
 func Delete(c *cli.Context) error {
 	machine := c.String("machine")
-
-	fmt.Println("Deleting machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
@@ -94,8 +84,6 @@ func Delete(c *cli.Context) error {
 
 func Stop(c *cli.Context) error {
 	machine := c.String("machine")
-
-	fmt.Println("Stopping machine:", machine)
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
