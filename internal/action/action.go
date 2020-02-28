@@ -1,6 +1,7 @@
 package action
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -40,10 +41,11 @@ func Update(c *cli.Context) error {
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/update.sh")
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	return cmd.Start()
 }
 
 func AddHost(c *cli.Context, e CommandLineExecutor) error {
@@ -80,6 +82,52 @@ func Delete(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func IP(c *cli.Context) error {
+	machine := c.String("machine")
+
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+
+	cmd := exec.Command(multipass, "list", "--format", "json")
+
+	type listOutput struct {
+		List []struct {
+			Ipv4    []string `json:"ipv4"`
+			Name    string   `json:"name"`
+			Release string   `json:"release"`
+			State   string   `json:"state"`
+		} `json:"list"`
+	}
+
+	output := listOutput{}
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(out, &output); err != nil {
+		return err
+	}
+
+	ip := ""
+	for _, m := range output.List {
+		if m.Name == machine && len(m.Ipv4) > 0 {
+			ip = m.Ipv4[0]
+		}
+	}
+
+	if ip == "" {
+		fmt.Println("Could not find an IP for the machine:", machine)
+		return nil
+	}
+
+	fmt.Println(
+		fmt.Sprintf("IP address for %s is:\n%s", machine, ip),
+	)
+
+	return nil
 }
 
 func Stop(c *cli.Context) error {

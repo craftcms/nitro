@@ -44,6 +44,7 @@ func main() {
 			command.AddHost(executor),
 			command.Logs(executor),
 			command.Database(executor),
+			command.IP(),
 		},
 	}
 

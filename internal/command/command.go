@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/validate"
 )
 
 var (
@@ -82,16 +83,27 @@ func AddHost(e action.CommandLineExecutor) *cli.Command {
 		Action: func(context *cli.Context) error {
 			return action.AddHost(context, e)
 		},
-		Before: func(context *cli.Context) error {
-			if context.NArg() != 1 {
+		Before: func(c *cli.Context) error {
+			if c.Args().First() == "" {
+				// TODO validate the domain name with validate.Domain(d)
 				return errors.New("you must pass a domain name")
 			}
 
-			// TODO validate the domain name with validate.Domain(d)
+			if err := validate.PHPVersion(c.String("php-version")); err != nil {
+				return err
+			}
+
+			if err := validate.Path(c.String("path")); err != nil {
+				return err
+			}
 
 			return nil
 		},
-		Flags: []cli.Flag{phpVersionFlag},
+		Flags: []cli.Flag{phpVersionFlag, &cli.StringFlag{
+			Name:     "path",
+			Usage:    "The path to the directory to mount",
+			Required: true,
+		}},
 	}
 }
 
@@ -110,6 +122,17 @@ func Logs(e action.CommandLineExecutor) *cli.Command {
 					return action.LogsNginx(c, e)
 				},
 			},
+		},
+	}
+}
+
+func IP() *cli.Command {
+	return &cli.Command{
+		Name:        "ip",
+		Usage:       "Show the IP address of a machine",
+		Description: "Show a machines IP address",
+		Action: func(c *cli.Context) error {
+			return action.IP(c)
 		},
 	}
 }
