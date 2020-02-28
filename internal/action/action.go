@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/urfave/cli/v2"
 )
@@ -18,7 +19,20 @@ func Initialize(c *cli.Context) error {
 
 	// create the machine
 	// TODO move the yaml file into the binary as stdin
-	cmd := exec.Command(multipass, "launch", "--name", machine, "--cloud-init", "./internal/init.yaml")
+	cmd := exec.Command(
+		multipass,
+		"launch",
+		"--name",
+		machine,
+		"--cpus",
+		strconv.Itoa(c.Int("cpus")),
+		"--disk",
+		c.String("disk"),
+		"--mem",
+		c.String("memory"),
+		"--cloud-init",
+		"./internal/init.yaml",
+	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

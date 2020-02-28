@@ -15,14 +15,36 @@ import (
 
 var (
 	bootstrapFlag = &cli.BoolFlag{
-		Name:  "bootstrap",
-		Usage: "Bootstrap the machine with defaults",
-		Value: true,
+		Name:        "bootstrap",
+		Usage:       "Bootstrap the machine with defaults",
+		Value:       false,
+		DefaultText: "false",
 	}
 	phpVersionFlag = &cli.StringFlag{
 		Name:        "php-version",
 		Usage:       "Provide version of PHP",
 		DefaultText: "7.4",
+	}
+	cpuFlag = &cli.Int64Flag{
+		Name:        "cpus",
+		Usage:       "The number of CPUs to assign the machine",
+		Required:    false,
+		Value:       1,
+		DefaultText: "1",
+	}
+	memoryFlag = &cli.StringFlag{
+		Name:        "memory",
+		Usage:       "The amount of memory to assign the machine",
+		Required:    false,
+		Value:       "1G",
+		DefaultText: "1G",
+	}
+	diskFlag = &cli.StringFlag{
+		Name:        "disk",
+		Usage:       "The amount of disk to assign the machine",
+		Required:    false,
+		Value:       "5G",
+		DefaultText: "5G",
 	}
 )
 
@@ -41,7 +63,12 @@ func Initialize() *cli.Command {
 
 			return nil
 		},
-		Flags: []cli.Flag{bootstrapFlag},
+		Flags: []cli.Flag{
+			bootstrapFlag,
+			cpuFlag,
+			memoryFlag,
+			diskFlag,
+		},
 	}
 }
 
