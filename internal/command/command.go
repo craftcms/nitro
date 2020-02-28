@@ -29,15 +29,15 @@ var (
 		Name:        "cpus",
 		Usage:       "The number of CPUs to assign the machine",
 		Required:    false,
-		Value:       1,
-		DefaultText: "1",
+		Value:       2,
+		DefaultText: "2",
 	}
 	memoryFlag = &cli.StringFlag{
 		Name:        "memory",
 		Usage:       "The amount of memory to assign the machine",
 		Required:    false,
-		Value:       "1G",
-		DefaultText: "1G",
+		Value:       "2G",
+		DefaultText: "2G",
 	}
 	diskFlag = &cli.StringFlag{
 		Name:        "disk",
