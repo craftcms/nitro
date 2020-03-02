@@ -9,7 +9,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "start",
-		Usage: "Start a machine",
+		Usage: "Start machine",
 		Action: func(c *cli.Context) error {
 			machine := c.String("machine")
 			return errors.New(machine)

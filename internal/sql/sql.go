@@ -12,7 +12,7 @@ import (
 func Command(executor executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "sql",
-		Usage: "Enter a shell for the database",
+		Usage: "Enter database shell",
 		Description: `Bootstrapping a machine will install mariadb by default, this command allows you to enter a SQL shell as a root user. 
 	 If you chose postgres as the database, you can pass a flag --pgsql to enter a postgres shell`,
 		Action: func(c *cli.Context) error {

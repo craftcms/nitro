@@ -33,9 +33,9 @@ func run(args []string) {
 	app := &cli.App{
 		Name:                 "nitro",
 		UsageText:            "nitro [global options] command [command options] [arguments...]",
-		Usage:                "Develop Craft CMS applications locally with ease",
+		Usage:                "Local Craft CMS on Tap.",
 		Version:              "1.0.0",
-		Description:          "Nitro uses Multipass to create virtual machines using your OS native hypervisor and provides a CLI to abstract common DevOps tasks.",
+		Description:          "Nitro creates virtual machines with Multipass and provides a CLI for common DevOps tasks.",
 		EnableBashCompletion: true,
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)

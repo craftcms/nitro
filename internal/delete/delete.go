@@ -13,7 +13,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "delete",
-		Usage:       "Delete a machine",
+		Usage:       "Delete machine",
 		Description: "Delete a machine when no longer needed, this is recoverable and not permanently deleted.",
 		Action: func(c *cli.Context) error {
 			rdr := bufio.NewReader(os.Stdin)

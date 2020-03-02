@@ -11,7 +11,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "logs",
-		Usage: "Show logs for a machine",
+		Usage: "Show machine logs",
 		Action: func(c *cli.Context) error {
 			return cli.ShowSubcommandHelp(c)
 		},

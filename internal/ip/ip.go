@@ -11,8 +11,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "ip",
-		Usage:       "Show the IP address of a machine",
-		Description: "Show a machines IP address",
+		Usage:       "Show machine IP address",
 		Action: func(c *cli.Context) error {
 			return run(c)
 		},

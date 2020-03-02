@@ -14,7 +14,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "add-host",
-		Usage: "Add a virtual host",
+		Usage: "Add virtual host",
 		Action: func(c *cli.Context) error {
 			return run(c, e)
 		},

@@ -160,7 +160,7 @@ runcmd:
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "init",
-		Usage: "Initialize a new machine",
+		Usage: "Initialize new machine",
 		Action: func(c *cli.Context) error {
 			return run(c)
 		},

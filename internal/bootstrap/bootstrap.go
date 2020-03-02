@@ -11,7 +11,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "bootstrap",
-		Usage: "Bootstrap a machine",
+		Usage: "Bootstrap machine",
 		Action: func(c *cli.Context) error {
 			return run(c, e)
 		},
