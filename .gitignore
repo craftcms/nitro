@@ -1,6 +1,6 @@
 /nitro
 /vendor
 /demo-app
-#/bin
+/bin
 /dist
 composer.lock
