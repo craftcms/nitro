@@ -11,7 +11,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:        "redis",
-		Usage:       "Enter a shell for redis",
+		Usage:       "Enter a redis shell",
 		Description: "Redis is installed by default on the machine, this command will drop you immediately into a shell inside the machine to run commands.",
 		Action: func(c *cli.Context) error {
 			return run(c, e)

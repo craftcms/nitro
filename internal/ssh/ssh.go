@@ -12,7 +12,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "ssh",
-		Usage: "SSH into a machine as administrator",
+		Usage: "SSH into a machine",
 		Action: func(c *cli.Context) error {
 			return run(c.String("machine"), e)
 		},

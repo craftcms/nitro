@@ -11,7 +11,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
-		Usage: "Stop the machine",
+		Usage: "Stop a machine",
 		Action: func(c *cli.Context) error {
 			return run(c)
 		},

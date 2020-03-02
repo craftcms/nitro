@@ -11,7 +11,7 @@ import (
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:        "password",
-		Usage:       "Get the database password for the user nitro",
+		Usage:       "Show the database password",
 		Description: "Regardless of the database engine, there is one password for the non-root user. This password is unique to each machine and generated on startup.",
 		Action: func(c *cli.Context) error {
 			return run(c, e)

@@ -11,7 +11,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "update",
-		Usage: "Update a machine with the latest software",
+		Usage: "Update a machine",
 		Action: func(c *cli.Context) error {
 			return run(c)
 		},

@@ -14,7 +14,7 @@ func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "delete",
 		Usage:       "Delete a machine",
-		Description: "Delete a machine when no longer needed",
+		Description: "Delete a machine when no longer needed, this is recoverable and not permanently deleted.",
 		Action: func(c *cli.Context) error {
 			rdr := bufio.NewReader(os.Stdin)
 			fmt.Print("WARNING: Are you sure you wish to perform this task (y/N)? ")
