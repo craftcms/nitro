@@ -1,4 +1,4 @@
 /nitro
 /vendor
 /demo-app
-/bin
+#/bin
