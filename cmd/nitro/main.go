@@ -35,7 +35,7 @@ func run(args []string) {
 		UsageText:            "nitro [global options] command [command options] [arguments...]",
 		Usage:                "Develop Craft CMS applications locally with ease",
 		Version:              "1.0.0",
-		Description:          "An easier way to develop Craft CMS applications without Docker or Vagrant",
+		Description:          "Nitro uses Multipass to create virtual machines using your OS native hypervisor and provides a CLI to abstract common DevOps tasks.",
 		EnableBashCompletion: true,
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
