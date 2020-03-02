@@ -24,7 +24,7 @@ builds:
   - darwin_amd64
   - windows_amd64
   dir: .
-  main: .
+  main: ./cmd/nitro.main.go
   ldflags:
   - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
     -X main.builtBy=goreleaser
