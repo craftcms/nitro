@@ -8,22 +8,21 @@ scoop:
   name: nitro
   commit_author:
     name: goreleaserbot
-    email: goreleaser@carlosbecker.com
+    email: jason@craftcms.com
 builds:
 - id: nitro
   goos:
   - linux
   - darwin
+  - windows
   goarch:
   - amd64
-  - "386"
   goarm:
   - "6"
   targets:
   - linux_amd64
-  - linux_386
   - darwin_amd64
-  - darwin_386
+  - windows_amd64
   dir: .
   main: .
   ldflags:
@@ -40,7 +39,6 @@ archives:
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
     }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}'
   replacements:
-    "386": i386
     amd64: x86_64
     darwin: Darwin
     linux: Linux
