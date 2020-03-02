@@ -177,8 +177,8 @@ func Command() *cli.Command {
 			&cli.BoolFlag{
 				Name:        "bootstrap",
 				Usage:       "Bootstrap the machine with defaults",
-				Value:       false,
-				DefaultText: "false",
+				Value:       true,
+				DefaultText: "true",
 			},
 			&cli.StringFlag{
 				Name:        "php-version",
