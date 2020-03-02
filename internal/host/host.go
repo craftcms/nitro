@@ -15,11 +15,9 @@ func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "add-host",
 		Usage: "Add virtual host",
-		Action: func(c *cli.Context) error {
-			return run(c, e)
-		},
 		Before: func(c *cli.Context) error {
-			if c.Args().First() == "" {
+			domain := c.Args().First()
+			if domain == "" {
 				// TODO validate the domain name with validate.Domain(d)
 				return errors.New("you must pass a domain name")
 			}
@@ -33,6 +31,9 @@ func Command(e executor.Executor) *cli.Command {
 			}
 
 			return nil
+		},
+		Action: func(c *cli.Context) error {
+			return run(c, e)
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
