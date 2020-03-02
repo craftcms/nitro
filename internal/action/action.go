@@ -2,7 +2,6 @@ package action
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,25 +20,6 @@ func Update(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Start()
-}
-
-func AddHost(c *cli.Context, e CommandLineExecutor) error {
-	machine := c.String("machine")
-	host := c.Args().First()
-	php := c.String("php-version")
-
-	if host == "" {
-		return errors.New("missing param host")
-	}
-
-	if php == "" {
-		fmt.Println("missing php-version")
-		php = "7.4"
-	}
-
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php}
-
-	return e.Exec(e.Path(), args, os.Environ())
 }
 
 func RedisCLIShell(c *cli.Context, e CommandLineExecutor) error {

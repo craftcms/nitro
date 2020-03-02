@@ -12,6 +12,7 @@ import (
 	"github.com/pixelandtonic/nitro/internal/action"
 	"github.com/pixelandtonic/nitro/internal/bootstrap"
 	"github.com/pixelandtonic/nitro/internal/command"
+	"github.com/pixelandtonic/nitro/internal/host"
 	"github.com/pixelandtonic/nitro/internal/initialize"
 	"github.com/pixelandtonic/nitro/internal/sql"
 	"github.com/pixelandtonic/nitro/internal/x"
@@ -42,7 +43,7 @@ func main() {
 		Commands: []*cli.Command{
 			initialize.Command(),
 			bootstrap.Command(executor),
-			command.AddHost(executor),
+			host.Command(executor),
 			command.SSH(executor),
 			{
 				Name:        "xdebug",
