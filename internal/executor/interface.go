@@ -55,7 +55,7 @@ func (s SyscallExecutor) Exec(argv0 string, argv []string, envv []string) (err e
 func NewSyscallExecutor(file string) *SyscallExecutor {
 	path, err := exec.LookPath(file)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("unable to find multipass")
 	}
 
 	return &SyscallExecutor{path: path}
