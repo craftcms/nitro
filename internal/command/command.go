@@ -13,17 +13,6 @@ import (
 	"github.com/pixelandtonic/nitro/internal/validate"
 )
 
-func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
-	return &cli.Command{
-		Name:  "bootstrap",
-		Usage: "Bootstrap the installation of a new machine",
-		Action: func(context *cli.Context) error {
-			return action.Bootstrap(context, executor)
-		},
-		Flags: []cli.Flag{phpVersionFlag},
-	}
-}
-
 func Update() *cli.Command {
 	return &cli.Command{
 		Name:  "update",

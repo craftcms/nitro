@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/bootstrap"
 	"github.com/pixelandtonic/nitro/internal/command"
 	"github.com/pixelandtonic/nitro/internal/initialize"
 	"github.com/pixelandtonic/nitro/internal/sql"
@@ -40,7 +41,7 @@ func main() {
 		Flags: []cli.Flag{machineFlag},
 		Commands: []*cli.Command{
 			initialize.Command(),
-			command.Bootstrap(executor),
+			bootstrap.Command(executor),
 			command.AddHost(executor),
 			command.SSH(executor),
 			{

@@ -10,16 +10,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
-	machine := c.String("machine")
-	php := c.String("php-version")
-	database := c.String("database")
-
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database}
-
-	return e.Exec(e.Path(), args, os.Environ())
-}
-
 // Update will perform system updates on a given machine
 func Update(c *cli.Context) error {
 	machine := c.String("machine")
