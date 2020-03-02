@@ -1,5 +1,5 @@
 {
-  "name": "craftcms/craft-nitro",
+  "name": "craftcms/nitro",
   "description": "A better way to develop Craft CMS applications locally without Docker or Vagrant",
   "type": "project",
   "keywords": [
@@ -19,9 +19,6 @@
     }
   ],
   "bin": [
-    "src/nitro",
-    "bin/nitro-darwin-amd64",
-    "bin/nitro-linux-amd64",
-    "bin/nitro-windows-amd64"
+    "src/nitro"
   ]
 }
