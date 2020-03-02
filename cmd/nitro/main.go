@@ -14,7 +14,15 @@ import (
 	"github.com/pixelandtonic/nitro/internal/command"
 	"github.com/pixelandtonic/nitro/internal/host"
 	"github.com/pixelandtonic/nitro/internal/initialize"
+	"github.com/pixelandtonic/nitro/internal/ip"
+	"github.com/pixelandtonic/nitro/internal/logs"
+	"github.com/pixelandtonic/nitro/internal/password"
+	"github.com/pixelandtonic/nitro/internal/redis"
 	"github.com/pixelandtonic/nitro/internal/sql"
+	"github.com/pixelandtonic/nitro/internal/ssh"
+	"github.com/pixelandtonic/nitro/internal/start"
+	"github.com/pixelandtonic/nitro/internal/stop"
+	"github.com/pixelandtonic/nitro/internal/update"
 	"github.com/pixelandtonic/nitro/internal/x"
 )
 
@@ -32,9 +40,9 @@ func main() {
 	app := &cli.App{
 		Name:                 "nitro",
 		UsageText:            "nitro [global options] command [command options] [arguments...]",
-		Usage:                "Develop Craft CMS websites locally with ease",
+		Usage:                "Develop Craft CMS applications locally with ease",
 		Version:              "1.0.0",
-		Description:          "A better way to develop Craft CMS applications without Docker or Vagrant",
+		Description:          "An easier way to develop Craft CMS applications without Docker or Vagrant",
 		EnableBashCompletion: true,
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
@@ -44,7 +52,7 @@ func main() {
 			initialize.Command(),
 			bootstrap.Command(executor),
 			host.Command(executor),
-			command.SSH(executor),
+			ssh.Command(executor),
 			{
 				Name:        "xdebug",
 				Usage:       "Enable of disable xdebug on the machine",
@@ -61,21 +69,8 @@ func main() {
 					},
 				},
 			},
-			{
-				Name:  "share",
-				Usage: "Create a shareable URL to access your application",
-				Action: func(c *cli.Context) error {
-					return errors.New("not implemented")
-				},
-			},
-			{
-				Name:  "start",
-				Usage: "Start your machine",
-				Action: func(c *cli.Context) error {
-					return errors.New("not implemented")
-				},
-			},
-			command.Stop(),
+			start.Command(),
+			stop.Command(),
 			command.Delete(),
 			{
 				Name:        "destroy",
@@ -85,14 +80,7 @@ func main() {
 					return errors.New("not implemented")
 				},
 			},
-			{
-				Name:        "password",
-				Usage:       "Get the database password for the user nitro",
-				Description: "Regardless of the database engine, there is one password for the non-root user. This password is unique to each machine and generated on startup.",
-				Action: func(c *cli.Context) error {
-					return action.DatabasePassword(c, executor)
-				},
-			},
+			password.Command(executor),
 			{
 				Name:        "php",
 				Usage:       "Install a specific version of PHP",
@@ -109,17 +97,10 @@ func main() {
 				Hidden: true,
 			},
 			sql.Command(executor),
-			{
-				Name:        "redis",
-				Usage:       "Enter a shell for redis",
-				Description: "Redis is installed by default on the machine, this command will drop you immediately into a shell inside the machine to run commands.",
-				Action: func(c *cli.Context) error {
-					return action.RedisCLIShell(c, executor)
-				},
-			},
-			command.Update(),
-			command.Logs(executor),
-			command.IP(),
+			redis.Command(executor),
+			update.Command(),
+			logs.Command(executor),
+			ip.Command(),
 			{
 				Name: "multiple",
 				Action: func(c *cli.Context) error {

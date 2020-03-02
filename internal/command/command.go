@@ -12,56 +12,6 @@ import (
 	"github.com/pixelandtonic/nitro/internal/action"
 )
 
-func Update() *cli.Command {
-	return &cli.Command{
-		Name:  "update",
-		Usage: "Update a machine with the latest software",
-		Action: func(c *cli.Context) error {
-			return action.Update(c)
-		},
-	}
-}
-
-func SSH(e action.CommandLineExecutor) *cli.Command {
-	return &cli.Command{
-		Name:  "ssh",
-		Usage: "SSH into a machine as administrator",
-		Action: func(c *cli.Context) error {
-			return action.SSH(c.String("machine"), e)
-		},
-	}
-}
-
-func Logs(e action.CommandLineExecutor) *cli.Command {
-	return &cli.Command{
-		Name:  "logs",
-		Usage: "Show logs for a machine",
-		Action: func(c *cli.Context) error {
-			return cli.ShowSubcommandHelp(c)
-		},
-		Subcommands: []*cli.Command{
-			{
-				Name:        "nginx",
-				Description: "Show logs from nginx",
-				Action: func(c *cli.Context) error {
-					return action.LogsNginx(c, e)
-				},
-			},
-		},
-	}
-}
-
-func IP() *cli.Command {
-	return &cli.Command{
-		Name:        "ip",
-		Usage:       "Show the IP address of a machine",
-		Description: "Show a machines IP address",
-		Action: func(c *cli.Context) error {
-			return action.IP(c)
-		},
-	}
-}
-
 func Stop() *cli.Command {
 	return &cli.Command{
 		Name:        "stop",
