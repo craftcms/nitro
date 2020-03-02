@@ -5,7 +5,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal/executor"
 )
 
 // Command SSH will login a user to a specific machine

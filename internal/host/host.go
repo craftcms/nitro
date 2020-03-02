@@ -7,8 +7,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/executor"
-	"github.com/pixelandtonic/nitro/internal/validate"
+	"github.com/craftcms/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func Command(e executor.Executor) *cli.Command {

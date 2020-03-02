@@ -3,7 +3,7 @@ package command
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 func Stop() *cli.Command {

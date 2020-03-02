@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/scripts"
+	"github.com/craftcms/nitro/internal/scripts"
 )
 
 var phpScript = `

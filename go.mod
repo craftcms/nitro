@@ -1,4 +1,4 @@
-module github.com/pixelandtonic/nitro
+module github.com/craftcms/nitro
 
 go 1.13
 
