@@ -13,65 +13,6 @@ import (
 	"github.com/pixelandtonic/nitro/internal/validate"
 )
 
-var (
-	bootstrapFlag = &cli.BoolFlag{
-		Name:        "bootstrap",
-		Usage:       "Bootstrap the machine with defaults",
-		Value:       false,
-		DefaultText: "false",
-	}
-	phpVersionFlag = &cli.StringFlag{
-		Name:        "php-version",
-		Usage:       "Provide version of PHP",
-		DefaultText: "7.4",
-	}
-	cpuFlag = &cli.Int64Flag{
-		Name:        "cpus",
-		Usage:       "The number of CPUs to assign the machine",
-		Required:    false,
-		Value:       2,
-		DefaultText: "2",
-	}
-	memoryFlag = &cli.StringFlag{
-		Name:        "memory",
-		Usage:       "The amount of memory to assign the machine",
-		Required:    false,
-		Value:       "2G",
-		DefaultText: "2G",
-	}
-	diskFlag = &cli.StringFlag{
-		Name:        "disk",
-		Usage:       "The amount of disk to assign the machine",
-		Required:    false,
-		Value:       "5G",
-		DefaultText: "5G",
-	}
-)
-
-func Initialize() *cli.Command {
-	return &cli.Command{
-		Name:  "init",
-		Usage: "Initialize a new machine",
-		Action: func(c *cli.Context) error {
-			return action.Initialize(c)
-		},
-		After: func(c *cli.Context) error {
-			// if we are bootstrapping, call the command
-			if c.Bool("bootstrap") {
-				return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"})
-			}
-
-			return nil
-		},
-		Flags: []cli.Flag{
-			bootstrapFlag,
-			cpuFlag,
-			memoryFlag,
-			diskFlag,
-		},
-	}
-}
-
 func Bootstrap(executor action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
 		Name:  "bootstrap",
@@ -136,8 +77,8 @@ func AddHost(e action.CommandLineExecutor) *cli.Command {
 
 func Logs(e action.CommandLineExecutor) *cli.Command {
 	return &cli.Command{
-		Name:        "logs",
-		Description: "Show a machines logs",
+		Name:  "logs",
+		Usage: "Show logs for a machine",
 		Action: func(c *cli.Context) error {
 			return cli.ShowSubcommandHelp(c)
 		},
@@ -160,29 +101,6 @@ func IP() *cli.Command {
 		Description: "Show a machines IP address",
 		Action: func(c *cli.Context) error {
 			return action.IP(c)
-		},
-	}
-}
-
-func Database(e action.CommandLineExecutor) *cli.Command {
-	return &cli.Command{
-		Name:        "database",
-		Description: "Perform actions related to the database",
-		Action: func(c *cli.Context) error {
-			return cli.ShowSubcommandHelp(c)
-		},
-		Subcommands: []*cli.Command{
-			databasePassword(e),
-		},
-	}
-}
-
-func databasePassword(e action.CommandLineExecutor) *cli.Command {
-	return &cli.Command{
-		Name:        "password",
-		Description: "Show the user password for the database",
-		Action: func(c *cli.Context) error {
-			return action.DatabasePassword(c, e)
 		},
 	}
 }
@@ -219,5 +137,19 @@ func Delete() *cli.Command {
 
 			return action.Delete(c)
 		},
+	}
+}
+
+func MariaDB() *cli.Command {
+	return &cli.Command{
+		Name:        "mariadb",
+		Usage:       "Enter a root shell for mariadb",
+		Description: "Allows a user to quickly access a mariadb shell as the root user",
+		Category:    "databases",
+		Action: func(c *cli.Context) error {
+			return errors.New("not implemented")
+		},
+		OnUsageError: nil,
+		Subcommands:  nil,
 	}
 }

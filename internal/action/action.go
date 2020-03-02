@@ -6,38 +6,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 
 	"github.com/urfave/cli/v2"
 )
-
-// Initialize is used to create a new machine
-func Initialize(c *cli.Context) error {
-	machine := c.String("machine")
-
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-
-	// create the machine
-	// TODO move the yaml file into the binary as stdin
-	cmd := exec.Command(
-		multipass,
-		"launch",
-		"--name",
-		machine,
-		"--cpus",
-		strconv.Itoa(c.Int("cpus")),
-		"--disk",
-		c.String("disk"),
-		"--mem",
-		c.String("memory"),
-		"--cloud-init",
-		"./internal/init.yaml",
-	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
-}
 
 func Bootstrap(c *cli.Context, e CommandLineExecutor) error {
 	machine := c.String("machine")
@@ -77,6 +48,14 @@ func AddHost(c *cli.Context, e CommandLineExecutor) error {
 	}
 
 	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php}
+
+	return e.Exec(e.Path(), args, os.Environ())
+}
+
+func RedisCLIShell(c *cli.Context, e CommandLineExecutor) error {
+	machine := c.String("machine")
+
+	args := []string{"multipass", "exec", machine, "--", "redis-cli"}
 
 	return e.Exec(e.Path(), args, os.Environ())
 }
