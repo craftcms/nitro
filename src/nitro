@@ -1,16 +1,4 @@
 #!/usr/bin/env php
-<?php declare(strict_types=1);
+<?php
 
-switch (strtolower(PHP_OS)) {
-    case 'windows':
-        exec('./vendor/bin/nitro-windows-amd64');
-        break;
-    case 'linux':
-        exec('./vendor/bin/nitro-linux-amd64');
-        break;
-    default:
-        echo PHP_OS;
-        exec('./vendor/bin/nitro-darwin-amd64');
-        break;
-}
-
+require __DIR__ . DIRECTORY_SEPARATOR . 'nitro.php';

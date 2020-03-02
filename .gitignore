@@ -3,3 +3,4 @@
 /demo-app
 #/bin
 /dist
+composer.lock

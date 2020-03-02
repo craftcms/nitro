@@ -19,10 +19,14 @@
       "email": "jason@craftcms.com"
     }
   ],
+  "require": {
+    "knplabs/github-api": "^2.12",
+    "php-http/guzzle6-adapter": "^1.1"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master"
+  },
   "bin": [
-    "src/nitro",
-    "bin/nitro-darwin-amd64",
-    "bin/nitro-linux-amd64",
-    "bin/nitro-windows-amd64"
+    "src/nitro"
   ]
 }
