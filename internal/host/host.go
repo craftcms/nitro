@@ -7,11 +7,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/executor"
 	"github.com/pixelandtonic/nitro/internal/validate"
 )
 
-func Command(e action.CommandLineExecutor) *cli.Command {
+func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "add-host",
 		Usage: "Add a virtual host",
@@ -49,7 +49,7 @@ func Command(e action.CommandLineExecutor) *cli.Command {
 	}
 }
 
-func run(c *cli.Context, e action.CommandLineExecutor) error {
+func run(c *cli.Context, e executor.Executor) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 	php := c.String("php-version")

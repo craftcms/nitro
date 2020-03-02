@@ -5,11 +5,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/executor"
 )
 
 // SQL Command creates a shell command into the provided database shell as a root user.
-func Command(executor action.CommandLineExecutor) *cli.Command {
+func Command(executor executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "sql",
 		Usage: "Enter a root shell for the database",
@@ -29,7 +29,7 @@ func Command(executor action.CommandLineExecutor) *cli.Command {
 	}
 }
 
-func run(c *cli.Context, e action.CommandLineExecutor) error {
+func run(c *cli.Context, e executor.Executor) error {
 	machine := c.String("machine")
 	pgsql := c.Bool("pgsql")
 

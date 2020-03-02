@@ -5,10 +5,10 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/executor"
 )
 
-func Command(e action.CommandLineExecutor) *cli.Command {
+func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:        "password",
 		Usage:       "Get the database password for the user nitro",
@@ -19,6 +19,6 @@ func Command(e action.CommandLineExecutor) *cli.Command {
 	}
 }
 
-func run(c *cli.Context, e action.CommandLineExecutor) error {
+func run(c *cli.Context, e executor.Executor) error {
 	return e.Exec(e.Path(), []string{"multipass", "exec", c.String("machine"), "--", "cat", "/home/ubuntu/.db_password"}, os.Environ())
 }

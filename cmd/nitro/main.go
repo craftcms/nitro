@@ -2,16 +2,16 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"os/exec"
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
 	"github.com/pixelandtonic/nitro/internal/bootstrap"
-	"github.com/pixelandtonic/nitro/internal/command"
+	"github.com/pixelandtonic/nitro/internal/delete"
+	"github.com/pixelandtonic/nitro/internal/destroy"
+	executor2 "github.com/pixelandtonic/nitro/internal/executor"
 	"github.com/pixelandtonic/nitro/internal/host"
 	"github.com/pixelandtonic/nitro/internal/initialize"
 	"github.com/pixelandtonic/nitro/internal/ip"
@@ -24,6 +24,7 @@ import (
 	"github.com/pixelandtonic/nitro/internal/stop"
 	"github.com/pixelandtonic/nitro/internal/update"
 	"github.com/pixelandtonic/nitro/internal/x"
+	"github.com/pixelandtonic/nitro/internal/xdebug"
 )
 
 var machineFlag = &cli.StringFlag{
@@ -35,7 +36,7 @@ var machineFlag = &cli.StringFlag{
 }
 
 func main() {
-	executor := action.NewSyscallExecutor("multipass")
+	executor := executor2.NewSyscallExecutor("multipass")
 
 	app := &cli.App{
 		Name:                 "nitro",
@@ -53,54 +54,18 @@ func main() {
 			bootstrap.Command(executor),
 			host.Command(executor),
 			ssh.Command(executor),
-			{
-				Name:        "xdebug",
-				Usage:       "Enable of disable xdebug on the machine",
-				Description: "Calling xdebug will default to enabling the extension, if the flag --disable is passed it will be disabled",
-				Action: func(c *cli.Context) error {
-					return errors.New("not implemented")
-				},
-				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:        "disable",
-						Usage:       "Disable xdebug",
-						Value:       false,
-						DefaultText: "false",
-					},
-				},
-			},
+			xdebug.Command(),
 			start.Command(),
 			stop.Command(),
-			command.Delete(),
-			{
-				Name:        "destroy",
-				Usage:       "Permanently shutdown and destroy a machine",
-				Description: "By default, when deleting a machine it is soft-deleted which means it can be recovered. This command will destroy the machine making it unrecoverable.",
-				Action: func(c *cli.Context) error {
-					return errors.New("not implemented")
-				},
-			},
+			delete.Command(),
+			destroy.Command(),
 			password.Command(executor),
-			{
-				Name:        "php",
-				Usage:       "Install a specific version of PHP",
-				Description: "The bootstrap command defaults to the latest version of PHP, this command allows you to install alternative versions of PHP.",
-				Action: func(c *cli.Context) error {
-					if c.Args().Len() > 0 {
-						return errors.New("you must provide a version of PHP")
-					}
-
-					// TODO validate the version of PHP
-
-					return errors.New("not implemented")
-				},
-				Hidden: true,
-			},
 			sql.Command(executor),
 			redis.Command(executor),
 			update.Command(),
 			logs.Command(executor),
 			ip.Command(),
+			// this command is experimental, probably not needed
 			{
 				Name: "multiple",
 				Action: func(c *cli.Context) error {

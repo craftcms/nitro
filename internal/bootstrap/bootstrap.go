@@ -5,10 +5,10 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/pixelandtonic/nitro/internal/action"
+	"github.com/pixelandtonic/nitro/internal/executor"
 )
 
-func Command(e action.CommandLineExecutor) *cli.Command {
+func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "bootstrap",
 		Usage: "Bootstrap the installation of a new machine",
@@ -25,7 +25,7 @@ func Command(e action.CommandLineExecutor) *cli.Command {
 	}
 }
 
-func run(c *cli.Context, e action.CommandLineExecutor) error {
+func run(c *cli.Context, e executor.Executor) error {
 	machine := c.String("machine")
 	php := c.String("php-version")
 	database := c.String("database")

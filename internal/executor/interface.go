@@ -1,4 +1,4 @@
-package action
+package executor
 
 import (
 	"log"
@@ -6,9 +6,9 @@ import (
 	"syscall"
 )
 
-// CommandLineExecutor is an interface that handles
+// Executor is an interface that handles
 // running commands, the real use case is to call syscall.Exec
-type CommandLineExecutor interface {
+type Executor interface {
 	// Path will use exec.LookPath to find a complete path to a file, in real world use, this would be
 	// a path to the multipass binary
 	Path() string
