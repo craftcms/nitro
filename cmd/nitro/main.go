@@ -11,7 +11,7 @@ import (
 	"github.com/craftcms/nitro/internal/bootstrap"
 	"github.com/craftcms/nitro/internal/delete"
 	"github.com/craftcms/nitro/internal/destroy"
-	executor2 "github.com/craftcms/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal/executor"
 	"github.com/craftcms/nitro/internal/host"
 	"github.com/craftcms/nitro/internal/initialize"
 	"github.com/craftcms/nitro/internal/ip"
@@ -36,7 +36,7 @@ var machineFlag = &cli.StringFlag{
 }
 
 func main() {
-	executor := executor2.NewSyscallExecutor("multipass")
+	e := executor.NewSyscallExecutor("multipass")
 
 	app := &cli.App{
 		Name:                 "nitro",
@@ -51,19 +51,19 @@ func main() {
 		Flags: []cli.Flag{machineFlag},
 		Commands: []*cli.Command{
 			initialize.Command(),
-			bootstrap.Command(executor),
-			host.Command(executor),
-			ssh.Command(executor),
+			bootstrap.Command(e),
+			host.Command(e),
+			ssh.Command(e),
 			xdebug.Command(),
 			start.Command(),
 			stop.Command(),
 			delete.Command(),
 			destroy.Command(),
-			password.Command(executor),
-			sql.Command(executor),
-			redis.Command(executor),
+			password.Command(e),
+			sql.Command(e),
+			redis.Command(e),
 			update.Command(),
-			logs.Command(executor),
+			logs.Command(e),
 			ip.Command(),
 			// this command is experimental, probably not needed
 			{
