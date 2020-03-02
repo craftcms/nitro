@@ -27,14 +27,6 @@ import (
 	"github.com/craftcms/nitro/internal/xdebug"
 )
 
-var machineFlag = &cli.StringFlag{
-	Name:        "machine",
-	Aliases:     []string{"m"},
-	Value:       "nitro-dev",
-	Usage:       "Provide a machine name",
-	DefaultText: "nitro-dev",
-}
-
 func main() {
 	e := executor.NewSyscallExecutor("multipass")
 
@@ -48,7 +40,15 @@ func main() {
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
 		},
-		Flags: []cli.Flag{machineFlag},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "machine",
+				Aliases:     []string{"m"},
+				Value:       "nitro-dev",
+				Usage:       "Provide a machine name",
+				DefaultText: "nitro-dev",
+			},
+		},
 		Commands: []*cli.Command{
 			initialize.Command(),
 			bootstrap.Command(e),
