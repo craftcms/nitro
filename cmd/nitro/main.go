@@ -27,7 +27,7 @@ import (
 	"github.com/craftcms/nitro/internal/xdebug"
 )
 
-func main() {
+func run(args []string) {
 	e := executor.NewSyscallExecutor("multipass")
 
 	app := &cli.App{
@@ -84,7 +84,11 @@ func main() {
 
 	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
-	if err := app.RunContext(ctx, os.Args); err != nil {
+	if err := app.RunContext(ctx, args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
+	run(os.Args)
 }
