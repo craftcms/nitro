@@ -103,7 +103,7 @@ write_files:
       server {
           listen 80;
 
-          root /var/www/CHANGEPATH/web;
+          root /var/www/CHANGEPATH/CHANGEPUBLICDIR;
 
           index index.html index.htm index.php;
 
@@ -124,6 +124,7 @@ write_files:
       #!/usr/bin/env bash
       NEW_HOST_NAME="$1"
       PHP_VERSION="$2"
+      PUBLIC_DIR="$3"
 
       # make the directories
       sudo mkdir /var/www/"$NEW_HOST_NAME"
@@ -137,6 +138,7 @@ write_files:
       # change the variables
       sudo sed -i 's|CHANGEPATH|'$NEW_HOST_NAME'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
       sudo sed -i 's|CHANGESERVERNAME|'$NEW_HOST_NAME'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
+      sudo sed -i 's|CHANGEPUBLICDIR|'$PUBLIC_DIR'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
       sudo sed -i 's|CHANGEPHPVERSION|'$PHP_VERSION'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
 
       # enable the nginx site
@@ -212,7 +214,6 @@ func Command() *cli.Command {
 
 func run(c *cli.Context) error {
 	machine := c.String("machine")
-
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	// create the machine

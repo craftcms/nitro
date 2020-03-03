@@ -8,6 +8,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/craftcms/nitro/internal/attach"
 	"github.com/craftcms/nitro/internal/bootstrap"
 	"github.com/craftcms/nitro/internal/delete"
 	"github.com/craftcms/nitro/internal/destroy"
@@ -52,7 +53,8 @@ func run(args []string) {
 		Commands: []*cli.Command{
 			initialize.Command(),
 			bootstrap.Command(e),
-			host.Command(e),
+			host.Command(),
+			attach.Command(),
 			ssh.Command(e),
 			xdebug.Command(),
 			start.Command(),

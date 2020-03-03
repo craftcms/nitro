@@ -4,67 +4,76 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal/executor"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Command(e executor.Executor) *cli.Command {
+func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "add-host",
 		Usage: "Add virtual host",
 		Before: func(c *cli.Context) error {
-			domain := c.Args().First()
-			if domain == "" {
+			if host := c.Args().First(); host == "" {
 				// TODO validate the domain name with validate.Domain(d)
 				return errors.New("you must pass a domain name")
+			}
+
+			if path := c.Args().Get(1); path == "" {
+				// TODO validate the domain name with validate.Domain(d)
+				return errors.New("you must provide a path to mount")
 			}
 
 			if err := validate.PHPVersion(c.String("php-version")); err != nil {
 				return err
 			}
 
-			if err := validate.Path(c.String("path")); err != nil {
+			if err := validate.Path(c.Args().Get(1)); err != nil {
 				return err
 			}
 
 			return nil
 		},
 		Action: func(c *cli.Context) error {
-			return run(c, e)
+			return run(c)
+		},
+		After: func(c *cli.Context) error {
+			return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", c.Args().First(), c.Args().Get(1)})
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "php-version",
 				Usage:       "Provide version of PHP",
+				Value:       "7.4",
 				DefaultText: "7.4",
 			},
 			&cli.StringFlag{
-				Name:     "path",
-				Usage:    "The path to the directory to mount",
-				Required: true,
+				Name:        "public-dir",
+				Usage:       "The public directory for the server",
+				Value:       "web",
+				DefaultText: "web",
 			},
 		},
 	}
 }
 
-func run(c *cli.Context, e executor.Executor) error {
+func run(c *cli.Context) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 	php := c.String("php-version")
+	dir := c.String("public-dir")
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	if host == "" {
 		return errors.New("missing param host")
 	}
 
-	if php == "" {
-		fmt.Println("missing php-version")
-		php = "7.4"
-	}
+	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php, dir)
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	return e.Exec(e.Path(), args, os.Environ())
+	return cmd.Run()
 }
