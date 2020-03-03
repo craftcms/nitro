@@ -23,15 +23,15 @@ write_files:
 
       # run the correct script depending on the version of PHP
       if [ "$phpversion" == '7.3' ]; then
+        echo "7.3" > /home/ubuntu/.php_version
         sudo bash /opt/nitro/php/php-73.sh
       elif [ "$phpversion" == '7.2' ]; then
+        echo "7.2" > /home/ubuntu/.php_version
         sudo bash /opt/nitro/php/php-72.sh
       else
+        echo "7.4" > /home/ubuntu/.php_version
         sudo bash /opt/nitro/php/php-74.sh
       fi
-
-      # place helper file to indicate the default php version
-      echo "$phpversion" >> /home/ubuntu/.php_version
 
       # run the correct script depending on the database
       if [ "$database" == 'postgres' ]; then
