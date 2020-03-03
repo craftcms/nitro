@@ -57,7 +57,7 @@ write_files:
   - path: /opt/nitro/update.sh
     content: |
       #!/usr/bin/env bash
-      sudo apt update && sudo apt upgrade -y
+      sudo apt update -y && sudo apt upgrade -y
     permissions: '770'
   # create the php install scripts
   - path: /opt/nitro/php/php-74.sh

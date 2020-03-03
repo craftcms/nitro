@@ -27,5 +27,5 @@ func run(c *cli.Context) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Start()
+	return cmd.Run()
 }
