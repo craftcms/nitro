@@ -24,7 +24,6 @@ import (
 	"github.com/craftcms/nitro/internal/start"
 	"github.com/craftcms/nitro/internal/stop"
 	"github.com/craftcms/nitro/internal/update"
-	"github.com/craftcms/nitro/internal/x"
 	"github.com/craftcms/nitro/internal/xdebug"
 )
 
@@ -68,14 +67,6 @@ func run(args []string) {
 			update.Command(),
 			logs.Command(e),
 			ip.Command(),
-			// this command is experimental, probably not needed
-			{
-				Name: "multiple",
-				Action: func(c *cli.Context) error {
-					return x.MultipleCommands(c)
-				},
-				Hidden: true,
-			},
 		},
 	}
 
