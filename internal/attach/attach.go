@@ -37,8 +37,7 @@ func Command() *cli.Command {
 			multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 			host := c.Args().First()
 			path := c.Args().Get(1)
-
-			//  multipass mount demo-app nitro-dev:/var/www/demo-app
+			
 			cmd := exec.Command(
 				multipass,
 				"mount",
