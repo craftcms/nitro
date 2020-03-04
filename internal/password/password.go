@@ -20,5 +20,5 @@ func Command(e executor.Executor) *cli.Command {
 }
 
 func run(c *cli.Context, e executor.Executor) error {
-	return e.Exec(e.Path(), []string{"multipass", "exec", c.String("machine"), "--", "cat", "/home/ubuntu/.db_password"}, os.Environ())
+	return e.Exec(e.Path(), []string{"multipass", "exec", c.String("machine"), "--", "cat", "/opt/nitro/db_password"}, os.Environ())
 }

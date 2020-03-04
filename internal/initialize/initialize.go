@@ -61,6 +61,18 @@ write_files:
       #!/usr/bin/env bash
       sudo apt update -y && sudo apt upgrade -y
     permissions: '770'
+  - path: /opt/nitro/php/enable-xdebug.sh
+    content: |
+      #!/bin/bash
+      export phpversion=$(cat /opt/nitro/php_version)
+      sudo phpenmod -v "$phpverison" xdebug
+      echo "enabled xdebug for $phpversion"
+  - path: /opt/nitro/php/disable-xdebug.sh
+    content: |
+      #!/bin/bash
+      export phpversion=$(cat /opt/nitro/php_version)
+      sudo phpdismod -v "$phpverison" xdebug
+      echo "disabled xdebug for $phpversion"
   # create the php install scripts
   - path: /opt/nitro/php/php-74.sh
     content: |
@@ -92,14 +104,14 @@ write_files:
       systemctl start mariadb
 
       # create the database and user
-      if [ -f /home/ubuntu/.db_password ]; then
+      if [ -f /opt/nitro/db_password ]; then
           # read the file contents for the password
-          export DB_USER_PASS=$(cat /home/ubuntu/.db_password)
+          export DB_USER_PASS=$(cat /opt/nitro/db_password)
       else
           # create a random password and store it
           export USER_PASS=$(openssl rand -base64 16)
-          echo "$USER_PASS" > /home/ubuntu/.db_password
-          export DB_USER_PASS=$(cat /home/ubuntu/.db_password)
+          echo "$USER_PASS" > /opt/nitro/db_password
+          export DB_USER_PASS=$(cat /opt/nitro/db_password)
       fi
 
       sudo sed -i 's|CHANGEME|'$DB_USER_PASS'|g' /opt/nitro/mariadb/init.sql
@@ -118,14 +130,14 @@ write_files:
       sudo service postgresql restart
 
       # create the database and user
-      if [ -f /home/ubuntu/.db_password ]; then
+      if [ -f /opt/nitro/db_password ]; then
           # read the file contents for the password
-          export DB_USER_PASS=$(cat /home/ubuntu/.db_password)
+          export DB_USER_PASS=$(cat /opt/nitro/db_password)
       else
           # create a random password and store it
           export USER_PASS=$(openssl rand -base64 16)
-          echo "$USER_PASS" > /home/ubuntu/.db_password
-          export DB_USER_PASS=$(cat /home/ubuntu/.db_password)
+          echo "$USER_PASS" > /opt/nitro/db_password
+          export DB_USER_PASS=$(cat /opt/nitro/db_password)
       fi
 
       sudo sed -i 's|CHANGEME|'$DB_USER_PASS'|g' /opt/nitro/postgres/init.sql
