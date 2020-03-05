@@ -6,12 +6,24 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/craftcms/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func Command(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "bootstrap",
 		Usage: "Bootstrap machine",
+		Before: func(c *cli.Context) error {
+			if err := validate.PHPVersion(c.String("php-version")); err != nil {
+				return err
+			}
+
+			if err := validate.Database(c.String("database")); err != nil {
+				return err
+			}
+
+			return nil
+		},
 		Action: func(c *cli.Context) error {
 			return run(c, e)
 		},
