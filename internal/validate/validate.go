@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // Database takes a string that represents a type of database to install and returns an error if it is a database that
@@ -17,6 +18,20 @@ func Database(v string) error {
 	}
 
 	return errors.New(fmt.Sprintf("the database %q is not supported", v))
+}
+
+func Domain(v string) error {
+	msg := "you must provide a valid domain, without a TLD and only lowercase"
+
+	if strings.Contains(v, " ") {
+		return errors.New(msg)
+	}
+
+	if strings.Contains(v, ".") {
+		return errors.New(msg)
+	}
+
+	return nil
 }
 
 // Path will check is a fali

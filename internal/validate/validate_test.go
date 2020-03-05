@@ -97,3 +97,27 @@ func TestDatabaseFlag(t *testing.T) {
 		})
 	}
 }
+
+func TestDomain(t *testing.T) {
+	type args struct {
+		v string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "is valid",
+			args:    args{v: "example"},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Domain(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("Domain() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
