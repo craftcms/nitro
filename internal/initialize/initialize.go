@@ -113,10 +113,12 @@ write_files:
           echo "$USER_PASS" > /opt/nitro/db_password
           export DB_USER_PASS=$(cat /opt/nitro/db_password)
       fi
-
-      sudo sed -i 's|CHANGEME|'$DB_USER_PASS'|g' /opt/nitro/mariadb/init.sql
-
-      sudo mysql -u root < /opt/nitro/mariadb/init.sql
+      
+      # create the database and user
+      sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS craftcms;"
+      sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'craftcms'@'%' IDENTIFIED BY '$DB_USER_PASS';"
+      sudo mysql -u root -e "GRANT CREATE, ALTER, INDEX, LOCK TABLES, REFERENCES, UPDATE, DELETE, DROP, SELECT, INSERT ON *.* TO 'craftcms'@'%';"
+      sudo mysql -u root -e "FLUSH PRIVILEGES;"
     permissions: '770'
   - path: /opt/nitro/mariadb/install.sh
     content: |
@@ -229,9 +231,8 @@ func Command() *cli.Command {
 		After: func(c *cli.Context) error {
 			// if we are bootstrapping, call the command
 			if c.Bool("bootstrap") {
-				php := c.String("php-version")
-				database := c.String("database")
-				args := []string{c.App.Name, "--machine", c.String("machine"), "bootstrap", "--php-version", php, "--database", database}
+				// we are not passing the flags as they should be in the context already
+				args := []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"}
 				return c.App.RunContext(c.Context, args)
 			}
 
