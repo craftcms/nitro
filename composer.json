@@ -10,7 +10,8 @@
     "development",
     "php",
     "multipass",
-    "virtual machine"
+    "virtual machine",
+    "vm"
   ],
   "license": "MIT",
   "authors": [
@@ -19,10 +20,6 @@
       "email": "jason@craftcms.com"
     }
   ],
-  "require": {
-    "knplabs/github-api": "^2.12",
-    "php-http/guzzle6-adapter": "^1.1"
-  },
   "require-dev": {
     "roave/security-advisories": "dev-master"
   },
