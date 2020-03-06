@@ -31,9 +31,8 @@ func Command(e executor.Executor) *cli.Command {
 
 func handle(c *cli.Context, e executor.Executor) error {
 	machine := c.String("machine")
-	pgsql := c.Bool("pgsql")
 
-	if pgsql {
+	if c.Bool("postgres") {
 		args := []string{"multipass", "exec", machine, "--", "sudo", "-u", "postgres", "psql"}
 
 		return e.Exec(e.Path(), args, os.Environ())
