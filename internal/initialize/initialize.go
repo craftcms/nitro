@@ -37,13 +37,15 @@ write_files:
       if [ "$database" == 'postgres' ]; then
         # install postgres
         sudo bash /opt/nitro/postgres/install.sh
-
+        # set the engine
+        sudo echo "postgres" > /opt/nitro/db_engine
         # run the postgres setup
         sudo bash /opt/nitro/postgres/setup.sh
       else
         # install mariadb
         sudo bash /opt/nitro/mariadb/install.sh
-
+        # set the engine
+        sudo echo "mariadb" > /opt/nitro/db_engine
         # run the mariadb setup
         sudo bash /opt/nitro/mariadb/setup.sh
       fi
@@ -116,7 +118,7 @@ write_files:
   - path: /opt/nitro/postgres/setup.sh
     content: |
       # allow remote access to postgres
-      sudo sed -i 's|#listen_addresses = 'localhost'|listen_addresses = '\*'|g' /etc/postgresql/10/main/postgresql.conf
+      sudo sed -i "s|#listen_addresses = 'localhost'|listen_addresses = '\*'|g" /etc/postgresql/10/main/postgresql.conf
       sudo sed -i 's|127.0.0.1/32|0.0.0.0/0|g' /etc/postgresql/10/main/pg_hba.conf
       sudo service postgresql restart
 
@@ -124,7 +126,7 @@ write_files:
       sudo su - postgres -c "createuser --createdb --login nitro"
       sudo -u postgres psql -c "ALTER USER nitro WITH PASSWORD 'nitro';"
       sudo su - postgres -c "createdb craftcms"
-      sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO craftcms;"
+      sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nitro;"
     permissions: '770'
   - path: /opt/nitro/postgres/install.sh
     content: |
