@@ -109,7 +109,7 @@ write_files:
           export DB_USER_PASS=$(cat /opt/nitro/db_password)
       else
           # create a random password and store it
-          export USER_PASS=$(openssl rand -base64 16)
+          export USER_PASS=$(openssl rand -base64 12)
           echo "$USER_PASS" > /opt/nitro/db_password
           export DB_USER_PASS=$(cat /opt/nitro/db_password)
       fi
@@ -127,8 +127,8 @@ write_files:
   - path: /opt/nitro/postgres/setup.sh
     content: |
       # allow remote access to postgres
-      sed -i 's|#listen_addresses = 'localhost'|listen_addresses = '*'|g' /etc/postgresql/10/main/postgresql.conf
-      sed -i 's|127.0.0.1/32|0.0.0.0/0|g' /etc/postgresql/10/main/pg_hba.conf
+      sudo sed -i 's|#listen_addresses = 'localhost'|listen_addresses = '*'|g' /etc/postgresql/10/main/postgresql.conf
+      sudo sed -i 's|127.0.0.1/32|0.0.0.0/0|g' /etc/postgresql/10/main/pg_hba.conf
       sudo service postgresql restart
 
       # create the database and user
@@ -137,24 +137,21 @@ write_files:
           export DB_USER_PASS=$(cat /opt/nitro/db_password)
       else
           # create a random password and store it
-          export USER_PASS=$(openssl rand -base64 16)
+          export USER_PASS=$(openssl rand -base64 12)
           echo "$USER_PASS" > /opt/nitro/db_password
           export DB_USER_PASS=$(cat /opt/nitro/db_password)
       fi
 
-      sudo sed -i 's|CHANGEME|'$DB_USER_PASS'|g' /opt/nitro/postgres/init.sql
-
-      sudo -u postgres psql -U ubuntu < /opt/nitro/postgres/init.sql
+      # create the user and database
+      sudo su - postgres -c "createuser --createdb --login craftcms"
+      sudo -u postgres psql -c "ALTER USER craftcms WITH PASSWORD '$DB_USER_PASS';"
+      sudo su - postgres -c "createdb craftcms"
+      sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, REFERENCES, CONNECT ON craftcms TO craftcms;"
     permissions: '770'
   - path: /opt/nitro/postgres/install.sh
     content: |
       #!/bin/bash
       apt install -y postgresql postgresql-contrib
-  - path: /opt/nitro/postgres/init.sql
-    content: |
-      CREATE DATABASE craftcms;
-      CREATE ROLE craftcms WITH LOGIN PASSWORD 'CHANGEME';
-      GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, REFERENCES, CONNECT ON craftcms TO craftcms; 
   # create nginx install scripts
   - path: /opt/nitro/nginx/install.sh
     content: |
@@ -232,8 +229,10 @@ func Command() *cli.Command {
 			// if we are bootstrapping, call the command
 			if c.Bool("bootstrap") {
 				// we are not passing the flags as they should be in the context already
-				args := []string{c.App.Name, "--machine", c.String("machine"), "bootstrap"}
-				return c.App.RunContext(c.Context, args)
+				return c.App.RunContext(
+					c.Context,
+					[]string{c.App.Name, "--machine", c.String("machine"), "bootstrap", "--php-version", c.String("php-version"), "--database", c.String("database")},
+				)
 			}
 
 			return nil
@@ -248,11 +247,13 @@ func Command() *cli.Command {
 			&cli.StringFlag{
 				Name:        "php-version",
 				Usage:       "Provide version of PHP",
+				Value:       "7.4",
 				DefaultText: "7.4",
 			},
 			&cli.StringFlag{
 				Name:        "database",
 				Usage:       "Provide version of PHP",
+				Value:       "mariadb",
 				DefaultText: "mariadb",
 			},
 			&cli.Int64Flag{

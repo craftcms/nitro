@@ -14,18 +14,10 @@ func Command(e executor.Executor) *cli.Command {
 		Name:  "bootstrap",
 		Usage: "Bootstrap machine",
 		Before: func(c *cli.Context) error {
-			if err := validate.PHPVersion(c.String("php-version")); err != nil {
-				return err
-			}
-
-			if err := validate.Database(c.String("database")); err != nil {
-				return err
-			}
-
-			return nil
+			return beforeAction(c)
 		},
 		Action: func(c *cli.Context) error {
-			return run(c, e)
+			return handle(c, e)
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -44,7 +36,19 @@ func Command(e executor.Executor) *cli.Command {
 	}
 }
 
-func run(c *cli.Context, e executor.Executor) error {
+func beforeAction(c *cli.Context) error {
+	if err := validate.PHPVersion(c.String("php-version")); err != nil {
+		return err
+	}
+
+	if err := validate.Database(c.String("database")); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func handle(c *cli.Context, e executor.Executor) error {
 	machine := c.String("machine")
 	php := c.String("php-version")
 	database := c.String("database")
