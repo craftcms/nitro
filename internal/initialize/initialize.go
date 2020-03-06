@@ -102,22 +102,11 @@ write_files:
       systemctl stop mariadb
       sed -i 's|bind-address|#bind-address|g' /etc/mysql/mariadb.conf.d/50-server.cnf
       systemctl start mariadb
-
-      # create the database and user
-      if [ -f /opt/nitro/db_password ]; then
-          # read the file contents for the password
-          export DB_USER_PASS=$(cat /opt/nitro/db_password)
-      else
-          # create a random password and store it
-          export USER_PASS=$(openssl rand -base64 12)
-          echo "$USER_PASS" > /opt/nitro/db_password
-          export DB_USER_PASS=$(cat /opt/nitro/db_password)
-      fi
       
       # create the database and user
       sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS craftcms;"
-      sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'craftcms'@'%' IDENTIFIED BY '$DB_USER_PASS';"
-      sudo mysql -u root -e "GRANT CREATE, ALTER, INDEX, LOCK TABLES, REFERENCES, UPDATE, DELETE, DROP, SELECT, INSERT ON *.* TO 'craftcms'@'%';"
+      sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'nitro'@'%' IDENTIFIED BY 'nitro';"
+      sudo mysql -u root -e "GRANT CREATE, ALTER, INDEX, LOCK TABLES, REFERENCES, UPDATE, DELETE, DROP, SELECT, INSERT ON *.* TO 'nitro'@'%';"
       sudo mysql -u root -e "FLUSH PRIVILEGES;"
     permissions: '770'
   - path: /opt/nitro/mariadb/install.sh
@@ -127,26 +116,15 @@ write_files:
   - path: /opt/nitro/postgres/setup.sh
     content: |
       # allow remote access to postgres
-      sudo sed -i 's|#listen_addresses = 'localhost'|listen_addresses = '*'|g' /etc/postgresql/10/main/postgresql.conf
+      sudo sed -i 's|#listen_addresses = 'localhost'|listen_addresses = '\*'|g' /etc/postgresql/10/main/postgresql.conf
       sudo sed -i 's|127.0.0.1/32|0.0.0.0/0|g' /etc/postgresql/10/main/pg_hba.conf
       sudo service postgresql restart
 
-      # create the database and user
-      if [ -f /opt/nitro/db_password ]; then
-          # read the file contents for the password
-          export DB_USER_PASS=$(cat /opt/nitro/db_password)
-      else
-          # create a random password and store it
-          export USER_PASS=$(openssl rand -base64 12)
-          echo "$USER_PASS" > /opt/nitro/db_password
-          export DB_USER_PASS=$(cat /opt/nitro/db_password)
-      fi
-
       # create the user and database
-      sudo su - postgres -c "createuser --createdb --login craftcms"
-      sudo -u postgres psql -c "ALTER USER craftcms WITH PASSWORD '$DB_USER_PASS';"
+      sudo su - postgres -c "createuser --createdb --login nitro"
+      sudo -u postgres psql -c "ALTER USER nitro WITH PASSWORD 'nitro';"
       sudo su - postgres -c "createdb craftcms"
-      sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, REFERENCES, CONNECT ON craftcms TO craftcms;"
+      sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO craftcms;"
     permissions: '770'
   - path: /opt/nitro/postgres/install.sh
     content: |

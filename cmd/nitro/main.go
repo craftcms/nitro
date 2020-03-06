@@ -17,7 +17,6 @@ import (
 	"github.com/craftcms/nitro/internal/initialize"
 	"github.com/craftcms/nitro/internal/ip"
 	"github.com/craftcms/nitro/internal/logs"
-	"github.com/craftcms/nitro/internal/password"
 	"github.com/craftcms/nitro/internal/redis"
 	"github.com/craftcms/nitro/internal/sql"
 	"github.com/craftcms/nitro/internal/ssh"
@@ -29,6 +28,14 @@ import (
 
 func run(args []string) {
 	e := executor.NewSyscallExecutor("multipass")
+
+	// find the path to multipass and set value in context
+	multipass, err := exec.LookPath("multipass")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
 	app := &cli.App{
 		Name:                 "nitro",
@@ -61,7 +68,6 @@ func run(args []string) {
 			stop.Command(),
 			delete.Command(),
 			destroy.Command(),
-			password.Command(e),
 			sql.Command(e),
 			redis.Command(e),
 			update.Command(),
@@ -69,14 +75,6 @@ func run(args []string) {
 			ip.Command(),
 		},
 	}
-
-	// find the path to multipass and set value in context
-	multipass, err := exec.LookPath("multipass")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
 	if err := app.RunContext(ctx, args); err != nil {
 		log.Fatal(err)
