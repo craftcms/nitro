@@ -10,17 +10,16 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:        "ip",
-		Usage:       "Show machine IP address",
+		Name:  "ip",
+		Usage: "Show machine IP address",
 		Action: func(c *cli.Context) error {
-			return run(c)
+			return handle(c)
 		},
 	}
 }
 
-func run(c *cli.Context) error {
+func handle(c *cli.Context) error {
 	machine := c.String("machine")
-
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
 	cmd := exec.Command(multipass, "list", "--format", "json")
@@ -58,7 +57,7 @@ func run(c *cli.Context) error {
 	}
 
 	fmt.Println(
-		fmt.Sprintf("IP address for %s is:\n%s", machine, ip),
+		fmt.Sprintf(ip),
 	)
 
 	return nil

@@ -203,19 +203,10 @@ func Command() *cli.Command {
 		Name:  "init",
 		Usage: "Initialize new machine",
 		Action: func(c *cli.Context) error {
-			return run(c)
+			return handle(c)
 		},
 		After: func(c *cli.Context) error {
-			// if we are bootstrapping, call the command
-			if c.Bool("bootstrap") {
-				// we are not passing the flags as they should be in the context already
-				return c.App.RunContext(
-					c.Context,
-					[]string{c.App.Name, "--machine", c.String("machine"), "bootstrap", "--php-version", c.String("php-version"), "--database", c.String("database")},
-				)
-			}
-
-			return nil
+			return afterAction(c)
 		},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
@@ -261,7 +252,7 @@ func Command() *cli.Command {
 	}
 }
 
-func run(c *cli.Context) error {
+func handle(c *cli.Context) error {
 	machine := c.String("machine")
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
@@ -288,4 +279,17 @@ func run(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func afterAction(c *cli.Context) error {
+	// if we are bootstrapping, call the command
+	if c.Bool("bootstrap") {
+		// we are not passing the flags as they should be in the context already
+		return c.App.RunContext(
+			c.Context,
+			[]string{c.App.Name, "--machine", c.String("machine"), "bootstrap", "--php-version", c.String("php-version"), "--database", c.String("database")},
+		)
+	}
+
+	return nil
 }

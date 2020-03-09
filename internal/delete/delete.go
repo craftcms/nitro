@@ -29,12 +29,12 @@ func Command() *cli.Command {
 				return nil
 			}
 
-			return run(c)
+			return handle(c)
 		},
 	}
 }
 
-func run(c *cli.Context) error {
+func handle(c *cli.Context) error {
 	machine := c.String("machine")
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))

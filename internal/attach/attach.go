@@ -16,21 +16,7 @@ func Command() *cli.Command {
 		Name:  "attach",
 		Usage: "Add directory to machine",
 		Before: func(c *cli.Context) error {
-			if host := c.Args().First(); host == "" {
-				// TODO validate the domain name with validate.Domain(d)
-				return errors.New("you must pass a domain name")
-			}
-
-			if path := c.Args().Get(1); path == "" {
-				// TODO validate the domain name with validate.Domain(d)
-				return errors.New("you must provide a path to mount")
-			}
-
-			if err := validate.Path(c.Args().Get(1)); err != nil {
-				return err
-			}
-
-			return nil
+			return beforeAction(c)
 		},
 		Action: func(c *cli.Context) error {
 			machine := c.String("machine")
@@ -51,4 +37,22 @@ func Command() *cli.Command {
 			return cmd.Run()
 		},
 	}
+}
+
+func beforeAction(c *cli.Context) error  {
+	if host := c.Args().First(); host == "" {
+		// TODO validate the domain name with validate.Domain(d)
+		return errors.New("you must pass a domain name")
+	}
+
+	if path := c.Args().Get(1); path == "" {
+		// TODO validate the domain name with validate.Domain(d)
+		return errors.New("you must provide a path to mount")
+	}
+
+	if err := validate.Path(c.Args().Get(1)); err != nil {
+		return err
+	}
+
+	return nil
 }
