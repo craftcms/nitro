@@ -10,6 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/internal/attach"
 	"github.com/craftcms/nitro/internal/bootstrap"
+	"github.com/craftcms/nitro/internal/command"
 	"github.com/craftcms/nitro/internal/delete"
 	"github.com/craftcms/nitro/internal/destroy"
 	"github.com/craftcms/nitro/internal/executor"
@@ -43,7 +44,6 @@ func run(args []string) {
 		Usage:                "Local Craft CMS on Tap.",
 		Version:              "1.0.0",
 		Description:          "Nitro creates virtual machines with Multipass and provides a CLI for common DevOps tasks.",
-		EnableBashCompletion: true,
 		Action: func(c *cli.Context) error {
 			return cli.ShowAppHelp(c)
 		},
@@ -60,6 +60,7 @@ func run(args []string) {
 			initialize.Command(),
 			bootstrap.Command(),
 			host.Command(),
+			command.Remove(),
 			attach.Command(),
 			ssh.Command(e),
 			xdebug.CommandOn(e),
