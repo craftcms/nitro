@@ -23,12 +23,12 @@ func Command() *cli.Command {
 			multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 			host := c.Args().First()
 			path := c.Args().Get(1)
-			
+
 			cmd := exec.Command(
 				multipass,
 				"mount",
 				path,
-				machine+":/var/www/"+host,
+				machine+":/home/ubuntu/sites/"+host,
 			)
 
 			cmd.Stdout = os.Stdout
@@ -39,7 +39,7 @@ func Command() *cli.Command {
 	}
 }
 
-func beforeAction(c *cli.Context) error  {
+func beforeAction(c *cli.Context) error {
 	if host := c.Args().First(); host == "" {
 		// TODO validate the domain name with validate.Domain(d)
 		return errors.New("you must pass a domain name")

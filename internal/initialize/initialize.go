@@ -57,6 +57,11 @@ write_files:
       if [ -f /etc/nginx/sites-enabled/default ]; then
           sudo rm /etc/nginx/sites-enabled/default
       fi
+      
+      # change user php is running as
+      export phpversion=$(cat /opt/nitro/php_version)
+      sudo sed -i "s|user = www-data|user = ubuntu|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
+      sudo sed -i "s|group = www-data|group = ubuntu|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
     permissions: '770'
   - path: /opt/nitro/update.sh
     content: |
@@ -142,7 +147,7 @@ write_files:
       server {
           listen 80;
 
-          root /var/www/CHANGEPATH/CHANGEPUBLICDIR;
+          root /home/ubuntu/sites/CHANGEPATH/CHANGEPUBLICDIR;
 
           index index.html index.htm index.php;
 
@@ -166,10 +171,7 @@ write_files:
       PUBLIC_DIR="$3"
 
       # make the directories
-      sudo mkdir /var/www/"$NEW_HOST_NAME"
-
-      # set permissions for www-data to new directory
-      sudo chown -R www-data:www-data /var/www/"$NEW_HOST_NAME"
+      mkdir -p /home/ubuntu/sites/"$NEW_HOST_NAME"
 
       # copy the nitro nginx template into sites-available/default
       sudo cp /opt/nitro/nginx/template.conf /etc/nginx/sites-available/"$NEW_HOST_NAME"
