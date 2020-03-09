@@ -62,6 +62,11 @@ write_files:
       export phpversion=$(cat /opt/nitro/php_version)
       sudo sed -i "s|user = www-data|user = ubuntu|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
       sudo sed -i "s|group = www-data|group = ubuntu|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
+
+      # set php.ini settings for craft
+      sudo sed -i "s|memory_limit = 128M|memory_limit = 256M|g" /etc/php/"$phpversion"/fpm/php.ini
+      sudo sed -i "s|max_execution_time = 30|max_execution_time = 120|g" /etc/php/"$phpversion"/fpm/php.ini
+      sudo service php"$phpversion"-fpm restart
     permissions: '770'
   - path: /opt/nitro/update.sh
     content: |
