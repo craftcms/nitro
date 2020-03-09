@@ -14,4 +14,4 @@ test:
 demo: build
 	composer create-project craftcms/craft ${MACHINE}
 	./nitro --machine ${MACHINE} init
-	./nitro --machine ${MACHINE} add-host ${MACHINE}.nitro
+	./nitro --machine ${MACHINE} add-host demo ${MACHINE}

@@ -1,15 +1,16 @@
 package bootstrap
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal/executor"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Command(e executor.Executor) *cli.Command {
+func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "bootstrap",
 		Usage: "Bootstrap machine",
@@ -17,7 +18,7 @@ func Command(e executor.Executor) *cli.Command {
 			return beforeAction(c)
 		},
 		Action: func(c *cli.Context) error {
-			return handle(c, e)
+			return handle(c)
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -48,12 +49,27 @@ func beforeAction(c *cli.Context) error {
 	return nil
 }
 
-func handle(c *cli.Context, e executor.Executor) error {
+func handle(c *cli.Context) error {
 	machine := c.String("machine")
 	php := c.String("php-version")
 	database := c.String("database")
+	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database}
+	// create the machine
+	cmd := exec.Command(
+		multipass,
+		"exec",
+		machine,
+		"--",
+		"sudo",
+		"bash",
+		"/opt/nitro/bootstrap.sh",
+		php,
+		database,
+	)
 
-	return e.Exec(e.Path(), args, os.Environ())
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }

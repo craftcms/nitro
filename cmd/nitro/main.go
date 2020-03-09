@@ -58,7 +58,7 @@ func run(args []string) {
 		},
 		Commands: []*cli.Command{
 			initialize.Command(),
-			bootstrap.Command(e),
+			bootstrap.Command(),
 			host.Command(),
 			attach.Command(),
 			ssh.Command(e),
