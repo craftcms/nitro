@@ -3,7 +3,6 @@ package app
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal/attach"
 	"github.com/craftcms/nitro/internal/bootstrap"
 	"github.com/craftcms/nitro/internal/command"
 	"github.com/craftcms/nitro/internal/destroy"
@@ -48,7 +47,7 @@ func NewApp(e executor.Executor) *cli.App {
 			bootstrap.Command(),
 			host.Command(),
 			command.Remove(),
-			attach.Command(),
+			command.Attach(),
 			ssh.Command(e),
 			xdebug.CommandOn(e),
 			xdebug.CommandOff(e),

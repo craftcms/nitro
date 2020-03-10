@@ -15,11 +15,11 @@ var (
 // Remove will remove a host from a machine
 func Remove() *cli.Command {
 	return &cli.Command{
-		Name:        "remove",
-		Usage:       "Remove host from machine",
-		Before:      removeBeforeAction,
-		Action:      removeAction,
-		After:       removeAfterAction,
+		Name:   "remove",
+		Usage:  "Remove host from machine",
+		Before: removeBeforeAction,
+		Action: removeAction,
+		After:  removeAfterAction,
 	}
 }
 
