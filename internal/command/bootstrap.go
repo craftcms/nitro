@@ -70,12 +70,15 @@ func bootstrapAfterAction(c *cli.Context) error {
 	}
 
 	fmt.Println("")
-	fmt.Println("==== DATABASE ====")
-	fmt.Println("Server:", "192.168.x.x")
-	fmt.Println("Port:", port)
-	fmt.Println("Driver:", database)
-	fmt.Println("Username:", "nitro")
-	fmt.Println("Password:", "nitro")
+	fmt.Println("==== DATABASE INFO ====")
+	fmt.Println("server:", "192.168.64.21")
+	fmt.Println("port:", port)
+	fmt.Println("driver:", database)
+	fmt.Println("database:", "craftcms")
+	fmt.Println("username:", "nitro")
+	fmt.Println("password:", "nitro")
+	fmt.Println("")
+	fmt.Println("For additional information on nitro, visit https://docs.craftcms.com/v3/nitro")
 
 	return nil
 }
