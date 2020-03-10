@@ -58,12 +58,10 @@ write_files:
       sudo sed -i "s|memory_limit = 128M|memory_limit = 256M|g" /etc/php/"$phpversion"/fpm/php.ini
       sudo sed -i "s|max_execution_time = 30|max_execution_time = 120|g" /etc/php/"$phpversion"/fpm/php.ini
       sudo service php"$phpversion"-fpm restart
-    permissions: '770'
   - path: /opt/nitro/update.sh
     content: |
       #!/usr/bin/env bash
       sudo apt update -y && sudo apt upgrade -y
-    permissions: '770'
   - path: /opt/nitro/php/enable-xdebug.sh
     content: |
       #!/bin/bash
@@ -97,7 +95,6 @@ write_files:
     content: |
       # install composer
       php -r "readfile('http://getcomposer.org/installer');" | sudo php -- --install-dir=/usr/bin/ --filename=composer
-    permissions: '770'
   # create mariadb scripts
   - path: /opt/nitro/mariadb/setup.sh
     content: |
@@ -111,7 +108,6 @@ write_files:
       sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'nitro'@'%' IDENTIFIED BY 'nitro';"
       sudo mysql -u root -e "GRANT CREATE, ALTER, INDEX, LOCK TABLES, REFERENCES, UPDATE, DELETE, DROP, SELECT, INSERT ON *.* TO 'nitro'@'%';"
       sudo mysql -u root -e "FLUSH PRIVILEGES;"
-    permissions: '770'
   - path: /opt/nitro/mariadb/install.sh
     content: |
       #!/bin/bash
@@ -128,7 +124,6 @@ write_files:
       sudo -u postgres psql -c "ALTER USER nitro WITH PASSWORD 'nitro';"
       sudo su - postgres -c "createdb craftcms"
       sudo -u postgres psql -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nitro;"
-    permissions: '770'
   - path: /opt/nitro/postgres/install.sh
     content: |
       #!/bin/bash
@@ -196,12 +191,10 @@ write_files:
 
       # reload nginx
       sudo service nginx reload
-    permissions: '0770'
   - path: /opt/nitro/nginx/tail-logs.sh
     content: |
       #!/usr/bin/env bash
       sudo tail -f /var/log/nginx/access.log -f /var/log/nginx/error.log
-    permissions: '0770'
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php
