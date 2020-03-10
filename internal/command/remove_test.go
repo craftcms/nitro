@@ -8,6 +8,39 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+type TestRunner struct {
+	args    []string
+	syscall bool
+	input   string
+}
+
+func (r TestRunner) Run(args []string) error {
+	r.args = args
+
+	return nil
+}
+
+func (r TestRunner) UseSyscall(t bool) {
+	r.syscall = t
+}
+
+func (r TestRunner) SetInput(input string) error {
+	return nil
+}
+
+func TestRemoveAction(t *testing.T) {
+	// Arrange
+	r := TestRunner{}
+	c := cli.NewContext(nil, nil, nil)
+
+	// Act
+	err := removeAction(c, r)
+
+	if err != nil {
+		t.Errorf("expected err to be nil; got %v instead", err)
+	}
+}
+
 func TestRemoveBeforeCommandReturnsError(t *testing.T) {
 	// Arrange
 	set := flag.NewFlagSet("test", 0)

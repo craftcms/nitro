@@ -1,6 +1,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/craftcms/nitro/internal"
@@ -17,6 +19,7 @@ func Bootstrap(r internal.Runner) *cli.Command {
 		Action: func(c *cli.Context) error {
 			return bootstrapAction(c, r)
 		},
+		After: bootstrapAfterAction,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "php-version",
@@ -52,4 +55,27 @@ func bootstrapAction(c *cli.Context, r internal.Runner) error {
 	database := c.String("database")
 
 	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database})
+}
+
+func bootstrapAfterAction(c *cli.Context) error {
+	// TODO make this pull the actual values
+	database := c.String("database")
+
+	var port int
+	switch database {
+	case "postgres":
+		port = 5432
+	default:
+		port = 3306
+	}
+
+	fmt.Println("")
+	fmt.Println("==== DATABASE ====")
+	fmt.Println("Server:", "192.168.x.x")
+	fmt.Println("Port:", port)
+	fmt.Println("Driver:", database)
+	fmt.Println("Username:", "nitro")
+	fmt.Println("Password:", "nitro")
+
+	return nil
 }
