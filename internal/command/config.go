@@ -140,7 +140,7 @@ write_files:
 
           root /home/ubuntu/sites/CHANGEPATH/CHANGEPUBLICDIR;
 
-          index index.html index.htm index.php;
+          index index.php;
 
           server_name CHANGESERVERNAME;
 
