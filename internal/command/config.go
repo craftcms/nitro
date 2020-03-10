@@ -158,7 +158,6 @@ write_files:
              fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
           }
       }
-    permissions: '770'
   - path: /opt/nitro/nginx/add-site.sh
     content: |
       #!/usr/bin/env bash
@@ -169,10 +168,13 @@ write_files:
 
       if [ "$REQUESTED_PHP_VERSION" != "$INSTALLED_PHP_VERSION" ]; then
           if [ "$REQUESTED_PHP_VERSION" == '7.3' ]; then
+              export REQUESTED_PHP_VERSION="7.3"
               sudo bash /opt/nitro/php/php-73.sh
           elif [ "$REQUESTED_PHP_VERSION" == '7.2' ]; then
+              export REQUESTED_PHP_VERSION="7.2"
               sudo bash /opt/nitro/php/php-72.sh
           else
+              export REQUESTED_PHP_VERSION="7.4"
               sudo bash /opt/nitro/php/php-74.sh
           fi
       fi
@@ -187,7 +189,7 @@ write_files:
       sudo sed -i 's|CHANGEPATH|'$NEW_HOST_NAME'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
       sudo sed -i 's|CHANGESERVERNAME|'$NEW_HOST_NAME'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
       sudo sed -i 's|CHANGEPUBLICDIR|'$PUBLIC_DIR'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
-      sudo sed -i 's|CHANGEPHPVERSION|'$PHP_VERSION'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
+      sudo sed -i 's|CHANGEPHPVERSION|'$REQUESTED_PHP_VERSION'|g' /etc/nginx/sites-available/"$NEW_HOST_NAME"
 
       # enable the nginx site
       sudo ln -s /etc/nginx/sites-available/"$NEW_HOST_NAME" /etc/nginx/sites-enabled/
