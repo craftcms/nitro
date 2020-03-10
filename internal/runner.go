@@ -4,22 +4,20 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 )
-
-// Runner is responsible for running command, it can defer to syscall.Exec or
-// exec.Command where required.
-type Runner interface {
-	// Run is used when the command does not need to be interactive
-	Run(args []string) error
-	UseSyscall(t bool)
-}
 
 // CommandRunner is a struct that will handle calling exec.Cmd or syscall.Exec using a boolean
 // it keeps all of the logic in a single interface to keep testing easier
 type CommandRunner struct {
 	path      string
 	isSyscall bool
+	reader    *strings.Reader
+}
+
+func (c CommandRunner) SetReader(rdr *strings.Reader) {
+	c.reader = rdr
 }
 
 func (c CommandRunner) Run(args []string) error {
@@ -35,6 +33,11 @@ func (c CommandRunner) Run(args []string) error {
 	}
 
 	cmd := exec.Command(c.path, args...)
+
+	// if the reader is set, we need tp
+	if c.reader != nil {
+		cmd.Stdin = c.reader
+	}
 
 	if cmd.Stdout == nil {
 		cmd.Stdout = os.Stdout

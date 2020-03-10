@@ -7,18 +7,18 @@ import (
 )
 
 // SSH SSH will login a user to a specific machine
-func SSH(runner internal.Runner) *cli.Command {
+func SSH(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "ssh",
 		Usage: "SSH into machine",
 		Action: func(c *cli.Context) error {
-			return sshAction(c, runner)
+			return sshAction(c, r)
 		},
 	}
 }
 
-func sshAction(c *cli.Context, runner internal.Runner) error {
-	runner.UseSyscall(true)
+func sshAction(c *cli.Context, r internal.Runner) error {
+	r.UseSyscall(true)
 
-	return runner.Run([]string{"shell", c.String("machine")})
+	return r.Run([]string{"shell", c.String("machine")})
 }

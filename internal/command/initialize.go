@@ -1,22 +1,23 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal"
 )
 
 // Initialize it the main entry point when calling the init command to start a new machine
-func Initialize() *cli.Command {
+func Initialize(r internal.Runner) *cli.Command {
 	return &cli.Command{
-		Name:   "init",
-		Usage:  "Initialize new machine",
-		Action: initializeAction,
-		After:  initializeAfterAction,
+		Name:  "init",
+		Usage: "Initialize new machine",
+		Action: func(c *cli.Context) error {
+			return initializeAction(c, r)
+		},
+		After: initializeAfterAction,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:        "bootstrap",
@@ -61,33 +62,16 @@ func Initialize() *cli.Command {
 	}
 }
 
-func initializeAction(c *cli.Context) error {
+func initializeAction(c *cli.Context, r internal.Runner) error {
 	machine := c.String("machine")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-
-	// create the machine
-	cmd := exec.Command(
-		multipass,
-		"launch",
-		"--name",
-		machine,
-		"--cpus",
-		strconv.Itoa(c.Int("cpus")),
-		"--disk",
-		c.String("disk"),
-		"--mem",
-		c.String("memory"),
-		"--cloud-init",
-		"-",
-	)
+	cpus := strconv.Itoa(c.Int("cpus"))
+	disk := c.String("disk")
+	mem := c.String("memory")
 
 	// pass the cloud init as stdin
-	cmd.Stdin = strings.NewReader(cloudInit)
+	r.SetReader(strings.NewReader(cloudInit))
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return r.Run([]string{"launch", "--name", machine, "--cpus", cpus, "--disk", disk, "--mem", mem, "--cloud-init", "-"})
 }
 
 func initializeAfterAction(c *cli.Context) error {
