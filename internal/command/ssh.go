@@ -1,34 +1,24 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal/runner"
 )
 
 // SSH SSH will login a user to a specific machine
-func SSH() *cli.Command {
+func SSH(runner runner.Runner) *cli.Command {
 	return &cli.Command{
-		Name:   "ssh",
-		Usage:  "SSH into machine",
-		Action: sshAction,
+		Name:  "ssh",
+		Usage: "SSH into machine",
+		Action: func(c *cli.Context) error {
+			return sshAction(c, runner)
+		},
 	}
 }
 
-func sshAction(c *cli.Context) error {
-	machine := c.String("machine")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
+func sshAction(c *cli.Context, runner runner.Runner) error {
+	runner.UseSyscall(true)
 
-	cmd := exec.Command(
-		multipass,
-		"shell",
-		machine,
-	)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return runner.Run([]string{"shell", c.String("machine")})
 }

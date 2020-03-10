@@ -5,6 +5,7 @@ import (
 
 	"github.com/craftcms/nitro/internal/command"
 	"github.com/craftcms/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal/runner"
 )
 
 var (
@@ -12,7 +13,7 @@ var (
 	Version = "1.0.0"
 )
 
-func NewApp(e executor.Executor) *cli.App {
+func NewApp(e executor.Executor, r runner.Runner) *cli.App {
 	return &cli.App{
 		Name:        "nitro",
 		UsageText:   "nitro [global options] command [command options] [arguments...]",
@@ -35,7 +36,7 @@ func NewApp(e executor.Executor) *cli.App {
 			command.Add(),
 			command.Remove(),
 			command.Attach(),
-			command.SSH(),
+			command.SSH(r),
 			command.XOn(),
 			command.XOff(),
 			command.Start(),
