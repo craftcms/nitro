@@ -1,15 +1,13 @@
 package command
 
 import (
-	"os"
-
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal/executor"
+	"github.com/craftcms/nitro/internal"
 )
 
 // Logs show system logs for a machine
-func Logs(e executor.Executor) *cli.Command {
+func Logs(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "logs",
 		Usage: "Show machine logs",
@@ -21,17 +19,13 @@ func Logs(e executor.Executor) *cli.Command {
 				Name:        "nginx",
 				Description: "Show logs from nginx",
 				Action: func(c *cli.Context) error {
-					return logsNginx(c, e)
+					return logsNginx(c, r)
 				},
 			},
 		},
 	}
 }
 
-func logsNginx(c *cli.Context, e executor.Executor) error {
-	machine := c.String("machine")
-
-	args := []string{"multipass", "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/tail-logs.sh"}
-
-	return e.Exec(e.Path(), args, os.Environ())
+func logsNginx(c *cli.Context, r internal.Runner) error {
+	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/nginx/tail-logs.sh"})
 }

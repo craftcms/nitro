@@ -3,9 +3,10 @@ package command
 import (
 	"errors"
 	"fmt"
-	"os/exec"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal"
 )
 
 var (
@@ -13,13 +14,15 @@ var (
 )
 
 // Remove will remove a host from a machine
-func Remove() *cli.Command {
+func Remove(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:   "remove",
 		Usage:  "Remove virtual host",
 		Before: removeBeforeAction,
-		Action: removeAction,
-		After:  removeAfterAction,
+		Action: func(c *cli.Context) error {
+			return removeAction(c, r)
+		},
+		After: removeAfterAction,
 	}
 }
 
@@ -31,21 +34,11 @@ func removeBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func removeAction(c *cli.Context) error {
+func removeAction(c *cli.Context, r internal.Runner) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 
-	return exec.Command(
-		fmt.Sprintf("%s", c.Context.Value("multipass")),
-		"exec",
-		"--name",
-		machine,
-		"--",
-		"sudo",
-		"bash",
-		"/opt/nitro/nginx/remove-host.sh",
-		host,
-	).Run()
+	return r.Run([]string{"exec", "--name", machine, "--", "sudo", "bash", "/opt/nitro/nginx/remove-host.sh", host})
 }
 
 func removeAfterAction(c *cli.Context) error {

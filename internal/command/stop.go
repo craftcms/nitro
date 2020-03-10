@@ -1,29 +1,21 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal"
 )
 
-func Stop() *cli.Command {
+func Stop(r internal.Runner) *cli.Command {
 	return &cli.Command{
-		Name:   "stop",
-		Usage:  "Stop machine",
-		Action: stopAction,
+		Name:  "stop",
+		Usage: "Stop machine",
+		Action: func(c *cli.Context) error {
+			return stopAction(c, r)
+		},
 	}
 }
 
-func stopAction(c *cli.Context) error {
-	machine := c.String("machine")
-
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-
-	cmd := exec.Command(multipass, "stop", machine)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+func stopAction(c *cli.Context, r internal.Runner) error {
+	return r.Run([]string{"stop", c.String("machine")})
 }

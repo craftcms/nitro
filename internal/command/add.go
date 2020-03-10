@@ -2,22 +2,22 @@ package command
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Add() *cli.Command {
+func Add(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:   "add",
 		Usage:  "Add virtual host",
 		Before: addBeforeAction,
-		Action: addAction,
-		After:  addAfterAction,
+		Action: func(c *cli.Context) error {
+			return addAction(c, r)
+		},
+		After: addAfterAction,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "php-version",
@@ -57,23 +57,13 @@ func addBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func addAction(c *cli.Context) error {
+func addAction(c *cli.Context, r internal.Runner) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 	php := c.String("php-version")
 	dir := c.String("public-dir")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
-	if host == "" {
-		return errors.New("missing param host")
-	}
-
-	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php, dir)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php, dir})
 }
 
 func addAfterAction(c *cli.Context) error {

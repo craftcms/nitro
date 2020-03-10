@@ -1,29 +1,25 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal"
 )
 
-func Update() *cli.Command {
+func Update(r internal.Runner) *cli.Command {
 	return &cli.Command{
-		Name:   "update",
-		Usage:  "Update machine",
-		Action: updateAction,
+		Name:  "update",
+		Usage: "Update machine",
+		Action: func(c *cli.Context) error {
+			return updateAction(c, r)
+		},
 	}
 }
 
-func updateAction(c *cli.Context) error {
+func updateAction(c *cli.Context, r internal.Runner) error {
 	machine := c.String("machine")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
-	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/update.sh")
+	r.UseSyscall(true)
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/update.sh"})
 }

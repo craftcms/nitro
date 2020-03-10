@@ -1,31 +1,23 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/urfave/cli/v2"
+
+	"github.com/craftcms/nitro/internal"
 )
 
 // XOff will disable xdebug on a machine
-func XOff() *cli.Command {
+func XOff(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "xoff",
 		Usage:       "Disable Xdebug",
 		Description: "Disable Xdebug on machine",
-		Action:      xOffAction,
+		Action: func(c *cli.Context) error {
+			return xOffAction(c, r)
+		},
 	}
 }
 
-func xOffAction(c *cli.Context) error {
-	machine := c.String("machine")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
-
-	cmd := exec.Command(multipass, "exec", machine, "--", "sudo", "bash", "/opt/nitro/php/disable-xdebug.sh")
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+func xOffAction(c *cli.Context, r internal.Runner) error {
+	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/php/disable-xdebug.sh"})
 }
