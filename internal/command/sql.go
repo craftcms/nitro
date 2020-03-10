@@ -33,8 +33,8 @@ func sqlAction(c *cli.Context, r internal.Runner) error {
 	r.UseSyscall(true)
 
 	if c.Bool("postgres") {
-		return r.Run([]string{"exec", "--name", machine, "--", "sudo", "-u", "postgres", "psql"})
+		return r.Run([]string{"exec", machine, "--", "sudo", "-u", "postgres", "psql"})
 	}
 
-	return r.Run([]string{"exec", "--name", machine, "--", "sudo", "mysql", "-u", "root"})
+	return r.Run([]string{"exec", machine, "--", "sudo", "mysql", "-u", "root"})
 }
