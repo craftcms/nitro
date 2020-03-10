@@ -3,9 +3,9 @@ package app
 import (
 	"github.com/urfave/cli/v2"
 
+	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/command"
 	"github.com/craftcms/nitro/internal/executor"
-	"github.com/craftcms/nitro/internal/runner"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 	Version = "1.0.0"
 )
 
-func NewApp(e executor.Executor, r runner.Runner) *cli.App {
+func NewApp(e executor.Executor, r internal.Runner) *cli.App {
 	return &cli.App{
 		Name:        "nitro",
 		UsageText:   "nitro [global options] command [command options] [arguments...]",

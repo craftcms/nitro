@@ -6,9 +6,9 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/app"
 	"github.com/craftcms/nitro/internal/executor"
-	"github.com/craftcms/nitro/internal/runner"
 )
 
 func run(args []string) {
@@ -18,7 +18,7 @@ func run(args []string) {
 		log.Fatal(err)
 	}
 
-	run := runner.NewRunner("multipass")
+	run := internal.NewRunner("multipass")
 
 	ctx := context.WithValue(context.Background(), "multipass", multipass)
 
