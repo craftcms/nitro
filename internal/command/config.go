@@ -3,6 +3,7 @@ package command
 var cloudInit = `#cloud-config
 packages:
   - redis
+  - jq
 write_files:
   # create the main bootstrap script
   - path: /opt/nitro/bootstrap.sh
@@ -162,8 +163,19 @@ write_files:
     content: |
       #!/usr/bin/env bash
       NEW_HOST_NAME="$1"
-      PHP_VERSION="$2"
+      REQUESTED_PHP_VERSION="$2"
       PUBLIC_DIR="$3"
+      export INSTALLED_PHP_VERSION=$(cat /opt/nitro/php_version)
+
+      if [ "$REQUESTED_PHP_VERSION" != "$INSTALLED_PHP_VERSION" ]; then
+          if [ "$REQUESTED_PHP_VERSION" == '7.3' ]; then
+              sudo bash /opt/nitro/php/php-73.sh
+          elif [ "$REQUESTED_PHP_VERSION" == '7.2' ]; then
+              sudo bash /opt/nitro/php/php-72.sh
+          else
+              sudo bash /opt/nitro/php/php-74.sh
+          fi
+      fi
 
       # make the directories
       mkdir -p /home/ubuntu/sites/"$NEW_HOST_NAME"
