@@ -1,4 +1,4 @@
-package stop
+package command
 
 import (
 	"fmt"
@@ -8,17 +8,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Command() *cli.Command {
+func Stop() *cli.Command {
 	return &cli.Command{
-		Name:  "stop",
-		Usage: "Stop machine",
-		Action: func(c *cli.Context) error {
-			return run(c)
-		},
+		Name:   "stop",
+		Usage:  "Stop machine",
+		Action: stopAction,
 	}
 }
 
-func run(c *cli.Context) error {
+func stopAction(c *cli.Context) error {
 	machine := c.String("machine")
 
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))

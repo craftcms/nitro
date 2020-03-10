@@ -11,6 +11,11 @@ import (
 	"github.com/craftcms/nitro/internal/validate"
 )
 
+var (
+	ErrAttachNoHostArgProvided = errors.New("you must pass a domain name")
+	ErrAttachNoPathArgProvided = errors.New("")
+)
+
 // Attach will mount a directory to a machine
 func Attach() *cli.Command {
 	return &cli.Command{
@@ -18,18 +23,18 @@ func Attach() *cli.Command {
 		Usage:  "Add directory to machine",
 		Before: attachBeforeAction,
 		Action: attachAction,
+		After:  attachAfterAction,
 	}
 }
 
 func attachBeforeAction(c *cli.Context) error {
 	if host := c.Args().First(); host == "" {
-		// TODO validate the domain name with validate.Domain(d)
-		return errors.New("you must pass a domain name")
+		// TODO validate the host name with validate.Host(h)
+		return ErrAttachNoHostArgProvided
 	}
 
 	if path := c.Args().Get(1); path == "" {
-		// TODO validate the domain name with validate.Domain(d)
-		return errors.New("you must provide a path to mount")
+		return ErrAttachNoPathArgProvided
 	}
 
 	if err := validate.Path(c.Args().Get(1)); err != nil {
@@ -56,4 +61,10 @@ func attachAction(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func attachAfterAction(c *cli.Context) error {
+	fmt.Println("attached", c.Args().First(), "to", c.Args().Get(1))
+
+	return nil
 }

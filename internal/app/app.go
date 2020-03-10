@@ -3,21 +3,8 @@ package app
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal/bootstrap"
 	"github.com/craftcms/nitro/internal/command"
-	"github.com/craftcms/nitro/internal/destroy"
 	"github.com/craftcms/nitro/internal/executor"
-	"github.com/craftcms/nitro/internal/host"
-	"github.com/craftcms/nitro/internal/initialize"
-	"github.com/craftcms/nitro/internal/ip"
-	"github.com/craftcms/nitro/internal/logs"
-	"github.com/craftcms/nitro/internal/redis"
-	"github.com/craftcms/nitro/internal/sql"
-	"github.com/craftcms/nitro/internal/ssh"
-	"github.com/craftcms/nitro/internal/start"
-	"github.com/craftcms/nitro/internal/stop"
-	"github.com/craftcms/nitro/internal/update"
-	"github.com/craftcms/nitro/internal/xdebug"
 )
 
 var (
@@ -43,22 +30,22 @@ func NewApp(e executor.Executor) *cli.App {
 			},
 		},
 		Commands: []*cli.Command{
-			initialize.Command(),
-			bootstrap.Command(),
-			host.Command(),
+			command.Initialize(),
+			command.Bootstrap(),
+			command.Add(),
 			command.Remove(),
 			command.Attach(),
-			ssh.Command(e),
-			xdebug.CommandOn(e),
-			xdebug.CommandOff(e),
-			start.Command(),
-			stop.Command(),
-			destroy.Command(),
-			sql.Command(e),
-			redis.Command(e),
-			update.Command(),
-			logs.Command(e),
-			ip.Command(),
+			command.SSH(),
+			command.XOn(),
+			command.XOff(),
+			command.Start(),
+			command.Stop(),
+			command.Destroy(),
+			command.SQL(),
+			command.Redis(e),
+			command.Update(),
+			command.Logs(e),
+			command.IP(),
 		},
 	}
 }

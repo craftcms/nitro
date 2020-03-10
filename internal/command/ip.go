@@ -1,4 +1,4 @@
-package ip
+package command
 
 import (
 	"encoding/json"
@@ -8,17 +8,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Command() *cli.Command {
+// IP will look for a specific machine IP address by name
+func IP() *cli.Command {
 	return &cli.Command{
 		Name:  "ip",
 		Usage: "Show machine IP address",
-		Action: func(c *cli.Context) error {
-			return handle(c)
-		},
+		Action: ipAction,
 	}
 }
 
-func handle(c *cli.Context) error {
+func ipAction(c *cli.Context) error {
 	machine := c.String("machine")
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
@@ -52,7 +51,7 @@ func handle(c *cli.Context) error {
 	}
 
 	if ip == "" {
-		fmt.Println("Could not find an IP for the machine:", machine)
+		fmt.Println("Could not find IP for machine:", machine)
 		return nil
 	}
 

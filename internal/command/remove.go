@@ -16,7 +16,7 @@ var (
 func Remove() *cli.Command {
 	return &cli.Command{
 		Name:   "remove",
-		Usage:  "Remove host from machine",
+		Usage:  "Remove virtual host",
 		Before: removeBeforeAction,
 		Action: removeAction,
 		After:  removeAfterAction,

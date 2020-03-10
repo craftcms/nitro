@@ -1,4 +1,4 @@
-package host
+package command
 
 import (
 	"errors"
@@ -11,19 +11,13 @@ import (
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Command() *cli.Command {
+func Add() *cli.Command {
 	return &cli.Command{
-		Name:  "add-host",
-		Usage: "Add virtual host",
-		Before: func(c *cli.Context) error {
-			return beforeAction(c)
-		},
-		Action: func(c *cli.Context) error {
-			return handle(c)
-		},
-		After: func(c *cli.Context) error {
-			return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", c.Args().First(), c.Args().Get(1)})
-		},
+		Name:   "add",
+		Usage:  "Add virtual host",
+		Before: addBeforeAction,
+		Action: addAction,
+		After:  addAfterAction,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "php-version",
@@ -41,7 +35,7 @@ func Command() *cli.Command {
 	}
 }
 
-func beforeAction(c *cli.Context) error {
+func addBeforeAction(c *cli.Context) error {
 	if host := c.Args().First(); host == "" {
 		// TODO validate the domain name with validate.Domain(d)
 		return errors.New("you must pass a domain name")
@@ -63,7 +57,7 @@ func beforeAction(c *cli.Context) error {
 	return nil
 }
 
-func handle(c *cli.Context) error {
+func addAction(c *cli.Context) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 	php := c.String("php-version")
@@ -80,4 +74,8 @@ func handle(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func addAfterAction(c *cli.Context) error {
+	return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", c.Args().First(), c.Args().Get(1)})
 }

@@ -1,4 +1,4 @@
-package logs
+package command
 
 import (
 	"os"
@@ -8,7 +8,8 @@ import (
 	"github.com/craftcms/nitro/internal/executor"
 )
 
-func Command(e executor.Executor) *cli.Command {
+// Logs show system logs for a machine
+func Logs(e executor.Executor) *cli.Command {
 	return &cli.Command{
 		Name:  "logs",
 		Usage: "Show machine logs",

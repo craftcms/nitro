@@ -1,4 +1,4 @@
-package update
+package command
 
 import (
 	"fmt"
@@ -8,17 +8,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Command() *cli.Command {
+func Update() *cli.Command {
 	return &cli.Command{
-		Name:  "update",
-		Usage: "Update machine",
-		Action: func(c *cli.Context) error {
-			return run(c)
-		},
+		Name:   "update",
+		Usage:  "Update machine",
+		Action: updateAction,
 	}
 }
 
-func run(c *cli.Context) error {
+func updateAction(c *cli.Context) error {
 	machine := c.String("machine")
 	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
