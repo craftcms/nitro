@@ -31,7 +31,7 @@ func NewApp(r internal.Runner) *cli.App {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(r),
-			command.Bootstrap(),
+			command.Bootstrap(r),
 			command.Add(),
 			command.Remove(),
 			command.Attach(),

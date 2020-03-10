@@ -2,7 +2,6 @@ package command
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -69,7 +68,9 @@ func initializeAction(c *cli.Context, r internal.Runner) error {
 	mem := c.String("memory")
 
 	// pass the cloud init as stdin
-	r.SetReader(strings.NewReader(cloudInit))
+	if err := r.SetInput(cloudInit); err != nil {
+		return err
+	}
 
 	return r.Run([]string{"launch", "--name", machine, "--cpus", cpus, "--disk", disk, "--mem", mem, "--cloud-init", "-"})
 }

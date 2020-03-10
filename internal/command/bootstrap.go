@@ -1,23 +1,22 @@
 package command
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/urfave/cli/v2"
 
+	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-// Bootstrap will install the requirements
-func Bootstrap() *cli.Command {
+// Bootstrap will install the software packages on the machine
+func Bootstrap(r internal.Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "bootstrap",
 		Usage:       "Delete machine",
 		Description: "Delete a machine when no longer needed, this is recoverable and not permanently deleted.",
 		Before:      bootstrapBeforeAction,
-		Action:      bootstrapAction,
+		Action: func(c *cli.Context) error {
+			return bootstrapAction(c, r)
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "php-version",
@@ -47,27 +46,10 @@ func bootstrapBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func bootstrapAction(c *cli.Context) error {
+func bootstrapAction(c *cli.Context, r internal.Runner) error {
 	machine := c.String("machine")
 	php := c.String("php-version")
 	database := c.String("database")
-	multipass := fmt.Sprintf("%s", c.Context.Value("multipass"))
 
-	// create the machine
-	cmd := exec.Command(
-		multipass,
-		"exec",
-		machine,
-		"--",
-		"sudo",
-		"bash",
-		"/opt/nitro/bootstrap.sh",
-		php,
-		database,
-	)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database})
 }

@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"errors"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -13,11 +15,18 @@ import (
 type CommandRunner struct {
 	path      string
 	isSyscall bool
-	reader    *strings.Reader
+	stdin     *io.Reader
+	input     string
 }
 
-func (c CommandRunner) SetReader(rdr *strings.Reader) {
-	c.reader = rdr
+func (c *CommandRunner) SetInput(input string) error {
+	if input == "" {
+		return errors.New("input should not be an empty string")
+	}
+
+	c.input = input
+
+	return nil
 }
 
 func (c CommandRunner) Run(args []string) error {
@@ -34,14 +43,14 @@ func (c CommandRunner) Run(args []string) error {
 
 	cmd := exec.Command(c.path, args...)
 
-	// if the reader is set, we need tp
-	if c.reader != nil {
-		cmd.Stdin = c.reader
+	if c.input != "" {
+		cmd.Stdin = strings.NewReader(c.input)
 	}
 
 	if cmd.Stdout == nil {
 		cmd.Stdout = os.Stdout
 	}
+
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
