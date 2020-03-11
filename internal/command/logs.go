@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // Logs show system logs for a machine
-func Logs(r internal.Runner) *cli.Command {
+func Logs(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "logs",
 		Usage: "Show machine logs",
@@ -26,6 +24,6 @@ func Logs(r internal.Runner) *cli.Command {
 	}
 }
 
-func logsNginx(c *cli.Context, r internal.Runner) error {
+func logsNginx(c *cli.Context, r Runner) error {
 	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/nginx/tail-logs.sh"})
 }

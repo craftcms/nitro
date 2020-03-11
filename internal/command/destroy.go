@@ -4,12 +4,10 @@ import (
 	"errors"
 
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // Destroy will completely destroy a machine
-func Destroy(r internal.Runner) *cli.Command {
+func Destroy(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "destroy",
 		Usage:       "Destroy machine",
@@ -20,6 +18,6 @@ func Destroy(r internal.Runner) *cli.Command {
 	}
 }
 
-func destroyAction(c *cli.Context, r internal.Runner) error {
+func destroyAction(c *cli.Context, r Runner) error {
 	return errors.New("not implemented")
 }

@@ -4,12 +4,10 @@ import (
 	"strconv"
 
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // Initialize it the main entry point when calling the init command to start a new machine
-func Initialize(r internal.Runner) *cli.Command {
+func Initialize(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Initialize new machine",
@@ -28,7 +26,7 @@ func Initialize(r internal.Runner) *cli.Command {
 	}
 }
 
-func initializeAction(c *cli.Context, r internal.Runner) error {
+func initializeAction(c *cli.Context, r Runner) error {
 	machine := c.String("machine")
 	cpus := strconv.Itoa(c.Int("cpus"))
 	disk := c.String("disk")

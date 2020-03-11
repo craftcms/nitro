@@ -6,7 +6,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
@@ -16,7 +15,7 @@ var (
 )
 
 // Attach will mount a directory to a machine
-func Attach(r internal.Runner) *cli.Command {
+func Attach(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:   "attach",
 		Usage:  "Add directory to machine",
@@ -45,7 +44,7 @@ func attachBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func attachAction(c *cli.Context, r internal.Runner) error {
+func attachAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"mount", c.Args().Get(1), c.String("machine") + ":/home/ubuntu/sites/" + c.Args().First()})
 }
 

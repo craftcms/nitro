@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // Xon will enable xdebug on a machine
-func XOn(r internal.Runner) *cli.Command {
+func XOn(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "xon",
 		Usage:       "Enable Xdebug",
@@ -18,6 +16,6 @@ func XOn(r internal.Runner) *cli.Command {
 	}
 }
 
-func xOnAction(c *cli.Context, r internal.Runner) error {
+func xOnAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/php/enable-xdebug.sh"})
 }

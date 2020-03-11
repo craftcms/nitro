@@ -2,11 +2,9 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
-func Update(r internal.Runner) *cli.Command {
+func Update(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "update",
 		Usage: "Update machine",
@@ -16,7 +14,7 @@ func Update(r internal.Runner) *cli.Command {
 	}
 }
 
-func updateAction(c *cli.Context, r internal.Runner) error {
+func updateAction(c *cli.Context, r Runner) error {
 	machine := c.String("machine")
 
 	r.UseSyscall(true)

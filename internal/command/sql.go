@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // SQL creates a shell command into the provided database shell as a root user.
-func SQL(r internal.Runner) *cli.Command {
+func SQL(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "sql",
 		Usage: "Enter database shell",
@@ -22,7 +20,7 @@ func SQL(r internal.Runner) *cli.Command {
 	}
 }
 
-func sqlAction(c *cli.Context, r internal.Runner) error {
+func sqlAction(c *cli.Context, r Runner) error {
 	machine := c.String("machine")
 
 	r.UseSyscall(true)

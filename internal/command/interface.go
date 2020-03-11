@@ -1,4 +1,4 @@
-package internal
+package command
 
 // Runner is responsible for running command, it can defer to syscall.Exec or
 // exec.Command where required.

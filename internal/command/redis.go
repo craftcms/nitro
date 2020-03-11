@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // Redis executes a shell for redis on a machine
-func Redis(r internal.Runner) *cli.Command {
+func Redis(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "redis",
 		Usage:       "Enter redis shell",
@@ -18,7 +16,7 @@ func Redis(r internal.Runner) *cli.Command {
 	}
 }
 
-func redisAction(c *cli.Context, r internal.Runner) error {
+func redisAction(c *cli.Context, r Runner) error {
 	r.UseSyscall(true)
 	return r.Run([]string{"multipass", "exec", c.String("machine"), "--", "redis-cli"})
 }

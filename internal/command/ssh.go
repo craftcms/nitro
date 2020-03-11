@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // SSH SSH will login a user to a specific machine
-func SSH(r internal.Runner) *cli.Command {
+func SSH(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "ssh",
 		Usage: "SSH into machine",
@@ -17,7 +15,7 @@ func SSH(r internal.Runner) *cli.Command {
 	}
 }
 
-func sshAction(c *cli.Context, r internal.Runner) error {
+func sshAction(c *cli.Context, r Runner) error {
 	r.UseSyscall(true)
 
 	return r.Run([]string{"shell", c.String("machine")})

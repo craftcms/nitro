@@ -2,12 +2,10 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 // IP will look for a specific machine IP address by name
-func IP(r internal.Runner) *cli.Command {
+func IP(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "ip",
 		Usage: "Show machine IP address",
@@ -17,6 +15,6 @@ func IP(r internal.Runner) *cli.Command {
 	}
 }
 
-func ipAction(c *cli.Context, r internal.Runner) error {
+func ipAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/ip.sh"})
 }

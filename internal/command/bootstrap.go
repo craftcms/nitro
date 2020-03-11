@@ -5,12 +5,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
 // Bootstrap will install the software packages on the machine
-func Bootstrap(r internal.Runner) *cli.Command {
+func Bootstrap(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "bootstrap",
 		Usage:       "Delete machine",
@@ -39,7 +38,7 @@ func bootstrapBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func bootstrapAction(c *cli.Context, r internal.Runner) error {
+func bootstrapAction(c *cli.Context, r Runner) error {
 	machine := c.String("machine")
 	php := c.String("php-version")
 	database := c.String("database")

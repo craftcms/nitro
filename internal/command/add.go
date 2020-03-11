@@ -5,11 +5,10 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/craftcms/nitro/internal"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Add(r internal.Runner) *cli.Command {
+func Add(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:   "add",
 		Usage:  "Add virtual host",
@@ -47,7 +46,7 @@ func addBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func addAction(c *cli.Context, r internal.Runner) error {
+func addAction(c *cli.Context, r Runner) error {
 	machine := c.String("machine")
 	host := c.Args().First()
 	php := c.String("php-version")

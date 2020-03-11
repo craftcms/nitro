@@ -2,11 +2,9 @@ package command
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
-func Stop(r internal.Runner) *cli.Command {
+func Stop(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
 		Usage: "Stop machine",
@@ -16,6 +14,6 @@ func Stop(r internal.Runner) *cli.Command {
 	}
 }
 
-func stopAction(c *cli.Context, r internal.Runner) error {
+func stopAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"stop", c.String("machine")})
 }
