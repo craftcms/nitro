@@ -8,6 +8,8 @@
 go.mod export-ignore
 go.sum export-ignore
 Makefile export-ignore
+gon.hcl export-ignore
+.goreleaser.yml export-ignore
 
 # Auto detect text files and perform LF normalization
 * text=auto
