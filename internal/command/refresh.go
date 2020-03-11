@@ -33,15 +33,18 @@ func refreshAction(c *cli.Context, r internal.Runner) error {
 		return err
 	}
 
+	// for each of those, override the path with the content
 	for _, file := range cfg.WriteFiles {
-		// for each of those, override the path with the content
-		// TODO this works for now, but need to determine how to pass the content without executing the file.Content
-		e := fmt.Sprintf(`echo "content" | sudo tee %s`, file.Path)
-		args := []string{"exec", c.String("machine"), "--", "bash", "-c", e}
-		// fmt.Println(args)
-		if err := r.Run(args); err != nil {
-			return err
+		// skip the script that does the updates
+		if file.Path == "/opt/nitro/refresh.sh" {
+			continue
 		}
+
+		fmt.Println("SKIPPED: updating file", file.Path)
+		//args := []string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/refresh.sh", file.Content, file.Path}
+		//if err := r.Run(args); err != nil {
+		//	return err
+		//}
 	}
 
 	return nil

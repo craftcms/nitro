@@ -62,6 +62,16 @@ write_files:
       sudo sed -i -e "\$axdebug.remote_enable=1\nxdebug.remote_connect_back=0\nxdebug.remote_host=localhost\nxdebug.remote_port=9000\nxdebug.remote_log=/var/log/nginx/xdebug.log" /etc/php/"$phpversion"/mods-available/xdebug.ini
 
       sudo service php"$phpversion"-fpm restart
+  - path: /opt/nitro/refresh.sh
+    content: |
+      #!/usr/bin/env bash
+      export FILE_CONTENT="$1"
+      export FILE_PATH="$2"
+      if [ -n "$FILE_CONTENT" ]; then
+         echo "$FILE_CONTENT" | sudo tee "$FILE_PATH"
+      else
+         echo "content was empty, skipping"
+      fi
   - path: /opt/nitro/update.sh
     content: |
       #!/usr/bin/env bash
