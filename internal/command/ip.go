@@ -18,7 +18,7 @@ func IP(r Runner) *cli.Command {
 }
 
 func ipAction(c *cli.Context, r Runner) error {
-	ip, err := FetchIP(c.String("machine"), r)
+	ip, err := fetchIP(c.String("machine"), r)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func FetchIP(machine string, r Runner) (string, error) {
+func fetchIP(machine string, r Runner) (string, error) {
 	cmd := exec.Command(r.Path(), "list", "--format", "json")
 
 	type listOutput struct {

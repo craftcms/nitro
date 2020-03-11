@@ -18,7 +18,9 @@ func Bootstrap(r Runner) *cli.Command {
 		Action: func(c *cli.Context) error {
 			return bootstrapAction(c, r)
 		},
-		After: bootstrapAfterAction,
+		After: func(c *cli.Context) error {
+			return bootstrapAfterAction(c, r)
+		},
 		Flags: []cli.Flag{
 			phpVersionFlag,
 			databaseFlag,
@@ -46,8 +48,8 @@ func bootstrapAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database})
 }
 
-func bootstrapAfterAction(c *cli.Context) error {
-	ip, err := FetchIP(c.String("machine"), r)
+func bootstrapAfterAction(c *cli.Context, r Runner) error {
+	ip, err := fetchIP(c.String("machine"), r)
 	if err != nil {
 		return err
 	}
