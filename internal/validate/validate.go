@@ -34,7 +34,7 @@ func Domain(v string) error {
 	return nil
 }
 
-// Path will check is a fali
+// path will check is a fali
 func Path(p string) error {
 	f, err := os.Stat(p)
 	if err != nil {

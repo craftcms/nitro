@@ -62,6 +62,10 @@ func (c *CmdRunner) UseSyscall(t bool) {
 	c.isSyscall = t
 }
 
+func (c CmdRunner) Path() string {
+	return c.path
+}
+
 func NewRunner(file string) Runner {
 	path, err := exec.LookPath(file)
 	if err != nil {

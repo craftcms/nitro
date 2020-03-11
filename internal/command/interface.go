@@ -7,4 +7,5 @@ type Runner interface {
 	Run(args []string) error
 	UseSyscall(t bool)
 	SetInput(input string) error
+	Path() string
 }

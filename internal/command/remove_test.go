@@ -9,6 +9,7 @@ import (
 )
 
 type TestRunner struct {
+	path    string
 	args    []string
 	syscall bool
 	input   string
@@ -22,6 +23,10 @@ func (r TestRunner) Run(args []string) error {
 
 func (r TestRunner) UseSyscall(t bool) {
 	r.syscall = t
+}
+
+func (r TestRunner) Path() string {
+	return r.path
 }
 
 func (r TestRunner) SetInput(input string) error {

@@ -47,22 +47,29 @@ func bootstrapAction(c *cli.Context, r Runner) error {
 }
 
 func bootstrapAfterAction(c *cli.Context) error {
-	// TODO make this pull the actual values
+	ip, err := FetchIP(c.String("machine"), r)
+	if err != nil {
+		return err
+	}
+
 	database := c.String("database")
 
 	var port int
+	var driver string
 	switch database {
 	case "postgres":
+		driver = "pgsql"
 		port = 5432
 	default:
+		driver = "mysql"
 		port = 3306
 	}
 
 	fmt.Println("")
 	fmt.Println("==== DATABASE INFO ====")
-	fmt.Println("server:", "192.168.64.21")
+	fmt.Println("server:", ip)
 	fmt.Println("port:", port)
-	fmt.Println("driver:", database)
+	fmt.Println("driver:", driver)
 	fmt.Println("database:", "craftcms")
 	fmt.Println("username:", "nitro")
 	fmt.Println("password:", "nitro")
