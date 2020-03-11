@@ -58,6 +58,16 @@ write_files:
       sudo sed -i "s|memory_limit = 128M|memory_limit = 256M|g" /etc/php/"$phpversion"/fpm/php.ini
       sudo sed -i "s|max_execution_time = 30|max_execution_time = 120|g" /etc/php/"$phpversion"/fpm/php.ini
       sudo service php"$phpversion"-fpm restart
+  - path: /opt/nitro/refresh.sh
+    content: |
+      #!/usr/bin/env bash
+      export FILE_CONTENT="$1"
+      export FILE_PATH="$2"
+      if [ -n "$FILE_CONTENT" ]; then
+         echo "$FILE_CONTENT" | sudo tee "$FILE_PATH"
+      else
+         echo "content was empty, skipping"
+      fi
   - path: /opt/nitro/update.sh
     content: |
       #!/usr/bin/env bash
