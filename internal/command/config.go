@@ -137,11 +137,14 @@ write_files:
     content: |
       server {
           listen 80;
+          listen [::]:80;
 
           root /home/ubuntu/sites/CHANGEPATH/CHANGEPUBLICDIR;
 
           index index.php;
-
+          gzip_static  on;
+          error_page 404 /index.php?$query_string;
+          ssi on;
           server_name CHANGESERVERNAME;
 
           location / {
