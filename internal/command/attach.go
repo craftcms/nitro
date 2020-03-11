@@ -49,7 +49,10 @@ func attachAction(c *cli.Context, r Runner) error {
 }
 
 func attachAfterAction(c *cli.Context) error {
-	fmt.Println("attached", c.Args().First(), "to", c.Args().Get(1))
+	fmt.Println("attached", c.Args().Get(1), "to", "/home/ubuntu/sites/"+c.Args().First())
+
+	fmt.Println("\nto edit your hosts file, run the following as sudo:")
+	fmt.Println("\nsudo", c.App.Name, "--machine", c.String("machine"), "hosts", c.Args().First())
 
 	return nil
 }

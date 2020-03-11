@@ -46,6 +46,7 @@ func NewApp(r command.Runner) *cli.App {
 			command.Logs(r),
 			command.IP(r),
 			command.Detach(r),
+			command.Hosts(r),
 		},
 	}
 }
