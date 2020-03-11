@@ -10,16 +10,16 @@ import (
 	"syscall"
 )
 
-// CommandRunner is a struct that will handle calling exec.Cmd or syscall.Exec using a boolean
+// CmdRunner is a struct that will handle calling exec.Cmd or syscall.Exec using a boolean
 // it keeps all of the logic in a single interface to keep testing easier
-type CommandRunner struct {
+type CmdRunner struct {
 	path      string
 	isSyscall bool
 	stdin     *io.Reader
 	input     string
 }
 
-func (c *CommandRunner) SetInput(input string) error {
+func (c *CmdRunner) SetInput(input string) error {
 	if input == "" {
 		return errors.New("input should not be an empty string")
 	}
@@ -29,7 +29,7 @@ func (c *CommandRunner) SetInput(input string) error {
 	return nil
 }
 
-func (c CommandRunner) Run(args []string) error {
+func (c CmdRunner) Run(args []string) error {
 	// if this is a syscall, hand it off
 	if c.isSyscall {
 		// this allows us to only add args, not the binary path to
@@ -58,7 +58,7 @@ func (c CommandRunner) Run(args []string) error {
 	return cmd.Run()
 }
 
-func (c *CommandRunner) UseSyscall(t bool) {
+func (c *CmdRunner) UseSyscall(t bool) {
 	c.isSyscall = t
 }
 
@@ -68,7 +68,7 @@ func NewRunner(file string) Runner {
 		log.Fatal("unable to find multipass")
 	}
 
-	return &CommandRunner{
+	return &CmdRunner{
 		path: path,
 	}
 }
