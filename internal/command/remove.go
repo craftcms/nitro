@@ -33,14 +33,10 @@ func removeBeforeAction(c *cli.Context) error {
 }
 
 func removeAction(c *cli.Context, r Runner) error {
-	machine := c.String("machine")
-	host := c.Args().First()
-
-	return r.Run([]string{"exec", "--name", machine, "--", "sudo", "bash", "/opt/nitro/nginx/remove-host.sh", host})
+	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/nginx/remove-site.sh", c.Args().First()})
 }
 
 func removeAfterAction(c *cli.Context) error {
-	fmt.Println("removed host", c.Args().First())
-
-	return nil
+	fmt.Println(fmt.Sprintf("removed host %v from nginx", c.Args().First()))
+	return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine") + "detach", c.Args().First()})
 }

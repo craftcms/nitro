@@ -194,6 +194,14 @@ write_files:
 
       # reload nginx
       sudo service nginx reload
+  - path: /opt/nitro/nginx/remove-site.sh
+    content: |
+      #!/usr/bin/env bash
+      REMOVE_HOST="$1"
+      # remove the nginx site
+      sudo rm /etc/nginx/sites-enabled/"$REMOVE_HOST"
+      # reload nginx
+      sudo service nginx reload
   - path: /opt/nitro/nginx/tail-logs.sh
     content: |
       #!/usr/bin/env bash

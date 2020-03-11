@@ -68,6 +68,10 @@ func bootstrapAfterAction(c *cli.Context, r Runner) error {
 	}
 
 	fmt.Println("")
+	fmt.Println("==== SERVER INFO ====")
+	fmt.Println("server:", "http://"+ip)
+	fmt.Println("")
+	fmt.Println("")
 	fmt.Println("==== DATABASE INFO ====")
 	fmt.Println("server:", ip)
 	fmt.Println("port:", port)
