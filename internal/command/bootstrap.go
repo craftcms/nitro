@@ -21,18 +21,8 @@ func Bootstrap(r internal.Runner) *cli.Command {
 		},
 		After: bootstrapAfterAction,
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "php-version",
-				Usage:       "Provide version of PHP",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-			&cli.StringFlag{
-				Name:        "database",
-				Usage:       "Provide version of PHP",
-				Value:       "mariadb",
-				DefaultText: "mariadb",
-			},
+			phpVersionFlag,
+			databaseFlag,
 		},
 	}
 }

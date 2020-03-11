@@ -19,18 +19,8 @@ func Add(r internal.Runner) *cli.Command {
 		},
 		After: addAfterAction,
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "php-version",
-				Usage:       "Provide version of PHP",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-			&cli.StringFlag{
-				Name:        "public-dir",
-				Usage:       "The public directory for the server",
-				Value:       "web",
-				DefaultText: "web",
-			},
+			phpVersionFlag,
+			publicDirFlag,
 		},
 	}
 }

@@ -17,12 +17,7 @@ func SQL(r internal.Runner) *cli.Command {
 			return sqlAction(c, r)
 		},
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:        "postgres",
-				Usage:       "Enter a postgres shell",
-				Value:       false,
-				DefaultText: "false",
-			},
+			postgresFlag,
 		},
 	}
 }

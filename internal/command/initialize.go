@@ -18,45 +18,12 @@ func Initialize(r internal.Runner) *cli.Command {
 		},
 		After: initializeAfterAction,
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:        "bootstrap",
-				Usage:       "Bootstrap the machine with defaults",
-				Value:       true,
-				DefaultText: "true",
-			},
-			&cli.StringFlag{
-				Name:        "php-version",
-				Usage:       "Provide version of PHP",
-				Value:       "7.4",
-				DefaultText: "7.4",
-			},
-			&cli.StringFlag{
-				Name:        "database",
-				Usage:       "Provide version of PHP",
-				Value:       "mariadb",
-				DefaultText: "mariadb",
-			},
-			&cli.Int64Flag{
-				Name:        "cpus",
-				Usage:       "The number of CPUs to assign the machine",
-				Required:    false,
-				Value:       2,
-				DefaultText: "2",
-			},
-			&cli.StringFlag{
-				Name:        "memory",
-				Usage:       "The amount of memory to assign the machine",
-				Required:    false,
-				Value:       "2G",
-				DefaultText: "2G",
-			},
-			&cli.StringFlag{
-				Name:        "disk",
-				Usage:       "The amount of disk to assign the machine",
-				Required:    false,
-				Value:       "5G",
-				DefaultText: "5G",
-			},
+			bootstrapFlag,
+			phpVersionFlag,
+			databaseFlag,
+			cpusFlag,
+			memoryFlag,
+			diskFlag,
 		},
 	}
 }
