@@ -17,8 +17,6 @@ Add the following script to your `composer.json` scripts section:
   },
 ```
 
-## Usage
-
 This package has a single executable named `nitro`. In order to 
 use the CLI, run `./vendor/bin/nitro`. 
 
@@ -33,3 +31,10 @@ This will create a new machine and give it the default name of `nitro-dev`. If y
 ```shell script
 ./vendor/bin/nitro --machine my-custom-name init
 ``` 
+
+## Usage
+
+General flow is this:
+1. init
+2. add
+3. hosts
