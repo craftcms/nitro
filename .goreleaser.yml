@@ -8,6 +8,10 @@ builds:
 - env:
   - CGO_ENABLED=0
   main: ./cmd/nitro/main.go
+  goos:
+    - windows
+    - linux
+    - darwin
 archives:
 - replacements:
     386: i386
