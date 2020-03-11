@@ -17,7 +17,8 @@ var (
 // Hosts will take a machine and a domain name and automatically edit the hosts name
 func Hosts(r Runner) *cli.Command {
 	return &cli.Command{
-		Name: "hosts",
+		Name:  "hosts",
+		Usage: "Map domains to the hosts file",
 		Before: func(c *cli.Context) error {
 			return beforeHostsAction(c)
 		},

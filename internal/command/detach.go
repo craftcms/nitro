@@ -13,7 +13,8 @@ var (
 
 func Detach(r Runner) *cli.Command {
 	return &cli.Command{
-		Name: "detach",
+		Name:  "detach",
+		Usage: "Detach directory from machine",
 		Before: func(c *cli.Context) error {
 			return detachBeforeAction(c)
 		},
