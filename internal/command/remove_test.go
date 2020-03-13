@@ -2,7 +2,6 @@ package command
 
 import (
 	"flag"
-	"fmt"
 	"testing"
 
 	"github.com/urfave/cli/v2"
@@ -33,63 +32,40 @@ func (r TestRunner) SetInput(input string) error {
 	return nil
 }
 
-func TestContextFlag(t *testing.T) {
-	set := flag.NewFlagSet("test", 0)
-	set.Bool("myflag", false, "doc")
-	c := cli.NewContext(nil, set, nil)
-	_ = set.Parse([]string{"--myflag", "bat", "baz"})
-
-	if c.Args().Len() != 2 {
-		t.Error("length should be two")
-	}
-
-	if c.Bool("myflag") == false {
-		t.Error("myflag should be true")
-	}
-}
-
-func TestRemoveBeforeAction(t *testing.T) {
+func Test_removeBeforeAction(t *testing.T) {
 	// Arrange
 	set := flag.NewFlagSet("test", 0)
 	set.String("machine", "nitro-test", "doc")
 	c := cli.NewContext(nil, set, nil)
-	_ = set.Parse([]string{"--machine=nitro-test"})
 
-	// act
-	err := removeBeforeAction(c)
-
-	// Assert
-	if err != ErrRemoveNoHostArgProvided {
-		t.Errorf("expected error to be %v, got %v instead", "no host was specified for removal", err)
+	type args struct {
+		c *cli.Context
 	}
-}
-
-func TestRemoveBeforeCommandReturnsError(t *testing.T) {
-	// Arrange
-	set := flag.NewFlagSet("test", 0)
-	ctx := cli.NewContext(nil, set, nil)
-	expected := "no host was specified for removal"
-
-	// Act
-	err := removeBeforeAction(ctx)
-
-	// Assert
-	if err == nil {
-		t.Error("expected the error from removeBeforeAction() to not be nil")
+	tests := []struct {
+		name    string
+		args    args
+		toParse []string
+		wantErr bool
+	}{
+		{
+			name:    "requires a host argument",
+			args:    args{c},
+			toParse: []string{"--machine=nitro-test"},
+			wantErr: true,
+		},
+		{
+			name:    "no error when a host argument is provided",
+			args:    args{c},
+			toParse: []string{"--machine=nitro-test", "hostname"},
+			wantErr: false,
+		},
 	}
-	if err.Error() != expected {
-		t.Errorf("expected the error from removeBeforeAction() to be %v; got %v instead", expected, err)
-	}
-	fmt.Println(ctx.Context.Value("host"))
-}
-
-func TestRemoveAfterActionPrintsOutput(t *testing.T) {
-	// Arrange
-	set := flag.NewFlagSet("test", 0)
-	ctx := cli.NewContext(nil, set, nil)
-
-	// Act
-	if err := removeAfterAction(ctx); err != nil {
-		t.Errorf("expected error to be nil. got %v instead", err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_ = set.Parse(tt.toParse)
+			if err := removeBeforeAction(tt.args.c); (err != nil) != tt.wantErr {
+				t.Errorf("removeBeforeAction() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
