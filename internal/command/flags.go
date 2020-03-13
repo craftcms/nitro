@@ -60,3 +60,31 @@ var publicDirFlag = &cli.StringFlag{
 	Value:       "web",
 	DefaultText: "web",
 }
+
+var serviceMySqlFlag = &cli.BoolFlag{
+	Name:        "mysql",
+	Usage:       "Affect MySQL service",
+	Value:       false,
+	DefaultText: "false",
+}
+
+var servicePostgresFlag = &cli.BoolFlag{
+	Name:        "postgres",
+	Usage:       "Affect PostgreSQL service",
+	Value:       false,
+	DefaultText: "false",
+}
+
+var serviceNginxFlag = &cli.BoolFlag{
+	Name:        "nginx",
+	Usage:       "Affect Nginx service",
+	Value:       false,
+	DefaultText: "false",
+}
+
+var serviceRedisFlag = &cli.BoolFlag{
+	Name:        "redis",
+	Usage:       "Affect redis service",
+	Value:       false,
+	DefaultText: "false",
+}
