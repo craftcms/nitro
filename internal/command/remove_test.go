@@ -33,6 +33,37 @@ func (r TestRunner) SetInput(input string) error {
 	return nil
 }
 
+func TestContextFlag(t *testing.T) {
+	set := flag.NewFlagSet("test", 0)
+	set.Bool("myflag", false, "doc")
+	c := cli.NewContext(nil, set, nil)
+	_ = set.Parse([]string{"--myflag", "bat", "baz"})
+
+	if c.Args().Len() != 2 {
+		t.Error("length should be two")
+	}
+
+	if c.Bool("myflag") == false {
+		t.Error("myflag should be true")
+	}
+}
+
+func TestRemoveBeforeAction(t *testing.T) {
+	// Arrange
+	set := flag.NewFlagSet("test", 0)
+	set.String("machine", "nitro-test", "doc")
+	c := cli.NewContext(nil, set, nil)
+	_ = set.Parse([]string{"--machine=nitro-test"})
+
+	// act
+	err := removeBeforeAction(c)
+
+	// Assert
+	if err != ErrRemoveNoHostArgProvided {
+		t.Errorf("expected error to be %v, got %v instead", "no host was specified for removal", err)
+	}
+}
+
 func TestRemoveBeforeCommandReturnsError(t *testing.T) {
 	// Arrange
 	set := flag.NewFlagSet("test", 0)
