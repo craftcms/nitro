@@ -29,6 +29,7 @@ func (r TestRunner) Path() string {
 }
 
 func (r TestRunner) SetInput(input string) error {
+	r.input = input
 	return nil
 }
 
@@ -68,4 +69,38 @@ func Test_removeBeforeAction(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_removeAction(t *testing.T) {
+	// Arrange
+	set := flag.NewFlagSet("test", 0)
+	set.String("machine", "nitro-test", "doc")
+	c := cli.NewContext(nil, set, nil)
+	_ = set.Parse([]string{"--machine=test", "somehost"})
+	expectedArgs := []string{"exec", "test", "--", "sudo", "bash", "/opt/nitro/nginx/remove-site.sh", "somehost"}
+	r := TestRunner{}
+
+	// Act
+	err := removeAction(c, r)
+
+	// Assert
+	if err != nil {
+		t.Error("expected error to be nil")
+	}
+	if assertArgsMatch(expectedArgs, r.args) {
+		t.Errorf("expected the args to match; got %v instead\n", r.args)
+	}
+}
+
+func assertArgsMatch(expected, actual []string) bool {
+	if len(expected) != len(actual) {
+		return false
+	}
+	for i, v := range expected {
+		if v != actual[i] {
+			return false
+		}
+	}
+
+	return true
 }
