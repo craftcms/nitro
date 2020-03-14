@@ -4,3 +4,4 @@
 /bin
 /dist
 composer.lock
+/.idea
