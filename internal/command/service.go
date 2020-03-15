@@ -162,3 +162,11 @@ func Service(r Runner) *cli.Command {
 		},
 	}
 }
+
+func serviceRestartAction(c *cli.Context, r Runner) error {
+	if c.Bool("nginx") {
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "nginx", "restart"})
+	}
+
+	return nil
+}

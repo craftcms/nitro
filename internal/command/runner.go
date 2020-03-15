@@ -32,7 +32,7 @@ func (c *CmdRunner) SetInput(input string) error {
 func (c CmdRunner) Run(args []string) error {
 	// if this is a syscall, hand it off
 	if c.isSyscall {
-		// this allows us to only add args, not the binary path to
+		// this allows us to only add Args, not the binary path to
 		// keep everything consistent
 		if args[0] != "multipass" {
 			args = append([]string{"multipass"}, args...)
