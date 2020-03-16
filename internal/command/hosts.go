@@ -35,7 +35,7 @@ func beforeHostsAction(c *cli.Context) error {
 	}
 
 	user := os.Getuid()
-	if (user == 0) || (user == -1) {
+	if (user != 0) || (user != -1) {
 		return errors.New("this command requires root/admin privileges")
 	}
 
