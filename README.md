@@ -8,10 +8,10 @@ A better and faster way to develop Craft CMS applications locally without Docker
 
 ## What's Included
 
-Nitro will install the following default on the server, the version of PHP and database engine are configurable.
+Nitro will install the following default on the machine, both the version of PHP and database engine are configurable.
 
 - PHP 7.4
-- MariaDB
+- MySQL (mariadb flavor)
 - PostgreSQL (optional)
 - Redis
 
@@ -42,7 +42,7 @@ composer run nitro init
 This will create a new machine and give it the default name of `nitro-dev`. If you wish to assign another name to the machine, run the following command instead:
 
 ```shell script
-./vendor/bin/nitro --server my-custom-name init
+./vendor/bin/nitro --machine my-custom-name init
 ``` 
 
 ## Usage
@@ -77,7 +77,7 @@ You can now visit `http://mysite.test` in your browser!
 
 The following commands will help you manage your virtual server.
 
-> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--server` argument. 
+> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--machine` argument. 
 
 ### init
 
@@ -100,7 +100,7 @@ Will install the specified version of PHP, the database engine, and Redis server
 #### Full Example
 
 ```bash
-nitro --server mysite bootstrap --php-version 7.2 --database postgres 
+nitro --machine diesel bootstrap --php-version 7.2 --database postgres 
 ```
 
 ### add
@@ -112,7 +112,7 @@ Adds a new virtual host to nginx and attaches a directory to a server.
 #### Full Example
 
 ```bash
-nitro --server mysite add --php-version 7.4 mysite.test ./path/to/site
+nitro --machine diesel add --php-version 7.4 mysite.test ./path/to/site
 ```
 
 ### remove
@@ -122,7 +122,7 @@ this will remove the specified virtual server from nginx and then detach the dir
 #### Full Example
 
 ```bash
-nitro --server mysite remove mysite.test
+nitro --machine diesel remove mysite.test
 ```
 
 ### attach
@@ -132,7 +132,7 @@ To attach, or mount, a directory to a virtual server in nginx, use this command.
 #### Full Example
 
 ```bash
-nitro --server mysite attach mysite.test ./path/to/mysite
+nitro --machine diesel attach mysite.test ./path/to/mysite
 ```
 
 ### ssh
@@ -142,52 +142,134 @@ Nitro gives you full root access to your virtual server. By default, the user is
 #### Full Example
 
 ```bash
-nitro --server mysite ssh
+nitro --machine diesel ssh
 ```
 
 ### xon
 
-TODO
+xDebug is installed on each machine, but it not enabled by default. Quickly enable xDebug on a machine.
+
+- `--php-version (default 7.4)` install a specific version of PHP to enable for xDebug
+
+#### Full Example
+
+```bash
+nitro --machine diesel xon --php-version 7.3
+``` 
 
 ### xoff
 
-TODO
+Quickly disable xDebug on a machine. The PHP version can be specified when 
+
+- `--php-version (default 7.4)` install a specific version of PHP to enable for xDebug
+
+#### Full Example
+
+```bash
+nitro --machine diesel xoff --php-version 7.2
+``` 
 
 ### start
 
-TODO
+Start, or turn on, a machine.
+
+#### Full Example
+
+```bash
+nitro --machine diesel start
+``` 
 
 ### stop
 
-TODO
+Stop, or turn off, a machine.
+
+#### Full Example
+
+```bash
+nitro --machine diesel stop
+``` 
 
 ### destroy
 
-TODO
+Destroy a machine. My default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`).
+
+- `--permanent (default false)` to permanently delete a machine (this is non-recoverable)
+
+#### Full Example
+
+```bash
+nitro --machine diesel destroy --permanent
+``` 
 
 ### sql
 
-TODO
+Access a SQL shell, as the root user, without using a GUI.
+
+- `--postgres (default false)` to access the postgres SQL shell
+
+#### Full Example
+
+```bash
+nitro --machine diesel sql --postgres
+``` 
 
 ### redis
 
-TODO
+Access a Redis shell.
+
+#### Full Example
+
+```bash
+nitro --machine diesel redis
+``` 
 
 ### update
 
-TODO
+Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
+
+#### Full Example
+
+```bash
+nitro --machine diesel update
+``` 
 
 ### logs
 
-TODO
+View the virtual machines logs.
+
+#### Full Example
+
+```bash
+nitro --machine diesel logs nginx
+```   
 
 ### ip
 
-TODO
+View the virtual machines IP address.
+
+#### Full Example
+
+```bash
+nitro --machine diesel ip
+```   
 
 ### services
 
-TODO
+Stop, start, or restart services on a virtual machine. The commands are nested under the `services` command so calling `nitro services` the sub commands will be listed.
+
+#### Full Example
+
+```bash
+nitro --machine diesel services restart --nginx|--mysql|--postgres|--redis
+```   
+
+```bash
+nitro --machine diesel services stop --nginx|--mysql|--postgres|--redis
+```   
+
+```bash
+nitro --machine diesel services start --nginx|--mysql|--postgres|--redis
+```   
 
 ### refresh
 
