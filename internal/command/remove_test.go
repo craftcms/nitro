@@ -2,7 +2,6 @@ package command
 
 import (
 	"flag"
-	"fmt"
 	"testing"
 
 	"github.com/urfave/cli/v2"
@@ -24,5 +23,4 @@ func TestRemoveBeforeCommandReturnsError(t *testing.T) {
 	if err.Error() != expected {
 		t.Errorf("expected the error from removeBeforeAction() to be %v; got %v instead", expected, err)
 	}
-	fmt.Println(ctx.Context.Value("host"))
 }
