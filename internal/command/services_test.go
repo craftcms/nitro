@@ -17,7 +17,7 @@ func Test_serviceRestartAction(t *testing.T) {
 
 	type args struct {
 		c *cli.Context
-		r TestRunner
+		r *TestRunner
 	}
 	tests := []struct {
 		name         string
@@ -28,14 +28,14 @@ func Test_serviceRestartAction(t *testing.T) {
 	}{
 		{
 			name:         "restart nginx",
-			args:         args{c: c, r: r},
+			args:         args{c: c, r: &r},
 			expectedArgs: []string{"exec", "nitro-test", "--", "sudo", "service", "nginx", "restart"},
 			toParse:      []string{"--nginx"},
 			wantErr:      false,
 		},
 		{
 			name:         "restart mysql",
-			args:         args{c: c, r: r},
+			args:         args{c: c, r: &r},
 			expectedArgs: []string{"exec", "nitro-test", "--", "sudo", "service", "mariadb", "start"},
 			toParse:      []string{"--mysql"},
 			wantErr:      false,
@@ -45,7 +45,7 @@ func Test_serviceRestartAction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = set.Parse(tt.toParse)
 
-			if err := serviceRestartAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
+			if err := serviceRestartAction(tt.args.c, tt.args.r); (err != nil) != tt.wantErr {
 				t.Errorf("serviceRestartAction() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
@@ -55,7 +55,7 @@ func Test_serviceRestartAction(t *testing.T) {
 				}
 			}
 			// reset the args
-			tt.args.r.args = nil
+			tt.args.r.args = []string{}
 		})
 	}
 }

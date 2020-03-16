@@ -19,23 +19,7 @@ func Service(r Runner) *cli.Command {
 				Name:  "restart",
 				Usage: "Restart machine services",
 				Action: func(c *cli.Context) error {
-					if c.Bool("nginx") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "nginx", "restart"})
-					}
-
-					if c.Bool("mysql") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "restart"})
-					}
-
-					if c.Bool("postgres") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "postgresql", "restart"})
-					}
-
-					if c.Bool("redis") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "redis-server", "restart"})
-					}
-
-					return cli.ShowCommandHelp(c, "restart")
+					return serviceRestartAction(c, r)
 				},
 				After: func(c *cli.Context) error {
 					if c.Bool("nginx") {
@@ -161,8 +145,16 @@ func serviceRestartAction(c *cli.Context, r Runner) error {
 	}
 
 	if c.Bool("mysql") {
-		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "start"})
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "restart"})
 	}
 
-	return nil
+	if c.Bool("postgres") {
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "postgresql", "restart"})
+	}
+
+	if c.Bool("redis") {
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "redis-server", "restart"})
+	}
+
+	return cli.ShowCommandHelp(c, "restart")
 }
