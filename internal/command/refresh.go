@@ -5,8 +5,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
-
-	"github.com/craftcms/nitro/internal"
 )
 
 type config struct {
@@ -16,7 +14,7 @@ type config struct {
 	} `yaml:"write_files"`
 }
 
-func Refresh(r internal.Runner) *cli.Command {
+func Refresh(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "refresh",
 		Usage: "",
@@ -26,7 +24,7 @@ func Refresh(r internal.Runner) *cli.Command {
 	}
 }
 
-func refreshAction(c *cli.Context, r internal.Runner) error {
+func refreshAction(c *cli.Context, r Runner) error {
 	cfg := config{}
 	// parse the cloudInit variable
 	if err := yaml.Unmarshal([]byte(cloudInit), &cfg); err != nil {
