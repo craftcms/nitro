@@ -37,7 +37,7 @@ func Test_serviceRestartAction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = set.Parse(tt.toParse)
 
-			if err := serviceRestartAction(tt.args.c, tt.args.r); (err != nil) != tt.wantErr {
+			if err := serviceRestartAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
 				t.Errorf("serviceRestartAction() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
