@@ -42,7 +42,7 @@ composer run nitro init
 This will create a new machine and give it the default name of `nitro-dev`. If you wish to assign another name to the machine, run the following command instead:
 
 ```shell script
-./vendor/bin/nitro --machine my-custom-name init
+./vendor/bin/nitro --server my-custom-name init
 ``` 
 
 ## Usage
@@ -77,7 +77,7 @@ You can now visit `http://mysite.test` in your browser!
 
 The following commands will help you manage your virtual server.
 
-> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--machine` argument. 
+> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--server` argument. 
 
 ### init
 
@@ -100,7 +100,7 @@ Will install the specified version of PHP, the database engine, and Redis server
 #### Full Example
 
 ```bash
-nitro --machine mysite bootstrap --php-version 7.2 --database postgres 
+nitro --server mysite bootstrap --php-version 7.2 --database postgres 
 ```
 
 ### add
@@ -112,7 +112,7 @@ Adds a new virtual host to nginx and attaches a directory to a server.
 #### Full Example
 
 ```bash
-nitro --machine mysite add --php-version 7.4 mysite.test ./path/to/site
+nitro --server mysite add --php-version 7.4 mysite.test ./path/to/site
 ```
 
 ### remove
@@ -122,7 +122,7 @@ this will remove the specified virtual server from nginx and then detach the dir
 #### Full Example
 
 ```bash
-nitro --machine mysite remove mysite.test
+nitro --server mysite remove mysite.test
 ```
 
 ## attach
@@ -132,7 +132,7 @@ To attach, or mount, a directory to a virtual server in nginx, use this command.
 #### Full Example
 
 ```bash
-nitro --machine mysite attach mysite.test ./path/to/mysite
+nitro --server mysite attach mysite.test ./path/to/mysite
 ```
 
 ### ssh
@@ -142,7 +142,7 @@ Nitro gives you full root access to your virtual server. By default, the user is
 #### Full Example
 
 ```bash
-nitro --machine mysite ssh
+nitro --server mysite ssh
 ```
 
 ### xon
