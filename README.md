@@ -60,13 +60,13 @@ After running `init`, the system will default to automatically bootstrap the ser
 The next step is to add a new virtual host to the server:
 
 ```bash
-nitro add mysite.test path/to/site
+nitro add mysite.test /Users/jason/Sites/craftcms
 ```
 
 This process will perform the following tasks:
 
 1. Set up a new nginx virtual server for `mysite.test`.
-2. Attach the directory `./path/to/site` to that virtual server.
+2. Attach the directory `/Users/jason/Sites/craftcms` to that virtual server.
 3. Edit your `/etc/hosts` file to point `mysite.test` to the virtual server for use locally.
 
 You can now visit `http://mysite.test` in your browser!
@@ -113,10 +113,10 @@ Adds a new virtual host to nginx and mounts a local directory to the server.
 
 > Note: if you pass a version of PHP that was _not_ used when provisioning the server, Nitro will install that version of PHP for you.
 
-This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `./path/to/site`.
+This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
 
 ```bash
-nitro --machine diesel add --php-version 7.4 mysite.test ./path/to/site
+nitro --machine diesel add --php-version 7.4 mysite.test /Users/jason/Sites/craftcms
 ```
 
 ### `remove`
@@ -133,10 +133,10 @@ nitro --machine diesel remove mysite.test
 
 Attaches, or mounts, a local directory to an nginx server’s web root.
 
-This mounts the local directory `./path/to/mysite` as the web root for the `diesel` machine’s `mysite.test` host:
+This mounts the local directory `/Users/jason/Sites/craftcms` as the web root for the `diesel` machine’s `mysite.test` host:
 
 ```bash
-nitro --machine diesel attach mysite.test ./path/to/mysite
+nitro --machine diesel attach mysite.test /Users/jason/Sites/craftcms
 ```
 
 ### `ssh`
@@ -203,7 +203,7 @@ Destroys a machine. By default, Multipass does not permanently delete a machine 
 
 Options:
 
-- `--permanent [argument]` use `true` to permanently delete a machine **(this is non-recoverable!)**
+- `--permanent` permanently deletes a machine **(this is non-recoverable!)**
 
 This soft-destroys the `diesel` machine:
 
