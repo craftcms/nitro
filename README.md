@@ -2,7 +2,7 @@
 
 A better and faster way to develop Craft CMS applications locally without Docker or Vagrant! Nitro has one dependency, Multipass, which will allow create virtual machines based on Ubuntu.
 
-# Requirements
+## Requirements
 
 - [Multipass](https://multipass.run)
 
