@@ -7,17 +7,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Test_serviceRestartAction(t *testing.T) {
+func Test_refreshAction(t *testing.T) {
 	// Arrange
 	set := flag.NewFlagSet("test", 0)
 	set.String("machine", "nitro-test", "doc")
-	set.Bool("nginx", false, "docs")
 	c := cli.NewContext(nil, set, nil)
-	r := TestRunner{}
+	r := SpyTestRunner{}
 
 	type args struct {
 		c *cli.Context
-		r TestRunner
+		r SpyTestRunner
 	}
 	tests := []struct {
 		name         string
@@ -27,19 +26,20 @@ func Test_serviceRestartAction(t *testing.T) {
 		wantErr      bool
 	}{
 		{
-			name:         "restart nginx",
-			args:         args{c: c, r: r},
-			expectedArgs: []string{"exec", "nitro-text", "--", "sudo", "service", "nginx", "restart"},
-			toParse:      []string{"--nginx"},
+			name:    "",
+			args:    args{c: c, r: r},
+			toParse: []string{"refresh"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = set.Parse(tt.toParse)
 
-			if err := serviceRestartAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
-				t.Errorf("serviceRestartAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := refreshAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
+				t.Errorf("refreshAction() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
+			t.Log(tt.args.r.args)
 		})
 	}
 }
