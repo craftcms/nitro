@@ -29,7 +29,7 @@ func (c *CmdRunner) SetInput(input string) error {
 	return nil
 }
 
-func (c CmdRunner) Run(args []string) error {
+func (c *CmdRunner) Run(args []string) error {
 	// if this is a syscall, hand it off
 	if c.isSyscall {
 		// this allows us to only add Args, not the binary path to

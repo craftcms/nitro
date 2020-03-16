@@ -12,11 +12,11 @@ func (r *TestRunner) Run(args []string) error {
 	return nil
 }
 
-func (r TestRunner) UseSyscall(t bool) {
+func (r *TestRunner) UseSyscall(t bool) {
 	r.syscall = t
 }
 
-func (r TestRunner) SetInput(input string) error {
+func (r *TestRunner) SetInput(input string) error {
 	r.input = input
 
 	return nil
