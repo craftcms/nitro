@@ -26,14 +26,3 @@ func TestRemoveBeforeCommandReturnsError(t *testing.T) {
 	}
 	fmt.Println(ctx.Context.Value("host"))
 }
-
-func TestRemoveAfterActionPrintsOutput(t *testing.T) {
-	// Arrange
-	set := flag.NewFlagSet("test", 0)
-	ctx := cli.NewContext(nil, set, nil)
-
-	// Act
-	if err := removeAfterAction(ctx); err != nil {
-		t.Errorf("expected error to be nil. got %v instead", err)
-	}
-}
