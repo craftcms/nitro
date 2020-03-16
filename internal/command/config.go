@@ -48,7 +48,7 @@ write_files:
       if [ -f /etc/nginx/sites-enabled/default ]; then
           sudo rm /etc/nginx/sites-enabled/default
       fi
-      
+
       # change user php is running as
       export phpversion=$(cat /opt/nitro/php_version)
       sudo sed -i "s|user = www-data|user = ubuntu|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
@@ -57,6 +57,10 @@ write_files:
       # set php.ini settings for craft
       sudo sed -i "s|memory_limit = 128M|memory_limit = 256M|g" /etc/php/"$phpversion"/fpm/php.ini
       sudo sed -i "s|max_execution_time = 30|max_execution_time = 120|g" /etc/php/"$phpversion"/fpm/php.ini
+
+      # set xDebug settings whether it's enabled or not
+      sudo sed -i -e "\$axdebug.remote_enable=1\nxdebug.remote_connect_back=0\nxdebug.remote_host=localhost\nxdebug.remote_port=9000\nxdebug.remote_log=/var/log/nginx/xdebug.log" /etc/php/"$phpversion"/mods-available/xdebug.ini
+
       sudo service php"$phpversion"-fpm restart
   - path: /opt/nitro/update.sh
     content: |
@@ -102,7 +106,7 @@ write_files:
       systemctl stop mariadb
       sed -i 's|bind-address|#bind-address|g' /etc/mysql/mariadb.conf.d/50-server.cnf
       systemctl start mariadb
-      
+
       # create the database and user
       sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS craftcms;"
       sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'nitro'@'%' IDENTIFIED BY 'nitro';"
