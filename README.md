@@ -273,4 +273,10 @@ nitro --machine diesel services start --nginx|--mysql|--postgres|--redis
 
 ### refresh
 
-TODO
+This command will update the scripts used to create virtual servers for nginx and other utilities. This is only needed when updating the nitro cli.
+
+#### Full Example
+  
+```bash
+nitro --machine diesel refresh
+```   
