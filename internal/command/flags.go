@@ -40,6 +40,13 @@ var memoryFlag = &cli.StringFlag{
 	DefaultText: "2G",
 }
 
+var permanentDeleteFlag = &cli.BoolFlag{
+	Name:        "permanent",
+	Usage:       "Permanently delete a machine",
+	Value:       false,
+	DefaultText: "false",
+}
+
 var phpVersionFlag = &cli.StringFlag{
 	Name:        "php-version",
 	Usage:       "Provide version of PHP",

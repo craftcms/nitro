@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/txn2/txeh"
 	"github.com/urfave/cli/v2"
@@ -31,6 +32,10 @@ func Hosts(r Runner) *cli.Command {
 func beforeHostsAction(c *cli.Context) error {
 	if c.Args().First() == "" {
 		return ErrHostsNoHostNameProvided
+	}
+
+	if os.Getuid() != 0 {
+		return errors.New("this command requires sudo privileges")
 	}
 
 	return nil

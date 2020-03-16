@@ -9,13 +9,13 @@ import (
 
 type TestRunner struct {
 	path    string
-	args    []string
+	Args    []string
 	syscall bool
 	input   string
 }
 
-func (r TestRunner) Run(args []string) error {
-	r.args = args
+func (r *TestRunner) Run(args []string) error {
+	r.Args = args
 
 	return nil
 }
@@ -81,18 +81,18 @@ func Test_removeAction(t *testing.T) {
 	r := TestRunner{}
 
 	// Act
-	err := removeAction(c, r)
+	err := removeAction(c, &r)
 
 	// Assert
 	if err != nil {
 		t.Error("expected error to be nil")
 	}
-	if assertArgsMatch(expectedArgs, r.args) {
-		t.Errorf("expected the args to match; got %v instead\n", r.args)
+	if assertArgsMatch(expectedArgs, r.Args) == false {
+		t.Errorf("expected the Args to match; got %v instead\n", r.Args)
 	}
 }
 
-func assertArgsMatch(expected, actual []string) bool {
+func assertArgsMatch(expected []string, actual []string) bool {
 	if len(expected) != len(actual) {
 		return false
 	}
