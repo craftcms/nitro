@@ -125,7 +125,7 @@ this will remove the specified virtual server from nginx and then detach the dir
 nitro --server mysite remove mysite.test
 ```
 
-## attach
+### attach
 
 To attach, or mount, a directory to a virtual server in nginx, use this command. The first argument is the path to the virtual server root followed by a path to the sites directory.
  
