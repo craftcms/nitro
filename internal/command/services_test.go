@@ -29,8 +29,16 @@ func Test_serviceRestartAction(t *testing.T) {
 		{
 			name:         "restart nginx",
 			args:         args{c: c, r: r},
-			expectedArgs: []string{"exec", "nitro-text", "--", "sudo", "service", "nginx", "restart"},
+			expectedArgs: []string{"exec", "nitro-test", "--", "sudo", "service", "nginx", "restart"},
 			toParse:      []string{"--nginx"},
+			wantErr:      false,
+		},
+		{
+			name:         "restart mysql",
+			args:         args{c: c, r: r},
+			expectedArgs: []string{"exec", "nitro-test", "--", "sudo", "service", "mariadb", "start"},
+			toParse:      []string{"--mysql"},
+			wantErr:      false,
 		},
 	}
 	for _, tt := range tests {
@@ -40,6 +48,14 @@ func Test_serviceRestartAction(t *testing.T) {
 			if err := serviceRestartAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
 				t.Errorf("serviceRestartAction() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
+			for i, arg := range tt.args.r.args {
+				if tt.expectedArgs[i] != arg {
+					t.Errorf("expected the arg %q; got %q instead", tt.expectedArgs[i], arg)
+				}
+			}
+			// reset the args
+			tt.args.r.args = nil
 		})
 	}
 }

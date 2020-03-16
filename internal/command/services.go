@@ -115,14 +115,6 @@ func Service(r Runner) *cli.Command {
 				Name:  "start",
 				Usage: "Start machine services",
 				Action: func(c *cli.Context) error {
-					if c.Bool("nginx") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "nginx", "start"})
-					}
-
-					if c.Bool("mysql") {
-						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "start"})
-					}
-
 					if c.Bool("postgres") {
 						return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "postgresql", "start"})
 					}
@@ -166,6 +158,10 @@ func Service(r Runner) *cli.Command {
 func serviceRestartAction(c *cli.Context, r Runner) error {
 	if c.Bool("nginx") {
 		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "nginx", "restart"})
+	}
+
+	if c.Bool("mysql") {
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "start"})
 	}
 
 	return nil
