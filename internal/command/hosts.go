@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/txn2/txeh"
 	"github.com/urfave/cli/v2"
@@ -31,6 +32,11 @@ func Hosts(r Runner) *cli.Command {
 func beforeHostsAction(c *cli.Context) error {
 	if c.Args().First() == "" {
 		return ErrHostsNoHostNameProvided
+	}
+
+	user := os.Getuid()
+	if (user == 0) || (user == -1) {
+		return errors.New("this command requires root/admin privileges")
 	}
 
 	return nil
