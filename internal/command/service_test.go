@@ -13,11 +13,11 @@ func Test_serviceRestartAction(t *testing.T) {
 	set.String("machine", "nitro-test", "doc")
 	set.Bool("nginx", false, "docs")
 	c := cli.NewContext(nil, set, nil)
-	r := &TestRunner{}
+	r := TestRunner{}
 
 	type args struct {
 		c *cli.Context
-		r Runner
+		r TestRunner
 	}
 	tests := []struct {
 		name         string
