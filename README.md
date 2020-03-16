@@ -1,3 +1,5 @@
+<p><img src="resources/craft-nitro.svg" width="60" height="60" alt="Craft Nitro icon" /></p>
+
 # Craft Nitro
 
 A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is Multipass, which allows you to create Ubuntu virtual machines.
