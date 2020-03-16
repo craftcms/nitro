@@ -14,7 +14,7 @@ type TestRunner struct {
 	input   string
 }
 
-func (r TestRunner) Run(args []string) error {
+func (r *TestRunner) Run(args []string) error {
 	r.Args = args
 
 	return nil
@@ -81,7 +81,7 @@ func Test_removeAction(t *testing.T) {
 	r := TestRunner{}
 
 	// Act
-	err := removeAction(c, r)
+	err := removeAction(c, &r)
 
 	// Assert
 	if err != nil {
