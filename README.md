@@ -77,29 +77,73 @@ You can now visit `http://mysite.test` in your browser!
 
 The following commands will help you manage your virtual server.
 
+> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--machine` argument. 
+
 ### init
 
-TODO
+This will create a new server. The following options are available when creating a new virtual server:
+
+- `--boostrap (default: true)` will bootstrap the installation of PHP, MySQL, and Redis
+- `--php-version (default 7.4)` will be passed to the bootstrap command to install a specific version of PHP
+- `--database (default mysql)` passed to bootstrap command for installation, valid options are `mysql` or `postgres` 
+- `--cpus (default 2)` the number of CPUs to allocate to the server
+- `--memory (default 2G)` how much memory to allocate to the server
+- `--disk (default 5G)` how much disk space to allocate
 
 ### bootstrap
 
-TODO
+Will install the specified version of PHP, the database engine, and Redis server onto a server. This should only be run once per virtual server. 
+
+- `--php-version (default 7.4)` install a specific version of PHP
+- `--database (default mysql)` install a database engine, valid options are `mysql` or `postgres`
+
+#### Full Example
+
+```bash
+nitro --machine mysite bootstrap --php-version 7.2 --database postgres 
+```
 
 ### add
 
-TODO
+Adds a new virtual host to nginx and attaches a directory to a server.
+
+> Note: if you pass a version of PHP that was _not_ used when provisioning the server, nitro will install that version of PHP for you.
+
+#### Full Example
+
+```bash
+nitro --machine mysite add --php-version 7.4 mysite.test ./path/to/site
+```
 
 ### remove
 
-TODO
+this will remove the specified virtual server from nginx and then detach the directory from the virtual server.
+
+#### Full Example
+
+```bash
+nitro --machine mysite remove mysite.test
+```
 
 ## attach
 
-TODO
+To attach, or mount, a directory to a virtual server in nginx, use this command. The first argument is the path to the virtual server root followed by a path to the sites directory.
+ 
+#### Full Example
+
+```bash
+nitro --machine mysite attach mysite.test ./path/to/mysite
+```
 
 ### ssh
 
-TODO
+Nitro gives you full root access to your virtual server. By default, the user is `ubuntu`. This user has `sudo` permissions without a password. Once you are in the virtual server, you can run sudo commands as usual (e.g. `sudo apt install golang`)
+
+#### Full Example
+
+```bash
+nitro --machine mysite ssh
+```
 
 ### xon
 
