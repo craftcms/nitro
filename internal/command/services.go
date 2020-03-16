@@ -6,8 +6,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Service is a parent command that allows you to manage a machines services
-func Service(r Runner) *cli.Command {
+// Services is a parent command that allows you to manage a machines services
+func Services(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "services",
 		Usage: "Start, stop, or restart services on machine",

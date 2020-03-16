@@ -45,7 +45,7 @@ func NewApp(r command.Runner) *cli.App {
 			command.Update(r),
 			command.Logs(r),
 			command.IP(r),
-			command.Service(r),
+			command.Services(r),
 			command.Refresh(r),
 		},
 	}
