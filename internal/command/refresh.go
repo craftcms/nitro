@@ -1,8 +1,6 @@
 package command
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -38,11 +36,14 @@ func refreshAction(c *cli.Context, r Runner) error {
 			continue
 		}
 
-		fmt.Println("SKIPPED: updating file", file.Path)
-		//args := []string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/refresh.sh", file.Content, file.Path}
-		//if err := r.Run(args); err != nil {
-		//	return err
-		//}
+		if err := r.SetInput(file.Content); err != nil {
+			return err
+		}
+
+		args := []string{"transfer", "-", c.String("machine") + ":/home/ubuntu" + file.Path}
+		if err := r.Run(args); err != nil {
+			return err
+		}
 	}
 
 	return nil
