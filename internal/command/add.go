@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"os"
 
 	"github.com/urfave/cli/v2"
 
@@ -9,6 +10,9 @@ import (
 )
 
 func Add(r Runner) *cli.Command {
+	cwd, _ := os.Getwd()
+	pathFlag.DefaultText = cwd
+
 	return &cli.Command{
 		Name:   "add",
 		Usage:  "Add virtual host",
@@ -19,6 +23,7 @@ func Add(r Runner) *cli.Command {
 		After: addAfterAction,
 		Flags: []cli.Flag{
 			phpVersionFlag,
+			pathFlag,
 			publicDirFlag,
 		},
 	}
@@ -30,16 +35,15 @@ func addBeforeAction(c *cli.Context) error {
 		return errors.New("you must pass a domain name")
 	}
 
-	if path := c.Args().Get(1); path == "" {
-		// TODO validate the domain name with validate.Domain(d)
-		return errors.New("you must provide a path to mount")
-	}
-
 	if err := validate.PHPVersion(c.String("php-version")); err != nil {
 		return err
 	}
 
-	if err := validate.Path(c.Args().Get(1)); err != nil {
+	if c.String("path") == "" {
+		return nil
+	}
+
+	if err := validate.Path(c.String("path")); err != nil {
 		return err
 	}
 
@@ -56,5 +60,18 @@ func addAction(c *cli.Context, r Runner) error {
 }
 
 func addAfterAction(c *cli.Context) error {
-	return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", c.Args().First(), c.Args().Get(1)})
+	host := c.Args().First()
+
+	var path string
+	if c.String("path") == "" {
+		var err error
+		path, err = os.Getwd()
+		if err != nil {
+			return err
+		}
+
+		return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", host, path})
+	}
+
+	return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "attach", host, c.String("path")})
 }
