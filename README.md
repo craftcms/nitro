@@ -15,24 +15,6 @@ A better, faster way to develop Craft CMS apps locally without Docker or Vagrant
 - [Installation](#installation)
 - [Usage](#usage)
 - [Commands](#commands)
-  - [`init`](#init)
-  - [`bootstrap`](#bootstrap)
-  - [`add`](#add)
-  - [`remove`](#remove)
-  - [`attach`](#attach)
-  - [`ssh`](#ssh)
-  - [`xon`](#xon)
-  - [`xoff`](#xoff)
-  - [`start`](#start)
-  - [`stop`](#stop)
-  - [`destroy`](#destroy)
-  - [`sql`](#sql)
-  - [`redis`](#redis)
-  - [`update`](#update)
-  - [`logs`](#logs)
-  - [`ip`](#ip)
-  - [`services`](#services)
-  - [`refresh`](#refresh)
 
 ---
 
@@ -108,6 +90,25 @@ You can now visit `http://mysite.test` in your browser!
 ## Commands
 
 The following commands will help you manage your virtual server.
+
+- [`init`](#init)
+- [`bootstrap`](#bootstrap)
+- [`add`](#add)
+- [`remove`](#remove)
+- [`attach`](#attach)
+- [`ssh`](#ssh)
+- [`xon`](#xon)
+- [`xoff`](#xoff)
+- [`start`](#start)
+- [`stop`](#stop)
+- [`destroy`](#destroy)
+- [`sql`](#sql)
+- [`redis`](#redis)
+- [`update`](#update)
+- [`logs`](#logs)
+- [`ip`](#ip)
+- [`services`](#services)
+- [`refresh`](#refresh)
 
 > Note: these examples use a custom server name of `diesel`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
