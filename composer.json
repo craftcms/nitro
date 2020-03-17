@@ -14,12 +14,14 @@
     "vm"
   ],
   "license": "MIT",
-  "authors": [
-    {
-      "name": "Jason McCallister",
-      "email": "jason@craftcms.com"
-    }
-  ],
+  "support": {
+    "email": "support@craftcms.com",
+    "issues": "https://github.com/craftcms/nitro/issues?state=open",
+    "forum": "https://craftcms.stackexchange.com/",
+    "source": "https://github.com/craftcms/nitro",
+    "docs": "https://github.com/craftcms/nitr",
+    "rss": "https://github.com/craftcms/nitro/releases.atom"
+  },
   "bin": [
     "src/nitro"
   ]
