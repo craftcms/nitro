@@ -136,7 +136,7 @@ Options:
 - `--php-version [argument]` install a specific version of PHP. Options are `7.4`, `7.3`, and `7.2`.
 - `--database [argument]` install a database engine. Options are `mysql` or `postgres`.
 
-This boostraps a machine with the custom name `diesel`, using PHP 7.2 and PostgreSQL:
+This bootstraps a machine with the custom name `diesel`, using PHP 7.2 and PostgreSQL:
 
 ```bash
 nitro --machine diesel bootstrap --php-version 7.2 --database postgres
@@ -151,7 +151,13 @@ Adds a new virtual host to nginx and mounts a local directory to the server.
 This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
 
 ```bash
-nitro --machine diesel add --php-version 7.4 mysite.test /Users/jason/Sites/craftcms
+nitro --machine diesel add --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test 
+```
+
+> Note: The `--path` argument is only required if you are not mounting the current working directory. If you are in a current Craft CMS project, you can omit the `--path`.
+
+```bash
+nitro --machine diesel add mysite.test
 ```
 
 ### `remove`
