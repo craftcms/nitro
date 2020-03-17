@@ -140,20 +140,22 @@ func Services(r Runner) *cli.Command {
 }
 
 func serviceRestartAction(c *cli.Context, r Runner) error {
+	machine := c.String("machine")
+
 	if c.Bool("nginx") {
-		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "nginx", "restart"})
+		return r.Run([]string{"exec", machine, "--", "sudo", "service", "nginx", "restart"})
 	}
 
 	if c.Bool("mysql") {
-		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "mariadb", "restart"})
+		return r.Run([]string{"exec", machine, "--", "sudo", "service", "mariadb", "restart"})
 	}
 
 	if c.Bool("postgres") {
-		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "postgresql", "restart"})
+		return r.Run([]string{"exec", machine, "--", "sudo", "service", "postgresql", "restart"})
 	}
 
 	if c.Bool("redis") {
-		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "service", "redis-server", "restart"})
+		return r.Run([]string{"exec", machine, "--", "sudo", "service", "redis-server", "restart"})
 	}
 
 	return cli.ShowCommandHelp(c, "restart")
