@@ -30,12 +30,31 @@ $binary = 'nitro-' . $version . '-' . strtolower(PHP_OS) . '-amd64';
 
 // check if the binary exists
 if (file_exists(CRAFT_VENDOR_PATH . 'bin' . DIRECTORY_SEPARATOR . $binary)) {
-    // if it exists, pass the args to the binary
-    echo 'call the binary';
-
     return;
 }
 
+
+try {
+    $filename = 'nitro-' . random_int(0, 10000);
+} catch (Exception $e) {
+}
+
+$zip = fopen($filename, "w+");
+
 // if it does not get the current version and download from github
+$url = 'https://github.com/craftcms/nitro/releases/download/v' . $version . '/' . $binary . '.tar.gz';
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_FAILONERROR, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_FILE, $zip);
+$page = curl_exec($ch);
+curl_close($ch);
+
+fclose($zip);
 
 // unzip the binary and place full path name into bin dir (e.g. vendor/bin/nitro-darwin-amd64)
