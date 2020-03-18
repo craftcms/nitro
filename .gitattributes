@@ -3,6 +3,7 @@
 /cmd export-ignore
 /internal export-ignore
 /dist export-ignore
+/resources export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
 go.mod export-ignore
