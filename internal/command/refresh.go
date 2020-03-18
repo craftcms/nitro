@@ -40,8 +40,7 @@ func refreshAction(c *cli.Context, r Runner) error {
 			return err
 		}
 
-		args := []string{"transfer", "-", c.String("machine") + ":/home/ubuntu" + file.Path}
-		if err := r.Run(args); err != nil {
+		if err := r.Run([]string{"transfer", "-", c.String("machine") + ":/tmp" + file.Path}); err != nil {
 			return err
 		}
 	}
