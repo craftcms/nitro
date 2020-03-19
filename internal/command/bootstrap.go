@@ -12,8 +12,8 @@ import (
 func Bootstrap(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:        "bootstrap",
-		Usage:       "Delete machine",
-		Description: "Delete a machine when no longer needed, this is recoverable and not permanently deleted.",
+		Usage:       "Bootstrap machine",
+		Description: "Bootstrap machine",
 		Before:      bootstrapBeforeAction,
 		Action: func(c *cli.Context) error {
 			return bootstrapAction(c, r)
