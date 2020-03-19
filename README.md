@@ -1,17 +1,33 @@
+<p><img src="resources/craft-nitro.svg" width="60" height="60" alt="Craft Nitro icon" /></p>
+
 # Craft Nitro
 
-A better and faster way to develop Craft CMS applications locally without Docker or Vagrant! Nitro has one dependency, Multipass, which will allow create virtual machines based on Ubuntu.
+A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is Multipass, which allows you to create Ubuntu virtual machines.
+
+![Go test](https://github.com/pixelandtonic/nitro/workflows/Go%20test/badge.svg)
+
+---
+
+## Table of Contents
+
+- [Requirements](#requirements)
+- [What’s Included](#whats-included)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Commands](#commands)
+
+---
 
 ## Requirements
 
 - [Multipass](https://multipass.run)
 
-## What's Included
+## What’s Included
 
-Nitro will install the following default on the machine, both the version of PHP and database engine are configurable.
+Nitro installs the following on every machine:
 
-- PHP 7.4
-- MySQL (mariadb flavor)
+- PHP 7.4 (+ option to use 7.3 or 7.2)
+- MySQL (MariaDB)
 - PostgreSQL (optional)
 - Redis
 
@@ -21,55 +37,53 @@ Nitro will install the following default on the machine, both the version of PHP
 composer require --dev craftcms/nitro
 ```
 
-Add the following script to your `composer.json` scripts section:
+This package has a single executable named `nitro`. In order to use the CLI, run `./vendor/bin/nitro`.
 
-```
+To use `composer run nitro`, add the following to your `composer.json`’s scripts section:
+
+```json
 "scripts": {
-    // other scripts
-    "nitro": "./vendor/bin/nitro"
-  },
+  "nitro": "./vendor/bin/nitro"
+},
 ```
 
-This package has a single executable named `nitro`. In order to 
-use the CLI, run `./vendor/bin/nitro`. 
+Create a new development machine by running the following:
 
-Creating a new machine for development is simple, run the following command:
-
-```shell script
+```bash
 composer run nitro init
 ```
 
-This will create a new machine and give it the default name of `nitro-dev`. If you wish to assign another name to the machine, run the following command instead:
+This will create a new machine with the default name `nitro-dev`. If you wish to assign another name to the machine, provide one with the `--machine` argument instead:
 
-```shell script
+```bash
 ./vendor/bin/nitro --machine my-custom-name init
-``` 
+```
 
 ## Usage
 
-In order to create a new development server, you must "initialize" nitro. By default, this will not mount any directories and can be viewed as getting a brand new Virtual Private Server (VPS).
+In order to create a new development server, you must “initialize” Nitro. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
 
 ```bash
 nitro init
-``` 
+```
 
-> Note: `nitro init` has options that you can pass when creating a new server. However, we can set some "sane" defaults that should work for most scenarios. To view the options, run `nitro init -h`
- 
-After running `init` the system will default to automatically `bootstrap` the server. The bootstrap process will install the latest PHP version, MySQL, Redis.
+> Note: `nitro init` has options you can pass when creating a new server. However, we can set some "“sane” defaults for most scenarios. To view the options, run `nitro init -h`.
 
-> Note: if you wish to avoid bootstrapping, pass the --bootstrap false when running init (e.g. `nitro init --bootstrap false`)
+After running `init`, the system will default to automatically bootstrap the server. The bootstrap process will install the latest PHP version, MySQL, and Redis.
 
-The next step is to add a new virtual host to the server. To make this simple, you can run:
+> Note: if you wish to avoid bootstrapping, pass `--bootstrap false` when running init (e.g. `nitro init --bootstrap false`)
+
+The next step is to add a new virtual host to the server:
 
 ```bash
-nitro add mysite.test path/to/site
+nitro add mysite.test /Users/jason/Sites/craftcms
 ```
 
 This process will perform the following tasks:
 
-1. Set up a new virtual server in Nginx for `mysite.test`
-2. Attach the directory `./path/to/site` to your virtual server
-3. Edit your /etc/hosts files to point `mysite.test` to your virtual server
+1. Set up a new nginx virtual server for `mysite.test`.
+2. Attach the directory `/Users/jason/Sites/craftcms` to that virtual server.
+3. Edit your `/etc/hosts` file to point `mysite.test` to the virtual server for use locally.
 
 You can now visit `http://mysite.test` in your browser!
 
@@ -77,206 +91,264 @@ You can now visit `http://mysite.test` in your browser!
 
 The following commands will help you manage your virtual server.
 
-> Note: `nitro` will default to the virtual server name `nitro-dev`, these commands are assuming you are connecting to a virtual server named `mysite`. If you are using the default servername, you can skip adding the `--machine` argument. 
+- [`init`](#init)
+- [`bootstrap`](#bootstrap)
+- [`add`](#add)
+- [`remove`](#remove)
+- [`attach`](#attach)
+- [`ssh`](#ssh)
+- [`xon`](#xon)
+- [`xoff`](#xoff)
+- [`start`](#start)
+- [`stop`](#stop)
+- [`destroy`](#destroy)
+- [`sql`](#sql)
+- [`redis`](#redis)
+- [`update`](#update)
+- [`logs`](#logs)
+- [`ip`](#ip)
+- [`services`](#services)
+- [`refresh`](#refresh)
 
-### init
+> Note: these examples use a custom server name of `diesel`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
-This will create a new server. The following options are available when creating a new virtual server:
+### `init`
 
-- `--boostrap (default: true)` will bootstrap the installation of PHP, MySQL, and Redis
-- `--php-version (default 7.4)` will be passed to the bootstrap command to install a specific version of PHP
-- `--database (default mysql)` passed to bootstrap command for installation, valid options are `mysql` or `postgres` 
-- `--cpus (default 2)` the number of CPUs to allocate to the server
-- `--memory (default 2G)` how much memory to allocate to the server
-- `--disk (default 5G)` how much disk space to allocate
+Creates a new server. The following options are available:
 
-### bootstrap
+| Argument        | Default | Options             | Description                                       |
+| --------------- | ------- | ------------------- | ------------------------------------------------- |
+| `--bootstrap`   | `true`  |                     | Bootstraps installation of PHP, MySQL, and Redis. |
+| `--php-version` | `7.4`   | `7.4`, `7.3`, `7.2` | Specifies PHP version used for bootstrap command. |
+| `--database`    | `mysql` | `mysql`, `postgres` | Specifies database used for bootstrap command.    |
+| `--cpus`        | `2`     | max host CPUs\*     | Number of CPUs to allocate to the server.         |
+| `--memory`      | `2G`    | max host memory\*   | Gigabytes of memory to allocate to the server.    |
+| `--disk`        | `5G`    | max host disk\*     | Disk space to allocate to the server.             |
 
-Will install the specified version of PHP, the database engine, and Redis server onto a server. This should only be run once per virtual server. 
+<small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
-- `--php-version (default 7.4)` install a specific version of PHP
-- `--database (default mysql)` install a database engine, valid options are `mysql` or `postgres`
+### `bootstrap`
 
-#### Full Example
+Installs the specified version of PHP, the database engine, and Redis server onto a server. This should only be run once per virtual server.
+
+Options:
+
+- `--php-version [argument]` install a specific version of PHP. Options are `7.4`, `7.3`, and `7.2`.
+- `--database [argument]` install a database engine. Options are `mysql` or `postgres`.
+
+This bootstraps a machine with the custom name `diesel`, using PHP 7.2 and PostgreSQL:
 
 ```bash
-nitro --machine diesel bootstrap --php-version 7.2 --database postgres 
+nitro --machine diesel bootstrap --php-version 7.2 --database postgres
 ```
 
-### add
+### `add`
 
-Adds a new virtual host to nginx and attaches a directory to a server.
+Adds a new virtual host to nginx and mounts a local directory to the server.
 
-> Note: if you pass a version of PHP that was _not_ used when provisioning the server, nitro will install that version of PHP for you.
+> Note: if you pass a version of PHP that was _not_ used when provisioning the server, Nitro will install that version of PHP for you.
 
-#### Full Example
+This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
 
 ```bash
-nitro --machine diesel add --php-version 7.4 mysite.test ./path/to/site
+nitro --machine diesel add --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test 
 ```
 
-### remove
+> Note: The `--path` argument is only required if you are not mounting the current working directory. If you are in a current Craft CMS project, you can omit the `--path`.
 
-this will remove the specified virtual server from nginx and then detach the directory from the virtual server.
+```bash
+nitro --machine diesel add mysite.test
+```
 
-#### Full Example
+### `remove`
+
+Removes the specified virtual server from nginx and detaches the attached directory from the virtual server.
+
+This removes the `mysite.test` host from the `diesel` machine:
 
 ```bash
 nitro --machine diesel remove mysite.test
 ```
 
-### attach
+### `attach`
 
-To attach, or mount, a directory to a virtual server in nginx, use this command. The first argument is the path to the virtual server root followed by a path to the sites directory.
- 
-#### Full Example
+Attaches, or mounts, a local directory to an nginx server’s web root.
+
+This mounts the local directory `/Users/jason/Sites/craftcms` as the web root for the `diesel` machine’s `mysite.test` host:
 
 ```bash
-nitro --machine diesel attach mysite.test ./path/to/mysite
+nitro --machine diesel attach mysite.test /Users/jason/Sites/craftcms
 ```
 
-### ssh
+### `ssh`
 
-Nitro gives you full root access to your virtual server. By default, the user is `ubuntu`. This user has `sudo` permissions without a password. Once you are in the virtual server, you can run sudo commands as usual (e.g. `sudo apt install golang`)
+Nitro gives you full root access to your virtual server. The default user is `ubuntu` and has `sudo` permissions without a password. Once you’re in the virtual server, you can run `sudo` commands as usual (e.g. `sudo apt install golang`).
 
-#### Full Example
+This launches a new shell within the `diesel` machine:
 
 ```bash
 nitro --machine diesel ssh
 ```
 
-### xon
+### `xon`
 
-xDebug is installed on each machine, but it not enabled by default. Quickly enable xDebug on a machine.
+Enables Xdebug, which is installed and disabled by default on each machine.
 
-- `--php-version (default 7.4)` install a specific version of PHP to enable for xDebug
+Options:
 
-#### Full Example
+- `--php-version [argument]` install a specific version of PHP to enable for Xdebug
+
+This ensures Xdebug is installed for PHP 7.3 and enables it for the `diesel` machine:
 
 ```bash
 nitro --machine diesel xon --php-version 7.3
-``` 
+```
 
-### xoff
+### `xoff`
 
-Quickly disable xDebug on a machine. The PHP version can be specified when 
+Disables Xdebug on a machine.
 
-- `--php-version (default 7.4)` install a specific version of PHP to enable for xDebug
+Options:
 
-#### Full Example
+- `--php-version [argument]` install a specific version of PHP to enable for Xdebug
+
+This ensures Xdebug is installed for PHP 7.2 but disables it for the `diesel` machine:
 
 ```bash
 nitro --machine diesel xoff --php-version 7.2
-``` 
+```
 
-### start
+### `start`
 
-Start, or turn on, a machine.
+Starts, or turns on, a machine.
 
-#### Full Example
+This turns on the `diesel` machine:
 
 ```bash
 nitro --machine diesel start
-``` 
+```
 
-### stop
+### `stop`
 
-Stop, or turn off, a machine.
+Stops, or turns off, a machine.
 
-#### Full Example
+This turns off the `diesel` machine:
 
 ```bash
 nitro --machine diesel stop
-``` 
+```
 
-### destroy
+### `destroy`
 
-Destroy a machine. My default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`).
+Destroys a machine. By default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`). This will not affect any files or directories attached to the machine.
 
-- `--permanent (default false)` to permanently delete a machine (this is non-recoverable)
+Options:
 
-#### Full Example
+- `--permanent` permanently deletes a machine **(this is non-recoverable!)**
+
+This soft-destroys the `diesel` machine:
 
 ```bash
 nitro --machine diesel destroy --permanent
-``` 
+```
 
-### sql
+This **permanently** destroys the `diesel` machine:
 
-Access a SQL shell, as the root user, without using a GUI.
+```bash
+nitro --machine diesel destroy --permanent true
+```
 
-- `--postgres (default false)` to access the postgres SQL shell
+### `sql`
 
-#### Full Example
+Launches a database shell as the root user.
+
+- `--postgres` access the PostgreSQL shell rather than MySQL (default)
+
+This launches a PostgreSQL console shell for the `diesel` machine:
 
 ```bash
 nitro --machine diesel sql --postgres
-``` 
+```
 
-### redis
+### `redis`
 
 Access a Redis shell.
 
-#### Full Example
+This launches a Redis console shell for the `diesel` machine:
 
 ```bash
 nitro --machine diesel redis
-``` 
+```
 
-### update
+### `update`
 
 Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
 
-#### Full Example
+This upgrades the `diesel` machine’s software packages to their newest versions:
 
 ```bash
 nitro --machine diesel update
-``` 
+```
 
-### logs
+### `logs`
 
-View the virtual machines logs.
+Views the virtual machines logs.
 
-#### Full Example
+Options:
+
+- `nginx`
+
+This displays nginx logs for the `diesel` machine:
 
 ```bash
 nitro --machine diesel logs nginx
-```   
+```
 
-### ip
+### `ip`
 
-View the virtual machines IP address.
+Prints the machine’s locally-accessible IP address.
 
-#### Full Example
+This prints the IP address of the `diesel` machine:
 
 ```bash
 nitro --machine diesel ip
-```   
+```
 
-### services
+### `services`
 
-Stop, start, or restart services on a virtual machine. The commands are nested under the `services` command so calling `nitro services` the sub commands will be listed.
+Stops, starts, or restarts services on a virtual machine. The commands are nested under the `services` command, so when calling `nitro services` the sub commands will be listed.
 
-#### Full Example
+Options:
+
+- `--nginx`
+- `--mysql`
+- `--postgres`
+- `--redis`
+
+This restarts nginx and MySQL on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services restart --nginx|--mysql|--postgres|--redis
-```   
+nitro --machine diesel services restart --nginx --mysql
+```
+
+This stops PostgreSQL on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services stop --nginx|--mysql|--postgres|--redis
-```   
+nitro --machine diesel services stop --postgres
+```
+
+This starts Redis on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services start --nginx|--mysql|--postgres|--redis
-```   
+nitro --machine diesel services start --redis
+```
 
-### refresh
+### `refresh`
 
-This command will update the scripts used to create virtual servers for nginx and other utilities. This is only needed when updating the nitro cli.
+Updates the scripts used to create virtual servers for nginx and other utilities. This is only needed when updating the Nitro CLI.
 
-#### Full Example
-  
+This updates the `diesel` machine to use Nitro’s most current virtual server scripts for the CLI:
+
 ```bash
 nitro --machine diesel refresh
-```   
+```

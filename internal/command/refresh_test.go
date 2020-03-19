@@ -12,11 +12,11 @@ func Test_refreshAction(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.String("machine", "nitro-test", "doc")
 	c := cli.NewContext(nil, set, nil)
-	r := SpyTestRunner{}
+	r := &SpyTestRunner{}
 
 	type args struct {
 		c *cli.Context
-		r SpyTestRunner
+		r *SpyTestRunner
 	}
 	tests := []struct {
 		name         string
@@ -35,11 +35,9 @@ func Test_refreshAction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = set.Parse(tt.toParse)
 
-			if err := refreshAction(tt.args.c, &tt.args.r); (err != nil) != tt.wantErr {
+			if err := refreshAction(tt.args.c, tt.args.r); (err != nil) != tt.wantErr {
 				t.Errorf("refreshAction() error = %v, wantErr %v", err, tt.wantErr)
 			}
-
-			t.Log(tt.args.r.args)
 		})
 	}
 }

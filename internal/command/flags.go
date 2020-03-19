@@ -1,6 +1,8 @@
 package command
 
-import "github.com/urfave/cli/v2"
+import (
+	"github.com/urfave/cli/v2"
+)
 
 var bootstrapFlag = &cli.BoolFlag{
 	Name:        "bootstrap",
@@ -59,6 +61,12 @@ var postgresFlag = &cli.BoolFlag{
 	Usage:       "Enter a postgres shell",
 	Value:       false,
 	DefaultText: "false",
+}
+
+var pathFlag = &cli.StringFlag{
+	Name:        "path",
+	Usage:       "The path to the site",
+	Value:       "",
 }
 
 var publicDirFlag = &cli.StringFlag{

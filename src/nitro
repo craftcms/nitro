@@ -1,4 +1,60 @@
 #!/usr/bin/env php
-<?php
+<?php declare(strict_types=1);
 
-require __DIR__ . DIRECTORY_SEPARATOR . 'nitro.php';
+error_reporting(-1);
+
+// make sure we are on 64-bit
+if (PHP_INT_SIZE !== 8) {
+    throw new RuntimeException('Only 64-bit is supported at the moment');
+}
+
+define('CRAFT_VENDOR_PATH', dirname(__DIR__) . '/vendor/');
+
+// make sure we have a CRAFT_VENDOR_PATH
+if (!defined('CRAFT_VENDOR_PATH')) {
+    throw new RuntimeException('The CRAFT_VENDOR_PATH must be set');
+}
+
+$packages = json_decode(file_get_contents(CRAFT_VENDOR_PATH . '/composer/installed.json'), true);
+foreach ($packages as $key => $package) {
+    foreach ($package as $k => $v) {
+        if ($k === 'name' && $v === 'craftcms/cms') {
+            $version = $packages[$key]['version'];
+            continue;
+        }
+    }
+}
+
+// get the name of the binary
+$binary = 'nitro-' . $version . '-' . strtolower(PHP_OS) . '-amd64';
+
+// check if the binary exists
+if (file_exists(CRAFT_VENDOR_PATH . 'bin' . DIRECTORY_SEPARATOR . $binary)) {
+    return;
+}
+
+
+try {
+    $filename = 'nitro-' . random_int(0, 10000);
+} catch (Exception $e) {
+}
+
+$zip = fopen($filename, "w+");
+
+// if it does not get the current version and download from github
+$url = 'https://github.com/craftcms/nitro/releases/download/v' . $version . '/' . $binary . '.tar.gz';
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_FAILONERROR, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_FILE, $zip);
+$page = curl_exec($ch);
+curl_close($ch);
+
+fclose($zip);
+
+// unzip the binary and place full path name into bin dir (e.g. vendor/bin/nitro-darwin-amd64)
