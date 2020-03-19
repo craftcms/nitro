@@ -162,7 +162,7 @@ write_files:
           gzip_static  on;
           error_page 404 /index.php?$query_string;
           ssi on;
-          server_name CHANGESERVERNAME.test;
+          server_name CHANGESERVERNAME;
 
           location / {
               try_files $uri $uri/ /index.php$is_args$args;
