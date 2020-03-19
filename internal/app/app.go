@@ -32,6 +32,7 @@ func NewApp(r command.Runner) *cli.App {
 			command.Initialize(r),
 			command.Bootstrap(r),
 			command.Add(r),
+			command.Hosts(r),
 			command.Remove(r),
 			command.Attach(r),
 			command.SSH(r),

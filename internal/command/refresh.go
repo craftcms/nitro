@@ -15,7 +15,7 @@ type config struct {
 func Refresh(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:  "refresh",
-		Usage: "",
+		Usage: "Update scripts on machine",
 		Action: func(c *cli.Context) error {
 			return refreshAction(c, r)
 		},
