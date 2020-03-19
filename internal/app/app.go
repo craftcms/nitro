@@ -37,6 +37,7 @@ func NewApp(r command.Runner) *cli.App {
 			command.SSH(r),
 			command.XOn(r),
 			command.XOff(r),
+			command.Info(r),
 			command.Start(r),
 			command.Stop(r),
 			command.Destroy(r),
