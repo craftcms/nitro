@@ -15,5 +15,6 @@ func run(args []string) {
 }
 
 func main() {
+	// todo check for a config file and append to args as flags
 	run(os.Args)
 }
