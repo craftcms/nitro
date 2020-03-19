@@ -171,6 +171,7 @@ write_files:
           location ~ \.php$ {
              include snippets/fastcgi-php.conf;
              fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
+             fastcgi_read_timeout 240;
           }
       }
   - path: /opt/nitro/nginx/add-site.sh
