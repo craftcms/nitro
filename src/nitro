@@ -15,6 +15,7 @@ if (!defined('CRAFT_VENDOR_PATH')) {
     throw new RuntimeException('The CRAFT_VENDOR_PATH must be set');
 }
 
+// get the version from composer
 $packages = json_decode(file_get_contents(CRAFT_VENDOR_PATH . '/composer/installed.json'), true);
 foreach ($packages as $key => $package) {
     foreach ($package as $k => $v) {
@@ -25,8 +26,8 @@ foreach ($packages as $key => $package) {
     }
 }
 
-// get the name of the binary
-$binary = 'nitro-' . $version . '-' . strtolower(PHP_OS) . '-amd64';
+// get the name of the binary (e.g. nitro-1.0.0-darwin-x86_64)
+$binary = 'nitro-' . $version . '-' . strtolower(PHP_OS) . '-x86_64';
 
 // check if the binary exists
 if (file_exists(CRAFT_VENDOR_PATH . 'bin' . DIRECTORY_SEPARATOR . $binary)) {
