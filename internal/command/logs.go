@@ -20,10 +20,21 @@ func Logs(r Runner) *cli.Command {
 					return logsNginx(c, r)
 				},
 			},
+			{
+				Name:        "xdebug",
+				Description: "Show logs from xdebug",
+				Action: func(c *cli.Context) error {
+					return logsXdebug(c, r)
+				},
+			},
 		},
 	}
 }
 
 func logsNginx(c *cli.Context, r Runner) error {
 	return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/nginx/tail-logs.sh"})
+}
+
+func logsXdebug(c *cli.Context, r Runner) error {
+	return r.Run([]string{"exec", c.String("machine"), "--", "tail", "-f", "/var/log/nitro/xdebug.log"})
 }

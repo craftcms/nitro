@@ -63,6 +63,7 @@ write_files:
       
       # make logs directory for nitro
       sudo mkdir /var/log/nitro
+      sudo touch /var/log/nitro/xdebug.log
       sudo chown -R ubuntu:ubuntu /var/log/nitro
 
       # set xDebug settings whether it's enabled or not

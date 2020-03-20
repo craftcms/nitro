@@ -275,11 +275,18 @@ Views the virtual machines logs.
 Options:
 
 - `nginx`
+- `xdebug`
 
 This displays nginx logs for the `diesel` machine:
 
 ```bash
 nitro --machine diesel logs nginx
+```
+
+This displays xdebug logs for the `diesel` machine:
+
+```bash
+nitro --machine diesel logs xdebug
 ```
 
 ### `services`
