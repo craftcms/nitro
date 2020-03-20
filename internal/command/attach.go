@@ -18,7 +18,7 @@ var (
 func Attach(r Runner) *cli.Command {
 	return &cli.Command{
 		Name:   "attach",
-		Usage:  "Add directory to machine",
+		Usage:  "Site directory to machine",
 		Before: attachBeforeAction,
 		Action: func(c *cli.Context) error {
 			return attachAction(c, r)

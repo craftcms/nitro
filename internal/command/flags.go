@@ -64,9 +64,9 @@ var postgresFlag = &cli.BoolFlag{
 }
 
 var pathFlag = &cli.StringFlag{
-	Name:        "path",
-	Usage:       "The path to the site",
-	Value:       "",
+	Name:  "path",
+	Usage: "The path to the site",
+	Value: "",
 }
 
 var publicDirFlag = &cli.StringFlag{
@@ -74,6 +74,12 @@ var publicDirFlag = &cli.StringFlag{
 	Usage:       "The public directory for the server",
 	Value:       "web",
 	DefaultText: "web",
+}
+
+var removeFlag = &cli.BoolFlag{
+	Name:        "remove",
+	Usage:       "Remove a virtual host",
+	DefaultText: "false",
 }
 
 var serviceMySqlFlag = &cli.BoolFlag{

@@ -12,8 +12,8 @@ clean:
 test:
 	go test ./...
 demo: build
-	composer create-project craftcms/craft ${MACHINE}
+	composer create-project craftcms/craft demo-site
 	./nitro --machine ${MACHINE} init
-	./nitro --machine ${MACHINE} add-host demo ${MACHINE}
+	./nitro --machine ${MACHINE} site --path=demo-site demo
 releaser:
 	goreleaser --snapshot --skip-publish --rm-dist

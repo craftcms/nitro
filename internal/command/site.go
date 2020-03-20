@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -9,27 +10,28 @@ import (
 	"github.com/craftcms/nitro/internal/validate"
 )
 
-func Add(r Runner) *cli.Command {
+func Site(r Runner) *cli.Command {
 	cwd, _ := os.Getwd()
 	pathFlag.DefaultText = cwd
 
 	return &cli.Command{
-		Name:   "add",
+		Name:   "site",
 		Usage:  "Add virtual host",
-		Before: addBeforeAction,
+		Before: siteBeforeAction,
 		Action: func(c *cli.Context) error {
-			return addAction(c, r)
+			return siteAction(c, r)
 		},
-		After: addAfterAction,
+		After: siteAfterAction,
 		Flags: []cli.Flag{
 			phpVersionFlag,
 			pathFlag,
 			publicDirFlag,
+			removeFlag,
 		},
 	}
 }
 
-func addBeforeAction(c *cli.Context) error {
+func siteBeforeAction(c *cli.Context) error {
 	if host := c.Args().First(); host == "" {
 		// TODO validate the domain name with validate.Domain(d)
 		return errors.New("you must pass a domain name")
@@ -50,18 +52,29 @@ func addBeforeAction(c *cli.Context) error {
 	return nil
 }
 
-func addAction(c *cli.Context, r Runner) error {
-	machine := c.String("machine")
+func siteAction(c *cli.Context, r Runner) error {
 	host := c.Args().First()
+	machine := c.String("machine")
 	php := c.String("php-version")
 	dir := c.String("public-dir")
+
+	if c.Bool("remove") {
+		fmt.Println("in remove")
+		return r.Run([]string{"exec", c.String("machine"), "--", "sudo", "bash", "/opt/nitro/nginx/remove-site.sh", c.Args().First()})
+	}
 
 	return r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/nginx/add-site.sh", host, php, dir})
 }
 
-func addAfterAction(c *cli.Context) error {
+func siteAfterAction(c *cli.Context) error {
 	host := c.Args().First()
 
+	if c.Bool("remove") {
+		fmt.Println("removed site", host)
+		return nil
+	}
+
+	// get the current working directory if no path is provided
 	var path string
 	if c.String("path") == "" {
 		var err error
