@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
@@ -14,7 +15,9 @@ func Initialize(r Runner) *cli.Command {
 		Action: func(c *cli.Context) error {
 			return initializeAction(c, r)
 		},
-		After: initializeAfterAction,
+		After: func(c *cli.Context) error {
+			return initializeAfterAction(c, r)
+		},
 		Flags: []cli.Flag{
 			bootstrapFlag,
 			phpVersionFlag,
@@ -40,11 +43,50 @@ func initializeAction(c *cli.Context, r Runner) error {
 	return r.Run([]string{"launch", "--name", machine, "--cpus", cpus, "--disk", disk, "--mem", mem, "--cloud-init", "-"})
 }
 
-func initializeAfterAction(c *cli.Context) error {
+func initializeAfterAction(c *cli.Context, r Runner) error {
 	// if we are bootstrapping, call the command
 	if c.Bool("bootstrap") {
-		// we are not passing the flags as they should be in the context already
-		return c.App.RunContext(c.Context, []string{c.App.Name, "--machine", c.String("machine"), "bootstrap", "--php-version", c.String("php-version"), "--database", c.String("database")}, )
+		machine := c.String("machine")
+		php := c.String("php-version")
+		database := c.String("database")
+
+		if err := r.Run([]string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/bootstrap.sh", php, database}); err != nil {
+			return err
+		}
+
+		// print the system information
+		ip, err := fetchIP(machine, r)
+		if err != nil {
+			return err
+		}
+
+		var port int
+		var driver string
+		switch database {
+		case "postgres":
+			driver = "pgsql"
+			port = 5432
+		default:
+			driver = "mysql"
+			port = 3306
+		}
+
+		fmt.Println("")
+		fmt.Println("==== SERVER INFO ====")
+		fmt.Println("server:", "http://"+ip)
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("==== DATABASE INFO ====")
+		fmt.Println("server:", ip)
+		fmt.Println("port:", port)
+		fmt.Println("driver:", driver)
+		fmt.Println("database:", "craftcms")
+		fmt.Println("username:", "nitro")
+		fmt.Println("password:", "nitro")
+		fmt.Println("")
+		fmt.Println("For additional information on nitro, visit https://docs.craftcms.com/v3/nitro")
+
+		return nil
 	}
 
 	return nil

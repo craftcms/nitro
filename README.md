@@ -92,7 +92,6 @@ You can now visit `http://mysite.test` in your browser!
 The following commands will help you manage your virtual server.
 
 - [`init`](#init)
-- [`bootstrap`](#bootstrap)
 - [`add`](#add)
 - [`remove`](#remove)
 - [`attach`](#attach)
@@ -126,21 +125,6 @@ Creates a new server. The following options are available:
 | `--disk`        | `5G`    | max host disk\*     | Disk space to allocate to the server.             |
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
-
-### `bootstrap`
-
-Installs the specified version of PHP, the database engine, and Redis server onto a server. This should only be run once per virtual server.
-
-Options:
-
-- `--php-version [argument]` install a specific version of PHP. Options are `7.4`, `7.3`, and `7.2`.
-- `--database [argument]` install a database engine. Options are `mysql` or `postgres`.
-
-This bootstraps a machine with the custom name `diesel`, using PHP 7.2 and PostgreSQL:
-
-```bash
-nitro --machine diesel bootstrap --php-version 7.2 --database postgres
-```
 
 ### `add`
 
