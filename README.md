@@ -127,21 +127,6 @@ Creates a new server. The following options are available:
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
-### `bootstrap`
-
-Installs the specified version of PHP, the database engine, and Redis server onto a server. This should only be run once per virtual server.
-
-Options:
-
-- `--php-version [argument]` install a specific version of PHP. Options are `7.4`, `7.3`, and `7.2`.
-- `--database [argument]` install a database engine. Options are `mysql` or `postgres`.
-
-This bootstraps a machine with the custom name `diesel`, using PHP 7.2 and PostgreSQL:
-
-```bash
-nitro --machine diesel bootstrap --php-version 7.2 --database postgres
-```
-
 ### `add`
 
 Adds a new virtual host to nginx and mounts a local directory to the server.

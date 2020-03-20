@@ -30,7 +30,6 @@ func NewApp(r command.Runner) *cli.App {
 		},
 		Commands: []*cli.Command{
 			command.Initialize(r),
-			command.Bootstrap(r),
 			command.Add(r),
 			command.Hosts(r),
 			command.Remove(r),
