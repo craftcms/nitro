@@ -120,7 +120,7 @@ Creates a new server. The following options are available:
 | `--database`    | `mysql` | `mysql`, `postgres` | Specifies database used for bootstrap command.    |
 | `--cpus`        | `2`     | max host CPUs\*     | Number of CPUs to allocate to the server.         |
 | `--memory`      | `2G`    | max host memory\*   | Gigabytes of memory to allocate to the server.    |
-| `--disk`        | `5G`    | max host disk\*     | Disk space to allocate to the server.             |
+| `--disk`        | `20G`    | max host disk\*     | Disk space to allocate to the server.             |
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
