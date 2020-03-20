@@ -105,7 +105,6 @@ The following commands will help you manage your virtual server.
 - [`redis`](#redis)
 - [`update`](#update)
 - [`logs`](#logs)
-- [`ip`](#ip)
 - [`services`](#services)
 - [`refresh`](#refresh)
 
@@ -286,16 +285,6 @@ This displays nginx logs for the `diesel` machine:
 
 ```bash
 nitro --machine diesel logs nginx
-```
-
-### `ip`
-
-Prints the machine’s locally-accessible IP address.
-
-This prints the IP address of the `diesel` machine:
-
-```bash
-nitro --machine diesel ip
 ```
 
 ### `services`
