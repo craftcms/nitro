@@ -30,8 +30,8 @@ var diskFlag = &cli.StringFlag{
 	Name:        "disk",
 	Usage:       "The amount of disk to assign the machine",
 	Required:    false,
-	Value:       "5G",
-	DefaultText: "5G",
+	Value:       "20G",
+	DefaultText: "20G",
 }
 
 var memoryFlag = &cli.StringFlag{
