@@ -11,25 +11,9 @@ builds:
     goos:
       - linux
       - windows
-    goarch:
-      - amd64
-  - binary: nitro
-    main: ./cmd/nitro/main.go
-    id: nitro-macos
-    goos:
       - darwin
     goarch:
       - amd64
-signs:
-  - signature: "${artifact}.dmg"
-    ids:
-      - nitro-macos
-    cmd: gon
-    # you can follow the gon docs to properly create the gon.hcl config file:
-    # https://github.com/mitchellh/gon
-    args:
-      - gon.hcl
-    artifacts: all
 archives:
   - replacements:
       386: i386
