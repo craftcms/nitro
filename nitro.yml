@@ -2,7 +2,6 @@ name: nitro-server # the name of the virtual machine
 system:
   php: 7.4 # server-wide default; options: `7.4`, `7.3`, `7.2`
   database: mysql # options: `mysql`, `postgres`
-hosts: # maps multiple virtual servers onto the virtual machine
+sites: # maps multiple virtual servers onto the virtual machine
   - domain: nitro.test # the domain name the web server will respond
     path: /Users/jasonmccallister/Code/craftcms # the local (full) path to mount on the host machine
-    php: 7.4 # each virtual server can specify a PHP version
