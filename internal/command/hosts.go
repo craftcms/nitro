@@ -9,8 +9,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const HostTLD = ".test"
-
 var (
 	ErrHostsNoHostNameProvided = errors.New("no host name argument provided")
 )
@@ -47,7 +45,7 @@ func hostsAction(c *cli.Context, r Runner) error {
 		return err
 	}
 
-	domain := c.Args().First() + HostTLD
+	domain := c.Args().First()
 
 	hosts, err := txeh.NewHostsDefault()
 	if err != nil {
