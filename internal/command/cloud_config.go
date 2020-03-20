@@ -60,9 +60,17 @@ write_files:
 
       # set nginx request_terminate_timeout
       sudo sed -i "s|;request_terminate_timeout = 0|request_terminate_timeout = 240|g" /etc/php/"$phpversion"/fpm/pool.d/www.conf
+      
+      # make logs directory for nitro
+      sudo mkdir /var/log/nitro
+      sudo chown -R ubuntu:ubuntu /var/log/nitro
 
       # set xDebug settings whether it's enabled or not
-      sudo sed -i -e "\$axdebug.remote_enable=1\nxdebug.remote_connect_back=0\nxdebug.remote_host=localhost\nxdebug.remote_port=9000\nxdebug.remote_log=/var/log/nginx/xdebug.log" /etc/php/"$phpversion"/mods-available/xdebug.ini
+      sudo sed -i -e "\$axdebug.remote_enable=1\nxdebug.remote_connect_back=0\nxdebug.remote_host=CHANGEMEIP\nxdebug.remote_port=9000\nxdebug.remote_log=/var/log/nitro/xdebug.log" /etc/php/"$phpversion"/mods-available/xdebug.ini
+
+      # grab the ip and change the remote_host in xdebug
+      ip_address=$(ip -json addr show enp0s2 | jq -r '.[] | .addr_info[] | select(.family == "inet") | .local')
+      sudo sed -i "s|CHANGEMEIP|$ip_address|g" /etc/php/"$phpversion"/mods-available/xdebug.ini
 
       sudo service php"$phpversion"-fpm restart
   - path: /opt/nitro/update.sh
