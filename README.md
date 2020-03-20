@@ -92,8 +92,7 @@ You can now visit `http://mysite.test` in your browser!
 The following commands will help you manage your virtual server.
 
 - [`init`](#init)
-- [`add`](#add)
-- [`remove`](#remove)
+- [`site`](#site)
 - [`attach`](#attach)
 - [`ssh`](#ssh)
 - [`xon`](#xon)
@@ -125,7 +124,7 @@ Creates a new server. The following options are available:
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
-### `add`
+### `site`
 
 Adds a new virtual host to nginx and mounts a local directory to the server.
 
@@ -134,23 +133,19 @@ Adds a new virtual host to nginx and mounts a local directory to the server.
 This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
 
 ```bash
-nitro --machine diesel add --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test 
+nitro --machine diesel site --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test 
 ```
 
 > Note: The `--path` argument is only required if you are not mounting the current working directory. If you are in a current Craft CMS project, you can omit the `--path`.
 
 ```bash
-nitro --machine diesel add mysite.test
+nitro --machine diesel site mysite.test
 ```
 
-### `remove`
-
-Removes the specified virtual server from nginx and detaches the attached directory from the virtual server.
-
-This removes the `mysite.test` host from the `diesel` machine:
+To remove a site from the virtual machine, run the following command:
 
 ```bash
-nitro --machine diesel remove mysite.test
+nitro --machine diesel site --remove mysite.test
 ```
 
 ### `attach`
