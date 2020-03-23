@@ -33,6 +33,10 @@ Nitro installs the following on every machine:
 
 ## Installation
 
+There are two ways to install Nitro, global or per-project. Global installation will make the `nitro` executable available anywhere in your shell. Per-project installation is done through composer and places the `nitro` executable in your `/vendor/bin` directory.
+
+### Composer
+ 
 ```shell script
 composer require --dev craftcms/nitro
 ```
@@ -58,6 +62,22 @@ This will create a new machine with the default name `nitro-dev`. If you wish to
 ```bash
 ./vendor/bin/nitro --machine my-custom-name init
 ```
+
+### Global
+
+To install Nitro globally, visit the [releases page](https://github.com/pixelandtonic/nitro/releases) and download the binary for your Operating System.
+
+- macOS is `darwin`
+- Windows is `windows`
+- Linux is `linux`
+
+Unzip the downloaded file and place the `nitro` into your shell's path.  
+
+```bash
+ sudo mv /Users/jasonmccallister/Downloads/nitro_<VERSION>_darwin_x86_64/nitro /usr/local/bin/
+```
+
+TODO add windows manual instructions. 
 
 ## Usage
 
