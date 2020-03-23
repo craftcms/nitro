@@ -76,7 +76,7 @@ After running `init`, the system will default to automatically bootstrap the ser
 The next step is to add a new virtual host to the server:
 
 ```bash
-nitro add mysite.test /Users/jason/Sites/craftcms
+nitro site mysite.test /Users/jason/Sites/craftcms
 ```
 
 This process will perform the following tasks:
