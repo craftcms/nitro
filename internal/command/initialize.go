@@ -85,6 +85,9 @@ func initializeAfterAction(c *cli.Context, r Runner) error {
 		fmt.Println("password:", "nitro")
 		fmt.Println("")
 		fmt.Println("For additional information on nitro, visit https://docs.craftcms.com/v3/nitro")
+		fmt.Println("")
+		fmt.Println("To get started, you can add a new site, which will mount a directory into the virtual machine and configure nginx.\n Run the command:")
+		fmt.Println("nitro --machine",c.String("machine"), "site --path /path/to/website project.test")
 
 		return nil
 	}
