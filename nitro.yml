@@ -1,7 +1,21 @@
 name: nitro-server # the name of the virtual machine
-system:
-  php: 7.4 # server-wide default; options: `7.4`, `7.3`, `7.2`
-  database: mysql # options: `mysql`, `postgres`
+php: 7.4 # server-wide default; options: `7.4`, `7.3`, `7.2`, `7.1`, `7.0`
+database:
+  engine: mysql
+  version: 5.6
+databases:
+  - clientsite
+  - craftcms
+  - example
+mounts:
+  - local: ~/dev
+    nitro: ~/dev # this would equate to /home/ubuntu/dev
 sites: # maps multiple virtual servers onto the virtual machine
-  - domain: nitro.test # the domain name the web server will respond
-    path: /Users/jasonmccallister/Code/craftcms # the local (full) path to mount on the host machine
+  - host: craft3.test # the hostname name the web server will respond
+    webroot: ~/dev/craft3.test/web
+  - host: clientsite.test # the hostname name the web server will respond
+    webroot: ~/sites/clientsite.test/web
+    php: 7.1 # optionally configure the version of PHP to use for the site. Defaults to the server-wide version installed
+    mounts: # the hostname name the web server will respond
+      - local: ~/sites/clientsite
+        nitro: ~/sites/clientsite.test
