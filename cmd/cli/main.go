@@ -26,9 +26,14 @@ func main() {
 	c := cli.NewCLI("nitro", "1.0.0")
 	c.Args = os.Args[1:]
 
+	baseCommand := &command.CoreCommand{
+		UI:     &ui,
+		Runner: r,
+	}
+
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
-			return &command.InitCommand{UI: &ui, Runner: r}, nil
+			return &command.InitCommand{CoreCommand: baseCommand}, nil
 		},
 	}
 

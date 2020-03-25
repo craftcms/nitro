@@ -12,10 +12,12 @@ func testInitCommand(t testing.TB, runner *SpyRunner) (*cli.MockUi, *InitCommand
 	t.Helper()
 
 	ui := cli.NewMockUi()
-	return ui, &InitCommand{
+	coreCmd := &CoreCommand{
 		UI:     ui,
 		Runner: runner,
 	}
+
+	return ui, &InitCommand{CoreCommand: coreCmd}
 }
 
 func TestInitCommand_Synopsis(t *testing.T) {

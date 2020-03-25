@@ -4,13 +4,10 @@ import (
 	"flag"
 	"strconv"
 	"strings"
-
-	"github.com/mitchellh/cli"
 )
 
 type InitCommand struct {
-	UI     cli.Ui
-	Runner ShellRunner
+	*CoreCommand
 
 	// flags
 	flagName        string
