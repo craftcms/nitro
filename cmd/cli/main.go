@@ -10,6 +10,10 @@ import (
 	"github.com/craftcms/nitro/command"
 )
 
+var (
+	Version = "1.0.0"
+)
+
 func main() {
 	ui := cli.ColoredUi{
 		ErrorColor: cli.UiColorRed,
@@ -23,7 +27,7 @@ func main() {
 
 	r := command.NewMultipassRunner("multipass")
 
-	c := cli.NewCLI("nitro", "1.0.0")
+	c := cli.NewCLI("nitro", Version)
 	c.Args = os.Args[1:]
 
 	baseCommand := &command.CoreCommand{
