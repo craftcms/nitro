@@ -4,7 +4,19 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/mitchellh/cli"
 )
+
+func testInitCommand(t testing.TB, runner *SpyRunner) (*cli.MockUi, *InitCommand) {
+	t.Helper()
+
+	ui := cli.NewMockUi()
+	return ui, &InitCommand{
+		UI:     ui,
+		runner: runner,
+	}
+}
 
 func TestInitCommand_Synopsis(t *testing.T) {
 	// Arrange
@@ -72,37 +84,38 @@ func TestInitCommand_Flags(t *testing.T) {
 }
 
 func TestInitCommand_Run(t *testing.T) {
-	spyRunner := &SpyRunner{}
-	type fields struct {
-		runner ShellRunner
-	}
 	tests := []struct {
 		name     string
-		fields   fields
 		args     []string
 		expected []string
 		want     int
 	}{
 		{
-			name:     "Run gets the right arguments passed to multipass",
-			fields:   fields{runner: spyRunner},
-			args:     []string{"-name=example-test", "-cpu=2"},
-			expected: []string{"multipass", "launch", "--name", "example-test", "--cpus", "2"},
+			name:     "Run uses the flag arguments over config file or defaults",
+			args:     []string{"-name", "example-test", "-cpu", "4"},
+			expected: []string{"multipass", "launch", "--name", "example-test", "--cpus", "4", "--memory", "2G", "--disk", "20G"},
+			want:     0,
+		},
+		{
+			name:     "Run uses the default if no flags are specified",
+			args:     nil,
+			expected: []string{"multipass", "launch", "--name", "nitro-dev", "--cpus", "2", "--memory", "2G", "--disk", "20G"},
 			want:     0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &InitCommand{
-				runner: tt.fields.runner,
-			}
+			spyRunner := &SpyRunner{}
+			_, c := testInitCommand(t, spyRunner)
 
 			if got := c.Run(tt.args); got != tt.want {
 				t.Errorf("Run() = %v, want %v", got, tt.want)
 			}
 
-			if !reflect.DeepEqual(tt.expected, spyRunner.calls) {
-				t.Errorf("wanted calls %v got %v", tt.expected, spyRunner.calls)
+			if tt.expected != nil {
+				if !reflect.DeepEqual(tt.expected, spyRunner.calls) {
+					t.Errorf("wanted: \n%v \ngot: \n%v", tt.expected, spyRunner.calls)
+				}
 			}
 		})
 	}

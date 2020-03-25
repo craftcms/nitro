@@ -56,9 +56,36 @@ func (c *InitCommand) Run(args []string) int {
 		return 1
 	}
 
-	// if any flags were provided as args use those
-	// if there is a config file use that
-	mpArgs := []string{"multipass", "launch", "--name", c.flagName, "--cpus", strconv.Itoa(c.flagCpus)}
+	// check each flag and try to get the values from the config file
+	if c.flagName == "" {
+		// TODO check if the config file has the option
+		c.flagName = "nitro-dev"
+	}
+
+	if c.flagCpus == 0 {
+		c.flagCpus = 2
+	}
+
+	if c.flagMemory == "" {
+		c.flagMemory = "2G"
+	}
+
+	if c.flagDisk == "" {
+		c.flagDisk = "20G"
+	}
+
+	mpArgs := []string{
+		"multipass",
+		"launch",
+		"--name",
+		c.flagName,
+		"--cpus",
+		strconv.Itoa(c.flagCpus),
+		"--memory",
+		c.flagMemory,
+		"--disk",
+		c.flagDisk,
+	}
 	if err := c.runner.Run(mpArgs); err != nil {
 		return 1
 	}
