@@ -20,7 +20,7 @@ func testInitCommand(t testing.TB, runner *SpyRunner) (*cli.MockUi, *InitCommand
 
 func TestInitCommand_Synopsis(t *testing.T) {
 	// Arrange
-	c := InitCommand{}
+	_, c := testInitCommand(t, nil)
 	expected := "create new machine"
 
 	// Act
@@ -34,7 +34,7 @@ func TestInitCommand_Synopsis(t *testing.T) {
 
 func TestInitCommand_Help(t *testing.T) {
 	// Arrange
-	c := InitCommand{}
+	_, c := testInitCommand(t, nil)
 	expected := strings.TrimSpace(`
 Usage: nitro init [options]
   This command starts a nitro virtual machine and will provision the machine with the requested specifications.
@@ -57,7 +57,7 @@ Usage: nitro init [options]
 
 func TestInitCommand_Flags(t *testing.T) {
 	// Arrange
-	c := InitCommand{}
+	_, c := testInitCommand(t, nil)
 	args := []string{"-name=nitro-dev", "-cpu=2", "-memory=2GB", "-disk=20GB", "-skip-install"}
 
 	// Act

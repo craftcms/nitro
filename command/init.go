@@ -56,9 +56,10 @@ func (c *InitCommand) Run(args []string) int {
 		return 1
 	}
 
-	// check each flag and try to get the values from the config file
+	// TODO check if the config file has the option
+
+	// set defaults if the flag is not set
 	if c.flagName == "" {
-		// TODO check if the config file has the option
 		c.flagName = "nitro-dev"
 	}
 
@@ -74,7 +75,7 @@ func (c *InitCommand) Run(args []string) int {
 		c.flagDisk = "20G"
 	}
 
-	mpArgs := []string{
+	runnerArgs := []string{
 		"multipass",
 		"launch",
 		"--name",
@@ -86,7 +87,8 @@ func (c *InitCommand) Run(args []string) int {
 		"--disk",
 		c.flagDisk,
 	}
-	if err := c.runner.Run(mpArgs); err != nil {
+
+	if err := c.runner.Run(runnerArgs); err != nil {
 		return 1
 	}
 
