@@ -10,7 +10,7 @@ import (
 
 type InitCommand struct {
 	UI     cli.Ui
-	runner ShellRunner
+	Runner ShellRunner
 
 	// flags
 	flagName        string
@@ -76,19 +76,18 @@ func (c *InitCommand) Run(args []string) int {
 	}
 
 	runnerArgs := []string{
-		"multipass",
 		"launch",
 		"--name",
 		c.flagName,
 		"--cpus",
 		strconv.Itoa(c.flagCpus),
-		"--memory",
+		"--mem",
 		c.flagMemory,
 		"--disk",
 		c.flagDisk,
 	}
 
-	if err := c.runner.Run(runnerArgs); err != nil {
+	if err := c.Runner.Run(runnerArgs); err != nil {
 		return 1
 	}
 

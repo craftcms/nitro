@@ -21,12 +21,14 @@ func main() {
 		},
 	}
 
+	r := command.NewMultipassRunner("multipass")
+
 	c := cli.NewCLI("nitro", "1.0.0")
 	c.Args = os.Args[1:]
 
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
-			return &command.InitCommand{UI: &ui}, nil
+			return &command.InitCommand{UI: &ui, Runner: r}, nil
 		},
 	}
 
