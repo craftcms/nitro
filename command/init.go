@@ -6,6 +6,24 @@ import (
 	"strings"
 )
 
+var cloudInit = `#cloud-config
+packages:
+  - redis
+  - jq
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+runcmd:
+  - sudo add-apt-repository -y ppa:nginx/stable
+  - sudo add-apt-repository -y ppa:ondrej/php
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update -y
+  - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
+`
+
 type InitCommand struct {
 	*CoreCommand
 
@@ -56,6 +74,35 @@ func (c *InitCommand) Run(args []string) int {
 	// TODO check if the config file has the option
 
 	// set defaults if the flag is not set
+	c.SetDefaults()
+
+	runnerArgs := []string{
+		"launch",
+		"--name",
+		c.flagName,
+		"--cpus",
+		strconv.Itoa(c.flagCpus),
+		"--mem",
+		c.flagMemory,
+		"--disk",
+		c.flagDisk,
+		"--cloud-init",
+		"-",
+	}
+
+	// pass the cloud init file to the machine
+	if err := c.Runner.SetInput(cloudInit); err != nil {
+		c.UI.Error(err.Error())
+	}
+
+	if err := c.Runner.Run(runnerArgs); err != nil {
+		return 1
+	}
+
+	return 0
+}
+
+func (c *InitCommand) SetDefaults() {
 	if c.flagName == "" {
 		c.flagName = "nitro-dev"
 	}
@@ -71,23 +118,4 @@ func (c *InitCommand) Run(args []string) int {
 	if c.flagDisk == "" {
 		c.flagDisk = "20G"
 	}
-
-	runnerArgs := []string{
-		"launch",
-		"--name",
-		c.flagName,
-		"--cpus",
-		strconv.Itoa(c.flagCpus),
-		"--mem",
-		c.flagMemory,
-		"--disk",
-		c.flagDisk,
-	}
-
-	if err := c.Runner.Run(runnerArgs); err != nil {
-		return 1
-	}
-
-	// otherwise prompt the user for the questions
-	return 0
 }

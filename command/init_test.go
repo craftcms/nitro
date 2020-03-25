@@ -95,13 +95,13 @@ func TestInitCommand_Run(t *testing.T) {
 		{
 			name:     "Run uses the flag arguments over config file or defaults",
 			args:     []string{"-name", "example-test", "-cpu", "4"},
-			expected: []string{"launch", "--name", "example-test", "--cpus", "4", "--mem", "2G", "--disk", "20G"},
+			expected: []string{"launch", "--name", "example-test", "--cpus", "4", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			want:     0,
 		},
 		{
 			name:     "Run uses the default if no flags are specified",
 			args:     nil,
-			expected: []string{"launch", "--name", "nitro-dev", "--cpus", "2", "--mem", "2G", "--disk", "20G"},
+			expected: []string{"launch", "--name", "nitro-dev", "--cpus", "2", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			want:     0,
 		},
 	}
