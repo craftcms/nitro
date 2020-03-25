@@ -3,6 +3,7 @@ module github.com/craftcms/nitro
 go 1.14
 
 require (
+	github.com/gosimple/slug v1.9.0
 	github.com/mitchellh/cli v1.0.0
 	github.com/spf13/viper v1.6.2
 	github.com/txn2/txeh v1.3.0

@@ -74,7 +74,10 @@ func (c *InitCommand) Run(args []string) int {
 	// TODO check if the config file has the option
 
 	// set defaults if the flag is not set
-	c.SetDefaults()
+	if err := c.setDefaultOptions(); err != nil {
+		c.UI.Error(err.Error())
+		return 1
+	}
 
 	runnerArgs := []string{
 		"launch",
@@ -99,10 +102,31 @@ func (c *InitCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSkipInstall {
+		c.UI.Info("skipping installation defaults")
+		return 0
+	}
+
+	c.UI.Info("installing nitro defaults")
+
 	return 0
 }
 
-func (c *InitCommand) SetDefaults() {
+func (c *InitCommand) setDefaultOptions() error {
+	// TODO hiding the interactive prompt
+	// if c.flagName == "" {
+	//	name, err := c.UI.Ask("what do you want the machine to be called?")
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	if name == "" {
+	//		c.flagName = "nitro-dev"
+	//	} else {
+	//		c.flagName = slug.Make(name)
+	//	}
+	//}
+
 	if c.flagName == "" {
 		c.flagName = "nitro-dev"
 	}
@@ -118,4 +142,6 @@ func (c *InitCommand) SetDefaults() {
 	if c.flagDisk == "" {
 		c.flagDisk = "20G"
 	}
+
+	return nil
 }
