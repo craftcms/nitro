@@ -71,15 +71,6 @@ func TestInitCommand_Flags(t *testing.T) {
 	}
 }
 
-type RunnerSpy struct {
-	Calls []string
-}
-
-func (r *RunnerSpy) Run(args []string) error {
-	r.Calls = args
-	return nil
-}
-
 func TestInitCommand_Run(t *testing.T) {
 	spyRunner := &RunnerSpy{}
 	type fields struct {
