@@ -72,7 +72,7 @@ func TestInitCommand_Flags(t *testing.T) {
 }
 
 func TestInitCommand_Run(t *testing.T) {
-	spyRunner := &RunnerSpy{}
+	spyRunner := &SpyRunner{}
 	type fields struct {
 		runner ShellRunner
 	}
@@ -101,8 +101,8 @@ func TestInitCommand_Run(t *testing.T) {
 				t.Errorf("Run() = %v, want %v", got, tt.want)
 			}
 
-			if !reflect.DeepEqual(tt.expected, spyRunner.Calls) {
-				t.Errorf("wanted calls %v got %v", tt.expected, spyRunner.Calls)
+			if !reflect.DeepEqual(tt.expected, spyRunner.calls) {
+				t.Errorf("wanted calls %v got %v", tt.expected, spyRunner.calls)
 			}
 		})
 	}
