@@ -1,36 +1,36 @@
 package config
 
 import (
-	"reflect"
 	"testing"
 )
 
 func TestReadFile(t *testing.T) {
-	type args struct {
-		file     string
-		defaults map[string]interface{}
+	// Arrange
+	file := "./testdata/nitro-full.yaml"
+	overrides := map[string]interface{}{
+		"cpu":    2,
+		"disk":   "20G",
+		"memory": "2G",
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
-	}{
-		{
-			name:"",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReadFile(tt.args.file, tt.args.defaults)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
 
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ReadFile() got = %v, want %v", got, tt.want)
-			}
-		})
+	// Act
+	config, err := ReadFile(file, overrides)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Assert
+	if config.GetString("name") != "nitro-server" {
+		t.Errorf("expected %q to be %q; got %q instead", "name", "nitro-server", config.GetString("name"))
+	}
+	// check if the defaults are set
+	if config.GetInt("cpu") != 2 {
+		t.Errorf("expected %q to be %q; got %q instead", "cpu", 2, config.GetInt("cpu"))
+	}
+	if config.GetString("memory") != "2G" {
+		t.Errorf("expected %q to be %q; got %q instead", "memory", "2G", config.GetString("memory"))
+	}
+	if config.GetString("disk") != "20G" {
+		t.Errorf("expected %q to be %q; got %q instead", "disk", "20G", config.GetString("disk"))
 	}
 }
