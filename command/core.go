@@ -5,6 +5,6 @@ import (
 )
 
 type CoreCommand struct {
-	UI     cli.Ui
-	Runner ShellRunner
+	UI           cli.Ui
+	Runner       ShellRunner
 }

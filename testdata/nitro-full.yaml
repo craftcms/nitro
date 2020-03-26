@@ -1,0 +1,21 @@
+name: nitro-server
+php: 7.4
+database:
+  engine: mysql
+  version: 5.6
+databases:
+  - clientsite
+  - craftcms
+  - example
+mounts:
+  - local: ~/dev
+    nitro: ~/dev
+sites:
+  - host: craft3.test
+    webroot: ~/dev/craft3.test/web
+  - host: clientsite.test
+    webroot: ~/sites/clientsite.test/web
+    php: 7.1
+    mounts:
+      - local: ~/sites/clientsite
+        nitro: ~/sites/clientsite.test

@@ -30,14 +30,17 @@ func main() {
 	c := cli.NewCLI("nitro", Version)
 	c.Args = os.Args[1:]
 
-	baseCommand := &command.CoreCommand{
+	coreCommand := &command.CoreCommand{
 		UI:     &ui,
 		Runner: r,
 	}
 
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
-			return &command.InitCommand{CoreCommand: baseCommand}, nil
+			return &command.InitCommand{CoreCommand: coreCommand}, nil
+		},
+		"install": func() (cli.Command, error) {
+			return &command.InstallCommand{CoreCommand: coreCommand}, nil
 		},
 	}
 
