@@ -2,3 +2,8 @@ name: from-config-file
 cpus: 4
 memory: 4G
 disk: 40G
+php: 7.3
+database:
+  engine: mysql
+  version: 5.6
+
