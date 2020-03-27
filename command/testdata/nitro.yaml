@@ -1,0 +1,4 @@
+name: from-config-file
+cpus: 4
+memory: 4G
+disk: 40G

@@ -1,8 +1,6 @@
 package command
 
 import (
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -93,38 +91,49 @@ func TestInitCommand_Flags(t *testing.T) {
 }
 
 func TestInitCommand_Run(t *testing.T) {
-	v := viper.New()
-	log.Println(os.Getwd())
+	// create an empty config file
+	configWithOutFile := viper.New()
+
+	// create a config file with an example
+	configWithFile := viper.New()
+	configWithFile.SetConfigType("yaml")
+	configWithFile.SetConfigFile("./testdata/nitro.yaml")
+	_ = configWithFile.ReadInConfig()
 
 	tests := []struct {
 		name     string
 		args     []string
 		expected []string
 		want     int
+		config   *viper.Viper
 	}{
 		{
-			name:     "Run uses the flag arguments over config file or defaults",
+			name:     "uses the flag arguments over config file or defaults",
 			args:     []string{"-name", "example-test", "-cpu", "4"},
 			expected: []string{"launch", "--name", "example-test", "--cpus", "4", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			want:     0,
+			config:   configWithOutFile,
 		},
 		{
-			name:     "Run uses the default if no flags are specified",
+			name:     "uses the default if no flags are specified",
 			args:     nil,
 			expected: []string{"launch", "--name", "nitro-dev", "--cpus", "2", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			want:     0,
+			config:   configWithOutFile,
 		},
-		//{
-		//	name:     "Run will use the configuration file if provided",
-		//	args:     nil,
-		//	expected: []string{"launch", "--name", "nitro-dev", "--cpus", "4", "--mem", "4G", "--disk", "40G", "--cloud-init", "-"},
-		//	want:     0,
-		//},
+		{
+			name:     "will use the configuration file if provided",
+			args:     nil,
+			expected: []string{"launch", "--name", "from-config-file", "--cpus", "4", "--mem", "4G", "--disk", "40G", "--cloud-init", "-"},
+			want:     0,
+			config:   configWithFile,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spyRunner := &SpyRunner{}
-			_, c := testInitCommand(t, spyRunner, v)
+
+			_, c := testInitCommand(t, spyRunner, tt.config)
 
 			if got := c.Run(tt.args); got != tt.want {
 				t.Errorf("Run() = %v, want %v", got, tt.want)

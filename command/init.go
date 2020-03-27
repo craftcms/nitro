@@ -71,7 +71,18 @@ func (c *InitCommand) Run(args []string) int {
 		return 1
 	}
 
-	// TODO check if the config file has the option
+	if c.Config.IsSet("name") {
+		c.flagName = c.Config.GetString("name")
+	}
+	if c.Config.IsSet("cpus") {
+		c.flagCpus = c.Config.GetInt("cpus")
+	}
+	if c.Config.IsSet("memory") {
+		c.flagMemory = c.Config.GetString("memory")
+	}
+	if c.Config.IsSet("disk") {
+		c.flagDisk = c.Config.GetString("disk")
+	}
 
 	// set defaults if the flag is not set
 	if err := c.setDefaultOptions(); err != nil {
