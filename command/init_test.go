@@ -1,20 +1,24 @@
 package command
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/mitchellh/cli"
+	"github.com/spf13/viper"
 )
 
-func testInitCommand(t testing.TB, runner *SpyRunner) (*cli.MockUi, *InitCommand) {
+func testInitCommand(t testing.TB, runner *SpyRunner, v *viper.Viper) (*cli.MockUi, *InitCommand) {
 	t.Helper()
 
 	ui := cli.NewMockUi()
 	coreCmd := &CoreCommand{
 		UI:     ui,
 		Runner: runner,
+		Config: v,
 	}
 
 	return ui, &InitCommand{CoreCommand: coreCmd}
@@ -22,7 +26,8 @@ func testInitCommand(t testing.TB, runner *SpyRunner) (*cli.MockUi, *InitCommand
 
 func TestInitCommand_Synopsis(t *testing.T) {
 	// Arrange
-	_, c := testInitCommand(t, nil)
+	v := viper.New()
+	_, c := testInitCommand(t, nil, v)
 	expected := "create new machine"
 
 	// Act
@@ -36,7 +41,8 @@ func TestInitCommand_Synopsis(t *testing.T) {
 
 func TestInitCommand_Help(t *testing.T) {
 	// Arrange
-	_, c := testInitCommand(t, nil)
+	v := viper.New()
+	_, c := testInitCommand(t, nil, v)
 	expected := strings.TrimSpace(`
 Usage: nitro init [options]
   This command starts a nitro virtual machine and will provision the machine with the requested specifications.
@@ -59,7 +65,8 @@ Usage: nitro init [options]
 
 func TestInitCommand_Flags(t *testing.T) {
 	// Arrange
-	_, c := testInitCommand(t, nil)
+	v := viper.New()
+	_, c := testInitCommand(t, nil, v)
 	args := []string{"-name=nitro-dev", "-cpu=2", "-memory=2GB", "-disk=20GB", "-skip-install"}
 
 	// Act
@@ -86,6 +93,9 @@ func TestInitCommand_Flags(t *testing.T) {
 }
 
 func TestInitCommand_Run(t *testing.T) {
+	v := viper.New()
+	log.Println(os.Getwd())
+
 	tests := []struct {
 		name     string
 		args     []string
@@ -104,11 +114,17 @@ func TestInitCommand_Run(t *testing.T) {
 			expected: []string{"launch", "--name", "nitro-dev", "--cpus", "2", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			want:     0,
 		},
+		//{
+		//	name:     "Run will use the configuration file if provided",
+		//	args:     nil,
+		//	expected: []string{"launch", "--name", "nitro-dev", "--cpus", "4", "--mem", "4G", "--disk", "40G", "--cloud-init", "-"},
+		//	want:     0,
+		//},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spyRunner := &SpyRunner{}
-			_, c := testInitCommand(t, spyRunner)
+			_, c := testInitCommand(t, spyRunner, v)
 
 			if got := c.Run(tt.args); got != tt.want {
 				t.Errorf("Run() = %v, want %v", got, tt.want)

@@ -113,20 +113,6 @@ func (c *InitCommand) Run(args []string) int {
 }
 
 func (c *InitCommand) setDefaultOptions() error {
-	// TODO hiding the interactive prompt
-	// if c.flagName == "" {
-	//	name, err := c.UI.Ask("what do you want the machine to be called?")
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	if name == "" {
-	//		c.flagName = "nitro-dev"
-	//	} else {
-	//		c.flagName = slug.Make(name)
-	//	}
-	//}
-
 	if c.flagName == "" {
 		c.flagName = "nitro-dev"
 	}

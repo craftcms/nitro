@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/mitchellh/cli"
+	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/command"
 )
@@ -24,24 +25,21 @@ func main() {
 			ErrorWriter: os.Stderr,
 		},
 	}
-
+	v := viper.New()
 	r := command.NewMultipassRunner("multipass")
 
 	c := cli.NewCLI("nitro", Version)
 	c.Args = os.Args[1:]
 
-	coreCommand := &command.CoreCommand{
-		UI:     &ui,
-		Runner: r,
-	}
+	cmd := coreCommand(ui, r, v)
 
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
-			return &command.InitCommand{CoreCommand: coreCommand}, nil
+			return &command.InitCommand{CoreCommand: cmd}, nil
 		},
-		"install": func() (cli.Command, error) {
-			return &command.InstallCommand{CoreCommand: coreCommand}, nil
-		},
+		//"install": func() (cli.Command, error) {
+		//	return &command.InstallCommand{CoreCommand: coreCommand}, nil
+		//},
 	}
 
 	status, err := c.Run()
@@ -50,4 +48,12 @@ func main() {
 	}
 
 	os.Exit(status)
+}
+
+func coreCommand(ui cli.ColoredUi, r command.ShellRunner, v *viper.Viper) *command.CoreCommand {
+	return &command.CoreCommand{
+		UI:     &ui,
+		Runner: r,
+		Config: v,
+	}
 }
