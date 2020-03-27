@@ -72,7 +72,7 @@ func (c *InstallCommand) Run(args []string) int {
 	// get the php version packages
 	packages := scripts.InstallPHP(c.flagPhpVersion)
 
-	if err := c.Runner.Run([]string{"exec", "from-config-file", "--", "bash -c", "'sudo apt install -y " + strings.Join(packages, " ") + "'"}); err != nil {
+	if err := c.Runner.Run([]string{"exec", c.flagName, "--", "bash -c", "'sudo apt install -y " + strings.Join(packages, " ") + "'"}); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}

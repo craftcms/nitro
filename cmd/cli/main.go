@@ -37,9 +37,9 @@ func main() {
 		"init": func() (cli.Command, error) {
 			return &command.InitCommand{CoreCommand: cmd}, nil
 		},
-		//"install": func() (cli.Command, error) {
-		//	return &command.InstallCommand{CoreCommand: coreCommand}, nil
-		//},
+		"install": func() (cli.Command, error) {
+			return &command.InstallCommand{CoreCommand: cmd}, nil
+		},
 	}
 
 	status, err := c.Run()
