@@ -3,10 +3,11 @@ package command
 import "errors"
 
 type SpyRunner struct {
-	path       string
-	calls      []string
-	input      string
-	useSyscall bool
+	path         string
+	calls        []string
+	chainedCalls []string
+	input        string
+	useSyscall   bool
 }
 
 func (r *SpyRunner) Path() string {
@@ -26,6 +27,11 @@ func (r *SpyRunner) SetInput(input string) error {
 }
 
 func (r *SpyRunner) Run(args []string) error {
+	// if we already passed args, lets add this to the chained
+	if r.calls != nil {
+		r.chainedCalls = args
+		return nil
+	}
 	r.calls = args
 	return nil
 }

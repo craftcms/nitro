@@ -125,18 +125,20 @@ func TestInstallCommand_Run(t *testing.T) {
 	spyRunner := &SpyRunner{}
 
 	tests := []struct {
-		name     string
-		args     []string
-		expected []string
-		config   *viper.Viper
-		want     int
+		name            string
+		args            []string
+		expected        []string
+		chainedCommands []string
+		config          *viper.Viper
+		want            int
 	}{
 		{
-			name:     "uses the flag arguments over configWithFile file or defaults",
-			args:     nil,
-			expected: []string{"exec", "from-config-file", "--", "sudo", "apt", "install", "-y", "php7.3", "php7.3-mbstring", "php7.3-cli", "php7.3-curl", "php7.3-fpm", "php7.3-gd", "php7.3-intl", "php7.3-json", "php7.3-mysql", "php7.3-opcache", "php7.3-pgsql", "php7.3-zip", "php7.3-xml", "php-xdebug", "php-imagick"},
-			want:     0,
-			config:   configWithFile,
+			name:            "uses the flag arguments over configWithFile file or defaults",
+			args:            nil,
+			expected:        []string{"exec", "from-config-file", "--", "sudo", "apt", "install", "-y", "php7.3", "php7.3-mbstring", "php7.3-cli", "php7.3-curl", "php7.3-fpm", "php7.3-gd", "php7.3-intl", "php7.3-json", "php7.3-mysql", "php7.3-opcache", "php7.3-pgsql", "php7.3-zip", "php7.3-xml", "php-xdebug", "php-imagick"},
+			chainedCommands: []string{"exec", "from-config-file", "--", "docker", "run", "mysql:5.6", "-p", "3306:3306"},
+			want:            0,
+			config:          configWithFile,
 		},
 	}
 	for _, tt := range tests {
@@ -149,6 +151,11 @@ func TestInstallCommand_Run(t *testing.T) {
 			if tt.expected != nil {
 				if !reflect.DeepEqual(tt.expected, spyRunner.calls) {
 					t.Errorf("wanted: \n%v \ngot: \n%v", tt.expected, spyRunner.calls)
+				}
+			}
+			if tt.chainedCommands != nil {
+				if !reflect.DeepEqual(tt.chainedCommands, spyRunner.chainedCalls) {
+					t.Errorf("wanted: \n%v \ngot: \n%v", tt.chainedCommands, spyRunner.chainedCalls)
 				}
 			}
 		})

@@ -72,15 +72,26 @@ func (c *InstallCommand) Run(args []string) int {
 
 	// get the php version packages
 	packages := scripts.InstallPHP(c.flagPhpVersion)
-	commands := []string{"exec", c.flagName, "--", "sudo", "apt", "install", "-y"}
-	commands = append(commands, packages...)
+	aptInstallCommands := []string{"exec", c.flagName, "--", "sudo", "apt", "install", "-y"}
+	aptInstallCommands = append(aptInstallCommands, packages...)
+
+	// TODO validate the database versions and engine
+	dockerRunCommands := []string{"exec", c.flagName, "--", "docker", "run", c.flagDatabaseEngine + ":" + c.flagDatabaseVersion, "-p", "3306:3306"}
 
 	if c.flagDryRun {
-		fmt.Println(commands)
+		fmt.Println(aptInstallCommands)
+		fmt.Println(dockerRunCommands)
 		return 0
 	}
 
-	if err := c.Runner.Run(commands); err != nil {
+	// install the core packages (e.g. php)
+	if err := c.Runner.Run(aptInstallCommands); err != nil {
+		c.UI.Error(err.Error())
+		return 1
+	}
+
+	// run the database engine and version in a docker container
+	if err := c.Runner.Run(dockerRunCommands); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}
