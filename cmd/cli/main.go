@@ -25,7 +25,15 @@ func main() {
 			ErrorWriter: os.Stderr,
 		},
 	}
+
 	v := viper.New()
+	v.SetConfigName("nitro")
+	v.SetConfigType("yaml")
+	v.AddConfigPath("$HOME/.nitro")
+	if err := v.ReadInConfig(); err != nil {
+		log.Println(err)
+	}
+
 	r := command.NewMultipassRunner("multipass")
 
 	c := cli.NewCLI("nitro", Version)
