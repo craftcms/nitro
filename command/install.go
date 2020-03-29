@@ -78,6 +78,7 @@ func (c *InstallCommand) Run(args []string) int {
 	// TODO validate the database versions and engine
 	dockerRunCommands := []string{"exec", c.flagName, "--", "docker", "run", c.flagDatabaseEngine + ":" + c.flagDatabaseVersion, "-p", "3306:3306"}
 
+	// if this is a dry run, only print out the commands
 	if c.flagDryRun {
 		fmt.Println(aptInstallCommands)
 		fmt.Println(dockerRunCommands)
