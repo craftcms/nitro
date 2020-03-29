@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -90,7 +91,7 @@ func (c *InitCommand) Run(args []string) int {
 		return 1
 	}
 
-	runnerArgs := []string{
+	commands := []string{
 		"launch",
 		"--name",
 		c.flagName,
@@ -104,21 +105,37 @@ func (c *InitCommand) Run(args []string) int {
 		"-",
 	}
 
+	c.UI.Info("Setting up machine, this may take a while...")
+	c.UI.Info("----")
+	c.UI.Info("name: " + c.flagName)
+	c.UI.Info("cpus: " + strconv.Itoa(c.flagCpus))
+	c.UI.Info("memory: " + c.flagMemory)
+	c.UI.Info("disk: " + c.flagDisk)
+	c.UI.Info("----")
+
 	// pass the cloud init file to the machine
 	if err := c.Runner.SetInput(cloudInit); err != nil {
 		c.UI.Error(err.Error())
 	}
 
-	if err := c.Runner.Run(runnerArgs); err != nil {
+	// we are just looking
+	if c.flagDryRun {
+		fmt.Println(commands)
+		return 0
+	}
+
+	if err := c.Runner.Run(commands); err != nil {
 		return 1
 	}
 
 	if c.flagSkipInstall {
-		c.UI.Info("skipping installation defaults")
+		c.UI.Info("Skipping software installation")
+		c.UI.Info("To install software on machine, run the following command:")
+		c.UI.Info("nitro -name " + c.flagName + "install")
 		return 0
 	}
 
-	c.UI.Info("installing nitro defaults")
+	c.UI.Info("Installing software on machine...")
 
 	return 0
 }

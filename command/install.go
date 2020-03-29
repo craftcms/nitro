@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/craftcms/nitro/scripts"
@@ -10,8 +11,7 @@ import (
 type InstallCommand struct {
 	*CoreCommand
 
-	// flags
-	flagName            string
+	// command specific flags
 	flagPhpVersion      string
 	flagDatabaseEngine  string
 	flagDatabaseVersion string
@@ -44,6 +44,7 @@ func (c *InstallCommand) Flags() *flag.FlagSet {
 	s.StringVar(&c.flagPhpVersion, "php-version", "", "version of PHP to install")
 	s.StringVar(&c.flagDatabaseEngine, "database-engine", "", "database engine (default: mysql)")
 	s.StringVar(&c.flagDatabaseVersion, "database-version", "", "database engine version (default: 5.7)")
+	s.BoolVar(&c.flagDryRun, "dry-run", false, "skip executing the command")
 
 	// set defaults from the config file
 	if c.Config.IsSet("name") {
@@ -71,8 +72,15 @@ func (c *InstallCommand) Run(args []string) int {
 
 	// get the php version packages
 	packages := scripts.InstallPHP(c.flagPhpVersion)
+	commands := []string{"exec", c.flagName, "--", "sudo", "apt", "install", "-y"}
+	commands = append(commands, packages...)
 
-	if err := c.Runner.Run([]string{"exec", c.flagName, "--", "bash -c", "'sudo apt install -y " + strings.Join(packages, " ") + "'"}); err != nil {
+	if c.flagDryRun {
+		fmt.Println(commands)
+		return 0
+	}
+
+	if err := c.Runner.Run(commands); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}

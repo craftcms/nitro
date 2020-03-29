@@ -9,4 +9,8 @@ type CoreCommand struct {
 	UI     cli.Ui
 	Runner ShellRunner
 	Config *viper.Viper
+
+	// global flags
+	flagName   string
+	flagDryRun bool
 }
