@@ -117,6 +117,7 @@ func (c *InitCommand) Run(args []string) int {
 	// pass the cloud init file to the machine
 	if err := c.Runner.SetInput(cloudInit); err != nil {
 		c.UI.Error(err.Error())
+		return 1
 	}
 
 	// we are just looking
