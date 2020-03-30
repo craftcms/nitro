@@ -13,10 +13,14 @@ func DockerRunDatabase(name, engine, version string) []string {
 		envvars = []string{"-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro"}
 	}
 
-	commands := []string{"exec", name, "--", "docker", "run", "-d", "--restart=always", engine + ":" + version, "-p", port + ":" + port}
+	commands := []string{"exec", name, "--", "docker", "run", "-d", "--restart=always", "-p", port + ":" + port}
 
 	// append the environment variables
 	commands = append(commands, envvars...)
+
+	// append the docker image as the last arg
+	image := []string{engine + ":" + version}
+	commands = append(commands, image...)
 
 	return commands
 }
