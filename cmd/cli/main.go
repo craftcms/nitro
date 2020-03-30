@@ -48,6 +48,9 @@ func main() {
 		"install": func() (cli.Command, error) {
 			return &command.InstallCommand{CoreCommand: cmd}, nil
 		},
+		"ssh": func() (cli.Command, error) {
+			return &command.SSHCommand{CoreCommand: cmd}, nil
+		},
 	}
 
 	status, err := c.Run()
