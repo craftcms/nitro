@@ -30,7 +30,6 @@ type InitCommand struct {
 	*CoreCommand
 
 	// flags
-	flagName        string
 	flagCpus        int
 	flagMemory      string
 	flagDisk        string

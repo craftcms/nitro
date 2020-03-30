@@ -44,7 +44,7 @@ func (c *InstallCommand) Flags() *flag.FlagSet {
 	s.StringVar(&c.flagPhpVersion, "php-version", "", "version of PHP to install")
 	s.StringVar(&c.flagDatabaseEngine, "database-engine", "", "database engine (default: mysql)")
 	s.StringVar(&c.flagDatabaseVersion, "database-version", "", "database engine version (default: 5.7)")
-	s.BoolVar(&c.flagDryRun, "dry-run", false, "skip executing the command")
+
 
 	// set defaults from the config file
 	if c.Config.IsSet("name") {
