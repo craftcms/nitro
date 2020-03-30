@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/craftcms/nitro/docker"
 	"github.com/craftcms/nitro/scripts"
 )
 
@@ -76,12 +77,12 @@ func (c *InstallCommand) Run(args []string) int {
 	aptInstallCommands = append(aptInstallCommands, packages...)
 
 	// TODO validate the database versions and engine
-	dockerRunCommands := []string{"exec", c.flagName, "--", "docker", "run", c.flagDatabaseEngine + ":" + c.flagDatabaseVersion, "-p", "3306:3306"}
+	dockerRunCmds := docker.RunDatabase(c.flagName, c.flagDatabaseEngine, c.flagDatabaseVersion)
 
 	// if this is a dry run, only print out the commands
 	if c.flagDryRun {
-		fmt.Println(aptInstallCommands)
-		fmt.Println(dockerRunCommands)
+		c.UI.Info(strings.Join(aptInstallCommands, " "))
+		fmt.Println(strings.Join(dockerRunCmds, " "))
 		return 0
 	}
 
@@ -92,7 +93,7 @@ func (c *InstallCommand) Run(args []string) int {
 	}
 
 	// run the database engine and version in a docker container
-	if err := c.Runner.Run(dockerRunCommands); err != nil {
+	if err := c.Runner.Run(dockerRunCmds); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}
