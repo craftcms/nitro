@@ -75,12 +75,12 @@ func (c *InstallCommand) Run(args []string) int {
 	installCommands := scripts.AptInstall(c.flagName, packages)
 
 	// TODO validate the database versions and engine
-	dockerRunCmds := scripts.DockerRunDatabase(c.flagName, c.flagDatabaseEngine, c.flagDatabaseVersion)
+	dockerCommands := scripts.DockerRunDatabase(c.flagName, c.flagDatabaseEngine, c.flagDatabaseVersion)
 
 	// if this is a dry run, only print out the commands
 	if c.flagDryRun {
 		c.UI.Info(strings.Join(installCommands, " "))
-		fmt.Println(strings.Join(dockerRunCmds, " "))
+		fmt.Println(strings.Join(dockerCommands, " "))
 		return 0
 	}
 
@@ -91,7 +91,7 @@ func (c *InstallCommand) Run(args []string) int {
 	}
 
 	// run the database engine and version in a docker container
-	if err := c.Runner.Run(dockerRunCmds); err != nil {
+	if err := c.Runner.Run(dockerCommands); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}
