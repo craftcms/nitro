@@ -1,7 +1,7 @@
-package docker
+package scripts
 
-// RunDatabase builds the commands to run a database inside of docker for a machine.
-func RunDatabase(name, engine, version string) []string {
+// DockerRunDatabase builds the commands to run a database inside of docker for a machine.
+func DockerRunDatabase(name, engine, version string) []string {
 	var port string
 	var envvars []string
 	switch engine {

@@ -1,4 +1,4 @@
-package docker
+package scripts
 
 import (
 	"reflect"
@@ -28,8 +28,8 @@ func TestRunDatabase(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RunDatabase(tt.args.name, tt.args.engine, tt.args.version); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("RunDatabase() = %v, want %v", got, tt.want)
+			if got := DockerRunDatabase(tt.args.name, tt.args.engine, tt.args.version); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DockerRunDatabase() = %v, want %v", got, tt.want)
 			}
 		})
 	}
