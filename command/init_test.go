@@ -101,11 +101,12 @@ func TestInitCommand_Run(t *testing.T) {
 	_ = configWithFile.ReadInConfig()
 
 	tests := []struct {
-		name     string
-		args     []string
-		expected []string
-		want     int
-		config   *viper.Viper
+		name            string
+		args            []string
+		expected        []string
+		chainedCommands []string
+		want            int
+		config          *viper.Viper
 	}{
 		{
 			name:     "uses the flag arguments over config file or defaults",
@@ -122,11 +123,12 @@ func TestInitCommand_Run(t *testing.T) {
 			config:   configWithOutFile,
 		},
 		{
-			name:     "will use the configuration file if provided",
-			args:     nil,
-			expected: []string{"launch", "--name", "from-config-file", "--cpus", "4", "--mem", "4G", "--disk", "40G", "--cloud-init", "-"},
-			want:     0,
-			config:   configWithFile,
+			name:            "will use the configuration file if provided",
+			args:            nil,
+			expected:        []string{"launch", "--name", "from-config-file", "--cpus", "4", "--mem", "4G", "--disk", "40G", "--cloud-init", "-"},
+			want:            0,
+			config:          configWithFile,
+			chainedCommands: []string{"exec", "from-config-file", "--", "docker", "run", "-d", "--restart=always", "mysql:5.6", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro",},
 		},
 	}
 	for _, tt := range tests {
@@ -142,6 +144,12 @@ func TestInitCommand_Run(t *testing.T) {
 			if tt.expected != nil {
 				if !reflect.DeepEqual(tt.expected, spyRunner.calls) {
 					t.Errorf("wanted: \n%v \ngot: \n%v", tt.expected, spyRunner.calls)
+				}
+			}
+
+			if tt.chainedCommands != nil {
+				if !reflect.DeepEqual(tt.chainedCommands, spyRunner.chainedCalls) {
+					t.Errorf("wanted: \n%v \ngot: \n%v", tt.chainedCommands, spyRunner.chainedCalls)
 				}
 			}
 		})
