@@ -24,6 +24,8 @@ runcmd:
   - sudo apt-get update -y
   - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
   - sudo usermod -aG docker ubuntu
+  - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
+  - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 `
 
 type InitCommand struct {
@@ -55,15 +57,16 @@ Usage: nitro init [options]
 }
 
 func (c *InitCommand) Flags() *flag.FlagSet {
-	set := flag.NewFlagSet("init", 128)
+	s := flag.NewFlagSet("init", 128)
 
-	set.StringVar(&c.flagName, "name", "", "name of the machine")
-	set.IntVar(&c.flagCpus, "cpu", 0, "Number of CPUs to allocate to machine")
-	set.StringVar(&c.flagMemory, "memory", "", "Amount of memory to allocate to machine")
-	set.StringVar(&c.flagDisk, "disk", "", "Amount of disk space to allocate to machine")
-	set.BoolVar(&c.flagSkipInstall, "skip-install", false, "Skip installing software on machine")
+	s.StringVar(&c.flagName, "name", "", "name of the machine")
+	s.IntVar(&c.flagCpus, "cpu", 0, "Number of CPUs to allocate to machine")
+	s.StringVar(&c.flagMemory, "memory", "", "Amount of memory to allocate to machine")
+	s.StringVar(&c.flagDisk, "disk", "", "Amount of disk space to allocate to machine")
+	s.BoolVar(&c.flagSkipInstall, "skip-install", false, "Skip installing software on machine")
+	s.BoolVar(&c.flagDryRun, "dry-run", false, "skip executing the command")
 
-	return set
+	return s
 }
 
 func (c *InitCommand) Run(args []string) int {

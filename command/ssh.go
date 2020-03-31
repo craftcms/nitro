@@ -1,7 +1,7 @@
 package command
 
 import (
-	"log"
+	"flag"
 	"strings"
 )
 
@@ -26,14 +26,35 @@ Usage: nitro ssh [options]
 `)
 }
 
+func (c *SSHCommand) Flags() *flag.FlagSet {
+	s := flag.NewFlagSet("ssh", 0)
+	s.StringVar(&c.flagName, "name", "", "name of the machine")
+	s.BoolVar(&c.flagDryRun, "dry-run", false, "skip executing the command")
+	return s
+}
+
 func (c *SSHCommand) Run(args []string) int {
 	if err := c.Flags().Parse(args); err != nil {
 		c.UI.Error(err.Error())
-		log.Fatal("in the parse")
 		return 1
 	}
 
-	if err := c.Runner.Run([]string{"shell", c.flagName}); err != nil {
+	if c.flagName == "" {
+		if c.Config.IsSet("name") {
+			c.flagName = c.Config.GetString("name")
+		}
+	}
+
+	commands := []string{"shell", c.flagName}
+
+	if c.flagDryRun {
+		c.UI.Info(strings.Join(commands, " "))
+		return 0
+	}
+
+	c.Runner.UseSyscall(true)
+
+	if err := c.Runner.Run(commands); err != nil {
 		c.UI.Error(err.Error())
 		return 2
 	}
