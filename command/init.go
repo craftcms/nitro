@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var cloudInit = `#cloud-config
+var CloudInit = `#cloud-config
 packages:
   - redis
   - jq
@@ -117,7 +117,7 @@ func (c *InitCommand) Run(args []string) int {
 	c.UI.Info("----")
 
 	// pass the cloud init file to the machine
-	if err := c.Runner.SetInput(cloudInit); err != nil {
+	if err := c.Runner.SetInput(CloudInit); err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}
