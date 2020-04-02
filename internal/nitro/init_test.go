@@ -52,6 +52,36 @@ func TestInit(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "installs a specific version of php and postgres",
+			args: args{
+				name:    "thisname",
+				cpus:    "4",
+				memory:  "4G",
+				disk:    "20G",
+				php:     "7.3",
+				db:      "postgres",
+				version: "11.5",
+			},
+			want: []Command{
+				{
+					Machine: "thisname",
+					Type:    "launch",
+					Input:   command.CloudInit,
+					Args:    []string{"--name", "thisname", "--cpus", "4", "--mem", "4G", "--disk", "20G", "--cloud-init", "-"},
+				},
+				{
+					Machine: "thisname",
+					Type:    "exec",
+					Args:    []string{"thisname", "--", "sudo", "apt", "install", "-y", "php7.3", "php7.3-mbstring", "php7.3-cli", "php7.3-curl", "php7.3-fpm", "php7.3-gd", "php7.3-intl", "php7.3-json", "php7.3-mysql", "php7.3-opcache", "php7.3-pgsql", "php7.3-zip", "php7.3-xml", "php-xdebug", "php-imagick"},
+				},
+				{
+					Machine: "thisname",
+					Type:    "exec",
+					Args:    []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.5"},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
