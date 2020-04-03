@@ -14,10 +14,9 @@ var (
 	flagDyRun       bool
 
 	rootCmd = &cobra.Command{
-		Use:              "nitro",
-		Short:            "Local Craft CMS on tap",
-		Long:             `TODO add the long description`,
-		TraverseChildren: true,
+		Use:   "nitro",
+		Short: "Local Craft CMS on tap",
+		Long:  `TODO add the long description`,
 	}
 )
 
@@ -29,7 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagDyRun, "dry-run", "d", false, "bypass executing the commands")
 
 	// add commands to root
-	rootCmd.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand)
+	rootCmd.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand, destroyCommand)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 }
 
