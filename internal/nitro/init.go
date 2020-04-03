@@ -1,9 +1,29 @@
 package nitro
 
 import (
-	"github.com/craftcms/nitro/command"
 	"github.com/craftcms/nitro/scripts"
 )
+
+const cloudConfig = `#cloud-config
+packages:
+  - redis
+  - jq
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+runcmd:
+  - sudo add-apt-repository -y ppa:nginx/stable
+  - sudo add-apt-repository -y ppa:ondrej/php
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update -y
+  - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
+  - sudo usermod -aG docker ubuntu
+  - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
+  - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+`
 
 type Command struct {
 	Machine   string
@@ -21,7 +41,7 @@ func Init(name, cpus, memory, disk, php, db, version string) []Command {
 		Machine:   name,
 		Type:      "launch",
 		Chainable: true,
-		Input:     command.CloudInit,
+		Input:     cloudConfig,
 		Args:      []string{"--name", name, "--cpus", cpus, "--mem", memory, "--disk", disk, "--cloud-init", "-"},
 	})
 
