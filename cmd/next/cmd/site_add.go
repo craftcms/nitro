@@ -9,13 +9,10 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func init() {
-	siteCommand.AddCommand(siteAddCommand)
-}
-
 var siteAddCommand = &cobra.Command{
-	Use:   "add",
-	Short: "Add a site to machine",
+	Use:              "add",
+	Short:            "Add a site to machine",
+	TraverseChildren: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := nitro.Run(
 			command.NewMultipassRunner("multipass"),

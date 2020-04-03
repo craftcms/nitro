@@ -21,7 +21,3 @@ var siteRemoveCommand = &cobra.Command{
 		}
 	},
 }
-
-func init() {
-	siteCommand.AddCommand(siteRemoveCommand)
-}
