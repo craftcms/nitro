@@ -15,8 +15,8 @@ func init() {
 }
 
 var redisCommand = &cobra.Command{
-	Use:     "redis",
-	Short:   "Enter a redis shell",
+	Use:   "redis",
+	Short: "Enter a redis shell",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		// set the defaults and load the yaml
 	},
