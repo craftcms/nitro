@@ -43,8 +43,10 @@ func init() {
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
-	machineCommand.AddCommand(destroyCommand, createCommand, servicesCommand)
+	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand)
 	logsCommand.AddCommand(logsNginxCommand, logsDatabaseCommand)
+	restartDatabaseCommand.AddCommand(servicesDatabaseRestartCommand)
+	restartCommand.AddCommand(restartDatabaseCommand)
 }
 
 func Execute() {
