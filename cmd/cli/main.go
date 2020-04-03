@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/craftcms/nitro/cmd/cli/cmd"
+	"github.com/craftcms/nitro/internal/cmd"
 )
 
 func main() {

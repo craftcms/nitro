@@ -6,20 +6,20 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command"
+
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-// sshCmd represents the ssh command
-var sshCmd = &cobra.Command{
-	Use:   "ssh",
-	Short: "A brief description of your command",
+var siteRemoveCommand = &cobra.Command{
+	Use:   "remove",
+	Short: "Remove a site from machine",
 	Run: func(cmd *cobra.Command, args []string) {
 		name := config.GetString("machine", flagMachineName)
 
 		if err := nitro.Run(
 			command.NewMultipassRunner("multipass"),
-			nitro.SSH(name),
+			nitro.Empty(name),
 		); err != nil {
 			log.Fatal(err)
 		}
