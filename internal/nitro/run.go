@@ -13,6 +13,11 @@ func Run(runner command.Runner, commands []Command) error {
 				return err
 			}
 		}
+
+		if c.Chainable == false {
+			runner.UseSyscall(true)
+		}
+
 		var preArgs []string
 		switch c.Type {
 		case "launch":
