@@ -1,5 +1,7 @@
 package scripts
 
+import "fmt"
+
 // DockerRunDatabase builds the commands to run a database inside of docker for a machine.
 func DockerRunDatabase(name, engine, version string) []string {
 	var port string
@@ -13,7 +15,18 @@ func DockerRunDatabase(name, engine, version string) []string {
 		envvars = []string{"-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro"}
 	}
 
-	commands := []string{"exec", name, "--", "docker", "run", "-d", "--restart=always", "-p", port + ":" + port}
+	// TODO clean this up
+	imageName := fmt.Sprintf("nitro_%v_%v", engine, version)
+	hostPath := fmt.Sprintf("/opt/nitro/volumes/%v", engine)
+	var containerPath string
+	if engine == "mysql" {
+		containerPath = "/var/lib/mysql"
+	} else {
+		containerPath = "/var/lib/postgresql/data"
+	}
+	volumeMount := fmt.Sprintf("%v:%v", hostPath, containerPath)
+
+	commands := []string{"exec", name, "--", "docker", "run", "-v", volumeMount, "--name", imageName, "-d", "--restart=always", "-p", port + ":" + port}
 
 	// append the environment variables
 	commands = append(commands, envvars...)
