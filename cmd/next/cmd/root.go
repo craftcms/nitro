@@ -11,6 +11,10 @@ var (
 	flagMachineName string
 )
 
+func init() {
+	rootCmd.PersistentFlags().StringVar(&flagMachineName, "machine", "", "name of machine")
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "nitro",
 	Short: "Local Craft CMS on tap",

@@ -18,19 +18,21 @@ func Init(name, cpus, memory, disk, php, db, version string) []Command {
 
 	// add the init command
 	commands = append(commands, Command{
-		Machine: name,
-		Type:    "launch",
-		Input:   command.CloudInit,
-		Args:    []string{"--name", name, "--cpus", cpus, "--mem", memory, "--disk", disk, "--cloud-init", "-"},
+		Machine:   name,
+		Type:      "launch",
+		Chainable: true,
+		Input:     command.CloudInit,
+		Args:      []string{"--name", name, "--cpus", cpus, "--mem", memory, "--disk", disk, "--cloud-init", "-"},
 	})
 
 	// install the core packages
 	installCommands := []string{name, "--", "sudo", "apt", "install", "-y"}
 	installCommands = append(installCommands, scripts.InstallPHP(php)...)
 	commands = append(commands, Command{
-		Machine: name,
-		Type:    "exec",
-		Args:    installCommands,
+		Machine:   name,
+		Chainable: true,
+		Type:      "exec",
+		Args:      installCommands,
 	})
 
 	var port string
@@ -50,9 +52,10 @@ func Init(name, cpus, memory, disk, php, db, version string) []Command {
 	image := []string{db + ":" + version}
 	dockerCommands = append(dockerCommands, image...)
 	commands = append(commands, Command{
-		Machine: name,
-		Type:    "exec",
-		Args:    dockerCommands,
+		Machine:   name,
+		Chainable: true,
+		Type:      "exec",
+		Args:      dockerCommands,
 	})
 
 	return commands

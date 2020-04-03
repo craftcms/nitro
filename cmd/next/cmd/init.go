@@ -24,13 +24,12 @@ func init() {
 	rootCmd.AddCommand(initCommand)
 
 	// attach local flags
-	initCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
 	initCommand.Flags().IntVar(&flagCPUs, "cpus", 2, "number of cpus to allocate")
 	initCommand.Flags().StringVar(&flagMemory, "memory", "4G", "amount of memory to allocate")
 	initCommand.Flags().StringVar(&flagDisk, "disk", "40G", "amount of disk space to allocate")
 	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "7.4", "which version of PHP to make default")
 	initCommand.Flags().StringVar(&flagDatabase, "database", "mysql", "which database engine to make default")
-	initCommand.Flags().StringVar(&flagPhpVersion, "database-version", "5.7", "which version of the database to install")
+	initCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "5.7", "which version of the database to install")
 }
 
 var initCommand = &cobra.Command{
