@@ -28,14 +28,13 @@ func init() {
 	nitroCommand.PersistentFlags().BoolVarP(&flagDyRun, "dry-run", "d", false, "bypass executing the commands")
 
 	// add commands to root
-	nitroCommand.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand, destroyCommand, xdebugCommand)
+	nitroCommand.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand, destroyCommand, xdebugCommand, infoCommand)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
 func Execute() {
 	if err := nitroCommand.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }

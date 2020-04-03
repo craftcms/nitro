@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -23,7 +22,7 @@ var (
 		Use:     "init",
 		Aliases: []string{"bootstrap", "boot"},
 		Short:   "Create a new machine",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			name := config.GetString("machine", flagMachineName)
 			cpus := config.GetInt("cpus", flagCPUs)
 			memory := config.GetString("memory", flagMemory)
@@ -41,15 +40,17 @@ var (
 				fmt.Println("php:", phpVersion)
 				fmt.Println("database:", dbEngine, dbVersion)
 				fmt.Println("--- DEBUG ---")
-				return
+				return nil
 			}
 
 			if err := nitro.Run(
 				nitro.NewMultipassRunner("multipass"),
 				nitro.Init(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion),
 			); err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 )
