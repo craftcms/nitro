@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/command"
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -25,55 +25,13 @@ var (
 		Aliases: []string{"bootstrap", "boot"},
 		Short:   "Create a new machine",
 		Run: func(cmd *cobra.Command, args []string) {
-			// look for the defaults from the config
-			var name string
-			if viper.IsSet("machine") && flagMachineName == "" {
-				name = viper.GetString("machine")
-			} else {
-				name = flagMachineName
-			}
-
-			var cpus string
-			if viper.IsSet("cpus") && flagCPUs == 0 {
-				cpus = strconv.Itoa(viper.GetInt("cpus"))
-			} else {
-				cpus = strconv.Itoa(flagCPUs)
-			}
-
-			var memory string
-			if viper.IsSet("memory") && flagMemory == "" {
-				memory = viper.GetString("memory")
-			} else {
-				memory = flagMemory
-			}
-
-			var disk string
-			if viper.IsSet("disk") && flagDisk == "" {
-				disk = viper.GetString("disk")
-			} else {
-				disk = flagDisk
-			}
-
-			var php string
-			if viper.IsSet("php") && flagPhpVersion == "" {
-				php = viper.GetString("php")
-			} else {
-				php = flagPhpVersion
-			}
-
-			var db string
-			if viper.IsSet("database.engine") && flagDatabase == "" {
-				db = viper.GetString("database.engine")
-			} else {
-				db = flagDatabase
-			}
-
-			var dbVersion string
-			if viper.IsSet("database.version") && flagDatabaseVersion == "" {
-				dbVersion = viper.GetString("database.version")
-			} else {
-				dbVersion = flagDatabaseVersion
-			}
+			name := config.GetString("machine", flagMachineName)
+			cpus := config.GetInt("cpus", flagCPUs)
+			memory := config.GetString("memory", flagMemory)
+			disk := config.GetString("disk", flagDisk)
+			phpVersion := config.GetString("phpVersion-version", flagPhpVersion)
+			dbEngine := config.GetString("database.engine", flagDatabase)
+			dbVersion := config.GetString("database.version", flagDatabaseVersion)
 
 			if flagDyRun {
 				fmt.Println("--- DEBUG ---")
@@ -81,8 +39,8 @@ var (
 				fmt.Println("cpus:", cpus)
 				fmt.Println("memory:", memory)
 				fmt.Println("disk:", disk)
-				fmt.Println("php-version:", php)
-				fmt.Println("database-engine:", db)
+				fmt.Println("phpVersion-version:", phpVersion)
+				fmt.Println("database-engine:", dbEngine)
 				fmt.Println("database-version:", dbVersion)
 				fmt.Println("--- DEBUG ---")
 				return
@@ -90,7 +48,7 @@ var (
 
 			if err := nitro.Run(
 				command.NewMultipassRunner("multipass"),
-				nitro.Init(name, cpus, memory, disk, php, db, dbVersion),
+				nitro.Init(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion),
 			); err != nil {
 				log.Fatal(err)
 			}

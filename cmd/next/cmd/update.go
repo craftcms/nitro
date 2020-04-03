@@ -6,25 +6,20 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command"
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
-
-func init() {
-	rootCmd.AddCommand(updateCommand)
-}
 
 var updateCommand = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"u", "upgrade"},
 	Short:   "Update a machine",
-	PreRun: func(cmd *cobra.Command, args []string) {
-		// set the defaults and load the yaml
-		// TODO validate options for php and etc
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		name := config.GetString("machine", flagMachineName)
+
 		if err := nitro.Run(
 			command.NewMultipassRunner("multipass"),
-			nitro.Update(flagMachineName),
+			nitro.Update(name),
 		); err != nil {
 			log.Fatal(err)
 		}

@@ -29,7 +29,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagDyRun, "dry-run", "d", false, "bypass executing the commands")
 
 	// add commands to root
-	rootCmd.AddCommand(siteCommand, sshCmd, initCommand)
+	rootCmd.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 }
 
