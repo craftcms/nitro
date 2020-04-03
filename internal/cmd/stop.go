@@ -9,15 +9,15 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-var sshCommand = &cobra.Command{
-	Use:   "ssh",
-	Short: "SSH into machine",
+var stopCommand = &cobra.Command{
+	Use:   "stop",
+	Short: "Stop a machine",
 	Run: func(cmd *cobra.Command, args []string) {
 		name := config.GetString("machine", flagMachineName)
 
 		if err := nitro.Run(
 			nitro.NewMultipassRunner("multipass"),
-			nitro.SSH(name),
+			nitro.Stop(name),
 		); err != nil {
 			log.Fatal(err)
 		}

@@ -20,6 +20,12 @@ func Run(runner command.Runner, commands []Command) error {
 
 		var preArgs []string
 		switch c.Type {
+		case "start":
+			preArgs = append(preArgs, "start")
+			preArgs = append(preArgs, c.Args...)
+		case "stop":
+			preArgs = append(preArgs, "stop")
+			preArgs = append(preArgs, c.Args...)
 		case "info":
 			preArgs = append(preArgs, "info")
 			preArgs = append(preArgs, c.Args...)
