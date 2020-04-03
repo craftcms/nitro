@@ -11,7 +11,6 @@ import (
 
 func init() {
 	siteCommand.AddCommand(siteAddCommand)
-	siteAddCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
 }
 
 var siteAddCommand = &cobra.Command{

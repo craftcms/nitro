@@ -25,5 +25,4 @@ var sshCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(sshCmd)
-	sshCmd.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
 }

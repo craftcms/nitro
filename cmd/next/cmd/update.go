@@ -11,7 +11,6 @@ import (
 
 func init() {
 	rootCmd.AddCommand(updateCommand)
-	updateCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
 }
 
 var updateCommand = &cobra.Command{

@@ -9,11 +9,6 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func init() {
-	rootCmd.AddCommand(redisCommand)
-	redisCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
-}
-
 var redisCommand = &cobra.Command{
 	Use:   "redis",
 	Short: "Enter a redis shell",
@@ -28,4 +23,8 @@ var redisCommand = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func init() {
+	rootCmd.AddCommand(redisCommand)
 }

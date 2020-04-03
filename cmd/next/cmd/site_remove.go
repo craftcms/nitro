@@ -9,11 +9,6 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func init() {
-	siteCommand.AddCommand(siteRemoveCommand)
-	siteRemoveCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
-}
-
 var siteRemoveCommand = &cobra.Command{
 	Use:   "remove",
 	Short: "Remove a site from machine",
@@ -25,4 +20,8 @@ var siteRemoveCommand = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func init() {
+	siteCommand.AddCommand(siteRemoveCommand)
 }

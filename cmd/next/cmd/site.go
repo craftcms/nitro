@@ -9,11 +9,6 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func init() {
-	rootCmd.AddCommand(siteCommand)
-	siteCommand.Flags().StringVar(&flagMachineName, "machine", "", "name of machine")
-}
-
 var siteCommand = &cobra.Command{
 	Use:   "site",
 	Short: "Perform site commands",
@@ -30,4 +25,8 @@ var siteCommand = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func init() {
+	rootCmd.AddCommand(siteCommand)
 }

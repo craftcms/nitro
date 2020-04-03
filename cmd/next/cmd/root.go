@@ -9,22 +9,22 @@ import (
 
 var (
 	flagMachineName string
+
+	rootCmd = &cobra.Command{
+		Use:   "nitro",
+		Short: "Local Craft CMS on tap",
+		Long:  `TODO add the long description`,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Do Stuff Here
+			if len(args) == 0 {
+				cmd.Help()
+			}
+		},
+	}
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&flagMachineName, "machine", "", "name of machine")
-}
-
-var rootCmd = &cobra.Command{
-	Use:   "nitro",
-	Short: "Local Craft CMS on tap",
-	Long:  `TODO add the long description`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		if len(args) == 0 {
-			cmd.Help()
-		}
-	},
 }
 
 func Execute() {
