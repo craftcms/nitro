@@ -80,5 +80,8 @@ func Init(name, cpus, memory, disk, php, db, version string) []Command {
 		Args:      dockerCommands,
 	})
 
+	// show info
+	commands = append(commands, Info(name)...)
+
 	return commands
 }

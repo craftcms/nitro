@@ -3,8 +3,6 @@ package nitro
 import (
 	"reflect"
 	"testing"
-
-	"github.com/craftcms/nitro/command"
 )
 
 func TestInit(t *testing.T) {
@@ -38,7 +36,7 @@ func TestInit(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "launch",
 					Chainable: true,
-					Input:     command.CloudInit,
+					Input:     cloudConfig,
 					Args:      []string{"--name", "thisname", "--cpus", "4", "--mem", "4G", "--disk", "20G", "--cloud-init", "-"},
 				},
 				{
@@ -52,6 +50,12 @@ func TestInit(t *testing.T) {
 					Type:      "exec",
 					Chainable: true,
 					Args:      []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
+				},
+				{
+					Machine:   "thisname",
+					Type:      "info",
+					Chainable: true,
+					Args:      []string{"thisname"},
 				},
 			},
 		},
@@ -71,7 +75,7 @@ func TestInit(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "launch",
 					Chainable: true,
-					Input:     command.CloudInit,
+					Input:     cloudConfig,
 					Args:      []string{"--name", "thisname", "--cpus", "4", "--mem", "4G", "--disk", "20G", "--cloud-init", "-"},
 				},
 				{
@@ -85,6 +89,12 @@ func TestInit(t *testing.T) {
 					Type:      "exec",
 					Chainable: true,
 					Args:      []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.5"},
+				},
+				{
+					Machine:   "thisname",
+					Type:      "info",
+					Chainable: true,
+					Args:      []string{"thisname"},
 				},
 			},
 		},
