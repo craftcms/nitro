@@ -30,7 +30,7 @@ func init() {
 	// add commands to root
 	nitroCommand.AddCommand(siteCommand, sshCmd, initCommand, redisCommand, updateCommand, destroyCommand, xdebugCommand)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
-	xdebugCommand.AddCommand(xdebugOnCommand)
+	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
 func Execute() {

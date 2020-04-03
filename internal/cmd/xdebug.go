@@ -13,22 +13,13 @@ var (
 		Aliases: []string{"x"},
 		Short:   "Perform Xdebug operations on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
-
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.Empty(name),
-			); err != nil {
-				return err
-			}
-
-			return nil
+			return cmd.Help()
 		},
 	}
 
 	xdebugOnCommand = &cobra.Command{
 		Use:   "on",
-		Short: "Enable on machine",
+		Short: "Enable XDebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := config.GetString("machine", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
@@ -43,8 +34,26 @@ var (
 			return nil
 		},
 	}
+
+	xdebugOffCommand = &cobra.Command{
+		Use:   "off",
+		Short: "Disable Xdebug on machine",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := config.GetString("machine", flagMachineName)
+			php := config.GetString("php", flagPhpVersion)
+
+			if err := nitro.Run(
+				nitro.NewMultipassRunner("multipass"),
+				nitro.DisableXdebug(name, php),
+			); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
 )
 
 func init() {
-	xdebugCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "v", "", "version of PHP to enable xdebug")
+	xdebugCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "v", "", "version of PHP to enable/disable xdebug")
 }

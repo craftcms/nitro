@@ -28,7 +28,7 @@ var (
 			cpus := config.GetInt("cpus", flagCPUs)
 			memory := config.GetString("memory", flagMemory)
 			disk := config.GetString("disk", flagDisk)
-			phpVersion := config.GetString("phpVersion-version", flagPhpVersion)
+			phpVersion := config.GetString("php", flagPhpVersion)
 			dbEngine := config.GetString("database.engine", flagDatabase)
 			dbVersion := config.GetString("database.version", flagDatabaseVersion)
 
@@ -38,9 +38,8 @@ var (
 				fmt.Println("cpus:", cpus)
 				fmt.Println("memory:", memory)
 				fmt.Println("disk:", disk)
-				fmt.Println("phpVersion-version:", phpVersion)
-				fmt.Println("database-engine:", dbEngine)
-				fmt.Println("database-version:", dbVersion)
+				fmt.Println("php:", phpVersion)
+				fmt.Println("database:", dbEngine, dbVersion)
 				fmt.Println("--- DEBUG ---")
 				return
 			}

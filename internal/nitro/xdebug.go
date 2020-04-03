@@ -9,3 +9,13 @@ func EnableXdebug(name, version string) []Command {
 		},
 	}
 }
+
+func DisableXdebug(name, version string) []Command {
+	return []Command{
+		{
+			Machine: name,
+			Type:    "exec",
+			Args:    []string{name, "--", "sudo", "phpdismod", "-v", version, "xdebug"},
+		},
+	}
+}
