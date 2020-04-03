@@ -6,10 +6,11 @@ import (
 )
 
 type Command struct {
-	Machine string
-	Type    string
-	Input   string
-	Args    []string
+	Machine   string
+	Type      string
+	Chainable bool
+	Input     string
+	Args      []string
 }
 
 func Init(name, cpus, memory, disk, php, db, version string) []Command {
