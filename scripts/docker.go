@@ -26,7 +26,7 @@ func DockerRunDatabase(name, engine, version string) []string {
 	}
 	volumeMount := fmt.Sprintf("%v:%v", hostPath, containerPath)
 
-	commands := []string{"exec", name, "--", "docker", "run", "-v", volumeMount, "--name", imageName, "-d", "--restart=always", "-p", port + ":" + port}
+	commands := []string{name, "--", "docker", "run", "-v", volumeMount, "--name", imageName, "-d", "--restart=always", "-p", port + ":" + port}
 
 	// append the environment variables
 	commands = append(commands, envvars...)

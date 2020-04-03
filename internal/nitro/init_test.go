@@ -101,8 +101,8 @@ func TestInit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Init(tt.args.name, tt.args.cpus, tt.args.memory, tt.args.disk, tt.args.php, tt.args.db, tt.args.version); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Init() = %v, want %v", got, tt.want)
+			if got := Create(tt.args.name, tt.args.cpus, tt.args.memory, tt.args.disk, tt.args.php, tt.args.db, tt.args.version); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Create() = %v, want %v", got, tt.want)
 			}
 		})
 	}
