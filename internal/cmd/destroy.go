@@ -31,8 +31,6 @@ var (
 				return err
 			}
 
-			fmt.Println("successfully deleted", name)
-
 			return nil
 		},
 	}
