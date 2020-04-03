@@ -1,6 +1,8 @@
 package nitro
 
 import (
+	"log"
+
 	"github.com/craftcms/nitro/internal/command"
 )
 
@@ -25,6 +27,8 @@ func Run(runner command.Runner, commands []Command) error {
 		}
 
 		if err := runner.Run(preArgs); err != nil {
+			log.Println("error in runner.Run:", err.Error())
+			log.Println(preArgs)
 			return err
 		}
 	}

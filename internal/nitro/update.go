@@ -1,11 +1,11 @@
 package nitro
 
-func SSH(name string) []Command {
+func Update(name string) []Command {
 	return []Command{
 		{
 			Machine: name,
-			Type:    "shell",
-			Args:    []string{"shell", name},
+			Type:    "exec",
+			Args:    []string{name, "--", "sudo", "apt-get", "upgrade", "-y"},
 		},
 	}
 }
