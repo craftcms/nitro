@@ -3,7 +3,7 @@
 MACHINE ?= demo-app
 
 build:
-	go build -o nitro ./cmd/next
+	go build -o nitro ./cmd/cli
 run: build
 	./nitro init
 clean:

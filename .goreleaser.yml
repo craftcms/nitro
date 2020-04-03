@@ -6,7 +6,7 @@ before:
     - go mod download
 builds:
   - binary: nitro
-    main: ./cmd/nitro/main.go
+    main: ./cmd/cli/main.go
     id: nitro
     goos:
       - linux
@@ -21,7 +21,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}-cli"
 changelog:
   sort: asc
   filters:
