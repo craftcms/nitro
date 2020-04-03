@@ -9,8 +9,9 @@ import (
 
 var (
 	restartDatabaseCommand = &cobra.Command{
-		Use:   "database",
-		Short: "Restart database",
+		Use:     "database",
+		Aliases: []string{"db"},
+		Short:   "Restart database",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := config.GetString("machine", flagMachineName)
 			engine := config.GetString("database.engine", flagDatabase)
