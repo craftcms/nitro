@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/mitchellh/go-homedir"
@@ -28,7 +27,20 @@ func init() {
 	nitroCommand.PersistentFlags().BoolVarP(&flagDyRun, "dry-run", "d", false, "bypass executing the commands")
 
 	// add commands to root
-	nitroCommand.AddCommand(siteCommand, sshCommand, initCommand, redisCommand, updateCommand, destroyCommand, xdebugCommand, infoCommand, sqlCommand, stopCommand, startCommand)
+	nitroCommand.AddCommand(
+		siteCommand,
+		sshCommand,
+		initCommand,
+		redisCommand,
+		updateCommand,
+		destroyCommand,
+		xdebugCommand,
+		infoCommand,
+		sqlCommand,
+		stopCommand,
+		startCommand,
+		ipCommand,
+	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
@@ -47,6 +59,6 @@ func loadConfig() {
 	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
