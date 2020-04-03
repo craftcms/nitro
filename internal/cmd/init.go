@@ -7,8 +7,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/command"
-
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -48,7 +46,7 @@ var (
 			}
 
 			if err := nitro.Run(
-				command.NewMultipassRunner("multipass"),
+				nitro.NewMultipassRunner("multipass"),
 				nitro.Init(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion),
 			); err != nil {
 				log.Fatal(err)

@@ -5,8 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/command"
-
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -18,7 +16,7 @@ var siteRemoveCommand = &cobra.Command{
 		name := config.GetString("machine", flagMachineName)
 
 		if err := nitro.Run(
-			command.NewMultipassRunner("multipass"),
+			nitro.NewMultipassRunner("multipass"),
 			nitro.Empty(name),
 		); err != nil {
 			log.Fatal(err)
