@@ -30,19 +30,19 @@ func init() {
 	nitroCommand.AddCommand(
 		siteCommand,
 		sshCommand,
-		initCommand,
 		redisCommand,
 		updateCommand,
-		destroyCommand,
 		xdebugCommand,
 		infoCommand,
 		sqlCommand,
 		stopCommand,
 		startCommand,
 		ipCommand,
+		machineCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
+	machineCommand.AddCommand(destroyCommand, createCommand)
 }
 
 func Execute() {

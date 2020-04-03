@@ -18,8 +18,8 @@ var (
 	flagDatabase        string
 	flagDatabaseVersion string
 
-	initCommand = &cobra.Command{
-		Use:     "init",
+	createCommand = &cobra.Command{
+		Use:     "create",
 		Aliases: []string{"bootstrap", "boot"},
 		Short:   "Create a new machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,10 +57,10 @@ var (
 
 func init() {
 	// attach local flags
-	initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "number of cpus to allocate")
-	initCommand.Flags().StringVar(&flagMemory, "memory", "", "amount of memory to allocate")
-	initCommand.Flags().StringVar(&flagDisk, "disk", "", "amount of disk space to allocate")
-	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which version of PHP to make default")
-	initCommand.Flags().StringVar(&flagDatabase, "database", "", "which database engine to make default")
-	initCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "", "which version of the database to install")
+	createCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "number of cpus to allocate")
+	createCommand.Flags().StringVar(&flagMemory, "memory", "", "amount of memory to allocate")
+	createCommand.Flags().StringVar(&flagDisk, "disk", "", "amount of disk space to allocate")
+	createCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which version of PHP to make default")
+	createCommand.Flags().StringVar(&flagDatabase, "database", "", "which database engine to make default")
+	createCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "", "which version of the database to install")
 }
