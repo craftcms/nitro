@@ -19,7 +19,7 @@ var sqlCommand = &cobra.Command{
 
 		if err := nitro.Run(
 			nitro.NewMultipassRunner("multipass"),
-			nitro.SQL(name, engine, version),
+			nitro.SQL(name, engine, version, false),
 		); err != nil {
 			log.Fatal(err)
 		}
