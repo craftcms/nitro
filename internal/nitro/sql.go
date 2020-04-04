@@ -6,7 +6,7 @@ func SQL(name, engine, version string) []Command {
 			Machine:   name,
 			Type:      "exec",
 			Chainable: false,
-			Args:      []string{name, "--", "docker", "exec", "-it", "nitro_" + engine + "_" + version, "mysql"},
+			Args:      []string{name, "--", "docker", "exec", "-it", "nitro_" + engine + "_" + version, "mysql", "-u", "nitro", "-pnitro"},
 		},
 	}
 }

@@ -23,7 +23,8 @@ runcmd:
   - sudo usermod -aG docker ubuntu
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-  - sudo mkdir -p /opt/nitro/storage/{mysql,postgres}
+  - sudo mkdir -p /opt/nitro/volumes/mysql
+  - sudo mkdir -p /opt/nitro/volumes/postgres
   - sudo chown -R ubuntu:ubuntu /opt/nitro
 `
 
