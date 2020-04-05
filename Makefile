@@ -19,9 +19,8 @@ releaser:
 	goreleaser --snapshot --skip-publish --rm-dist
 integration-test: build
 	./nitro -f nitro.yaml machine create
-	if [[ ! -d "demo-site" ]]
-		composer create-project craftcms/craft demo-site
-	fi
+	composer create-project craftcms/craft demo-site
 	./nitro -f nitro.yaml serve ./demo-site demo.test
 remove-integration-test:
 	./nitro -f nitro.yaml machine destroy -p
+	rm -rf demo-site
