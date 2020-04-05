@@ -1,0 +1,8 @@
+machine: nitro-local
+cpus: 2
+memory: 2G
+disk: 30G
+php: 7.3
+database:
+  engine: mysql
+  version: 5.6
