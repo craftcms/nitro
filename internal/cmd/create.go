@@ -41,11 +41,11 @@ var (
 			if err := validate.PHPVersion(phpVersion); err != nil {
 				return err
 			}
-			if err := validate.DatabaseEngine(dbEngine); err != nil {
+			if err := validate.DatabaseEngineAndVersion(dbEngine, dbVersion); err != nil {
 				return err
 			}
 
-			if flagDyRun {
+			if flagDebug {
 				fmt.Println("--- DEBUG ---")
 				fmt.Println("machine:", name)
 				fmt.Println("cpus:", cpus)
