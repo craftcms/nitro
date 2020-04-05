@@ -63,3 +63,75 @@ func PHPVersion(v string) error {
 
 	return errors.New(fmt.Sprintf("the PHP version %q is not valid", v))
 }
+
+func Memory(v string) error {
+	if !strings.HasSuffix(v, "G") {
+		return errors.New("memory must end with a G")
+	}
+
+	return nil
+}
+
+func DiskSize(v string) error {
+	if !strings.HasSuffix(v, "G") {
+		return errors.New("disk must end with a G")
+	}
+
+	return nil
+}
+
+func DatabaseEngine(v string) error {
+	switch v {
+	case "mysql":
+		return nil
+	case "postgres":
+		return nil
+	}
+	return errors.New("unsupported database engine: " + v)
+}
+
+func DatabaseVersion(e, v string) error {
+	if err := DatabaseEngine(e); err != nil {
+		return err
+	}
+
+	if e == "mysql" {
+		switch v {
+		case "8.0":
+			return nil
+		case "8":
+			return nil
+		case "5.7":
+			return nil
+		case "5.8":
+			return nil
+		case "5":
+			return nil
+		}
+	}
+
+	if e == "postgres" {
+		switch v {
+		case "12.2":
+			return nil
+		case "12":
+			return nil
+		case "11.7":
+			return nil
+		case "11":
+			return nil
+		case "10.12":
+			return nil
+		case "10":
+			return nil
+		case "9.6":
+			return nil
+		case "9.5":
+			return nil
+		case "9":
+			return nil
+		}
+	}
+
+	return errors.New("unsupported version of " + e + ": " + v)
+}

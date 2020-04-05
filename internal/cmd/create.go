@@ -8,6 +8,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 var (
@@ -30,6 +31,19 @@ var (
 			phpVersion := config.GetString("php", flagPhpVersion)
 			dbEngine := config.GetString("database.engine", flagDatabase)
 			dbVersion := config.GetString("database.version", flagDatabaseVersion)
+
+			if err := validate.DiskSize(disk); err != nil {
+				return err
+			}
+			if err := validate.Memory(memory); err != nil {
+				return err
+			}
+			if err := validate.PHPVersion(phpVersion); err != nil {
+				return err
+			}
+			if err := validate.DatabaseEngine(dbEngine); err != nil {
+				return err
+			}
 
 			if flagDyRun {
 				fmt.Println("--- DEBUG ---")
