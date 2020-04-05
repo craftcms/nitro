@@ -19,9 +19,9 @@ releaser:
 	goreleaser --snapshot --skip-publish --rm-dist
 integration-test: build
 	./nitro -f nitro.yaml machine create
-	if [ -d $directory]; then
-		@echo "skipping composer project creation step"
-	else
+	if [[ ! -d "demo-site" ]]
 		composer create-project craftcms/craft demo-site
 	fi
 	./nitro -f nitro.yaml serve ./demo-site demo.test
+remove-integration-test:
+	./nitro -f nitro.yaml machine destroy -p
