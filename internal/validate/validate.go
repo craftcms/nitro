@@ -90,7 +90,7 @@ func DatabaseEngine(v string) error {
 	return errors.New("unsupported database engine: " + v)
 }
 
-func DatabaseVersion(e, v string) error {
+func DatabaseEngineAndVersion(e, v string) error {
 	if err := DatabaseEngine(e); err != nil {
 		return err
 	}
@@ -101,9 +101,11 @@ func DatabaseVersion(e, v string) error {
 			return nil
 		case "8":
 			return nil
+		case "5.8":
+			return nil
 		case "5.7":
 			return nil
-		case "5.8":
+		case "5.6":
 			return nil
 		case "5":
 			return nil
