@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -23,6 +24,9 @@ var (
 		Use:     "create",
 		Aliases: []string{"bootstrap", "boot"},
 		Short:   "Create a new machine",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := config.GetString("machine", flagMachineName)
 			cpus := config.GetInt("cpus", flagCPUs)
