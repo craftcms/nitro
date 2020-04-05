@@ -13,6 +13,7 @@ packages:
   - curl
   - gnupg-agent
   - software-properties-common
+  - sshfs
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php

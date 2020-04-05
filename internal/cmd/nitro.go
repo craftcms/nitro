@@ -40,6 +40,7 @@ func init() {
 		ipCommand,
 		machineCommand,
 		logsCommand,
+		serveCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
