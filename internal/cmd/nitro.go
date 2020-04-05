@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/mitchellh/go-homedir"
@@ -15,9 +14,10 @@ var (
 	flagDebug       bool
 
 	nitroCommand = &cobra.Command{
-		Use:   "nitro",
-		Short: "Local Craft CMS on tap",
-		Long:  `TODO add the long description`,
+		Use:          "nitro",
+		Short:        "Local Craft CMS on tap",
+		Long:         `TODO add the long description`,
+		SilenceUsage: true,
 	}
 )
 
@@ -44,6 +44,7 @@ func init() {
 		machineCommand,
 		logsCommand,
 		serveCommand,
+		completionCmd,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
@@ -70,7 +71,5 @@ func loadConfig() {
 		viper.SetConfigType("yaml")
 	}
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	_ = viper.ReadInConfig()
 }
