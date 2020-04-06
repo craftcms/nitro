@@ -109,7 +109,7 @@ func TestDomain(t *testing.T) {
 	}{
 		{
 			name:    "is valid",
-			args:    args{v: "example"},
+			args:    args{v: "example.test"},
 			wantErr: false,
 		},
 	}

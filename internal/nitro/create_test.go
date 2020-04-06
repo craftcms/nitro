@@ -90,19 +90,13 @@ func TestInit(t *testing.T) {
 					Chainable: true,
 					Args:      []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.5"},
 				},
-				{
-					Machine:   "thisname",
-					Type:      "info",
-					Chainable: true,
-					Args:      []string{"thisname"},
-				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Create(tt.args.name, tt.args.cpus, tt.args.memory, tt.args.disk, tt.args.php, tt.args.db, tt.args.version); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Create() = %v, want %v", got, tt.want)
+				t.Errorf("Create() = \n%v, \nwant\n %v", got, tt.want)
 			}
 		})
 	}
