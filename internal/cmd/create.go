@@ -36,6 +36,12 @@ var (
 			dbEngine := config.GetString("database.engine", flagDatabase)
 			dbVersion := config.GetString("database.version", flagDatabaseVersion)
 
+			if viper.IsSet("sites") {
+				var sites []config.Site
+				viper.UnmarshalKey("sites", &sites)
+				fmt.Println(sites)
+			}
+
 			if err := validate.DiskSize(disk); err != nil {
 				return err
 			}
