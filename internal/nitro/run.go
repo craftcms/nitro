@@ -2,11 +2,9 @@ package nitro
 
 import (
 	"log"
-
-	"github.com/craftcms/nitro/internal/command"
 )
 
-func Run(runner command.Runner, commands []Command) error {
+func Run(runner ShellRunner, commands []Command) error {
 	for _, c := range commands {
 		if c.Input != "" {
 			if err := runner.SetInput(c.Input); err != nil {
@@ -47,8 +45,7 @@ func Run(runner command.Runner, commands []Command) error {
 		}
 
 		if err := runner.Run(preArgs); err != nil {
-			log.Println("error in runner.Run:", err.Error())
-			log.Println(preArgs)
+			log.Println("error in nitro runner:", err.Error())
 			return err
 		}
 	}
