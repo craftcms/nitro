@@ -13,13 +13,6 @@ var infoCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.Info(name),
-		); err != nil {
-			return err
-		}
-
-		return nil
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Info(name))
 	},
 }

@@ -67,14 +67,7 @@ var (
 				return nil
 			}
 
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.Create(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion),
-			); err != nil {
-				return err
-			}
-
-			return nil
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Create(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion), )
 		},
 	}
 )

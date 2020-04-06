@@ -24,14 +24,7 @@ var (
 				fmt.Println("soft deleting", name)
 			}
 
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.Destroy(name, flagPermanent),
-			); err != nil {
-				return err
-			}
-
-			return nil
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Destroy(name, flagPermanent))
 		},
 	}
 )

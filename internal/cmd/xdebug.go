@@ -25,14 +25,7 @@ var (
 			name := config.GetString("machine", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
 
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.EnableXdebug(name, php),
-			); err != nil {
-				return err
-			}
-
-			return nil
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.EnableXdebug(name, php))
 		},
 	}
 
@@ -43,14 +36,7 @@ var (
 			name := config.GetString("machine", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
 
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.DisableXdebug(name, php),
-			); err != nil {
-				return err
-			}
-
-			return nil
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.DisableXdebug(name, php))
 		},
 	}
 )

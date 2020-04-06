@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
@@ -12,14 +10,9 @@ import (
 var redisCommand = &cobra.Command{
 	Use:   "redis",
 	Short: "Enter a redis shell",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.Redis(name),
-		); err != nil {
-			log.Fatal(err)
-		}
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Redis(name))
 	},
 }

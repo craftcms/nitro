@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
@@ -12,16 +10,11 @@ import (
 var sqlCommand = &cobra.Command{
 	Use:   "sql",
 	Short: "Enter a SQL shell",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 		engine := config.GetString("database.engine", flagDatabase)
 		version := config.GetString("database.version", flagDatabaseVersion)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.SQL(name, engine, version, false),
-		); err != nil {
-			log.Fatal(err)
-		}
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.SQL(name, engine, version, false))
 	},
 }
