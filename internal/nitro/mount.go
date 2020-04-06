@@ -1,9 +1,10 @@
 package nitro
 
-func Mount(name, path, domain string) Command {
+func Mount(name, folder, domain string) Command {
 	return Command{
-		Machine: name,
-		Type:    "mount",
-		Args:    []string{path, name + ":/app/sites/" + domain},
+		Machine:   name,
+		Chainable: true,
+		Type:      "mount",
+		Args:      []string{folder, name + ":/app/sites/" + domain},
 	}
 }

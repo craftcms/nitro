@@ -25,28 +25,31 @@ var (
 		Use:   "add",
 		Short: "Add a site to machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
+			machineName := config.GetString("machine", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
-			path := args[0]
-			domain := args[1]
+			localDirectory := args[0]
+			domainName := args[1]
 
-			if err := validate.Path(path); err != nil {
+			if err := validate.Path(localDirectory); err != nil {
 				return err
 			}
-
-			if err := validate.Domain(domain); err != nil {
+			if err := validate.Domain(domainName); err != nil {
 				return err
 			}
 
 			var commands []nitro.Command
-
-			// attach the provided path to /app/sites/domain.test
-			commands = append(commands, nitro.Mount(name, path, domain))
-
-			// run the nginx add-site script
-			commands = append(commands, nitro.AddSiteScript(name, domain, php, flagPublicDir))
-
-			// todo edit the hosts file
+			// attach the provided localDirectory to /app/sites/domainName.test
+			commands = append(commands, nitro.Mount(machineName, localDirectory, domainName))
+			// create localDirectory directory
+			commands = append(commands, nitro.CreateNewDirectoryForSite(machineName, domainName))
+			// copy the template
+			commands = append(commands, nitro.CopyNginxTemplate(machineName, domainName))
+			// change template variables
+			commands = append(commands, nitro.ChangeVariablesInTemplate(machineName, domainName, flagPublicDir, php)...)
+			// make link for nginx localDirectory
+			commands = append(commands, nitro.LinkNginxSite(machineName, domainName))
+			// reload nginx
+			commands = append(commands, nitro.ReloadNginx(machineName))
 
 			if flagDebug {
 				for _, command := range commands {
@@ -56,11 +59,7 @@ var (
 				return nil
 			}
 
-			if err := nitro.Run(nitro.NewMultipassRunner("multipass"), commands); err != nil {
-				return err
-			}
-
-			return nil
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), commands)
 		},
 		PostRun: func(cmd *cobra.Command, args []string) {
 			fmt.Println(
