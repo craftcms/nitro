@@ -17,7 +17,7 @@ var (
 		Use:          "nitro",
 		Short:        "Local Craft CMS on tap",
 		Long:         `TODO add the long description`,
-		SilenceUsage: true,
+		// SilenceUsage: true,
 	}
 )
 
@@ -43,7 +43,6 @@ func init() {
 		ipCommand,
 		machineCommand,
 		logsCommand,
-		serveCommand,
 		completionCmd,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
