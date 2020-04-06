@@ -3,7 +3,7 @@ package scripts
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/internal/validate"
+	"github.com/craftcms/nitro/validate"
 )
 
 func ConfigureXdebug(php string) (*Script, error) {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/validate"
+	"github.com/craftcms/nitro/validate"
 )
 
 var (
