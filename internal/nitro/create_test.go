@@ -49,7 +49,7 @@ func TestInit(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "exec",
 					Chainable: true,
-					Args:      []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
+					Args:      []string{"thisname", "--", "docker", "run", "-v", "/opt/nitro/volumes/mysql:/var/lib/mysql", "--name", "nitro_mysql_5.7", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
 				},
 				{
 					Machine:   "thisname",
@@ -88,7 +88,13 @@ func TestInit(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "exec",
 					Chainable: true,
-					Args:      []string{"thisname", "--", "docker", "run", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.5"},
+					Args:      []string{"thisname", "--", "docker", "run", "-v", "/opt/nitro/volumes/postgres:/var/lib/postgresql/data", "--name", "nitro_postgres_11.5", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.5"},
+				},
+				{
+					Machine:   "thisname",
+					Type:      "info",
+					Chainable: true,
+					Args:      []string{"thisname"},
 				},
 			},
 		},

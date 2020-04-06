@@ -96,7 +96,7 @@ func Create(name, cpus, memory, disk, php, db, version string) []Command {
 	})
 
 	// show info
-	//commands = append(commands, Info(name)...)
+	commands = append(commands, Info(name)...)
 
 	return commands
 }
