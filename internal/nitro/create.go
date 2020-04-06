@@ -14,6 +14,31 @@ packages:
   - gnupg-agent
   - software-properties-common
   - sshfs
+write_files:
+  - path: /opt/nitro/nginx/template.conf
+    content: |
+      server {
+          listen 80;
+          listen [::]:80;
+
+          root /app/sites/CHANGEPATH/CHANGEPUBLICDIR;
+
+          index index.php;
+          gzip_static  on;
+          error_page 404 /index.php?$query_string;
+          ssi on;
+          server_name CHANGESERVERNAME;
+
+          location / {
+              try_files $uri $uri/ /index.php$is_args$args;
+          }
+
+          location ~ \.php$ {
+             include snippets/fastcgi-php.conf;
+             fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
+             fastcgi_read_timeout 240;
+          }
+      }
 runcmd:
   - sudo add-apt-repository -y ppa:nginx/stable
   - sudo add-apt-repository -y ppa:ondrej/php
@@ -27,6 +52,8 @@ runcmd:
   - sudo mkdir -p /opt/nitro/volumes/mysql
   - sudo mkdir -p /opt/nitro/volumes/postgres
   - sudo chown -R ubuntu:ubuntu /opt/nitro
+  - sudo mkdir -p /app/sites
+  - sudo chown -R ubuntu:ubuntu /app/sites
 `
 
 type Command struct {
