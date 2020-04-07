@@ -43,7 +43,7 @@ func Run(runner ShellRunner, commands []Command) error {
 			preArgs = append(preArgs, "exec")
 			preArgs = append(preArgs, c.Args...)
 		}
-
+		
 		if err := runner.Run(preArgs); err != nil {
 			log.Println("error in nitro runner:", err.Error())
 			return err
