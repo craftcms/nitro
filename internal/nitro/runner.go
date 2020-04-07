@@ -2,7 +2,6 @@ package nitro
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -47,11 +46,9 @@ func (m *MultipassRunner) SetInput(input string) error {
 func (m *MultipassRunner) Run(args []string) error {
 	// if this is a syscall, hand it off
 	if m.useSyscall {
-		fmt.Println("using syscall")
 		// this allows us to only add Args, not the binary path to
 		// keep everything consistent
 		if args[0] != "multipass" {
-			fmt.Println("missing multipass from", args)
 			args = append([]string{"multipass"}, args...)
 		}
 
