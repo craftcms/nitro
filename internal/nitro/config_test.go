@@ -48,6 +48,11 @@ func TestConfig_Parse(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "empty files returns an error",
+			args: args{file: "./testdata/not-here.yaml"},
+			want: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
