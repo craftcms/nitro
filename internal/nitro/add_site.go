@@ -7,7 +7,7 @@ func CreateNewDirectoryForSite(name, site string) Command {
 		Machine:   name,
 		Type:      "exec",
 		Chainable: true,
-		Args:      []string{name, "--", "mkdir", "-p", "/home/ubuntu/sites/" + site},
+		Args:      []string{name, "--", "mkdir", "-p", "/app/sites/" + site},
 	}
 }
 
