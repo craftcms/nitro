@@ -7,14 +7,23 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-var sqlCommand = &cobra.Command{
-	Use:   "sql",
-	Short: "Enter a SQL shell",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
-		engine := config.GetString("database.engine", flagDatabase)
-		version := config.GetString("database.version", flagDatabaseVersion)
+var (
+	flagRootDatabaseUser bool
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.SQL(name, engine, version, false))
-	},
+	sqlCommand = &cobra.Command{
+		Use:   "sql",
+		Short: "Enter a SQL shell",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := config.GetString("machine", flagMachineName)
+			engine := config.GetString("database.engine", flagDatabase)
+			version := config.GetString("database.version", flagDatabaseVersion)
+			root := flagRootDatabaseUser
+
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.SQL(name, engine, version, root))
+		},
+	}
+)
+
+func init() {
+	sqlCommand.Flags().BoolVarP(&flagRootDatabaseUser, "root", "r", false, "Enter a root ")
 }
