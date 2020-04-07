@@ -18,16 +18,53 @@ func TestSQL(t *testing.T) {
 		want []Command
 	}{
 		{
-			name: "",
+			name: "can get postgres shell",
 			args: args{
-				name:    "",
-				engine:  "",
-				version: "",
+				name:    "machine-name",
+				engine:  "postgres",
+				version: "11.5",
 				root:    false,
 			},
 			want: []Command{
 				{
-
+					Machine:   "machine-name",
+					Type:      "exec",
+					Chainable: false,
+					Args:      []string{"machine-name", "--", "docker", "exec", "-it", "nitro_postgres_11.5", "psql", "-U", "nitro"},
+				},
+			},
+		},
+		{
+			name: "can get mysql root shell",
+			args: args{
+				name:    "machine-name",
+				engine:  "mysql",
+				version: "5.7",
+				root:    false,
+			},
+			want: []Command{
+				{
+					Machine:   "machine-name",
+					Type:      "exec",
+					Chainable: false,
+					Args:      []string{"machine-name", "--", "docker", "exec", "-it", "nitro_mysql_5.7", "mysql", "-u", "nitro", "-pnitro"},
+				},
+			},
+		},
+		{
+			name: "can get mysql root shell",
+			args: args{
+				name:    "machine-name",
+				engine:  "mysql",
+				version: "5.7",
+				root:    true,
+			},
+			want: []Command{
+				{
+					Machine:   "machine-name",
+					Type:      "exec",
+					Chainable: false,
+					Args:      []string{"machine-name", "--", "docker", "exec", "-it", "nitro_mysql_5.7", "mysql", "-u", "root", "-pnitro"},
 				},
 			},
 		},
@@ -35,7 +72,7 @@ func TestSQL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := SQL(tt.args.name, tt.args.engine, tt.args.version, tt.args.root); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SQL() = %v, want %v", got, tt.want)
+				t.Errorf("SQL() = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}

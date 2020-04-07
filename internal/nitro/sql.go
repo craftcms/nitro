@@ -3,7 +3,8 @@ package nitro
 func SQL(name, engine, version string, root bool) []Command {
 	var dockerArgs []string
 	switch engine {
-	// TODO add the postgres args
+	case "postgres":
+		dockerArgs = append(dockerArgs, "psql", "-U", "nitro")
 	default:
 		if root {
 			dockerArgs = append(dockerArgs, "mysql", "-u", "root", "-pnitro")
