@@ -39,7 +39,7 @@ func TestDestroy(t *testing.T) {
 			want: []Command{
 				{
 					Machine:   "some-machine",
-					Chainable: true,
+					Chainable: false,
 					Type:      "delete",
 					Args:      []string{"some-machine", "-p"},
 				},
