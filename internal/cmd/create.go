@@ -23,7 +23,7 @@ var (
 	createCommand = &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"bootstrap", "boot"},
-		Short:   "Create a new machine",
+		Short:   "Create a machine",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Using config file:", viper.ConfigFileUsed())
 		},
@@ -67,7 +67,10 @@ var (
 				return nil
 			}
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Create(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion), )
+			var commands []nitro.Command
+			commands = append(commands, nitro.Create(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion)...)
+
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), commands)
 		},
 	}
 )
