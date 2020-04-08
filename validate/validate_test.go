@@ -1,6 +1,10 @@
 package validate
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/craftcms/nitro/config"
+)
 
 func TestPHPVersionFlag(t *testing.T) {
 	type args struct {
@@ -330,6 +334,53 @@ func TestDatabaseVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := DatabaseEngineAndVersion(tt.args.e, tt.args.v); (err != nil) != tt.wantErr {
 				t.Errorf("DatabaseEngineAndVersion() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestDatabaseConfig(t *testing.T) {
+	type args struct {
+		databases []config.Database
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "non duplicate ports does not return an error",
+			args: args{
+				databases: []config.Database{
+					{
+						Port: 3306,
+					},
+					{
+						Port: 33061,
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "duplicate ports return error",
+			args: args{
+				databases: []config.Database{
+					{
+						Port: 3306,
+					},
+					{
+						Port: 3306,
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := DatabaseConfig(tt.args.databases); (err != nil) != tt.wantErr {
+				t.Errorf("DatabaseConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

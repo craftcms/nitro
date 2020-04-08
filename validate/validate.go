@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/craftcms/nitro/config"
 )
 
 // Database takes a string that represents a type of database to install and returns an error if it is a database that
@@ -146,6 +148,19 @@ func DatabaseEngineAndVersion(e, v string) error {
 func MachineName(v string) error {
 	if strings.Contains(v, " ") {
 		return errors.New("machine name cannot contain spaces")
+	}
+
+	return nil
+}
+
+func DatabaseConfig(databases []config.Database) error {
+	ports := map[int]int{}
+
+	for _, database := range databases {
+		if ports[database.Port] != 0 {
+			return errors.New("duplicate ports are assigned")
+		}
+		ports[database.Port] = database.Port
 	}
 
 	return nil
