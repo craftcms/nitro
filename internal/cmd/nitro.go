@@ -17,6 +17,7 @@ var (
 		Use:          "nitro",
 		Short:        "Local Craft CMS on tap",
 		Long:         `TODO add the long description`,
+		SilenceUsage: true,
 	}
 )
 
