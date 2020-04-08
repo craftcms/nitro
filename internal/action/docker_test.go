@@ -33,6 +33,32 @@ func TestCreateDatabaseContainer(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "create postgres 11.7",
+			args: args{
+				name:    "postgresmachine",
+				engine:  "postgres",
+				version: "11.7",
+				port:    "5432",
+			},
+			want: &Action{
+				Type:       "exec",
+				UseSyscall: false,
+				Args:       []string{"exec", "postgresmachine", "--", "docker", "run", "-v", "postgres_11.7_5432:/var/lib/postgresql/data", "--name", "postgres_11.7_5432", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres:11.7"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "validation fails",
+			args: args{
+				name:    "postgresmachine",
+				engine:  "postgres",
+				version: "110",
+				port:    "5432",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -75,6 +101,17 @@ func TestCreateDatabaseVolume(t *testing.T) {
 				Args:       []string{"exec", "somename", "--", "docker", "volume", "create", "mysql_5.7_3306"},
 			},
 			wantErr: false,
+		},
+		{
+			name: "validation fails",
+			args: args{
+				name:    "postgresmachine",
+				engine:  "postgres",
+				version: "110",
+				port:    "5432",
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

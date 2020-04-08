@@ -28,6 +28,18 @@ func TestDestroy(t *testing.T) {
 				Args:       []string{"delete", "notpermanent"},
 			},
 		},
+		{
+			name: "can destroy a machine permanently",
+			args: args{
+				name:  "ispermanent",
+				force: true,
+			},
+			want: &Action{
+				Type:       "delete",
+				UseSyscall: false,
+				Args:       []string{"delete", "ispermanent", "-p"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
