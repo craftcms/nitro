@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
@@ -15,7 +16,7 @@ var siteAddCommand = &cobra.Command{
 	Short: "Add a site to machine",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machineName := config.GetString("name", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 		php := config.GetString("php", flagPhpVersion)
 		localDirectory := args[0]
 		domainName := args[1]
@@ -27,33 +28,41 @@ var siteAddCommand = &cobra.Command{
 			return err
 		}
 
-		var commands []nitro.Command
-		// attach the provided localDirectory to /app/sites/domainName.test
-		commands = append(commands, nitro.Mount(machineName, localDirectory, domainName))
-		// create localDirectory directory
-		commands = append(commands, nitro.CreateNewDirectoryForSite(machineName, domainName))
-		// copy the template
-		commands = append(commands, nitro.CopyNginxTemplate(machineName, domainName))
-		// change template variables
-		commands = append(commands, nitro.ChangeVariablesInTemplate(machineName, domainName, flagPublicDir, php)...)
-		// make link for nginx localDirectory
-		commands = append(commands, nitro.LinkNginxSite(machineName, domainName))
-		// reload nginx
-		commands = append(commands, nitro.ReloadNginx(machineName))
+		var actions []action.Action
+
+		mountAction, _ := action.Mount(name, localDirectory, domainName)
+		actions = append(actions, *mountAction)
+
+		createDirectoryAction, _ := action.CreateNginxSiteDirectory(name, domainName)
+		actions = append(actions, *createDirectoryAction)
+
+		copyTemplateAction, _ := action.CopyNginxTemplate(name, domainName)
+		actions = append(actions, *copyTemplateAction)
+
+		changeVarsActions, _ := action.ChangeTemplateVariables(name, domainName, flagPublicDir, php)
+		for _, a := range *changeVarsActions {
+			actions = append(actions, a)
+		}
+
+		createSymlinkAction, _ := action.CreateSiteSymllink(name, domainName)
+		actions = append(actions, *createSymlinkAction)
+
+		reloadNginxAction, _ := action.NginxReload(name)
+		actions = append(actions, *reloadNginxAction)
 
 		if flagDebug {
-			for _, command := range commands {
-				fmt.Println(command.Type, command.Args)
+			for _, a := range actions {
+				fmt.Println(a.Args)
 			}
 
 			return nil
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), commands)
+		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), actions)
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
 		fmt.Println(
-			fmt.Sprintf("added site %q to machine %q", args[1], config.GetString("name", flagMachineName)),
+			fmt.Sprintf("added site %q to %q", args[1], config.GetString("name", flagMachineName)),
 		)
 	},
 }
