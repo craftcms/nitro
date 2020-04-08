@@ -58,7 +58,7 @@ var (
 			}
 
 			var actions []action.Action
-			launchAction, err := action.Launch(name, cpus, memory, disk, nitro.CloudConfig)
+			launchAction, err := action.Launch(name, cpus, memory, disk, CloudConfig)
 			if err != nil {
 				return err
 			}
