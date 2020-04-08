@@ -29,7 +29,7 @@ var (
 				return err
 			}
 
-			return Run(NewMultipassRunner("multipass"), []action.Action{*destroyAction})
+			return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
 		},
 	}
 )

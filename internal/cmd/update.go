@@ -27,6 +27,6 @@ var updateCommand = &cobra.Command{
 		}
 		actions = append(actions, *upgradeAction)
 
-		return Run(NewMultipassRunner("multipass"), actions)
+		return action.Run(action.NewMultipassRunner("multipass"), actions)
 	},
 }

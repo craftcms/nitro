@@ -18,6 +18,6 @@ var sshCommand = &cobra.Command{
 			return err
 		}
 
-		return Run(NewMultipassRunner("multipass"), []action.Action{*sshAction})
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*sshAction})
 	},
 }

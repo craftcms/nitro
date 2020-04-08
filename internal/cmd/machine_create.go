@@ -85,7 +85,7 @@ var createCommand = &cobra.Command{
 			return nil
 		}
 
-		return Run(NewMultipassRunner("multipass"), actions)
+		return action.Run(action.NewMultipassRunner("multipass"), actions)
 	},
 }
 

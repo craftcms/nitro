@@ -18,6 +18,6 @@ var redisCommand = &cobra.Command{
 			return err
 		}
 
-		return Run(NewMultipassRunner("multipass"), []action.Action{*redisAction})
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*redisAction})
 	},
 }

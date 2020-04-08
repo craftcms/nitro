@@ -57,7 +57,7 @@ var siteAddCommand = &cobra.Command{
 			return nil
 		}
 
-		return Run(NewMultipassRunner("multipass"), actions)
+		return action.Run(action.NewMultipassRunner("multipass"), actions)
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
 		fmt.Println(

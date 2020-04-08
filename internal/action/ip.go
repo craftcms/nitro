@@ -3,11 +3,9 @@ package action
 import (
 	"encoding/json"
 	"os/exec"
-
-	"github.com/craftcms/nitro/internal/cmd"
 )
 
-func IP(name string, r cmd.ShellRunner) string {
+func IP(name string, r ShellRunner) string {
 	execCommand := exec.Command(r.Path(), "list", "--format", "json")
 
 	type listOutput struct {

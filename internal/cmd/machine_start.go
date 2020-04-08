@@ -19,6 +19,6 @@ var startCommand = &cobra.Command{
 			return err
 		}
 
-		return Run(NewMultipassRunner("multipass"), []action.Action{*startAction})
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*startAction})
 	},
 }

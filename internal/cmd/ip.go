@@ -16,7 +16,7 @@ var ipCommand = &cobra.Command{
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
-		r := NewMultipassRunner("multipass")
+		r := action.NewMultipassRunner("multipass")
 
 		ip := action.IP(name, r)
 		if ip == "" {
