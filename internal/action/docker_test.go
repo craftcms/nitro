@@ -29,7 +29,7 @@ func TestCreateDatabaseContainer(t *testing.T) {
 			want: &Action{
 				Type:       "exec",
 				UseSyscall: false,
-				Args:       []string{"exec", "machinename", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306"},
+				Args:       []string{"exec", "machinename", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "mysql:5.7"},
 			},
 			wantErr: false,
 		},

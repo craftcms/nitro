@@ -39,7 +39,7 @@ func CreateDatabaseContainer(name, engine, version string, port int) (*Action, e
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "docker", "run", "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping},
+		Args:       []string{"exec", name, "--", "docker", "run", "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping, engine + ":" + version},
 	}, nil
 }
 
