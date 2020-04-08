@@ -11,7 +11,7 @@ var sshCommand = &cobra.Command{
 	Use:   "ssh",
 	Short: "SSH into machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.SSH(name))
 	},
