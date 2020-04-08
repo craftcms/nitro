@@ -142,3 +142,11 @@ func DatabaseEngineAndVersion(e, v string) error {
 
 	return errors.New("unsupported version of " + e + ": " + v)
 }
+
+func MachineName(v string) error {
+	if strings.Contains(v, " ") {
+		return errors.New("machine name cannot contain spaces")
+	}
+
+	return nil
+}
