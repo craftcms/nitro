@@ -10,16 +10,24 @@ import (
 
 var updateCommand = &cobra.Command{
 	Use:     "update",
-	Aliases: []string{"u", "upgrade"},
-	Short:   "Update a machine",
+	Aliases: []string{"upgrade"},
+	Short:   "Update machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
+		var actions []action.Action
 		updateAction, err := action.Update(name)
 		if err != nil {
 			return err
 		}
+		actions = append(actions, *updateAction)
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*updateAction})
+		upgradeAction, err := action.Upgrade(name)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *upgradeAction)
+
+		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
