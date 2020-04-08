@@ -1,11 +1,13 @@
-package nitro
+package action
 
 import (
 	"encoding/json"
 	"os/exec"
+
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func IP(name string, r ShellRunner) string {
+func IP(name string, r nitro.ShellRunner) string {
 	cmd := exec.Command(r.Path(), "list", "--format", "json")
 
 	type listOutput struct {

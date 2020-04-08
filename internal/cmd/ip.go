@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -18,7 +19,7 @@ var ipCommand = &cobra.Command{
 		name := config.GetString("name", flagMachineName)
 		r := nitro.NewMultipassRunner("multipass")
 
-		ip := nitro.IP(name, r)
+		ip := action.IP(name, r)
 		if ip == "" {
 			return errors.New("could not get the IP of " + name)
 		}
