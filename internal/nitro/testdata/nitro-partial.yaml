@@ -1,0 +1,4 @@
+name: defaults
+database:
+  engine: mysql
+  version: 5.7

@@ -1,9 +1,9 @@
 .PHONY: install
 
-MACHINE ?= demo-app
+MACHINE ?= nitro-global
 
 build:
-	go build -o nitro ./cmd/nitro
+	go build -o nitro ./cmd/cli
 run: build
 	./nitro init
 clean:
@@ -12,8 +12,15 @@ clean:
 test:
 	go test ./...
 demo: build
+	./nitro serve demo-site demo
+demo-site:
 	composer create-project craftcms/craft demo-site
-	./nitro --machine ${MACHINE} init
-	./nitro --machine ${MACHINE} site --path=demo-site demo
 releaser:
 	goreleaser --snapshot --skip-publish --rm-dist
+integration-test: build
+	./nitro -f nitro.yaml machine create
+	composer create-project craftcms/craft demo-site
+	./nitro -f nitro.yaml serve ./demo-site demo.test
+remove-integration-test:
+	./nitro -f nitro.yaml machine destroy -p
+	rm -rf demo-site

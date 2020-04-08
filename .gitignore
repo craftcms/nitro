@@ -5,3 +5,4 @@
 /dist
 composer.lock
 /.idea
+/demo-site
