@@ -353,10 +353,10 @@ func TestDatabaseConfig(t *testing.T) {
 			args: args{
 				databases: []config.Database{
 					{
-						Port: 3306,
+						Port: "3306",
 					},
 					{
-						Port: 33061,
+						Port: "33061",
 					},
 				},
 			},
@@ -367,10 +367,10 @@ func TestDatabaseConfig(t *testing.T) {
 			args: args{
 				databases: []config.Database{
 					{
-						Port: 3306,
+						Port: "3306",
 					},
 					{
-						Port: 3306,
+						Port: "3306",
 					},
 				},
 			},

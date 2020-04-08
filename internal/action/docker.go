@@ -9,20 +9,20 @@ import (
 // CreateDatabaseContainer is responsible for the creation of a new Docker database and will
 // assign a volume and port based on the arguments. Validation of port collisions should occur
 // outside of this func and this will only validate engines and versions.
-func CreateDatabaseContainer(name, engine, version string, port int) (*Action, error) {
+func CreateDatabaseContainer(name, engine, version, port string) (*Action, error) {
 	if err := validate.DatabaseEngineAndVersion(engine, version); err != nil {
 		return nil, err
 	}
 
 	// get the container path and port based on the engine
 	var containerPath string
-	var containerPort int
+	var containerPort string
 	switch engine {
 	case "postgres":
-		containerPort = 5432
+		containerPort = "5432"
 		containerPath = "/var/lib/postgresql/data"
 	default:
-		containerPort = 3306
+		containerPort = "3306"
 		containerPath = "/var/lib/mysql"
 	}
 
@@ -34,7 +34,7 @@ func CreateDatabaseContainer(name, engine, version string, port int) (*Action, e
 	containerName := containerName(engine, version, port)
 
 	// create the port mapping
-	portMapping := fmt.Sprintf("%d:%d", port, containerPort)
+	portMapping := fmt.Sprintf("%v:%v", port, containerPort)
 
 	return &Action{
 		Type:       "exec",
@@ -43,7 +43,7 @@ func CreateDatabaseContainer(name, engine, version string, port int) (*Action, e
 	}, nil
 }
 
-func CreateDatabaseVolume(name, engine, version string, port int) (*Action, error) {
+func CreateDatabaseVolume(name, engine, version, port string) (*Action, error) {
 	if err := validate.DatabaseEngineAndVersion(engine, version); err != nil {
 		return nil, err
 	}
@@ -57,10 +57,10 @@ func CreateDatabaseVolume(name, engine, version string, port int) (*Action, erro
 	}, nil
 }
 
-func containerName(engine, version string, port int) string {
-	return fmt.Sprintf("%s_%s_%d", engine, version, port)
+func containerName(engine, version, port string) string {
+	return fmt.Sprintf("%s_%s_%s", engine, version, port)
 }
 
-func containerVolume(engine, version string, port int) string {
-	return fmt.Sprintf("%s_%s_%d", engine, version, port)
+func containerVolume(engine, version, port string) string {
+	return fmt.Sprintf("%s_%s_%s", engine, version, port)
 }

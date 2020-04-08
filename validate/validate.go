@@ -154,11 +154,11 @@ func MachineName(v string) error {
 }
 
 func DatabaseConfig(databases []config.Database) error {
-	ports := map[int]int{}
+	ports := map[string]string{}
 
 	for _, database := range databases {
-		if ports[database.Port] != 0 {
-			return errors.New(fmt.Sprintf("duplicate port %d assigned to %s", database.Port, database.Engine))
+		if ports[database.Port] != "" {
+			return errors.New(fmt.Sprintf("duplicate port %s assigned to %s", database.Port, database.Engine))
 		}
 
 		ports[database.Port] = database.Port

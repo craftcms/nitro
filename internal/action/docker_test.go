@@ -10,7 +10,7 @@ func TestCreateDatabaseContainer(t *testing.T) {
 		name    string
 		engine  string
 		version string
-		port    int
+		port    string
 	}
 	tests := []struct {
 		name    string
@@ -24,7 +24,7 @@ func TestCreateDatabaseContainer(t *testing.T) {
 				name:    "machinename",
 				engine:  "mysql",
 				version: "5.7",
-				port:    3306,
+				port:    "3306",
 			},
 			want: &Action{
 				Type:       "exec",
@@ -53,7 +53,7 @@ func TestCreateDatabaseVolume(t *testing.T) {
 		name    string
 		engine  string
 		version string
-		port    int
+		port    string
 	}
 	tests := []struct {
 		name    string
@@ -67,7 +67,7 @@ func TestCreateDatabaseVolume(t *testing.T) {
 				name:    "somename",
 				engine:  "mysql",
 				version: "5.7",
-				port:    3306,
+				port:    "3306",
 			},
 			want: &Action{
 				Type:       "exec",
