@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"os/exec"
 
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/cmd"
 )
 
-func IP(name string, r nitro.ShellRunner) string {
-	cmd := exec.Command(r.Path(), "list", "--format", "json")
+func IP(name string, r cmd.ShellRunner) string {
+	execCommand := exec.Command(r.Path(), "list", "--format", "json")
 
 	type listOutput struct {
 		List []struct {
@@ -21,7 +21,7 @@ func IP(name string, r nitro.ShellRunner) string {
 
 	output := listOutput{}
 
-	out, err := cmd.CombinedOutput()
+	out, err := execCommand.CombinedOutput()
 	if err != nil {
 		return ""
 	}

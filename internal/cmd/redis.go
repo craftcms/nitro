@@ -5,7 +5,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
-	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var redisCommand = &cobra.Command{
@@ -19,6 +18,6 @@ var redisCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*redisAction})
+		return Run(NewMultipassRunner("multipass"), []action.Action{*redisAction})
 	},
 }

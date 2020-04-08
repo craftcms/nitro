@@ -5,7 +5,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
-	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var restartCommand = &cobra.Command{
@@ -19,6 +18,6 @@ var restartCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*restartAction})
+		return Run(NewMultipassRunner("multipass"), []action.Action{*restartAction})
 	},
 }

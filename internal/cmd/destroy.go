@@ -7,7 +7,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
-	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var (
@@ -30,7 +29,7 @@ var (
 				return err
 			}
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
+			return Run(NewMultipassRunner("multipass"), []action.Action{*destroyAction})
 		},
 	}
 )

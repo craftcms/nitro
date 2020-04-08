@@ -5,7 +5,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
-	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var updateCommand = &cobra.Command{
@@ -28,6 +27,6 @@ var updateCommand = &cobra.Command{
 		}
 		actions = append(actions, *upgradeAction)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		return Run(NewMultipassRunner("multipass"), actions)
 	},
 }

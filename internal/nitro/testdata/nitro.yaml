@@ -1,7 +1,0 @@
-name: some-name
-cpu: 2
-memory: 4G
-disk: 33G
-database:
-  engine: mysql
-  version: 5.7

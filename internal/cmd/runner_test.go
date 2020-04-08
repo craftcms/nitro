@@ -1,4 +1,4 @@
-package nitro
+package cmd
 
 import "errors"
 

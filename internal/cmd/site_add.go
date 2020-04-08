@@ -7,7 +7,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -58,7 +57,7 @@ var siteAddCommand = &cobra.Command{
 			return nil
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		return Run(NewMultipassRunner("multipass"), actions)
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
 		fmt.Println(
