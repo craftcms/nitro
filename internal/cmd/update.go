@@ -13,7 +13,7 @@ var updateCommand = &cobra.Command{
 	Aliases: []string{"u", "upgrade"},
 	Short:   "Update a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 
 		updateAction, err := action.Update(name)
 		if err != nil {

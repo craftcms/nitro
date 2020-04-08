@@ -10,6 +10,6 @@ func Update(name string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "sudo", "apt-get", "update", "-y", "&&", "sudo", "apt-get", "upgrade", "-y"},
+		Args:       []string{"exec", name, "--", "sudo", "apt-get", "update", "&&", "sudo", "apt-get", "upgrade", "-y"},
 	}, nil
 }
