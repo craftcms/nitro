@@ -122,15 +122,13 @@ The following commands will help you manage your virtual server.
 
 > Note: these examples use a custom server name of `diesel`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
-### `init`
+### `machine create`
 
 Creates a new server. The following options are available:
 
 | Argument        | Default | Options             | Description                                       |
 | --------------- | ------- | ------------------- | ------------------------------------------------- |
-| `--bootstrap`   | `true`  |                     | Bootstraps installation of PHP, MySQL, and Redis. |
-| `--php-version` | `7.4`   | `7.4`, `7.3`, `7.2` | Specifies PHP version used for bootstrap command. |
-| `--database`    | `mysql` | `mysql`, `postgres` | Specifies database used for bootstrap command.    |
+| `--php-version` | `7.4`   | `7.4`, `7.3`, `7.2`, `7.1`, `7.0` | Specifies PHP version used for bootstrap command. |
 | `--cpus`        | `2`     | max host CPUs\*     | Number of CPUs to allocate to the server.         |
 | `--memory`      | `2G`    | max host memory\*   | Gigabytes of memory to allocate to the server.    |
 | `--disk`        | `20G`   | max host disk\*     | Disk space to allocate to the server.             |
