@@ -31,6 +31,7 @@ func TestLaunch(t *testing.T) {
 			want: &Action{
 				Type:       "launch",
 				UseSyscall: false,
+				Input:      "someinput",
 				Args:       []string{"--name", "machine", "--cpus", "4", "--mem", "2G", "--disk", "20G", "--cloud-init", "-"},
 			},
 			wantErr: false,
@@ -99,7 +100,7 @@ func TestLaunch(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Launch() got = %v, want %v", got, tt.want)
+				t.Errorf("Launch() got = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}
