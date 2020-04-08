@@ -24,6 +24,7 @@ var (
 	siteAddCommand = &cobra.Command{
 		Use:   "add",
 		Short: "Add a site to machine",
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			machineName := config.GetString("machine", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
