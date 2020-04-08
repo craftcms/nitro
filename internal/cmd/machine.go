@@ -6,7 +6,7 @@ import (
 
 var machineCommand = &cobra.Command{
 	Use:    "machine",
-	Short:  "Perform actions on the multipass machine",
+	Short:  "Manage multipass machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},

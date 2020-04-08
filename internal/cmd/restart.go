@@ -8,19 +8,17 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-var (
-	restartCommand = &cobra.Command{
-		Use:   "restart",
-		Short: "Restart a machine",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("name", flagMachineName)
+var restartCommand = &cobra.Command{
+	Use:   "restart",
+	Short: "Restart a machine",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := config.GetString("name", flagMachineName)
 
-			restartAction, err := action.Restart(name)
-			if err != nil {
-				return err
-			}
+		restartAction, err := action.Restart(name)
+		if err != nil {
+			return err
+		}
 
-			return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*restartAction})
-		},
-	}
-)
+		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*restartAction})
+	},
+}

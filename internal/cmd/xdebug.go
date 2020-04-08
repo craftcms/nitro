@@ -11,7 +11,7 @@ var (
 	xdebugCommand = &cobra.Command{
 		Use:     "xdebug",
 		Aliases: []string{"x"},
-		Short:   "Perform Xdebug operations on machine",
+		Short:   "Manage Xdebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
