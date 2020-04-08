@@ -26,8 +26,8 @@ A better, faster way to develop Craft CMS apps locally without Docker or Vagrant
 
 Nitro installs the following on every machine:
 
-- PHP 7.4 (+ option to use 7.3 or 7.2)
-- MySQL (MariaDB)
+- PHP 7.4 (+ option to use 7.3, 7.2, 7.1, 7.0)
+- MySQL
 - PostgreSQL (optional)
 - Redis
 
@@ -81,51 +81,44 @@ TODO add windows manual instructions.
 
 ## Usage
 
-In order to create a new development server, you must “initialize” Nitro. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
+In order to create a new development server, you must create a new Nitro machine. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
 
 ```bash
-nitro init
+nitro machine create
 ```
 
-> Note: `nitro init` has options you can pass when creating a new server. However, we can set some "“sane” defaults for most scenarios. To view the options, run `nitro init -h`.
+> Note: `nitro machine create` has options you can pass when creating a new server. However, we can set some "“sane” defaults for most scenarios. To view the options, run `nitro machine create --help`.
 
-After running `init`, the system will default to automatically bootstrap the server. The bootstrap process will install the latest PHP version, MySQL, and Redis.
-
-> Note: if you wish to avoid bootstrapping, pass `--bootstrap false` when running init (e.g. `nitro init --bootstrap false`)
+After running `machine create`, the system will default to automatically bootstrap the server. The bootstrap process will install the latest PHP version, MySQL, and Redis.
 
 The next step is to add a new virtual host to the server:
 
 ```bash
-nitro site mysite.test /Users/jason/Sites/craftcms
+nitro site add /Users/jason/Sites/craftcms myclientsite.test
 ```
+
+> Note: you can use any top level domain you wish, but we recomend using .test
 
 This process will perform the following tasks:
 
-1. Set up a new nginx virtual server for `mysite.test`.
+1. Set up a new nginx virtual server for `myclientsite.test`.
 2. Attach the directory `/Users/jason/Sites/craftcms` to that virtual server.
-3. Edit your `/etc/hosts` file to point `mysite.test` to the virtual server for use locally.
+3. Edit your `/etc/hosts` file to point `myclientsite.test` to the virtual server for use locally.
 
-You can now visit `http://mysite.test` in your browser!
+You can now visit `http://myclientsite.test` in your browser!
 
 ## Commands
 
 The following commands will help you manage your virtual server.
 
-- [`init`](#init)
 - [`site`](#site)
-- [`attach`](#attach)
 - [`ssh`](#ssh)
-- [`xon`](#xon)
-- [`xoff`](#xoff)
 - [`start`](#start)
 - [`stop`](#stop)
-- [`destroy`](#destroy)
-- [`sql`](#sql)
+- [`machine destroy`](#destroy)
 - [`redis`](#redis)
 - [`update`](#update)
 - [`logs`](#logs)
-- [`services`](#services)
-- [`refresh`](#refresh)
 
 > Note: these examples use a custom server name of `diesel`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
@@ -336,14 +329,4 @@ This starts Redis on the `diesel` machine:
 
 ```bash
 nitro --machine diesel services start --redis
-```
-
-### `refresh`
-
-Updates the scripts used to create virtual servers for nginx and other utilities. This is only needed when updating the Nitro CLI.
-
-This updates the `diesel` machine to use Nitro’s most current virtual server scripts for the CLI:
-
-```bash
-nitro --machine diesel refresh
 ```
