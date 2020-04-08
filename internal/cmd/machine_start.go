@@ -11,7 +11,7 @@ import (
 var startCommand = &cobra.Command{
 	Use:     "start",
 	Aliases: []string{"up"},
-	Short:   "Start a machine",
+	Short:   "Start machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 

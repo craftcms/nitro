@@ -10,7 +10,7 @@ import (
 
 var restartCommand = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart a machine",
+	Short: "Restart machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
