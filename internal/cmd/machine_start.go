@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -12,8 +13,13 @@ var startCommand = &cobra.Command{
 	Aliases: []string{"up"},
 	Short:   "Start a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Start(name))
+		startAction, err := action.Start(name)
+		if err != nil {
+			return err
+		}
+
+		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*startAction})
 	},
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -14,6 +15,11 @@ var updateCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Update(name))
+		updateAction, err := action.Update(name)
+		if err != nil {
+			return err
+		}
+
+		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*updateAction})
 	},
 }

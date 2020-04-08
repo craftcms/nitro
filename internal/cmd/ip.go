@@ -15,7 +15,7 @@ var ipCommand = &cobra.Command{
 	Short:  "Show machine IP",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 		r := nitro.NewMultipassRunner("multipass")
 
 		ip := nitro.IP(name, r)

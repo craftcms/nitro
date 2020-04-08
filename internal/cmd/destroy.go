@@ -17,7 +17,7 @@ var (
 		Use:   "destroy",
 		Short: "Destroy a machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
+			name := config.GetString("name", flagMachineName)
 
 			if flagPermanent {
 				fmt.Println("permanently deleting", name)

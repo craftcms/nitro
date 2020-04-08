@@ -26,7 +26,7 @@ var (
 		Short: "Add a site to machine",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			machineName := config.GetString("machine", flagMachineName)
+			machineName := config.GetString("name", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
 			localDirectory := args[0]
 			domainName := args[1]

@@ -14,7 +14,7 @@ var (
 		Use:   "nginx",
 		Short: "Show nginx logs",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
+			name := config.GetString("name", flagMachineName)
 
 			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.NginxLogs(name, flagNginxLogsKind))
 		},

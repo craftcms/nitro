@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var (
@@ -9,7 +13,14 @@ var (
 		Use:   "restart",
 		Short: "Restart a machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
+			name := config.GetString("name", flagMachineName)
+
+			restartAction, err := action.Restart(name)
+			if err != nil {
+				return err
+			}
+
+			return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*restartAction})
 		},
 	}
 )
