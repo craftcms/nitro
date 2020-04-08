@@ -5,13 +5,13 @@ disk: 30G
 php: 7.3
 databases:
   - engine: mysql
-    verison: 5.7
+    version: 5.7
     port: 3306
   - engine: mysql
-    verison: 5.8
+    version: 5.6
     port: 33061
   - engine: postgres
-    verison: 11.7
+    version: 11.7
     port: 5432
 sites:
   - domain: example.test
