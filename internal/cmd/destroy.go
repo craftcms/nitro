@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -24,7 +25,12 @@ var (
 				fmt.Println("soft deleting", name)
 			}
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Destroy(name, flagPermanent))
+			destroyAction, err := action.Destroy(name, flagPermanent)
+			if err != nil {
+				return err
+			}
+
+			return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
 		},
 	}
 )
