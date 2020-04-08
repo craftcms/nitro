@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
@@ -28,20 +29,13 @@ var (
 			fmt.Println("Using config file:", viper.ConfigFileUsed())
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
+			name := config.GetString("name", flagMachineName)
 			cpus := config.GetInt("cpus", flagCPUs)
 			memory := config.GetString("memory", flagMemory)
 			disk := config.GetString("disk", flagDisk)
 			phpVersion := config.GetString("php", flagPhpVersion)
-			dbEngine := config.GetString("database.engine", flagDatabase)
-			dbVersion := config.GetString("database.version", flagDatabaseVersion)
 
-			if viper.IsSet("sites") {
-				var sites []config.Site
-				viper.UnmarshalKey("sites", &sites)
-				fmt.Println(sites)
-			}
-
+			// validate
 			if err := validate.DiskSize(disk); err != nil {
 				return err
 			}
@@ -51,36 +45,60 @@ var (
 			if err := validate.PHPVersion(phpVersion); err != nil {
 				return err
 			}
-			if err := validate.DatabaseEngineAndVersion(dbEngine, dbVersion); err != nil {
+			if !viper.IsSet("databases") {
+				return errors.New("no databases defined in " + viper.ConfigFileUsed())
+			}
+
+			var databases []config.Database
+			_ = viper.UnmarshalKey("databases", &databases)
+
+			if err := validate.DatabaseConfig(databases); err != nil {
 				return err
 			}
 
+			var actions []action.Action
+			launchAction, err := action.Launch(name, cpus, memory, disk, nitro.CloudConfig)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *launchAction)
+
+			installAction, err := action.InstallPackages(name, phpVersion)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *installAction)
+
+			for _, database := range databases {
+				volumeAction, err := action.CreateDatabaseVolume(name, database.Engine, database.Version, database.Port)
+				if err != nil {
+					return err
+				}
+				actions = append(actions, *volumeAction)
+
+				createDatabaseAction, err := action.CreateDatabaseContainer(name, database.Engine, database.Version, database.Port)
+				if err != nil {
+					return err
+				}
+				actions = append(actions, *createDatabaseAction)
+			}
+
 			if flagDebug {
-				fmt.Println("--- DEBUG ---")
-				fmt.Println("machine:", name)
-				fmt.Println("cpus:", cpus)
-				fmt.Println("memory:", memory)
-				fmt.Println("disk:", disk)
-				fmt.Println("php:", phpVersion)
-				fmt.Println("database:", dbEngine, dbVersion)
-				fmt.Println("--- DEBUG ---")
+				for _, a := range actions {
+					fmt.Println(a.Args)
+				}
+
 				return nil
 			}
 
-			var commands []nitro.Command
-			commands = append(commands, nitro.Create(name, strconv.Itoa(cpus), memory, disk, phpVersion, dbEngine, dbVersion)...)
-
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), commands)
+			return nitro.RunAction(nitro.NewMultipassRunner("multipass"), actions)
 		},
 	}
 )
 
 func init() {
-	// attach local flags
 	createCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "number of cpus to allocate")
 	createCommand.Flags().StringVar(&flagMemory, "memory", "", "amount of memory to allocate")
 	createCommand.Flags().StringVar(&flagDisk, "disk", "", "amount of disk space to allocate")
 	createCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which version of PHP to make default")
-	createCommand.Flags().StringVar(&flagDatabase, "database", "", "which database engine to make default")
-	createCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "", "which version of the database to install")
 }
