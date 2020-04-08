@@ -42,10 +42,8 @@ var hostsRemoveCommand = &cobra.Command{
 			domains = append(domains, site.Domain)
 		}
 
-		hosts.RemoveAddresses(domains)
+		hosts.Remove(domains)
 
-		// fmt.Println(hosts.RenderHostsFile())
-
-		return nil
+		return hosts.Save()
 	},
 }

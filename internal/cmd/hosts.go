@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -49,8 +48,6 @@ var hostsCommand = &cobra.Command{
 
 		hosts.AddHosts(ip, domains)
 
-		fmt.Println(hosts.RenderHostsFile())
-
-		return nil
+		return hosts.Save()
 	},
 }
