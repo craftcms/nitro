@@ -41,11 +41,13 @@ func init() {
 		logsCommand,
 		xdebugCommand,
 		redisCommand,
+		hostsCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
 	logsCommand.AddCommand(logsNginxCommand, logsDockerCommand, logsDatabaseCommand)
+	hostsCommand.AddCommand(hostsRemoveCommand)
 }
 
 func Execute() {
