@@ -20,9 +20,9 @@ databases:
     version: 12
     port: 54321
 sites:
-  - domain: example.test
-    path: /Users/jasonmccallister/go/src/github.com/nitro/demo-site
-    root: web
-  - domain: another.test
-    path: /Users/jasonmccallister/go/src/github.com/nitro/demo-site
-    root: web
+  - domain: craft3dev.test
+    path: ~/dev/craft-dev
+    docroot: web
+  - domain: anotherproject.test
+    path: ~/dev/plugins-dev
+    docroot: web

@@ -1,17 +1,17 @@
 package cmd
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var (
 	xdebugCommand = &cobra.Command{
-		Use:     "xdebug",
-		Aliases: []string{"x"},
-		Short:   "Manage Xdebug on machine",
+		Use:   "xdebug",
+		Short: "Manage Xdebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -22,10 +22,10 @@ var (
 		Aliases: []string{"xon"},
 		Short:   "Enable XDebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
-			php := config.GetString("php", flagPhpVersion)
+			_ = config.GetString("machine", flagMachineName)
+			_ = config.GetString("php", flagPhpVersion)
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.EnableXdebug(name, php))
+			return errors.New("not implemented")
 		},
 	}
 
@@ -33,10 +33,10 @@ var (
 		Use:   "off",
 		Short: "Disable Xdebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
-			php := config.GetString("php", flagPhpVersion)
+			_ = config.GetString("name", flagMachineName)
+			_ = config.GetString("php", flagPhpVersion)
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.DisableXdebug(name, php))
+			return errors.New("not implemented")
 		},
 	}
 )

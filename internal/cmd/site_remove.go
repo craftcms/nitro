@@ -13,7 +13,7 @@ var siteRemoveCommand = &cobra.Command{
 	Short: "Remove a site from machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		_ = config.GetString("name", flagMachineName)
+
 		return errors.New("not implemented yet")
-		// return nitro.Run(nitro.NewMultipassRunner("multipass"), nitro.Empty(name))
 	},
 }
