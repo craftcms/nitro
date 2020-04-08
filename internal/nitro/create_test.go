@@ -36,7 +36,7 @@ func TestCreate(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "launch",
 					Chainable: true,
-					Input:     cloudConfig,
+					Input:     CloudConfig,
 					Args:      []string{"--name", "thisname", "--cpus", "4", "--mem", "4G", "--disk", "20G", "--cloud-init", "-"},
 				},
 				{
@@ -75,7 +75,7 @@ func TestCreate(t *testing.T) {
 					Machine:   "thisname",
 					Type:      "launch",
 					Chainable: true,
-					Input:     cloudConfig,
+					Input:     CloudConfig,
 					Args:      []string{"--name", "thisname", "--cpus", "4", "--mem", "4G", "--disk", "20G", "--cloud-init", "-"},
 				},
 				{

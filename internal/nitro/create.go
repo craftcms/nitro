@@ -4,7 +4,7 @@ import (
 	"github.com/craftcms/nitro/scripts"
 )
 
-const cloudConfig = `#cloud-config
+const CloudConfig = `#cloud-config
 packages:
   - redis
   - jq
@@ -72,7 +72,7 @@ func Create(name, cpus, memory, disk, php, db, version string) []Command {
 		Machine:   name,
 		Type:      "launch",
 		Chainable: true,
-		Input:     cloudConfig,
+		Input:     CloudConfig,
 		Args:      []string{"--name", name, "--cpus", cpus, "--mem", memory, "--disk", disk, "--cloud-init", "-"},
 	})
 
