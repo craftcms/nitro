@@ -20,6 +20,6 @@ var startCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*startAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*startAction})
 	},
 }

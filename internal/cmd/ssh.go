@@ -19,6 +19,6 @@ var sshCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*sshAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*sshAction})
 	},
 }

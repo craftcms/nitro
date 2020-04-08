@@ -4,7 +4,7 @@ import (
 	"github.com/craftcms/nitro/internal/action"
 )
 
-func RunAction(r ShellRunner, actions []action.Action) error {
+func Run(r ShellRunner, actions []action.Action) error {
 	for _, a := range actions {
 		// if this is the launch action, check for input
 		if a.Type == "launch" && a.Input != "" {

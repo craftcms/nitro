@@ -19,6 +19,6 @@ var redisCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*redisAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*redisAction})
 	},
 }

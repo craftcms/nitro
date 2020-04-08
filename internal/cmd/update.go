@@ -28,6 +28,6 @@ var updateCommand = &cobra.Command{
 		}
 		actions = append(actions, *upgradeAction)
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), actions)
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }

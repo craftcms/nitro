@@ -30,7 +30,7 @@ var (
 				return err
 			}
 
-			return nitro.RunAction(nitro.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
 		},
 	}
 )

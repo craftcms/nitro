@@ -86,7 +86,7 @@ var createCommand = &cobra.Command{
 			return nil
 		}
 
-		return nitro.RunAction(nitro.NewMultipassRunner("multipass"), actions)
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
 
