@@ -42,7 +42,8 @@ write_files:
       xdebug.remote_connect_back=0
       xdebug.remote_host=192.168.64.1
       xdebug.remote_port=9000
-      xdebug.remote_log=/home/ubuntu/.nitro/logs/xdebug.log
+      xdebug.remote_autostart=1
+      xdebug.idekey=PHPSTORM
 runcmd:
   - sudo add-apt-repository --no-update -y ppa:nginx/stable
   - sudo add-apt-repository --no-update -y ppa:ondrej/php
@@ -55,6 +56,4 @@ runcmd:
   - sudo usermod -aG docker ubuntu
   - sudo mkdir -p /app/sites
   - sudo chown -R ubuntu:ubuntu /app/sites
-  - mkdir /home/ubuntu/.nitro
-  - touch /home/ubuntu/.nitro/logs/xdebug.log 
 `
