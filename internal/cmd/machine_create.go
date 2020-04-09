@@ -76,6 +76,18 @@ var createCommand = &cobra.Command{
 		}
 		actions = append(actions, *configureExecutionTimeAction)
 
+		xdebugConfigureAction, err := action.ConfigureXdebug(name, phpVersion)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *xdebugConfigureAction)
+
+		restartPhpFpmAction, err := action.RestartPhpFpm(name, phpVersion)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *restartPhpFpmAction)
+
 		for _, database := range databases {
 			volumeAction, err := action.CreateDatabaseVolume(name, database.Engine, database.Version, database.Port)
 			if err != nil {
