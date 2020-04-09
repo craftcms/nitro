@@ -35,6 +35,14 @@ write_files:
              fastcgi_read_timeout 240;
           }
       }
+  - path: /opt/nitro/php-xdebug.ini
+    content: |
+      zend_extension=xdebug.so
+      xdebug.remote_enable=1
+      xdebug.remote_connect_back=0
+      xdebug.remote_host=localhost
+      xdebug.remote_port=9000
+      xdebug.remote_log=/var/log/nginx/xdebug.log
 runcmd:
   - sudo add-apt-repository --no-update -y ppa:nginx/stable
   - sudo add-apt-repository --no-update -y ppa:ondrej/php

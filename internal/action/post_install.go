@@ -51,6 +51,6 @@ func ConfigureXdebug(name, php string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "printf", "xdebug.remote_enable=1\nxdebug.remote_connect_back=0\nxdebug.remote_host=localhost\nxdebug.remote_port=9000\nxdebug.remote_log=/var/log/nginx/xdebug.log\n", "|", "sudo", "tee", "-a", "/etc/php/" + php + "/mods-available/xdebug.ini"},
+		Args:       []string{"exec", name, "--", "sudo", "cp", "/opt/nitro/php-xdebug.ini", "/etc/php/" + php + "/mods-available/xdebug.ini"},
 	}, nil
 }
