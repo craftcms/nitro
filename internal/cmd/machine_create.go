@@ -63,6 +63,25 @@ var createCommand = &cobra.Command{
 		}
 		actions = append(actions, *installAction)
 
+		// configure php settings that are specific to Craft
+		configurePhpMemoryAction, err := action.ConfigurePHPMemoryLimit(name, phpVersion, "256M")
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *configurePhpMemoryAction)
+
+		configureExecutionTimeAction, err := action.ConfigurePHPExecutionTimeLimit(name, phpVersion, "240")
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *configureExecutionTimeAction)
+
+		configureXdebugAction, err := action.ConfigureXdebug(name, phpVersion)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *configureXdebugAction)
+
 		for _, database := range databases {
 			volumeAction, err := action.CreateDatabaseVolume(name, database.Engine, database.Version, database.Port)
 			if err != nil {
