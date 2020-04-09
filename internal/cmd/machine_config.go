@@ -39,7 +39,7 @@ runcmd:
   - sudo add-apt-repository --no-update -y ppa:nginx/stable
   - sudo add-apt-repository --no-update -y ppa:ondrej/php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
   - sudo apt-get update -y
