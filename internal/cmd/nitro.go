@@ -45,7 +45,7 @@ func init() {
 		contextCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
-	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
+	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
 	logsCommand.AddCommand(logsNginxCommand, logsDockerCommand, logsDatabaseCommand)
 	hostsCommand.AddCommand(hostsRemoveCommand)

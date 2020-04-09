@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"errors"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/validate"
 )
 
 var (
@@ -22,10 +22,18 @@ var (
 		Aliases: []string{"xon"},
 		Short:   "Enable XDebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_ = config.GetString("machine", flagMachineName)
-			_ = config.GetString("php", flagPhpVersion)
+			name := config.GetString("name", flagMachineName)
+			php := config.GetString("php", flagPhpVersion)
+			if err := validate.PHPVersion(php); err != nil {
+				return err
+			}
 
-			return errors.New("not implemented")
+			enableXdebugAction, err := action.EnableXdebug(name, php)
+			if err != nil {
+				return err
+			}
+
+			return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*enableXdebugAction})
 		},
 	}
 
@@ -33,10 +41,34 @@ var (
 		Use:   "off",
 		Short: "Disable Xdebug on machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_ = config.GetString("name", flagMachineName)
-			_ = config.GetString("php", flagPhpVersion)
+			name := config.GetString("name", flagMachineName)
+			php := config.GetString("php", flagPhpVersion)
+			if err := validate.PHPVersion(php); err != nil {
+				return err
+			}
 
-			return errors.New("not implemented")
+			disableXdebugAction, err := action.DisableXdebug(name, php)
+			if err != nil {
+				return err
+			}
+
+			return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*disableXdebugAction})
+		},
+	}
+
+	xdebugConfigureCommand = &cobra.Command{
+		Use:   "configure",
+		Short: "Configure xdebug on machine",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := config.GetString("name", flagMachineName)
+			php := config.GetString("php", flagPhpVersion)
+
+			xdebugConfigureAction, err := action.ConfigureXdebug(name, php)
+			if err != nil {
+				return err
+			}
+
+			return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*xdebugConfigureAction})
 		},
 	}
 )
