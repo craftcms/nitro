@@ -10,7 +10,7 @@ func EnableXdebug(name, php string) (*Action, error) {
 	if name == "" {
 		return nil, errors.New("name cannot by empty")
 	}
-	if err := validate.PHPVersion(v); err != nil {
+	if err := validate.PHPVersion(php); err != nil {
 		return nil, err
 	}
 
@@ -25,7 +25,7 @@ func DisableXdebug(name, php string) (*Action, error) {
 	if name == "" {
 		return nil, errors.New("name cannot by empty")
 	}
-	if err := validate.PHPVersion(v); err != nil {
+	if err := validate.PHPVersion(php); err != nil {
 		return nil, err
 	}
 
