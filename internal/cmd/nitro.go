@@ -42,6 +42,7 @@ func init() {
 		xdebugCommand,
 		redisCommand,
 		hostsCommand,
+		contextCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
