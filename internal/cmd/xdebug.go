@@ -63,12 +63,20 @@ var (
 			name := config.GetString("name", flagMachineName)
 			php := config.GetString("php", flagPhpVersion)
 
+			var actions []action.Action
 			xdebugConfigureAction, err := action.ConfigureXdebug(name, php)
 			if err != nil {
 				return err
 			}
+			actions = append(actions, *xdebugConfigureAction)
 
-			return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*xdebugConfigureAction})
+			restartPhpFpmAction, err := action.RestartPhpFpm(name, php)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *restartPhpFpmAction)
+
+			return action.Run(action.NewMultipassRunner("multipass"), actions)
 		},
 	}
 )
