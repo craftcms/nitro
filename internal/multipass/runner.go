@@ -8,11 +8,11 @@ import (
 	"syscall"
 )
 
-// Multipasser is an interface that provides a set of helpful wrappers around executing multipass
+// Runner is an interface that provides a set of helpful wrappers around executing multipass
 // commands. It provides the option to pass input (e.g. when using the multipass launch command
 // to pass a cloud config) and a method to tell the command to use syscall (when chaining commands
 // is not required for execution (e.g. multipass shell commands)
-type Multipasser interface {
+type Runner interface {
 	UseSyscall()
 	SetInput(input string) error
 	Run(args []string) error
@@ -67,9 +67,9 @@ func (m *multipass) Run(args []string) error {
 }
 
 // New takes a file path (e.g. multipass) and will look for the full path and
-// return a new Multipasser or an error. This provides a simple setup to
+// return a new Runner or an error. This provides a simple setup to
 // use multipass.
-func New(file string) (Multipasser, error) {
+func New(file string) (Runner, error) {
 	path, err := exec.LookPath(file)
 	if err != nil {
 		return nil, errors.New(err.Error())
