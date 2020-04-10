@@ -17,9 +17,17 @@ builds:
     hooks:
       post: ./hashgen.sh
 archives:
-  - replacements:
+  -
+    id: example
+    builds:
+      - nitro
+    replacements:
       386: i386
       amd64: x86_64
+    files:
+      - dist/nitro_windows_amd64.sha256
+      - dist/nitro_linux_amd64.sha256
+      - dist/nitro_darwin_amd64.sha256
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
