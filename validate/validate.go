@@ -146,6 +146,9 @@ func DatabaseEngineAndVersion(e, v string) error {
 }
 
 func MachineName(v string) error {
+	if v == "" {
+		return errors.New("machine name cannot be empty")
+	}
 	if strings.Contains(v, " ") {
 		return errors.New("machine name cannot contain spaces")
 	}
