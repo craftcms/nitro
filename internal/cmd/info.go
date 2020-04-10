@@ -4,22 +4,20 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 var infoCommand = &cobra.Command{
 	Use:   "info",
 	Short: "Show machine info",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("machine", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.Info(name),
-		); err != nil {
+		infoAction, err := action.Info(name)
+		if err != nil {
 			return err
 		}
 
-		return nil
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*infoAction})
 	},
 }

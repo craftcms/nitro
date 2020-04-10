@@ -6,35 +6,29 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/action"
 )
 
-var (
-	flagPermanent bool
+var destroyCommand = &cobra.Command{
+	Use:   "destroy",
+	Short: "Destroy a machine",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := config.GetString("name", flagMachineName)
 
-	destroyCommand = &cobra.Command{
-		Use:   "destroy",
-		Short: "Destroy a machine",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			name := config.GetString("machine", flagMachineName)
+		if flagPermanent {
+			fmt.Println("permanently deleting", name)
+		} else {
+			fmt.Println("soft deleting", name)
+		}
 
-			if flagPermanent {
-				fmt.Println("permanently deleting", name)
-			} else {
-				fmt.Println("soft deleting", name)
-			}
+		destroyAction, err := action.Destroy(name, flagPermanent)
+		if err != nil {
+			return err
+		}
 
-			if err := nitro.Run(
-				nitro.NewMultipassRunner("multipass"),
-				nitro.Destroy(name, flagPermanent),
-			); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
-)
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
+	},
+}
 
 func init() {
 	destroyCommand.Flags().BoolVarP(&flagPermanent, "permanent", "p", false, "permanently destroy the machine")

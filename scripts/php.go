@@ -21,6 +21,8 @@ func InstallPHP(v string) []string {
 			"php7.0-xml",
 			"php-xdebug",
 			"php-imagick",
+			"blackfire-agent",
+			"blackfire-php",
 		}
 	case "7.1":
 		return []string{
@@ -39,6 +41,8 @@ func InstallPHP(v string) []string {
 			"php7.1-xml",
 			"php-xdebug",
 			"php-imagick",
+			"blackfire-agent",
+			"blackfire-php",
 		}
 	case "7.2":
 		return []string{
@@ -57,6 +61,8 @@ func InstallPHP(v string) []string {
 			"php7.2-xml",
 			"php-xdebug",
 			"php-imagick",
+			"blackfire-agent",
+			"blackfire-php",
 		}
 	case "7.3":
 		return []string{
@@ -75,6 +81,8 @@ func InstallPHP(v string) []string {
 			"php7.3-xml",
 			"php-xdebug",
 			"php-imagick",
+			"blackfire-agent",
+			"blackfire-php",
 		}
 	}
 
@@ -94,5 +102,7 @@ func InstallPHP(v string) []string {
 		"php7.4-xml",
 		"php-xdebug",
 		"php-imagick",
+		"blackfire-agent",
+		"blackfire-php",
 	}
 }

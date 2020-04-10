@@ -1,25 +1,23 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 var sshCommand = &cobra.Command{
 	Use:   "ssh",
 	Short: "SSH into machine",
-	Run: func(cmd *cobra.Command, args []string) {
-		name := config.GetString("machine", flagMachineName)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := config.GetString("name", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.SSH(name),
-		); err != nil {
-			log.Fatal(err)
+		sshAction, err := action.SSH(name)
+		if err != nil {
+			return err
 		}
+
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*sshAction})
 	},
 }

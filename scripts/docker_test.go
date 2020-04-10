@@ -23,7 +23,7 @@ func TestRunDatabase(t *testing.T) {
 				engine:  "postgres",
 				version: "11.5",
 			},
-			want: []string{"exec", "some-name", "--", "docker", "run", "-v", "/opt/nitro/volumes/postgres:/var/lib/postgresql/data", "--name", "nitro_postgres_11.5", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres" + ":" + "11.5"},
+			want: []string{"some-name", "--", "docker", "run", "-v", "/opt/nitro/volumes/postgres:/var/lib/postgresql/data", "--name", "nitro_postgres_11.5", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "-e", "POSTGRES_DB=nitro", "postgres" + ":" + "11.5"},
 		},
 		{
 			name: "can run mysql",
@@ -32,7 +32,7 @@ func TestRunDatabase(t *testing.T) {
 				engine:  "mysql",
 				version: "5.7",
 			},
-			want: []string{"exec", "some-name", "--", "docker", "run", "-v", "/opt/nitro/volumes/mysql:/var/lib/mysql", "--name", "nitro_mysql_5.7", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql" + ":" + "5.7"},
+			want: []string{"some-name", "--", "docker", "run", "-v", "/opt/nitro/volumes/mysql:/var/lib/mysql", "--name", "nitro_mysql_5.7", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql" + ":" + "5.7"},
 		},
 	}
 	for _, tt := range tests {

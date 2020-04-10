@@ -1,26 +1,32 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 var updateCommand = &cobra.Command{
 	Use:     "update",
-	Aliases: []string{"u", "upgrade"},
-	Short:   "Update a machine",
-	Run: func(cmd *cobra.Command, args []string) {
-		name := config.GetString("machine", flagMachineName)
+	Aliases: []string{"upgrade"},
+	Short:   "Update machine",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := config.GetString("name", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.Update(name),
-		); err != nil {
-			log.Fatal(err)
+		var actions []action.Action
+		updateAction, err := action.Update(name)
+		if err != nil {
+			return err
 		}
+		actions = append(actions, *updateAction)
+
+		upgradeAction, err := action.Upgrade(name)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *upgradeAction)
+
+		return action.Run(action.NewMultipassRunner("multipass"), actions)
 	},
 }

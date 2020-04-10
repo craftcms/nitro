@@ -1,25 +1,23 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 var stopCommand = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop a machine",
-	Run: func(cmd *cobra.Command, args []string) {
+	Short: "Stop machine",
+	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 
-		if err := nitro.Run(
-			nitro.NewMultipassRunner("multipass"),
-			nitro.Stop(name),
-		); err != nil {
-			log.Fatal(err)
+		stopAction, err := action.Stop(name)
+		if err != nil {
+			return err
 		}
+
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*stopAction})
 	},
 }

@@ -34,7 +34,7 @@ func TestConfigureXdebug(t *testing.T) {
 				}
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ConfigureXdebug() = %v, \nwant\n %v", got, tt.want)
+				t.Errorf("ConfigureXdebug() = \n%v, \nwant\n %v", got, tt.want)
 			}
 		})
 	}

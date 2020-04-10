@@ -1,6 +1,54 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"os"
+	"strings"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
+)
+
+type Config struct {
+	Name      string     `yaml:"name"`
+	PHP       string     `yaml:"php"`
+	CPUs      string     `yaml:"cpus"`
+	Disk      string     `yaml:"disk"`
+	Memory    string     `yaml:"memory"`
+	Databases []Database `yaml:"databases"`
+	Sites     []Site     `yaml:"sites"`
+}
+
+func (c *Config) AddSite(site Site) error {
+	// replace the homedir with the tilde
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	site.Path = strings.Replace(site.Path, home, "~", 1)
+
+	c.Sites = append(c.Sites, site)
+	return nil
+}
+
+func (c *Config) Save(filename string) error {
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func GetString(key, flag string) string {
 	if viper.IsSet(key) && flag == "" {

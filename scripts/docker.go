@@ -1,6 +1,8 @@
 package scripts
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // DockerRunDatabase builds the commands to run a database inside of docker for a machine.
 func DockerRunDatabase(name, engine, version string) []string {

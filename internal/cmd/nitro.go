@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/mitchellh/go-homedir"
@@ -15,9 +14,10 @@ var (
 	flagDebug       bool
 
 	nitroCommand = &cobra.Command{
-		Use:   "nitro",
-		Short: "Local Craft CMS on tap",
-		Long:  `TODO add the long description`,
+		Use:          "nitro",
+		Short:        "Local Craft CMS on tap",
+		Long:         `nitro is a command-line tool focused on creating and managing virtual machines ready to run Craft websites.`,
+		SilenceUsage: true,
 	}
 )
 
@@ -33,24 +33,23 @@ func init() {
 	nitroCommand.AddCommand(
 		siteCommand,
 		sshCommand,
-		redisCommand,
 		updateCommand,
-		xdebugCommand,
 		infoCommand,
-		sqlCommand,
 		stopCommand,
+		restartCommand,
 		startCommand,
-		ipCommand,
 		machineCommand,
 		logsCommand,
-		serveCommand,
+		xdebugCommand,
+		redisCommand,
+		hostsCommand,
+		contextCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
-	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
-	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand)
-	logsCommand.AddCommand(logsNginxCommand, logsDatabaseCommand)
-	restartDatabaseCommand.AddCommand(servicesDatabaseRestartCommand)
-	restartCommand.AddCommand(restartDatabaseCommand)
+	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
+	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
+	logsCommand.AddCommand(logsNginxCommand, logsDockerCommand, logsDatabaseCommand)
+	hostsCommand.AddCommand(hostsAddCommand, hostsRemoveCommand, hostsShowCommand)
 }
 
 func Execute() {
@@ -70,7 +69,5 @@ func loadConfig() {
 		viper.SetConfigType("yaml")
 	}
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	_ = viper.ReadInConfig()
 }

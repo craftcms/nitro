@@ -30,6 +30,8 @@ func TestInstallPHP(t *testing.T) {
 				"php7.0-xml",
 				"php-xdebug",
 				"php-imagick",
+				"blackfire-agent",
+				"blackfire-php",
 			},
 		},
 		{
@@ -51,6 +53,8 @@ func TestInstallPHP(t *testing.T) {
 				"php7.1-xml",
 				"php-xdebug",
 				"php-imagick",
+				"blackfire-agent",
+				"blackfire-php",
 			},
 		},
 		{
@@ -72,6 +76,8 @@ func TestInstallPHP(t *testing.T) {
 				"php7.2-xml",
 				"php-xdebug",
 				"php-imagick",
+				"blackfire-agent",
+				"blackfire-php",
 			},
 		},
 		{
@@ -93,6 +99,8 @@ func TestInstallPHP(t *testing.T) {
 				"php7.3-xml",
 				"php-xdebug",
 				"php-imagick",
+				"blackfire-agent",
+				"blackfire-php",
 			},
 		},
 		{
@@ -114,6 +122,8 @@ func TestInstallPHP(t *testing.T) {
 				"php7.4-xml",
 				"php-xdebug",
 				"php-imagick",
+				"blackfire-agent",
+				"blackfire-php",
 			},
 		},
 	}

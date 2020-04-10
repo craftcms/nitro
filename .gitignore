@@ -6,3 +6,4 @@
 composer.lock
 /.idea
 /demo-site
+coverage.txt
