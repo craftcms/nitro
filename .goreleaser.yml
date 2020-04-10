@@ -6,24 +6,22 @@ before:
     - go mod download
 builds:
   - binary: nitro
-    main: ./cmd/cli/main.go
     id: nitro
+    main: ./cmd/cli/main.go
     goos:
       - linux
       - windows
       - darwin
     goarch:
       - amd64
-  - hooks:
+    hooks:
       post: ./hashgen.sh
 archives:
   - replacements:
       386: i386
       amd64: x86_64
-checksum:
-  name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-cli"
+  name_template: "{{ .Tag }}"
 changelog:
   sort: asc
   filters:
