@@ -2,6 +2,13 @@ package config
 
 import "github.com/spf13/viper"
 
+type Config struct {
+	Name     string
+	PHP      string
+	Database []Database
+	Sites    []Site
+}
+
 func GetString(key, flag string) string {
 	if viper.IsSet(key) && flag == "" {
 		return viper.GetString(key)

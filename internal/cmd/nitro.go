@@ -36,6 +36,7 @@ func init() {
 		updateCommand,
 		infoCommand,
 		stopCommand,
+		restartCommand,
 		startCommand,
 		machineCommand,
 		logsCommand,

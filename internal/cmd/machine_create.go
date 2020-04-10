@@ -3,7 +3,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -103,12 +105,79 @@ var createCommand = &cobra.Command{
 			actions = append(actions, *createDatabaseAction)
 		}
 
+		var siteErrs []error
+		if viper.IsSet("sites") {
+			var sites []config.Site
+			if err := viper.UnmarshalKey("sites", &sites); err != nil {
+				return err
+			}
+			for _, site := range sites {
+				// check the site.Path for a tilde
+				if strings.HasPrefix(site.Path, "~/") {
+					home, _ := homedir.Dir()
+					site.Path = strings.Replace(site.Path, "~", home, 1)
+				}
+				mountAction, err := action.Mount(name, site.Path, site.Domain)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				actions = append(actions, *mountAction)
+
+				createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				actions = append(actions, *createDirectoryAction)
+
+				copyTemplateAction, err := action.CopyNginxTemplate(name, site.Domain)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				actions = append(actions, *copyTemplateAction)
+
+				if site.Docroot == "" {
+					site.Docroot = "web"
+				}
+				changeVarsActions, err := action.ChangeTemplateVariables(name, site.Domain, site.Docroot, phpVersion)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				for _, a := range *changeVarsActions {
+					actions = append(actions, a)
+				}
+
+				createSymlinkAction, err := action.CreateSiteSymllink(name, site.Domain)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				actions = append(actions, *createSymlinkAction)
+
+				reloadNginxAction, err := action.NginxReload(name)
+				if err != nil {
+					siteErrs = append(siteErrs, err)
+					continue
+				}
+				actions = append(actions, *reloadNginxAction)
+			}
+		}
+
 		if flagDebug {
 			for _, a := range actions {
 				fmt.Println(a.Args)
 			}
 
 			return nil
+		}
+
+		if len(siteErrs) > 0 {
+			for _, siteErr := range siteErrs {
+				fmt.Println(siteErr)
+			}
 		}
 
 		return action.Run(action.NewMultipassRunner("multipass"), actions)

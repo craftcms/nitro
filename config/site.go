@@ -1,7 +1,7 @@
 package config
 
 type Site struct {
-	Domain string
-	Path   string
-	PHP    string
+	Domain  string
+	Path    string
+	Docroot string
 }
