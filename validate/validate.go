@@ -155,13 +155,19 @@ func MachineName(v string) error {
 
 func DatabaseConfig(databases []config.Database) error {
 	ports := map[string]string{}
+	versions := map[string]string{}
 
 	for _, database := range databases {
 		if ports[database.Port] != "" {
 			return errors.New(fmt.Sprintf("duplicate port %s assigned to %s version %s", database.Port, database.Engine, database.Version))
 		}
 
+		if versions[database.Engine] == database.Version {
+			return errors.New(fmt.Sprintf("duplicate engine %s and version %s", database.Engine, database.Version))
+		}
+
 		ports[database.Port] = database.Port
+		versions[database.Engine] = database.Version
 	}
 
 	return nil

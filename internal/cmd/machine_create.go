@@ -21,13 +21,14 @@ var createCommand = &cobra.Command{
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// grab the config/options for the command
 		name := config.GetString("name", flagMachineName)
 		cpus := config.GetInt("cpus", flagCPUs)
 		memory := config.GetString("memory", flagMemory)
 		disk := config.GetString("disk", flagDisk)
 		phpVersion := config.GetString("php", flagPhpVersion)
 
-		// validate
+		// validate options
 		if err := validate.DiskSize(disk); err != nil {
 			return err
 		}

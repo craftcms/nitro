@@ -353,10 +353,14 @@ func TestDatabaseConfig(t *testing.T) {
 			args: args{
 				databases: []config.Database{
 					{
-						Port: "3306",
+						Engine:  "mysql",
+						Version: "8",
+						Port:    "3306",
 					},
 					{
-						Port: "33061",
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "33061",
 					},
 				},
 			},
@@ -367,10 +371,32 @@ func TestDatabaseConfig(t *testing.T) {
 			args: args{
 				databases: []config.Database{
 					{
-						Port: "3306",
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
 					},
 					{
-						Port: "3306",
+						Engine:  "mysql",
+						Version: "8",
+						Port:    "3306",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "duplicate engines and version returns an error",
+			args: args{
+				databases: []config.Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "33061",
 					},
 				},
 			},
