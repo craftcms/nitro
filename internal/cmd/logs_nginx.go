@@ -1,20 +1,24 @@
 package cmd
 
 import (
-	"errors"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/action"
 )
 
 var logsNginxCommand = &cobra.Command{
 	Use:   "nginx",
 	Short: "Show nginx logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		_ = config.GetString("name", flagMachineName)
+		name := config.GetString("name", flagMachineName)
 
-		return errors.New("TODO")
+		nginxLogsAction, err := action.LogsNginx(name, flagNginxLogsKind)
+		if err != nil {
+			return err
+		}
+
+		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*nginxLogsAction})
 	},
 }
 
