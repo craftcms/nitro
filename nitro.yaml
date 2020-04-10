@@ -1,24 +1,15 @@
 name: nitro-local
 cpus: 2
 memory: 4G
-disk: 30G
+disk: 40G
 php: 7.4
 databases:
   - engine: mysql
     version: 5.7
     port: 3306
-  - engine: mysql
-    version: 5.6
-    port: 33061
-  - engine: mysql
-    version: 8
-    port: 33062
-  - engine: postgres
-    version: 11.7
-    port: 5432
   - engine: postgres
     version: 12
-    port: 54321
+    port: 5432
 sites:
   - domain: craft3dev.test
     path: ~/dev/craft-dev
