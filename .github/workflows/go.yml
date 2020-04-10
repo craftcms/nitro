@@ -22,5 +22,10 @@ jobs:
       - name: Run tests
         run: go test ./...
 
+#      - name: Running code coverage
+#        uses: codecov/codecov-action@v1
+#        with:
+#          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Build
         run: go build -v ./cmd/cli
