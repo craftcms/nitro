@@ -9,4 +9,5 @@ var (
 	flagDatabaseVersion string
 	flagNginxLogsKind   string
 	flagPublicDir       string
+	flagPermanent       bool
 )
