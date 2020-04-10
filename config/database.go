@@ -1,7 +1,7 @@
 package config
 
 type Database struct {
-	Engine  string
-	Version string
-	Port    string
+	Engine  string `yaml:"engine"`
+	Version string `yaml:"version"`
+	Port    string `yaml:"port"`
 }

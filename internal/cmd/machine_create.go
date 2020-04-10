@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
@@ -167,9 +168,24 @@ var createCommand = &cobra.Command{
 		}
 
 		if flagDebug {
+			fmt.Println("---- COMMANDS ----")
 			for _, a := range actions {
 				fmt.Println(a.Args)
 			}
+
+			fmt.Println("---- CONFIG FILE ----")
+
+			var configFile config.Config
+			if err := viper.Unmarshal(&configFile); err != nil {
+				return err
+			}
+
+			configData, err := yaml.Marshal(configFile)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(configData))
 
 			return nil
 		}

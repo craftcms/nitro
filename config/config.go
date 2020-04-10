@@ -3,10 +3,10 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	Name     string
-	PHP      string
-	Database []Database
-	Sites    []Site
+	Name      string     `yaml:"name"`
+	PHP       string     `yaml:"php"`
+	Databases []Database `yaml:"databases"`
+	Sites     []Site     `yaml:"sites"`
 }
 
 func GetString(key, flag string) string {
