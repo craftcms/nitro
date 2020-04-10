@@ -6,7 +6,7 @@ export REPO=nitro
 export SUCCESS_CMD="$REPO version"
 export BINLOCATION="/usr/local/bin"
 
-version=$(curl -s https://$NITRO_TOKEN@api.github.com/repos/$GH_ORG/$REPO/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
+version=$(curl -s https://"$NITRO_TOKEN"@api.github.com/repos/$GH_ORG/$REPO/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install $REPO. You can try to install manually:"
@@ -43,8 +43,6 @@ checkHash () {
 
     (cd "$targetFileDir" && curl -sSL "$packageUrl")
 
-
-
     echo "cd $targetFileDir && curl -sSL $packageUrl.sha256|$shaCmd -c"
 
     (cd "$targetFileDir" && curl -sSL "$packageUrl"|$shaCmd -c >/dev/null)
@@ -65,7 +63,7 @@ getNitro () {
   case $uname in
 
     "Darwin")
-      suffix="-darwin"
+      suffix="_darwin"
       ;;
 
     "MINGW"*)
@@ -80,13 +78,13 @@ getNitro () {
 
       case $arch in
         "aarch64")
-          suffix="-arm64"
+          suffix="_arm64"
           ;;
       esac
 
       case $arch in
         "armv6l" | "armv7l")
-          suffix="-armhf"
+          suffix="_armhf"
           ;;
       esac
     ;;
@@ -102,13 +100,15 @@ getNitro () {
     rm "$targetFile"
   fi
 
-  packageUrl=https://github.com/$GH_ORG/$REPO/releases/download/$version/$REPO$suffix
+  # TODO make this more dynamic
+  packageUrl=https://github.com/$GH_ORG/$REPO/releases/download/$version/"$REPO"_"$version""$suffix"_x86_64.tar.gz
   echo "Downloading package $packageUrl as $targetFile"
 
   curl -sSL "$packageUrl" --output "$targetFile"
 
   if [ "$?" = "0" ]; then
-    checkHash
+    # TODO add checkHash
+    # checkHash
     chmod +x "$targetFile"
     echo "Download complete."
 
