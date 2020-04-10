@@ -6,16 +6,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	logsDatabaseCommand = &cobra.Command{
-		Use:    "database",
-		Short:  "Show database logs",
-		Hidden: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return errors.New("not implemented yet")
-		},
-	}
-)
+var logsDatabaseCommand = &cobra.Command{
+	Use:    "database",
+	Short:  "Show database logs",
+	Hidden: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return errors.New("not implemented yet")
+	},
+}
 
 func init() {
 	logsDatabaseCommand.Flags().StringVar(&flagDatabase, "database", "", "which database engine")
