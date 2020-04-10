@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -44,6 +45,7 @@ var hostsCommand = &cobra.Command{
 		var domains []string
 		for _, site := range sites {
 			domains = append(domains, site.Domain)
+			fmt.Println("adding", site.Domain, "to", name)
 		}
 
 		hosts.AddHosts(ip, domains)
