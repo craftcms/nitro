@@ -20,12 +20,13 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Run tests
-        run: go test ./...
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Running code coverage
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.txt
 
       - name: Build
         run: go build -v ./cmd/cli
