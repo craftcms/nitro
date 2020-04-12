@@ -91,7 +91,7 @@ getNitro () {
     targetTempFolder="$(pwd)"
   fi
 
-  fileName=nitro_"$version""$suffix"_x86_64.tar.gz
+  fileName=nitro"$suffix"_x86_64.tar.gz
   packageUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/"$fileName"
   targetZipFile="$targetTempFolder"/$fileName
 
