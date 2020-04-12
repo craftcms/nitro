@@ -10,9 +10,9 @@ if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install nitro. You can try to install manually:"
   echo ""
   echo "1. Open your web browser and go to https://github.com/pixelandtonic/nitro/releases"
-  echo "2. Download the latest release for your platform. Call it 'nitro'."
-  echo "3. chmod +x ./nitro"
-  echo "4. mv ./nitro $BINLOCATION"
+  echo "2. Download the latest release for your platform and unzip it."
+  echo "3. Run 'chmod +x ./nitro' on the unzipped 'nitro' executable."
+  echo "4. Run 'mv ./nitro $BINLOCATION'"
   exit 1
 fi
 
@@ -44,7 +44,7 @@ checkHash () {
 
     if [ "$?" != "0" ]; then
       rm "$targetFile"
-      echo "Binary checksum didn't match. Exiting"
+      echo "Binary checksum didn't match. Exiting."
       exit 1
     fi
   fi
@@ -117,7 +117,7 @@ getNitro () {
       echo "  following commands may need to be run manually."
       echo "============================================================"
       echo
-      echo "  sudo cp nitro$suffix $BINLOCATION/nitro"
+      echo "  sudo cp ./nitro $BINLOCATION/nitro"
       echo
     else
       echo
@@ -137,12 +137,12 @@ getNitro () {
       mv ./nitro "$BINLOCATION"/nitro
 
       if [ "$?" = "0" ]; then
-        echo "New version of nitro installed to $BINLOCATION"
+        echo "The New version of nitro is installed to $BINLOCATION"
         echo
       fi
 
-      if [ -e "$targetNitroFile" ]; then
-        rm "$targetNitroFile"
+      if [ -e "$targetZipFile" ]; then
+        rm "$targetZipFile"
       fi
 
       ${SUCCESS_CMD}
