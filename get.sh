@@ -1,23 +1,18 @@
 #!/bin/bash
 
-export SYMLINK_NAME="nitro"
 export GH_ORG=pixelandtonic
-export REPO=nitro
-export SUCCESS_CMD="$REPO version"
+export SUCCESS_CMD="nitro"
 export BINLOCATION="/usr/local/bin"
 
-version=$(curl -s https://"$NITRO_TOKEN"@api.github.com/repos/$GH_ORG/$REPO/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
+version=$(curl -s https://api.github.com/repos/pixelandtonic/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
-  echo "There was a problem trying to automatically install $REPO. You can try to install manually:"
+  echo "There was a problem trying to automatically install nitro. You can try to install manually:"
   echo ""
-  echo "1. Open your web browser and go to https://github.com/$GH_ORG/$REPO/releases"
-  echo "2. Download the latest release for your platform. Call it '$REPO'."
-  echo "3. chmod +x ./$REPO"
-  echo "4. mv ./$REPO $BINLOCATION"
-  if [ -n "$SYMLINK_NAME" ]; then
-    echo "5. ln -sf $BINLOCATION/$REPO /usr/local/bin/$SYMLINK_NAME"
-  fi
+  echo "1. Open your web browser and go to https://github.com/pixelandtonic/nitro/releases"
+  echo "2. Download the latest release for your platform. Call it 'nitro'."
+  echo "3. chmod +x ./nitro"
+  echo "4. mv ./nitro $BINLOCATION"
   exit 1
 fi
 
@@ -31,7 +26,7 @@ hasCurl() {
 
 checkHash () {
   sha_cmd="sha256sum"
-  checksumUrl=https://github.com/$GH_ORG/$REPO/releases/download/$version/checksums.txt
+  checksumUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/checksums.txt
 
   if [ ! -x "$(command -v $sha_cmd)" ]; then
     shaCmd="shasum -a 256"
@@ -90,26 +85,28 @@ getNitro () {
     ;;
   esac
 
-  targetFile="/tmp/$REPO$suffix"
+  targetTempFolder="/tmp"
 
   if [ "$userid" != "0" ]; then
-    targetFile="$(pwd)/$REPO$suffix"
+    targetTempFolder="$(pwd)"
   fi
 
-  if [ -e $targetFile ]; then
-    rm "$targetFile"
-  fi
+  fileName=nitro_"$version""$suffix"_x86_64.tar.gz
+  packageUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/"$fileName"
+  targetZipFile="$targetTempFolder"/$fileName
 
-  # TODO make this more dynamic
-  packageUrl=https://github.com/$GH_ORG/$REPO/releases/download/$version/"$REPO"_"$version""$suffix"_x86_64.tar.gz
-  echo "Downloading package $packageUrl as $targetFile"
+  echo "Downloading package $packageUrl to $targetZipFile"
 
-  curl -sSL "$packageUrl" --output "$targetFile"
+  curl -sSL "$packageUrl" --output "$targetZipFile"
 
   if [ "$?" = "0" ]; then
+
+    #unzip
+    tar xvzf "$targetZipFile"
+
     # TODO add checkHash
     # checkHash
-    chmod +x "$targetFile"
+    chmod +x ./nitro
     echo "Download complete."
 
     if [ ! -w "$BINLOCATION" ]; then
@@ -120,21 +117,16 @@ getNitro () {
       echo "  following commands may need to be run manually."
       echo "============================================================"
       echo
-      echo "  sudo cp $REPO$suffix $BINLOCATION/$REPO"
-
-      if [ -n "$SYMLINK_NAME" ]; then
-          echo "  sudo ln -sf $BINLOCATION/$REPO $BINLOCATION/$SYMLINK_NAME"
-      fi
-
+      echo "  sudo cp nitro$suffix $BINLOCATION/nitro"
       echo
     else
       echo
-      echo "Running with sufficient permissions to attempt to move $REPO to $BINLOCATION"
+      echo "Running with sufficient permissions to attempt to move nitro to $BINLOCATION"
 
-      if [ ! -w "$BINLOCATION/$REPO" ] && [ -f "$BINLOCATION/$REPO" ]; then
+      if [ ! -w "$BINLOCATION/nitro" ] && [ -f "$BINLOCATION/nitro" ]; then
         echo
         echo "================================================================"
-        echo "  $BINLOCATION/$REPO already exists and is not writeable"
+        echo "  $BINLOCATION/nitro already exists and is not writeable"
         echo "  by the current user.  Please adjust the binary ownership"
         echo "  or run sh/bash with sudo."
         echo "================================================================"
@@ -142,21 +134,15 @@ getNitro () {
         exit 1
       fi
 
-      mv "$targetFile" "$BINLOCATION"/$REPO
+      mv ./nitro "$BINLOCATION"/nitro
 
       if [ "$?" = "0" ]; then
-        echo "New version of $REPO installed to $BINLOCATION"
+        echo "New version of nitro installed to $BINLOCATION"
+        echo
       fi
 
-      if [ -e "$targetFile" ]; then
-        rm "$targetFile"
-      fi
-
-      if [ -n "$SYMLINK_NAME" ]; then
-        if [ ! -L "$BINLOCATION"/$SYMLINK_NAME ]; then
-          ln -s "$BINLOCATION"/$REPO "$BINLOCATION"/$SYMLINK_NAME
-          echo "Creating symlink '$SYMLINK_NAME' for '$REPO'."
-        fi
+      if [ -e "$targetNitroFile" ]; then
+        rm "$targetNitroFile"
       fi
 
       ${SUCCESS_CMD}
