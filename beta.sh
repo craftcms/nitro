@@ -12,10 +12,11 @@ alias errcho='>&2 echo'
 function gh_curl() {
   curl -sL -H "Authorization: token $NITRO_TOKEN" -H "Accept: application/vnd.github.v3.raw" $@
 }
+
 os=$(uname | tr '[:upper:]' '[:lower:]')
 arch=$(uname -m)
+FILE="nitro_"$os"_$arch.tar.gz"
 
-FILE="nitro_$version"_"$os"_"$arch".tar.gz
 if [ "$VERSION" = "latest" ]; then
   # Github should return the latest release first.
   PARSER=".[0].assets | map(select(.name == \"$FILE\"))[0].id"
