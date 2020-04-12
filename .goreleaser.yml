@@ -18,6 +18,7 @@ builds:
       post: ./hashgen.sh
 archives:
   -
+    name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
     id: example
     builds:
       - nitro
