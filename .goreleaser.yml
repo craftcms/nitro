@@ -14,8 +14,6 @@ builds:
       - darwin
     goarch:
       - amd64
-    hooks:
-      post: ./hashgen.sh
 archives:
   -
     name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
@@ -25,10 +23,6 @@ archives:
     replacements:
       386: i386
       amd64: x86_64
-    files:
-      - dist/nitro_windows_amd64.sha256
-      - dist/nitro_linux_amd64.sha256
-      - dist/nitro_darwin_amd64.sha256
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
