@@ -209,24 +209,12 @@ var createCommand = &cobra.Command{
 
 		if flagDebug {
 			fmt.Println("---- COMMANDS ----")
+
 			for _, a := range actions {
 				fmt.Println(a.Args)
 			}
-			fmt.Printf("---- %d TOTAL COMMANDS ----", len(actions))
 
-			//fmt.Println("---- CONFIG FILE ----")
-			//
-			//var configFile config.Config
-			//if err := viper.Unmarshal(&configFile); err != nil {
-			//	return err
-			//}
-			//
-			//configData, err := yaml.Marshal(configFile)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			//fmt.Println(string(configData))
+			fmt.Printf("---- %d TOTAL COMMANDS ----", len(actions))
 
 			return nil
 		}
