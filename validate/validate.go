@@ -23,7 +23,7 @@ func Database(v string) error {
 }
 
 func Domain(v string) error {
-	msg := "you must provide a valid domain, without a TLD and only lowercase"
+	msg := "You must provide a valid domain, without a TLD and only lowercase"
 
 	if strings.Contains(v, " ") {
 		return errors.New(msg)
@@ -53,7 +53,7 @@ func Path(p string) error {
 		return nil
 	}
 
-	return errors.New("you must provide a path to a valid directory")
+	return errors.New("You must provide a path to a valid directory")
 }
 
 // PHPVersion takes a string that represents a PHP version to install and returns and error if that PHP version
@@ -94,7 +94,7 @@ func DatabaseEngine(v string) error {
 	case "postgres":
 		return nil
 	}
-	return errors.New("unsupported database engine: " + v)
+	return errors.New("Unsupported database engine: " + v)
 }
 
 func DatabaseEngineAndVersion(e, v string) error {
