@@ -55,36 +55,6 @@ var createCommand = &cobra.Command{
 
 		var actions []action.Action
 
-		// check for mounts
-		var mounts []config.Mount
-		if viper.IsSet("mounts") {
-			if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
-				return err
-			}
-
-			for _, m := range mounts {
-				// check for the tilde
-				sourceDir := m.Source
-				if strings.HasPrefix(m.Source, "~/") {
-					home, err := homedir.Dir()
-					if err != nil {
-						return err
-					}
-
-					sourceDir = strings.Replace(m.Source, "~", home, 1)
-				}
-				if err := validate.Path(sourceDir); err != nil {
-					return err
-				}
-
-				mountDirectoryAction, err := action.MountDirectory(name, sourceDir, m.Destination)
-				if err != nil {
-					return err
-				}
-				actions = append(actions, *mountDirectoryAction)
-			}
-		}
-
 		launchAction, err := action.Launch(name, cpus, memory, disk, CloudConfig)
 		if err != nil {
 			return err
@@ -143,33 +113,62 @@ var createCommand = &cobra.Command{
 				return err
 			}
 
+			// check for mounts
+			var mounts []config.Mount
+			if viper.IsSet("mounts") {
+				if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
+					return err
+				}
+
+				for _, m := range mounts {
+					// check for the tilde
+					sourceDir := m.Source
+					if strings.HasPrefix(m.Source, "~/") {
+						home, err := homedir.Dir()
+						if err != nil {
+							return err
+						}
+
+						sourceDir = strings.Replace(m.Source, "~", home, 1)
+					}
+					if err := validate.Path(sourceDir); err != nil {
+						return err
+					}
+
+					mountDirectoryAction, err := action.MountDirectory(name, sourceDir, m.Destination)
+					if err != nil {
+						return err
+					}
+					actions = append(actions, *mountDirectoryAction)
+				}
+			}
+
 			for _, site := range sites {
 				// check if the site.Path is a mount
 				for _, mount := range mounts {
 					if strings.Contains(site.Path, mount.Source) && strings.Contains("/app/sites", mount.Destination) {
 						fmt.Println("skipping: " + site.Path + " because the mount has already been set " + mount.Source)
-						continue
-					}
+					} else {
+						// this is not already mounted, so we need to mount it
+						if strings.HasPrefix(site.Path, "~/") {
+							home, _ := homedir.Dir()
+							site.Path = strings.Replace(site.Path, "~", home, 1)
+						}
 
-					// this is not already mounted, so we need to mount it
-					if strings.HasPrefix(site.Path, "~/") {
-						home, _ := homedir.Dir()
-						site.Path = strings.Replace(site.Path, "~", home, 1)
-					}
+						mountAction, err := action.Mount(name, site.Path, site.Domain)
+						if err != nil {
+							siteErrs = append(siteErrs, err)
+							continue
+						}
+						actions = append(actions, *mountAction)
 
-					mountAction, err := action.Mount(name, site.Path, site.Domain)
-					if err != nil {
-						siteErrs = append(siteErrs, err)
-						continue
+						createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
+						if err != nil {
+							siteErrs = append(siteErrs, err)
+							continue
+						}
+						actions = append(actions, *createDirectoryAction)
 					}
-					actions = append(actions, *mountAction)
-
-					createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
-					if err != nil {
-						siteErrs = append(siteErrs, err)
-						continue
-					}
-					actions = append(actions, *createDirectoryAction)
 				}
 
 				copyTemplateAction, err := action.CopyNginxTemplate(name, site.Domain)
