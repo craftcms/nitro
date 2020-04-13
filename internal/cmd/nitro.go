@@ -9,14 +9,13 @@ import (
 )
 
 var (
-	flagConfigFile  string
-	flagMachineName string
-	flagDebug       bool
+	Version = "development"
 
 	nitroCommand = &cobra.Command{
 		Use:          "nitro",
 		Short:        "Local Craft CMS dev made easy",
 		Long:         `nitro is a command-line tool focused on making local Craft development quick and easy.`,
+		Version:      Version,
 		SilenceUsage: true,
 	}
 )
@@ -27,7 +26,7 @@ func init() {
 	// set persistent flags on the root command
 	nitroCommand.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "name of machine")
 	nitroCommand.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "bypass executing the commands")
-	nitroCommand.PersistentFlags().StringVarP(&flagConfigFile, "config-file", "f", "", "configuration file to use")
+	nitroCommand.PersistentFlags().StringVarP(&flagConfigFile, "config", "f", "", "configuration file to use")
 
 	// add commands to root
 	nitroCommand.AddCommand(
@@ -44,6 +43,7 @@ func init() {
 		redisCommand,
 		hostsCommand,
 		contextCommand,
+		versionCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
