@@ -1,5 +1,5 @@
 name: nitro-local
-cpus: 2
+cpus: 1
 memory: 4G
 disk: 40G
 php: 7.4
