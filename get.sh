@@ -45,9 +45,11 @@ checkHash () {
     # See if the has we calculated matches a result in the checksum file.
     checkResultFileName=$(sed -n "s/^$zipHash  //p" "$fileName")
 
+    # don't need this anymore
+    rm "nitro_$2_checksums.txt"
+
     # Make sure the file names match up.
     if [ "$4" != "$checkResultFileName" ]; then
-      rm "nitro_$2_checksums.txt"
       rm "$1";
       echo "Checksums do not match. Exiting."
       exit 1
@@ -142,7 +144,7 @@ getNitro () {
       mv ./nitro "$BINLOCATION"/nitro
 
       if [ "$?" = "0" ]; then
-        echo "A new version of nitro is installed at $BINLOCATION"
+        echo "nitro $version has been installed to $BINLOCATION"
         echo
       fi
 
