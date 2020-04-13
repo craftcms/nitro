@@ -27,5 +27,5 @@ remove-integration-test:
 
 test-version: releaser
 	chmod u+x ./dist/nitro_darwin_amd64/nitro
-	./dist/nitro_darwin_amd64/nitro --version
+	./dist/nitro_darwin_amd64/nitro version
 
