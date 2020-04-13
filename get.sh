@@ -17,7 +17,7 @@ if [ ! "$version" ]; then
 fi
 
 hasCurl() {
-  $(which curl)
+  result=$(command -v curl)
   if [ "$?" = "1" ]; then
     echo "You need curl to use this script."
     exit 1
@@ -26,7 +26,9 @@ hasCurl() {
 
 checkHash () {
   sha_cmd="sha256sum"
-  checksumUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/checksums.txt
+  fileName=nitro_$2_checksums.txt
+  checksumUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/$fileName
+  targetFile=$3/$fileName
 
   if [ ! -x "$(command -v $sha_cmd)" ]; then
     shaCmd="shasum -a 256"
@@ -34,17 +36,20 @@ checkHash () {
 
   if [ -x "$(command -v $shaCmd)" ]; then
 
-    targetFileDir=${targetFile%/*}
+    # download the checksum file.
+    (curl -sSL "$checksumUrl" --output "$targetFile")
 
-    (cd "$targetFileDir" && curl -sSL "$packageUrl")
+    # Run the sha command against the zip and grab the hash from the first segment.
+    zipHash="$($shaCmd $1 | cut -d' ' -f1 | tr -d '[:space:]')"
 
-    echo "cd $targetFileDir && curl -sSL $packageUrl.sha256|$shaCmd -c"
+    # See if the has we calculated matches a result in the checksum file.
+    checkResultFileName=$(sed -n "s/^$zipHash  //p" "$fileName")
 
-    (cd "$targetFileDir" && curl -sSL "$packageUrl"|$shaCmd -c >/dev/null)
-
-    if [ "$?" != "0" ]; then
-      rm "$targetFile"
-      echo "Binary checksum didn't match. Exiting."
+    # Make sure the file names match up.
+    if [ "$4" != "$checkResultFileName" ]; then
+      rm "nitro_$2_checksums.txt"
+      rm "$1";
+      echo "Checksums do not match. Exiting."
       exit 1
     fi
   fi
@@ -96,16 +101,16 @@ getNitro () {
   targetZipFile="$targetTempFolder"/$fileName
 
   echo "Downloading package $packageUrl to $targetZipFile"
-
   curl -sSL "$packageUrl" --output "$targetZipFile"
 
   if [ "$?" = "0" ]; then
 
-    #unzip
+    # unzip
     tar xvzf "$targetZipFile"
 
-    # TODO add checkHash
-    # checkHash
+    # verify
+    checkHash "$targetZipFile" "$version" "$targetTempFolder" "$fileName"
+
     chmod +x ./nitro
     echo "Download complete."
 
@@ -137,12 +142,13 @@ getNitro () {
       mv ./nitro "$BINLOCATION"/nitro
 
       if [ "$?" = "0" ]; then
-        echo "The New version of nitro is installed to $BINLOCATION"
+        echo "A new version of nitro is installed at $BINLOCATION"
         echo
       fi
 
       if [ -e "$targetZipFile" ]; then
         rm "$targetZipFile"
+        echo
       fi
 
       ${SUCCESS_CMD}
