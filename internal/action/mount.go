@@ -21,6 +21,13 @@ func Mount(name, folder, site string) (*Action, error) {
 }
 
 func MountDirectory(name, source, destination string) (*Action, error) {
+	if err := validate.MachineName(name); err != nil {
+		return nil, err
+	}
+	if err := validate.Path(source); err != nil {
+		return nil, err
+	}
+
 	return &Action{
 		Type:       "mount",
 		UseSyscall: false,
