@@ -15,8 +15,8 @@ var (
 
 	nitroCommand = &cobra.Command{
 		Use:          "nitro",
-		Short:        "Local Craft CMS on tap",
-		Long:         `nitro is a command-line tool focused on creating and managing virtual machines ready to run Craft websites.`,
+		Short:        "Local Craft CMS dev made easy",
+		Long:         `nitro is a command-line tool focused on making local Craft development quick and easy.`,
 		SilenceUsage: true,
 	}
 )

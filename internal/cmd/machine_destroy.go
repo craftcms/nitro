@@ -16,9 +16,9 @@ var destroyCommand = &cobra.Command{
 		name := config.GetString("name", flagMachineName)
 
 		if flagPermanent {
-			fmt.Println("Permanently deleting", name)
+			fmt.Println("Permanently destroying", name)
 		} else {
-			fmt.Println("Soft deleting", name)
+			fmt.Println("Gently destroying", name)
 		}
 
 		destroyAction, err := action.Destroy(name, flagPermanent)
@@ -31,5 +31,5 @@ var destroyCommand = &cobra.Command{
 }
 
 func init() {
-	destroyCommand.Flags().BoolVarP(&flagPermanent, "permanent", "p", false, "permanently destroy the machine")
+	destroyCommand.Flags().BoolVarP(&flagPermanent, "permanent", "p", false, "Permanently destroy the machine")
 }

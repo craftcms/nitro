@@ -18,7 +18,7 @@ import (
 var createCommand = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"bootstrap", "boot"},
-	Short:   "Create machine",
+	Short:   "Create a machine",
 	Example: "nitro machine create --name example-machine --cpus 4 --memory 4G --disk 60G --php-version 7.4",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
@@ -201,8 +201,8 @@ var createCommand = &cobra.Command{
 }
 
 func init() {
-	createCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "number of cpus to allocate")
-	createCommand.Flags().StringVar(&flagMemory, "memory", "", "amount of memory to allocate")
-	createCommand.Flags().StringVar(&flagDisk, "disk", "", "amount of disk space to allocate")
-	createCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which version of PHP to make default")
+	createCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPUs to allocate")
+	createCommand.Flags().StringVar(&flagMemory, "memory", "", "Amount of memory to allocate")
+	createCommand.Flags().StringVar(&flagDisk, "disk", "", "Amount of disk space to allocate")
+	createCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "Which version of PHP to make default")
 }

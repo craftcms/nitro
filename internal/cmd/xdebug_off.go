@@ -10,7 +10,7 @@ import (
 
 var xdebugOffCommand = &cobra.Command{
 	Use:   "off",
-	Short: "Disable Xdebug on machine",
+	Short: "Disable Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 		php := config.GetString("php", flagPhpVersion)

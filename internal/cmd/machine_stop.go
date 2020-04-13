@@ -9,7 +9,7 @@ import (
 
 var stopCommand = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop machine",
+	Short: "Stop a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("machine", flagMachineName)
 

@@ -10,7 +10,7 @@ import (
 
 var siteRemoveCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove a site from machine",
+	Short: "Remove a site from a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		_ = config.GetString("name", flagMachineName)
 

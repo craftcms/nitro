@@ -13,5 +13,5 @@ var xdebugCommand = &cobra.Command{
 }
 
 func init() {
-	xdebugCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "v", "", "version of PHP to enable/disable xdebug")
+	xdebugCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "v", "", "Version of PHP to enable/disable Xdebug")
 }

@@ -9,7 +9,7 @@ import (
 
 var xdebugConfigureCommand = &cobra.Command{
 	Use:   "configure",
-	Short: "Configure xdebug on machine",
+	Short: "Configure Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 		php := config.GetString("php", flagPhpVersion)

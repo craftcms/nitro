@@ -10,7 +10,7 @@ import (
 var updateCommand = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"upgrade"},
-	Short:   "Update machine",
+	Short:   "Update a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 

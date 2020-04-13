@@ -15,7 +15,7 @@ import (
 
 var siteAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a site to machine",
+	Short: "Add a site to a machine",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
@@ -109,6 +109,6 @@ var siteAddCommand = &cobra.Command{
 }
 
 func init() {
-	siteAddCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "p", "", "version of PHP to use")
-	siteAddCommand.Flags().StringVarP(&flagPublicDir, "public-dir", "r", "web", "name of the public directory")
+	siteAddCommand.Flags().StringVarP(&flagPhpVersion, "php-version", "p", "", "Version of PHP to use")
+	siteAddCommand.Flags().StringVarP(&flagPublicDir, "public-dir", "r", "web", "Name of the public directory")
 }

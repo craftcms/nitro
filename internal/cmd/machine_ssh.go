@@ -9,7 +9,7 @@ import (
 
 var sshCommand = &cobra.Command{
 	Use:   "ssh",
-	Short: "SSH into machine",
+	Short: "SSH into a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 

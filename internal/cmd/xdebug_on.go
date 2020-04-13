@@ -11,7 +11,7 @@ import (
 var xdebugOnCommand = &cobra.Command{
 	Use:     "on",
 	Aliases: []string{"xon"},
-	Short:   "Enable XDebug on machine",
+	Short:   "Enable Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 		php := config.GetString("php", flagPhpVersion)

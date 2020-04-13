@@ -11,7 +11,7 @@ import (
 
 var contextCommand = &cobra.Command{
 	Use:   "context",
-	Short: "View the current config",
+	Short: "View the current Nitro context",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		configFile := viper.ConfigFileUsed()
 		if configFile == "" {

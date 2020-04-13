@@ -53,6 +53,6 @@ var logsDatabaseCommand = &cobra.Command{
 }
 
 func init() {
-	logsDatabaseCommand.Flags().StringVar(&flagDatabase, "database", "", "which database engine")
-	logsDatabaseCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "", "which version of the database")
+	logsDatabaseCommand.Flags().StringVar(&flagDatabase, "database", "", "Which database engine")
+	logsDatabaseCommand.Flags().StringVar(&flagDatabaseVersion, "database-version", "", "Which version of the database")
 }

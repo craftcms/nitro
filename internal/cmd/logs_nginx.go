@@ -23,5 +23,5 @@ var logsNginxCommand = &cobra.Command{
 }
 
 func init() {
-	logsNginxCommand.Flags().StringVarP(&flagNginxLogsKind, "type", "t", "all", "filter the logs by kind, access or error (defaults to all)")
+	logsNginxCommand.Flags().StringVarP(&flagNginxLogsKind, "type", "t", "all", "Filter the logs by kind, access or error (defaults to all)")
 }
