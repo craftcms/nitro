@@ -66,6 +66,13 @@ var siteRemoveCommand = &cobra.Command{
 		}
 		actions = append(actions, *unmountAction)
 
+		// remove the directory
+		removeNginxSiteDirectoryAction, err := action.RemoveNginxSiteDirectory(name, site)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *removeNginxSiteDirectoryAction)
+
 		// restart nginx
 		restartNginxAction, err := action.NginxReload(name)
 		if err != nil {

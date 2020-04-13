@@ -151,6 +151,24 @@ func TestConfigureXdebug(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "bad name returns error",
+			args: args{
+				name: "",
+				php:  "7.4",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "bad php version returns error",
+			args: args{
+				name: "somename",
+				php:  "7.9",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

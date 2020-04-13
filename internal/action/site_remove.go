@@ -6,6 +6,9 @@ func RemoveSymlink(name, site string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {
 		return nil, err
 	}
+	if err := validate.Domain(site); err != nil {
+		return nil, err
+	}
 
 	return &Action{
 		Type:       "exec",
@@ -16,6 +19,9 @@ func RemoveSymlink(name, site string) (*Action, error) {
 
 func RemoveNginxSiteDirectory(name, site string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {
+		return nil, err
+	}
+	if err := validate.Domain(site); err != nil {
 		return nil, err
 	}
 

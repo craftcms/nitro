@@ -411,3 +411,32 @@ func TestDatabaseConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestPath(t *testing.T) {
+	type args struct {
+		p string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "valid path returns nil",
+			args:    args{p: "/tmp"},
+			wantErr: false,
+		},
+		{
+			name:    "invalid path returns error",
+			args:    args{p: "does-not-exist"},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Path(tt.args.p); (err != nil) != tt.wantErr {
+				t.Errorf("Path() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
