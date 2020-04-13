@@ -21,5 +21,5 @@ sites:
     path: ~/dev/plugins-dev # maps to /apps/sites/anotherproject.test
     docroot: web
   - domain: clientname.test
-    path: ~/clientname/prodution-site # maps to /apps/sites/prodution-site.test
+    path: ~/clientname/production-site # maps to /apps/sites/production-site.test
     docroot: web

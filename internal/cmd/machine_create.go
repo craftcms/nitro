@@ -8,7 +8,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/action"
@@ -55,6 +54,37 @@ var createCommand = &cobra.Command{
 		}
 
 		var actions []action.Action
+
+		// check for mounts
+		var mounts []config.Mount
+		if viper.IsSet("mounts") {
+			if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
+				return err
+			}
+
+			for _, m := range mounts {
+				// check for the tilde
+				sourceDir := m.Source
+				if strings.HasPrefix(m.Source, "~/") {
+					home, err := homedir.Dir()
+					if err != nil {
+						return err
+					}
+
+					sourceDir = strings.Replace(m.Source, "~", home, 1)
+				}
+				if err := validate.Path(sourceDir); err != nil {
+					return err
+				}
+
+				mountDirectoryAction, err := action.MountDirectory(name, sourceDir, m.Destination)
+				if err != nil {
+					return err
+				}
+				actions = append(actions, *mountDirectoryAction)
+			}
+		}
+
 		launchAction, err := action.Launch(name, cpus, memory, disk, CloudConfig)
 		if err != nil {
 			return err
@@ -112,25 +142,35 @@ var createCommand = &cobra.Command{
 			if err := viper.UnmarshalKey("sites", &sites); err != nil {
 				return err
 			}
-			for _, site := range sites {
-				// check the site.Path for a tilde
-				if strings.HasPrefix(site.Path, "~/") {
-					home, _ := homedir.Dir()
-					site.Path = strings.Replace(site.Path, "~", home, 1)
-				}
-				mountAction, err := action.Mount(name, site.Path, site.Domain)
-				if err != nil {
-					siteErrs = append(siteErrs, err)
-					continue
-				}
-				actions = append(actions, *mountAction)
 
-				createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
-				if err != nil {
-					siteErrs = append(siteErrs, err)
-					continue
+			for _, site := range sites {
+				// check if the site.Path is a mount
+				for _, mount := range mounts {
+					if strings.Contains(site.Path, mount.Source) && strings.Contains("/app/sites", mount.Destination) {
+						fmt.Println("skipping: " + site.Path + " because the mount has already been set " + mount.Source)
+						continue
+					}
+
+					// this is not already mounted, so we need to mount it
+					if strings.HasPrefix(site.Path, "~/") {
+						home, _ := homedir.Dir()
+						site.Path = strings.Replace(site.Path, "~", home, 1)
+					}
+
+					mountAction, err := action.Mount(name, site.Path, site.Domain)
+					if err != nil {
+						siteErrs = append(siteErrs, err)
+						continue
+					}
+					actions = append(actions, *mountAction)
+
+					createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
+					if err != nil {
+						siteErrs = append(siteErrs, err)
+						continue
+					}
+					actions = append(actions, *createDirectoryAction)
 				}
-				actions = append(actions, *createDirectoryAction)
 
 				copyTemplateAction, err := action.CopyNginxTemplate(name, site.Domain)
 				if err != nil {
@@ -172,20 +212,21 @@ var createCommand = &cobra.Command{
 			for _, a := range actions {
 				fmt.Println(a.Args)
 			}
+			fmt.Printf("---- %d TOTAL COMMANDS ----", len(actions))
 
-			fmt.Println("---- CONFIG FILE ----")
-
-			var configFile config.Config
-			if err := viper.Unmarshal(&configFile); err != nil {
-				return err
-			}
-
-			configData, err := yaml.Marshal(configFile)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(configData))
+			//fmt.Println("---- CONFIG FILE ----")
+			//
+			//var configFile config.Config
+			//if err := viper.Unmarshal(&configFile); err != nil {
+			//	return err
+			//}
+			//
+			//configData, err := yaml.Marshal(configFile)
+			//if err != nil {
+			//	return err
+			//}
+			//
+			//fmt.Println(string(configData))
 
 			return nil
 		}

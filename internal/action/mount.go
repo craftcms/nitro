@@ -19,3 +19,11 @@ func Mount(name, folder, site string) (*Action, error) {
 		Args:       []string{"mount", folder, name + ":/app/sites/" + site},
 	}, nil
 }
+
+func MountDirectory(name, source, destination string) (*Action, error) {
+	return &Action{
+		Type:       "mount",
+		UseSyscall: false,
+		Args:       []string{"mount", source, name + ":" + destination},
+	}, nil
+}

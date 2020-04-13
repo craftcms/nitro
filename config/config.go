@@ -11,11 +11,12 @@ import (
 )
 
 type Config struct {
-	Name      string     `yaml:"name"`
-	PHP       string     `yaml:"php"`
-	CPUs      string     `yaml:"cpus"`
-	Disk      string     `yaml:"disk"`
-	Memory    string     `yaml:"memory"`
+	Name      string `yaml:"name"`
+	PHP       string `yaml:"php"`
+	CPUs      string `yaml:"cpus"`
+	Disk      string `yaml:"disk"`
+	Memory    string `yaml:"memory"`
+	Mounts    []Mount `yaml:"mounts"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites"`
 }
