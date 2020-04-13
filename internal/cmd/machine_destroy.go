@@ -16,9 +16,9 @@ var destroyCommand = &cobra.Command{
 		name := config.GetString("name", flagMachineName)
 
 		if flagPermanent {
-			fmt.Println("permanently deleting", name)
+			fmt.Println("Permanently deleting", name)
 		} else {
-			fmt.Println("soft deleting", name)
+			fmt.Println("Soft deleting", name)
 		}
 
 		destroyAction, err := action.Destroy(name, flagPermanent)
