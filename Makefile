@@ -16,7 +16,7 @@ demo: build
 demo-site:
 	composer create-project craftcms/craft demo-site
 releaser:
-	goreleaser --snapshot --skip-publish --rm-dist
+	goreleaser --skip-publish --rm-dist --skip-validate
 integration-test: build
 	./nitro -f nitro.yaml machine create
 	composer create-project craftcms/craft demo-site
@@ -24,3 +24,8 @@ integration-test: build
 remove-integration-test:
 	./nitro -f nitro.yaml machine destroy -p
 	rm -rf demo-site
+
+test-version: releaser
+	chmod u+x ./dist/nitro_darwin_amd64/nitro
+	./dist/nitro_darwin_amd64/nitro version
+

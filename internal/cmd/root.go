@@ -8,29 +8,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	flagConfigFile  string
-	flagMachineName string
-	flagDebug       bool
-
-	nitroCommand = &cobra.Command{
-		Use:          "nitro",
-		Short:        "Local Craft CMS dev made easy",
-		Long:         `nitro is a command-line tool focused on making local Craft development quick and easy.`,
-		SilenceUsage: true,
-	}
-)
+var rootCmd = &cobra.Command{
+	Use:          "nitro",
+	Short:        "Local Craft CMS dev made easy",
+	Long:         `nitro is a command-line tool focused on making local Craft development quick and easy.`,
+	SilenceUsage: true,
+}
 
 func init() {
 	cobra.OnInitialize(loadConfig)
 
 	// set persistent flags on the root command
-	nitroCommand.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "name of machine")
-	nitroCommand.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "bypass executing the commands")
-	nitroCommand.PersistentFlags().StringVarP(&flagConfigFile, "config-file", "f", "", "configuration file to use")
+	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "name of machine")
+	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "bypass executing the commands")
+	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "f", "", "configuration file to use")
 
 	// add commands to root
-	nitroCommand.AddCommand(
+	rootCmd.AddCommand(
 		siteCommand,
 		sshCommand,
 		updateCommand,
@@ -44,6 +38,7 @@ func init() {
 		redisCommand,
 		hostsCommand,
 		contextCommand,
+		versionCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
@@ -53,7 +48,7 @@ func init() {
 }
 
 func Execute() {
-	if err := nitroCommand.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
