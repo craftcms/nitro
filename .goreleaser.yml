@@ -14,6 +14,7 @@ builds:
       - darwin
     goarch:
       - amd64
+    ldflags: "-s -w -X github.com/pixelandtonic/nitro/internal/cmd.Version={{.Version}}"
 archives:
   -
     name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
