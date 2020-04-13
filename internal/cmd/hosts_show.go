@@ -11,7 +11,7 @@ import (
 
 var hostsShowCommand = &cobra.Command{
 	Use:   "show",
-	Short: "Show /etc/hosts file",
+	Short: "Show your hosts file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		_ = config.GetString("name", flagMachineName)
 

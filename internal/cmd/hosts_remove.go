@@ -13,13 +13,13 @@ import (
 
 var hostsRemoveCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove entries from /etc/hosts file",
+	Short: "Remove an entry from your hosts file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		_ = config.GetString("name", flagMachineName)
 
 		uid := os.Geteuid()
 		if uid != 0 {
-			return errors.New("you do not appear to be running this command as root, so we cannot modify the /etc/hosts file")
+			return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
 		}
 
 		// get all of the sites from the config file

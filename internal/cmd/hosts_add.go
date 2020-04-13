@@ -15,13 +15,13 @@ import (
 
 var hostsAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Edit /etc/hosts file",
+	Short: "Add an entry to your hosts file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
 		uid := os.Geteuid()
 		if uid != 0 {
-			return errors.New("you do not appear to be running this command as root, so we cannot modify the /etc/hosts file")
+			return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
 		}
 
 		// get the requested machines ip
@@ -45,7 +45,7 @@ var hostsAddCommand = &cobra.Command{
 		var domains []string
 		for _, site := range sites {
 			domains = append(domains, site.Domain)
-			fmt.Println("adding", site.Domain, "to", name)
+			fmt.Println("Adding", site.Domain, "to", name)
 		}
 
 		hosts.AddHosts(ip, domains)

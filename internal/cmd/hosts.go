@@ -6,7 +6,7 @@ import (
 
 var hostsCommand = &cobra.Command{
 	Use:   "hosts",
-	Short: "Manage /etc/hosts file",
+	Short: "Manage your hosts file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
