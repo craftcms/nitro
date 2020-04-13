@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -30,6 +31,19 @@ func (c *Config) AddSite(site Site) error {
 
 	c.Sites = append(c.Sites, site)
 	return nil
+}
+
+func (c *Config) RemoveSite(site string) error {
+	for i, s := range c.Sites {
+		if s.Domain == site {
+			copy(c.Sites[i:], c.Sites[i+1:])
+			c.Sites[len(c.Sites)-1] = Site{}
+			c.Sites = c.Sites[:len(c.Sites)-1]
+			return nil
+		}
+	}
+
+	return errors.New("unable to find the domain " + site + " to remove")
 }
 
 func (c *Config) Save(filename string) error {
