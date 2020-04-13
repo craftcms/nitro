@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,8 +49,11 @@ var siteAddCommand = &cobra.Command{
 
 		var actions []action.Action
 
-		mountAction, _ := action.Mount(name, localDirectory, domainName)
-		actions = append(actions, *mountAction)
+		// TODO skip if the site.Path is located in mounts
+		if !strings.Contains(site.Path, "~/dev") {
+			mountAction, _ := action.Mount(name, localDirectory, domainName)
+			actions = append(actions, *mountAction)
+		}
 
 		createDirectoryAction, _ := action.CreateNginxSiteDirectory(name, domainName)
 		actions = append(actions, *createDirectoryAction)
