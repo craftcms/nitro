@@ -76,17 +76,11 @@ getNitro () {
 
     "Linux")
       arch=$(uname -m)
-      echo "$arch"
+      suffix="_linux"
 
       case $arch in
         "aarch64")
-          suffix="_arm64"
-          ;;
-      esac
-
-      case $arch in
-        "armv6l" | "armv7l")
-          suffix="_armhf"
+          suffix="_linux"
           ;;
       esac
     ;;
