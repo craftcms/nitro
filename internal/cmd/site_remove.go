@@ -93,7 +93,7 @@ var siteRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("removed %q from %q", site, name)
+		fmt.Printf("removed %q from %q\n", site, name)
 
 		return nil
 	},
