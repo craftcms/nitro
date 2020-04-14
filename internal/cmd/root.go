@@ -39,6 +39,7 @@ func init() {
 		hostsCommand,
 		contextCommand,
 		versionCommand,
+		selfUpdateCommand,
 	)
 	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
