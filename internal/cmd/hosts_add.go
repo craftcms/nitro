@@ -10,7 +10,7 @@ import (
 	"github.com/txn2/txeh"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var hostsAddCommand = &cobra.Command{
@@ -25,7 +25,7 @@ var hostsAddCommand = &cobra.Command{
 		}
 
 		// get the requested machines ip
-		ip := action.IP(name, action.NewMultipassRunner("multipass"))
+		ip := nitro.IP(name, nitro.NewMultipassRunner("multipass"))
 
 		// get all of the sites from the config file
 		if !viper.IsSet("sites") {

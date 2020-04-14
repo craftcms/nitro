@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var logsDatabaseCommand = &cobra.Command{
@@ -43,12 +43,12 @@ var logsDatabaseCommand = &cobra.Command{
 			return err
 		}
 
-		dockerLogsAction, err := action.LogsDocker(name, container)
+		dockerLogsAction, err := nitro.LogsDocker(name, container)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*dockerLogsAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*dockerLogsAction})
 	},
 }
 

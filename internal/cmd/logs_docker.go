@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var logsDockerCommand = &cobra.Command{
@@ -14,11 +14,11 @@ var logsDockerCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
-		dockerLogsAction, err := action.LogsDocker(name, args[0])
+		dockerLogsAction, err := nitro.LogsDocker(name, args[0])
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*dockerLogsAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*dockerLogsAction})
 	},
 }

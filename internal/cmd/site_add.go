@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -47,29 +47,29 @@ var siteAddCommand = &cobra.Command{
 			Docroot: flagPublicDir,
 		}
 
-		var actions []action.Action
+		var actions []nitro.Action
 
 		// TODO skip if the site.Path is located in mounts
 		if !strings.Contains(site.Path, "~/dev") {
-			mountAction, _ := action.Mount(name, localDirectory, domainName)
+			mountAction, _ := nitro.Mount(name, localDirectory, domainName)
 			actions = append(actions, *mountAction)
 		}
 
-		createDirectoryAction, _ := action.CreateNginxSiteDirectory(name, domainName)
+		createDirectoryAction, _ := nitro.CreateNginxSiteDirectory(name, domainName)
 		actions = append(actions, *createDirectoryAction)
 
-		copyTemplateAction, _ := action.CopyNginxTemplate(name, domainName)
+		copyTemplateAction, _ := nitro.CopyNginxTemplate(name, domainName)
 		actions = append(actions, *copyTemplateAction)
 
-		changeVarsActions, _ := action.ChangeTemplateVariables(name, domainName, flagPublicDir, php)
+		changeVarsActions, _ := nitro.ChangeTemplateVariables(name, domainName, flagPublicDir, php)
 		for _, a := range *changeVarsActions {
 			actions = append(actions, a)
 		}
 
-		createSymlinkAction, _ := action.CreateSiteSymllink(name, domainName)
+		createSymlinkAction, _ := nitro.CreateSiteSymllink(name, domainName)
 		actions = append(actions, *createSymlinkAction)
 
-		reloadNginxAction, _ := action.NginxReload(name)
+		reloadNginxAction, _ := nitro.NginxReload(name)
 		actions = append(actions, *reloadNginxAction)
 
 		if err := configFile.AddSite(site); err != nil {
@@ -98,7 +98,7 @@ var siteAddCommand = &cobra.Command{
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), actions)
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if flagDebug {

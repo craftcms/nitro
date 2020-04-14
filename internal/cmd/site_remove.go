@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var siteRemoveCommand = &cobra.Command{
@@ -50,31 +50,31 @@ var siteRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		var actions []action.Action
+		var actions []nitro.Action
 
 		// remove symlink
-		removeSymlinkAction, err := action.RemoveSymlink(name, site)
+		removeSymlinkAction, err := nitro.RemoveSymlink(name, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *removeSymlinkAction)
 
 		// remove mount
-		unmountAction, err := action.Unmount(name, site)
+		unmountAction, err := nitro.Unmount(name, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *unmountAction)
 
 		// remove the directory
-		removeNginxSiteDirectoryAction, err := action.RemoveNginxSiteDirectory(name, site)
+		removeNginxSiteDirectoryAction, err := nitro.RemoveNginxSiteDirectory(name, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *removeNginxSiteDirectoryAction)
 
 		// restart nginx
-		restartNginxAction, err := action.NginxReload(name)
+		restartNginxAction, err := nitro.NginxReload(name)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ var siteRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		if err := action.Run(action.NewMultipassRunner("multipass"), actions); err != nil {
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return nil
 		}
 

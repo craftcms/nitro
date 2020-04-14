@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var xdebugConfigureCommand = &cobra.Command{
@@ -14,19 +14,19 @@ var xdebugConfigureCommand = &cobra.Command{
 		name := config.GetString("name", flagMachineName)
 		php := config.GetString("php", flagPhpVersion)
 
-		var actions []action.Action
-		xdebugConfigureAction, err := action.ConfigureXdebug(name, php)
+		var actions []nitro.Action
+		xdebugConfigureAction, err := nitro.ConfigureXdebug(name, php)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *xdebugConfigureAction)
 
-		restartPhpFpmAction, err := action.RestartPhpFpm(name, php)
+		restartPhpFpmAction, err := nitro.RestartPhpFpm(name, php)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
-		return action.Run(action.NewMultipassRunner("multipass"), actions)
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }

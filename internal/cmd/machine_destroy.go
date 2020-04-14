@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var destroyCommand = &cobra.Command{
@@ -21,12 +21,12 @@ var destroyCommand = &cobra.Command{
 			fmt.Println("Gently destroying", name)
 		}
 
-		destroyAction, err := action.Destroy(name, flagPermanent)
+		destroyAction, err := nitro.Destroy(name, flagPermanent)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*destroyAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*destroyAction})
 	},
 }
 
