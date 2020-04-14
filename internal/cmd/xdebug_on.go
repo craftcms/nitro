@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -19,11 +19,11 @@ var xdebugOnCommand = &cobra.Command{
 			return err
 		}
 
-		enableXdebugAction, err := action.EnableXdebug(name, php)
+		enableXdebugAction, err := nitro.EnableXdebug(name, php)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*enableXdebugAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*enableXdebugAction})
 	},
 }

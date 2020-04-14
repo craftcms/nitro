@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var restartCommand = &cobra.Command{
@@ -13,11 +13,11 @@ var restartCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
-		restartAction, err := action.Restart(name)
+		restartAction, err := nitro.Restart(name)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*restartAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*restartAction})
 	},
 }

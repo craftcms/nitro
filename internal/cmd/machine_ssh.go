@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var sshCommand = &cobra.Command{
@@ -13,11 +13,11 @@ var sshCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
-		sshAction, err := action.SSH(name)
+		sshAction, err := nitro.SSH(name)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*sshAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*sshAction})
 	},
 }

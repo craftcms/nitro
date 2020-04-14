@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/action"
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var redisCommand = &cobra.Command{
@@ -13,11 +13,11 @@ var redisCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
-		redisAction, err := action.Redis(name)
+		redisAction, err := nitro.Redis(name)
 		if err != nil {
 			return err
 		}
 
-		return action.Run(action.NewMultipassRunner("multipass"), []action.Action{*redisAction})
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*redisAction})
 	},
 }
