@@ -15,7 +15,7 @@ import (
 var (
 	selfUpdateCommand = &cobra.Command{
 		Use:   "self-update",
-		Short: "Update nitro to the latest",
+		Short: "Update Nitro to the latest",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fileUrl := "https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh"
 

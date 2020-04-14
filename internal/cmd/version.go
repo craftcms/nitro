@@ -11,9 +11,9 @@ var (
 
 	versionCommand = &cobra.Command{
 		Use:   "version",
-		Short: "View nitro version",
+		Short: "View Nitro version",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("nitro version %s\n", Version)
+			fmt.Printf("Nitro version %s\n", Version)
 
 			return nil
 		},

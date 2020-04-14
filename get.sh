@@ -7,7 +7,7 @@ export BINLOCATION="/usr/local/bin"
 version=$(curl -s https://api.github.com/repos/pixelandtonic/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
-  echo "There was a problem trying to automatically install nitro. You can try to install manually:"
+  echo "There was a problem trying to automatically install Nitro. You can try to install manually:"
   echo
   echo "1. Open your web browser and go to https://github.com/pixelandtonic/nitro/releases"
   echo "2. Download the latest release for your platform and unzip it."
@@ -27,7 +27,7 @@ hasCurl() {
 hasMultipass() {
   result=$(command -v multipass)
   if [ "$?" = "1" ]; then
-    echo "You need multipass to use nitro. Please install it for your platform https://multipass.run/"
+    echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
     exit 1
   fi
 }
@@ -133,7 +133,7 @@ getNitro () {
       echo
     else
       echo
-      echo "Running with sufficient permissions to attempt to move nitro to $BINLOCATION"
+      echo "Running with sufficient permissions to attempt to move the nitro executable to $BINLOCATION"
 
       if [ ! -w "$BINLOCATION/nitro" ] && [ -f "$BINLOCATION/nitro" ]; then
         echo
