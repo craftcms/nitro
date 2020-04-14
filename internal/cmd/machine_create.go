@@ -144,30 +144,20 @@ var createCommand = &cobra.Command{
 			}
 
 			for _, site := range sites {
-				// check if the site.Path is a mount
-				for _, mount := range mounts {
-					if strings.Contains(site.Path, mount.Source) && strings.Contains("/app/sites", mount.Destination) {
-						fmt.Println("skipping: " + site.Path + " because the mount has already been set " + mount.Source)
-					} else {
-						// this is not already mounted, so we need to mount it
-						if strings.HasPrefix(site.Path, "~/") {
-							home, _ := homedir.Dir()
-							site.Path = strings.Replace(site.Path, "~", home, 1)
-						}
-
-						mountAction, err := action.Mount(name, site.Path, site.Domain)
+				if len(mounts) == 0 {
+					siteActions, err := getSiteActions(name, &site)
+					if err != nil {
+						return err
+					}
+					actions = append(actions, siteActions...)
+				} else {
+					// check if the site.Path is a mount
+					for _, mount := range mounts {
+						siteMountActions, err := getSiteActionsWithMount(name, &site, mount)
 						if err != nil {
-							siteErrs = append(siteErrs, err)
-							continue
+							return err
 						}
-						actions = append(actions, *mountAction)
-
-						createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
-						if err != nil {
-							siteErrs = append(siteErrs, err)
-							continue
-						}
-						actions = append(actions, *createDirectoryAction)
+						actions = append(actions, siteMountActions...)
 					}
 				}
 
@@ -226,6 +216,56 @@ var createCommand = &cobra.Command{
 
 		return action.Run(action.NewMultipassRunner("multipass"), actions)
 	},
+}
+
+func getSiteActionsWithMount(name string, site *config.Site, mount config.Mount) ([]action.Action, error) {
+	if strings.Contains(site.Path, mount.Source) && strings.Contains("/app/sites", mount.Destination) {
+		fmt.Println("skipping: " + site.Path + " because the mount has already been set " + mount.Source)
+		return nil, nil
+	}
+
+	var actions []action.Action
+	// this is not already mounted, so we need to mount it
+	if strings.HasPrefix(site.Path, "~/") {
+		home, _ := homedir.Dir()
+		site.Path = strings.Replace(site.Path, "~", home, 1)
+	}
+
+	mountAction, err := action.Mount(name, site.Path, site.Domain)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *mountAction)
+
+	createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *createDirectoryAction)
+
+	return actions, nil
+}
+
+func getSiteActions(name string, site *config.Site) ([]action.Action, error) {
+	var actions []action.Action
+	if strings.HasPrefix(site.Path, "~/") {
+		home, _ := homedir.Dir()
+		site.Path = strings.Replace(site.Path, "~", home, 1)
+	}
+
+	mountAction, err := action.Mount(name, site.Path, site.Domain)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *mountAction)
+
+	createDirectoryAction, err := action.CreateNginxSiteDirectory(name, site.Domain)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *createDirectoryAction)
+
+	return actions, nil
 }
 
 func init() {
