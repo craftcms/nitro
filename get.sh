@@ -8,7 +8,7 @@ version=$(curl -s https://api.github.com/repos/pixelandtonic/nitro/releases/late
 
 if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install nitro. You can try to install manually:"
-  echo ""
+  echo
   echo "1. Open your web browser and go to https://github.com/pixelandtonic/nitro/releases"
   echo "2. Download the latest release for your platform and unzip it."
   echo "3. Run 'chmod +x ./nitro' on the unzipped 'nitro' executable."
@@ -97,6 +97,7 @@ getNitro () {
   targetZipFile="$targetTempFolder"/$fileName
 
   echo "Downloading package $packageUrl to $targetZipFile"
+  echo
   curl -sSL "$packageUrl" --output "$targetZipFile"
 
   if [ "$?" = "0" ]; then
@@ -109,6 +110,7 @@ getNitro () {
 
     chmod +x ./nitro
     echo "Download complete."
+    echo
 
     if [ ! -w "$BINLOCATION" ]; then
       echo
