@@ -4,6 +4,7 @@
 
 ### Added
 - Added a `self-update` command.
+- Add a Multipass check to get.sh.
 
 ## 0.7.5 - 2020-04-12
 

@@ -24,6 +24,14 @@ hasCurl() {
   fi
 }
 
+hasMultipass() {
+  result=$(command -v multipass)
+  if [ "$?" = "1" ]; then
+    echo "You need multipass to use nitro. Please install it for your platform https://multipass.run/"
+    exit 1
+  fi
+}
+
 checkHash () {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
@@ -121,6 +129,7 @@ getNitro () {
       echo "============================================================"
       echo
       echo "  sudo cp ./nitro $BINLOCATION/nitro"
+      echo "  nitro"
       echo
     else
       echo
@@ -155,4 +164,5 @@ getNitro () {
 }
 
 hasCurl
+hasMultipass
 getNitro
