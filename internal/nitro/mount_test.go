@@ -56,7 +56,7 @@ func TestMount(t *testing.T) {
 			args: args{
 				name:   "somename",
 				folder: "/tmp",
-				site:   "example",
+				site:   "example test",
 			},
 			want:    nil,
 			wantErr: true,

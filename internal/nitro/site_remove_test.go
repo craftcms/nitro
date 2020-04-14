@@ -42,7 +42,7 @@ func TestRemoveSymlink(t *testing.T) {
 			name: "invalid site returns error",
 			args: args{
 				name: "somename",
-				site: "notvalid",
+				site: "not valid",
 			},
 			want:    nil,
 			wantErr: true,
@@ -99,7 +99,7 @@ func TestRemoveNginxSiteDirectory(t *testing.T) {
 			name: "invalid site returns error",
 			args: args{
 				name: "somename",
-				site: "notvalid",
+				site: "not valid",
 			},
 			want:    nil,
 			wantErr: true,

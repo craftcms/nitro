@@ -29,10 +29,6 @@ func Domain(v string) error {
 		return errors.New(msg)
 	}
 
-	if !strings.Contains(v, ".") {
-		return errors.New(msg)
-	}
-
 	lower := strings.ToLower(v)
 	if lower != v {
 		return errors.New(msg)
