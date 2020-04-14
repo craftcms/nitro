@@ -23,13 +23,13 @@ var (
 
 			localFile := filepath.Join(tempFolder, "get.sh")
 
-			if err := DownloadFile(localFile, fileUrl); err != nil {
-				panic(err)
+			if downloadErr := DownloadFile(localFile, fileUrl); downloadErr != nil {
+				panic(downloadErr)
 			}
 
-			err1 := os.Chmod(localFile, 0777)
-			if err1 != nil {
-				log.Println(err1)
+			permErr := os.Chmod(localFile, 0777)
+			if permErr != nil {
+				log.Println(permErr)
 			}
 
 			ch := make(chan string)
