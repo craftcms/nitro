@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -44,16 +43,10 @@ var siteAddCommand = &cobra.Command{
 		site := config.Site{
 			Hostname: domainName,
 			Path:     fullDirectoryPath,
-			Docroot:  flagPublicDir,
+			Webroot:  flagPublicDir,
 		}
 
 		var actions []nitro.Action
-
-		// TODO skip if the site.Path is located in mounts
-		if !strings.Contains(site.Path, "~/dev") {
-			mountAction, _ := nitro.Mount(name, localDirectory, domainName)
-			actions = append(actions, *mountAction)
-		}
 
 		createDirectoryAction, _ := nitro.CreateNginxSiteDirectory(name, domainName)
 		actions = append(actions, *createDirectoryAction)

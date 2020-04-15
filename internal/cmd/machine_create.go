@@ -3,9 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strings"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -113,18 +111,6 @@ var createCommand = &cobra.Command{
 				return err
 			}
 			for _, site := range sites {
-				// check the site.Path for a tilde
-				if strings.HasPrefix(site.Path, "~/") {
-					home, _ := homedir.Dir()
-					site.Path = strings.Replace(site.Path, "~", home, 1)
-				}
-				mountAction, err := nitro.Mount(name, site.Path, site.Hostname)
-				if err != nil {
-					siteErrs = append(siteErrs, err)
-					continue
-				}
-				actions = append(actions, *mountAction)
-
 				createDirectoryAction, err := nitro.CreateNginxSiteDirectory(name, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
@@ -139,10 +125,10 @@ var createCommand = &cobra.Command{
 				}
 				actions = append(actions, *copyTemplateAction)
 
-				if site.Docroot == "" {
-					site.Docroot = "web"
+				if site.Webroot == "" {
+					site.Webroot = "web"
 				}
-				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Hostname, site.Docroot, phpVersion)
+				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Hostname, site.Webroot, phpVersion)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue

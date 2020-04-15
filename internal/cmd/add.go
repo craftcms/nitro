@@ -25,7 +25,7 @@ var addCommand = &cobra.Command{
 			wd = cwd
 		}
 
-		parent, err := helpers.ParentPathName(wd)
+		parent, err := helpers.PathName(wd)
 		if err != nil {
 			return err
 		}

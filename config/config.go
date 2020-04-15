@@ -38,18 +38,10 @@ type Database struct {
 type Site struct {
 	Hostname string `yaml:"domain"`
 	Path     string `yaml:"path"`
-	Docroot  string `yaml:"docroot"`
+	Webroot  string `yaml:"docroot"`
 }
 
 func (c *Config) AddSite(site Site) error {
-	// replace the homedir with the tilde
-	home, err := homedir.Dir()
-	if err != nil {
-		return err
-	}
-
-	site.Path = strings.Replace(site.Path, home, "~", 1)
-
 	c.Sites = append(c.Sites, site)
 	return nil
 }
