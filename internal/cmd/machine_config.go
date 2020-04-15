@@ -17,7 +17,7 @@ write_files:
           listen 80;
           listen [::]:80;
 
-          root /app/sites/CHANGEPATH/CHANGEPUBLICDIR;
+          root CHANGEWEBROOTDIR;
 
           index index.php;
           gzip_static  on;
@@ -54,6 +54,6 @@ runcmd:
   - sudo apt-get update -y
   - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
   - sudo usermod -aG docker ubuntu
-  - sudo mkdir -p /app/sites
-  - sudo chown -R ubuntu:ubuntu /app/sites
+  - sudo mkdir -p /nitro/sites
+  - sudo chown -R ubuntu:ubuntu /nitro/sites
 `
