@@ -41,11 +41,16 @@ type Database struct {
 }
 
 type Site struct {
-	Hostname string `yaml:"hostname"`
-	Webroot  string `yaml:"webroot"`
+	Hostname string   `yaml:"hostname"`
+	Webroot  string   `yaml:"webroot"`
+	Aliases  []string `yaml:"aliases"`
 }
 
 func (c *Config) AddSite(site Site) error {
+	if len(site.Aliases) == 0 {
+		site.Aliases = nil
+	}
+
 	c.Sites = append(c.Sites, site)
 	return nil
 }
