@@ -1,9 +1,9 @@
 package cmd
 
 var (
-	flagConfigFile  string
-	flagMachineName string
-	flagDebug       bool
+	flagConfigFile      string
+	flagMachineName     string
+	flagDebug           bool
 	flagCPUs            int
 	flagMemory          string
 	flagDisk            string
@@ -14,4 +14,8 @@ var (
 	flagPublicDir       string
 	flagPermanent       bool
 	flagUpgrade         bool
+
+	// flags for the add command
+	flagHostname string
+	flagWebroot  string
 )

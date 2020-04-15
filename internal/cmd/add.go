@@ -15,7 +15,7 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add sites to machine",
+	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var wd string
 		if len(args) > 0 {
@@ -28,38 +28,50 @@ var addCommand = &cobra.Command{
 			wd = cwd
 		}
 
-		pathName, err := helpers.PathName(wd)
-		if err != nil {
-			return err
+		// if the hostname flag is not set
+		var hostname string
+		if flagHostname == "" {
+			pathName, err := helpers.PathName(wd)
+			if err != nil {
+				return err
+			}
+
+			hostnamePrompt := promptui.Prompt{
+				Label:    fmt.Sprintf("what should the hostname be? [%s]", pathName),
+				Validate: validate.Hostname,
+			}
+
+			hostname, err := hostnamePrompt.Run()
+			if err != nil {
+				return err
+			}
+			if hostname == "" {
+				hostname = pathName
+			}
+		} else {
+			hostname = flagHostname
 		}
 
-		hostnamePrompt := promptui.Prompt{
-			Label:    fmt.Sprintf("what should the hostname be? [%s]", pathName),
-			Validate: validate.Hostname,
-		}
+		// if the flag for webroot is not set, prompt
+		var webroot string
+		if flagWebroot == "" {
+			foundDir, err := helpers.FindWebRoot(wd)
+			if err != nil {
+				return err
+			}
+			webRootPrompt := promptui.Prompt{
+				Label: fmt.Sprintf("where is the webroot? [%s]", foundDir),
+			}
 
-		hostname, err := hostnamePrompt.Run()
-		if err != nil {
-			return err
-		}
-		if hostname == "" {
-			hostname = pathName
-		}
-
-		foundDir, err := helpers.FindWebRoot(wd)
-		if err != nil {
-			return err
-		}
-		webRootPrompt := promptui.Prompt{
-			Label: fmt.Sprintf("where is the webroot? [%s]", foundDir),
-		}
-
-		webroot, err := webRootPrompt.Run()
-		if err != nil {
-			return err
-		}
-		if webroot == "" {
-			webroot = foundDir
+			webroot, err := webRootPrompt.Run()
+			if err != nil {
+				return err
+			}
+			if webroot == "" {
+				webroot = foundDir
+			}
+		} else {
+			webroot = flagWebroot
 		}
 
 		var configFile config.Config
@@ -112,4 +124,9 @@ var addCommand = &cobra.Command{
 		fmt.Println(configFile.Sites)
 		return nil
 	},
+}
+
+func init() {
+	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "hostname of the site (e.g client.test)")
+	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
 }
