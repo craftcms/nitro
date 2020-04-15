@@ -78,7 +78,7 @@ func (c *Config) AddMount(m Mount) error {
 	}
 
 	if m.Dest == "" {
-		dirname, err := helpers.ParentPathName(m.Source)
+		dirname, err := helpers.PathName(m.Source)
 		if err != nil {
 			return err
 		}

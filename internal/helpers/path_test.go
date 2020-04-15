@@ -13,9 +13,9 @@ func TestParentPathName(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "can get the parent directory name",
+			name: "can get the path directory name",
 			args: args{
-				path: "./testdata/good-example/web",
+				path: "./testdata/good-example",
 			},
 			want:    "good-example",
 			wantErr: false,
@@ -23,13 +23,13 @@ func TestParentPathName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParentPathName(tt.args.path)
+			got, err := PathName(tt.args.path)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParentPathName() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("PathName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ParentPathName() got = %v, want %v", got, tt.want)
+				t.Errorf("PathName() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

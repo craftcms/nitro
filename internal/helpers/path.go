@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-// ParentPathName takes a path and will return the directory name of the
-// parent dir (e.g. /nitro/sites/test will return sites)
-func ParentPathName(path string) (string, error) {
+// PathName takes a path and will return the directory name of the
+// parent dir (e.g. /nitro/sites/test will return test)
+func PathName(path string) (string, error) {
 	p, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
