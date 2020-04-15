@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -31,11 +30,9 @@ var addCommand = &cobra.Command{
 			wd = cwd
 		}
 
-		// if the hostname flag is not set
 		var hostname string
-		if flagHostname != "" {
-			hostname = flagHostname
-		} else {
+		switch flagHostname {
+		case "":
 			pathName, err := helpers.PathName(wd)
 			if err != nil {
 				return err
@@ -50,16 +47,21 @@ var addCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if hostnameEntered == "" {
+
+			switch hostnameEntered {
+			case "":
 				hostname = pathName
+			default:
+				hostname = hostnameEntered
 			}
+		default:
+			hostname = flagHostname
 		}
 
 		// if the flag for webroot is not set, prompt
 		var webroot string
-		if flagWebroot != "" {
-			webroot = flagWebroot
-		} else {
+		switch flagWebroot {
+		case "":
 			foundDir, err := helpers.FindWebRoot(wd)
 			if err != nil {
 				return err
@@ -72,9 +74,14 @@ var addCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if webrootEntered == "" {
+			switch webrootEntered {
+			case "":
 				webroot = foundDir
+			default:
+				webroot = webrootEntered
 			}
+		default:
+			webroot = flagWebroot
 		}
 
 		var configFile config.Config
@@ -82,11 +89,13 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
+		// create a mount and add it
 		mount := config.Mount{Source: wd}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
 
+		// create a site and add it
 		site := config.Site{Hostname: hostname, Webroot: "/nitro/sites/" + wd + "/" + webroot}
 		if err := configFile.AddSite(site); err != nil {
 			return err
@@ -135,11 +144,23 @@ var addCommand = &cobra.Command{
 		actions = append(actions, *copyTemplateAction)
 
 		// copy the nginx template
-		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, []string{"test", "three", "four"})
+		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *changeNginxVariablesAction...)
+
+		createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *createSymlinkAction)
+
+		restartNginxAction, err := nitro.NginxReload(name)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *restartNginxAction)
 
 		if flagDebug {
 			for _, action := range actions {
@@ -149,11 +170,18 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		return errors.New("need to run the actions")
+		err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("ok, we applied the changes and added", hostname, "to", name)
+
+		return nil
 	},
 }
 
 func init() {
-	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "hostname of the site (e.g client.test)")
-	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
+	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "hostname of site (e.g client.test)")
+	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of site (e.g. web)")
 }
