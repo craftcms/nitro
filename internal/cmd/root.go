@@ -38,7 +38,6 @@ func init() {
 		redisCommand,
 		hostsCommand,
 		contextCommand,
-		versionCommand,
 		selfUpdateCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
