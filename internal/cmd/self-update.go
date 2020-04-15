@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"log"
 	"net/http"
@@ -10,47 +9,43 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-var (
-	selfUpdateCommand = &cobra.Command{
-		Use:   "self-update",
-		Short: "Update Nitro to the latest",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			fileUrl := "https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh"
+var selfUpdateCommand = &cobra.Command{
+	Use:   "self-update",
+	Short: "Update Nitro to the latest",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fileUrl := "https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh"
 
-			tempFolder := os.TempDir()
+		tempFolder := os.TempDir()
+		defer os.Remove(tempFolder)
 
-			localFile := filepath.Join(tempFolder, "get.sh")
+		localFile := filepath.Join(tempFolder, "get.sh")
 
-			if downloadErr := DownloadFile(localFile, fileUrl); downloadErr != nil {
-				panic(downloadErr)
+		if err := DownloadFile(localFile, fileUrl); err != nil {
+			return err
+		}
+
+		if err := os.Chmod(localFile, 0777); err != nil {
+			return err
+		}
+
+		ch := make(chan string)
+		go func() {
+			if err := RunCommandCh(ch, "\r\n", localFile); err != nil {
+				log.Fatal(err)
 			}
+		}()
 
-			permErr := os.Chmod(localFile, 0777)
-			if permErr != nil {
-				log.Println(permErr)
-			}
+		for v := range ch {
+			fmt.Println(v)
+		}
 
-			ch := make(chan string)
-			go func() {
-				err := RunCommandCh(ch, "\r\n", localFile)
-				if err != nil {
-					log.Fatal(err)
-				}
-			}()
-
-			for v := range ch {
-				fmt.Println(v)
-			}
-
-
-			defer os.Remove(tempFolder)
-
-			return nil
-		},
-	}
-)
+		return nil
+	},
+}
 
 func DownloadFile(filepath string, url string) error {
 
@@ -73,18 +68,17 @@ func DownloadFile(filepath string, url string) error {
 	return err
 }
 
-
 // RunCommandCh runs an arbitrary command and streams the output to a channel.
 func RunCommandCh(stdoutCh chan<- string, cutset string, command string, flags ...string) error {
 	cmd := exec.Command(command, flags...)
 
 	output, err := cmd.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("RunCommand: cmd.StdoutPipe(): %v", err)
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("RunCommand: cmd.Start(): %v", err)
+		return err
 	}
 
 	go func() {
@@ -123,8 +117,5 @@ func RunCommandCh(stdoutCh chan<- string, cutset string, command string, flags .
 		}
 	}()
 
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("RunCommand: cmd.Wait(): %v", err)
-	}
-	return nil
+	return cmd.Wait()
 }
