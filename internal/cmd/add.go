@@ -6,14 +6,16 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add sites and mounts to machine",
+	Short: "Add sites to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var wd string
 		if len(args) > 0 {
@@ -26,13 +28,13 @@ var addCommand = &cobra.Command{
 			wd = cwd
 		}
 
-		parent, err := helpers.PathName(wd)
+		pathName, err := helpers.PathName(wd)
 		if err != nil {
 			return err
 		}
 
 		hostnamePrompt := promptui.Prompt{
-			Label:    fmt.Sprintf("what should the hostname be? [%s]", parent),
+			Label:    fmt.Sprintf("what should the hostname be? [%s]", pathName),
 			Validate: validate.Hostname,
 		}
 
@@ -41,7 +43,7 @@ var addCommand = &cobra.Command{
 			return err
 		}
 		if hostname == "" {
-			hostname = parent
+			hostname = pathName
 		}
 
 		foundDir, err := helpers.FindWebRoot(wd)
@@ -60,8 +62,30 @@ var addCommand = &cobra.Command{
 			webroot = foundDir
 		}
 
-		// TODO create the mount action
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
+
+		mount := config.Mount{Source: wd}
+		if err := configFile.AddMount(mount); err != nil {
+			return err
+		}
+
+		site := config.Site{Hostname: hostname, Webroot: "/nitro/sites/" + wd + "/" + webroot}
+		if err := configFile.AddSite(site); err != nil {
+			return err
+		}
+
+		if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
+			return err
+		}
+
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
+
+		return nil
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
 		applyPrompt := promptui.Prompt{
 			Label: "apply nitro.yaml changes now? [y]",
 		}
@@ -76,8 +100,16 @@ var addCommand = &cobra.Command{
 
 		if apply != "y" {
 			fmt.Println("ok, you can apply new nitro.yaml changes later by running `nitro apply`.")
+
+			return nil
 		}
 
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
+
+		fmt.Println(configFile.Sites)
 		return nil
 	},
 }
