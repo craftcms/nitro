@@ -118,21 +118,21 @@ var createCommand = &cobra.Command{
 					home, _ := homedir.Dir()
 					site.Path = strings.Replace(site.Path, "~", home, 1)
 				}
-				mountAction, err := nitro.Mount(name, site.Path, site.Domain)
+				mountAction, err := nitro.Mount(name, site.Path, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue
 				}
 				actions = append(actions, *mountAction)
 
-				createDirectoryAction, err := nitro.CreateNginxSiteDirectory(name, site.Domain)
+				createDirectoryAction, err := nitro.CreateNginxSiteDirectory(name, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue
 				}
 				actions = append(actions, *createDirectoryAction)
 
-				copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Domain)
+				copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue
@@ -142,7 +142,7 @@ var createCommand = &cobra.Command{
 				if site.Docroot == "" {
 					site.Docroot = "web"
 				}
-				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Domain, site.Docroot, phpVersion)
+				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Hostname, site.Docroot, phpVersion)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue
@@ -151,7 +151,7 @@ var createCommand = &cobra.Command{
 					actions = append(actions, a)
 				}
 
-				createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Domain)
+				createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue

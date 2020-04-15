@@ -38,7 +38,7 @@ var siteRemoveCommand = &cobra.Command{
 
 		var sites []string
 		for _, site := range configFile.Sites {
-			sites = append(sites, site.Domain)
+			sites = append(sites, site.Hostname)
 		}
 
 		prompt := promptui.Select{

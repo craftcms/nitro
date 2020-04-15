@@ -42,9 +42,9 @@ var siteAddCommand = &cobra.Command{
 		}
 
 		site := config.Site{
-			Domain:  domainName,
-			Path:    fullDirectoryPath,
-			Docroot: flagPublicDir,
+			Hostname: domainName,
+			Path:     fullDirectoryPath,
+			Docroot:  flagPublicDir,
 		}
 
 		var actions []nitro.Action
