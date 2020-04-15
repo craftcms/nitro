@@ -9,13 +9,13 @@ func Mount(name, folder, site string) (*Action, error) {
 	if err := validate.Path(folder); err != nil {
 		return nil, err
 	}
-	if err := validate.Domain(site); err != nil {
+	if err := validate.Hostname(site); err != nil {
 		return nil, err
 	}
 
 	return &Action{
 		Type:       "mount",
 		UseSyscall: false,
-		Args:       []string{"mount", folder, name + ":/app/sites/" + site},
+		Args:       []string{"mount", folder, name + ":/nitro/sites/" + site},
 	}, nil
 }

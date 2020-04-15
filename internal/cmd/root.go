@@ -25,7 +25,7 @@ func init() {
 
 	// add commands to root
 	rootCmd.AddCommand(
-		siteCommand,
+		addCommand,
 		sshCommand,
 		updateCommand,
 		infoCommand,
@@ -41,7 +41,6 @@ func init() {
 		versionCommand,
 		selfUpdateCommand,
 	)
-	siteCommand.AddCommand(siteAddCommand, siteRemoveCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
 	logsCommand.AddCommand(logsNginxCommand, logsDockerCommand, logsDatabaseCommand)

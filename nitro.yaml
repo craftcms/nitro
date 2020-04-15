@@ -1,25 +1,12 @@
-name: nitro-local
-cpus: 2
-memory: 4G
+name: nitro
+php: "7.4"
+cpus: "1"
 disk: 40G
-php: 7.4
-mounts:
-  - source: ~/dev
-    destination: /app/sites
+memory: 4G
 databases:
-  - engine: mysql
-    version: 5.7
-    port: 3306
-  - engine: postgres
-    version: 12
-    port: 5432
-sites:
-  - domain: craft3dev.test
-    path: ~/dev/craft-dev # maps to /apps/sites/craft3dev.test
-    docroot: web
-  - domain: anotherproject.test
-    path: ~/dev/plugins-dev # maps to /apps/sites/anotherproject.test
-    docroot: web
-  - domain: clientname.test
-    path: ~/clientname/prodution-site # maps to /apps/sites/prodution-site.test
-    docroot: web
+- engine: mysql
+  version: "5.7"
+  port: "3306"
+- engine: postgres
+  version: "12"
+  port: "5432"

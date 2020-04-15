@@ -44,8 +44,8 @@ var hostsAddCommand = &cobra.Command{
 
 		var domains []string
 		for _, site := range sites {
-			domains = append(domains, site.Domain)
-			fmt.Println("Adding", site.Domain, "to", name)
+			domains = append(domains, site.Hostname)
+			fmt.Println("Adding", site.Hostname, "to", name)
 		}
 
 		hosts.AddHosts(ip, domains)

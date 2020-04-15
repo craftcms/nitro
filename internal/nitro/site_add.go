@@ -1,6 +1,12 @@
 package nitro
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/craftcms/nitro/validate"
+)
 
 func NginxReload(name string) (*Action, error) {
 	return &Action{
@@ -18,11 +24,18 @@ func CreateSiteSymllink(name, site string) (*Action, error) {
 	}, nil
 }
 
-func CopyNginxTemplate(name, site string) (*Action, error) {
+func CopyNginxTemplate(name, hostname string) (*Action, error) {
+	if hostname == "" {
+		return nil, errors.New("hostname cannot be empty")
+	}
+	if err := validate.Hostname(hostname); err != nil {
+		return nil, err
+	}
+
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "sudo", "cp", "/opt/nitro/nginx/template.conf", "/etc/nginx/sites-available/" + site},
+		Args:       []string{"exec", name, "--", "sudo", "cp", "/opt/nitro/nginx/template.conf", "/etc/nginx/sites-available/" + hostname},
 	}, nil
 }
 
@@ -30,17 +43,20 @@ func CreateNginxSiteDirectory(name, site string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "mkdir", "-p", "/app/sites/" + site},
+		Args:       []string{"exec", name, "--", "mkdir", "-p", "/nitro/sites/" + site},
 	}, nil
 }
 
-func ChangeTemplateVariables(name, site, dir, php string) (*[]Action, error) {
+func ChangeTemplateVariables(name, webroot, hostname, php string, aliases []string) (*[]Action, error) {
 	var actions []Action
+	template := hostname
+	if aliases != nil {
+		hostname = hostname + " " + strings.Join(aliases, " ")
+	}
 
-	actions = append(actions, *changeVariables(name, site, "CHANGEPATH", site))
-	actions = append(actions, *changeVariables(name, site, "CHANGESERVERNAME", site))
-	actions = append(actions, *changeVariables(name, site, "CHANGEPUBLICDIR", dir))
-	actions = append(actions, *changeVariables(name, site, "CHANGEPHPVERSION", php))
+	actions = append(actions, *changeVariables(name, template, "CHANGEWEBROOTDIR", webroot))
+	actions = append(actions, *changeVariables(name, template, "CHANGESERVERNAME", hostname))
+	actions = append(actions, *changeVariables(name, template, "CHANGEPHPVERSION", php))
 
 	return &actions, nil
 }

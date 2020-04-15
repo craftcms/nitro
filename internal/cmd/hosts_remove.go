@@ -39,7 +39,7 @@ var hostsRemoveCommand = &cobra.Command{
 
 		var domains []string
 		for _, site := range sites {
-			domains = append(domains, site.Domain)
+			domains = append(domains, site.Hostname)
 		}
 
 		hosts.RemoveHosts(domains)

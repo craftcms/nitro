@@ -22,7 +22,7 @@ func Database(v string) error {
 	return errors.New(fmt.Sprintf("the database %q is not supported", v))
 }
 
-func Domain(v string) error {
+func Hostname(v string) error {
 	msg := "You must provide a valid domain, without a TLD and only lowercase"
 
 	if strings.Contains(v, " ") {
@@ -49,7 +49,7 @@ func Path(p string) error {
 		return nil
 	}
 
-	return errors.New("You must provide a path to a valid directory")
+	return errors.New("you must provide a path to a valid directory")
 }
 
 // PHPVersion takes a string that represents a PHP version to install and returns and error if that PHP version
