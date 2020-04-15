@@ -3,11 +3,14 @@ package config
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
+
+	"github.com/craftcms/nitro/internal/helpers"
 )
 
 type Config struct {
@@ -16,8 +19,26 @@ type Config struct {
 	CPUs      string     `yaml:"cpus"`
 	Disk      string     `yaml:"disk"`
 	Memory    string     `yaml:"memory"`
+	Mounts    []Mount    `yaml:"mounts"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites"`
+}
+
+type Mount struct {
+	Source string `yaml:"source"`
+	Dest   string `yaml:"dest"`
+}
+
+type Database struct {
+	Engine  string `yaml:"engine"`
+	Version string `yaml:"version"`
+	Port    string `yaml:"port"`
+}
+
+type Site struct {
+	Hostname string `yaml:"domain"`
+	Path     string `yaml:"path"`
+	Docroot  string `yaml:"docroot"`
 }
 
 func (c *Config) AddSite(site Site) error {
@@ -33,9 +54,44 @@ func (c *Config) AddSite(site Site) error {
 	return nil
 }
 
+func (c *Config) AddMount(m Mount) error {
+	// replace the homedir with the tilde
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	// set the relative path
+	if strings.Contains(m.Source, "./") {
+		// get the full directory
+		fp, err := filepath.Abs(m.Source)
+		if err != nil {
+			return err
+		}
+
+		m.Source = strings.Replace(fp, home, "~", 1)
+	}
+
+	// set the relative path
+	if strings.Contains(m.Source, "~") {
+		m.Source = strings.Replace(m.Source, home, "~", 1)
+	}
+
+	if m.Dest == "" {
+		dirname, err := helpers.ParentPathName(m.Source)
+		if err != nil {
+			return err
+		}
+		m.Dest = "/nitro/sites/" + dirname
+	}
+
+	c.Mounts = append(c.Mounts, m)
+	return nil
+}
+
 func (c *Config) RemoveSite(site string) error {
 	for i, s := range c.Sites {
-		if s.Domain == site {
+		if s.Hostname == site {
 			copy(c.Sites[i:], c.Sites[i+1:])
 			c.Sites[len(c.Sites)-1] = Site{}
 			c.Sites = c.Sites[:len(c.Sites)-1]

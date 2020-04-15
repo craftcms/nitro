@@ -116,39 +116,39 @@ func TestConfig_RemoveSite(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "remove a site by its domain",
+			name: "remove a site by its hostname",
 			args: args{
 				site: "anotherexample.test",
 			},
 			fields: fields{
 				Sites: []Site{
 					{
-						Domain:  "example.test",
-						Path:    "/some/path",
-						Docroot: "web",
+						Hostname: "example.test",
+						Path:     "/some/path",
+						Docroot:  "web",
 					},
 					{
-						Domain:  "anotherexample.test",
-						Path:    "/some/path/to/anotherexample",
-						Docroot: "web",
+						Hostname: "anotherexample.test",
+						Path:     "/some/path/to/anotherexample",
+						Docroot:  "web",
 					},
 					{
-						Domain:  "finalexample.test",
-						Path:    "/some/path/to/finalexample",
-						Docroot: "web",
+						Hostname: "finalexample.test",
+						Path:     "/some/path/to/finalexample",
+						Docroot:  "web",
 					},
 				},
 			},
 			want: []Site{
 				{
-					Domain:  "example.test",
-					Path:    "/some/path",
-					Docroot: "web",
+					Hostname: "example.test",
+					Path:     "/some/path",
+					Docroot:  "web",
 				},
 				{
-					Domain:  "finalexample.test",
-					Path:    "/some/path/to/finalexample",
-					Docroot: "web",
+					Hostname: "finalexample.test",
+					Path:     "/some/path/to/finalexample",
+					Docroot:  "web",
 				},
 			},
 			wantErr: false,
@@ -161,37 +161,37 @@ func TestConfig_RemoveSite(t *testing.T) {
 			fields: fields{
 				Sites: []Site{
 					{
-						Domain:  "example.test",
-						Path:    "/some/path",
-						Docroot: "web",
+						Hostname: "example.test",
+						Path:     "/some/path",
+						Docroot:  "web",
 					},
 					{
-						Domain:  "anotherexample.test",
-						Path:    "/some/path/to/anotherexample",
-						Docroot: "web",
+						Hostname: "anotherexample.test",
+						Path:     "/some/path/to/anotherexample",
+						Docroot:  "web",
 					},
 					{
-						Domain:  "finalexample.test",
-						Path:    "/some/path/to/finalexample",
-						Docroot: "web",
+						Hostname: "finalexample.test",
+						Path:     "/some/path/to/finalexample",
+						Docroot:  "web",
 					},
 				},
 			},
 			want: []Site{
 				{
-					Domain:  "example.test",
-					Path:    "/some/path",
-					Docroot: "web",
+					Hostname: "example.test",
+					Path:     "/some/path",
+					Docroot:  "web",
 				},
 				{
-					Domain:  "anotherexample.test",
-					Path:    "/some/path/to/anotherexample",
-					Docroot: "web",
+					Hostname: "anotherexample.test",
+					Path:     "/some/path/to/anotherexample",
+					Docroot:  "web",
 				},
 				{
-					Domain:  "finalexample.test",
-					Path:    "/some/path/to/finalexample",
-					Docroot: "web",
+					Hostname: "finalexample.test",
+					Path:     "/some/path/to/finalexample",
+					Docroot:  "web",
 				},
 			},
 			wantErr: true,
@@ -217,6 +217,99 @@ func TestConfig_RemoveSite(t *testing.T) {
 			if tt.want != nil {
 				if !reflect.DeepEqual(c.Sites, tt.want) {
 					t.Errorf("RemoveSite() got = \n%v, \nwant \n%v", c.Sites, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestConfig_AddMount(t *testing.T) {
+	type fields struct {
+		Name      string
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		m Mount
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Mount
+		wantErr bool
+	}{
+		{
+			name: "adds a new mount and sets a default dest path for period references",
+			args: args{
+				m: Mount{
+					Source: "./testdata/test-mount",
+				},
+			},
+			want: []Mount{
+				{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Dest:   "/nitro/sites/test-mount",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "adds a new mount and sets a default dest path for relative",
+			args: args{
+				m: Mount{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+				},
+			},
+			want: []Mount{
+				{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Dest:   "/nitro/sites/test-mount",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "adds a new mount",
+			args: args{
+				m: Mount{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Dest: "/home/ubuntu/sites",
+				},
+			},
+			want: []Mount{
+				{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Dest:   "/home/ubuntu/sites",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Name:      tt.fields.Name,
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if err := c.AddMount(tt.args.m); (err != nil) != tt.wantErr {
+				t.Errorf("AddMount() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != nil {
+				if !reflect.DeepEqual(c.Mounts, tt.want) {
+					t.Errorf("AddMount() got = \n%v, \nwant \n%v", c.Mounts, tt.want)
 				}
 			}
 		})
