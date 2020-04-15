@@ -22,10 +22,10 @@ jobs:
       - name: Run tests
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
-      - name: Running code coverage
-        uses: codecov/codecov-nitro@v1
-        with:
-          file: ./coverage.txt
+#      - name: Running code coverage
+#        uses: codecov/codecov-nitro@v1
+#        with:
+#          file: ./coverage.txt
 
       - name: Build
         run: go build -v ./cmd/cli
