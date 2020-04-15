@@ -3,7 +3,7 @@ VERSION ?= 0.8.0
 MACHINE ?= nitro-global
 
 build:
-	go build -ldflags="-s -w -X github.com/pixelandtonic/nitro/internal/cmd/cmd.Version=${VERSION}" -o nitro ./cmd/cli
+	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro ./cmd/cli
 test:
 	go test ./...
 demo-site:
@@ -20,4 +20,5 @@ remove-integration-test:
 
 test-version: build
 	./nitro version
+test-version-releaser: releaser
 
