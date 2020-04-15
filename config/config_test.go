@@ -249,6 +249,21 @@ func TestConfig_AddMount(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "adds a new mount and sets a default dest path for non-relative references",
+			args: args{
+				m: Mount{
+					Source: "testdata/test-mount",
+				},
+			},
+			want: []Mount{
+				{
+					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Dest:   "/nitro/sites/test-mount",
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "adds a new mount and sets a default dest path for relative",
 			args: args{
 				m: Mount{

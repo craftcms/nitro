@@ -53,20 +53,24 @@ func (c *Config) AddMount(m Mount) error {
 		return err
 	}
 
-	// set the relative path
-	if strings.Contains(m.Source, "./") {
-		// get the full directory
+	prefix := m.Source[0:2]
+	switch prefix {
+	case "./":
 		fp, err := filepath.Abs(m.Source)
 		if err != nil {
 			return err
 		}
 
 		m.Source = strings.Replace(fp, home, "~", 1)
-	}
-
-	// set the relative path
-	if strings.Contains(m.Source, "~") {
+	case "~/":
 		m.Source = strings.Replace(m.Source, home, "~", 1)
+	default:
+		fp, err := filepath.Abs(m.Source)
+		if err != nil {
+			return err
+		}
+
+		m.Source = strings.Replace(fp, home, "~", 1)
 	}
 
 	if m.Dest == "" {
@@ -78,6 +82,7 @@ func (c *Config) AddMount(m Mount) error {
 	}
 
 	c.Mounts = append(c.Mounts, m)
+
 	return nil
 }
 
