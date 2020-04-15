@@ -1,6 +1,6 @@
 name: nitro
 php: "7.4"
-cpus: "2"
+cpus: "1"
 disk: 40G
 memory: 4G
 databases:
