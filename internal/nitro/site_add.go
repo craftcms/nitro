@@ -30,7 +30,7 @@ func CreateNginxSiteDirectory(name, site string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "mkdir", "-p", "/app/sites/" + site},
+		Args:       []string{"exec", name, "--", "mkdir", "-p", "/nitro/sites/" + site},
 	}, nil
 }
 
