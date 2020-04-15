@@ -5,7 +5,7 @@ disk: 40G
 php: 7.4
 mounts:
   - source: ~/dev
-    destination: /app/sites
+    dest: /app/sites
 databases:
   - engine: mysql
     version: 5.7
@@ -14,12 +14,9 @@ databases:
     version: 12
     port: 5432
 sites:
-  - domain: craft3dev.test
-    path: ~/dev/craft-dev # maps to /apps/sites/craft3dev.test
-    docroot: web
-  - domain: anotherproject.test
-    path: ~/dev/plugins-dev # maps to /apps/sites/anotherproject.test
-    docroot: web
-  - domain: clientname.test
-    path: ~/clientname/prodution-site # maps to /apps/sites/prodution-site.test
-    docroot: web
+  - hostname: craft3dev.test
+    webroot: /app/sites/craft-dev/web
+  - hostname: anotherproject
+    webroot: /app/sites/anotherproject/web
+  - hostname: clientname.test
+    webroot: /app/sites/clientname/web
