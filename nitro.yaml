@@ -5,7 +5,7 @@ disk: 40G
 php: 7.4
 mounts:
   - source: ~/dev
-    dest: /app/sites
+    dest: /nitro/sites
 databases:
   - engine: mysql
     version: 5.7
@@ -15,8 +15,8 @@ databases:
     port: 5432
 sites:
   - hostname: craft3dev.test
-    webroot: /app/sites/craft-dev/web
+    webroot: /nitro/sites/craft-dev/web
   - hostname: anotherproject
-    webroot: /app/sites/anotherproject/web
+    webroot: /nitro/sites/anotherproject/web
   - hostname: clientname.test
-    webroot: /app/sites/clientname/web
+    webroot: /nitro/sites/clientname/web
