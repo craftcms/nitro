@@ -16,6 +16,6 @@ func Mount(name, folder, site string) (*Action, error) {
 	return &Action{
 		Type:       "mount",
 		UseSyscall: false,
-		Args:       []string{"mount", folder, name + ":/app/sites/" + site},
+		Args:       []string{"mount", folder, name + ":/nitro/sites/" + site},
 	}, nil
 }
