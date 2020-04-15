@@ -36,9 +36,8 @@ type Database struct {
 }
 
 type Site struct {
-	Hostname string `yaml:"domain"`
-	Path     string `yaml:"path"`
-	Webroot  string `yaml:"docroot"`
+	Hostname string `yaml:"hostname"`
+	Webroot  string `yaml:"webroot"`
 }
 
 func (c *Config) AddSite(site Site) error {
