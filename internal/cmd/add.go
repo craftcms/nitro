@@ -11,6 +11,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -18,6 +19,7 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		name := config.GetString("name", flagMachineName)
 		var wd string
 		if len(args) > 0 {
 			wd = args[0]
@@ -31,7 +33,9 @@ var addCommand = &cobra.Command{
 
 		// if the hostname flag is not set
 		var hostname string
-		if flagHostname == "" {
+		if flagHostname != "" {
+			hostname = flagHostname
+		} else {
 			pathName, err := helpers.PathName(wd)
 			if err != nil {
 				return err
@@ -42,20 +46,20 @@ var addCommand = &cobra.Command{
 				Validate: validate.Hostname,
 			}
 
-			hostname, err := hostnamePrompt.Run()
+			hostnameEntered, err := hostnamePrompt.Run()
 			if err != nil {
 				return err
 			}
-			if hostname == "" {
+			if hostnameEntered == "" {
 				hostname = pathName
 			}
-		} else {
-			hostname = flagHostname
 		}
 
 		// if the flag for webroot is not set, prompt
 		var webroot string
-		if flagWebroot == "" {
+		if flagWebroot != "" {
+			webroot = flagWebroot
+		} else {
 			foundDir, err := helpers.FindWebRoot(wd)
 			if err != nil {
 				return err
@@ -64,15 +68,13 @@ var addCommand = &cobra.Command{
 				Label: fmt.Sprintf("where is the webroot? [%s]", foundDir),
 			}
 
-			webroot, err := webRootPrompt.Run()
+			webrootEntered, err := webRootPrompt.Run()
 			if err != nil {
 				return err
 			}
-			if webroot == "" {
+			if webrootEntered == "" {
 				webroot = foundDir
 			}
-		} else {
-			webroot = flagWebroot
 		}
 
 		var configFile config.Config
@@ -90,8 +92,10 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
-			return err
+		if !flagDebug {
+			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
+				return err
+			}
 		}
 
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
@@ -113,7 +117,38 @@ var addCommand = &cobra.Command{
 
 			return nil
 		}
-		
+
+		var actions []nitro.Action
+		// mount the directory
+		m := configFile.Mounts[len(configFile.Mounts)-1]
+		mountAction, err := nitro.MountDir(name, m.AbsSourcePath(), m.Dest)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *mountAction)
+
+		// copy the nginx template
+		copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *copyTemplateAction)
+
+		// copy the nginx template
+		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, []string{"test", "three", "four"})
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *changeNginxVariablesAction...)
+
+		if flagDebug {
+			for _, action := range actions {
+				fmt.Println(action.Args)
+			}
+
+			return nil
+		}
+
 		return errors.New("need to run the actions")
 	},
 }
