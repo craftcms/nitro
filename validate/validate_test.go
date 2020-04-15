@@ -119,8 +119,8 @@ func TestDomain(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Domain(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("Domain() error = %v, wantErr %v", err, tt.wantErr)
+			if err := Hostname(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("Hostname() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

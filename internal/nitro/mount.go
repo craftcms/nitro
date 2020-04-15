@@ -9,7 +9,7 @@ func Mount(name, folder, site string) (*Action, error) {
 	if err := validate.Path(folder); err != nil {
 		return nil, err
 	}
-	if err := validate.Domain(site); err != nil {
+	if err := validate.Hostname(site); err != nil {
 		return nil, err
 	}
 

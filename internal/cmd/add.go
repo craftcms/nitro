@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
@@ -31,7 +32,8 @@ var addCommand = &cobra.Command{
 		}
 
 		hostnamePrompt := promptui.Prompt{
-			Label: fmt.Sprintf("what should the hostname be? [%s]", parent),
+			Label:    fmt.Sprintf("what should the hostname be? [%s]", parent),
+			Validate: validate.Hostname,
 		}
 
 		hostname, err := hostnamePrompt.Run()
@@ -41,8 +43,6 @@ var addCommand = &cobra.Command{
 		if hostname == "" {
 			hostname = parent
 		}
-
-		// mountPath := "/nitro/sites/" + parent
 
 		foundDir, err := helpers.FindWebRoot(wd)
 		if err != nil {
@@ -69,6 +69,9 @@ var addCommand = &cobra.Command{
 		apply, err := applyPrompt.Run()
 		if err != nil {
 			return err
+		}
+		if apply == "" {
+			apply = "y"
 		}
 
 		if apply != "y" {
