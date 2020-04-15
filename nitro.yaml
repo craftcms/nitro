@@ -1,4 +1,4 @@
-name: nitro-local
+name: nitro
 php: "7.4"
 cpus: "2"
 disk: 40G
