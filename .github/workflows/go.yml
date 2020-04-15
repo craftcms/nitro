@@ -25,7 +25,6 @@ jobs:
       - name: Running code coverage
         uses: codecov/codecov-nitro@v1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
 
       - name: Build
