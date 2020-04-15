@@ -29,6 +29,11 @@ type Mount struct {
 	Dest   string `yaml:"dest"`
 }
 
+func (m *Mount) AbsSourcePath() string {
+	home, _ := homedir.Dir()
+	return strings.Replace(m.Source, "~", home, 1)
+}
+
 type Database struct {
 	Engine  string `yaml:"engine"`
 	Version string `yaml:"version"`
