@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -95,9 +96,6 @@ var addCommand = &cobra.Command{
 
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
 
-		return nil
-	},
-	PostRunE: func(cmd *cobra.Command, args []string) error {
 		applyPrompt := promptui.Prompt{
 			Label: "apply nitro.yaml changes now? [y]",
 		}
@@ -115,14 +113,8 @@ var addCommand = &cobra.Command{
 
 			return nil
 		}
-
-		var configFile config.Config
-		if err := viper.Unmarshal(&configFile); err != nil {
-			return err
-		}
-
-		fmt.Println(configFile.Sites)
-		return nil
+		
+		return errors.New("need to run the actions")
 	},
 }
 
