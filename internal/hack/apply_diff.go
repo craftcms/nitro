@@ -20,19 +20,21 @@ func MountDiffActions(name string, attached, file []config.Mount) ([]nitro.Actio
 
 			// check the the source exists in the mount
 			for _, mounted := range attached {
-				if mounted.Source == mount.Source {
+				if mounted.AbsSourcePath() == mount.AbsSourcePath() {
 					skip = true
 				}
 			}
 
 			if !skip {
-				mountDirAction, err := nitro.MountDir(name, mount.Source, mount.Dest)
+				mountDirAction, err := nitro.MountDir(name, mount.AbsSourcePath(), mount.Dest)
 				if err != nil {
 					return nil, err
 				}
 				actions = append(actions, *mountDirAction)
 			}
 		}
+
+		return actions, nil
 	default:
 		for _, mount := range attached {
 			// check the mount if the source already exists

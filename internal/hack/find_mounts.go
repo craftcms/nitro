@@ -3,7 +3,6 @@ package hack
 import (
 	"bytes"
 	"encoding/csv"
-	"io"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -16,21 +15,17 @@ import (
 func FindMounts(name string, b []byte) ([]config.Mount, error) {
 	var mounts []config.Mount
 
-	rdr := csv.NewReader(bytes.NewReader(b))
+	records, err := csv.NewReader(bytes.NewReader(b)).ReadAll()
+	if err != nil {
+		return nil, err
+	}
 
-	for {
-		line, err := rdr.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return nil, err
+	for i, record := range records {
+		if i == 0 || record[0] != name {
+			continue
 		}
 
-		if line[0] != name {
-			break
-		}
-
-		for _, m := range strings.Split(line[12], ";") {
+		for _, m := range strings.Split(record[12], ";") {
 			// since we split on the ;, the last element could be empty
 			if len(m) == 0 {
 				break

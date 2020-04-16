@@ -12,9 +12,9 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-var xCommand = &cobra.Command{
-	Use:    "x",
-	Short:  "Examine machine and config file",
+var applyCommand = &cobra.Command{
+	Use:    "apply",
+	Short:  "Apply changes from config",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
@@ -34,19 +34,6 @@ var xCommand = &cobra.Command{
 			return err
 		}
 
-		if len(attachedMounts) == 0 {
-			fmt.Println("ok, there are no already mounted directories")
-		}
-		if len(attachedMounts) == 1 {
-			fmt.Println("ok, we found 1 already mounted directory")
-		}
-		if len(attachedMounts) > 1 {
-			fmt.Printf("ok, we found %d already mounted directories\n", len(attachedMounts))
-		}
-
-		// prompt?
-		var actions []nitro.Action
-
 		// load the config file
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
@@ -59,15 +46,30 @@ var xCommand = &cobra.Command{
 			fileMounts = append(fileMounts, config.Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
 		}
 
+		fmt.Printf("ok, there are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
+
+		// prompt?
+		var actions []nitro.Action
+
 		mountActions, err := hack.MountDiffActions(name, attachedMounts, fileMounts)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, mountActions...)
 
-		for _, a := range actions {
-			fmt.Println(a.Args)
+		if flagDebug {
+			for _, a := range actions {
+				fmt.Println(a.Args)
+			}
+
+			return nil
 		}
+
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		fmt.Println("applied changes from", viper.ConfigFileUsed())
 
 		return nil
 	},
