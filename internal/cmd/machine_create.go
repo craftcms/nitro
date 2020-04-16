@@ -90,6 +90,22 @@ var createCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
+		// if there are mounts, set them
+		if viper.IsSet("mounts") {
+			var mounts []config.Mount
+			if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
+				return err
+			}
+
+			for _, mount := range mounts {
+				mountDirAction, err := nitro.MountDir(name, mount.AbsSourcePath(), mount.Dest)
+				if err != nil {
+					return err
+				}
+				actions = append(actions, *mountDirAction)
+			}
+		}
+
 		for _, database := range databases {
 			volumeAction, err := nitro.CreateDatabaseVolume(name, database.Engine, database.Version, database.Port)
 			if err != nil {
@@ -111,13 +127,6 @@ var createCommand = &cobra.Command{
 				return err
 			}
 			for _, site := range sites {
-				createDirectoryAction, err := nitro.CreateNginxSiteDirectory(name, site.Hostname)
-				if err != nil {
-					siteErrs = append(siteErrs, err)
-					continue
-				}
-				actions = append(actions, *createDirectoryAction)
-
 				copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
@@ -128,6 +137,7 @@ var createCommand = &cobra.Command{
 				if site.Webroot == "" {
 					site.Webroot = "web"
 				}
+
 				// TODO add support for aliases
 				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, phpVersion, nil)
 				if err != nil {
