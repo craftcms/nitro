@@ -39,6 +39,7 @@ func init() {
 		hostsCommand,
 		contextCommand,
 		selfUpdateCommand,
+		applyCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
