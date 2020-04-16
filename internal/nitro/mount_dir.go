@@ -19,6 +19,10 @@ func MountDir(name, source, target string) (*Action, error) {
 		target = "/" + target
 	}
 
+	if strings.HasSuffix(source, "/") {
+		source = strings.TrimRight(source, "/")
+	}
+
 	return &Action{
 		Type:       "mount",
 		UseSyscall: false,
