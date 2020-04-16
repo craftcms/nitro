@@ -55,6 +55,18 @@ func (c *Config) AddSite(site Site) error {
 	return nil
 }
 
+func (c *Config) GetSites() []Site {
+	return c.Sites
+}
+
+func (c *Config) SitesAsList() []string {
+	var s []string
+	for _, site := range c.Sites {
+		s = append(s, site.Hostname)
+	}
+	return s
+}
+
 func (c *Config) AddMount(m Mount) error {
 	// replace the homedir with the tilde
 	home, err := homedir.Dir()
