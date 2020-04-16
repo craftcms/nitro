@@ -4,8 +4,6 @@
 
 A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is Multipass, which allows you to create Ubuntu virtual machines.
 
-![Go test](https://github.com/pixelandtonic/nitro/workflows/Go%20test/badge.svg)
-
 ---
 
 ## Table of Contents
@@ -82,9 +80,9 @@ The following commands will help you manage your virtual server.
 - [`machine create`](#destroy)
 - [`machine destroy`](#destroy)
 - [`redis`](#redis)
-- [`restart`](#restart)
 - [`self-update`](#self-update)
 - [`update`](#update)
+- [`xdebug`](#xdebug)
 
 > Note: these examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
@@ -193,51 +191,58 @@ Creates a new server. The following options are available:
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
-### `site`
 
-Adds a new virtual host to nginx and mounts a local directory to the server.
+### `machine destroy`
 
-> Note: if you pass a version of PHP that was _not_ used when provisioning the server, Nitro will install that version of PHP for you.
+Destroys a machine.
 
-This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
+> Note: by default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`). This will not affect any local files or directories attached to the machine.
+
+Options:
+
+- `--permanent` permanently deletes a machine **(this is non-recoverable!)**
+
+This soft-destroys the `diesel` machine:
 
 ```bash
-nitro site --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test
+nitro machine destroy
 ```
 
-> Note: The `--path` argument is only required if you are not mounting the current working directory. If you are in a current Craft CMS project, you can omit the `--path`.
+This **permanently** destroys the `diesel` machine:
 
 ```bash
-nitro site mysite.test
+nitro machine destroy --permanent
 ```
 
-To remove a site from the virtual machine, run the following command:
+### `mount`
+
+Mounts a local directory to a path on the machine.
 
 ```bash
-nitro site --remove mysite.test
-```
-
-### `attach`
-
-Attaches, or mounts, a local directory to an nginx server’s web root.
-
-This mounts the local directory `/Users/jason/Sites/craftcms` as the web root for the `diesel` machine’s `mysite.test` host:
-
-```bash
-nitro attach mysite.test /Users/jason/Sites/craftcms
+nitro mount ~/sites/project-folder /home/ubuntu/project-folder
 ```
 
 ### `ssh`
 
 Nitro gives you full root access to your virtual server. The default user is `ubuntu` and has `sudo` permissions without a password. Once you’re in the virtual server, you can run `sudo` commands as usual (e.g. `sudo apt install golang`).
 
-This launches a new shell within the `diesel` machine:
-
 ```bash
 nitro ssh
 ```
 
-### `xon`
+### `xdebug configure`
+
+Configures Xdebug for remote access and debugging with PHPStorm or other IDE.
+
+Options:
+
+- `--php-version [argument]` install a specific version of PHP to enable for Xdebug
+
+```bash
+nitro xdebug configure --php-version 7.3
+```
+
+### `xdebug on`
 
 Enables Xdebug, which is installed and disabled by default on each machine.
 
@@ -245,13 +250,13 @@ Options:
 
 - `--php-version [argument]` install a specific version of PHP to enable for Xdebug
 
-This ensures Xdebug is installed for PHP 7.3 and enables it for the `diesel` machine:
+This ensures Xdebug is installed for PHP 7.3 and enables it:
 
 ```bash
-nitro xon --php-version 7.3
+nitro xdebug on --php-version 7.3
 ```
 
-### `xoff`
+### `xdebug off`
 
 Disables Xdebug on a machine.
 
@@ -259,17 +264,15 @@ Options:
 
 - `--php-version [argument]` install a specific version of PHP to enable for Xdebug
 
-This ensures Xdebug is installed for PHP 7.2 but disables it for the `diesel` machine:
+This ensures Xdebug is installed for PHP 7.2 but disables it:
 
 ```bash
-nitro xoff --php-version 7.2
+nitro xdebug off --php-version 7.2
 ```
 
 ### `start`
 
 Starts, or turns on, a machine.
-
-This turns on the `diesel` machine:
 
 ```bash
 nitro start
@@ -279,42 +282,8 @@ nitro start
 
 Stops, or turns off, a machine.
 
-This turns off the `diesel` machine:
-
 ```bash
 nitro stop
-```
-
-### `destroy`
-
-Destroys a machine. By default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`). This will not affect any files or directories attached to the machine.
-
-Options:
-
-- `--permanent` permanently deletes a machine **(this is non-recoverable!)**
-
-This soft-destroys the `diesel` machine:
-
-```bash
-nitro destroy --permanent
-```
-
-This **permanently** destroys the `diesel` machine:
-
-```bash
-nitro destroy --permanent true
-```
-
-### `sql`
-
-Launches a database shell as the root user.
-
-- `--postgres` access the PostgreSQL shell rather than MySQL (default)
-
-This launches a PostgreSQL console shell for the `diesel` machine:
-
-```bash
-nitro sql --postgres
 ```
 
 ### `redis`
@@ -339,6 +308,8 @@ nitro update
 
 ### `logs`
 
+TODO update now that its dynamic.
+
 Views the virtual machines logs.
 
 Options:
@@ -349,45 +320,8 @@ Options:
 This displays nginx logs for the `diesel` machine:
 
 ```bash
-nitro logs nginx
+nitro logs
 ```
-
-This displays xdebug logs for the `diesel` machine:
-
-```bash
-nitro logs xdebug
-```
-
-### `services`
-
-Stops, starts, or restarts services on a virtual machine. The commands are nested under the `services` command, so when calling `nitro services` the sub commands will be listed.
-
-Options:
-
-- `--nginx`
-- `--mysql`
-- `--postgres`
-- `--redis`
-
-This restarts nginx and MySQL on the `diesel` machine:
-
-```bash
-nitro services restart --nginx --mysql
-```
-
-This stops PostgreSQL on the `diesel` machine:
-
-```bash
-nitro services stop --postgres
-```
-
-This starts Redis on the `diesel` machine:
-
-```bash
-nitro services start --redis
-```
-
-### Xdebug
 
 #### Debugging web requests
 
