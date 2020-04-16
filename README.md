@@ -33,7 +33,9 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-TODO
+```
+curl https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh | sudo sh
+```
 
 ## Usage
 
