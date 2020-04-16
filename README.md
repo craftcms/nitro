@@ -28,6 +28,10 @@ Nitro installs the following on every machine:
 - MySQL
 - PostgreSQL (optional)
 - Redis
+- Xdebug
+- Blackfire
+
+> note: for a more detailed writeup on how to configure xdebug and nitro with PHPStorm, view this document on [how to configure xdebug and PHPStorm for both web and console debugging](XDEBUG.md).
 
 ## Installation
 
