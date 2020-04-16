@@ -75,14 +75,17 @@ The following commands will help you manage your virtual server.
 - [`context`](#context)
 - [`info`](#info)
 - [`logs`](#logs)
-- [`ssh`](#ssh)
-- [`stop`](#stop)
-- [`machine create`](#destroy)
-- [`machine destroy`](#destroy)
+- [`mount`](#mount)
+- [`machine create`](#machine-create)
+- [`machine destroy`](#machine-destroy)
 - [`redis`](#redis)
 - [`self-update`](#self-update)
+- [`ssh`](#ssh)
+- [`stop`](#stop)
 - [`update`](#update)
-- [`xdebug`](#xdebug)
+- [`xdebug configure`](#xdebug-configure)
+- [`xdebug on`](#xdebug-on)
+- [`xdebug off`](#xdebug-off)
 
 > Note: these examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
@@ -294,6 +297,14 @@ This launches a Redis console shell for the `diesel` machine:
 
 ```bash
 nitro redis
+```
+
+### `self-update`
+
+Perform updates to the nitro CLI.
+
+```bash
+nitro self-update
 ```
 
 ### `update`
