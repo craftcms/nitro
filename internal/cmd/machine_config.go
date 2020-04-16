@@ -11,6 +11,13 @@ packages:
   - software-properties-common
   - sshfs
 write_files:
+  - path: /opt/nitro/scripts/site-exists.sh
+    content: |
+      #!/usr/bin/env bash
+      site="$1"
+      if test -f /etc/nginx/sites-enabled/"$site"; then
+          echo "exists"
+      fi
   - path: /opt/nitro/nginx/template.conf
     content: |
       server {
