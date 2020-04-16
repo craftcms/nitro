@@ -18,6 +18,8 @@ var versionCommand = &cobra.Command{
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("nitro version %s\n", Version)
+		fmt.Println("")
+		fmt.Println("visit https://github.com/craftcms/nitro for more information")
 
 		return nil
 	},
