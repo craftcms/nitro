@@ -46,6 +46,8 @@ var applyCommand = &cobra.Command{
 			fileMounts = append(fileMounts, config.Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
 		}
 
+		// TODO find sites not created
+
 		fmt.Printf("ok, there are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
 
 		// prompt?
