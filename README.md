@@ -33,55 +33,14 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-There are two ways to install Nitro, global or per-project. Global installation will make the `nitro` executable available anywhere in your shell. Per-project installation is done through composer and places the `nitro` executable in your `/vendor/bin` directory.
-
-### Composer
- 
-```shell script
-composer require --dev craftcms/nitro
-```
-
-This package has a single executable named `nitro`. In order to use the CLI, run `./vendor/bin/nitro`.
-
-To use `composer run nitro`, add the following to your `composer.json`’s scripts section:
-
-```json
-"scripts": {
-  "nitro": "./vendor/bin/nitro"
-},
-```
-
-Create a new development machine by running the following:
-
-```bash
-composer run nitro init
-```
-
-This will create a new machine with the default name `nitro-dev`. If you wish to assign another name to the machine, provide one with the `--machine` argument instead:
-
-```bash
-./vendor/bin/nitro --machine my-custom-name init
-```
-
-### Global
-
-To install Nitro globally, visit the [releases page](https://github.com/pixelandtonic/nitro/releases) and download the binary for your Operating System.
-
-- macOS is `darwin`
-- Windows is `windows`
-- Linux is `linux`
-
-Unzip the downloaded file and place the `nitro` into your shell's path.  
-
-```bash
- sudo mv /Users/jasonmccallister/Downloads/nitro_<VERSION>_darwin_x86_64/nitro /usr/local/bin/
-```
-
-TODO add windows manual instructions. 
+TODO
 
 ## Usage
 
 In order to create a new development server, you must create a new Nitro machine. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
+
+Nitro defaults to a global `nitro.yaml`. The default location is `~/.nitro/nitro.yaml`. However, you can override the configuration for each command by providing a `--config` (or the shorthand `-f`) with the path to the file (e.g. `nitro -f /path/to/nitro.yaml <command>`).
+
 
 ```bash
 nitro machine create
@@ -89,7 +48,7 @@ nitro machine create
 
 > Note: `nitro machine create` has options you can pass when creating a new server. However, we can set some "“sane” defaults for most scenarios. To view the options, run `nitro machine create --help`.
 
-After running `machine create`, the system will default to automatically bootstrap the server. The bootstrap process will install the latest PHP version, MySQL, and Redis.
+After running `machine create`. The bootstrap process will install the latest PHP version, MySQL, Postgres, and Redis from the `nitro.yaml` file.
 
 The next step is to add a new virtual host to the server:
 
@@ -111,27 +70,124 @@ You can now visit `http://myclientsite.test` in your browser!
 
 The following commands will help you manage your virtual server.
 
-- [`site`](#site)
+- [`apply`](#apply)
+- [`add`](#add)
+- [`context`](#context)
+- [`info`](#info)
+- [`logs`](#logs)
 - [`ssh`](#ssh)
-- [`start`](#start)
 - [`stop`](#stop)
+- [`machine create`](#destroy)
 - [`machine destroy`](#destroy)
 - [`redis`](#redis)
+- [`restart`](#restart)
+- [`self-update`](#self-update)
 - [`update`](#update)
-- [`logs`](#logs)
 
-> Note: these examples use a custom server name of `diesel`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
+> Note: these examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
+
+### `apply`
+
+Apply will look at a config file and make changes from the mounts, and sites in the config file by adding or removing. The config file is the source of truth for your nitro machine.
+
+```bash
+nitro apply
+```
+
+```bash
+$ nitro apply
+ok, there are 2 mounted directories and 1 new mount(s) in the config file
+applied changes from nitro.yaml
+```
+
+### `add`
+
+Add will create an interactive prompt to add a site (and mount it) into your nitro machine. By default, it will look at your current working directory and assume that it is a Craft project.
+
+```bash
+cd /Users/brandon/Sites/example.test
+$ nitro add
+→ what should the hostname be? [example.test] $ ex.test
+→ what is the webroot? [web] $
+ex.test has been added to nitro.yaml
+→ apply nitro.yaml changes now? [y] $ n
+ok, you can apply new nitro.yaml changes later by running `nitro apply`.
+```
+
+You can optionally pass a path to the directory as the first argument to use that directory:
+
+```bash
+cd /Users/brandon/Sites/
+$ nitro -f nitro.yaml add demo-site
+✔ what should the hostname be? [demo-site]: $
+what is the webroot? [web]: $
+✔ apply nitro.yaml changes now? [y]: $
+ok, we applied the changes and added demo-site to nitro  
+````
+
+| Argument     | Default                                        | Options | Description                                 |
+|--------------|------------------------------------------------|---------|---------------------------------------------|
+| `--hostname` | (the current working directory name)           |         | The hostname to use for accessing the site. |
+| `--webroot`  | (looks for web, public, public_html, and www)) |         | The webroot to configure nginx.             |
+
+### `context`
+
+Shows the currently used configuration file for quick reference.
+
+```shell
+$ nitro -f nitro-example.yaml context
+Using config file: nitro.yaml
+------
+name: nitro
+php: "7.4"
+cpus: "1"
+disk: 40G
+memory: 4G
+mounts:
+- source: ~/sites/demo-site
+  dest: /nitro/sites/demo-site
+databases:
+- engine: mysql
+  version: "5.7"
+  port: "3306"
+- engine: postgres
+  version: "12"
+  port: "5432"
+sites:
+- hostname: demo-site
+  webroot: /nitro/sites/demo-site/web
+------
+```
+
+### `info`
+
+Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
+
+```shell
+$ nitro info
+Name:           nitro
+State:          Running
+IPv4:           192.168.64.48
+Release:        Ubuntu 18.04.4 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Load:           0.09 0.15 0.22
+Disk usage:     2.7G out of 38.6G
+Memory usage:   379.8M out of 3.9G
+Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-site
+                    UID map: 501:default
+                    GID map: 20:default
+```
 
 ### `machine create`
 
 Creates a new server. The following options are available:
 
-| Argument        | Default | Options             | Description                                       |
-| --------------- | ------- | ------------------- | ------------------------------------------------- |
+| Argument        | Default | Options                           | Description                                       |
+|-----------------|---------|-----------------------------------|---------------------------------------------------|
 | `--php-version` | `7.4`   | `7.4`, `7.3`, `7.2`, `7.1`, `7.0` | Specifies PHP version used for bootstrap command. |
-| `--cpus`        | `2`     | max host CPUs\*     | Number of CPUs to allocate to the server.         |
-| `--memory`      | `2G`    | max host memory\*   | Gigabytes of memory to allocate to the server.    |
-| `--disk`        | `20G`   | max host disk\*     | Disk space to allocate to the server.             |
+| `--cpus`        | `2`     | max host CPUs\*                   | Number of CPUs to allocate to the server.         |
+| `--memory`      | `2G`    | max host memory\*                 | Gigabytes of memory to allocate to the server.    |
+| `--disk`        | `20G`   | max host disk\*                   | Disk space to allocate to the server.             |
 
 <small>\*: CPU, memory, and disk are shared with the host—not reserved—and represent maximum resources to be made available.</small>
 
@@ -144,19 +200,19 @@ Adds a new virtual host to nginx and mounts a local directory to the server.
 This adds a host using `mysite.test` to the `diesel` machine, using PHP 7.4 and a document root of `/Users/jason/Sites/craftcms`.
 
 ```bash
-nitro --machine diesel site --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test 
+nitro site --php-version 7.4 --path /Users/jason/Sites/craftcms mysite.test
 ```
 
 > Note: The `--path` argument is only required if you are not mounting the current working directory. If you are in a current Craft CMS project, you can omit the `--path`.
 
 ```bash
-nitro --machine diesel site mysite.test
+nitro site mysite.test
 ```
 
 To remove a site from the virtual machine, run the following command:
 
 ```bash
-nitro --machine diesel site --remove mysite.test
+nitro site --remove mysite.test
 ```
 
 ### `attach`
@@ -166,7 +222,7 @@ Attaches, or mounts, a local directory to an nginx server’s web root.
 This mounts the local directory `/Users/jason/Sites/craftcms` as the web root for the `diesel` machine’s `mysite.test` host:
 
 ```bash
-nitro --machine diesel attach mysite.test /Users/jason/Sites/craftcms
+nitro attach mysite.test /Users/jason/Sites/craftcms
 ```
 
 ### `ssh`
@@ -176,7 +232,7 @@ Nitro gives you full root access to your virtual server. The default user is `ub
 This launches a new shell within the `diesel` machine:
 
 ```bash
-nitro --machine diesel ssh
+nitro ssh
 ```
 
 ### `xon`
@@ -190,7 +246,7 @@ Options:
 This ensures Xdebug is installed for PHP 7.3 and enables it for the `diesel` machine:
 
 ```bash
-nitro --machine diesel xon --php-version 7.3
+nitro xon --php-version 7.3
 ```
 
 ### `xoff`
@@ -204,7 +260,7 @@ Options:
 This ensures Xdebug is installed for PHP 7.2 but disables it for the `diesel` machine:
 
 ```bash
-nitro --machine diesel xoff --php-version 7.2
+nitro xoff --php-version 7.2
 ```
 
 ### `start`
@@ -214,7 +270,7 @@ Starts, or turns on, a machine.
 This turns on the `diesel` machine:
 
 ```bash
-nitro --machine diesel start
+nitro start
 ```
 
 ### `stop`
@@ -224,7 +280,7 @@ Stops, or turns off, a machine.
 This turns off the `diesel` machine:
 
 ```bash
-nitro --machine diesel stop
+nitro stop
 ```
 
 ### `destroy`
@@ -238,13 +294,13 @@ Options:
 This soft-destroys the `diesel` machine:
 
 ```bash
-nitro --machine diesel destroy --permanent
+nitro destroy --permanent
 ```
 
 This **permanently** destroys the `diesel` machine:
 
 ```bash
-nitro --machine diesel destroy --permanent true
+nitro destroy --permanent true
 ```
 
 ### `sql`
@@ -256,7 +312,7 @@ Launches a database shell as the root user.
 This launches a PostgreSQL console shell for the `diesel` machine:
 
 ```bash
-nitro --machine diesel sql --postgres
+nitro sql --postgres
 ```
 
 ### `redis`
@@ -266,7 +322,7 @@ Access a Redis shell.
 This launches a Redis console shell for the `diesel` machine:
 
 ```bash
-nitro --machine diesel redis
+nitro redis
 ```
 
 ### `update`
@@ -276,7 +332,7 @@ Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
 This upgrades the `diesel` machine’s software packages to their newest versions:
 
 ```bash
-nitro --machine diesel update
+nitro update
 ```
 
 ### `logs`
@@ -291,13 +347,13 @@ Options:
 This displays nginx logs for the `diesel` machine:
 
 ```bash
-nitro --machine diesel logs nginx
+nitro logs nginx
 ```
 
 This displays xdebug logs for the `diesel` machine:
 
 ```bash
-nitro --machine diesel logs xdebug
+nitro logs xdebug
 ```
 
 ### `services`
@@ -314,19 +370,19 @@ Options:
 This restarts nginx and MySQL on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services restart --nginx --mysql
+nitro services restart --nginx --mysql
 ```
 
 This stops PostgreSQL on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services stop --postgres
+nitro services stop --postgres
 ```
 
 This starts Redis on the `diesel` machine:
 
 ```bash
-nitro --machine diesel services start --redis
+nitro services start --redis
 ```
 
 ### Xdebug
