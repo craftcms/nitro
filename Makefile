@@ -1,9 +1,9 @@
 .PHONY: install
-VERSION ?= 0.8.0
+BUDDY_EXECUTION_TAG ?= 0.8.0
 MACHINE ?= nitro-global
 
 build:
-	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro ./cmd/cli
+	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${BUDDY_EXECUTION_TAG}'" -o nitro ./cmd/cli
 test:
 	go test ./...
 demo-site:
@@ -17,7 +17,6 @@ integration-test: build
 remove-integration-test:
 	./nitro -f nitro.yaml machine destroy -p
 	rm -rf demo-site
-
 test-version: build
 	./nitro version
 test-version-releaser: releaser
