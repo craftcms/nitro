@@ -29,11 +29,6 @@ type Mount struct {
 	Dest   string `yaml:"dest"`
 }
 
-func (m *Mount) AbsSourcePath() string {
-	home, _ := homedir.Dir()
-	return strings.Replace(m.Source, "~", home, 1)
-}
-
 type Database struct {
 	Engine  string `yaml:"engine"`
 	Version string `yaml:"version"`
@@ -44,6 +39,11 @@ type Site struct {
 	Hostname string   `yaml:"hostname"`
 	Webroot  string   `yaml:"webroot"`
 	Aliases  []string `yaml:"aliases,omitempty"`
+}
+
+func (m *Mount) AbsSourcePath() string {
+	home, _ := homedir.Dir()
+	return strings.Replace(m.Source, "~", home, 1)
 }
 
 func (c *Config) AddSite(site Site) error {

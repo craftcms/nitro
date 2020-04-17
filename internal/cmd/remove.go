@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -26,11 +28,6 @@ var removeCommand = &cobra.Command{
 		i, _ := prompt.Select("Select site to remove", configFile.SitesAsList())
 
 		site := sites[i]
-		if !prompt.Verify(fmt.Sprintf("this will remove %s from %s, do you want to apply the changes? [y]", site.Hostname, name)) {
-			fmt.Println("ok, you can apply new nitro.yaml changes later by running `nitro apply`.")
-
-			return nil
-		}
 
 		// find the mount
 		mount := configFile.FindMountBySiteWebroot(site.Webroot)
@@ -43,26 +40,30 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		if flagDebug {
-			fmt.Println("sites:", configFile.Sites)
-			fmt.Println("sites (length):", len(configFile.Sites))
-		}
-
 		// remove the mount
 		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
 			return err
 		}
 
-		if flagDebug {
-			fmt.Println("mounts:", configFile.Mounts)
-			fmt.Println("mounts (length):", len(configFile.Mounts))
+		// START HACK
+		// use viper to ensure consistency when saving
+		c, err := yaml.Marshal(configFile)
+		if err := viper.ReadConfig(bytes.NewBuffer(c)); err != nil {
+			return err
 		}
-
-		if !flagDebug {
-			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
-				return err
-			}
+		if err := viper.WriteConfigAs(viper.ConfigFileUsed()); err != nil {
+			return err
 		}
+		// unmarshal the messy config into a config
+		var messyConfig config.Config
+		if err := viper.Unmarshal(&messyConfig); err != nil {
+			return err
+		}
+		// save that config in the right order
+		if err := messyConfig.Save(viper.ConfigFileUsed()); err != nil {
+			return err
+		}
+		// END HACK
 
 		actions, err := removeActions(name, *mount, site)
 		if err != nil {
