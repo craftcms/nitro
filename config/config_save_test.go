@@ -19,7 +19,7 @@ func getConfigFile(t *testing.T, file string) Config {
 	v.SetConfigType("yaml")
 	v.SetConfigFile(fp)
 	if err := v.ReadInConfig(); err != nil {
-		t.Fatal(err)
+		t.Fatal("error reading", file, "err:", err)
 	}
 
 	var cfg Config
