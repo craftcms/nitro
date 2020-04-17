@@ -43,39 +43,35 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		// remove the mount
-		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
-			return err
-		}
-
-		// save the config
 		if !flagDebug {
 			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
 				return err
 			}
 		}
 
-		var actions []nitro.Action
+		// remove the mount
+		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
+			return err
+		}
 
-		// unmount
-		unmountAction, err := nitro.UnmountDir(name, mount.Dest)
+		if !flagDebug {
+			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
+				return err
+			}
+		}
+
+		actions, err := removeActions(name, *mount, site)
 		if err != nil {
 			return err
 		}
-		actions = append(actions, *unmountAction)
 
-		// remove nginx symlink
-		removeSymlinkAction, err := nitro.RemoveSymlink(name, site.Hostname)
-		if err != nil {
-			return err
+		// save the config
+		if flagDebug {
+			for _, a := range actions {
+				fmt.Println(a.Args)
+			}
+			return nil
 		}
-		actions = append(actions, *removeSymlinkAction)
-
-		restartNginxAction, err := nitro.NginxReload(name)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *restartNginxAction)
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			fmt.Println("failed to remove the site:", err)
@@ -86,4 +82,30 @@ var removeCommand = &cobra.Command{
 
 		return nil
 	},
+}
+
+func removeActions(name string, mount config.Mount, site config.Site) ([]nitro.Action, error) {
+	var actions []nitro.Action
+
+	// unmount
+	unmountAction, err := nitro.UnmountDir(name, mount.Dest)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *unmountAction)
+
+	// remove nginx symlink
+	removeSymlinkAction, err := nitro.RemoveSymlink(name, site.Hostname)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *removeSymlinkAction)
+
+	restartNginxAction, err := nitro.NginxReload(name)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *restartNginxAction)
+
+	return actions, nil
 }
