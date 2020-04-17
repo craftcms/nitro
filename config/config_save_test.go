@@ -63,12 +63,13 @@ func TestCanSaveConfigProperly(t *testing.T) {
 	// double check the golden file
 	goldenCfgFile := getConfigFile(t, "testdata/configs/golden-full.yaml")
 	// make sure the mounts are the same
+	// TODO reflect.DeepEqual verifies memory
 	if !reflect.DeepEqual(goldenCfgFile.Mounts, modifiedCfgFile.Mounts) {
-		t.Errorf("expected configs mounts to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Mounts, modifiedCfgFile.Mounts)
+		t.Errorf("expected configs mounts to be the same, got \n%v \nwant: \n%v", modifiedCfgFile.Mounts, goldenCfgFile.Mounts)
 	}
 	// make sure the sites are the same
 	if !reflect.DeepEqual(goldenCfgFile.Sites, modifiedCfgFile.Sites) {
-		t.Errorf("expected configs sites to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Sites, modifiedCfgFile.Sites)
+		t.Errorf("expected configs sites to be the same, got \n%p \nwant: \n%p", &modifiedCfgFile.Sites, &goldenCfgFile.Sites)
 	}
 	// make sure the entire config is the same
 	if !reflect.DeepEqual(goldenCfgFile, modifiedCfgFile) {
