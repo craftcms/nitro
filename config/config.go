@@ -108,8 +108,9 @@ func (c *Config) AddMount(m Mount) error {
 }
 
 func (c *Config) RemoveSite(hostname string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i := len(c.Sites) - 1; i >= 0; i-- {
+		site := c.Sites[i]
+		if site.Hostname == hostname {
 			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
 			return nil
 		}
@@ -127,8 +128,9 @@ func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
 	t := path[:len(path)-1]
 	dest := strings.Join(t, string(os.PathSeparator))
 
-	for i, m := range c.Mounts {
-		if m.Dest == dest {
+	for i := len(c.Mounts) - 1; i >= 0; i-- {
+		mount := c.Mounts[i]
+		if mount.Dest == dest {
 			c.Mounts = append(c.Mounts[:i], c.Mounts[i+1:]...)
 			return nil
 		}
