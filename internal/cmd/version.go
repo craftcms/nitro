@@ -25,8 +25,14 @@ var (
 				return err
 			}
 
-			fmt.Println("The latest version of nitro is", latest)
-			fmt.Println("Visit https://github.com/craftcms/nitro for more details or \nrun `nitro self-update` to perform an upgrade")
+			if latest != Version {
+				fmt.Println("The latest version of nitro is", latest)
+				fmt.Println("Visit https://github.com/craftcms/nitro for more details or \nrun `nitro self-update` to perform an upgrade")
+
+				return nil
+			}
+
+			fmt.Println("you are on the latest version of nitro!")
 
 			return nil
 		},
