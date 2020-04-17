@@ -73,6 +73,13 @@ var applyCommand = &cobra.Command{
 
 		// create site actions
 		for _, site := range sitesToCreate {
+			m := configFile.FindMountBySiteWebroot(site.Webroot)
+			mountAction, err := nitro.MountDir(name, m.AbsSourcePath(), m.Dest)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *mountAction)
+
 			copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
 			if err != nil {
 				return err
