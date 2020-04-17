@@ -5,14 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ghodss/yaml"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/config"
 )
 
 func TestCanSaveConfigProperly(t *testing.T) {
 	// set the config file
+	t.Log("TODO")
+
 	originalFilePath, err := filepath.Abs("configs/full-example.yaml")
 	if err != nil {
 		t.Fatal(err)
