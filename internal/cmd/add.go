@@ -171,8 +171,7 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
-		if err != nil {
+		if err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
