@@ -25,13 +25,19 @@ func PathName(path string) (string, error) {
 }
 
 func GetDirectoryArg(args []string) (string, string, error) {
+	// if there is a path provided
+	if len(args) > 0 {
+		wd, err := filepath.Abs(args[0])
+		if err != nil {
+			return "", "", err
+		}
+
+		return RemoveTrailingSlash(args[0]), wd, nil
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return "", "", err
-	}
-
-	if len(args) > 0 {
-		return args[0], wd, nil
 	}
 
 	path := strings.Split(wd, string(os.PathSeparator))
