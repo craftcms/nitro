@@ -90,7 +90,7 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		// add the mount to configfile
-		mount := config.Mount{Source: absolutePath, Dest: webRootPath}
+		mount := config.Mount{Source: absolutePath}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
