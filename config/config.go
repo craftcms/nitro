@@ -19,9 +19,9 @@ type Config struct {
 	CPUs      string     `yaml:"cpus"`
 	Disk      string     `yaml:"disk"`
 	Memory    string     `yaml:"memory"`
-	Mounts    []Mount    `yaml:"mounts"`
+	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
-	Sites     []Site     `yaml:"sites"`
+	Sites     []Site     `yaml:"sites,omitempty"`
 }
 
 type Mount struct {
@@ -43,7 +43,7 @@ type Database struct {
 type Site struct {
 	Hostname string   `yaml:"hostname"`
 	Webroot  string   `yaml:"webroot"`
-	Aliases  []string `yaml:"aliases"`
+	Aliases  []string `yaml:"aliases,omitempty"`
 }
 
 func (c *Config) AddSite(site Site) error {
@@ -154,12 +154,12 @@ func (c *Config) FindMountBySiteWebroot(webroot string) *Mount {
 }
 
 func (c *Config) Save(filename string) error {
-	data, err := yaml.Marshal(c)
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
 
-	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
