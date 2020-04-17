@@ -40,12 +40,17 @@ func TestCanSaveConfigProperly(t *testing.T) {
 	originalCfgFile := getConfigFile(t, "testdata/configs/full-example.yaml")
 
 	// Act
+	// TODO make the same call that remove does
+	sites := originalCfgFile.GetSites()
+	site := sites[1]
+	_ = originalCfgFile.FindMountBySiteWebroot(site.Webroot)
+
 	// remove a site
-	if err := originalCfgFile.RemoveSite("demo-site"); err != nil {
+	if err := originalCfgFile.RemoveSite(site.Hostname); err != nil {
 		t.Error(err)
 	}
 	// remove a mount
-	if err := originalCfgFile.RemoveMountBySiteWebroot("/nitro/sites/demo-site/web"); err != nil {
+	if err := originalCfgFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
 		t.Error(err)
 	}
 	// save to a temp config
