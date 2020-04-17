@@ -383,3 +383,73 @@ func TestConfig_AddSite(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
+	type fields struct {
+		Name      string
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		webroot string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Mount
+		wantErr bool
+	}{
+		{
+			name: "removes the mount by site webroot",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/test-mount",
+						Dest:   "/nitro/sites/craft-dev",
+					},
+					{
+						Source: "./testdata/test-mount",
+						Dest:   "/nitro/sites/another-project-dev",
+					},
+				},
+			},
+			args: args{webroot: "/nitro/sites/craft-dev/web"},
+			want: []Mount{
+				{
+					Source: "./testdata/test-mount",
+					Dest:   "/nitro/sites/another-project-dev",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Name:      tt.fields.Name,
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if err := c.RemoveMountBySiteWebroot(tt.args.webroot); (err != nil) != tt.wantErr {
+				t.Errorf("RemoveMountBySiteWebroot() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != nil {
+				if !reflect.DeepEqual(c.Mounts, tt.want) {
+					t.Errorf("RemoveMountBySiteWebroot() got = \n%v, \nwant \n%v", c.Mounts, tt.want)
+				}
+			}
+		})
+	}
+}
