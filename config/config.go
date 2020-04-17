@@ -108,8 +108,8 @@ func (c *Config) AddMount(m Mount) error {
 }
 
 func (c *Config) RemoveSite(hostname string) error {
-	for i, site := range c.Sites {
-		if site.Hostname == hostname {
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
 			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
 			return nil
 		}

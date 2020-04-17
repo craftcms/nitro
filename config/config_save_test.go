@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func getConfigFile(t *testing.T, file string) Config {
+func getConfigFile(t *testing.T, file string) *Config {
 	fp, err := filepath.Abs(file)
 	if err != nil {
 		t.Fatal(err)
@@ -31,7 +31,7 @@ func getConfigFile(t *testing.T, file string) Config {
 		t.Fatal(err)
 	}
 
-	return cfg
+	return &cfg
 }
 
 func TestCanSaveConfigProperly(t *testing.T) {
@@ -40,7 +40,6 @@ func TestCanSaveConfigProperly(t *testing.T) {
 	originalCfgFile := getConfigFile(t, "testdata/configs/full-example.yaml")
 
 	// Act
-	// TODO make the same call that remove does
 	sites := originalCfgFile.GetSites()
 	site := sites[0]
 	_ = originalCfgFile.FindMountBySiteWebroot(site.Webroot)
@@ -60,22 +59,19 @@ func TestCanSaveConfigProperly(t *testing.T) {
 
 	// Assert
 	// compare the original and saved files
-	savedCfgFile := getConfigFile(t, "testdata/configs/test-example.yaml")
-	if !reflect.DeepEqual(originalCfgFile, savedCfgFile) {
-		t.Errorf("expected configs to be the same, got \n%v \nwant: \n%v", originalCfgFile, savedCfgFile)
-	}
+	modifiedCfgFile := getConfigFile(t, "testdata/configs/test-example.yaml")
 	// double check the golden file
 	goldenCfgFile := getConfigFile(t, "testdata/configs/golden-full.yaml")
 	// make sure the mounts are the same
-	if !reflect.DeepEqual(goldenCfgFile.Mounts, savedCfgFile.Mounts) {
-		t.Errorf("expected configs mounts to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Mounts, savedCfgFile.Mounts)
+	if !reflect.DeepEqual(goldenCfgFile.Mounts, modifiedCfgFile.Mounts) {
+		t.Errorf("expected configs mounts to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Mounts, modifiedCfgFile.Mounts)
 	}
 	// make sure the sites are the same
-	if !reflect.DeepEqual(goldenCfgFile.Sites, savedCfgFile.Sites) {
-		t.Errorf("expected configs sites to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Sites, savedCfgFile.Sites)
+	if !reflect.DeepEqual(goldenCfgFile.Sites, modifiedCfgFile.Sites) {
+		t.Errorf("expected configs sites to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Sites, modifiedCfgFile.Sites)
 	}
 	// make sure the entire config is the same
-	if !reflect.DeepEqual(goldenCfgFile, savedCfgFile) {
-		t.Errorf("expected configs to be the same, got \n%v \nwant: \n%v", goldenCfgFile, savedCfgFile)
+	if !reflect.DeepEqual(goldenCfgFile, modifiedCfgFile) {
+		t.Errorf("expected configs to be the same, got \n%v \nwant: \n%v", goldenCfgFile, modifiedCfgFile)
 	}
 }
