@@ -55,6 +55,18 @@ func (c *Config) AddSite(site Site) error {
 	return nil
 }
 
+func (c *Config) GetSites() []Site {
+	return c.Sites
+}
+
+func (c *Config) SitesAsList() []string {
+	var s []string
+	for _, site := range c.Sites {
+		s = append(s, site.Hostname)
+	}
+	return s
+}
+
 func (c *Config) AddMount(m Mount) error {
 	// replace the homedir with the tilde
 	home, err := homedir.Dir()
@@ -106,6 +118,41 @@ func (c *Config) RemoveSite(site string) error {
 	}
 
 	return errors.New("unable to find the domain " + site + " to remove")
+}
+
+// RemoveMountBySiteWebroot takes a complete webroot, including
+// the www,public,public_html,www directory name. It will then
+// find the dest by splitting a path and removing the webroot
+// directory name. If it cannot find the mount, it errors.
+func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
+	path := strings.Split(webroot, string(os.PathSeparator))
+	t := path[:len(path)-1]
+	dest := strings.Join(t, string(os.PathSeparator))
+
+	for i, m := range c.Mounts {
+		if m.Dest == dest {
+			copy(c.Mounts[i:], c.Mounts[i+1:])
+			c.Mounts[len(c.Mounts)-1] = Mount{}
+			c.Mounts = c.Mounts[:len(c.Mounts)-1]
+			return nil
+		}
+	}
+
+	return errors.New("unable to find the mount")
+}
+
+func (c *Config) FindMountBySiteWebroot(webroot string) *Mount {
+	path := strings.Split(webroot, string(os.PathSeparator))
+	t := path[:len(path)-1]
+	dest := strings.Join(t, string(os.PathSeparator))
+
+	for _, mount := range c.Mounts {
+		if mount.Dest == dest {
+			return &mount
+		}
+	}
+
+	return nil
 }
 
 func (c *Config) Save(filename string) error {

@@ -40,6 +40,8 @@ func init() {
 		contextCommand,
 		selfUpdateCommand,
 		applyCommand,
+		removeCommand,
+		xCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)

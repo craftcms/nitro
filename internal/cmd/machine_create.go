@@ -138,8 +138,7 @@ var createCommand = &cobra.Command{
 					site.Webroot = "web"
 				}
 
-				// TODO add support for aliases
-				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, phpVersion, nil)
+				changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, phpVersion, site.Aliases)
 				if err != nil {
 					siteErrs = append(siteErrs, err)
 					continue

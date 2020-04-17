@@ -49,7 +49,7 @@ var addCommand = &cobra.Command{
 				hostname = hostnameEntered
 			}
 		default:
-			hostname = flagHostname
+			hostname = helpers.RemoveTrailingSlash(flagHostname)
 		}
 
 		// look for the www,public,public_html,www using the absolutePath variable
