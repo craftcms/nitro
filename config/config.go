@@ -43,7 +43,7 @@ type Database struct {
 type Site struct {
 	Hostname string   `yaml:"hostname"`
 	Webroot  string   `yaml:"webroot"`
-	Aliases  []string `yaml:"aliases,omitempty"`
+	Aliases  []string `yaml:"aliases"`
 }
 
 func (c *Config) AddSite(site Site) error {
@@ -107,17 +107,15 @@ func (c *Config) AddMount(m Mount) error {
 	return nil
 }
 
-func (c *Config) RemoveSite(site string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == site {
-			copy(c.Sites[i:], c.Sites[i+1:])
-			c.Sites[len(c.Sites)-1] = Site{}
-			c.Sites = c.Sites[:len(c.Sites)-1]
+func (c *Config) RemoveSite(hostname string) error {
+	for i, site := range c.Sites {
+		if site.Hostname == hostname {
+			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
 			return nil
 		}
 	}
 
-	return errors.New("unable to find the domain " + site + " to remove")
+	return errors.New("unable to find the hostname " + hostname + " to remove")
 }
 
 // RemoveMountBySiteWebroot takes a complete webroot, including
@@ -131,9 +129,7 @@ func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
 
 	for i, m := range c.Mounts {
 		if m.Dest == dest {
-			copy(c.Mounts[i:], c.Mounts[i+1:])
-			c.Mounts[len(c.Mounts)-1] = Mount{}
-			c.Mounts = c.Mounts[:len(c.Mounts)-1]
+			c.Mounts = append(c.Mounts[:i], c.Mounts[i+1:]...)
 			return nil
 		}
 	}

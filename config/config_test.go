@@ -406,24 +406,39 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "removes the mount by site webroot",
+			name: "can remove a mount by a site webroot",
 			fields: fields{
+				Name:   "somename",
+				PHP:    "7.4",
+				CPUs:   "3",
+				Disk:   "20G",
+				Memory: "4G",
 				Mounts: []Mount{
 					{
 						Source: "./testdata/test-mount",
-						Dest:   "/nitro/sites/craft-dev",
+						Dest:   "/nitro/sites/testmount",
 					},
 					{
-						Source: "./testdata/test-mount",
-						Dest:   "/nitro/sites/another-project-dev",
+						Source: "./testdata/test-mount/remove",
+						Dest:   "/nitro/sites/remove",
+					},
+				},
+				Sites: []Site{
+					{
+						Hostname: "keep.test",
+						Webroot:  "/nitro/sites/keep/web",
+					},
+					{
+						Hostname: "remove.test",
+						Webroot:  "/nitro/sites/testmount/remove/web",
 					},
 				},
 			},
-			args: args{webroot: "/nitro/sites/craft-dev/web"},
+			args: args{webroot: "/nitro/sites/remove/web"},
 			want: []Mount{
 				{
 					Source: "./testdata/test-mount",
-					Dest:   "/nitro/sites/another-project-dev",
+					Dest:   "/nitro/sites/testmount",
 				},
 			},
 			wantErr: false,
@@ -448,6 +463,81 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 			if tt.want != nil {
 				if !reflect.DeepEqual(c.Mounts, tt.want) {
 					t.Errorf("RemoveMountBySiteWebroot() got = \n%v, \nwant \n%v", c.Mounts, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestConfig_RemoveSite1(t *testing.T) {
+	type fields struct {
+		Name      string
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		hostname string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Site
+		wantErr bool
+	}{
+		{
+			name: "can remove a site by its hostname",
+			fields: fields{
+				Name:   "somename",
+				PHP:    "7.4",
+				CPUs:   "3",
+				Disk:   "20G",
+				Memory: "4G",
+				Sites: []Site{
+					{
+						Hostname: "keep.test",
+						Webroot:  "/nitro/sites/keep/web",
+					},
+					{
+						Hostname: "remove.test",
+						Webroot:  "/nitro/sites/remove/web",
+					},
+				},
+			},
+			args: args{hostname: "remove.test"},
+			want: []Site{
+				{
+					Hostname: "keep.test",
+					Webroot:  "/nitro/sites/keep/web",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Name:      tt.fields.Name,
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if err := c.RemoveSite(tt.args.hostname); (err != nil) != tt.wantErr {
+				t.Errorf("RemoveSite() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != nil {
+				if !reflect.DeepEqual(c.Sites, tt.want) {
+					t.Errorf("RemoveSite() got = \n%v, \nwant \n%v", c.Sites, tt.want)
 				}
 			}
 		})
