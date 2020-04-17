@@ -43,12 +43,6 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		if !flagDebug {
-			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
-				return err
-			}
-		}
-
 		// remove the mount
 		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
 			return err
