@@ -43,9 +43,19 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
+		if flagDebug {
+			fmt.Println("sites:", configFile.Sites)
+			fmt.Println("sites (length):", len(configFile.Sites))
+		}
+
 		// remove the mount
 		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
 			return err
+		}
+
+		if flagDebug {
+			fmt.Println("mounts:", configFile.Mounts)
+			fmt.Println("mounts (length):", len(configFile.Mounts))
 		}
 
 		if !flagDebug {
