@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -19,27 +18,22 @@ var addCommand = &cobra.Command{
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
-		var wd string
-		if len(args) > 0 {
-			wd = args[0]
-		} else {
-			cwd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-			wd = cwd
+
+		// if there is no arg, get the current working dir
+		// else get the first arg
+		// set the directoryName variable
+		directoryName, absolutePath, err := helpers.GetDirectoryArg(args)
+		if err != nil {
+			return err
 		}
 
+		// prompt for the hostname if --hostname == ""
+		// else get the name of the current directory (e.g. nitro)
 		var hostname string
 		switch flagHostname {
 		case "":
-			pathName, err := helpers.PathName(wd)
-			if err != nil {
-				return err
-			}
-
 			hostnamePrompt := promptui.Prompt{
-				Label:    fmt.Sprintf("what should the hostname be? [%s]", pathName),
+				Label:    fmt.Sprintf("what should the hostname be? [%s]", directoryName),
 				Validate: validate.Hostname,
 			}
 
@@ -50,7 +44,7 @@ var addCommand = &cobra.Command{
 
 			switch hostnameEntered {
 			case "":
-				hostname = pathName
+				hostname = directoryName
 			default:
 				hostname = hostnameEntered
 			}
@@ -58,11 +52,12 @@ var addCommand = &cobra.Command{
 			hostname = flagHostname
 		}
 
-		// if the flag for webroot is not set, prompt
+		// look for the www,public,public_html,www using the absolutePath variable
+		// set the webrootName var (e.g. web)
 		var webroot string
 		switch flagWebroot {
 		case "":
-			foundDir, err := helpers.FindWebRoot(wd)
+			foundDir, err := helpers.FindWebRoot(absolutePath)
 			if err != nil {
 				return err
 			}
@@ -84,19 +79,25 @@ var addCommand = &cobra.Command{
 			webroot = flagWebroot
 		}
 
+		// create the vmWebRootPath (e.g. "/nitro/sites/"+ directoryName + "/" | webrootName
+		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webroot)
+
+		// load the config
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
 		}
 
-		// create a mount and add it
-		mount := config.Mount{Source: wd}
+		// create a new mount
+		// add the mount to configfile
+		mount := config.Mount{Source: absolutePath}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
 
-		// create a site and add it
-		site := config.Site{Hostname: hostname, Webroot: "/nitro/sites/" + wd + "/" + webroot}
+		// create a new site
+		// add site to config file
+		site := config.Site{Hostname: hostname, Webroot: webRootPath}
 		if err := configFile.AddSite(site); err != nil {
 			return err
 		}
@@ -170,8 +171,7 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
-		if err != nil {
+		if err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
