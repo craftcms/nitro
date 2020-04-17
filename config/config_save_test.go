@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func getConfigFile(t *testing.T, file string) Config {
@@ -42,7 +42,7 @@ func TestCanSaveConfigProperly(t *testing.T) {
 	// Act
 	// TODO make the same call that remove does
 	sites := originalCfgFile.GetSites()
-	site := sites[1]
+	site := sites[0]
 	_ = originalCfgFile.FindMountBySiteWebroot(site.Webroot)
 
 	// remove a site
@@ -66,6 +66,15 @@ func TestCanSaveConfigProperly(t *testing.T) {
 	}
 	// double check the golden file
 	goldenCfgFile := getConfigFile(t, "testdata/configs/golden-full.yaml")
+	// make sure the mounts are the same
+	if !reflect.DeepEqual(goldenCfgFile.Mounts, savedCfgFile.Mounts) {
+		t.Errorf("expected configs mounts to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Mounts, savedCfgFile.Mounts)
+	}
+	// make sure the sites are the same
+	if !reflect.DeepEqual(goldenCfgFile.Sites, savedCfgFile.Sites) {
+		t.Errorf("expected configs sites to be the same, got \n%v \nwant: \n%v", goldenCfgFile.Sites, savedCfgFile.Sites)
+	}
+	// make sure the entire config is the same
 	if !reflect.DeepEqual(goldenCfgFile, savedCfgFile) {
 		t.Errorf("expected configs to be the same, got \n%v \nwant: \n%v", goldenCfgFile, savedCfgFile)
 	}
