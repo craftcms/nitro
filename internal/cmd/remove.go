@@ -77,9 +77,12 @@ var removeCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartNginxAction)
 
-		for _, a := range actions {
-			fmt.Println(a.Args)
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			fmt.Println("failed to remove the site:", err)
+			return err
 		}
+
+		fmt.Println("ok, we removed the site from your nitro.yaml and made the changes")
 
 		return nil
 	},
