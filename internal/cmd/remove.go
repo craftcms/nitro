@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -25,11 +26,16 @@ var removeCommand = &cobra.Command{
 		i, _ := prompt.Select("Select site to remove", configFile.SitesAsList())
 
 		site := sites[i]
-
 		if !prompt.Verify(fmt.Sprintf("this will remove %s from %s, do you want to apply the changes? [y]", site.Hostname, name)) {
 			fmt.Println("ok, you can apply new nitro.yaml changes later by running `nitro apply`.")
 
 			return nil
+		}
+
+		// find the mount
+		mount := configFile.FindMountBySiteWebroot(site.Webroot)
+		if mount == nil {
+			return errors.New("unable to find an associated mount")
 		}
 
 		// remove site
@@ -37,15 +43,22 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		// save the config
-		if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
+		// remove the mount
+		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
 			return err
+		}
+
+		// save the config
+		if !flagDebug {
+			if err := configFile.Save(viper.ConfigFileUsed()); err != nil {
+				return err
+			}
 		}
 
 		var actions []nitro.Action
 
 		// unmount
-		unmountAction, err := nitro.UnmountDir(name, site.Webroot)
+		unmountAction, err := nitro.UnmountDir(name, mount.Dest)
 		if err != nil {
 			return err
 		}
