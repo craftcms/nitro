@@ -49,7 +49,7 @@ var addCommand = &cobra.Command{
 				hostname = hostnameEntered
 			}
 		default:
-			hostname = flagHostname
+			hostname = helpers.RemoveTrailingSlash(flagHostname)
 		}
 
 		// look for the www,public,public_html,www using the absolutePath variable
@@ -90,7 +90,7 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		// add the mount to configfile
-		mount := config.Mount{Source: absolutePath}
+		mount := config.Mount{Source: absolutePath, Dest: webRootPath}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
