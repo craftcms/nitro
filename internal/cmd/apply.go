@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,7 +47,18 @@ var applyCommand = &cobra.Command{
 			fileMounts = append(fileMounts, config.Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
 		}
 
-		// TODO find sites not created
+		// find sites not created
+		var sitesToCreate []config.Site
+		for _, site := range configFile.Sites {
+			c := exec.Command(path, "exec", name, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname)
+			output, err := c.Output()
+			if err != nil {
+				return err
+			}
+			if !strings.Contains(string(output), "exists") {
+				sitesToCreate = append(sitesToCreate, site)
+			}
+		}
 
 		fmt.Printf("ok, there are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
 
@@ -58,6 +70,36 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 		actions = append(actions, mountActions...)
+
+		// create site actions
+		for _, site := range sitesToCreate {
+			copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *copyTemplateAction)
+
+			// copy the nginx template
+			changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *changeNginxVariablesAction...)
+
+			createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *createSymlinkAction)
+		}
+
+		if len(sitesToCreate) > 0 {
+			restartNginxAction, err := nitro.NginxReload(name)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *restartNginxAction)
+		}
 
 		if flagDebug {
 			for _, a := range actions {
