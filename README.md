@@ -39,12 +39,30 @@ Nitro installs the following on every machine:
 curl https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh | sudo sh
 ```
 
-## Usage
+## Getting Started
 
 In order to create a new development server, you must create a new Nitro machine. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
 
-Nitro defaults to a global `nitro.yaml`. The default location is `~/.nitro/nitro.yaml`. However, you can override the configuration for each command by providing a `--config` (or the shorthand `-f`) with the path to the file (e.g. `nitro -f /path/to/nitro.yaml <command>`).
+Nitro defaults to a global `nitro.yaml`. The default location is `~/.nitro/nitro.yaml`. However, you can override the configuration for each command by providing a `--config` (or the shorthand `-f`) with the path to the file (e.g. `nitro -f /path/to/nitro.yaml <command>`). Here is an example config:
 
+```yaml
+name: diesel
+php: "7.4"
+cpus: "2"
+disk: 40G
+memory: 4G
+databases:
+- engine: mysql
+  version: "5.7"
+  port: "3306"
+- engine: postgres
+  version: "12"
+  port: "5432"
+```
+
+This works like you might expect, it will create a new machine named `diesel` with 2 CPUs and 4GB of RAM. In addition, it will create to database "servers" inside the virtual machine for MySQL and PostgreSQL and make the assigned ports available on the machines IP address (not your localhost). 
+
+> Note: Nitro can run multiple versions of the same database engine (e.g. PostgreSQL 11 and 12) because it utilizes Docker underneath. See [this file](examples/nitro-multiple-versions.yaml) for an example.
 
 ```bash
 nitro machine create
@@ -77,6 +95,7 @@ The following commands will help you manage your virtual server.
 - [`apply`](#apply)
 - [`add`](#add)
 - [`context`](#context)
+- [`edit`](#edit)
 - [`info`](#info)
 - [`logs`](#logs)
 - [`mount`](#mount)
@@ -90,6 +109,7 @@ The following commands will help you manage your virtual server.
 - [`xdebug configure`](#xdebug-configure)
 - [`xdebug on`](#xdebug-on)
 - [`xdebug off`](#xdebug-off)
+- [`version`](#version)
 
 > Note: these examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
 
@@ -166,6 +186,14 @@ sites:
 ------
 ```
 
+### `edit`
+
+Edit allows you to quickly open your nitro.yaml to make changes. However, it is recommended to use `nitro` commands to edit your config.
+
+```shell
+nitro edit
+```
+
 ### `info`
 
 Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
@@ -183,6 +211,14 @@ Memory usage:   379.8M out of 3.9G
 Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-site
                     UID map: 501:default
                     GID map: 20:default
+```
+
+### `logs`
+
+Views virtual machines logs. This command will prompt you for a type of logs to view (e.g. `nginx`, `database`, or `docker` (for a specific container)). 
+
+```bash
+nitro logs
 ```
 
 ### `machine create`
@@ -227,6 +263,40 @@ Mounts a local directory to a path on the machine.
 
 ```bash
 nitro mount ~/sites/project-folder /home/ubuntu/project-folder
+```
+
+### `redis`
+
+Access a Redis shell.
+
+This launches a Redis console shell for the `diesel` machine:
+
+```bash
+nitro redis
+```
+
+### `start`
+
+Starts, or turns on, a machine.
+
+```bash
+nitro start
+```
+
+### `stop`
+
+Stops, or turns off, a machine.
+
+```bash
+nitro stop
+```
+
+### `self-update`
+
+Perform updates to the nitro CLI.
+
+```bash
+nitro self-update
 ```
 
 ### `ssh`
@@ -277,40 +347,6 @@ This ensures Xdebug is installed for PHP 7.2 but disables it:
 nitro xdebug off --php-version 7.2
 ```
 
-### `start`
-
-Starts, or turns on, a machine.
-
-```bash
-nitro start
-```
-
-### `stop`
-
-Stops, or turns off, a machine.
-
-```bash
-nitro stop
-```
-
-### `redis`
-
-Access a Redis shell.
-
-This launches a Redis console shell for the `diesel` machine:
-
-```bash
-nitro redis
-```
-
-### `self-update`
-
-Perform updates to the nitro CLI.
-
-```bash
-nitro self-update
-```
-
 ### `update`
 
 Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
@@ -319,21 +355,4 @@ This upgrades the `diesel` machine’s software packages to their newest version
 
 ```bash
 nitro update
-```
-
-### `logs`
-
-TODO update now that its dynamic.
-
-Views the virtual machines logs.
-
-Options:
-
-- `nginx`
-- `xdebug`
-
-This displays nginx logs for the `diesel` machine:
-
-```bash
-nitro logs
 ```

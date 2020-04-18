@@ -1,0 +1,18 @@
+name: nitro
+php: "7.4"
+cpus: "2"
+disk: 40G
+memory: 4G
+databases:
+  - engine: mysql
+    version: "5.7"
+    port: "3306"
+  - engine: mysql
+    version: "8.0"
+    port: "33061"
+  - engine: postgres
+    version: "12"
+    port: "5432"
+  - engine: postgres
+    version: "11"
+    port: "54321"

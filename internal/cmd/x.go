@@ -11,7 +11,8 @@ import (
 )
 
 var xCommand = &cobra.Command{
-	Use: "x",
+	Use:    "x",
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgFile := viper.ConfigFileUsed()
 		if cfgFile == "" {
