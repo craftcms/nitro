@@ -40,3 +40,7 @@ var xCommand = &cobra.Command{
 		return nil
 	},
 }
+
+func init() {
+	rootCmd.AddCommand(xCommand)
+}
