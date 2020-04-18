@@ -10,8 +10,9 @@ import (
 	"github.com/craftcms/nitro/internal/editor"
 )
 
-var xCommand = &cobra.Command{
-	Use: "x",
+var editCommand = &cobra.Command{
+	Use: "edit",
+	Short: "Edit your nitro.yaml",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgFile := viper.ConfigFileUsed()
 		if cfgFile == "" {
@@ -30,8 +31,4 @@ var xCommand = &cobra.Command{
 
 		return nil
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(xCommand)
 }
