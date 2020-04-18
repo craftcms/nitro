@@ -10,6 +10,7 @@ packages:
   - gnupg-agent
   - software-properties-common
   - sshfs
+  - pv
 write_files:
   - path: /opt/nitro/scripts/site-exists.sh
     content: |
