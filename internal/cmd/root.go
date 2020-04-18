@@ -45,7 +45,6 @@ func init() {
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
-	logsCommand.AddCommand(logsNginxCommand, logsDockerCommand, logsDatabaseCommand)
 	hostsCommand.AddCommand(hostsAddCommand, hostsRemoveCommand, hostsShowCommand)
 }
 
