@@ -37,9 +37,10 @@ var createCommand = &cobra.Command{
 			// make the ~/.nitro/ directory
 			nitroDir := home + "/.nitro/"
 			if dirExists(nitroDir) {
-				if err := os.Mkdir(nitroDir, 0755); err != nil {
-					return err
-				}
+				// TODO make this cleaner as a helper with tests
+				//if err := os.Mkdir(nitroDir, 0755); err != nil {
+				//	return err
+				//}
 			}
 
 			// TODO make the ~/.nitro/nitro.yaml file if not exists

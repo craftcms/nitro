@@ -84,7 +84,7 @@ func fileExists(filename string) bool {
 
 func dirExists(dir string) bool {
 	info, err := os.Stat(dir)
-	if os.IsNotExist(err) {
+	if os.IsExist(err) {
 		return false
 	}
 	return info.IsDir()
