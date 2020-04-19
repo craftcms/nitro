@@ -3,8 +3,7 @@
 ## Unreleased
 
 ### Added
-- Added a `self-update` command.
-- Add a Multipass check to get.sh.
+- Added `import` command to let users import a database backup from their system into nitro. ([#1](https://github.com/pixelandtonic/nitro/issues/1))
 
 ## 0.9.1 - 2020-04-18
 
