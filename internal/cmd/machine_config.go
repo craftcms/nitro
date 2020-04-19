@@ -28,7 +28,7 @@ write_files:
       engine="$4"
       
       if [ "$engine" == "mysql" ]; then
-          cat "$filename" | pv | docker exec -i "$container" /bin/mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
+          cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
       else
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
