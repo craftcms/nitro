@@ -97,6 +97,7 @@ The following commands will help you manage your virtual server.
 - [`context`](#context)
 - [`edit`](#edit)
 - [`info`](#info)
+- [`import`](#import)
 - [`logs`](#logs)
 - [`mount`](#mount)
 - [`machine create`](#machine-create)
@@ -212,6 +213,17 @@ Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-sit
                     UID map: 501:default
                     GID map: 20:default
 ```
+
+### `import`
+
+Import allows you to import a SQL file into a database. Uoi will be prompted with a list of running database engine (mysql and postgres) to import the file into.
+
+```shell
+$ nitro import mybackup.sql
+Use the arrow keys to navigate: ↓ ↑ → ← 
+? Select database:
+  ▸ mysql_5.7_3306
+``
 
 ### `logs`
 
