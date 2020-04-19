@@ -81,3 +81,11 @@ func fileExists(filename string) bool {
 	}
 	return !info.IsDir()
 }
+
+func dirExists(dir string) bool {
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
+}
