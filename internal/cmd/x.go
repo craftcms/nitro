@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/craftcms/nitro/internal/editor"
+	"github.com/craftcms/nitro/config"
 )
 
 var xCommand = &cobra.Command{
@@ -24,12 +27,17 @@ var xCommand = &cobra.Command{
 			return err
 		}
 
-		_, err = editor.CaptureInputFromEditor(filePath, editor.GetPreferredEditorFromEnvironment)
+		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
 		}
 
-		return nil
+		fmt.Println("ok, modifying the hosts file to add sites for", config.GetString("name", ""), "(you will be prompted for your password)... ")
+		hostsCmd := exec.Command("sudo", nitro, "-f", filePath, "hosts", "add")
+		hostsCmd.Stdout = os.Stdout
+		hostsCmd.Stderr = os.Stderr
+
+		return hostsCmd.Run()
 	},
 }
 
