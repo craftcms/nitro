@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -54,9 +55,12 @@ var importCommand = &cobra.Command{
 		}
 		actions = append(actions, transferAction)
 
-		// TODO we hard code mysql as an example, need to abstract
-		importArgs := []string{"exec", name, "--", "cat", "/home/ubuntu/" + args[0], `|`, "pv", `|`, "docker", "exec", "-i", containerName, "/bin/mysql", "-unitro", "-pnitro", "nitro", `--init-command="SET autocommit=0;"`}
-		fmt.Println(importArgs)
+		engine := "mysql"
+		if strings.Contains(containerName, "postgres") {
+			engine = "postgres"
+		}
+
+		importArgs := []string{"exec", name, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", args[0], engine}
 		dockerExecAction := nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
