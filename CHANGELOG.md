@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.2 - 2020-04-20
+
 ### Added
 - Added `import` command to let users import a database backup from their system into nitro. ([#1](https://github.com/pixelandtonic/nitro/issues/1))
 
