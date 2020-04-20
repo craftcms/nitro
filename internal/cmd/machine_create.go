@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/manifoldco/promptui"
@@ -12,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/validate"
@@ -36,26 +36,19 @@ var createCommand = &cobra.Command{
 
 			// make the ~/.nitro/ directory
 			nitroDir := home + "/.nitro/"
-			if dirExists(nitroDir) {
-				// TODO make this cleaner as a helper with tests
-				//if err := os.Mkdir(nitroDir, 0755); err != nil {
-				//	return err
-				//}
+			if err := helpers.MkdirIfNotExists(nitroDir); err != nil {
+				return err
 			}
 
-			// TODO make the ~/.nitro/nitro.yaml file if not exists
-			f, err := os.Create(nitroDir + "nitro.yaml")
-			if err := f.Close(); err != nil {
-				return err
+			if err := helpers.CreateFileIfNotExist(nitroDir + "nitro.yaml"); err != nil {
+				fmt.Println(err)
 			}
 
 			// set the config file
 			var configFile config.Config
 
-			// prompts
-
 			// name
-			name, err := prompt.Ask("what should the machine be named?", "nito", validate.MachineName)
+			name, err := prompt.Ask("what should the machine be named?", "nitro-dev", validate.MachineName)
 			if err != nil {
 				return err
 			}
@@ -85,18 +78,19 @@ var createCommand = &cobra.Command{
 			// which version of PHP would you like installed? 7.5
 			phpPrompt := promptui.Select{
 				Label:     "which version of PHP should we install?",
-				Items:     []string{"7.4", "7.3", "7.2", "7.1", "7.0"},
+				Items:     nitro.PHPVersions,
 				CursorPos: 0,
 			}
 			_, phpVersion, err := phpPrompt.Run()
 			if err != nil {
 				return err
 			}
+			configFile.PHP = phpVersion
 
 			// what database engine would you like to use? mysql
 			dbEnginePrompt := promptui.Select{
 				Label:     "which database engine should we setup?",
-				Items:     []string{"mysql", "postgres"},
+				Items:     nitro.DBEngines,
 				CursorPos: 0,
 			}
 			_, dbEngine, err := dbEnginePrompt.Run()
@@ -104,11 +98,10 @@ var createCommand = &cobra.Command{
 				return err
 			}
 
-			// TODO make this dynamic
-			dbVersion := "5.7"
+			_, dbVersion := prompt.Select("select a version of "+dbEngine+" to use:", nitro.DBVersions[dbEngine])
+
 			dbPort := "3306"
 			if dbEngine == "postgres" {
-				dbVersion = "11"
 				dbPort = "5432"
 			}
 
@@ -117,11 +110,14 @@ var createCommand = &cobra.Command{
 				Version: dbVersion,
 				Port:    dbPort,
 			}
+			configFile.Databases = []config.Database{db}
 
-			// TODO validate database config
+			if err := validate.DatabaseConfig(configFile.Databases); err != nil {
+				return err
+			}
 
 			// save the config file
-			if err := configFile.Save("testing.yaml"); err != nil {
+			if err := configFile.Save(nitroDir + "nitro.yaml"); err != nil {
 				return err
 			}
 
@@ -130,7 +126,7 @@ var createCommand = &cobra.Command{
 				return err
 			}
 
-			actions, err := createActions(name, memory, disk, cpu, phpVersion, []config.Database{db}, nil, nil)
+			actions, err := createActions(name, memory, disk, cpu, phpVersion, configFile.Databases, nil, nil)
 			if err != nil {
 				return err
 			}
