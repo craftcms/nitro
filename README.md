@@ -2,7 +2,7 @@
 
 # Craft Nitro
 
-A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is Multipass, which allows you to create Ubuntu virtual machines.
+A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is [Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
 
 ---
 
@@ -26,12 +26,12 @@ Nitro installs the following on every machine:
 
 - PHP 7.4 (+ option to use 7.3, 7.2, 7.1, 7.0)
 - MySQL
-- PostgreSQL (optional)
+- PostgreSQL
 - Redis
 - Xdebug
 - Blackfire
 
-> note: for a more detailed writeup on how to configure xdebug and nitro with PHPStorm, view this document on [how to configure xdebug and PHPStorm for both web and console debugging](XDEBUG.md).
+> Note: For a more detailed writeup on how to configure Xdebug and Nitro with PhpStorm, view this document on [how to configure Xdebug and PhpStorm for both web and console debugging](XDEBUG.md).
 
 ## Installation
 
@@ -60,7 +60,7 @@ databases:
   port: "5432"
 ```
 
-This works like you might expect, it will create a new machine named `diesel` with 2 CPUs and 4GB of RAM. In addition, it will create to database "servers" inside the virtual machine for MySQL and PostgreSQL and make the assigned ports available on the machines IP address (not your localhost). 
+This works like you might expect, it will create a new machine named `diesel` with 2 CPUs and 4GB of RAM. In addition, it will create two database "servers" inside the virtual machine for MySQL and PostgreSQL and make the assigned ports available on the machine's IP address (i.e. not localhost). 
 
 > Note: Nitro can run multiple versions of the same database engine (e.g. PostgreSQL 11 and 12) because it utilizes Docker underneath. See [this file](examples/nitro-multiple-versions.yaml) for an example.
 
@@ -68,7 +68,7 @@ This works like you might expect, it will create a new machine named `diesel` wi
 nitro machine create
 ```
 
-> Note: `nitro machine create` has options you can pass when creating a new server. However, we can set some "“sane” defaults for most scenarios. To view the options, run `nitro machine create --help`.
+> Note: `nitro machine create` has options you can pass when creating a new server. However, Nitro sets some “sane” defaults by default. To view the options, run `nitro machine create --help`.
 
 After running `machine create`. The bootstrap process will install the latest PHP version, MySQL, Postgres, and Redis from the `nitro.yaml` file.
 
@@ -78,7 +78,7 @@ The next step is to add a new virtual host to the server:
 nitro site add /Users/jason/Sites/craftcms myclientsite.test
 ```
 
-> Note: you can use any top level domain you wish, but we recomend using .test
+> Note: You can use any top level domain you wish, but we recomend using .test
 
 This process will perform the following tasks:
 
@@ -112,11 +112,11 @@ The following commands will help you manage your virtual server.
 - [`xdebug off`](#xdebug-off)
 - [`version`](#version)
 
-> Note: these examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-dev`), you can skip adding the `--machine` argument.
+> Note: These examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-local`), you can skip adding the `--machine` argument.
 
 ### `apply`
 
-Apply will look at a config file and make changes from the mounts, and sites in the config file by adding or removing. The config file is the source of truth for your nitro machine.
+`apply` will look at a config file and make changes from the mounts and sites in the config file by adding or removing them. The config file is the source of truth for your Nitro machine.
 
 ```bash
 nitro apply
@@ -124,22 +124,22 @@ nitro apply
 
 ```bash
 $ nitro apply
-ok, there are 2 mounted directories and 1 new mount(s) in the config file
-applied changes from nitro.yaml
+There are 2 mounted directories and 1 new mount(s) in the config file.
+Applied changes from nitro.yaml.
 ```
 
 ### `add`
 
-Add will create an interactive prompt to add a site (and mount it) into your nitro machine. By default, it will look at your current working directory and assume that it is a Craft project.
+Add will create an interactive prompt to add a site (and mount it) into your Nitro machine. By default, it will look at your current working directory and assume that it is a Craft project.
 
 ```bash
 cd /Users/brandon/Sites/example.test
 $ nitro add
-→ what should the hostname be? [example.test] $ ex.test
-→ what is the webroot? [web] $
-ex.test has been added to nitro.yaml
+→ What should the hostname be? [example.test] $ ex.test
+→ Where is the webroot? [web] $
+ex.test has been added to nitro.yaml.
 → apply nitro.yaml changes now? [y] $ n
-ok, you can apply new nitro.yaml changes later by running `nitro apply`.
+You can apply new nitro.yaml changes later by running `nitro apply`.
 ```
 
 You can optionally pass a path to the directory as the first argument to use that directory:
@@ -147,10 +147,10 @@ You can optionally pass a path to the directory as the first argument to use tha
 ```bash
 cd /Users/brandon/Sites/
 $ nitro -f nitro.yaml add demo-site
-✔ what should the hostname be? [demo-site]: $
-what is the webroot? [web]: $
+✔ What should the hostname be? [demo-site]: $
+Where is the webroot? [web]: $
 ✔ apply nitro.yaml changes now? [y]: $
-ok, we applied the changes and added demo-site to nitro  
+Applied the changes and added demo-site to nitro.  
 ````
 
 | Argument     | Default                                        | Options | Description                                 |
@@ -189,7 +189,7 @@ sites:
 
 ### `edit`
 
-Edit allows you to quickly open your nitro.yaml to make changes. However, it is recommended to use `nitro` commands to edit your config.
+Edit allows you to quickly open your nitro.yaml file to manually make changes. However, it is recommended to use `nitro` commands to edit your config.
 
 ```shell
 nitro edit
@@ -216,7 +216,7 @@ Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-sit
 
 ### `import`
 
-Import allows you to import a SQL file into a database. Uoi will be prompted with a list of running database engine (mysql and postgres) to import the file into.
+Import allows you to import a SQL file into a database. You will be prompted with a list of running database engines (mysql and postgres) to import the file into.
 
 ```shell
 $ nitro import mybackup.sql
@@ -229,7 +229,7 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 
 Views virtual machines logs. This command will prompt you for a type of logs to view (e.g. `nginx`, `database`, or `docker` (for a specific container)). 
 
-```bash
+​```bash
 nitro logs
 ```
 
@@ -251,19 +251,19 @@ Creates a new server. The following options are available:
 
 Destroys a machine.
 
-> Note: by default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-dev" already exists`). This will not affect any local files or directories attached to the machine.
+> Note: By default, Multipass does not permanently delete a machine and can cause name conflicts (e.g. `instance "nitro-local" already exists`). This will not affect any local files or directories attached to the machine.
 
 Options:
 
 - `--permanent` permanently deletes a machine **(this is non-recoverable!)**
 
-This soft-destroys the `diesel` machine:
+To soft-destroy the `diesel` machine, so it is revcoverable later:
 
 ```bash
 nitro machine destroy
 ```
 
-This **permanently** destroys the `diesel` machine:
+To **permanently** destroy the `diesel` machine:
 
 ```bash
 nitro machine destroy --permanent
@@ -305,7 +305,7 @@ nitro stop
 
 ### `self-update`
 
-Perform updates to the nitro CLI.
+Perform updates to the Nitro CLI.
 
 ```bash
 nitro self-update
@@ -321,7 +321,7 @@ nitro ssh
 
 ### `xdebug configure`
 
-Configures Xdebug for remote access and debugging with PHPStorm or other IDE.
+Configures Xdebug for remote access and debugging with PhpStorm or other IDEs.
 
 Options:
 
