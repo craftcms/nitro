@@ -23,7 +23,9 @@ var createCommand = &cobra.Command{
 	Short:   "Create a machine",
 	Example: "nitro machine create --name example-machine --cpus 4 --memory 4G --disk 60G --php-version 7.4",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		if viper.ConfigFileUsed() != "" {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// load the config file
