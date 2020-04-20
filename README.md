@@ -2,7 +2,7 @@
 
 # Craft Nitro
 
-A better, faster way to develop Craft CMS apps locally without Docker or Vagrant! Nitro’s one dependency is [Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
+Nitro is a command-line tool focused on making local Craft development quick and easy. Nitro’s one dependency is [Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
 
 ---
 
