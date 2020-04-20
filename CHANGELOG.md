@@ -5,6 +5,9 @@
 ### Added
 - Added `import` command to let users import a database backup from their system into nitro. ([#1](https://github.com/pixelandtonic/nitro/issues/1))
 
+### Changed
+- Nitro now installs the PHP SOAP extension by default.
+
 ## 0.9.1 - 2020-04-18
 
 ### Added

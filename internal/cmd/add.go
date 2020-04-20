@@ -37,7 +37,7 @@ var addCommand = &cobra.Command{
 		switch flagHostname {
 		case "":
 			hostnamePrompt := promptui.Prompt{
-				Label:    fmt.Sprintf("what should the hostname be? [%s]", directoryName),
+				Label:    fmt.Sprintf("What should the hostname be? [%s]", directoryName),
 				Validate: validate.Hostname,
 			}
 
@@ -66,7 +66,7 @@ var addCommand = &cobra.Command{
 				return err
 			}
 			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("where is the webroot? [%s]", foundDir),
+				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
 			}
 
 			webrootEntered, err := webRootPrompt.Run()
@@ -115,7 +115,7 @@ var addCommand = &cobra.Command{
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
 
 		applyPrompt := promptui.Prompt{
-			Label: "apply nitro.yaml changes now? [y]",
+			Label: "Apply nitro.yaml changes now? [y]",
 		}
 
 		apply, err := applyPrompt.Run()
@@ -127,7 +127,7 @@ var addCommand = &cobra.Command{
 		}
 
 		if apply != "y" {
-			fmt.Println("ok, you can apply new nitro.yaml changes later by running `nitro apply`.")
+			fmt.Println("You can apply new nitro.yaml changes later by running `nitro apply`.")
 
 			return nil
 		}
@@ -179,7 +179,7 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("ok, we applied the changes and added", hostname, "to", name)
+		fmt.Println("Applied the changes and added", hostname, "to", name)
 
 		// prompt to add hosts file
 		cfgFile := viper.ConfigFileUsed()
@@ -208,6 +208,6 @@ var addCommand = &cobra.Command{
 }
 
 func init() {
-	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "hostname of site (e.g client.test)")
-	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of site (e.g. web)")
+	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "Hostname of the site (e.g client.test)")
+	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
 }

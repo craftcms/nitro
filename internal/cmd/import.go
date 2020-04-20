@@ -68,7 +68,7 @@ var importCommand = &cobra.Command{
 		}
 		actions = append(actions, dockerExecAction)
 
-		fmt.Printf("ok, importing %q into %q (large files may take a while)...\n", args[0], containerName)
+		fmt.Printf("Importing %q into %q (large files may take a while)...\n", args[0], containerName)
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},

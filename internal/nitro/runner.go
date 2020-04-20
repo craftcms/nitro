@@ -69,7 +69,7 @@ func (m *MultipassRunner) Run(args []string) error {
 func NewMultipassRunner(file string) ShellRunner {
 	path, err := exec.LookPath(file)
 	if err != nil {
-		log.Fatal("unable to find multipass")
+		log.Fatal("Unable to find multipass")
 	}
 
 	return &MultipassRunner{
