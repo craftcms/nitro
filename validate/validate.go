@@ -162,11 +162,11 @@ func DatabaseConfig(databases []config.Database) error {
 
 	for _, database := range databases {
 		if ports[database.Port] != "" {
-			return errors.New(fmt.Sprintf("duplicate port %s assigned to %s version %s", database.Port, database.Engine, database.Version))
+			return errors.New(fmt.Sprintf("Duplicate port %s assigned to %s version %s", database.Port, database.Engine, database.Version))
 		}
 
 		if versions[database.Engine] == database.Version {
-			return errors.New(fmt.Sprintf("duplicate engine %s and version %s", database.Engine, database.Version))
+			return errors.New(fmt.Sprintf("Duplicate engine %s and version %s", database.Engine, database.Version))
 		}
 
 		ports[database.Port] = database.Port

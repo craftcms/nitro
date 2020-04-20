@@ -15,7 +15,7 @@ import (
 
 var applyCommand = &cobra.Command{
 	Use:    "apply",
-	Short:  "Apply changes from config",
+	Short:  "Apply changes from nitro.yaml",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
@@ -60,7 +60,7 @@ var applyCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("ok, there are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
+		fmt.Printf("There are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
 
 		// prompt?
 		var actions []nitro.Action
@@ -120,7 +120,7 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("applied changes from", viper.ConfigFileUsed())
+		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
 		return nil
 	},

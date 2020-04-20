@@ -61,7 +61,7 @@ var logsCommand = &cobra.Command{
 				return err
 			}
 			actions = append(actions, *dockerLogsAction)
-			fmt.Println("ok, here are the docker logs for", containerName, "...")
+			fmt.Println("Here are the docker logs for", containerName, "...")
 		case "database":
 			var databases []config.Database
 			if err := viper.UnmarshalKey("databases", &databases); err != nil {
@@ -85,15 +85,15 @@ var logsCommand = &cobra.Command{
 				return err
 			}
 			actions = append(actions, *dockerLogsAction)
-			fmt.Println("ok, here are the database logs for", containerName, "...")
+			fmt.Println("Here are the database logs for", containerName, "...")
 		default:
-			fmt.Println("ok, here are the nginx logs...")
+			fmt.Println("Here are the nginx logs...")
 			nginxLogsAction, err := nitro.LogsNginx(name, flagNginxLogsKind)
 			if err != nil {
 				return err
 			}
 			actions = append(actions, *nginxLogsAction)
-			fmt.Println("ok, here are the nginx logs...")
+			fmt.Println("Here are the nginx logs...")
 		}
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
