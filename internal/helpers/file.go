@@ -7,7 +7,7 @@ import (
 
 func CreateFileIfNotExist(filename string) error {
 	// does it exist
-	if fileExists(filename) {
+	if FileExists(filename) {
 		return errors.New("file already exists")
 	}
 
@@ -17,7 +17,7 @@ func CreateFileIfNotExist(filename string) error {
 	return err
 }
 
-func fileExists(filename string) bool {
+func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		return false
