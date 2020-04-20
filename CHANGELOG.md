@@ -7,6 +7,7 @@
 
 ### Changed
 - Nitro now installs the PHP SOAP extension by default.
+- Nitro will now walk users through the creation of a machine when no config file is present.
 
 ## 0.9.1 - 2020-04-18
 
