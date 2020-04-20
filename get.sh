@@ -149,7 +149,7 @@ getNitro () {
       mv ./nitro "$BINLOCATION"/nitro
 
       if [ "$?" = "0" ]; then
-        echo "nitro $version has been installed to $BINLOCATION"
+        echo "Nitro $version has been installed to $BINLOCATION"
         echo
       fi
 
