@@ -18,11 +18,19 @@ var xdebugOffCommand = &cobra.Command{
 			return err
 		}
 
+		var actions []nitro.Action
 		disableXdebugAction, err := nitro.DisableXdebug(name, php)
 		if err != nil {
 			return err
 		}
+		actions = append(actions, *disableXdebugAction)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*disableXdebugAction})
+		restartPhpFpmAction, err := nitro.RestartPhpFpm(name, php)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *restartPhpFpmAction)
+
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
