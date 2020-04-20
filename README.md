@@ -68,7 +68,7 @@ This works like you might expect, it will create a new machine named `diesel` wi
 nitro machine create
 ```
 
-> Note: if you run `nitro machine create` and it cannot locate the `nitro.yaml` it will walk you through setting up the machine.
+> Note: If you run `nitro machine create` and it cannot locate the `nitro.yaml` it will walk you through setting up the machine.
 
 After running `machine create`. The bootstrap process will install the latest PHP version, MySQL, Postgres, and Redis from the `nitro.yaml` file.
 
