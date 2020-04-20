@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.9.2.1 - 2020-04-20
+
+### Fixed
+- Fixed an issue when importing database backups using relative paths ([#75](https://github.com/craftcms/nitro/issues/75))
+
 ## 0.9.2 - 2020-04-20
 
 ### Added
