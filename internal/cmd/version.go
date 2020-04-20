@@ -20,7 +20,7 @@ var (
 			fmt.Printf("nitro %s\n", Version)
 			fmt.Println("")
 
-			latest, err := hack.GetLatestVersion(http.DefaultClient, "https://api.github.com/repos/pixelandtonic/nitro/releases")
+			latest, err := hack.GetLatestVersion(http.DefaultClient, "https://api.github.com/repos/craftcms/nitro/releases")
 			if err != nil {
 				return err
 			}

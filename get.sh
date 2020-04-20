@@ -1,15 +1,15 @@
 #!/bin/bash
 
-export GH_ORG=pixelandtonic
+export GH_ORG=craftcms
 export SUCCESS_CMD="nitro"
 export BINLOCATION="/usr/local/bin"
 
-version=$(curl -s https://api.github.com/repos/pixelandtonic/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
+version=$(curl -s https://api.github.com/repos/craftcms/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install Nitro. You can try to install manually:"
   echo
-  echo "1. Open your web browser and go to https://github.com/pixelandtonic/nitro/releases"
+  echo "1. Open your web browser and go to https://github.com/craftcms/nitro/releases"
   echo "2. Download the latest release for your platform and unzip it."
   echo "3. Run 'chmod +x ./nitro' on the unzipped 'nitro' executable."
   echo "4. Run 'mv ./nitro $BINLOCATION'"
@@ -35,7 +35,7 @@ hasMultipass() {
 checkHash () {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
-  checksumUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/$fileName
+  checksumUrl=https://github.com/craftcms/nitro/releases/download/$version/$fileName
   targetFile=$3/$fileName
 
   if [ ! -x "$(command -v $sha_cmd)" ]; then
@@ -101,7 +101,7 @@ getNitro () {
   fi
 
   fileName=nitro"$suffix"_x86_64.tar.gz
-  packageUrl=https://github.com/pixelandtonic/nitro/releases/download/$version/"$fileName"
+  packageUrl=https://github.com/craftcms/nitro/releases/download/$version/"$fileName"
   targetZipFile="$targetTempFolder"/$fileName
 
   echo "Downloading package $packageUrl to $targetZipFile"
