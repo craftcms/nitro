@@ -50,28 +50,28 @@ var createCommand = &cobra.Command{
 			var configFile config.Config
 
 			// name
-			name, err := prompt.Ask("what should the machine be named?", "nitro-dev", validate.MachineName)
+			name, err := prompt.Ask("What should the machine be named?", "nitro-dev", validate.MachineName)
 			if err != nil {
 				return err
 			}
 			configFile.Name = name
 
 			// number of cpus 1
-			cpus, err := prompt.Ask("how many CPUs should the machine have?", "1", nil)
+			cpus, err := prompt.Ask("How many CPUs should the machine have?", "1", nil)
 			if err != nil {
 				return err
 			}
 			configFile.CPUs = cpus
 
 			// how much memory 4G
-			memory, err := prompt.Ask("how much memory should we give the machine?", "4G", validate.Memory)
+			memory, err := prompt.Ask("How much memory should the machine have?", "4G", validate.Memory)
 			if err != nil {
 				return err
 			}
 			configFile.Memory = memory
 
 			// how large should the disk size be? 40G
-			disk, err := prompt.Ask("how much disk space should we use?", "40G", validate.Memory)
+			disk, err := prompt.Ask("How much disk space should the machine have?", "40G", validate.Memory)
 			if err != nil {
 				return err
 			}
@@ -79,7 +79,7 @@ var createCommand = &cobra.Command{
 
 			// which version of PHP would you like installed? 7.5
 			phpPrompt := promptui.Select{
-				Label:     "which version of PHP should we install?",
+				Label:     "Which version of PHP should we install?",
 				Items:     nitro.PHPVersions,
 				CursorPos: 0,
 			}
@@ -91,7 +91,7 @@ var createCommand = &cobra.Command{
 
 			// what database engine would you like to use? mysql
 			dbEnginePrompt := promptui.Select{
-				Label:     "which database engine should we setup?",
+				Label:     "Which database engine should the machine have?",
 				Items:     nitro.DBEngines,
 				CursorPos: 0,
 			}
@@ -100,7 +100,7 @@ var createCommand = &cobra.Command{
 				return err
 			}
 
-			_, dbVersion := prompt.Select("select a version of "+dbEngine+" to use:", nitro.DBVersions[dbEngine])
+			_, dbVersion := prompt.Select("Select a version of "+dbEngine+" to use:", nitro.DBVersions[dbEngine])
 
 			dbPort := "3306"
 			if dbEngine == "postgres" {
