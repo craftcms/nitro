@@ -68,25 +68,31 @@ This works like you might expect, it will create a new machine named `diesel` wi
 nitro machine create
 ```
 
-> Note: `nitro machine create` has options you can pass when creating a new server. However, Nitro sets some “sane” defaults by default. To view the options, run `nitro machine create --help`.
+> Note: If you run `nitro machine create` and it cannot locate the `nitro.yaml` it will walk you through setting up the machine.
 
 After running `machine create`. The bootstrap process will install the latest PHP version, MySQL, Postgres, and Redis from the `nitro.yaml` file.
 
-The next step is to add a new virtual host to the server:
+The next step is to add a new site to the machine:
 
 ```bash
-nitro site add /Users/jason/Sites/craftcms myclientsite.test
+cd /Users/jasonmccallister/dev
+$ nitro add my-project
+→ What should the hostname be? [my-project] $ myproject.test
+→ Where is the webroot? [web] $
+myproject.test has been added to nitro.yaml.
+→ apply nitro.yaml changes now? [y] $ n
+You can apply new nitro.yaml changes later by running `nitro apply`.
 ```
 
-> Note: You can use any top level domain you wish, but we recomend using .test
+> Note: You can use any top-level domain you wish, but we recommend using .test
 
 This process will perform the following tasks:
 
-1. Set up a new nginx virtual server for `myclientsite.test`.
-2. Attach the directory `/Users/jason/Sites/craftcms` to that virtual server.
-3. Edit your `/etc/hosts` file to point `myclientsite.test` to the virtual server for use locally.
+1. Set up a new nginx virtual server for `myproject.test`.
+2. Attach the directory `/Users/jasonmccallister/dev/my-project` to that virtual server.
+3. Edit your `/etc/hosts` file to point `myproject.test` to the virtual server for use locally.
 
-You can now visit `http://myclientsite.test` in your browser!
+You can now visit `http://myproject.test` in your browser!
 
 ## Commands
 
