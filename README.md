@@ -105,7 +105,6 @@ The following commands will help you manage your virtual server.
 - [`info`](#info)
 - [`import`](#import)
 - [`logs`](#logs)
-- [`mount`](#mount)
 - [`machine create`](#machine-create)
 - [`machine destroy`](#machine-destroy)
 - [`redis`](#redis)
@@ -113,10 +112,10 @@ The following commands will help you manage your virtual server.
 - [`ssh`](#ssh)
 - [`stop`](#stop)
 - [`update`](#update)
+- [`version`](#version)
 - [`xdebug configure`](#xdebug-configure)
 - [`xdebug on`](#xdebug-on)
 - [`xdebug off`](#xdebug-off)
-- [`version`](#version)
 
 > Note: These examples use a custom config file `nitro-example.yaml`. If you’d like to use Nitro’s default server name (`nitro-local`), you can skip adding the `--machine` argument.
 
@@ -229,13 +228,13 @@ $ nitro import mybackup.sql
 Use the arrow keys to navigate: ↓ ↑ → ← 
 ? Select database:
   ▸ mysql_5.7_3306
-``
+```
 
 ### `logs`
 
 Views virtual machines logs. This command will prompt you for a type of logs to view (e.g. `nginx`, `database`, or `docker` (for a specific container)). 
 
-​```bash
+```​shell
 nitro logs
 ```
 
@@ -263,7 +262,7 @@ Options:
 
 - `--permanent` permanently deletes a machine **(this is non-recoverable!)**
 
-To soft-destroy the `diesel` machine, so it is revcoverable later:
+To soft-destroy the `diesel` machine, so it is recoverable later:
 
 ```bash
 nitro machine destroy
@@ -275,19 +274,9 @@ To **permanently** destroy the `diesel` machine:
 nitro machine destroy --permanent
 ```
 
-### `mount`
-
-Mounts a local directory to a path on the machine.
-
-```bash
-nitro mount ~/sites/project-folder /home/ubuntu/project-folder
-```
-
 ### `redis`
 
 Access a Redis shell.
-
-This launches a Redis console shell for the `diesel` machine:
 
 ```bash
 nitro redis
@@ -323,6 +312,24 @@ Nitro gives you full root access to your virtual server. The default user is `ub
 
 ```bash
 nitro ssh
+```
+
+### `update`
+
+Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
+
+This upgrades the `diesel` machine’s software packages to their newest versions:
+
+```bash
+nitro update
+```
+
+### `version`
+
+Checks the currently version of nitro against the releases and shows any updated versions.  
+
+```bash
+nitro version
 ```
 
 ### `xdebug configure`
@@ -363,14 +370,4 @@ This ensures Xdebug is installed for PHP 7.2 but disables it:
 
 ```bash
 nitro xdebug off --php-version 7.2
-```
-
-### `update`
-
-Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
-
-This upgrades the `diesel` machine’s software packages to their newest versions:
-
-```bash
-nitro update
 ```
