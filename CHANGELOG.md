@@ -7,7 +7,8 @@
 
 ### Changed
 - Nitro now installs the PHP SOAP extension by default.
-- Nitro will now walk users through the creation of a machine when no config file is present.
+- Nitro will now walk users through the creation of a machine when no config file is present ([#44](https://github.com/pixelandtonic/nitro/issues/44)).
+- Nitro now prompts you to modify your hosts file after using `add` ([#40](https://github.com/pixelandtonic/nitro/issues/40)).
 
 ## 0.9.1 - 2020-04-18
 
