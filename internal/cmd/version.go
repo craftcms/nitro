@@ -20,19 +20,19 @@ var (
 			fmt.Printf("nitro %s\n", Version)
 			fmt.Println("")
 
-			latest, err := hack.GetLatestVersion(http.DefaultClient, "https://api.github.com/repos/pixelandtonic/nitro/releases")
+			latest, err := hack.GetLatestVersion(http.DefaultClient, "https://api.github.com/repos/craftcms/nitro/releases")
 			if err != nil {
 				return err
 			}
 
 			if latest != Version {
-				fmt.Println("The latest version of nitro is", latest)
-				fmt.Println("Visit https://github.com/craftcms/nitro for more details or \nrun `nitro self-update` to perform an upgrade")
+				fmt.Println("The latest version of Nitro is", latest)
+				fmt.Println("Visit https://github.com/craftcms/nitro for more details or \nrun `nitro self-update` to perform an update.")
 
 				return nil
 			}
 
-			fmt.Println("you are on the latest version of nitro!")
+			fmt.Println("You are on the latest version of Nitro!")
 
 			return nil
 		},

@@ -22,7 +22,7 @@ var selfUpdateCommand = &cobra.Command{
 		// if latest version is not current version (does not match)
 		// then download get.sh
 
-		fileUrl := "https://raw.githubusercontent.com/pixelandtonic/nitro/develop/get.sh"
+		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/get.sh"
 
 		tempFolder := os.TempDir()
 		defer os.Remove(tempFolder)

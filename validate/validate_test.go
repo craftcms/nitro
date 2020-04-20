@@ -362,6 +362,16 @@ func TestDatabaseConfig(t *testing.T) {
 						Version: "5.7",
 						Port:    "33061",
 					},
+					{
+						Engine:  "postgres",
+						Version: "11",
+						Port:    "5432",
+					},
+					{
+						Engine:  "postgres",
+						Version: "12",
+						Port:    "54321",
+					},
 				},
 			},
 			wantErr: false,

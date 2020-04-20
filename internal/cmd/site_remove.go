@@ -17,10 +17,10 @@ var siteRemoveCommand = &cobra.Command{
 	Short: "Remove a site from a machine",
 	Long: `Removing a site will perform the following steps:
 
-1. Remove the virtual host from NGINX sites enabled
+1. Remove the virtual host from nginx sites enabled
 2. Delete the directory in "app/sites/xmydomain.test"
 3. Unmount the local directory from the machine
-4. Restart the NGINX web server
+4. Restart the nginx web server
 5. Remove the site from your nitro.yaml sites configuration
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -93,7 +93,7 @@ var siteRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("removed %q from %q", site, name)
+		fmt.Printf("Removed %q from %q", site, name)
 
 		return nil
 	},

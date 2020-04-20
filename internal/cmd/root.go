@@ -19,9 +19,9 @@ func init() {
 	cobra.OnInitialize(loadConfig)
 
 	// set persistent flags on the root command
-	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "name of machine")
-	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "bypass executing the commands")
-	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "f", "", "configuration file to use")
+	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "Name of the machine.")
+	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "Bypass executing the commands.")
+	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "f", "", "Configuration file to use.")
 
 	// add commands to root
 	rootCmd.AddCommand(
@@ -42,6 +42,7 @@ func init() {
 		applyCommand,
 		removeCommand,
 		editCommand,
+		importCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)

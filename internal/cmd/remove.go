@@ -79,11 +79,11 @@ var removeCommand = &cobra.Command{
 		}
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			fmt.Println("failed to remove the site:", err)
+			fmt.Println("Failed to remove the site:", err)
 			return err
 		}
 
-		fmt.Println("ok, we removed the site from your nitro.yaml and made the changes")
+		fmt.Println("Removed the site from your nitro.yaml and applied the changes.")
 
 		return nil
 	},

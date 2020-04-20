@@ -10,6 +10,7 @@ packages:
   - gnupg-agent
   - software-properties-common
   - sshfs
+  - pv
 write_files:
   - path: /opt/nitro/scripts/site-exists.sh
     content: |
@@ -17,6 +18,19 @@ write_files:
       site="$1"
       if test -f /etc/nginx/sites-enabled/"$site"; then
           echo "exists"
+      fi
+  - path: /opt/nitro/scripts/docker-exec-import.sh
+    content: |
+      #!/usr/bin/env bash
+      container="$1"
+      database="$2"
+      filename="$3"
+      engine="$4"
+      
+      if [ "$engine" == "mysql" ]; then
+          cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
+      else
+          cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
   - path: /opt/nitro/nginx/template.conf
     content: |

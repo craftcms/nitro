@@ -81,7 +81,7 @@ type releaseList []struct {
 	Body       string `json:"body"`
 }
 
-// https://api.github.com/repos/pixelandtonic/nitro/releases
+// https://api.github.com/repos/master/nitro/releases
 func GetLatestVersion(client *http.Client, url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
