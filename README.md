@@ -8,7 +8,6 @@ Nitro is a command-line tool focused on making local Craft development quick and
 
 ## Table of Contents
 
-- [Requirements](#requirements)
 - [What’s Included](#whats-included)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
