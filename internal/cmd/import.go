@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -21,8 +22,18 @@ var importCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
 
+		// get the filename
+		path := strings.Split(args[0], string(os.PathSeparator))
+		filename := path[len(path)-1]
+
+		// get the abs path
+		fileAbsPath, err := filepath.Abs(filename)
+		if err != nil {
+			return err
+		}
+
 		// verify the file exists
-		if !fileExists(args[0]) {
+		if !fileExists(fileAbsPath) {
 			return errors.New(fmt.Sprintf("unable to located the file %q to import", args[0]))
 		}
 
@@ -51,7 +62,7 @@ var importCommand = &cobra.Command{
 		transferAction := nitro.Action{
 			Type:       "transfer",
 			UseSyscall: false,
-			Args:       []string{"transfer", args[0], name + ":" + args[0]},
+			Args:       []string{"transfer", fileAbsPath, name + ":" + filename},
 		}
 		actions = append(actions, transferAction)
 
@@ -60,7 +71,7 @@ var importCommand = &cobra.Command{
 			engine = "postgres"
 		}
 
-		importArgs := []string{"exec", name, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", args[0], engine}
+		importArgs := []string{"exec", name, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
 		dockerExecAction := nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
@@ -68,7 +79,7 @@ var importCommand = &cobra.Command{
 		}
 		actions = append(actions, dockerExecAction)
 
-		fmt.Printf("Importing %q into %q (large files may take a while)...\n", args[0], containerName)
+		fmt.Printf("Importing %q into %q (large files may take a while)...\n", filename, containerName)
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
