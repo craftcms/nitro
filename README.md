@@ -16,10 +16,6 @@ Nitro is a command-line tool focused on making local Craft development quick and
 
 ---
 
-## Requirements
-
-- [Multipass](https://multipass.run)
-
 ## What’s Included
 
 Nitro installs the following on every machine:
@@ -35,9 +31,12 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-```
-curl https://raw.githubusercontent.com/craftcms/nitro/master/get.sh | bash
-```
+1. Install [Multipass](https://multipass.run).
+2. Run this terminal command:
+
+    ```bash
+    curl https://raw.githubusercontent.com/craftcms/nitro/master/get.sh | bash
+    ```
 
 ## Getting Started
 
