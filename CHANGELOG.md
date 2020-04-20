@@ -1,6 +1,10 @@
 # Release Notes for Nitro
 
 ## Unreleased
+ 
+### Fixed
+- Fixed (again) an issue when importing database backups using relative paths and added more tests ([#75](https://github.com/craftcms/nitro/issues/75))
+- Fixed an error when running `xdebuf off` where php-fpm would not restart
 
 ## 0.9.3 - 2020-04-20
 
