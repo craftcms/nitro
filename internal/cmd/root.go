@@ -32,7 +32,6 @@ func init() {
 		stopCommand,
 		restartCommand,
 		startCommand,
-		machineCommand,
 		logsCommand,
 		xdebugCommand,
 		redisCommand,
@@ -45,7 +44,6 @@ func init() {
 		importCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
-	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
 }
 
 func Execute() {
