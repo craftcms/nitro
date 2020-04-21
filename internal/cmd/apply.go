@@ -15,7 +15,7 @@ import (
 
 var applyCommand = &cobra.Command{
 	Use:    "apply",
-	Short:  "Apply changes from nitro.yaml",
+	Short:  "Apply changes from config",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := "nitro-dev"
@@ -63,8 +63,6 @@ var applyCommand = &cobra.Command{
 				sitesToCreate = append(sitesToCreate, site)
 			}
 		}
-
-		fmt.Printf("There are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
 
 		// prompt?
 		var actions []nitro.Action
@@ -119,6 +117,9 @@ var applyCommand = &cobra.Command{
 
 			return nil
 		}
+
+		fmt.Printf("There are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
+		fmt.Printf("There are %d sites to create and %d sites in the config file. Applying changes now...\n", len(sitesToCreate), len(configFile.Sites))
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err

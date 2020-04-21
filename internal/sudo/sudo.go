@@ -6,10 +6,11 @@ import (
 )
 
 func RunCommand(nitro, configFile, command string) error {
-	hostsCmd := exec.Command("sudo", nitro, "-f", configFile, command)
+	// TODO update this for windows support
+	c := exec.Command("sudo", nitro, "-f", configFile, command)
 
-	hostsCmd.Stdout = os.Stdout
-	hostsCmd.Stderr = os.Stderr
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 
-	return hostsCmd.Run()
+	return c.Run()
 }

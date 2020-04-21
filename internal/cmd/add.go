@@ -201,7 +201,6 @@ var addCommand = &cobra.Command{
 		}
 
 		fmt.Println("Adding", machine, "to your hosts file")
-		fmt.Println("sudo", nitro, "-f", filePath, "hosts", "add")
 
 		return sudo.RunCommand(nitro, filePath, "hosts")
 	},
