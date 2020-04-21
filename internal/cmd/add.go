@@ -197,7 +197,7 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Modifying the hosts file to add sites for", config.GetString("name", ""), "(you will be prompted for your password)... ")
+		fmt.Println("Adding", config.GetString("name", ""), "to your hosts file")
 
 		hostsCmd := exec.Command("sudo", nitro, "-f", filePath, "hosts", "add")
 		hostsCmd.Stdout = os.Stdout
