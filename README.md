@@ -34,7 +34,7 @@ Nitro installs the following on every machine:
 2. Run this terminal command:
 
     ```bash
-    curl https://raw.githubusercontent.com/craftcms/nitro/master/instal.sh | bash
+    curl https://raw.githubusercontent.com/craftcms/nitro/master/install.sh | bash
     ```
 
 ## Getting Started
