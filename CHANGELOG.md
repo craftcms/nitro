@@ -4,6 +4,7 @@
  
  ### Changes
  - `destroy` command is now always permanent and the `--permanent` flag has been removed. `destroy` is no longer nested under the machine command.
+ - Fixed an error where a user could select MySQL version 5.8.
  
 ### Fixed
 - Fixed (again) an issue when importing database backups using relative paths and added more tests ([#75](https://github.com/craftcms/nitro/issues/75))
