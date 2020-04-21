@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -200,13 +200,10 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Adding", config.GetString("name", ""), "to your hosts file")
+		fmt.Println("Adding", machine, "to your hosts file")
+		fmt.Println("sudo", nitro, "-f", filePath, "hosts", "add")
 
-		hostsCmd := exec.Command("sudo", nitro, "-f", filePath, "hosts", "add")
-		hostsCmd.Stdout = os.Stdout
-		hostsCmd.Stderr = os.Stderr
-
-		return hostsCmd.Run()
+		return sudo.RunCommand(nitro, filePath, "hosts")
 	},
 }
 
