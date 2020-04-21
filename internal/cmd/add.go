@@ -21,7 +21,10 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := "nitro-dev"
+		if flagMachineName != "" {
+			machine = flagMachineName
+		}
 
 		// if there is no arg, get the current working dir
 		// else get the first arg
@@ -135,33 +138,33 @@ var addCommand = &cobra.Command{
 		var actions []nitro.Action
 		// mount the directory
 		m := configFile.Mounts[len(configFile.Mounts)-1]
-		mountAction, err := nitro.MountDir(name, m.AbsSourcePath(), m.Dest)
+		mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *mountAction)
 
 		// copy the nginx template
-		copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
+		copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *copyTemplateAction)
 
 		// copy the nginx template
-		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
+		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *changeNginxVariablesAction...)
 
-		createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
+		createSymlinkAction, err := nitro.CreateSiteSymllink(machine, site.Hostname)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *createSymlinkAction)
 
-		restartNginxAction, err := nitro.NginxReload(name)
+		restartNginxAction, err := nitro.NginxReload(machine)
 		if err != nil {
 			return err
 		}
@@ -179,7 +182,7 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Applied the changes and added", hostname, "to", name)
+		fmt.Println("Applied the changes and added", hostname, "to", machine)
 
 		// prompt to add hosts file
 		cfgFile := viper.ConfigFileUsed()
