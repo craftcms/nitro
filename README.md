@@ -378,7 +378,7 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 Views the machine’s logs. This command will prompt you for a type of logs to view, including e.g. `nginx`,
 `database`, or `docker` (for a specific container). 
 
-```sh```
+```sh
 nitro logs [<options>]
 ```
 
