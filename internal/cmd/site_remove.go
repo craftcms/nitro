@@ -24,7 +24,11 @@ var siteRemoveCommand = &cobra.Command{
 5. Remove the site from your nitro.yaml sites configuration
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := "nitro-dev"
+		if flagMachineName != "" {
+			machine = flagMachineName
+		}
+
 		// make sure we have sites in the configFile
 		if !viper.IsSet("sites") {
 			return errors.New("no sites found in " + viper.ConfigFileUsed())
@@ -53,28 +57,28 @@ var siteRemoveCommand = &cobra.Command{
 		var actions []nitro.Action
 
 		// remove symlink
-		removeSymlinkAction, err := nitro.RemoveSymlink(name, site)
+		removeSymlinkAction, err := nitro.RemoveSymlink(machine, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *removeSymlinkAction)
 
 		// remove mount
-		unmountAction, err := nitro.Unmount(name, site)
+		unmountAction, err := nitro.Unmount(machine, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *unmountAction)
 
 		// remove the directory
-		removeNginxSiteDirectoryAction, err := nitro.RemoveNginxSiteDirectory(name, site)
+		removeNginxSiteDirectoryAction, err := nitro.RemoveNginxSiteDirectory(machine, site)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *removeNginxSiteDirectoryAction)
 
 		// restart nginx
-		restartNginxAction, err := nitro.NginxReload(name)
+		restartNginxAction, err := nitro.NginxReload(machine)
 		if err != nil {
 			return err
 		}
@@ -93,7 +97,7 @@ var siteRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("Removed %q from %q", site, name)
+		fmt.Printf("Removed %q from %q", site, machine)
 
 		return nil
 	},

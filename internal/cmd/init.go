@@ -109,14 +109,116 @@ var initCommand = &cobra.Command{
 			return nil
 		}
 
-		return errors.New("would create the file " + machine + ".yaml")
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
 
-func getMachine(name string) string {
-	if name == "" {
-		return "nitro-dev"
+func init() {
+	initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPUs to allocate")
+	initCommand.Flags().StringVar(&flagMemory, "memory", "", "Amount of memory to allocate")
+	initCommand.Flags().StringVar(&flagDisk, "disk", "", "Amount of disk space to allocate")
+	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "Which version of PHP to make default")
+}
+
+func createActions(name, memory, disk string, cpus int, phpVersion string, databases []config.Database, mounts []config.Mount, sites []config.Site) ([]nitro.Action, error) {
+	var actions []nitro.Action
+	launchAction, err := nitro.Launch(name, cpus, memory, disk, CloudConfig)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *launchAction)
+
+	installAction, err := nitro.InstallPackages(name, phpVersion)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *installAction)
+
+	// configure php settings that are specific to Craft
+	configurePhpMemoryAction, err := nitro.ConfigurePHPMemoryLimit(name, phpVersion, "256M")
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *configurePhpMemoryAction)
+
+	configureExecutionTimeAction, err := nitro.ConfigurePHPExecutionTimeLimit(name, phpVersion, "240")
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *configureExecutionTimeAction)
+
+	xdebugConfigureAction, err := nitro.ConfigureXdebug(name, phpVersion)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *xdebugConfigureAction)
+
+	restartPhpFpmAction, err := nitro.RestartPhpFpm(name, phpVersion)
+	if err != nil {
+		return nil, err
+	}
+	actions = append(actions, *restartPhpFpmAction)
+
+	// if there are mounts, set them
+	for _, mount := range mounts {
+		mountDirAction, err := nitro.MountDir(name, mount.AbsSourcePath(), mount.Dest)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, *mountDirAction)
 	}
 
-	return name
+	for _, database := range databases {
+		volumeAction, err := nitro.CreateDatabaseVolume(name, database.Engine, database.Version, database.Port)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, *volumeAction)
+
+		createDatabaseAction, err := nitro.CreateDatabaseContainer(name, database.Engine, database.Version, database.Port)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, *createDatabaseAction)
+	}
+
+	var siteErrs []error
+
+	for _, site := range sites {
+		copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
+		if err != nil {
+			siteErrs = append(siteErrs, err)
+			continue
+		}
+		actions = append(actions, *copyTemplateAction)
+
+		if site.Webroot == "" {
+			site.Webroot = "web"
+		}
+
+		changeVarsActions, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, phpVersion, site.Aliases)
+		if err != nil {
+			siteErrs = append(siteErrs, err)
+			continue
+		}
+		for _, a := range *changeVarsActions {
+			actions = append(actions, a)
+		}
+
+		createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
+		if err != nil {
+			siteErrs = append(siteErrs, err)
+			continue
+		}
+		actions = append(actions, *createSymlinkAction)
+
+		reloadNginxAction, err := nitro.NginxReload(name)
+		if err != nil {
+			siteErrs = append(siteErrs, err)
+			continue
+		}
+		actions = append(actions, *reloadNginxAction)
+	}
+
+	return actions, nil
 }

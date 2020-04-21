@@ -17,7 +17,10 @@ var logsCommand = &cobra.Command{
 	Use:   "logs",
 	Short: "Show machine logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := "nitro-dev"
+		if flagMachineName != "" {
+			machine = flagMachineName
+		}
 
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
@@ -38,7 +41,7 @@ var logsCommand = &cobra.Command{
 		case "docker":
 			validate := func(input string) error {
 				if input == "" {
-					return errors.New("container name cannot be empty")
+					return errors.New("container machine cannot be empty")
 				}
 				if strings.Contains(input, " ") {
 					return errors.New("container names cannot contain spaces")
@@ -47,7 +50,7 @@ var logsCommand = &cobra.Command{
 			}
 
 			containerNamePrompt := promptui.Prompt{
-				Label:    "Enter container name",
+				Label:    "Enter container machine",
 				Validate: validate,
 			}
 
@@ -56,7 +59,7 @@ var logsCommand = &cobra.Command{
 				return err
 			}
 
-			dockerLogsAction, err := nitro.LogsDocker(name, containerName)
+			dockerLogsAction, err := nitro.LogsDocker(machine, containerName)
 			if err != nil {
 				return err
 			}
@@ -80,7 +83,7 @@ var logsCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			dockerLogsAction, err := nitro.LogsDocker(name, containerName)
+			dockerLogsAction, err := nitro.LogsDocker(machine, containerName)
 			if err != nil {
 				return err
 			}
@@ -88,7 +91,7 @@ var logsCommand = &cobra.Command{
 			fmt.Println("Here are the database logs for", containerName, "...")
 		default:
 			fmt.Println("Here are the nginx logs...")
-			nginxLogsAction, err := nitro.LogsNginx(name, flagNginxLogsKind)
+			nginxLogsAction, err := nitro.LogsNginx(machine, flagNginxLogsKind)
 			if err != nil {
 				return err
 			}

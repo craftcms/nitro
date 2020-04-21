@@ -17,11 +17,6 @@ var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
 	Short: "Update Nitro to the latest",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO
-		// call public github api
-		// if latest version is not current version (does not match)
-		// then download install.sh
-
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
 		tempFolder := os.TempDir()

@@ -21,7 +21,11 @@ var importCommand = &cobra.Command{
 	Short: "Import database into machine",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := "nitro-dev"
+		if flagMachineName != "" {
+			machine = flagMachineName
+		}
+
 		home, err := homedir.Dir()
 		if err != nil {
 			return err
@@ -63,7 +67,7 @@ var importCommand = &cobra.Command{
 		transferAction := nitro.Action{
 			Type:       "transfer",
 			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, name + ":" + filename},
+			Args:       []string{"transfer", fileAbsPath, machine + ":" + filename},
 		}
 		actions = append(actions, transferAction)
 
@@ -72,7 +76,7 @@ var importCommand = &cobra.Command{
 			engine = "postgres"
 		}
 
-		importArgs := []string{"exec", name, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
+		importArgs := []string{"exec", machine, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
 		dockerExecAction := nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
