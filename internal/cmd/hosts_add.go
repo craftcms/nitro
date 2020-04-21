@@ -9,14 +9,19 @@ import (
 	"github.com/txn2/txeh"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/hosts"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-var hostsAddCommand = &cobra.Command{
-	Use:   "add",
-	Short: "Add an entry to your hosts file",
+var hostsCommand = &cobra.Command{
+	Use:    "add",
+	Short:  "Add an entry to your hosts file",
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := "nitro-dev"
+		if flagMachineName != "" {
+			machine = flagMachineName
+		}
 
 		uid := os.Geteuid()
 		if uid != 0 {
@@ -24,7 +29,7 @@ var hostsAddCommand = &cobra.Command{
 		}
 
 		// get the requested machines ip
-		ip := nitro.IP(name, nitro.NewMultipassRunner("multipass"))
+		ip := nitro.IP(machine, nitro.NewMultipassRunner("multipass"))
 
 		// get all of the sites from the config file
 		if !viper.IsSet("sites") {
@@ -36,18 +41,16 @@ var hostsAddCommand = &cobra.Command{
 			return err
 		}
 
-		hosts, err := txeh.NewHostsDefault()
-		if err != nil {
-			return err
-		}
-
 		var domains []string
 		for _, site := range sites {
 			domains = append(domains, site.Hostname)
 		}
 
-		hosts.AddHosts(ip, domains)
+		he, err := txeh.NewHostsDefault()
+		if err != nil {
+			return err
+		}
 
-		return hosts.Save()
+		return hosts.Add(he, ip, domains)
 	},
 }

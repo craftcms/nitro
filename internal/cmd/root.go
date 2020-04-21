@@ -42,6 +42,7 @@ func init() {
 		destroyCommand,
 		editCommand,
 		importCommand,
+		hostsCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 }
