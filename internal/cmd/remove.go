@@ -22,7 +22,7 @@ var removeCommand = &cobra.Command{
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
 		}
-		name := configFile.Name
+		name := "nitro-dev"
 
 		sites := configFile.GetSites()
 		i, _ := prompt.Select("Select site to remove", configFile.SitesAsList())
