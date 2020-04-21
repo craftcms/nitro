@@ -2,7 +2,8 @@
 
 # Craft Nitro
 
-Nitro is a command-line tool focused on making local Craft development quick and easy. Nitro’s one dependency is [Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
+Nitro is a command-line tool focused on making local Craft development quick and easy. Nitro’s one dependency is
+[Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
 
 ---
 
@@ -26,7 +27,8 @@ Nitro installs the following on every machine:
 - Xdebug
 - Blackfire
 
-> Note: For a more detailed writeup on how to configure Xdebug and Nitro with PhpStorm, view this document on [how to configure Xdebug and PhpStorm for both web and console debugging](XDEBUG.md).
+> Note: For a more detailed writeup on how to configure Xdebug and Nitro with PhpStorm, view this document on
+> [how to configure Xdebug and PhpStorm for both web and console debugging](XDEBUG.md).
 
 ## Installation
 
@@ -37,7 +39,79 @@ Nitro installs the following on every machine:
     curl https://raw.githubusercontent.com/craftcms/nitro/master/instal.sh | bash
     ```
 
-## Getting Started
+3. Follow the prompts to create your primary machine.
+
+Once complete, you will have a primary machine called `nitro-dev`, and a new configuration file for the machine
+ stored at `~/.nitro/nitro.yaml`.
+
+## Adding Sites
+
+To add a site to Nitro, three things need to happen:
+
+- Your project files need to be [mounted](#adding-mounts) into the Nitro machine.
+- The web server within your Nitro machine needs to be configured to serve your site.
+- Your system’s `hosts` file needs to be updated to associate your site’s hostname with Nitro.
+
+### Add a site with `nitro add`
+
+If your project files are completely contained within a single folder, then you can quickly accomplish these using
+the [add](#add) command:  
+
+```bash
+cd /path/to/project
+$ nitro add
+→ What should the hostname be? $ example.test
+→ Where is the webroot? $ web
+✔ example.test has been added to nitro.yaml.
+→ apply nitro.yaml changes now? $ yes
+✔ Applied the changes and added example.test to nitro-dev                  
+Adding nitro-dev to your hosts file 
+Password:
+✔ example.test added successfully!
+```
+
+### Add a site manually
+
+If you would prefer to add a site manually, follow these steps:
+
+1. Open your `~/.nitro/nitro.yaml` file in a text editor, and add a new [mount](#adding-mounts) and site to it:
+
+    ```yaml
+   mounts:
+     - source: /path/to/project
+       dest: /nitro/sites/example.test
+   sites:
+     - hostname: example.test
+       webroot: /nitro/sites/craft3.support.test/web 
+   ```
+
+2. Run `nitro apply` to apply your `nitro.yaml` changes to the machine. You will be prompted for your password so
+   Nitro can add the new hostname to your system’s `hosts` file.
+
+You should now be able to point your web browser at your new hostname.
+
+## Adding Mounts
+
+Nitro can mount various directories within your host OS into your Nitro machine. You can either mount each of your
+project’s directories into Nitro individually (as you’d get when
+[adding a site with `nitro add`](#add-a-site-with-nitro-add)), or you can mount your entire dev folder, or some
+combination of the two.
+
+To add a new mount, follow these steps:
+
+1. Open your `~/.nitro/nitro.yaml` file in a text editor, and add the new mount:
+
+    ```yaml
+   mounts:
+     - source: /Users/cathy/dev
+       dest: /nitro/dev
+   ```
+
+2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
+
+Once that’s done, yous should be able to [SSH](#ssh) into your machine and see the newly-mounted directory in there.
+
+## Managing Machines
 
 In order to create a new development server, you must create a new Nitro machine. By default, this will not attach any directories and is equivalent to getting a brand new Virtual Private Server (VPS).
 
@@ -136,25 +210,17 @@ Applied changes from nitro.yaml.
 Add will create an interactive prompt to add a site (and mount it) into your Nitro machine. By default, it will look at your current working directory and assume that it is a Craft project.
 
 ```bash
-cd /Users/brandon/Sites/example.test
+cd /path/to/project
 $ nitro add
-→ What should the hostname be? [example.test] $ ex.test
-→ Where is the webroot? [web] $
-ex.test has been added to nitro.yaml.
-→ apply nitro.yaml changes now? [y] $ n
-You can apply new nitro.yaml changes later by running `nitro apply`.
+→ What should the hostname be? $ example.test
+→ Where is the webroot? $ web
+✔ example.test has been added to nitro.yaml.
+→ apply nitro.yaml changes now? $ yes
+✔ Applied the changes and added example.test to nitro-dev                  
+Adding nitro-dev to your hosts file 
+Password:
+✔ example.test added successfully!
 ```
-
-You can optionally pass a path to the directory as the first argument to use that directory:
-
-```bash
-cd /Users/brandon/Sites/
-$ nitro -f nitro.yaml add demo-site
-✔ What should the hostname be? [demo-site]: $
-Where is the webroot? [web]: $
-✔ apply nitro.yaml changes now? [y]: $
-Applied the changes and added demo-site to nitro.  
-````
 
 | Argument     | Default                                        | Options | Description                                 |
 |--------------|------------------------------------------------|---------|---------------------------------------------|
