@@ -1,7 +1,6 @@
 package cmd
 
 var (
-	flagConfigFile    string
 	flagMachineName   string
 	flagDebug         bool
 	flagCPUs          int

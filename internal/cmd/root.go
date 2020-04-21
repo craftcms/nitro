@@ -21,10 +21,10 @@ func init() {
 	// set persistent flags on the root command
 	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "Name of the machine.")
 	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "Bypass executing the commands.")
-	rootCmd.PersistentFlags().StringVarP(&flagConfigFile, "config", "f", "", "Configuration file to use.")
 
 	// add commands to root
 	rootCmd.AddCommand(
+		initCommand,
 		addCommand,
 		sshCommand,
 		updateCommand,
@@ -36,7 +36,6 @@ func init() {
 		logsCommand,
 		xdebugCommand,
 		redisCommand,
-		hostsCommand,
 		contextCommand,
 		selfUpdateCommand,
 		applyCommand,
@@ -47,7 +46,6 @@ func init() {
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 	machineCommand.AddCommand(destroyCommand, createCommand, restartCommand, startCommand, stopCommand)
-	hostsCommand.AddCommand(hostsAddCommand, hostsRemoveCommand, hostsShowCommand)
 }
 
 func Execute() {
@@ -57,14 +55,15 @@ func Execute() {
 }
 
 func loadConfig() {
-	if flagConfigFile != "" {
-		viper.SetConfigFile(flagConfigFile)
-	} else {
-		home, _ := homedir.Dir()
+	home, _ := homedir.Dir()
 
-		viper.AddConfigPath(home + "/" + ".nitro")
-		viper.SetConfigName("nitro")
-		viper.SetConfigType("yaml")
+	viper.AddConfigPath(home + "/" + ".nitro")
+	viper.SetConfigType("yaml")
+
+	if flagMachineName != "" {
+		viper.SetConfigName(flagMachineName)
+	} else {
+		viper.SetConfigName("nitro-dev")
 	}
 
 	_ = viper.ReadInConfig()
