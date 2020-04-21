@@ -17,7 +17,8 @@ import (
 )
 
 var initCommand = &cobra.Command{
-	Use: "init",
+	Use:   "init",
+	Short: "Initialize a new machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := "nitro-dev"
 		if flagMachineName != "" {
