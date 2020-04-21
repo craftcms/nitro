@@ -26,6 +26,7 @@ var initCommand = &cobra.Command{
 		}
 
 		if viper.ConfigFileUsed() != "" {
+			// TODO prompt for the confirmation of re initing the machine
 			return errors.New("using a config file already")
 		}
 
@@ -110,7 +111,15 @@ var initCommand = &cobra.Command{
 			return nil
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		if prompt.Verify("apply the changes now?") {
+			fmt.Println("Ok, applying the changes now")
+
+			return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		}
+
+		fmt.Println("Ok, you can apple ")
+
+		return nil
 	},
 }
 
