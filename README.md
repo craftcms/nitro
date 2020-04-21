@@ -33,7 +33,7 @@ Nitro installs the following on every machine:
 1. Install [Multipass](https://multipass.run).
 2. Run this terminal command:
 
-    ```bash
+    ```sh
     curl https://raw.githubusercontent.com/craftcms/nitro/master/install.sh | bash
     ```
 
@@ -62,7 +62,7 @@ This works like you might expect, it will create a new machine named `diesel` wi
 
 > Note: Nitro can run multiple versions of the same database engine (e.g. PostgreSQL 11 and 12) because it utilizes Docker underneath. See [this file](examples/nitro-multiple-versions.yaml) for an example.
 
-```bash
+```sh
 nitro machine create
 ```
 
@@ -72,7 +72,7 @@ After running `machine create`. The bootstrap process will install the latest PH
 
 The next step is to add a new site to the machine:
 
-```bash
+```sh
 cd /Users/jasonmccallister/dev
 $ nitro add my-project
 → What should the hostname be? [my-project] $ myproject.test
@@ -121,11 +121,11 @@ The following commands will help you manage your virtual server.
 
 `apply` will look at a config file and make changes from the mounts and sites in the config file by adding or removing them. The config file is the source of truth for your Nitro machine.
 
-```bash
+```sh
 nitro apply
 ```
 
-```bash
+```sh
 $ nitro apply
 There are 2 mounted directories and 1 new mount(s) in the config file.
 Applied changes from nitro.yaml.
@@ -135,7 +135,7 @@ Applied changes from nitro.yaml.
 
 Add will create an interactive prompt to add a site (and mount it) into your Nitro machine. By default, it will look at your current working directory and assume that it is a Craft project.
 
-```bash
+```sh
 cd /Users/brandon/Sites/example.test
 $ nitro add
 → What should the hostname be? [example.test] $ ex.test
@@ -147,14 +147,14 @@ You can apply new nitro.yaml changes later by running `nitro apply`.
 
 You can optionally pass a path to the directory as the first argument to use that directory:
 
-```bash
+```sh
 cd /Users/brandon/Sites/
 $ nitro -f nitro.yaml add demo-site
 ✔ What should the hostname be? [demo-site]: $
 Where is the webroot? [web]: $
 ✔ apply nitro.yaml changes now? [y]: $
 Applied the changes and added demo-site to nitro.  
-````
+```
 
 | Argument     | Default                                        | Options | Description                                 |
 |--------------|------------------------------------------------|---------|---------------------------------------------|
@@ -165,7 +165,7 @@ Applied the changes and added demo-site to nitro.
 
 Shows the currently used configuration file for quick reference.
 
-```shell
+```sh
 $ nitro -f nitro-example.yaml context
 Using config file: nitro.yaml
 ------
@@ -194,7 +194,7 @@ sites:
 
 Edit allows you to quickly open your nitro.yaml file to manually make changes. However, it is recommended to use `nitro` commands to edit your config.
 
-```shell
+```sh
 nitro edit
 ```
 
@@ -202,7 +202,7 @@ nitro edit
 
 Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
 
-```shell
+```sh
 $ nitro info
 Name:           nitro
 State:          Running
@@ -221,7 +221,7 @@ Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-sit
 
 Import allows you to import a SQL file into a database. You will be prompted with a list of running database engines (mysql and postgres) to import the file into.
 
-```shell
+```sh
 $ nitro import mybackup.sql
 Use the arrow keys to navigate: ↓ ↑ → ← 
 ? Select database:
@@ -232,7 +232,7 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 
 Views virtual machines logs. This command will prompt you for a type of logs to view (e.g. `nginx`, `database`, or `docker` (for a specific container)). 
 
-```​shell
+```sh
 nitro logs
 ```
 
@@ -262,13 +262,13 @@ Options:
 
 To soft-destroy the `diesel` machine, so it is recoverable later:
 
-```bash
+```sh
 nitro machine destroy
 ```
 
 To **permanently** destroy the `diesel` machine:
 
-```bash
+```sh
 nitro machine destroy --permanent
 ```
 
@@ -276,7 +276,7 @@ nitro machine destroy --permanent
 
 Access a Redis shell.
 
-```bash
+```sh
 nitro redis
 ```
 
@@ -284,7 +284,7 @@ nitro redis
 
 Starts, or turns on, a machine.
 
-```bash
+```sh
 nitro start
 ```
 
@@ -292,7 +292,7 @@ nitro start
 
 Stops, or turns off, a machine.
 
-```bash
+```sh
 nitro stop
 ```
 
@@ -300,7 +300,7 @@ nitro stop
 
 Perform updates to the Nitro CLI.
 
-```bash
+```sh
 nitro self-update
 ```
 
@@ -308,7 +308,7 @@ nitro self-update
 
 Nitro gives you full root access to your virtual server. The default user is `ubuntu` and has `sudo` permissions without a password. Once you’re in the virtual server, you can run `sudo` commands as usual (e.g. `sudo apt install golang`).
 
-```bash
+```sh
 nitro ssh
 ```
 
@@ -318,7 +318,7 @@ Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
 
 This upgrades the `diesel` machine’s software packages to their newest versions:
 
-```bash
+```sh
 nitro update
 ```
 
@@ -326,7 +326,7 @@ nitro update
 
 Checks the currently version of nitro against the releases and shows any updated versions.  
 
-```bash
+```sh
 nitro version
 ```
 
@@ -338,7 +338,7 @@ Options:
 
 - `--php-version [argument]` install a specific version of PHP to enable for Xdebug
 
-```bash
+```sh
 nitro xdebug configure --php-version 7.3
 ```
 
@@ -352,7 +352,7 @@ Options:
 
 This ensures Xdebug is installed for PHP 7.3 and enables it:
 
-```bash
+```sh
 nitro xdebug on --php-version 7.3
 ```
 
@@ -366,6 +366,6 @@ Options:
 
 This ensures Xdebug is installed for PHP 7.2 but disables it:
 
-```bash
+```sh
 nitro xdebug off --php-version 7.2
 ```
