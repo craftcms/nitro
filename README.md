@@ -117,7 +117,7 @@ create a machine for a specific dev project.
 To create a new machine, run the following command:
 
 ```sh
-$ nitro init -m <machine>.
+$ nitro init -m <machine>
 ``` 
 
 Replace `<machine>` with the name you want to give your new machine. Machine names can only include letters,
