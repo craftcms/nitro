@@ -14,8 +14,8 @@ import (
 )
 
 var hostsCommand = &cobra.Command{
-	Use:    "add",
-	Short:  "Add an entry to your hosts file",
+	Use:    "hosts",
+	Short:  "Add sites to your hosts file",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := "nitro-dev"
