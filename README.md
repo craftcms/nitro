@@ -53,7 +53,7 @@ To add a site to Nitro, three things need to happen:
 ### Add a site with `nitro add`
 
 If your project files are completely contained within a single folder, then you can quickly accomplish these using
-the [add](#add) command:  
+the [`add`](#add) command:  
 
 ```sh
 $ cd /path/to/project
@@ -106,7 +106,8 @@ To add a new mount, follow these steps:
 
 2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
 
-Once that’s done, yous should be able to [SSH](#ssh) into your machine and see the newly-mounted directory in there.
+Once that’s done, yous should be able to tunnel into your machine using the [`ssh`](#ssh) command, and see the
+newly-mounted directory in there.
 
 ## Running Multiple Machines
 
