@@ -168,7 +168,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 Example:
@@ -191,7 +191,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--hostname</code></dt>
 <dd>The hostname to use for accessing the site. If not passed, the command will prompt for it.</dd>
 <dt><code>--webroot</code></dt>
@@ -225,7 +225,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 Example:
@@ -266,7 +266,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `edit`
@@ -282,7 +282,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 Example:
@@ -303,7 +303,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 Example:
@@ -335,7 +335,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--php-version</code></dt>
 <dd>The PHP version to use. If not passed, the command will prompt for it.</dd>
 <dt><code>--cpus</code></dt>
@@ -361,7 +361,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 Example:
@@ -386,7 +386,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `redis`
@@ -401,7 +401,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `start`
@@ -416,7 +416,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `stop`
@@ -431,7 +431,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `restart`
@@ -446,7 +446,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `self-update`
@@ -469,7 +469,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `update`
@@ -484,7 +484,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
 ### `version`
@@ -507,7 +507,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--php-version</code></dt>
 <dd>The PHP version to configure Xdebug for</dd>
 </dl>
@@ -524,7 +524,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--php-version</code></dt>
 <dd>The PHP version to enable Xdebug for</dd>
 </dl>
@@ -543,7 +543,7 @@ Options:
 
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to `nitro-dev`.</dd>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--php-version</code></dt>
 <dd>The PHP version to disable Xdebug for</dd>
 </dl>
