@@ -41,6 +41,7 @@ func init() {
 		selfUpdateCommand,
 		applyCommand,
 		removeCommand,
+		destroyCommand,
 		editCommand,
 		importCommand,
 	)
