@@ -115,7 +115,7 @@ var initCommand = &cobra.Command{
 }
 
 func init() {
-	initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPUs to allocate")
+	// initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPUs to allocate")
 	initCommand.Flags().StringVar(&flagMemory, "memory", "", "Amount of memory to allocate")
 	initCommand.Flags().StringVar(&flagDisk, "disk", "", "Amount of disk space to allocate")
 	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "Which version of PHP to make default")
