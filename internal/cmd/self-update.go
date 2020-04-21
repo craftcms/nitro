@@ -25,7 +25,6 @@ var selfUpdateCommand = &cobra.Command{
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
 		tempFolder := os.TempDir()
-		defer os.Remove(tempFolder)
 
 		localFile := filepath.Join(tempFolder, "install.sh")
 
@@ -48,7 +47,7 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return nil
+		return os.Remove(tempFolder)
 	},
 }
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
  
+ ### Changes
+ - `destroy` command is now always permanent and the `--permanent` flag has been removed. `destroy` is no longer nested under the machine command.
+ 
 ### Fixed
 - Fixed (again) an issue when importing database backups using relative paths and added more tests ([#75](https://github.com/craftcms/nitro/issues/75))
 - Fixed an error when running `xdebuf off` where php-fpm would not restart

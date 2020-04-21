@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
@@ -14,22 +12,15 @@ var destroyCommand = &cobra.Command{
 	Short: "Destroy a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := config.GetString("name", flagMachineName)
-
-		if flagPermanent {
-			fmt.Println("Permanently destroying", name)
-		} else {
-			fmt.Println("Gently destroying", name)
+		if len(args) > 0 {
+			name = args[0]
 		}
 
-		destroyAction, err := nitro.Destroy(name, flagPermanent)
+		destroyAction, err := nitro.Destroy(name)
 		if err != nil {
 			return err
 		}
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*destroyAction})
 	},
-}
-
-func init() {
-	destroyCommand.Flags().BoolVarP(&flagPermanent, "permanent", "p", false, "Permanently destroy the machine")
 }

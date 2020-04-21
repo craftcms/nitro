@@ -9,7 +9,6 @@ var (
 	flagDisk          string
 	flagPhpVersion    string
 	flagNginxLogsKind string
-	flagPermanent     bool
 
 	// flags for the add command
 	flagHostname string
