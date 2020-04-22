@@ -2,7 +2,8 @@
 
 ## Unreleased
  
- ### Changes
+ ### Changes 
+ - `destroy` removes any sites added to your hosts file and deletes the `machine-name.yaml`
  - `remove` will not prompt for sites to remove if it cannot find any sites in the config file.
  - `remove` will now remove the machines sites from the hosts file. 
  - `apply` will now create any new databases that it finds in the config file.

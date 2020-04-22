@@ -99,7 +99,7 @@ var removeCommand = &cobra.Command{
 
 		fmt.Println("Removed the site from your config and applied the changes.")
 
-		// prompt to add hosts file
+		// prompt to remove hosts file
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
