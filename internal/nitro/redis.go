@@ -9,7 +9,7 @@ func Redis(name string) (*Action, error) {
 
 	return &Action{
 		Type:       "exec",
-		UseSyscall: false,
+		UseSyscall: true,
 		Args:       []string{"exec", name, "--", "redis-cli"},
 	}, nil
 }
