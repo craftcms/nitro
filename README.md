@@ -143,8 +143,6 @@ The following commands will help you manage your virtual server.
 - [`init`](#init)
 - [`import`](#import)
 - [`logs`](#logs)
-- [`machine create`](#machine-create)
-- [`machine destroy`](#machine-destroy)
 - [`redis`](#redis)
 - [`restart`](#restart)
 - [`self-update`](#self-update)
