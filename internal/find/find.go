@@ -1,4 +1,4 @@
-package hack
+package find
 
 import (
 	"bytes"
@@ -8,11 +8,11 @@ import (
 	"github.com/craftcms/nitro/config"
 )
 
-// FindMounts will take a name of a machine and the output of an exec.Command as a slice of bytes
+// Mounts will take a name of a machine and the output of an exec.Command as a slice of bytes
 // and return a slice of config mounts that has a source and destination or an error. This is
 // used to match if the machine has any mounts. The args passed to multipass are expected to
 // return a csv format (e.g. "multipass info machinename --format=csv").
-func FindMounts(name string, b []byte) ([]config.Mount, error) {
+func Mounts(name string, b []byte) ([]config.Mount, error) {
 	var mounts []config.Mount
 
 	records, err := csv.NewReader(bytes.NewReader(b)).ReadAll()

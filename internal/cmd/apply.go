@@ -10,7 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/diff"
-	"github.com/craftcms/nitro/internal/hack"
+	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
@@ -35,7 +35,7 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
-		attachedMounts, err := hack.FindMounts(machine, output)
+		attachedMounts, err := find.Mounts(machine, output)
 		if err != nil {
 			return err
 		}
