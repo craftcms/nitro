@@ -1,5 +1,6 @@
 - pipeline: "test"
   trigger_mode: "ON_EVERY_PUSH"
+  auto_clear_cache: true
   ref_name: "refs/heads/*"
   ref_type: "WILDCARD"
   trigger_condition: "ALWAYS"
