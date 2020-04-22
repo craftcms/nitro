@@ -143,6 +143,7 @@ The following commands will help you manage your virtual server.
 - [`init`](#init)
 - [`import`](#import)
 - [`logs`](#logs)
+- [`remove`](#remove)
 - [`redis`](#redis)
 - [`restart`](#restart)
 - [`self-update`](#self-update)
@@ -380,6 +381,24 @@ Views the machine’s logs. This command will prompt you for a type of logs to v
 ```sh
 nitro logs [<options>]
 ```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `remove`
+
+Removes a site from the machine.
+
+```sh
+nitro remove [<options>]
+```
+
+You will be prompted to select the site that should be removed. If the site has a corresponding
+[mount](#adding-mounts) at `/nitro/sites/<hostname>`, the mount will be removed as well.
 
 Options:
 
