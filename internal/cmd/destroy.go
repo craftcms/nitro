@@ -48,14 +48,6 @@ var destroyCommand = &cobra.Command{
 			fmt.Println("unable to remove the config file:", err)
 		}
 
-		// prompt to remove hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Removing sites from your hosts file")
-
 		if len(domains) == 0 {
 			return nil
 		}
@@ -64,6 +56,14 @@ var destroyCommand = &cobra.Command{
 		for _, domain := range domains {
 			cmds = append(cmds, domain)
 		}
+
+		// prompt to remove hosts file
+		nitro, err := exec.LookPath("nitro")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Removing sites from your hosts file")
 
 		return sudo.RunCommand(nitro, machine, cmds...)
 	},
