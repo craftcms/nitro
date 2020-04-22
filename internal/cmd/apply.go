@@ -65,6 +65,12 @@ var applyCommand = &cobra.Command{
 			}
 		}
 
+		// check for new dbs
+		dbsToCreate, err := find.ContainersToCreate(machine, configFile)
+		if err != nil {
+			return err
+		}
+
 		// prompt?
 		var actions []nitro.Action
 
@@ -109,6 +115,21 @@ var applyCommand = &cobra.Command{
 				return err
 			}
 			actions = append(actions, *restartNginxAction)
+		}
+
+		// create database actions
+		for _, database := range dbsToCreate {
+			volumeAction, err := nitro.CreateDatabaseVolume(machine, database.Engine, database.Version, database.Port)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *volumeAction)
+
+			createDatabaseAction, err := nitro.CreateDatabaseContainer(machine, database.Engine, database.Version, database.Port)
+			if err != nil {
+				return err
+			}
+			actions = append(actions, *createDatabaseAction)
 		}
 
 		if flagDebug {

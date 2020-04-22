@@ -19,6 +19,13 @@ write_files:
       if test -f /etc/nginx/sites-enabled/"$site"; then
           echo "exists"
       fi
+  - path: /opt/nitro/scripts/docker-container-exists.sh
+    content: |
+      #!/usr/bin/env bash
+      NAME="$1"
+      if [ -n "$(docker ps -q -f name="$NAME")" ]; then
+        echo "exists"
+      fi
   - path: /opt/nitro/scripts/docker-exec-import.sh
     content: |
       #!/usr/bin/env bash

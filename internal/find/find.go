@@ -3,6 +3,8 @@ package find
 import (
 	"bytes"
 	"encoding/csv"
+	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -38,4 +40,28 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 	}
 
 	return mounts, nil
+}
+
+func ContainersToCreate(machine string, cfg config.Config) ([]config.Database, error) {
+	path, err := exec.LookPath("multipass")
+	if err != nil {
+		return nil, err
+	}
+
+	var dbs []config.Database
+	for _, db := range cfg.Databases {
+		container := fmt.Sprintf("%s_%s_%s", db.Engine, db.Version, db.Port)
+
+		c := exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", container}...)
+		output, err := c.Output()
+		if err != nil {
+			return nil, err
+		}
+
+		if !strings.Contains(string(output), "exists") {
+			dbs = append(dbs, db)
+		}
+	}
+
+	return dbs, nil
 }

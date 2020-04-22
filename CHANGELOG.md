@@ -3,10 +3,12 @@
 ## Unreleased
  
  ### Changes
+ - `apply` will now create any new databases that it finds in the config file.
  - `destroy` command is now always permanent and the `--permanent` flag has been removed. `destroy` is no longer nested under the machine command.
  - Fixed an error where a user could select MySQL version 5.8.
  
 ### Fixed
+- Fixed and issue where users could get a segfault when adding a site ([#78](https://github.com/craftcms/nitro/issues/78))
 - Fixed (again) an issue when importing database backups using relative paths and added more tests ([#75](https://github.com/craftcms/nitro/issues/75))
 - Fixed an error when running `xdebuf off` where php-fpm would not restart
 - Renamed `get.sh` to `install.sh`

@@ -119,7 +119,7 @@ var addCommand = &cobra.Command{
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
 
 		applyPrompt := promptui.Prompt{
-			Label: "Apply nitro.yaml changes now? [y]",
+			Label: "Apply changes now? [y]",
 		}
 
 		apply, err := applyPrompt.Run()
