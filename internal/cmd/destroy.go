@@ -48,6 +48,8 @@ var destroyCommand = &cobra.Command{
 			fmt.Println("unable to remove the config file:", err)
 		}
 
+		fmt.Println("Removed", viper.ConfigFileUsed())
+
 		if len(domains) == 0 {
 			return nil
 		}
