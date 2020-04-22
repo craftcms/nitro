@@ -9,6 +9,10 @@ import (
 func FindWebRoot(path string) (string, error) {
 	var webroot string
 	if err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
+
 		if !info.IsDir() {
 			return nil
 		}
