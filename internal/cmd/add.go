@@ -14,7 +14,7 @@ import (
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
-	webroot2 "github.com/craftcms/nitro/internal/webroot"
+	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -62,15 +62,15 @@ var addCommand = &cobra.Command{
 
 		// look for the www,public,public_html,www using the absolutePath variable
 		// set the webrootName var (e.g. web)
-		var webroot string
+		var webrootDir string
 		switch flagWebroot {
 		case "":
-			foundDir, err := webroot2.Find(absolutePath)
+			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
 				return err
 			}
 			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
+				Label: fmt.Sprintf("Where is the webrootDir? [%s]", foundDir),
 			}
 
 			webrootEntered, err := webRootPrompt.Run()
@@ -79,16 +79,16 @@ var addCommand = &cobra.Command{
 			}
 			switch webrootEntered {
 			case "":
-				webroot = foundDir
+				webrootDir = foundDir
 			default:
-				webroot = webrootEntered
+				webrootDir = webrootEntered
 			}
 		default:
-			webroot = flagWebroot
+			webrootDir = flagWebroot
 		}
 
 		// create the vmWebRootPath (e.g. "/nitro/sites/"+ directoryName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webroot)
+		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webrootDir)
 
 		// load the config
 		var configFile config.Config
