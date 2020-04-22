@@ -107,7 +107,7 @@ var removeCommand = &cobra.Command{
 
 		fmt.Println("Removing site from your hosts file")
 
-		return sudo.RunCommand(nitro, machine, "hosts", "remove")
+		return sudo.RunCommand(nitro, machine, "hosts", "remove", site.Hostname)
 	},
 }
 
