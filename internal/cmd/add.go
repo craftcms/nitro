@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -70,7 +69,7 @@ var addCommand = &cobra.Command{
 				return err
 			}
 			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("Where is the webrootDir? [%s]", foundDir),
+				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
 			}
 
 			webrootEntered, err := webRootPrompt.Run()
@@ -191,11 +190,6 @@ var addCommand = &cobra.Command{
 			return errors.New("unable to find the config file")
 		}
 
-		filePath, err := filepath.Abs(cfgFile)
-		if err != nil {
-			return err
-		}
-
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
@@ -203,7 +197,7 @@ var addCommand = &cobra.Command{
 
 		fmt.Println("Adding", machine, "to your hosts file")
 
-		return sudo.RunCommand(nitro, filePath, "hosts")
+		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }
 
