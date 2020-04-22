@@ -85,8 +85,8 @@ var addCommand = &cobra.Command{
 			webrootDir = flagWebroot
 		}
 
-		// create the vmWebRootPath (e.g. "/nitro/sites/"+ directoryName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webrootDir)
+		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
+		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
 		// load the config
 		var configFile config.Config
@@ -96,7 +96,7 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		// add the mount to configfile
-		mount := config.Mount{Source: absolutePath}
+		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
