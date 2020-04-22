@@ -32,7 +32,7 @@ hasMultipass() {
   fi
 }
 
-checkHash () {
+checkHash() {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
   checksumUrl=https://github.com/craftcms/nitro/releases/download/$version/$fileName
@@ -58,39 +58,39 @@ checkHash () {
 
     # Make sure the file names match up.
     if [ "$4" != "$checkResultFileName" ]; then
-      rm "$1";
+      rm "$1"
       echo "Checksums do not match. Exiting."
       exit 1
     fi
   fi
 }
 
-getNitro () {
+getNitro() {
   uname=$(uname)
   userid=$(id -u)
 
   suffix=""
   case $uname in
 
-    "Darwin")
-      suffix="_darwin"
-      ;;
+  "Darwin")
+    suffix="_darwin"
+    ;;
 
-    "MINGW"*)
-      suffix=".exe"
-      BINLOCATION="$HOME/bin"
-      mkdir -p "$BINLOCATION"
-      ;;
+  "MINGW"*)
+    suffix=".exe"
+    BINLOCATION="$HOME/bin"
+    mkdir -p "$BINLOCATION"
+    ;;
 
-    "Linux")
-      arch=$(uname -m)
+  "Linux")
+    arch=$(uname -m)
+    suffix="_linux"
+
+    case $arch in
+    "aarch64")
       suffix="_linux"
-
-      case $arch in
-        "aarch64")
-          suffix="_linux"
-          ;;
-      esac
+      ;;
+    esac
     ;;
   esac
 
@@ -163,6 +163,15 @@ getNitro () {
   fi
 }
 
+init() {
+  read -p "Initialize the primary machine now? " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    nitro init
+  fi
+}
+
 hasCurl
 hasMultipass
 getNitro
+init
