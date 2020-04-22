@@ -163,6 +163,7 @@ getNitro() {
       fi
 
       ${SUCCESS_CMD}
+      init
     fi
   fi
 }
@@ -179,4 +180,3 @@ init() {
 hasCurl
 hasMultipass
 getNitro
-init
