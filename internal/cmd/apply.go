@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/diff"
 	"github.com/craftcms/nitro/internal/hack"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -67,7 +68,7 @@ var applyCommand = &cobra.Command{
 		// prompt?
 		var actions []nitro.Action
 
-		mountActions, err := hack.MountDiffActions(machine, attachedMounts, fileMounts)
+		mountActions, err := diff.MountActions(machine, attachedMounts, fileMounts)
 		if err != nil {
 			return err
 		}

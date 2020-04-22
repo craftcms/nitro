@@ -1,14 +1,14 @@
-package hack
+package diff
 
 import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-// MountDiffActions takes a machine name and currently attached mounts and mounts from
+// MountActions takes a machine name and currently attached mounts and mounts from
 // the config file. It will then compare the two and determine if we need to add or
 // remove mounts from the machine and return the appropriate actions.
-func MountDiffActions(name string, attached, file []config.Mount) ([]nitro.Action, error) {
+func MountActions(name string, attached, file []config.Mount) ([]nitro.Action, error) {
 	var actions []nitro.Action
 
 	// if there are more attached than file, we need to run the remove commands

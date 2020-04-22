@@ -1,4 +1,4 @@
-package hack
+package diff
 
 import (
 	"reflect"
@@ -83,13 +83,13 @@ func TestMountDiffActions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := MountDiffActions(tt.args.name, tt.args.attached, tt.args.file)
+			got, err := MountActions(tt.args.name, tt.args.attached, tt.args.file)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("MountDiffActions() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("MountActions() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MountDiffActions() got = \n%v, \nwant \n%v", got, tt.want)
+				t.Errorf("MountActions() got = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}
