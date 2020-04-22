@@ -21,6 +21,7 @@
       shell: "BASH"
 - pipeline: "release"
   trigger_mode: "ON_EVERY_PUSH"
+  auto_clear_cache: true
   ref_name: "refs/tags/*"
   ref_type: "WILDCARD"
   trigger_condition: "ALWAYS"
