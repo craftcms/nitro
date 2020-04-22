@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -9,17 +10,19 @@ import (
 	"github.com/txn2/txeh"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/hosts"
 )
 
 var hostsRemoveCommand = &cobra.Command{
-	Use:   "remove",
-	Short: "Remove an entry from your hosts file",
+	Use:    "remove",
+	Short:  "Remove an entry from your hosts file",
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		_ = config.GetString("name", flagMachineName)
-
-		uid := os.Geteuid()
-		if uid != 0 {
-			return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
+		if !flagDebug {
+			uid := os.Geteuid()
+			if uid != 0 {
+				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
+			}
 		}
 
 		// get all of the sites from the config file
@@ -32,7 +35,7 @@ var hostsRemoveCommand = &cobra.Command{
 			return err
 		}
 
-		hosts, err := txeh.NewHostsDefault()
+		he, err := txeh.NewHostsDefault()
 		if err != nil {
 			return err
 		}
@@ -42,8 +45,14 @@ var hostsRemoveCommand = &cobra.Command{
 			domains = append(domains, site.Hostname)
 		}
 
-		hosts.RemoveHosts(domains)
+		if flagDebug {
+			for _, domain := range domains {
+				fmt.Println("removing", domain, "from hosts file")
+			}
 
-		return hosts.Save()
+			return nil
+		}
+
+		return hosts.Remove(he, domains)
 	},
 }

@@ -65,3 +65,7 @@ var hostsCommand = &cobra.Command{
 		return hosts.Add(he, ip, domains)
 	},
 }
+
+func init() {
+	hostsCommand.AddCommand(hostsRemoveCommand)
+}
