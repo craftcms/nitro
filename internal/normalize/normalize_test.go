@@ -1,4 +1,4 @@
-package helpers
+package normalize
 
 import (
 	"os"
@@ -45,16 +45,16 @@ func TestNormalizePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := NormalizePath(tt.args.path, tt.args.home)
+			got, got1, err := Path(tt.args.path, tt.args.home)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NormalizePath() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Path() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.wantFilename {
-				t.Errorf("NormalizePath() got = \n%v, \nwant \n%v", got, tt.wantFilename)
+				t.Errorf("Path() got = \n%v, \nwant \n%v", got, tt.wantFilename)
 			}
 			if got1 != tt.wantFileAbsPath {
-				t.Errorf("NormalizePath() got1 = \n%v, \nwant \n%v", got1, tt.wantFileAbsPath)
+				t.Errorf("Path() got1 = \n%v, \nwant \n%v", got1, tt.wantFileAbsPath)
 			}
 		})
 	}

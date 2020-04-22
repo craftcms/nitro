@@ -1,4 +1,4 @@
-package helpers
+package normalize
 
 import (
 	"os"
@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-// NormalizePath is responsible for taking a path, relative
+// Path is responsible for taking a path, relative
 // or otherwise, and returning the name of the file,
 // the absolute path, and an error if not found.
-func NormalizePath(path, home string) (string, string, error) {
+func Path(path, home string) (string, string, error) {
 	p := strings.Split(path, string(os.PathSeparator))
 
 	if strings.Contains(p[0], "~") {p[0] = home

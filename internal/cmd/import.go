@@ -14,6 +14,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/normalize"
 )
 
 var importCommand = &cobra.Command{
@@ -32,7 +33,7 @@ var importCommand = &cobra.Command{
 		}
 
 		// get the filename
-		filename, fileAbsPath, err := helpers.NormalizePath(args[0], home)
+		filename, fileAbsPath, err := normalize.Path(args[0], home)
 		if err != nil {
 			return err
 		}
