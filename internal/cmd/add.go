@@ -14,6 +14,7 @@ import (
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
+	webroot2 "github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -64,7 +65,7 @@ var addCommand = &cobra.Command{
 		var webroot string
 		switch flagWebroot {
 		case "":
-			foundDir, err := helpers.FindWebRoot(absolutePath)
+			foundDir, err := webroot2.Find(absolutePath)
 			if err != nil {
 				return err
 			}

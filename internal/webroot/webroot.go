@@ -1,4 +1,4 @@
-package helpers
+package webroot
 
 import (
 	"errors"
@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 )
 
-// FindWebRoot takes a directory and will search for the "webroot" automatically.
+// Find takes a directory and will search for the "webroot" automatically.
 // if it cannot find a know webroot, the func will return an error. This is
 // used when determining a sites complete path to the webroot for nginx.
-func FindWebRoot(path string) (string, error) {
+func Find(path string) (string, error) {
 	var w string
 	if err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
 		if info == nil {
