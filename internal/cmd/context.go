@@ -24,7 +24,7 @@ var contextCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Using config file: ", configFile)
+		fmt.Println("Using config file:", configFile)
 		fmt.Println("------")
 		fmt.Print(string(data))
 		return nil
