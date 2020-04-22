@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os/exec"
 
@@ -185,11 +184,6 @@ var addCommand = &cobra.Command{
 		fmt.Println("Applied the changes and added", hostname, "to", machine)
 
 		// prompt to add hosts file
-		cfgFile := viper.ConfigFileUsed()
-		if cfgFile == "" {
-			return errors.New("unable to find the config file")
-		}
-
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
