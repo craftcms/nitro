@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -41,14 +40,6 @@ var destroyCommand = &cobra.Command{
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*destroyAction}); err != nil {
 			return err
 		}
-
-		// delete machine config file
-		if err := os.Remove(viper.ConfigFileUsed()); err != nil {
-			// dont return the error, we still need to cleanup the hosts file
-			fmt.Println("unable to remove the config file:", err)
-		}
-
-		fmt.Println("Removed", viper.ConfigFileUsed())
 
 		if len(domains) == 0 {
 			return nil
