@@ -6,8 +6,11 @@ import (
 	"path/filepath"
 )
 
+// FindWebRoot takes a directory and will search for the "webroot" automatically.
+// if it cannot find a know webroot, the func will return an error. This is
+// used when determining a sites complete path to the webroot for nginx.
 func FindWebRoot(path string) (string, error) {
-	var webroot string
+	var w string
 	if err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -19,13 +22,13 @@ func FindWebRoot(path string) (string, error) {
 
 		switch info.Name() {
 		case "web":
-			webroot = info.Name()
+			w = info.Name()
 		case "public":
-			webroot = info.Name()
+			w = info.Name()
 		case "public_html":
-			webroot = info.Name()
+			w = info.Name()
 		case "www":
-			webroot = info.Name()
+			w = info.Name()
 		}
 
 		return nil
@@ -33,9 +36,9 @@ func FindWebRoot(path string) (string, error) {
 		return "", err
 	}
 
-	if webroot == "" {
-		return "", errors.New("unable to locate the webroot")
+	if w == "" {
+		return "", errors.New("unable to locate the webroot for " + path)
 	}
 
-	return webroot, nil
+	return w, nil
 }
