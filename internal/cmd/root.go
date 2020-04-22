@@ -61,6 +61,8 @@ func loadConfig() {
 
 	if flagMachineName != "" {
 		viper.SetConfigName(flagMachineName)
+	} else if os.Getenv("NITRO_DEFAULT_MACHINE") != "" {
+		viper.SetConfigName(os.Getenv("NITRO_DEFAULT_MACHINE"))
 	} else {
 		viper.SetConfigName("nitro-dev")
 	}
