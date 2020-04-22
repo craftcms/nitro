@@ -82,12 +82,21 @@ var applyCommand = &cobra.Command{
 
 		// create site actions
 		for _, site := range sitesToCreate {
-			m := configFile.FindMountBySiteWebroot(site.Webroot)
-			mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
-			if err != nil {
-				return err
+			// TODO abstract this logic into a func that takes mountActions and sites to return the mount action
+			for _, ma := range mountActions {
+				// break the string
+				mnt := strings.Split(ma.Args[2], ":")
+
+				// if the webroot is not of the mounts, then we should create an action
+				if !strings.Contains(mnt[1], site.Webroot) {
+					m := configFile.FindMountBySiteWebroot(site.Webroot)
+					mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
+					if err != nil {
+						return err
+					}
+					actions = append(actions, *mountAction)
+				}
 			}
-			actions = append(actions, *mountAction)
 
 			copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
 			if err != nil {
