@@ -80,7 +80,7 @@ If you would prefer to add a site manually, follow these steps:
        dest: /nitro/sites/example.test
    sites:
      - hostname: example.test
-       webroot: /nitro/sites/craft3.support.test/web 
+       webroot: /nitro/sites/example.test/web 
    ```
 
 2. Run `nitro apply` to apply your `nitro.yaml` changes to the machine. You will be prompted for your password so
