@@ -189,7 +189,6 @@ func TestConfig_RemoveSite(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Name:      tt.fields.Name,
 				PHP:       tt.fields.PHP,
 				CPUs:      tt.fields.CPUs,
 				Disk:      tt.fields.Disk,
@@ -301,7 +300,6 @@ func TestConfig_AddMount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Name:      tt.fields.Name,
 				PHP:       tt.fields.PHP,
 				CPUs:      tt.fields.CPUs,
 				Disk:      tt.fields.Disk,
@@ -362,7 +360,6 @@ func TestConfig_AddSite(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Name:      tt.fields.Name,
 				PHP:       tt.fields.PHP,
 				CPUs:      tt.fields.CPUs,
 				Disk:      tt.fields.Disk,
@@ -447,7 +444,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Name:      tt.fields.Name,
 				PHP:       tt.fields.PHP,
 				CPUs:      tt.fields.CPUs,
 				Disk:      tt.fields.Disk,
@@ -522,7 +518,6 @@ func TestConfig_RemoveSite1(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Name:      tt.fields.Name,
 				PHP:       tt.fields.PHP,
 				CPUs:      tt.fields.CPUs,
 				Disk:      tt.fields.Disk,

@@ -1,7 +1,6 @@
 package cmd
 
 var (
-	flagConfigFile    string
 	flagMachineName   string
 	flagDebug         bool
 	flagCPUs          int
@@ -9,7 +8,6 @@ var (
 	flagDisk          string
 	flagPhpVersion    string
 	flagNginxLogsKind string
-	flagPermanent     bool
 
 	// flags for the add command
 	flagHostname string
