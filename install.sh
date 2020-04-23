@@ -3,6 +3,7 @@
 export GH_ORG=craftcms
 export SUCCESS_CMD="nitro"
 export BINLOCATION="/usr/local/bin"
+export TEMP_FOLDER="temp_nitro_extract"
 
 version=$(curl -s https://api.github.com/repos/craftcms/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
@@ -32,9 +33,10 @@ hasMultipass() {
   fi
 }
 
-checkHash () {
+checkHash() {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
+  filePath=$(pwd)/$TEMP_FOLDER/$fileName
   checksumUrl=https://github.com/craftcms/nitro/releases/download/$version/$fileName
   targetFile=$3/$fileName
 
@@ -45,60 +47,60 @@ checkHash () {
   if [ -x "$(command -v $shaCmd)" ]; then
 
     # download the checksum file.
-    (curl -sSL "$checksumUrl" --output "$targetFile")
+    (curl -sLS "$checksumUrl" --output "$targetFile")
 
     # Run the sha command against the zip and grab the hash from the first segment.
     zipHash="$($shaCmd $1 | cut -d' ' -f1 | tr -d '[:space:]')"
 
     # See if the has we calculated matches a result in the checksum file.
-    checkResultFileName=$(sed -n "s/^$zipHash  //p" "$fileName")
+    checkResultFileName=$(sed -n "s/^$zipHash  //p" "$filePath")
 
     # don't need this anymore
-    rm "nitro_$2_checksums.txt"
+    rm "$filePath"
 
     # Make sure the file names match up.
     if [ "$4" != "$checkResultFileName" ]; then
-      rm "$1";
+      # rm "$1"
       echo "Checksums do not match. Exiting."
       exit 1
     fi
   fi
 }
 
-getNitro () {
+getNitro() {
   uname=$(uname)
   userid=$(id -u)
 
   suffix=""
   case $uname in
 
-    "Darwin")
-      suffix="_darwin"
-      ;;
+  "Darwin")
+    suffix="_darwin"
+    ;;
 
-    "MINGW"*)
-      suffix=".exe"
-      BINLOCATION="$HOME/bin"
-      mkdir -p "$BINLOCATION"
-      ;;
+  "MINGW"*)
+    suffix=".exe"
+    BINLOCATION="$HOME/bin"
+    mkdir -p "$BINLOCATION"
+    ;;
 
-    "Linux")
-      arch=$(uname -m)
+  "Linux")
+    arch=$(uname -m)
+    suffix="_linux"
+
+    case $arch in
+    "aarch64")
       suffix="_linux"
-
-      case $arch in
-        "aarch64")
-          suffix="_linux"
-          ;;
-      esac
+      ;;
+    esac
     ;;
   esac
 
-  targetTempFolder="/tmp"
-
-  if [ "$userid" != "0" ]; then
-    targetTempFolder="$(pwd)"
+  if [ ! -d $(pwd)/$TEMP_FOLDER ]; then
+    mkdir $(pwd)/$TEMP_FOLDER
   fi
+
+  targetTempFolder="$(pwd)/$TEMP_FOLDER"
 
   fileName=nitro"$suffix"_x86_64.tar.gz
   packageUrl=https://github.com/craftcms/nitro/releases/download/$version/"$fileName"
@@ -111,14 +113,16 @@ getNitro () {
   if [ "$?" = "0" ]; then
 
     # unzip
-    tar xvzf "$targetZipFile"
+    tar xvzf "$targetZipFile" -C "$targetTempFolder"
 
     # verify
     checkHash "$targetZipFile" "$version" "$targetTempFolder" "$fileName"
 
+    mv "$targetTempFolder"/nitro ./nitro
     chmod +x ./nitro
-    echo "Download complete."
+
     echo
+    echo "Download complete."
 
     if [ ! -w "$BINLOCATION" ]; then
       echo
@@ -134,6 +138,7 @@ getNitro () {
     else
       echo
       echo "Running with sufficient permissions to attempt to move the nitro executable to $BINLOCATION"
+      echo
 
       if [ ! -w "$BINLOCATION/nitro" ] && [ -f "$BINLOCATION/nitro" ]; then
         echo
@@ -150,16 +155,25 @@ getNitro () {
 
       if [ "$?" = "0" ]; then
         echo "Nitro $version has been installed to $BINLOCATION"
-        echo
       fi
 
-      if [ -e "$targetZipFile" ]; then
-        rm "$targetZipFile"
+      if [ -e "$targetTempFolder" ]; then
+        rm -rf "$targetTempFolder"
         echo
       fi
 
       ${SUCCESS_CMD}
+      init
     fi
+  fi
+}
+
+init() {
+  echo
+  read -p "Initialize the primary machine now? " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    nitro init
   fi
 }
 

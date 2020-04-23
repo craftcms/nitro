@@ -5,9 +5,15 @@ import (
 	"os/exec"
 )
 
-func RunCommand(nitro, configFile, command string) error {
+func RunCommand(nitro, machine string, commands ...string) error {
 	// TODO update this for windows support
-	c := exec.Command("sudo", nitro, "-f", configFile, command)
+
+	b := []string{nitro, "-m", machine}
+	for _, command := range commands {
+		b = append(b, command)
+	}
+
+	c := exec.Command("sudo", b...)
 
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr

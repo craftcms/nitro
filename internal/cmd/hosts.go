@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -23,9 +24,11 @@ var hostsCommand = &cobra.Command{
 			machine = flagMachineName
 		}
 
-		uid := os.Geteuid()
-		if uid != 0 {
-			return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
+		if !flagDebug {
+			uid := os.Geteuid()
+			if uid != 0 {
+				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
+			}
 		}
 
 		// get the requested machines ip
@@ -51,6 +54,18 @@ var hostsCommand = &cobra.Command{
 			return err
 		}
 
+		if flagDebug {
+			for _, domain := range domains {
+				fmt.Println("adding", domain, "to hosts file")
+			}
+
+			return nil
+		}
+
 		return hosts.Add(he, ip, domains)
 	},
+}
+
+func init() {
+	hostsCommand.AddCommand(hostsRemoveCommand)
 }

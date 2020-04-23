@@ -20,7 +20,7 @@ func TestRedis(t *testing.T) {
 			args: args{name: "somename"},
 			want: &Action{
 				Type:       "exec",
-				UseSyscall: false,
+				UseSyscall: true,
 				Args:       []string{"exec", "somename", "--", "redis-cli"},
 			},
 			wantErr: false,

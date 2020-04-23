@@ -59,8 +59,13 @@ func loadConfig() {
 	viper.AddConfigPath(home + "/" + ".nitro")
 	viper.SetConfigType("yaml")
 
+	defaultMachine := os.Getenv("NITRO_DEFAULT_MACHINE")
+
 	if flagMachineName != "" {
 		viper.SetConfigName(flagMachineName)
+	} else if defaultMachine != "" {
+		flagMachineName = defaultMachine
+		viper.SetConfigName(defaultMachine)
 	} else {
 		viper.SetConfigName("nitro-dev")
 	}

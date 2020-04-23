@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -70,7 +68,7 @@ var addCommand = &cobra.Command{
 				return err
 			}
 			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("Where is the webrootDir? [%s]", foundDir),
+				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
 			}
 
 			webrootEntered, err := webRootPrompt.Run()
@@ -87,8 +85,8 @@ var addCommand = &cobra.Command{
 			webrootDir = flagWebroot
 		}
 
-		// create the vmWebRootPath (e.g. "/nitro/sites/"+ directoryName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webrootDir)
+		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
+		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
 		// load the config
 		var configFile config.Config
@@ -98,7 +96,7 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		// add the mount to configfile
-		mount := config.Mount{Source: absolutePath}
+		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
@@ -186,24 +184,14 @@ var addCommand = &cobra.Command{
 		fmt.Println("Applied the changes and added", hostname, "to", machine)
 
 		// prompt to add hosts file
-		cfgFile := viper.ConfigFileUsed()
-		if cfgFile == "" {
-			return errors.New("unable to find the config file")
-		}
-
-		filePath, err := filepath.Abs(cfgFile)
-		if err != nil {
-			return err
-		}
-
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
 		}
 
-		fmt.Println("Adding", machine, "to your hosts file")
+		fmt.Println("Adding", site.Hostname, "to your hosts file")
 
-		return sudo.RunCommand(nitro, filePath, "hosts")
+		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }
 
