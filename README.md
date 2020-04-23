@@ -30,7 +30,7 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-1. Install [Multipass](https://multipass.run).
+1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
 
     ```sh
