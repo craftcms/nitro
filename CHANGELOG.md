@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.0 - 2020-04-23
+
 > **Warning:** This release contains breaking changes. See the [upgrade notes](UPGRADE.md#upgrading-to-nitro-0100)
 > for details.
 
