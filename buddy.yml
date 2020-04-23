@@ -39,7 +39,6 @@
         - "goreleaser --rm-dist"
       setup_commands:
         - "curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh"
-      volume_mappings:
-        - "/:/src/github.com/craftcms/nitro"
+      mount_filesystem_disable: true
       trigger_condition: "ALWAYS"
       shell: "BASH"
