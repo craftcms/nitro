@@ -114,7 +114,7 @@ var initCommand = &cobra.Command{
 			return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 		}
 
-		fmt.Println("Ok, you can apple ")
+		fmt.Println("Ok, you can apply changes later by running `nitro apply`")
 
 		return nil
 	},
