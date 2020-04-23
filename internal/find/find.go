@@ -1,6 +1,7 @@
 package find
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/csv"
 	"fmt"
@@ -9,6 +10,13 @@ import (
 
 	"github.com/craftcms/nitro/config"
 )
+
+
+// Finder is an interface the wraps the exec.Command Output function
+// it is used by this package to parse output of the exec.Command
+type Finder interface {
+	Output() ([]byte, error)
+}
 
 // Mounts will take a name of a machine and the output of an exec.Command as a slice of bytes
 // and return a slice of config mounts that has a source and destination or an error. This is
@@ -64,4 +72,28 @@ func ContainersToCreate(machine string, cfg config.Config) ([]config.Database, e
 	}
 
 	return dbs, nil
+}
+
+// SitesEnabled takes a finder which is a command executed
+// by the multipass cli tool that outputs the contents
+// (symlinks) or sites-enabled and returns sites.
+func SitesEnabled(f Finder) ([]config.Site, error) {
+	out, err := f.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	// parse the out
+	var sites []config.Site
+	sc := bufio.NewScanner(strings.NewReader(string(out)))
+	for sc.Scan() {
+		if l := sc.Text(); l != "" {
+			path := strings.Split(strings.TrimSpace(sc.Text()), "/")
+			if h := path[len(path)-1]; h != "default" {
+				sites = append(sites, config.Site{Hostname: h})
+			}
+		}
+	}
+
+	return sites, nil
 }
