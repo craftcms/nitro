@@ -14,11 +14,10 @@ import (
 )
 
 type Config struct {
-	Name      string     `yaml:"name"`
-	PHP       string     `yaml:"php"`
-	CPUs      string     `yaml:"cpus"`
-	Disk      string     `yaml:"disk"`
-	Memory    string     `yaml:"memory"`
+	PHP       string     `yaml:"-"`
+	CPUs      string     `yaml:"-"`
+	Disk      string     `yaml:"-"`
+	Memory    string     `yaml:"-"`
 	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites,omitempty"`
@@ -154,6 +153,33 @@ func (c *Config) FindMountBySiteWebroot(webroot string) *Mount {
 }
 
 func (c *Config) Save(filename string) error {
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) SaveAs(home, machine string) error {
+	nitroDir := home + "/.nitro/"
+
+	if err := helpers.MkdirIfNotExists(nitroDir); err != nil {
+		return err
+	}
+	filename := nitroDir + machine + ".yaml"
+
+	_ = helpers.CreateFileIfNotExist(filename)
+
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err

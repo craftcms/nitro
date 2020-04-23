@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -12,19 +13,26 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/prompt"
+	"github.com/craftcms/nitro/internal/sudo"
 )
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
 	Short: "Manage your nitro sites",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
 		}
-		name := configFile.Name
 
 		sites := configFile.GetSites()
+
+		if len(sites) == 0 {
+			return errors.New("there are no sites to remove")
+		}
+
 		i, _ := prompt.Select("Select site to remove", configFile.SitesAsList())
 
 		site := sites[i]
@@ -59,13 +67,16 @@ var removeCommand = &cobra.Command{
 		if err := viper.Unmarshal(&messyConfig); err != nil {
 			return err
 		}
-		// save that config in the right order
-		if err := messyConfig.Save(viper.ConfigFileUsed()); err != nil {
-			return err
+
+		if !flagDebug {
+			// save that config in the right order
+			if err := messyConfig.Save(viper.ConfigFileUsed()); err != nil {
+				return err
+			}
 		}
 		// END HACK
 
-		actions, err := removeActions(name, *mount, site)
+		actions, err := removeActions(machine, *mount, site)
 		if err != nil {
 			return err
 		}
@@ -83,9 +94,17 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Removed the site from your nitro.yaml and applied the changes.")
+		fmt.Println("Removed the site from your config and applied the changes.")
 
-		return nil
+		// prompt to remove hosts file
+		nitro, err := exec.LookPath("nitro")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Removing site from your hosts file")
+
+		return sudo.RunCommand(nitro, machine, "hosts", "remove", site.Hostname)
 	},
 }
 

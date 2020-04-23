@@ -1,11 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -14,6 +11,8 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -21,7 +20,7 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := flagMachineName
 
 		// if there is no arg, get the current working dir
 		// else get the first arg
@@ -58,10 +57,10 @@ var addCommand = &cobra.Command{
 
 		// look for the www,public,public_html,www using the absolutePath variable
 		// set the webrootName var (e.g. web)
-		var webroot string
+		var webrootDir string
 		switch flagWebroot {
 		case "":
-			foundDir, err := helpers.FindWebRoot(absolutePath)
+			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
 				return err
 			}
@@ -75,16 +74,16 @@ var addCommand = &cobra.Command{
 			}
 			switch webrootEntered {
 			case "":
-				webroot = foundDir
+				webrootDir = foundDir
 			default:
-				webroot = webrootEntered
+				webrootDir = webrootEntered
 			}
 		default:
-			webroot = flagWebroot
+			webrootDir = flagWebroot
 		}
 
-		// create the vmWebRootPath (e.g. "/nitro/sites/"+ directoryName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", directoryName, webroot)
+		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
+		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
 		// load the config
 		var configFile config.Config
@@ -94,7 +93,7 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		// add the mount to configfile
-		mount := config.Mount{Source: absolutePath}
+		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
 		if err := configFile.AddMount(mount); err != nil {
 			return err
 		}
@@ -115,7 +114,7 @@ var addCommand = &cobra.Command{
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
 
 		applyPrompt := promptui.Prompt{
-			Label: "Apply nitro.yaml changes now? [y]",
+			Label: "Apply changes now? [y]",
 		}
 
 		apply, err := applyPrompt.Run()
@@ -135,33 +134,33 @@ var addCommand = &cobra.Command{
 		var actions []nitro.Action
 		// mount the directory
 		m := configFile.Mounts[len(configFile.Mounts)-1]
-		mountAction, err := nitro.MountDir(name, m.AbsSourcePath(), m.Dest)
+		mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *mountAction)
 
 		// copy the nginx template
-		copyTemplateAction, err := nitro.CopyNginxTemplate(name, site.Hostname)
+		copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *copyTemplateAction)
 
 		// copy the nginx template
-		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(name, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
+		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *changeNginxVariablesAction...)
 
-		createSymlinkAction, err := nitro.CreateSiteSymllink(name, site.Hostname)
+		createSymlinkAction, err := nitro.CreateSiteSymllink(machine, site.Hostname)
 		if err != nil {
 			return err
 		}
 		actions = append(actions, *createSymlinkAction)
 
-		restartNginxAction, err := nitro.NginxReload(name)
+		restartNginxAction, err := nitro.NginxReload(machine)
 		if err != nil {
 			return err
 		}
@@ -179,31 +178,17 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Applied the changes and added", hostname, "to", name)
+		fmt.Println("Applied the changes and added", hostname, "to", machine)
 
 		// prompt to add hosts file
-		cfgFile := viper.ConfigFileUsed()
-		if cfgFile == "" {
-			return errors.New("unable to find the config file")
-		}
-
-		filePath, err := filepath.Abs(cfgFile)
-		if err != nil {
-			return err
-		}
-
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
 		}
 
-		fmt.Println("Modifying the hosts file to add sites for", config.GetString("name", ""), "(you will be prompted for your password)... ")
+		fmt.Println("Adding", site.Hostname, "to your hosts file")
 
-		hostsCmd := exec.Command("sudo", nitro, "-f", filePath, "hosts", "add")
-		hostsCmd.Stdout = os.Stdout
-		hostsCmd.Stderr = os.Stderr
-
-		return hostsCmd.Run()
+		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }
 

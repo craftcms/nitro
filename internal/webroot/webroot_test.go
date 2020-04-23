@@ -1,4 +1,4 @@
-package helpers
+package webroot
 
 import "testing"
 
@@ -47,13 +47,13 @@ func TestFindWebRoot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := FindWebRoot(tt.args.path)
+			got, err := Find(tt.args.path)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("FindWebRoot() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("FindWebRoot() got = %v, want %v", got, tt.want)
+				t.Errorf("Find() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

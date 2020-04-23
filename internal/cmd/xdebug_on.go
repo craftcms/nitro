@@ -13,13 +13,14 @@ var xdebugOnCommand = &cobra.Command{
 	Aliases: []string{"xon"},
 	Short:   "Enable Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := flagMachineName
+
 		php := config.GetString("php", flagPhpVersion)
 		if err := validate.PHPVersion(php); err != nil {
 			return err
 		}
 
-		enableXdebugAction, err := nitro.EnableXdebug(name, php)
+		enableXdebugAction, err := nitro.EnableXdebug(machine, php)
 		if err != nil {
 			return err
 		}

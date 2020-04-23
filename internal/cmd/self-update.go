@@ -17,17 +17,11 @@ var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
 	Short: "Update Nitro to the latest",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO
-		// call public github api
-		// if latest version is not current version (does not match)
-		// then download get.sh
-
-		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/get.sh"
+		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
 		tempFolder := os.TempDir()
-		defer os.Remove(tempFolder)
 
-		localFile := filepath.Join(tempFolder, "get.sh")
+		localFile := filepath.Join(tempFolder, "install.sh")
 
 		if err := DownloadFile(localFile, fileUrl); err != nil {
 			return err
@@ -48,7 +42,7 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return nil
+		return os.Remove(tempFolder)
 	},
 }
 

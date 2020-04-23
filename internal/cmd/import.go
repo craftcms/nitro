@@ -4,15 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/manifoldco/promptui"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/normalize"
 )
 
 var importCommand = &cobra.Command{
@@ -20,21 +22,22 @@ var importCommand = &cobra.Command{
 	Short: "Import database into machine",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := config.GetString("name", flagMachineName)
+		machine := flagMachineName
 
-		// get the filename
-		path := strings.Split(args[0], string(os.PathSeparator))
-		filename := path[len(path)-1]
-
-		// get the abs path
-		fileAbsPath, err := filepath.Abs(filename)
+		home, err := homedir.Dir()
 		if err != nil {
 			return err
 		}
 
-		// verify the file exists
-		if !fileExists(fileAbsPath) {
-			return errors.New(fmt.Sprintf("unable to located the file %q to import", args[0]))
+		// get the filename
+		filename, fileAbsPath, err := normalize.Path(args[0], home)
+		if err != nil {
+			return err
+		}
+
+		// make sure the file exists
+		if !helpers.FileExists(fileAbsPath) {
+			return errors.New(fmt.Sprintf("Unable to locate the file %q", fileAbsPath))
 		}
 
 		// which database engine?
@@ -62,7 +65,7 @@ var importCommand = &cobra.Command{
 		transferAction := nitro.Action{
 			Type:       "transfer",
 			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, name + ":" + filename},
+			Args:       []string{"transfer", fileAbsPath, machine + ":" + filename},
 		}
 		actions = append(actions, transferAction)
 
@@ -71,7 +74,7 @@ var importCommand = &cobra.Command{
 			engine = "postgres"
 		}
 
-		importArgs := []string{"exec", name, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
+		importArgs := []string{"exec", machine, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
 		dockerExecAction := nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,

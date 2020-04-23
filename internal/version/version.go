@@ -1,4 +1,4 @@
-package hack
+package version
 
 import (
 	"encoding/json"
@@ -81,8 +81,10 @@ type releaseList []struct {
 	Body       string `json:"body"`
 }
 
-// https://api.github.com/repos/master/nitro/releases
-func GetLatestVersion(client *http.Client, url string) (string, error) {
+// GetLatest takes a http client and URL. It is responsible for
+// communicating with the Github API and returning the string
+// representation of the latest nitro release or an error.
+func GetLatest(client *http.Client, url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", err

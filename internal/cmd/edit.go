@@ -11,8 +11,8 @@ import (
 )
 
 var editCommand = &cobra.Command{
-	Use: "edit",
-	Short: "Edit your nitro.yaml",
+	Use:   "edit",
+	Short: "Edit your config",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgFile := viper.ConfigFileUsed()
 		if cfgFile == "" {
@@ -25,10 +25,7 @@ var editCommand = &cobra.Command{
 		}
 
 		_, err = editor.CaptureInputFromEditor(filePath, editor.GetPreferredEditorFromEnvironment)
-		if err != nil {
-			return err
-		}
 
-		return nil
+		return err
 	},
 }
