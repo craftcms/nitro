@@ -16,13 +16,13 @@ func FindEngineByDump(fileAbsPath string) string {
 	}
 	defer file.Close()
 
-	foundEngine := "unknown"
+	foundEngine := ""
 	scanner := bufio.NewScanner(file)
 	line := 1
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
 		_, matchesPostgres := checkSubstrings(scanner.Text(), "PostgreSQL", "pg_dump")
-		_, matchesMySql := checkSubstrings(scanner.Text(), "MySQL", "mysqldump")
+		_, matchesMySql := checkSubstrings(scanner.Text(), "MySQL", "mysqldump", "MariaDB")
 
 		if matchesMySql > 0 {
 			foundEngine = "mysql"
@@ -32,7 +32,7 @@ func FindEngineByDump(fileAbsPath string) string {
 			foundEngine = "postgres"
 		}
 
-		if line > 50 || foundEngine != "unknown" {
+		if line > 50 || foundEngine != "" {
 			break
 		}
 

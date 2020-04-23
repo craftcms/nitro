@@ -50,7 +50,7 @@ var importCommand = &cobra.Command{
 
 		var dbs []string
 		for _, db := range databases {
-			if foundEngine == "unknown" || foundEngine == db.Engine {
+			if foundEngine == "" || foundEngine == db.Engine {
 				dbs = append(dbs, fmt.Sprintf("%s_%s_%s", db.Engine, db.Version, db.Port))
 			}
 		}
