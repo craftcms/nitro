@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/internal/nitro"
@@ -17,6 +19,12 @@ var stopCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*stopAction})
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*stopAction}); err != nil {
+			return err
+		}
+
+		fmt.Println("Stopped", machine)
+
+		return nil
 	},
 }
