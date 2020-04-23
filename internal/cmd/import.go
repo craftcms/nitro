@@ -14,7 +14,6 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/nitro/db_engine"
 	"github.com/craftcms/nitro/internal/normalize"
 )
 
@@ -44,7 +43,7 @@ var importCommand = &cobra.Command{
 			return errors.New(fmt.Sprintf("Unable to locate the file %q", fileAbsPath))
 		}
 
-		foundEngine = db_engine.FindEngineByDump(fileAbsPath)
+		foundEngine := nitro.FindEngineByDump(fileAbsPath)
 
 		// which database engine?
 		var databases []config.Database
