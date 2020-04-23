@@ -11,7 +11,6 @@ import (
 	"github.com/craftcms/nitro/config"
 )
 
-
 // Finder is an interface the wraps the exec.Command Output function
 // it is used by this package to parse output of the exec.Command
 type Finder interface {
@@ -88,8 +87,8 @@ func SitesEnabled(f Finder) ([]config.Site, error) {
 	sc := bufio.NewScanner(strings.NewReader(string(out)))
 	for sc.Scan() {
 		if l := sc.Text(); l != "" {
-			path := strings.Split(strings.TrimSpace(sc.Text()), "/")
-			if h := path[len(path)-1]; h != "default" {
+			sp := strings.Split(strings.TrimSpace(sc.Text()), "/")
+			if h := sp[len(sp)-1]; (h != "default") || (h != "") {
 				sites = append(sites, config.Site{Hostname: h})
 			}
 		}
