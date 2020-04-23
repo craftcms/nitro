@@ -20,10 +20,7 @@ var initCommand = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize a new machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		if viper.ConfigFileUsed() != "" {
 			// TODO prompt for the confirmation of re initing the machine

@@ -19,10 +19,7 @@ var hostsCommand = &cobra.Command{
 	Short:  "Add sites to your hosts file",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		if !flagDebug {
 			uid := os.Geteuid()

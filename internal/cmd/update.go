@@ -11,10 +11,7 @@ var updateCommand = &cobra.Command{
 	Aliases: []string{"upgrade"},
 	Short:   "Update a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		var actions []nitro.Action
 		updateAction, err := nitro.Update(machine)

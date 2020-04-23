@@ -10,10 +10,7 @@ var stopCommand = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		stopAction, err := nitro.Stop(machine)
 		if err != nil {

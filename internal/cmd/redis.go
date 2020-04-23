@@ -10,10 +10,7 @@ var redisCommand = &cobra.Command{
 	Use:   "redis",
 	Short: "Enter a redis shell",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		redisAction, err := nitro.Redis(machine)
 		if err != nil {

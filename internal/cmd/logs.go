@@ -17,10 +17,7 @@ var logsCommand = &cobra.Command{
 	Use:   "logs",
 	Short: "Show machine logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
