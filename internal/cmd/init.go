@@ -108,15 +108,9 @@ var initCommand = &cobra.Command{
 			return nil
 		}
 
-		if prompt.Verify("Apply changes now? [y]") {
-			fmt.Println("Ok, applying the changes now")
+		fmt.Println("Ok, applying the changes now")
 
-			return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
-		}
-
-		fmt.Println("Ok, you can apple ")
-
-		return nil
+		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
 
