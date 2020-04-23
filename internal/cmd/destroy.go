@@ -16,10 +16,7 @@ var destroyCommand = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		// get the sites
 		var cfg config.Config

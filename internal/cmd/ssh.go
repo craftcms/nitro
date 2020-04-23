@@ -10,10 +10,7 @@ var sshCommand = &cobra.Command{
 	Use:   "ssh",
 	Short: "SSH into a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		sshAction, err := nitro.SSH(machine)
 		if err != nil {

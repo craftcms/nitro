@@ -10,10 +10,7 @@ var restartCommand = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		restartAction, err := nitro.Restart(machine)
 		if err != nil {

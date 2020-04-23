@@ -12,10 +12,7 @@ var xdebugConfigureCommand = &cobra.Command{
 	Short:  "Configure Xdebug on a machine",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		php := config.GetString("php", flagPhpVersion)
 

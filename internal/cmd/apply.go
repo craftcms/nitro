@@ -19,10 +19,7 @@ var applyCommand = &cobra.Command{
 	Short:  "Apply changes from config",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		path, err := exec.LookPath("multipass")
 		if err != nil {

@@ -20,10 +20,7 @@ var removeCommand = &cobra.Command{
 	Use:   "remove",
 	Short: "Manage your nitro sites",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {

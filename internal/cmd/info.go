@@ -10,10 +10,7 @@ var infoCommand = &cobra.Command{
 	Use:   "info",
 	Short: "Show machine info",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		infoAction, err := nitro.Info(machine)
 		if err != nil {

@@ -12,10 +12,7 @@ var xdebugOffCommand = &cobra.Command{
 	Use:   "off",
 	Short: "Disable Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		php := config.GetString("php", flagPhpVersion)
 		if err := validate.PHPVersion(php); err != nil {

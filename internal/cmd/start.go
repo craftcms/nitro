@@ -11,10 +11,7 @@ var startCommand = &cobra.Command{
 	Aliases: []string{"up"},
 	Short:   "Start a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		startAction, err := nitro.Start(machine)
 		if err != nil {

@@ -22,10 +22,7 @@ var importCommand = &cobra.Command{
 	Short: "Import database into machine",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		home, err := homedir.Dir()
 		if err != nil {

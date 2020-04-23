@@ -20,10 +20,7 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := "nitro-dev"
-		if flagMachineName != "" {
-			machine = flagMachineName
-		}
+		machine := flagMachineName
 
 		// if there is no arg, get the current working dir
 		// else get the first arg
