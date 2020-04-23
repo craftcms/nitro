@@ -88,7 +88,7 @@ func SitesEnabled(f Finder) ([]config.Site, error) {
 	for sc.Scan() {
 		if l := sc.Text(); l != "" {
 			sp := strings.Split(strings.TrimSpace(sc.Text()), "/")
-			if h := sp[len(sp)-1]; (h != "default") || (h != "") {
+			if h := sp[len(sp)-1]; h != "default" {
 				sites = append(sites, config.Site{Hostname: h})
 			}
 		}
