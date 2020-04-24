@@ -550,11 +550,11 @@ func TestConfig_RenameSite(t *testing.T) {
 		hostname string
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []Site
-		wantErr bool
+		name       string
+		fields     fields
+		args       args
+		want       []Site
+		wantErr    bool
 	}{
 		{
 			name: "remove a site my hostname",
@@ -603,7 +603,7 @@ func TestConfig_RenameSite(t *testing.T) {
 
 			if tt.want != nil {
 				if !reflect.DeepEqual(c.Sites, tt.want) {
-					t.Errorf("RenameSite() got = \n%v, \nwant \n%v", c.Sites, tt.want)
+					t.Errorf("RenameSite() got sites = \n%v, \nwant \n%v", c.Sites, tt.want)
 				}
 			}
 		})
