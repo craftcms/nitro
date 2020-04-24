@@ -107,10 +107,10 @@ func (c *Config) AddMount(m Mount) error {
 }
 
 func (c *Config) RenameSite(site Site, hostname string) error {
-	for _, s := range c.Sites {
-		if site.Hostname == s.Hostname {
-			s.Hostname = hostname
-
+	for i, s := range c.Sites {
+		if s.Hostname == site.Hostname {
+			w := strings.Replace(s.Webroot, s.Hostname, hostname, 1)
+			c.Sites[i] = Site{Hostname: hostname, Webroot: w}
 			return nil
 		}
 	}

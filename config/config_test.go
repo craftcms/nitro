@@ -538,3 +538,74 @@ func TestConfig_RemoveSite1(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_RenameSite(t *testing.T) {
+	type fields struct {
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		site     Site
+		hostname string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Site
+		wantErr bool
+	}{
+		{
+			name: "remove a site my hostname",
+			args: args{
+				site: Site{
+					Hostname: "old.test",
+					Webroot:  "/nitro/sites/old.test",
+				},
+				hostname: "new.test",
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "old.test",
+						Webroot:  "/nitro/sites/old.test",
+					},
+					{
+						Hostname: "keep.test",
+						Webroot:  "/nitro/sites/keep.test",
+					},
+				},
+			},
+			want: []Site{
+				{
+					Hostname: "new.test",
+					Webroot:  "/nitro/sites/new.test",
+				},
+				{
+					Hostname: "keep.test",
+					Webroot:  "/nitro/sites/keep.test",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if err := c.RenameSite(tt.args.site, tt.args.hostname); (err != nil) != tt.wantErr {
+				t.Errorf("RenameSite() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != nil {
+				if !reflect.DeepEqual(c.Sites, tt.want) {
+					t.Errorf("RenameSite() got = \n%v, \nwant \n%v", c.Sites, tt.want)
+				}
+			}
+		})
+	}
+}
