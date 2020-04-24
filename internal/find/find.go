@@ -96,3 +96,32 @@ func SitesEnabled(f Finder) ([]config.Site, error) {
 
 	return sites, nil
 }
+
+// PHPVersion is used to get the "current" or "default" version
+// of PHP that is installed. It expects exec.Command to sent
+// "multipass", "exec", machine, "--", "php", "--version"
+func PHPVersion(f Finder) (string, error) {
+	out, err := f.Output()
+	if err != nil {
+		return "", err
+	}
+
+	var version string
+	sc := bufio.NewScanner(strings.NewReader(string(out)))
+	c := 0
+	for sc.Scan() {
+		if c > 0 {
+			break
+		}
+
+		if l := sc.Text(); l != "" {
+			sp := strings.Split(strings.TrimSpace(sc.Text()), " ")
+			full := strings.Split(sp[1], ".")
+			version = fmt.Sprintf("%s.%s", full[0], full[1])
+		}
+
+		c = c + 1
+	}
+
+	return version, nil
+}
