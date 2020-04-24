@@ -20,6 +20,11 @@ var renameCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		path, err := exec.LookPath("multipass")
+		if err != nil {
+			return err
+		}
+
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
@@ -34,11 +39,6 @@ var renameCommand = &cobra.Command{
 		i, _ := prompt.Select("Select site to rename", configFile.SitesAsList())
 
 		siteToRename := configSites[i]
-
-		path, err := exec.LookPath("multipass")
-		if err != nil {
-			return err
-		}
 
 		_, err = find.SitesEnabled(
 			exec.Command(path, []string{"exec", machine, "--", "find", "/etc/nginx/sites-enabled/", "-maxdepth", "1", "-type", "l"}...),
