@@ -57,9 +57,7 @@ func ContainersToCreate(machine string, cfg config.Config) ([]config.Database, e
 
 	var dbs []config.Database
 	for _, db := range cfg.Databases {
-		container := fmt.Sprintf("%s_%s_%s", db.Engine, db.Version, db.Port)
-
-		c := exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", container}...)
+		c := exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...)
 		output, err := c.Output()
 		if err != nil {
 			return nil, err
