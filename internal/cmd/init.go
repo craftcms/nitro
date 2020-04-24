@@ -71,8 +71,8 @@ var initCommand = &cobra.Command{
 		if strings.Contains(engine, "postgres") {
 			port = "5432"
 		}
-		// TODO check if the port has already been used and +1 it
 
+		// TODO check if the port has already been used and +1 it
 		cfg.Databases = []config.Database{
 			{
 				Engine:  engine,
