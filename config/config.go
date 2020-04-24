@@ -106,6 +106,18 @@ func (c *Config) AddMount(m Mount) error {
 	return nil
 }
 
+func (c *Config) RenameSite(site Site, hostname string) error {
+	for _, s := range c.Sites {
+		if site.Hostname == s.Hostname {
+			s.Hostname = hostname
+
+			return nil
+		}
+	}
+
+	return errors.New("unable to locate the site with the hostname: " + site.Hostname)
+}
+
 func (c *Config) RemoveSite(hostname string) error {
 	for i := len(c.Sites) - 1; i >= 0; i-- {
 		site := c.Sites[i]
