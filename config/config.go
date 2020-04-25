@@ -36,6 +36,17 @@ func (c *Config) GetSites() []Site {
 	return c.Sites
 }
 
+// GetExpandedMounts will take all of the mounts in a config file
+// and "expand" or get the full path mount source and return
+// a slice of mounts
+func (c *Config) GetExpandedMounts() []Mount {
+	var mounts []Mount
+	for _, m := range c.Mounts {
+		mounts = append(mounts, Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
+	}
+	return mounts
+}
+
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {
