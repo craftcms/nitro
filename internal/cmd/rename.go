@@ -35,15 +35,15 @@ var renameCommand = &cobra.Command{
 			return errors.New("there are no sites to rename")
 		}
 
-		// ask to select a site
-		i, _ := prompt.Select("Select site to rename", configFile.SitesAsList())
+		// ask to select a existingSite
+		i, _ := prompt.Select("Select existingSite to rename", configFile.SitesAsList())
 
-		site := configSites[i]
+		existingSite := configSites[i]
 
-		// ask for the new hostname
-		var hostname string
+		// ask for the new newHostname
+		var newHostname string
 		hostnamePrompt := promptui.Prompt{
-			Label:    fmt.Sprintf("What should the new hostname be? [current: %s]", site.Hostname),
+			Label:    fmt.Sprintf("What should the new newHostname be? [current: %s]", existingSite.Hostname),
 			Validate: validate.Hostname,
 		}
 
@@ -54,9 +54,13 @@ var renameCommand = &cobra.Command{
 
 		switch hostnameEntered {
 		case "":
-			hostname = site.Hostname
+			newHostname = existingSite.Hostname
 		default:
-			hostname = hostnameEntered
+			newHostname = hostnameEntered
+		}
+
+		if existingSite.Hostname == newHostname {
+			return errors.New("the new and original hostnames match, nothing to do")
 		}
 
 		path, err := exec.LookPath("multipass")
@@ -68,14 +72,13 @@ var renameCommand = &cobra.Command{
 			exec.Command(path, []string{"exec", machine, "--", "php", "--version"}...),
 		)
 
-		actions, err := task.Rename(machine, php, site)
+		renamedSite := config.Site{Hostname: newHostname, Webroot: existingSite.Webroot}
+		mount := configFile.FindMountBySiteWebroot(existingSite.Webroot)
 
-		if site.Hostname == hostname {
-			return errors.New("the new and original hostnames match, nothing to do")
-		}
+		actions, err := task.Rename(machine, php, existingSite, renamedSite, mount)
 
 		// update the config
-		if err := configFile.RenameSite(site, hostname); err != nil {
+		if err := configFile.RenameSite(existingSite, newHostname); err != nil {
 			return err
 		}
 
@@ -98,21 +101,21 @@ var renameCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Ok, we renamed the site %s to %s. We are now going to update the hosts file...", site.Hostname, hostname))
+		fmt.Println(fmt.Sprintf("Ok, we renamed the existingSite %s to %s. We are now going to update the hosts file...", existingSite.Hostname, newHostname))
 
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
 		}
 
-		// remove the site
-		if err := sudo.RunCommand(nitro, machine, "hosts", "remove", site.Hostname); err != nil {
-			fmt.Println("Error removing", site.Hostname, "from the hosts file")
+		// remove the existingSite
+		if err := sudo.RunCommand(nitro, machine, "hosts", "remove", existingSite.Hostname); err != nil {
+			fmt.Println("Error removing", existingSite.Hostname, "from the hosts file")
 			return err
 		}
 
 		if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
-			fmt.Println("Error adding", hostname, "to the hosts file")
+			fmt.Println("Error adding", newHostname, "to the hosts file")
 			return err
 		}
 
