@@ -27,3 +27,11 @@ func (m *Mount) Exists(webroot string) bool {
 
 	return false
 }
+
+func (m *Mount) IsExact(webroot string) bool {
+	if m.Dest == webroot {
+		return true
+	}
+
+	return false
+}
