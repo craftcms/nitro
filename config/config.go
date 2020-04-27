@@ -14,7 +14,7 @@ import (
 )
 
 type Config struct {
-	PHP       string     `yaml:"-"`
+	PHP       string     `yaml:"php"`
 	CPUs      string     `yaml:"-"`
 	Disk      string     `yaml:"-"`
 	Memory    string     `yaml:"-"`
