@@ -33,7 +33,7 @@ var initCommand = &cobra.Command{
 
 		// hardcode the CPUs until this issue is resolved
 		// https://github.com/craftcms/nitro/issues/65
-		hardCodedCpus := "1"
+		hardCodedCpus := "2"
 		cpuInt, err := strconv.Atoi(hardCodedCpus)
 		if err != nil {
 			return err
