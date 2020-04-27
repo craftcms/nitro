@@ -59,6 +59,16 @@ func (c *Config) MountExists(dest string) bool {
 	return false
 }
 
+func (c *Config) SiteExists(site Site) bool {
+	for _, s := range c.Sites {
+		if s.IsExact(site) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {

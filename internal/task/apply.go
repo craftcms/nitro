@@ -32,5 +32,31 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		}
 	}
 
+	for _, site := range configFile.Sites {
+		// find the parent to mount
+		if !inMemoryConfig.SiteExists(site) {
+			// copy template
+			copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *copyTemplateAction)
+
+			// replace variable
+			changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *changeNginxVariablesAction...)
+
+			// reload nginx
+			reloadNginxAction, err := nitro.NginxReload(machine)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *reloadNginxAction)
+		}
+	}
+
 	return actions, nil
 }

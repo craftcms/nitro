@@ -690,3 +690,73 @@ func TestConfig_MountExists(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_SiteExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		site Site
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "exact sites return true",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "iexist.test",
+						Webroot:  "/nitro/sites/iexist.test",
+					},
+				},
+			},
+			args: args{site: Site{
+				Hostname: "iexist.test",
+				Webroot:  "/nitro/sites/iexist.test",
+			}},
+			want: true,
+		},
+		{
+			name: "exact sites return false",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "iexist.test",
+						Webroot:  "/nitro/sites/iexist.test",
+					},
+				},
+			},
+			args: args{site: Site{
+				Hostname: "idontexist.test",
+				Webroot:  "/nitro/sites/idontexist.test",
+			}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.SiteExists(tt.args.site); got != tt.want {
+				t.Errorf("SiteExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

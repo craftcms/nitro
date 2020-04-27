@@ -24,6 +24,136 @@ func TestApply(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "new sites without a parent mount in the config are added to the machine and mounted",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					PHP: "7.4",
+					Mounts: []config.Mount{
+						{
+							Source: "./testdata/existing-mount",
+							Dest:   "/nitro/sites/existing-site",
+						},
+					},
+					Sites: []config.Site{
+						{
+							Hostname: "existing-site",
+							Webroot:  "/nitro/sites/existing-site",
+						},
+						{
+							Hostname: "new-site",
+							Webroot:  "/nitro/sites/new-site",
+						},
+					},
+				},
+				fromMultipassMounts: []config.Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/existing-site",
+					},
+				},
+				sites: []config.Site{
+					{
+						Hostname: "existing-site",
+						Webroot:  "/nitro/sites/existing-site",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "cp", "/opt/nitro/nginx/template.conf", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEWEBROOTDIR|/nitro/sites/new-site|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGESERVERNAME|new-site|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEPHPVERSION|7.4|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "new sites using parent mounts in the config are added to the machine",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					PHP: "7.4",
+					Mounts: []config.Mount{
+						{
+							Source: "./testdata/existing-mount",
+							Dest:   "/nitro/sites",
+						},
+					},
+					Sites: []config.Site{
+						{
+							Hostname: "existing-site",
+							Webroot:  "/nitro/sites/existing-site",
+						},
+						{
+							Hostname: "new-site",
+							Webroot:  "/nitro/sites/new-site",
+						},
+					},
+				},
+				fromMultipassMounts: []config.Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites",
+					},
+				},
+				sites: []config.Site{
+					{
+						Hostname: "existing-site",
+						Webroot:  "/nitro/sites/existing-site",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "cp", "/opt/nitro/nginx/template.conf", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEWEBROOTDIR|/nitro/sites/new-site|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGESERVERNAME|new-site|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEPHPVERSION|7.4|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "new mounts return actions to create mounts",
 			args: args{
 				machine: "mytestmachine",
