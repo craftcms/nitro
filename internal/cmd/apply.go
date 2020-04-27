@@ -20,6 +20,13 @@ var applyCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		// load the config file
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
+
+		// ABSTRACT
 		path, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
@@ -35,18 +42,7 @@ var applyCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		// load the config file
-		var configFile config.Config
-		if err := viper.Unmarshal(&configFile); err != nil {
-			return err
-		}
-
-		// get abs path for file sources
-		var fileMounts []config.Mount
-		for _, m := range configFile.Mounts {
-			fileMounts = append(fileMounts, config.Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
-		}
+		// END ABSTRACT
 
 		// find sites not created
 		var sitesToCreate []config.Site
@@ -67,10 +63,10 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
-		// prompt?
+		// task.ApplyChanges(cfgfile, attached, sitesNotCreated, dbsToCreate)
 		var actions []nitro.Action
 
-		mountActions, err := diff.MountActions(machine, attachedMounts, fileMounts)
+		mountActions, err := diff.MountActions(machine, attachedMounts, configFile.GetExpandedMounts())
 		if err != nil {
 			return err
 		}
@@ -144,9 +140,6 @@ var applyCommand = &cobra.Command{
 
 			return nil
 		}
-
-		fmt.Printf("There are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
-		fmt.Printf("There are %d sites to create and %d sites in the config file. Applying changes now...\n", len(sitesToCreate), len(configFile.Sites))
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err

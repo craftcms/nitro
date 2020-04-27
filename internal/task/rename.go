@@ -5,31 +5,8 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
-func RenameSite(machine, php string, oldSite, newSite config.Site, configFile config.Config) ([]nitro.Action, error) {
+func RenameSite(machine, php string, oldSite, newSite config.Site) ([]nitro.Action, error) {
 	var actions []nitro.Action
-	unmount := false
-	for _, m := range configFile.Mounts {
-		if m.IsExact(oldSite.Webroot) {
-			unmount = true
-		}
-	}
-
-	if unmount {
-		// unmount the site
-		unmountAction, err := nitro.Unmount(machine, oldSite.Hostname)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, *unmountAction)
-
-		// mount the new directory
-		mount := configFile.FindMountBySiteWebroot(newSite.Webroot)
-		mountAction, err := nitro.MountDir(machine, mount.AbsSourcePath(), mount.Dest)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, *mountAction)
-	}
 
 	// remove the symlink from the old oldSite
 	removeSymlinkAction, err := nitro.RemoveSymlink(machine, oldSite.Hostname)
