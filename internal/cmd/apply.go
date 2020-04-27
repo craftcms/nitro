@@ -51,7 +51,7 @@ var applyCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if !strings.Contains(string(output), "exists") {
+			if strings.Contains(string(output), "exists") {
 				sites = append(sites, site)
 			}
 		}

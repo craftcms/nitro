@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
@@ -132,7 +134,55 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		actions, err := task.Add(machine, configFile, site)
+		path, err := exec.LookPath("multipass")
+		if err != nil {
+			return err
+		}
+
+		// find the existingMounts
+
+		c := exec.Command(path, []string{"info", machine, "--format=csv"}...)
+		output, err := c.Output()
+		if err != nil {
+			return err
+		}
+		existingMounts, err := find.Mounts(machine, output)
+		if err != nil {
+			return err
+		}
+
+		// find the sites
+		var sites []config.Site
+		for _, site := range configFile.Sites {
+			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
+			if err != nil {
+				return err
+			}
+			if strings.Contains(string(output), "exists") {
+				sites = append(sites, site)
+			}
+		}
+
+		// check if a database already exists
+		var databases []config.Database
+		for _, db := range configFile.Databases {
+			database, err := find.ExistingContainer(exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...), db)
+			if err != nil {
+				return err
+			}
+
+			if database != nil {
+				fmt.Println("Database", db.Name(), "exists, skipping...")
+				databases = append(databases, *database)
+			}
+		}
+
+		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
+		if err != nil {
+			return err
+		}
+
+		actions, err := task.Apply(machine, configFile, existingMounts, sites, databases, php)
 
 		if flagDebug {
 			for _, action := range actions {
