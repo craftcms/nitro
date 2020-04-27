@@ -49,6 +49,19 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 	return mounts, nil
 }
 
+func ExistingContainer(f Finder, database config.Database) (*config.Database, error) {
+	output, err := f.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Contains(string(output), "exists") {
+		return &database, nil
+	}
+
+	return nil, nil
+}
+
 func ContainersToCreate(machine string, cfg config.Config) ([]config.Database, error) {
 	path, err := exec.LookPath("multipass")
 	if err != nil {
