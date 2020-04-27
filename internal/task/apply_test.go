@@ -24,6 +24,21 @@ func TestApply(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "mismatched versions of PHP installs the request version from the config file",
+			args: args{
+				machine:    "mytestmachine",
+				configFile: config.Config{PHP: "7.4"},
+				php:        "7.2",
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "apt-get", "install", "-y", "php7.4", "php7.4-mbstring", "php7.4-cli", "php7.4-curl", "php7.4-fpm", "php7.4-gd", "php7.4-intl", "php7.4-json", "php7.4-mysql", "php7.4-opcache", "php7.4-pgsql", "php7.4-zip", "php7.4-xml", "php7.4-soap", "php-xdebug", "php-imagick", "blackfire-agent", "blackfire-php"},
+				},
+			},
+		},
+		{
 			name: "new databases that are in the config are created",
 			args: args{
 				machine: "mytestmachine",
@@ -156,6 +171,7 @@ func TestApply(t *testing.T) {
 						Webroot:  "/nitro/sites/existing-site",
 					},
 				},
+				php: "7.4",
 			},
 			want: []nitro.Action{
 				{
@@ -221,6 +237,7 @@ func TestApply(t *testing.T) {
 						Webroot:  "/nitro/sites/existing-site",
 					},
 				},
+				php: "7.4",
 			},
 			want: []nitro.Action{
 				{

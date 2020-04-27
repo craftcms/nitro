@@ -108,5 +108,15 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		}
 	}
 
+	// if the php versions do not match, install the requested version - which makes it the default
+	if configFile.PHP != php {
+		installPhp, err := nitro.InstallPackages(machine, configFile.PHP)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, *installPhp)
+
+	}
+
 	return actions, nil
 }
