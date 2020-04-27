@@ -24,6 +24,42 @@ func TestApply(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "sites that exist but are not in the config file are removed",
+			args: args{
+				machine:    "mytestmachine",
+				configFile: config.Config{},
+				fromMultipassMounts: []config.Mount{
+					{
+						Source: "./testdata/existing/mount",
+						Dest:   "/nitro/sites/leftoversite.test",
+					},
+				},
+				sites: []config.Site{
+					{
+						Hostname: "leftoversite.test",
+						Webroot:  "/nitro/sites/leftoversite.test/web",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "umount",
+					UseSyscall: false,
+					Args:       []string{"umount", "mytestmachine:/nitro/sites/leftoversite.test"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args: []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
+				},
+			},
+		},
+		{
 			name: "new sites without a parent mount in the config are added to the machine and mounted",
 			args: args{
 				machine: "mytestmachine",
