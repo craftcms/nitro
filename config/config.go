@@ -69,6 +69,16 @@ func (c *Config) SiteExists(site Site) bool {
 	return false
 }
 
+func (c *Config) DatabaseExists(database Database) bool {
+	for _, d := range c.Databases {
+		if d.Engine == database.Engine && d.Version == database.Version && d.Port == database.Port {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {

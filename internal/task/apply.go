@@ -80,5 +80,33 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		}
 	}
 
+	// check if there are databases to remove
+	for _, database := range inMemoryConfig.Databases {
+		if !configFile.DatabaseExists(database) {
+			actions = append(actions, nitro.Action{
+				Type:       "exec",
+				UseSyscall: false,
+				Args:       []string{"exec", machine, "--", "docker", "rm", "-v", database.Name()},
+			})
+		}
+	}
+
+	// check if there are database to create
+	for _, database := range configFile.Databases {
+		if !inMemoryConfig.DatabaseExists(database) {
+			createVolume, err := nitro.CreateDatabaseVolume(machine, database.Engine, database.Version, database.Port)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *createVolume)
+
+			createContainer, err := nitro.CreateDatabaseContainer(machine, database.Engine, database.Version, database.Port)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *createContainer)
+		}
+	}
+
 	return actions, nil
 }

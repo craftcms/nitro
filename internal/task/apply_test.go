@@ -24,6 +24,68 @@ func TestApply(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "new databases that are in the config are created",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					Databases: []config.Database{
+						{
+							Engine:  "mysql",
+							Version: "5.7",
+							Port:    "3306",
+						},
+					},
+				},
+				dbs: nil,
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "volume", "create", "mysql_5.7_3306"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
+				},
+			},
+		},
+		{
+			name: "databases that are not in the config are removed",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					Databases: []config.Database{
+						{
+							Engine:  "mysql",
+							Version: "5.7",
+							Port:    "3306",
+						},
+					},
+				},
+				dbs: []config.Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+					{
+						Engine:  "postgres",
+						Version: "11",
+						Port:    "5432",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_11_5432"},
+				},
+			},
+		},
+		{
 			name: "sites that exist but are not in the config file are removed",
 			args: args{
 				machine:    "mytestmachine",
@@ -50,7 +112,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args: []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
 				},
 				{
 					Type:       "exec",
