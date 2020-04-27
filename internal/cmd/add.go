@@ -3,15 +3,18 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
@@ -131,40 +134,55 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		var actions []nitro.Action
-		// mount the directory
-		m := configFile.Mounts[len(configFile.Mounts)-1]
-		mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
+		path, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
 		}
-		actions = append(actions, *mountAction)
 
-		// copy the nginx template
-		copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *copyTemplateAction)
+		// find the existingMounts
 
-		// copy the nginx template
-		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
+		c := exec.Command(path, []string{"info", machine, "--format=csv"}...)
+		output, err := c.Output()
 		if err != nil {
 			return err
 		}
-		actions = append(actions, *changeNginxVariablesAction...)
+		existingMounts, err := find.Mounts(machine, output)
+		if err != nil {
+			return err
+		}
 
-		createSymlinkAction, err := nitro.CreateSiteSymllink(machine, site.Hostname)
-		if err != nil {
-			return err
+		// find the sites
+		var sites []config.Site
+		for _, site := range configFile.Sites {
+			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
+			if err != nil {
+				return err
+			}
+			if strings.Contains(string(output), "exists") {
+				sites = append(sites, site)
+			}
 		}
-		actions = append(actions, *createSymlinkAction)
 
-		restartNginxAction, err := nitro.NginxReload(machine)
+		// check if a database already exists
+		var databases []config.Database
+		for _, db := range configFile.Databases {
+			database, err := find.ExistingContainer(exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...), db)
+			if err != nil {
+				return err
+			}
+
+			if database != nil {
+				fmt.Println("Database", db.Name(), "exists, skipping...")
+				databases = append(databases, *database)
+			}
+		}
+
+		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
 		if err != nil {
 			return err
 		}
-		actions = append(actions, *restartNginxAction)
+
+		actions, err := task.Apply(machine, configFile, existingMounts, sites, databases, php)
 
 		if flagDebug {
 			for _, action := range actions {

@@ -47,7 +47,7 @@ var importCommand = &cobra.Command{
 		}
 		var dbs []string
 		for _, db := range databases {
-			dbs = append(dbs, fmt.Sprintf("%s_%s_%s", db.Engine, db.Version, db.Port))
+			dbs = append(dbs, db.Name())
 		}
 		databaseContainerName := promptui.Select{
 			Label: "Select database",
