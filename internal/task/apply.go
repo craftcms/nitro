@@ -34,7 +34,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		}
 	}
 
-	// TODO check if there are sites we need to remove
+	// check if there are sites we need to remove
 	for _, site := range inMemoryConfig.Sites {
 		if !configFile.SiteExists(site) {
 			// remove symlink
