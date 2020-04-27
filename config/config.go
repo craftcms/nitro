@@ -47,6 +47,18 @@ func (c *Config) GetExpandedMounts() []Mount {
 	return mounts
 }
 
+// MountExists will check if a mount exists by checking if it is an exact
+// dest or a parent of an existing dest
+func (c *Config) MountExists(dest string) bool {
+	for _, mount := range c.Mounts {
+		if mount.IsExact(dest) || mount.IsParent(dest) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {

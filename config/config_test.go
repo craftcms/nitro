@@ -550,11 +550,11 @@ func TestConfig_RenameSite(t *testing.T) {
 		hostname string
 	}
 	tests := []struct {
-		name       string
-		fields     fields
-		args       args
-		want       []Site
-		wantErr    bool
+		name    string
+		fields  fields
+		args    args
+		want    []Site
+		wantErr bool
 	}{
 		{
 			name: "remove a site my hostname",
@@ -605,6 +605,87 @@ func TestConfig_RenameSite(t *testing.T) {
 				if !reflect.DeepEqual(c.Sites, tt.want) {
 					t.Errorf("RenameSite() got sites = \n%v, \nwant \n%v", c.Sites, tt.want)
 				}
+			}
+		})
+	}
+}
+
+func TestConfig_MountExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		dest string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "existing mounts return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/example-site",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/example-site"},
+			want: true,
+		},
+		{
+			name: "non-existing mounts return false",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/example-site",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/nonexistent-site"},
+			want: false,
+		},
+		{
+			name: "parent mounts return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/test-mount",
+						Dest:   "/nitro/sites",
+					},
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/nonexistent-site"},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.MountExists(tt.args.dest); got != tt.want {
+				t.Errorf("MountExists() = %v, want %v", got, tt.want)
 			}
 		})
 	}

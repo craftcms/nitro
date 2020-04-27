@@ -16,20 +16,16 @@ func (m *Mount) AbsSourcePath() string {
 	return strings.Replace(m.Source, "~", home, 1)
 }
 
-func (m *Mount) Exists(webroot string) bool {
-	split := strings.Split(webroot, "/")
-	path := split[:len(split)-1]
-	dest := strings.Join(path, "/")
-
-	if strings.Contains(m.Dest, dest) {
+func (m *Mount) IsExact(dest string) bool {
+	if m.Dest == dest {
 		return true
 	}
 
 	return false
 }
 
-func (m *Mount) IsExact(webroot string) bool {
-	if m.Dest == webroot {
+func (m *Mount) IsParent(dest string) bool {
+	if strings.Contains(dest, m.Dest) {
 		return true
 	}
 
