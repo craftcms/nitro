@@ -27,6 +27,19 @@ func AskWithDefault(label, def string, validator promptui.ValidateFunc) (string,
 	return v, nil
 }
 
+func Ask(ui *input.UI, query, def string, req bool) (string, error) {
+	a, err := ui.Ask(query, &input.Options{
+		Default:  def,
+		Required: req,
+		Loop:     true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return a, nil
+}
+
 // Select is responsible for providing a list of options to remove
 func Select(ui *input.UI, query, def string, list []string) (string, int, error) {
 	selected, err := ui.Select(query, list, &input.Options{

@@ -35,19 +35,19 @@ var renameCommand = &cobra.Command{
 			Reader: os.Stdin,
 		}
 
-		// ask to select a existingSite
-		var existingSite config.Site
+		// ask to select a site
+		var site config.Site
 		_, i, err := prompt.Select(ui, "Select a site to rename:", "1", configFile.SitesAsList())
 		if err != nil {
 			return err
 		}
 
-		existingSite = sites[i]
+		site = sites[i]
 
 		// ask for the new newHostname
 		var newHostname string
 		hostnamePrompt := promptui.Prompt{
-			Label:    fmt.Sprintf("What should the new newHostname be? [current: %s]", existingSite.Hostname),
+			Label:    fmt.Sprintf("What should the new newHostname be? [current: %s]", site.Hostname),
 			Validate: validate.Hostname,
 		}
 
@@ -58,17 +58,17 @@ var renameCommand = &cobra.Command{
 
 		switch hostnameEntered {
 		case "":
-			newHostname = existingSite.Hostname
+			newHostname = site.Hostname
 		default:
 			newHostname = hostnameEntered
 		}
 
-		if existingSite.Hostname == newHostname {
+		if site.Hostname == newHostname {
 			return errors.New("the new and original hostnames match, nothing to do")
 		}
 
 		// update the config
-		if err := configFile.RenameSite(existingSite, newHostname); err != nil {
+		if err := configFile.RenameSite(site, newHostname); err != nil {
 			return err
 		}
 

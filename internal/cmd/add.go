@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/internal/webroot"
-	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
@@ -31,26 +32,19 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
+
 		// prompt for the hostname if --hostname == ""
 		// else get the name of the current directory (e.g. nitro)
 		var hostname string
 		switch flagHostname {
 		case "":
-			hostnamePrompt := promptui.Prompt{
-				Label:    fmt.Sprintf("What should the hostname be? [%s]", directoryName),
-				Validate: validate.Hostname,
-			}
-
-			hostnameEntered, err := hostnamePrompt.Run()
+			hostname, err = prompt.Ask(ui, "What should the hostname be?", directoryName, true)
 			if err != nil {
 				return err
-			}
-
-			switch hostnameEntered {
-			case "":
-				hostname = directoryName
-			default:
-				hostname = hostnameEntered
 			}
 		default:
 			hostname = helpers.RemoveTrailingSlash(flagHostname)
@@ -65,19 +59,10 @@ var addCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
-			}
 
-			webrootEntered, err := webRootPrompt.Run()
+			webrootDir, err = prompt.Ask(ui, "Where is the webroot?", foundDir, true)
 			if err != nil {
 				return err
-			}
-			switch webrootEntered {
-			case "":
-				webrootDir = foundDir
-			default:
-				webrootDir = webrootEntered
 			}
 		default:
 			webrootDir = flagWebroot
@@ -108,19 +93,12 @@ var addCommand = &cobra.Command{
 
 		fmt.Printf("%s has been added to nitro.yaml", hostname)
 
-		applyPrompt := promptui.Prompt{
-			Label: "Apply changes now? [y]",
-		}
-
-		apply, err := applyPrompt.Run()
+		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
 			return err
 		}
-		if apply == "" {
-			apply = "y"
-		}
 
-		if apply != "y" {
+		if !applyChanges {
 			fmt.Println("You can apply new nitro.yaml changes later by running `nitro apply`.")
 
 			return nil
