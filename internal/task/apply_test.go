@@ -106,7 +106,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_12_54321"},
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_12_54321", "-f"},
 				},
 			},
 		},
@@ -140,7 +140,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_11_5432"},
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_11_5432", "-f"},
 				},
 			},
 		},
