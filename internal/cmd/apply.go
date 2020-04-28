@@ -102,6 +102,7 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Editing your hosts file")
 
+		// TODO check the current OS and call commands for windows
 		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }
