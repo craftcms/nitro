@@ -67,6 +67,50 @@ func TestApply(t *testing.T) {
 			},
 		},
 		{
+			name: "new databases are created but the ones in the config are kept",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					Databases: []config.Database{
+						{
+							Engine:  "mysql",
+							Version: "5.7",
+							Port:    "3306",
+						},
+						{
+							Engine:  "postgres",
+							Version: "11",
+							Port:    "5432",
+						},
+					},
+				},
+				dbs: []config.Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+					{
+						Engine:  "postgres",
+						Version: "11",
+						Port:    "5432",
+					},
+					{
+						Engine:  "postgres",
+						Version: "12",
+						Port:    "54321",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_12_54321"},
+				},
+			},
+		},
+		{
 			name: "databases that are not in the config are removed",
 			args: args{
 				machine: "mytestmachine",
