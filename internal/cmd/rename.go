@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/prompt"
-	"github.com/craftcms/nitro/validate"
 )
 
 var renameCommand = &cobra.Command{
@@ -37,32 +35,18 @@ var renameCommand = &cobra.Command{
 
 		// ask to select a site
 		var site config.Site
-		_, i, err := prompt.Select(ui, "Select a site to rename:", "1", configFile.SitesAsList())
+		_, i, err := prompt.Select(ui, "Select a site to rename:", sites[0].Hostname, configFile.SitesAsList())
 		if err != nil {
 			return err
 		}
-
 		site = sites[i]
 
 		// ask for the new newHostname
 		var newHostname string
-		hostnamePrompt := promptui.Prompt{
-			Label:    fmt.Sprintf("What should the new newHostname be? [current: %s]", site.Hostname),
-			Validate: validate.Hostname,
-		}
-
-		hostnameEntered, err := hostnamePrompt.Run()
+		newHostname, err = prompt.Ask(ui, "What should the new hostname be?", site.Hostname, true)
 		if err != nil {
 			return err
 		}
-
-		switch hostnameEntered {
-		case "":
-			newHostname = site.Hostname
-		default:
-			newHostname = hostnameEntered
-		}
-
 		if site.Hostname == newHostname {
 			return errors.New("the new and original hostnames match, nothing to do")
 		}
