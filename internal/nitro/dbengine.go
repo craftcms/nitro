@@ -19,6 +19,7 @@ func FindEngineByDump(fileAbsPath string) string {
 	foundEngine := ""
 	scanner := bufio.NewScanner(file)
 	line := 1
+
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
 		_, matchesPostgres := checkSubstrings(scanner.Text(), "PostgreSQL", "pg_dump")
@@ -32,6 +33,7 @@ func FindEngineByDump(fileAbsPath string) string {
 			foundEngine = "postgres"
 		}
 
+		// Stop looking after 50 lines or when we have found the engine
 		if line > 50 || foundEngine != "" {
 			break
 		}
