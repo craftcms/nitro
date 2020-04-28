@@ -71,6 +71,12 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *changeNginxVariablesAction...)
 
+			createSymlink, err := nitro.CreateSiteSymllink(machine, site.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *createSymlink)
+
 			// reload nginx
 			reloadNginxAction, err := nitro.NginxReload(machine)
 			if err != nil {

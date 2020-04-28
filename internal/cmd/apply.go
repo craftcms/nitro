@@ -11,6 +11,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/internal/task"
 )
 
@@ -94,6 +95,13 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
-		return nil
+		nitro, err := exec.LookPath("nitro")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Editing your hosts file")
+
+		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }

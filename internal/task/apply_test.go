@@ -197,6 +197,11 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/new-site", "/etc/nginx/sites-enabled/"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
 				},
 			},
@@ -259,6 +264,11 @@ func TestApply(t *testing.T) {
 					Type:       "exec",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEPHPVERSION|7.4|g", "/etc/nginx/sites-available/new-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/new-site", "/etc/nginx/sites-enabled/"},
 				},
 				{
 					Type:       "exec",
