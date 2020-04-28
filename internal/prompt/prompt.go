@@ -4,28 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/manifoldco/promptui"
 	"github.com/tcnksm/go-input"
 )
-
-func AskWithDefault(label, def string, validator promptui.ValidateFunc) (string, error) {
-	p := promptui.Prompt{
-		Label:    label + " [" + def + "]",
-		Validate: validator,
-	}
-
-	v, err := p.Run()
-	if err != nil {
-		return "", err
-	}
-
-	switch v {
-	case "":
-		v = def
-	}
-
-	return v, nil
-}
 
 func Ask(ui *input.UI, query, def string, req bool) (string, error) {
 	a, err := ui.Ask(query, &input.Options{
@@ -57,17 +37,6 @@ func Select(ui *input.UI, query, def string, list []string) (string, int, error)
 	}
 
 	return "", 0, errors.New("unable to find the selected option")
-}
-
-func SelectWithDefault(label, def string, options []string) (int, string) {
-	p := promptui.Select{
-		Label: label + " [" + def + "]",
-		Items: options,
-	}
-
-	i, selected, _ := p.Run()
-
-	return i, selected
 }
 
 func Verify(ui *input.UI, query, def string) (bool, error) {

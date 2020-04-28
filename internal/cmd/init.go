@@ -3,12 +3,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -27,6 +29,11 @@ var initCommand = &cobra.Command{
 			return errors.New("using a config file already")
 		}
 
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
+
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
@@ -41,30 +48,39 @@ var initCommand = &cobra.Command{
 		cfg.CPUs = hardCodedCpus
 
 		// ask how much memory
-		memory, err := prompt.AskWithDefault("How much memory should we assign?", "4G", nil)
+		memory, err := prompt.Ask(ui, "How much memory should we assign?", "4G", true)
 		if err != nil {
 			return err
 		}
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.AskWithDefault("How much disk space should the machine have?", "40G", nil)
+		disk, err := prompt.Ask(ui, "How much disk space should the machine have?", "40G", true)
 		if err != nil {
 			return err
 		}
 		cfg.Disk = disk
 
 		// which version of PHP
-		_, php := prompt.SelectWithDefault("Which version of PHP should we install?", "7.4", nitro.PHPVersions)
+		php, _, err := prompt.Select(ui, "Which version of PHP should we install?", "7.4", nitro.PHPVersions)
+		if err != nil {
+			return err
+		}
 		cfg.PHP = php
 
 		// what database engine?
-		_, engine := prompt.SelectWithDefault("Which database engine should we setup?", "mysql", nitro.DBEngines)
+		engine, _, err := prompt.Select(ui, "Which database engine should we setup?", "mysql", nitro.DBEngines)
+		if err != nil {
+			return err
+		}
 
 		// which version should we use?
 		versions := nitro.DBVersions[engine]
 		defaultVersion := versions[0]
-		_, version := prompt.SelectWithDefault("Select a version of "+engine+" to use:", defaultVersion, versions)
+		version, _, err := prompt.Select(ui, "Select a version of "+engine+" to use:", defaultVersion, versions)
+		if err != nil {
+			return err
+		}
 
 		// get the port for the engine
 		port := "3306"
