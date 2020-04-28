@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,15 +12,13 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/task"
+	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
 	Short: "Manage your nitro sites",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := flagMachineName
-
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
@@ -38,22 +35,12 @@ var removeCommand = &cobra.Command{
 			Reader: os.Stdin,
 		}
 
-		selectedSite, err := ui.Select("Select a site to remove:", configFile.SitesAsList(), &input.Options{
-			Required: true,
-		})
+		var site config.Site
+		_, i, err := prompt.Select(ui, "Select a site to remove:", sites[0].Hostname, configFile.SitesAsList())
 		if err != nil {
 			return err
 		}
-
-		var site config.Site
-		for i, s := range sites {
-			if s.Hostname == selectedSite {
-				site = sites[i]
-			}
-		}
-		if site.Hostname == "" {
-			return errors.New("error selecting a site")
-		}
+		site = sites[i]
 
 		// find the mount
 		mount := configFile.FindMountBySiteWebroot(site.Webroot)
@@ -98,34 +85,9 @@ var removeCommand = &cobra.Command{
 		}
 		// END HACK
 
-		actions, err := task.Remove(machine, *mount, site)
+		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
 			return err
-		}
-
-		applyChanges := false
-		answer, err := ui.Ask("Apply changes from config now?", &input.Options{
-			Default:  "y",
-			Required: true,
-			Loop:     true,
-		})
-		if err != nil {
-			return err
-		}
-
-		if strings.ContainsAny(answer, "y") {
-			applyChanges = true
-		}
-
-		// save the config
-		if flagDebug {
-			if applyChanges {
-				fmt.Println("Ok, applying changes from the config file...")
-			}
-			for _, a := range actions {
-				fmt.Println(a.Args)
-			}
-			return nil
 		}
 
 		if applyChanges {

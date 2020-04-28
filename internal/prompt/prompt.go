@@ -1,23 +1,12 @@
 package prompt
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/manifoldco/promptui"
+	"github.com/tcnksm/go-input"
 )
-
-func Ask(label, def string, validator promptui.ValidateFunc) (string, error) {
-	p := promptui.Prompt{
-		Label:    label,
-		Default:  def,
-		Validate: validator,
-	}
-
-	v, err := p.Run()
-	if err != nil {
-		return "", err
-	}
-
-	return v, nil
-}
 
 func AskWithDefault(label, def string, validator promptui.ValidateFunc) (string, error) {
 	p := promptui.Prompt{
@@ -38,6 +27,25 @@ func AskWithDefault(label, def string, validator promptui.ValidateFunc) (string,
 	return v, nil
 }
 
+// Select is responsible for providing a list of options to remove
+func Select(ui *input.UI, query, def string, list []string) (string, int, error) {
+	selected, err := ui.Select(query, list, &input.Options{
+		Required: true,
+		Default:  def,
+	})
+	if err != nil {
+		return "", 0, err
+	}
+
+	for i, s := range list {
+		if s == selected {
+			return s, i, nil
+		}
+	}
+
+	return "", 0, errors.New("unable to find the selected option")
+}
+
 func SelectWithDefault(label, def string, options []string) (int, string) {
 	p := promptui.Select{
 		Label: label + " [" + def + "]",
@@ -49,30 +57,19 @@ func SelectWithDefault(label, def string, options []string) (int, string) {
 	return i, selected
 }
 
-func Select(label string, options []string) (int, string) {
-	p := promptui.Select{
-		Label: label,
-		Items: options,
-	}
-
-	i, selected, _ := p.Run()
-
-	return i, selected
-}
-
-func Verify(label string) bool {
-	verify := promptui.Prompt{
-		Label: label,
-	}
-
-	answer, err := verify.Run()
+func Verify(ui *input.UI, query, def string) (bool, error) {
+	a, err := ui.Ask(query, &input.Options{
+		Default:  def,
+		Required: true,
+		Loop:     true,
+	})
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	if answer == "" {
-		return true
+	if strings.ContainsAny(a, "y") {
+		return true, nil
 	}
 
-	return false
+	return false, nil
 }

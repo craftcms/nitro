@@ -3,18 +3,15 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os/exec"
+	"os"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/find"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/prompt"
-	"github.com/craftcms/nitro/internal/sudo"
-	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -22,23 +19,30 @@ var renameCommand = &cobra.Command{
 	Use:   "rename",
 	Short: "Rename a site",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := flagMachineName
-
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
 		}
 
-		configSites := configFile.GetSites()
+		sites := configFile.GetSites()
 
-		if len(configSites) == 0 {
+		if len(sites) == 0 {
 			return errors.New("there are no sites to rename")
 		}
 
-		// ask to select a existingSite
-		i, _ := prompt.Select("Select existingSite to rename", configFile.SitesAsList())
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
 
-		existingSite := configSites[i]
+		// ask to select a existingSite
+		var existingSite config.Site
+		_, i, err := prompt.Select(ui, "Select a site to rename:", "1", configFile.SitesAsList())
+		if err != nil {
+			return err
+		}
+
+		existingSite = sites[i]
 
 		// ask for the new newHostname
 		var newHostname string
@@ -63,20 +67,6 @@ var renameCommand = &cobra.Command{
 			return errors.New("the new and original hostnames match, nothing to do")
 		}
 
-		path, err := exec.LookPath("multipass")
-		if err != nil {
-			return err
-		}
-
-		php, err := find.PHPVersion(
-			exec.Command(path, []string{"exec", machine, "--", "php", "--version"}...),
-		)
-
-		renamedSite := config.Site{Hostname: newHostname, Webroot: existingSite.Webroot}
-		mount := configFile.FindMountBySiteWebroot(existingSite.Webroot)
-
-		actions, err := task.Rename(machine, php, existingSite, renamedSite, mount)
-
 		// update the config
 		if err := configFile.RenameSite(existingSite, newHostname); err != nil {
 			return err
@@ -89,34 +79,14 @@ var renameCommand = &cobra.Command{
 			}
 		}
 
-		if flagDebug {
-			for _, action := range actions {
-				fmt.Println(action.Args)
-			}
-
-			return nil
-		}
-
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			return err
-		}
-
-		fmt.Println(fmt.Sprintf("Ok, we renamed the existingSite %s to %s. We are now going to update the hosts file...", existingSite.Hostname, newHostname))
-
-		nitro, err := exec.LookPath("nitro")
+		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
 			return err
 		}
 
-		// remove the existingSite
-		if err := sudo.RunCommand(nitro, machine, "hosts", "remove", existingSite.Hostname); err != nil {
-			fmt.Println("Error removing", existingSite.Hostname, "from the hosts file")
-			return err
-		}
-
-		if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
-			fmt.Println("Error adding", newHostname, "to the hosts file")
-			return err
+		if applyChanges {
+			fmt.Println("Ok, applying changes from the config file...")
+			return applyCommand.RunE(cmd, args)
 		}
 
 		return nil
