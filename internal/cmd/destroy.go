@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -38,6 +39,12 @@ var destroyCommand = &cobra.Command{
 			return err
 		}
 
+		if flagClean {
+			if err := os.Remove(viper.ConfigFileUsed()); err != nil {
+				fmt.Println("unable to remove the config:", viper.ConfigFileUsed())
+			}
+		}
+
 		if len(domains) == 0 {
 			return nil
 		}
@@ -57,4 +64,8 @@ var destroyCommand = &cobra.Command{
 
 		return sudo.RunCommand(nitro, machine, cmds...)
 	},
+}
+
+func init() {
+	destroyCommand.Flags().BoolVar(&flagClean, "clean", false, "remove the config file when destroying the machine")
 }

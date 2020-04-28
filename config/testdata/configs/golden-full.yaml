@@ -1,3 +1,4 @@
+php: "7.4"
 mounts:
   - source: ~/go/src/github.com/craftcms/nitro/production-site
     dest: /nitro/sites/production-site
