@@ -2,19 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
-	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
@@ -23,7 +17,11 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := flagMachineName
+		// load the config
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
 
 		// if there is no arg, get the current working dir
 		// else get the first arg
@@ -88,12 +86,6 @@ var addCommand = &cobra.Command{
 		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
 		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
-		// load the config
-		var configFile config.Config
-		if err := viper.Unmarshal(&configFile); err != nil {
-			return err
-		}
-
 		// create a new mount
 		// add the mount to configfile
 		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
@@ -134,79 +126,7 @@ var addCommand = &cobra.Command{
 			return nil
 		}
 
-		path, err := exec.LookPath("multipass")
-		if err != nil {
-			return err
-		}
-
-		// find the existingMounts
-
-		c := exec.Command(path, []string{"info", machine, "--format=csv"}...)
-		output, err := c.Output()
-		if err != nil {
-			return err
-		}
-		existingMounts, err := find.Mounts(machine, output)
-		if err != nil {
-			return err
-		}
-
-		// find the sites
-		var sites []config.Site
-		for _, site := range configFile.Sites {
-			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
-			if err != nil {
-				return err
-			}
-			if strings.Contains(string(output), "exists") {
-				sites = append(sites, site)
-			}
-		}
-
-		// check if a database already exists
-		var databases []config.Database
-		for _, db := range configFile.Databases {
-			database, err := find.ExistingContainer(exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...), db)
-			if err != nil {
-				return err
-			}
-
-			if database != nil {
-				fmt.Println("Database", db.Name(), "exists, skipping...")
-				databases = append(databases, *database)
-			}
-		}
-
-		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
-		if err != nil {
-			return err
-		}
-
-		actions, err := task.Apply(machine, configFile, existingMounts, sites, databases, php)
-
-		if flagDebug {
-			for _, action := range actions {
-				fmt.Println(action.Args)
-			}
-
-			return nil
-		}
-
-		if err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			return err
-		}
-
-		fmt.Println("Applied the changes and added", hostname, "to", machine)
-
-		// prompt to add hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Adding", site.Hostname, "to your hosts file")
-
-		return sudo.RunCommand(nitro, machine, "hosts")
+		return applyCommand.RunE(cmd, args)
 	},
 }
 
