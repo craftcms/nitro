@@ -6,15 +6,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/manifoldco/promptui"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/normalize"
+	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var importCommand = &cobra.Command{
@@ -49,15 +50,16 @@ var importCommand = &cobra.Command{
 		for _, db := range databases {
 			dbs = append(dbs, db.Name())
 		}
-		databaseContainerName := promptui.Select{
-			Label: "Select database",
-			Items: dbs,
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
 		}
 
-		_, containerName, err := databaseContainerName.Run()
-		if err != nil {
-			return err
+		if len(dbs) == 0 {
+			return errors.New("there are no databases that we can import the file into")
 		}
+
+		containerName, _, err := prompt.Select(ui, "Select a database to import the file into", dbs[0], dbs)
 
 		var actions []nitro.Action
 
@@ -84,22 +86,12 @@ var importCommand = &cobra.Command{
 
 		fmt.Printf("Importing %q into %q (large files may take a while)...\n", filename, containerName)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		fmt.Println("Successfully imported the database file into", containerName)
+
+		return nil
 	},
-}
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
-
-func dirExists(dir string) bool {
-	info, err := os.Stat(dir)
-	if os.IsExist(err) {
-		return false
-	}
-	return info.IsDir()
 }
