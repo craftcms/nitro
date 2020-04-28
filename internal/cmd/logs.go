@@ -3,14 +3,15 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strings"
+	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var logsCommand = &cobra.Command{
@@ -21,14 +22,12 @@ var logsCommand = &cobra.Command{
 
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
-
-		logType := promptui.Select{
-			Label: "Select the type of logs to view",
-			Items: opts,
-			Size:  len(opts),
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
 		}
 
-		_, kind, err := logType.Run()
+		kind, _, err := prompt.Select(ui, "Select the type of logs to view", "nginx", opts)
 		if err != nil {
 			return err
 		}
@@ -36,24 +35,13 @@ var logsCommand = &cobra.Command{
 		var actions []nitro.Action
 		switch kind {
 		case "docker":
-			validate := func(input string) error {
-				if input == "" {
-					return errors.New("container machine cannot be empty")
-				}
-				if strings.Contains(input, " ") {
-					return errors.New("container names cannot contain spaces")
-				}
-				return nil
-			}
-
-			containerNamePrompt := promptui.Prompt{
-				Label:    "Enter container machine",
-				Validate: validate,
-			}
-
-			containerName, err := containerNamePrompt.Run()
+			containerName, err := prompt.Ask(ui, "Enter container name:", "", true)
 			if err != nil {
 				return err
+			}
+
+			if containerName == "" {
+				return errors.New("container name cannot be empty")
 			}
 
 			dockerLogsAction, err := nitro.LogsDocker(machine, containerName)
@@ -71,15 +59,16 @@ var logsCommand = &cobra.Command{
 			for _, db := range databases {
 				dbs = append(dbs, db.Name())
 			}
-			databaseContainerName := promptui.Select{
-				Label: "Select database",
-				Items: dbs,
+
+			if len(dbs) == 0 {
+				return errors.New("there are no databases to view logs from")
 			}
 
-			_, containerName, err := databaseContainerName.Run()
+			containerName, _, err := prompt.Select(ui, "Select database", dbs[0], dbs)
 			if err != nil {
 				return err
 			}
+
 			dockerLogsAction, err := nitro.LogsDocker(machine, containerName)
 			if err != nil {
 				return err
