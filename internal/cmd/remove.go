@@ -4,24 +4,21 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os/exec"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/prompt"
-	"github.com/craftcms/nitro/internal/sudo"
 )
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
 	Short: "Manage your nitro sites",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := flagMachineName
-
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
@@ -33,9 +30,17 @@ var removeCommand = &cobra.Command{
 			return errors.New("there are no sites to remove")
 		}
 
-		i, _ := prompt.Select("Select site to remove", configFile.SitesAsList())
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
 
-		site := sites[i]
+		var site config.Site
+		_, i, err := prompt.Select(ui, "Select a site to remove:", sites[0].Hostname, configFile.SitesAsList())
+		if err != nil {
+			return err
+		}
+		site = sites[i]
 
 		// find the mount
 		mount := configFile.FindMountBySiteWebroot(site.Webroot)
@@ -59,9 +64,13 @@ var removeCommand = &cobra.Command{
 		if err := viper.ReadConfig(bytes.NewBuffer(c)); err != nil {
 			return err
 		}
-		if err := viper.WriteConfigAs(viper.ConfigFileUsed()); err != nil {
-			return err
+
+		if !flagDebug {
+			if err := viper.WriteConfigAs(viper.ConfigFileUsed()); err != nil {
+				return err
+			}
 		}
+
 		// unmarshal the messy config into a config
 		var messyConfig config.Config
 		if err := viper.Unmarshal(&messyConfig); err != nil {
@@ -76,60 +85,16 @@ var removeCommand = &cobra.Command{
 		}
 		// END HACK
 
-		actions, err := removeActions(machine, *mount, site)
+		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
 			return err
 		}
 
-		// save the config
-		if flagDebug {
-			for _, a := range actions {
-				fmt.Println(a.Args)
-			}
-			return nil
+		if applyChanges {
+			fmt.Println("Ok, applying changes from the config file...")
+			return applyCommand.RunE(cmd, args)
 		}
 
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			fmt.Println("Failed to remove the site:", err)
-			return err
-		}
-
-		fmt.Println("Removed the site from your config and applied the changes.")
-
-		// prompt to remove hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Removing site from your hosts file")
-
-		return sudo.RunCommand(nitro, machine, "hosts", "remove", site.Hostname)
+		return nil
 	},
-}
-
-func removeActions(name string, mount config.Mount, site config.Site) ([]nitro.Action, error) {
-	var actions []nitro.Action
-
-	// unmount
-	unmountAction, err := nitro.UnmountDir(name, mount.Dest)
-	if err != nil {
-		return nil, err
-	}
-	actions = append(actions, *unmountAction)
-
-	// remove nginx symlink
-	removeSymlinkAction, err := nitro.RemoveSymlink(name, site.Hostname)
-	if err != nil {
-		return nil, err
-	}
-	actions = append(actions, *removeSymlinkAction)
-
-	restartNginxAction, err := nitro.NginxReload(name)
-	if err != nil {
-		return nil, err
-	}
-	actions = append(actions, *restartNginxAction)
-
-	return actions, nil
 }

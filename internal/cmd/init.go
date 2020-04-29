@@ -1,14 +1,15 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -22,9 +23,15 @@ var initCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		existingConfig := false
 		if viper.ConfigFileUsed() != "" {
-			// TODO prompt for the confirmation of re initing the machine
-			return errors.New("using a config file already")
+			fmt.Println("Using an existing config:", viper.ConfigFileUsed())
+			existingConfig = true
+		}
+
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
 		}
 
 		// we don't have a config file
@@ -41,60 +48,103 @@ var initCommand = &cobra.Command{
 		cfg.CPUs = hardCodedCpus
 
 		// ask how much memory
-		memory, err := prompt.AskWithDefault("How much memory should we assign?", "4G", nil)
+		memory, err := prompt.Ask(ui, "How much memory should we assign?", "4G", true)
 		if err != nil {
 			return err
 		}
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.AskWithDefault("How much disk space should the machine have?", "40G", nil)
+		disk, err := prompt.Ask(ui, "How much disk space should the machine have?", "40G", true)
 		if err != nil {
 			return err
 		}
 		cfg.Disk = disk
 
 		// which version of PHP
-		_, php := prompt.SelectWithDefault("Which version of PHP should we install?", "7.4", nitro.PHPVersions)
-		cfg.PHP = php
+		if !existingConfig {
+			php, _, err := prompt.Select(ui, "Which version of PHP should we install?", "7.4", nitro.PHPVersions)
+			if err != nil {
+				return err
+			}
+			cfg.PHP = php
+		} else {
+			cfg.PHP = config.GetString("php", flagPhpVersion)
 
-		// what database engine?
-		_, engine := prompt.SelectWithDefault("Which database engine should we setup?", "mysql", nitro.DBEngines)
-
-		// which version should we use?
-		versions := nitro.DBVersions[engine]
-		defaultVersion := versions[0]
-		_, version := prompt.SelectWithDefault("Select a version of "+engine+" to use:", defaultVersion, versions)
-
-		// get the port for the engine
-		port := "3306"
-		if strings.Contains(engine, "postgres") {
-			port = "5432"
-		}
-		// TODO check if the port has already been used and +1 it
-
-		cfg.Databases = []config.Database{
-			{
-				Engine:  engine,
-				Version: version,
-				Port:    port,
-			},
+			// double check from the major update
+			if cfg.PHP == "" {
+				cfg.PHP = "7.4"
+			}
 		}
 
-		if err := validate.DatabaseConfig(cfg.Databases); err != nil {
-			return err
+		if !existingConfig {
+			// what database engine?
+			engine, _, err := prompt.Select(ui, "Which database engine should we setup?", "mysql", nitro.DBEngines)
+			if err != nil {
+				return err
+			}
+
+			// which version should we use?
+			versions := nitro.DBVersions[engine]
+			defaultVersion := versions[0]
+			version, _, err := prompt.Select(ui, "Select a version of "+engine+" to use:", defaultVersion, versions)
+			if err != nil {
+				return err
+			}
+
+			// get the port for the engine
+			port := "3306"
+			if strings.Contains(engine, "postgres") {
+				port = "5432"
+			}
+
+			cfg.Databases = []config.Database{
+				{
+					Engine:  engine,
+					Version: version,
+					Port:    port,
+				},
+			}
+		} else {
+			var databases []config.Database
+			if err := viper.UnmarshalKey("databases", &databases); err != nil {
+				return err
+			}
+
+			if databases != nil {
+				cfg.Databases = databases
+			}
 		}
 
-		// save the config file
-		home, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-		if err := cfg.SaveAs(home, machine); err != nil {
-			return err
+		if len(cfg.Databases) > 0 {
+			if err := validate.DatabaseConfig(cfg.Databases); err != nil {
+				return err
+			}
 		}
 
-		actions, err := createActions(machine, memory, disk, cpuInt, php, cfg.Databases, nil, nil)
+		var mounts []config.Mount
+		var sites []config.Site
+		if existingConfig {
+			if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
+				return err
+			}
+			if err := viper.UnmarshalKey("sites", &sites); err != nil {
+				return err
+			}
+		}
+
+		// save the config file if it does not exist
+		if !existingConfig {
+			home, err := homedir.Dir()
+			if err != nil {
+				return err
+			}
+			if err := cfg.SaveAs(home, machine); err != nil {
+				return err
+			}
+		}
+
+		actions, err := createActions(machine, memory, disk, cpuInt, cfg.PHP, cfg.Databases, mounts, sites)
 		if err != nil {
 			return err
 		}
@@ -181,6 +231,12 @@ func createActions(machine, memory, disk string, cpus int, phpVersion string, da
 			return nil, err
 		}
 		actions = append(actions, *createDatabaseAction)
+
+		setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, *setUserPermissions)
 	}
 
 	var siteErrs []error

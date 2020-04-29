@@ -32,13 +32,14 @@ var hostsCommand = &cobra.Command{
 		ip := nitro.IP(machine, nitro.NewMultipassRunner("multipass"))
 
 		// get all of the sites from the config file
-		if !viper.IsSet("sites") {
-			return errors.New("unable to read sites from " + viper.ConfigFileUsed())
-		}
-
 		var sites []config.Site
 		if err := viper.UnmarshalKey("sites", &sites); err != nil {
 			return err
+		}
+
+		if sites == nil {
+			fmt.Println("There are no sites in the config file to remove")
+			return nil
 		}
 
 		var domains []string
