@@ -59,7 +59,12 @@ var importCommand = &cobra.Command{
 			return errors.New("there are no databases that we can import the file into")
 		}
 
-		containerName, _, err := prompt.Select(ui, "Select a database to import the file into", dbs[0], dbs)
+		containerName, _, err := prompt.Select(ui, "Select a database engine to import the file into", dbs[0], dbs)
+
+		databaseName, err := prompt.Ask(ui, "What is the database name?", "", true)
+		if err != nil {
+			return err
+		}
 
 		var actions []nitro.Action
 
@@ -76,7 +81,7 @@ var importCommand = &cobra.Command{
 			engine = "postgres"
 		}
 
-		importArgs := []string{"exec", machine, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, "nitro", filename, engine}
+		importArgs := []string{"exec", machine, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, databaseName, filename, engine}
 		dockerExecAction := nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
