@@ -49,7 +49,7 @@ var addCommand = &cobra.Command{
 		default:
 			hostname = helpers.RemoveTrailingSlash(flagHostname)
 		}
-		
+
 		// set the webrootName var (e.g. web)
 		var webrootDir string
 		switch flagWebroot {
