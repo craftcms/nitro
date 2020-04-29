@@ -13,7 +13,7 @@ import (
 
 var hostsRemoveCommand = &cobra.Command{
 	Use:    "remove",
-	Short:  "Remove an entry from your hosts file",
+	Short:  "Remove a site from your hosts file",
 	Hidden: true,
 	Args:   cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -69,7 +69,7 @@ var renameCommand = &cobra.Command{
 		}
 
 		if applyChanges {
-			fmt.Println("Ok, applying changes from the config file...")
+			fmt.Println("Applying changes from the config file...")
 			return applyCommand.RunE(cmd, args)
 		}
 

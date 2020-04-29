@@ -19,8 +19,8 @@ func init() {
 	cobra.OnInitialize(loadConfig)
 
 	// set persistent flags on the root command
-	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "Name of the machine.")
-	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "Bypass executing the commands.")
+	rootCmd.PersistentFlags().StringVarP(&flagMachineName, "machine", "m", "", "Name of a machine.")
+	rootCmd.PersistentFlags().BoolVarP(&flagDebug, "debug", "d", false, "Show command output and do not execute.")
 
 	// add commands to root
 	rootCmd.AddCommand(

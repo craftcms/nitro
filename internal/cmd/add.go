@@ -16,7 +16,7 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add site to machine",
+	Short: "Add a site to a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// load the config
 		var configFile config.Config
@@ -89,7 +89,7 @@ var addCommand = &cobra.Command{
 		skipSite := true
 		site := config.Site{Hostname: hostname, Webroot: webRootPath}
 		if configFile.SiteExists(site) {
-			fmt.Println(site.Hostname, "has already been set")
+			fmt.Println(site.Hostname, "has already been set.")
 		} else {
 			if err := configFile.AddSite(site); err != nil {
 				return err
@@ -116,7 +116,7 @@ var addCommand = &cobra.Command{
 		}
 
 		if !applyChanges {
-			fmt.Println("You can apply new nitro.yaml changes later by running `nitro apply`.")
+			fmt.Println("You can apply new config file changes later by running `nitro apply`.")
 
 			return nil
 		}
