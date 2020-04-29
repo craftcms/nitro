@@ -26,6 +26,8 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
+		// TODO check if a machine exists, if not launch it
+
 		// load the config file
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
