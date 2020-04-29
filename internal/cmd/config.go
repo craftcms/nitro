@@ -60,6 +60,7 @@ write_files:
       fi
 
       if [ "$engine" == "mysql" ]; then
+          docker exec "$container" bash -c "while ! mysqladmin ping -h 127.0.0.1 -uroot -pnitro; do echo 'waiting...'; sleep 1; done"
           docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON *.* TO 'nitro'@'%';"
           docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           echo "setting root permissions on user nitro"
