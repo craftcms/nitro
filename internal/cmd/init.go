@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -24,9 +23,10 @@ var initCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		existingConfig := false
 		if viper.ConfigFileUsed() != "" {
-			// TODO prompt for the confirmation of re initing the machine
-			return errors.New("existing config file: " + viper.ConfigFileUsed())
+			fmt.Println("Using an existing config:", viper.ConfigFileUsed())
+			existingConfig = true
 		}
 
 		ui := &input.UI{
@@ -62,43 +62,75 @@ var initCommand = &cobra.Command{
 		cfg.Disk = disk
 
 		// which version of PHP
-		php, _, err := prompt.Select(ui, "Which version of PHP should we install?", "7.4", nitro.PHPVersions)
-		if err != nil {
-			return err
-		}
-		cfg.PHP = php
+		if !existingConfig {
+			php, _, err := prompt.Select(ui, "Which version of PHP should we install?", "7.4", nitro.PHPVersions)
+			if err != nil {
+				return err
+			}
+			cfg.PHP = php
+		} else {
+			cfg.PHP = config.GetString("php", flagPhpVersion)
 
-		// what database engine?
-		engine, _, err := prompt.Select(ui, "Which database engine should we setup?", "mysql", nitro.DBEngines)
-		if err != nil {
-			return err
-		}
-
-		// which version should we use?
-		versions := nitro.DBVersions[engine]
-		defaultVersion := versions[0]
-		version, _, err := prompt.Select(ui, "Select a version of "+engine+" to use:", defaultVersion, versions)
-		if err != nil {
-			return err
+			// double check from the major update
+			if cfg.PHP == "" {
+				cfg.PHP = "7.4"
+			}
 		}
 
-		// get the port for the engine
-		port := "3306"
-		if strings.Contains(engine, "postgres") {
-			port = "5432"
+		if !existingConfig {
+			// what database engine?
+			engine, _, err := prompt.Select(ui, "Which database engine should we setup?", "mysql", nitro.DBEngines)
+			if err != nil {
+				return err
+			}
+
+			// which version should we use?
+			versions := nitro.DBVersions[engine]
+			defaultVersion := versions[0]
+			version, _, err := prompt.Select(ui, "Select a version of "+engine+" to use:", defaultVersion, versions)
+			if err != nil {
+				return err
+			}
+
+			// get the port for the engine
+			port := "3306"
+			if strings.Contains(engine, "postgres") {
+				port = "5432"
+			}
+
+			cfg.Databases = []config.Database{
+				{
+					Engine:  engine,
+					Version: version,
+					Port:    port,
+				},
+			}
+		} else {
+			var databases []config.Database
+			if err := viper.UnmarshalKey("databases", &databases); err != nil {
+				return err
+			}
+
+			if databases != nil {
+				cfg.Databases = databases
+			}
 		}
 
-		// TODO check if the port has already been used and +1 it
-		cfg.Databases = []config.Database{
-			{
-				Engine:  engine,
-				Version: version,
-				Port:    port,
-			},
+		if len(cfg.Databases) > 0 {
+			if err := validate.DatabaseConfig(cfg.Databases); err != nil {
+				return err
+			}
 		}
 
-		if err := validate.DatabaseConfig(cfg.Databases); err != nil {
-			return err
+		var mounts []config.Mount
+		var sites []config.Site
+		if existingConfig {
+			if err := viper.UnmarshalKey("mounts", &mounts); err != nil {
+				return err
+			}
+			if err := viper.UnmarshalKey("sites", &sites); err != nil {
+				return err
+			}
 		}
 
 		// save the config file
@@ -110,7 +142,7 @@ var initCommand = &cobra.Command{
 			return err
 		}
 
-		actions, err := createActions(machine, memory, disk, cpuInt, php, cfg.Databases, nil, nil)
+		actions, err := createActions(machine, memory, disk, cpuInt, cfg.PHP, cfg.Databases, mounts, sites)
 		if err != nil {
 			return err
 		}
