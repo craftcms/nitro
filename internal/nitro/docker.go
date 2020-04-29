@@ -9,7 +9,7 @@ import (
 // CreateDatabaseContainer is responsible for the creation of a new Docker database and will
 // assign a volume and port based on the arguments. Validation of port collisions should occur
 // outside of this func and this will only validate engines and versions.
-func CreateDatabaseContainer(name, engine, version, port string) (*Action, error) {
+func CreateDatabaseContainer(machine, engine, version, port string) (*Action, error) {
 	if err := validate.DatabaseEngineAndVersion(engine, version); err != nil {
 		return nil, err
 	}
@@ -33,13 +33,13 @@ func CreateDatabaseContainer(name, engine, version, port string) (*Action, error
 	volume := containerVolume(engine, version, port)
 	volumeMount := fmt.Sprintf("%s:%s", volume, containerPath)
 
-	// build the container name based on engine, version, and port
+	// build the container machine based on engine, version, and port
 	containerName := containerName(engine, version, port)
 
 	// create the port mapping
 	portMapping := fmt.Sprintf("%v:%v", port, containerPort)
 
-	args := []string{"exec", name, "--", "docker", "run", "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping}
+	args := []string{"exec", machine, "--", "docker", "run", "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping}
 
 	// append the env vars
 	args = append(args, containerEnvVars...)
@@ -54,7 +54,8 @@ func CreateDatabaseContainer(name, engine, version, port string) (*Action, error
 	}, nil
 }
 
-func CreateDatabaseVolume(name, engine, version, port string) (*Action, error) {
+// CreateDatabaseVolume will make a database vaolume to ensure that data is persisted during reboots.
+func CreateDatabaseVolume(machine, engine, version, port string) (*Action, error) {
 	if err := validate.DatabaseEngineAndVersion(engine, version); err != nil {
 		return nil, err
 	}
@@ -64,7 +65,7 @@ func CreateDatabaseVolume(name, engine, version, port string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "docker", "volume", "create", volume},
+		Args:       []string{"exec", machine, "--", "docker", "volume", "create", volume},
 	}, nil
 }
 

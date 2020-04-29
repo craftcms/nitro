@@ -74,15 +74,23 @@ var addCommand = &cobra.Command{
 		// create a new mount
 		// add the mount to configfile
 		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
-		if err := configFile.AddMount(mount); err != nil {
-			return err
+		if configFile.MountExists(mount.Dest) {
+			fmt.Println(mount.Source, "is already mounted at", mount.Dest)
+		} else {
+			if err := configFile.AddMount(mount); err != nil {
+				return err
+			}
 		}
 
 		// create a new site
 		// add site to config file
 		site := config.Site{Hostname: hostname, Webroot: webRootPath}
-		if err := configFile.AddSite(site); err != nil {
-			return err
+		if configFile.SiteExists(site) {
+			fmt.Println(site.Hostname, "has already been set")
+		} else {
+			if err := configFile.AddSite(site); err != nil {
+				return err
+			}
 		}
 
 		if !flagDebug {
