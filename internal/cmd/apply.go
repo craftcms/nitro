@@ -21,6 +21,11 @@ var applyCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		// always read the config file so its updated from any previous commands
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+
 		// load the config file
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
