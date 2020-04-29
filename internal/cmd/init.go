@@ -26,7 +26,7 @@ var initCommand = &cobra.Command{
 
 		if viper.ConfigFileUsed() != "" {
 			// TODO prompt for the confirmation of re initing the machine
-			return errors.New("using a config file already")
+			return errors.New("existing config file: " + viper.ConfigFileUsed())
 		}
 
 		ui := &input.UI{
