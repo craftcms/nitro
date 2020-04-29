@@ -35,7 +35,9 @@ write_files:
       engine="$4"
       
       if [ "$engine" == "mysql" ]; then
-          docker exec "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database; GRANT ALL ON $database.* TO 'nitro'@'%'; FLUSH PRIVILEGES;"
+          docker exec "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
+          docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
+          docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           cat "$filename" | pv | docker exec "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
       else
           docker exec "$container" psql -U nitro -c "CREATE DATABASE IF NOT EXISTS $database OWNER nitro;"
@@ -58,7 +60,8 @@ write_files:
       fi
 
       if [ "$engine" == "mysql" ]; then
-          docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON *.* TO 'nitro'@'%'; FLUSH PRIVILEGES;"
+          docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON *.* TO 'nitro'@'%';"
+          docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           echo "setting root permissions on user nitro"
       else
           docker exec "$container" psql -U nitro -c "ALTER USER nitro WITH SUPERUSER;"
