@@ -64,6 +64,11 @@ func TestApply(t *testing.T) {
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
 				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "bash", "/opt/nitro/scripts/docker-set-database-user-permissions.sh", "mysql_5.7_3306", "mysql"},
+				},
 			},
 		},
 		{

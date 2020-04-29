@@ -3,6 +3,7 @@ package nitro
 import (
 	"fmt"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -51,6 +52,15 @@ func CreateDatabaseContainer(machine, engine, version, port string) (*Action, er
 		Type:       "exec",
 		UseSyscall: false,
 		Args:       args,
+	}, nil
+}
+
+// SetDatabaseUserPermissions is used to set all permissions on the nitro user for a database
+func SetDatabaseUserPermissions(machine string, database config.Database) (*Action, error) {
+	return &Action{
+		Type:       "exec",
+		UseSyscall: false,
+		Args:       []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-set-database-user-permissions.sh", database.Name(), database.Engine},
 	}, nil
 }
 

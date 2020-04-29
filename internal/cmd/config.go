@@ -39,6 +39,29 @@ write_files:
       else
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
+  - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
+    content: |
+      #!/usr/bin/env bash
+      container="$1"
+      engine="$2"
+
+      if [ -z "$container" ]; then
+          echo "you must provide a container name"
+          exit 1
+      fi
+
+      if [ -z "$engine" ]; then
+          echo "you must provide a database engine (e.g. mysql or postgres)"
+          exit 1
+      fi
+
+      if [ "$engine" == "mysql" ]; then
+          docker exec -it "$container" mysql -uroot -pnitro -e "GRANT ALL ON *.* TO 'nitro'@'%'; FLUSH PRIVILEGES;"
+          echo "setting root permissions on user nitro"
+      else
+          docker exec -it "$container" psql -U nitro -c "ALTER USER nitro WITH SUPERUSER;"
+          echo "setting superuser permissions on user nitro"
+      fi
   - path: /opt/nitro/nginx/template.conf
     content: |
       server {
