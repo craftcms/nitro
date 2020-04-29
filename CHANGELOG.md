@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## Added
+- Added the `rename` command to allow users to quickly rename sites in Nitro.
+
+## Changed
+- The command `destroy` now has a `--clean` option which will delete a configuration file after destroying the machine.
+- The database user nitro now has root privileges for `mysql` and `postgres` databases.
+- Removed the sometime buggy prompt package in favor of a simple package to ask for user input on certain commands.
+- Added the `php` option back to the config file
+- All commands that perform configuration changes (e.g. `add`, `remove`, and `rename`) now use the same logic as the `apply` command.
+- When importing a database using the `import` command, users asked for the database name which nitro will create if it does not exist. 
+- Added a lot of tests and code cleanup for future work.
+- The `apply` command will automatically update our hosts file.
+- The `destroy` command will now remove any sites in the machine configuration from the hosts file.
+- The `init` command will use an existing configuration file and recreate the entire environment. Also, the existing file will not be overwritten when using this command.
+- Commands now output more _statuses_ where possible to provide the user more feedback.
+
+## Fixed
+- When using the `add` command, the config file checks for duplicate sites and mounts and displays. [#86](https://github.com/craftcms/nitro/issues/86)
+- Fixed an issue when using some commands on Windows. [#88](https://github.com/craftcms/nitro/issues/88)
+- Fixed an issue in the `apply` command that would not detect new changes to 
+
 ## 0.10.0 - 2020-04-23
 
 > **Warning:** This release contains breaking changes. See the [upgrade notes](UPGRADE.md#upgrading-to-nitro-0100)
