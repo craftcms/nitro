@@ -54,21 +54,19 @@ func ChangeTemplateVariables(name, webroot, hostname, php string, aliases []stri
 		hostname = hostname + " " + strings.Join(aliases, " ")
 	}
 
-	actions = append(actions, *changeVariables(name, template, "CHANGEWEBROOTDIR", webroot))
-	actions = append(actions, *changeVariables(name, template, "CHANGESERVERNAME", hostname))
-	actions = append(actions, *changeVariables(name, template, "CHANGEPHPVERSION", php))
+	actions = append(actions, *ChangeNginxTemplateVariable(name, template, "CHANGEWEBROOTDIR", webroot))
+	actions = append(actions, *ChangeNginxTemplateVariable(name, template, "CHANGESERVERNAME", hostname))
+	actions = append(actions, *ChangeNginxTemplateVariable(name, template, "CHANGEPHPVERSION", php))
 
 	return &actions, nil
 }
 
-func changeVariables(name, site, variable, actual string) *Action {
-	file := fmt.Sprintf("/etc/nginx/sites-available/%v", site)
-
+func ChangeNginxTemplateVariable(machine, hostname, variable, actual string) *Action {
 	sedCmd := "s|" + variable + "|" + actual + "|g"
 
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "sudo", "sed", "-i", sedCmd, file},
+		Args:       []string{"exec", machine, "--", "sudo", "sed", "-i", sedCmd, fmt.Sprintf("/etc/nginx/sites-available/%v", hostname)},
 	}
 }

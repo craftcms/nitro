@@ -538,3 +538,299 @@ func TestConfig_RemoveSite1(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_RenameSite(t *testing.T) {
+	type fields struct {
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		site     Site
+		hostname string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Site
+		wantErr bool
+	}{
+		{
+			name: "remove a site my hostname",
+			args: args{
+				site: Site{
+					Hostname: "old.test",
+					Webroot:  "/nitro/sites/old.test",
+				},
+				hostname: "new.test",
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "old.test",
+						Webroot:  "/nitro/sites/old.test",
+					},
+					{
+						Hostname: "keep.test",
+						Webroot:  "/nitro/sites/keep.test",
+					},
+				},
+			},
+			want: []Site{
+				{
+					Hostname: "new.test",
+					Webroot:  "/nitro/sites/new.test",
+				},
+				{
+					Hostname: "keep.test",
+					Webroot:  "/nitro/sites/keep.test",
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if err := c.RenameSite(tt.args.site, tt.args.hostname); (err != nil) != tt.wantErr {
+				t.Errorf("RenameSite() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.want != nil {
+				if !reflect.DeepEqual(c.Sites, tt.want) {
+					t.Errorf("RenameSite() got sites = \n%v, \nwant \n%v", c.Sites, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestConfig_MountExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		dest string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "existing mounts return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/example-site",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/example-site"},
+			want: true,
+		},
+		{
+			name: "non-existing mounts return false",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/example-site",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/nonexistent-site"},
+			want: false,
+		},
+		{
+			name: "parent mounts return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: "./testdata/test-mount",
+						Dest:   "/nitro/sites",
+					},
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites",
+					},
+				},
+			},
+			args: args{dest: "/nitro/sites/nonexistent-site"},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.MountExists(tt.args.dest); got != tt.want {
+				t.Errorf("MountExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_SiteExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		site Site
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "exact sites return true",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "iexist.test",
+						Webroot:  "/nitro/sites/iexist.test",
+					},
+				},
+			},
+			args: args{site: Site{
+				Hostname: "iexist.test",
+				Webroot:  "/nitro/sites/iexist.test",
+			}},
+			want: true,
+		},
+		{
+			name: "exact sites return false",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "iexist.test",
+						Webroot:  "/nitro/sites/iexist.test",
+					},
+				},
+			},
+			args: args{site: Site{
+				Hostname: "idontexist.test",
+				Webroot:  "/nitro/sites/idontexist.test",
+			}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.SiteExists(tt.args.site); got != tt.want {
+				t.Errorf("SiteExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_DatabaseExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		database Database
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "can find an existing database",
+			fields: fields{
+				Databases: []Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+				},
+			},
+			args: args{database: Database{
+				Engine:  "mysql",
+				Version: "5.8",
+				Port:    "3306",
+			}},
+			want: false,
+		},
+		{
+			name: "non-existing databases return false",
+			fields: fields{
+				Databases: []Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+				},
+			},
+			args: args{database: Database{
+				Engine:  "mysql",
+				Version: "5.7",
+				Port:    "3306",
+			}},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.DatabaseExists(tt.args.database); got != tt.want {
+				t.Errorf("DatabaseExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

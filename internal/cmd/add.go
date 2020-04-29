@@ -2,25 +2,27 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/internal/webroot"
-	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		machine := flagMachineName
+		// load the config
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
 
 		// if there is no arg, get the current working dir
 		// else get the first arg
@@ -30,53 +32,37 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
+
 		// prompt for the hostname if --hostname == ""
 		// else get the name of the current directory (e.g. nitro)
 		var hostname string
 		switch flagHostname {
 		case "":
-			hostnamePrompt := promptui.Prompt{
-				Label:    fmt.Sprintf("What should the hostname be? [%s]", directoryName),
-				Validate: validate.Hostname,
-			}
-
-			hostnameEntered, err := hostnamePrompt.Run()
+			hostname, err = prompt.Ask(ui, "What should the hostname be?", directoryName, true)
 			if err != nil {
 				return err
-			}
-
-			switch hostnameEntered {
-			case "":
-				hostname = directoryName
-			default:
-				hostname = hostnameEntered
 			}
 		default:
 			hostname = helpers.RemoveTrailingSlash(flagHostname)
 		}
 
-		// look for the www,public,public_html,www using the absolutePath variable
 		// set the webrootName var (e.g. web)
 		var webrootDir string
 		switch flagWebroot {
 		case "":
+			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
 				return err
 			}
-			webRootPrompt := promptui.Prompt{
-				Label: fmt.Sprintf("Where is the webroot? [%s]", foundDir),
-			}
 
-			webrootEntered, err := webRootPrompt.Run()
+			webrootDir, err = prompt.Ask(ui, "Where is the webroot?", foundDir, true)
 			if err != nil {
 				return err
-			}
-			switch webrootEntered {
-			case "":
-				webrootDir = foundDir
-			default:
-				webrootDir = webrootEntered
 			}
 		default:
 			webrootDir = flagWebroot
@@ -85,24 +71,35 @@ var addCommand = &cobra.Command{
 		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
 		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
-		// load the config
-		var configFile config.Config
-		if err := viper.Unmarshal(&configFile); err != nil {
-			return err
-		}
-
 		// create a new mount
-		// add the mount to configfile
+		skipMount := true
 		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
-		if err := configFile.AddMount(mount); err != nil {
-			return err
+		if configFile.MountExists(mount.Dest) {
+			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
+		} else {
+			// add the mount to configfile
+			if err := configFile.AddMount(mount); err != nil {
+				return err
+			}
+			skipMount = false
 		}
 
 		// create a new site
 		// add site to config file
+		skipSite := true
 		site := config.Site{Hostname: hostname, Webroot: webRootPath}
-		if err := configFile.AddSite(site); err != nil {
-			return err
+		if configFile.SiteExists(site) {
+			fmt.Println(site.Hostname, "has already been set")
+		} else {
+			if err := configFile.AddSite(site); err != nil {
+				return err
+			}
+			skipSite = false
+		}
+
+		if skipMount && skipSite {
+			fmt.Println("There are no changes to apply, skipping...")
+			return nil
 		}
 
 		if !flagDebug {
@@ -111,84 +108,20 @@ var addCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s has been added to nitro.yaml", hostname)
+		fmt.Printf("%s has been added to nitro.yaml\n", hostname)
 
-		applyPrompt := promptui.Prompt{
-			Label: "Apply changes now? [y]",
-		}
-
-		apply, err := applyPrompt.Run()
+		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
 			return err
 		}
-		if apply == "" {
-			apply = "y"
-		}
 
-		if apply != "y" {
+		if !applyChanges {
 			fmt.Println("You can apply new nitro.yaml changes later by running `nitro apply`.")
 
 			return nil
 		}
 
-		var actions []nitro.Action
-		// mount the directory
-		m := configFile.Mounts[len(configFile.Mounts)-1]
-		mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *mountAction)
-
-		// copy the nginx template
-		copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *copyTemplateAction)
-
-		// copy the nginx template
-		changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *changeNginxVariablesAction...)
-
-		createSymlinkAction, err := nitro.CreateSiteSymllink(machine, site.Hostname)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *createSymlinkAction)
-
-		restartNginxAction, err := nitro.NginxReload(machine)
-		if err != nil {
-			return err
-		}
-		actions = append(actions, *restartNginxAction)
-
-		if flagDebug {
-			for _, action := range actions {
-				fmt.Println(action.Args)
-			}
-
-			return nil
-		}
-
-		if err = nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			return err
-		}
-
-		fmt.Println("Applied the changes and added", hostname, "to", machine)
-
-		// prompt to add hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Adding", site.Hostname, "to your hosts file")
-
-		return sudo.RunCommand(nitro, machine, "hosts")
+		return applyCommand.RunE(cmd, args)
 	},
 }
 

@@ -14,35 +14,13 @@ import (
 )
 
 type Config struct {
-	PHP       string     `yaml:"-"`
+	PHP       string     `yaml:"php"`
 	CPUs      string     `yaml:"-"`
 	Disk      string     `yaml:"-"`
 	Memory    string     `yaml:"-"`
 	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites,omitempty"`
-}
-
-type Mount struct {
-	Source string `yaml:"source"`
-	Dest   string `yaml:"dest"`
-}
-
-type Database struct {
-	Engine  string `yaml:"engine"`
-	Version string `yaml:"version"`
-	Port    string `yaml:"port"`
-}
-
-type Site struct {
-	Hostname string   `yaml:"hostname"`
-	Webroot  string   `yaml:"webroot"`
-	Aliases  []string `yaml:"aliases,omitempty"`
-}
-
-func (m *Mount) AbsSourcePath() string {
-	home, _ := homedir.Dir()
-	return strings.Replace(m.Source, "~", home, 1)
 }
 
 func (c *Config) AddSite(site Site) error {
@@ -56,6 +34,49 @@ func (c *Config) AddSite(site Site) error {
 
 func (c *Config) GetSites() []Site {
 	return c.Sites
+}
+
+// GetExpandedMounts will take all of the mounts in a config file
+// and "expand" or get the full path mount source and return
+// a slice of mounts
+func (c *Config) GetExpandedMounts() []Mount {
+	var mounts []Mount
+	for _, m := range c.Mounts {
+		mounts = append(mounts, Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
+	}
+	return mounts
+}
+
+// MountExists will check if a mount exists by checking if it is an exact
+// dest or a parent of an existing dest
+func (c *Config) MountExists(dest string) bool {
+	for _, mount := range c.Mounts {
+		if mount.IsExact(dest) || mount.IsParent(dest) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *Config) SiteExists(site Site) bool {
+	for _, s := range c.Sites {
+		if s.IsExact(site) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *Config) DatabaseExists(database Database) bool {
+	for _, d := range c.Databases {
+		if d.Engine == database.Engine && d.Version == database.Version && d.Port == database.Port {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (c *Config) SitesAsList() []string {
@@ -104,6 +125,36 @@ func (c *Config) AddMount(m Mount) error {
 	c.Mounts = append(c.Mounts, m)
 
 	return nil
+}
+
+func (c *Config) RenameSite(site Site, hostname string) error {
+	for i, s := range c.Sites {
+		if s.Hostname == site.Hostname {
+			w := strings.Replace(s.Webroot, s.Hostname, hostname, 1)
+			c.Sites[i] = Site{Hostname: hostname, Webroot: w}
+
+			return nil
+		}
+	}
+
+	return errors.New("unable to locate the site with the hostname: " + site.Hostname)
+}
+
+func (c *Config) RenameMountBySite(site Site) error {
+	for i, mount := range c.Mounts {
+		sp := strings.Split(site.Webroot, "/")
+		siteMount := sp[len(sp)-1]
+		if strings.Contains(mount.Dest, siteMount) {
+			c.Mounts[i] = Mount{
+				Source: mount.Source,
+				Dest:   siteMount,
+			}
+
+			return nil
+		}
+	}
+
+	return errors.New("unable to find the mount for the site " + site.Hostname)
 }
 
 func (c *Config) RemoveSite(hostname string) error {

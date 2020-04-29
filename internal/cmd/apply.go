@@ -9,17 +9,30 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/diff"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/task"
 )
 
 var applyCommand = &cobra.Command{
-	Use:    "apply",
-	Short:  "Apply changes from config",
+	Use:   "apply",
+	Short: "Apply changes from config",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		// always read the config file so its updated from any previous commands
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+
+		// load the config file
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
+
+		// ABSTRACT
 		path, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
@@ -31,110 +44,40 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
-		attachedMounts, err := find.Mounts(machine, output)
+		// find mounts that already exist
+		mounts, err := find.Mounts(machine, output)
 		if err != nil {
 			return err
 		}
+		// END ABSTRACT
 
-		// load the config file
-		var configFile config.Config
-		if err := viper.Unmarshal(&configFile); err != nil {
-			return err
-		}
-
-		// get abs path for file sources
-		var fileMounts []config.Mount
-		for _, m := range configFile.Mounts {
-			fileMounts = append(fileMounts, config.Mount{Source: m.AbsSourcePath(), Dest: m.Dest})
-		}
-
-		// find sites not created
-		var sitesToCreate []config.Site
+		// find sites that are created
+		var sites []config.Site
 		for _, site := range configFile.Sites {
-			c := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname)
-			output, err := c.Output()
+			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
 			if err != nil {
 				return err
 			}
-			if !strings.Contains(string(output), "exists") {
-				sitesToCreate = append(sitesToCreate, site)
+			if strings.Contains(string(output), "exists") {
+				sites = append(sites, site)
 			}
 		}
 
-		// check for new dbs
-		dbsToCreate, err := find.ContainersToCreate(machine, configFile)
+		// find all existing databases
+		databases, err := find.AllDatabases(exec.Command(path, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
 		if err != nil {
 			return err
 		}
 
-		// prompt?
-		var actions []nitro.Action
-
-		mountActions, err := diff.MountActions(machine, attachedMounts, fileMounts)
+		// find the current version of php installed
+		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
 		if err != nil {
 			return err
 		}
-		actions = append(actions, mountActions...)
 
-		// create site actions
-		for _, site := range sitesToCreate {
-			// TODO abstract this logic into a func that takes mountActions and sites to return the mount action
-			for _, ma := range mountActions {
-				// break the string
-				mnt := strings.Split(ma.Args[2], ":")
-
-				// if the webroot is not of the mounts, then we should create an action
-				if !strings.Contains(mnt[1], site.Webroot) {
-					m := configFile.FindMountBySiteWebroot(site.Webroot)
-					mountAction, err := nitro.MountDir(machine, m.AbsSourcePath(), m.Dest)
-					if err != nil {
-						return err
-					}
-					actions = append(actions, *mountAction)
-				}
-			}
-
-			copyTemplateAction, err := nitro.CopyNginxTemplate(machine, site.Hostname)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *copyTemplateAction)
-
-			// copy the nginx template
-			changeNginxVariablesAction, err := nitro.ChangeTemplateVariables(machine, site.Webroot, site.Hostname, configFile.PHP, site.Aliases)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *changeNginxVariablesAction...)
-
-			createSymlinkAction, err := nitro.CreateSiteSymllink(machine, site.Hostname)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *createSymlinkAction)
-		}
-
-		if len(sitesToCreate) > 0 {
-			restartNginxAction, err := nitro.NginxReload(machine)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *restartNginxAction)
-		}
-
-		// create database actions
-		for _, database := range dbsToCreate {
-			volumeAction, err := nitro.CreateDatabaseVolume(machine, database.Engine, database.Version, database.Port)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *volumeAction)
-
-			createDatabaseAction, err := nitro.CreateDatabaseContainer(machine, database.Engine, database.Version, database.Port)
-			if err != nil {
-				return err
-			}
-			actions = append(actions, *createDatabaseAction)
+		actions, err := task.Apply(machine, configFile, mounts, sites, databases, php)
+		if err != nil {
+			return err
 		}
 
 		if flagDebug {
@@ -145,15 +88,20 @@ var applyCommand = &cobra.Command{
 			return nil
 		}
 
-		fmt.Printf("There are %d mounted directories and %d mounts in the config file. Applying changes now...\n", len(attachedMounts), len(fileMounts))
-		fmt.Printf("There are %d sites to create and %d sites in the config file. Applying changes now...\n", len(sitesToCreate), len(configFile.Sites))
-
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
-		return nil
+		nitro, err := exec.LookPath("nitro")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Editing your hosts file")
+
+		// TODO check the current OS and call commands for windows
+		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }
