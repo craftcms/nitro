@@ -49,12 +49,12 @@ var addCommand = &cobra.Command{
 		default:
 			hostname = helpers.RemoveTrailingSlash(flagHostname)
 		}
-
-		// look for the www,public,public_html,www using the absolutePath variable
+		
 		// set the webrootName var (e.g. web)
 		var webrootDir string
 		switch flagWebroot {
 		case "":
+			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
 				return err
@@ -72,18 +72,21 @@ var addCommand = &cobra.Command{
 		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
 
 		// create a new mount
-		// add the mount to configfile
+		skipMount := true
 		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
 		if configFile.MountExists(mount.Dest) {
-			fmt.Println(mount.Source, "is already mounted at", mount.Dest)
+			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
 		} else {
+			// add the mount to configfile
 			if err := configFile.AddMount(mount); err != nil {
 				return err
 			}
+			skipMount = false
 		}
 
 		// create a new site
 		// add site to config file
+		skipSite := true
 		site := config.Site{Hostname: hostname, Webroot: webRootPath}
 		if configFile.SiteExists(site) {
 			fmt.Println(site.Hostname, "has already been set")
@@ -91,6 +94,12 @@ var addCommand = &cobra.Command{
 			if err := configFile.AddSite(site); err != nil {
 				return err
 			}
+			skipSite = false
+		}
+
+		if skipMount && skipSite {
+			fmt.Println("There are no changes to apply, skipping...")
+			return nil
 		}
 
 		if !flagDebug {
