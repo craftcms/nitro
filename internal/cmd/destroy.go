@@ -46,6 +46,7 @@ var destroyCommand = &cobra.Command{
 		}
 
 		if len(domains) == 0 {
+			fmt.Println("Permanently removed", machine)
 			return nil
 		}
 

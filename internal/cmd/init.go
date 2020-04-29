@@ -133,13 +133,15 @@ var initCommand = &cobra.Command{
 			}
 		}
 
-		// save the config file
-		home, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-		if err := cfg.SaveAs(home, machine); err != nil {
-			return err
+		// save the config file if it does not exist
+		if !existingConfig {
+			home, err := homedir.Dir()
+			if err != nil {
+				return err
+			}
+			if err := cfg.SaveAs(home, machine); err != nil {
+				return err
+			}
 		}
 
 		actions, err := createActions(machine, memory, disk, cpuInt, cfg.PHP, cfg.Databases, mounts, sites)
