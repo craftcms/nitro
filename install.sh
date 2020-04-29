@@ -60,7 +60,7 @@ checkHash() {
 
     # Make sure the file names match up.
     if [ "$4" != "$checkResultFileName" ]; then
-      # rm "$1"
+      rm "$1"
       echo "Checksums do not match. Exiting."
       exit 1
     fi
