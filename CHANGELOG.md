@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## Changed
+- The `init` command now prompts for how many CPU cores should be assigned to the machine.
+
 ## 0.11.0 - 2020-04-29
 
 ## Added
