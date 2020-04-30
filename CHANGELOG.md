@@ -1,11 +1,13 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+### Unreleased
+
+### 0.11.2 - 2020-04-09
 
 ## Changed
 - The `init` command now prompts for how many CPU cores should be assigned to the machine.
 
-## 0.11.0 - 2020-04-29
+### 0.11.0 - 2020-04-29
 
 ## Added
 - Added the `rename` command to allow users to quickly rename sites.
