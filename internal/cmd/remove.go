@@ -17,7 +17,7 @@ import (
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Manage your nitro sites",
+	Short: "Remove site from a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
@@ -91,7 +91,7 @@ var removeCommand = &cobra.Command{
 		}
 
 		if applyChanges {
-			fmt.Println("Ok, applying changes from the config file...")
+			fmt.Println("Applying changes from the config file...")
 			return applyCommand.RunE(cmd, args)
 		}
 

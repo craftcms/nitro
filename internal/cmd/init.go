@@ -38,24 +38,23 @@ var initCommand = &cobra.Command{
 		// set the config file
 		var cfg config.Config
 
-		// hardcode the CPUs until this issue is resolved
-		// https://github.com/craftcms/nitro/issues/65
-		hardCodedCpus := "2"
-		cpuInt, err := strconv.Atoi(hardCodedCpus)
+		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
+		// ask how many cores
+		cpuCores, err := prompt.Ask(ui, "How many CPU cores?", "2", true)
 		if err != nil {
 			return err
 		}
-		cfg.CPUs = hardCodedCpus
+		cfg.CPUs = cpuCores
 
 		// ask how much memory
-		memory, err := prompt.Ask(ui, "How much memory should we assign?", "4G", true)
+		memory, err := prompt.Ask(ui, "How much memory?", "4G", true)
 		if err != nil {
 			return err
 		}
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space should the machine have?", "40G", true)
+		disk, err := prompt.Ask(ui, "How much disk space??", "40G", true)
 		if err != nil {
 			return err
 		}
@@ -63,7 +62,7 @@ var initCommand = &cobra.Command{
 
 		// which version of PHP
 		if !existingConfig {
-			php, _, err := prompt.Select(ui, "Which version of PHP should we install?", "7.4", nitro.PHPVersions)
+			php, _, err := prompt.Select(ui, "Which version of PHP?", "7.4", nitro.PHPVersions)
 			if err != nil {
 				return err
 			}
@@ -79,7 +78,7 @@ var initCommand = &cobra.Command{
 
 		if !existingConfig {
 			// what database engine?
-			engine, _, err := prompt.Select(ui, "Which database engine should we setup?", "mysql", nitro.DBEngines)
+			engine, _, err := prompt.Select(ui, "Which database engine?", "mysql", nitro.DBEngines)
 			if err != nil {
 				return err
 			}
@@ -87,7 +86,7 @@ var initCommand = &cobra.Command{
 			// which version should we use?
 			versions := nitro.DBVersions[engine]
 			defaultVersion := versions[0]
-			version, _, err := prompt.Select(ui, "Select a version of "+engine+" to use:", defaultVersion, versions)
+			version, _, err := prompt.Select(ui, "Select a version of "+engine+"?", defaultVersion, versions)
 			if err != nil {
 				return err
 			}
@@ -144,7 +143,13 @@ var initCommand = &cobra.Command{
 			}
 		}
 
-		actions, err := createActions(machine, memory, disk, cpuInt, cfg.PHP, cfg.Databases, mounts, sites)
+		cpuCoresInt := 0
+		cpuCoresInt, err = strconv.Atoi(cpuCores)
+		if err != nil {
+			return err
+		}
+
+		actions, err := createActions(machine, memory, disk, cpuCoresInt, cfg.PHP, cfg.Databases, mounts, sites)
 		if err != nil {
 			return err
 		}
@@ -158,17 +163,17 @@ var initCommand = &cobra.Command{
 			return nil
 		}
 
-		fmt.Println("Ok, applying the changes now")
+		fmt.Println("Applying the changes now...")
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
 	},
 }
 
 func init() {
-	// initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPUs to allocate")
-	initCommand.Flags().StringVar(&flagMemory, "memory", "", "Amount of memory to allocate")
-	initCommand.Flags().StringVar(&flagDisk, "disk", "", "Amount of disk space to allocate")
-	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "Which version of PHP to make default")
+	initCommand.Flags().IntVar(&flagCPUs, "cpus", 0, "Number of CPU cores for machine")
+	initCommand.Flags().StringVar(&flagMemory, "memory", "", "Amount of memory for machine")
+	initCommand.Flags().StringVar(&flagDisk, "disk", "", "Amount of disk space for machine")
+	initCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "Version of PHP to make default")
 }
 
 func createActions(machine, memory, disk string, cpus int, phpVersion string, databases []config.Database, mounts []config.Mount, sites []config.Site) ([]nitro.Action, error) {

@@ -20,7 +20,7 @@ import (
 
 var importCommand = &cobra.Command{
 	Use:   "import",
-	Short: "Import database into machine",
+	Short: "Import database into a machine",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
@@ -59,7 +59,7 @@ var importCommand = &cobra.Command{
 			return errors.New("there are no databases that we can import the file into")
 		}
 
-		containerName, _, err := prompt.Select(ui, "Select a database engine to import the file into", dbs[0], dbs)
+		containerName, _, err := prompt.Select(ui, "Select a database engine to import the backup into", dbs[0], dbs)
 
 		databaseName, err := prompt.Ask(ui, "What is the database name?", "", true)
 		if err != nil {
@@ -95,7 +95,7 @@ var importCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Successfully imported the database file into", containerName)
+		fmt.Println("Successfully imported the database backup into", containerName)
 
 		return nil
 	},
