@@ -6,7 +6,7 @@ import (
 
 var xdebugCommand = &cobra.Command{
 	Use:   "xdebug",
-	Short: "Manage Xdebug on machine",
+	Short: "Manage Xdebug on a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},

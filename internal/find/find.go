@@ -136,3 +136,27 @@ func PHPVersion(f Finder) (string, error) {
 
 	return version, nil
 }
+
+// docker container ls --format '{{.Names}}'
+func AllDatabases(f Finder) ([]config.Database, error) {
+	out, err := f.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var databases []config.Database
+	sc := bufio.NewScanner(strings.NewReader(string(out)))
+	for sc.Scan() {
+		if strings.Contains(sc.Text(), "mysql") || strings.Contains(sc.Text(), "postgres") {
+			sp := strings.Split(sc.Text(), "_")
+			db := config.Database{
+				Engine:  strings.TrimLeft(sp[0], "'"),
+				Version: sp[1],
+				Port:    strings.TrimRight(sp[2], "'"),
+			}
+			databases = append(databases, db)
+		}
+	}
+
+	return databases, nil
+}

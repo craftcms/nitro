@@ -760,3 +760,77 @@ func TestConfig_SiteExists(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_DatabaseExists(t *testing.T) {
+	type fields struct {
+		PHP       string
+		CPUs      string
+		Disk      string
+		Memory    string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		database Database
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "can find an existing database",
+			fields: fields{
+				Databases: []Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+				},
+			},
+			args: args{database: Database{
+				Engine:  "mysql",
+				Version: "5.8",
+				Port:    "3306",
+			}},
+			want: false,
+		},
+		{
+			name: "non-existing databases return false",
+			fields: fields{
+				Databases: []Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+				},
+			},
+			args: args{database: Database{
+				Engine:  "mysql",
+				Version: "5.7",
+				Port:    "3306",
+			}},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				CPUs:      tt.fields.CPUs,
+				Disk:      tt.fields.Disk,
+				Memory:    tt.fields.Memory,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.DatabaseExists(tt.args.database); got != tt.want {
+				t.Errorf("DatabaseExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

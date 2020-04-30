@@ -21,6 +21,11 @@ var applyCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		// always read the config file so its updated from any previous commands
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+
 		// load the config file
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
@@ -39,13 +44,14 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
+		// find mounts that already exist
 		mounts, err := find.Mounts(machine, output)
 		if err != nil {
 			return err
 		}
 		// END ABSTRACT
 
-		// find sites not created
+		// find sites that are created
 		var sites []config.Site
 		for _, site := range configFile.Sites {
 			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
@@ -57,20 +63,13 @@ var applyCommand = &cobra.Command{
 			}
 		}
 
-		// check if a database already exists
-		var databases []config.Database
-		for _, db := range configFile.Databases {
-			database, err := find.ExistingContainer(exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...), db)
-			if err != nil {
-				return err
-			}
-
-			if database != nil {
-				fmt.Println("Database", db.Name(), "exists, skipping...")
-				databases = append(databases, *database)
-			}
+		// find all existing databases
+		databases, err := find.AllDatabases(exec.Command(path, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
+		if err != nil {
+			return err
 		}
 
+		// find the current version of php installed
 		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
 		if err != nil {
 			return err
@@ -102,6 +101,7 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Editing your hosts file")
 
+		// TODO check the current OS and call commands for windows
 		return sudo.RunCommand(nitro, machine, "hosts")
 	},
 }

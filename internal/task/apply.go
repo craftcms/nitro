@@ -92,7 +92,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			actions = append(actions, nitro.Action{
 				Type:       "exec",
 				UseSyscall: false,
-				Args:       []string{"exec", machine, "--", "docker", "rm", "-v", database.Name()},
+				Args:       []string{"exec", machine, "--", "docker", "rm", "-v", database.Name(), "-f"},
 			})
 		}
 	}
@@ -111,6 +111,12 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *createContainer)
+
+			setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *setUserPermissions)
 		}
 	}
 

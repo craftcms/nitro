@@ -64,6 +64,55 @@ func TestApply(t *testing.T) {
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
 				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "bash", "/opt/nitro/scripts/docker-set-database-user-permissions.sh", "mysql_5.7_3306", "mysql"},
+				},
+			},
+		},
+		{
+			name: "new databases are created but the ones in the config are kept",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					Databases: []config.Database{
+						{
+							Engine:  "mysql",
+							Version: "5.7",
+							Port:    "3306",
+						},
+						{
+							Engine:  "postgres",
+							Version: "11",
+							Port:    "5432",
+						},
+					},
+				},
+				dbs: []config.Database{
+					{
+						Engine:  "mysql",
+						Version: "5.7",
+						Port:    "3306",
+					},
+					{
+						Engine:  "postgres",
+						Version: "11",
+						Port:    "5432",
+					},
+					{
+						Engine:  "postgres",
+						Version: "12",
+						Port:    "54321",
+					},
+				},
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_12_54321", "-f"},
+				},
 			},
 		},
 		{
@@ -96,7 +145,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_11_5432"},
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "rm", "-v", "postgres_11_5432", "-f"},
 				},
 			},
 		},
