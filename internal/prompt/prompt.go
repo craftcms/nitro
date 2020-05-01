@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/tcnksm/go-input"
+	"github.com/pixelandtonic/go-input"
 )
 
 func Ask(ui *input.UI, query, def string, req bool) (string, error) {

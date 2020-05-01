@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pixelandtonic/go-input"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"

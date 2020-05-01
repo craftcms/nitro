@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pixelandtonic/go-input"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"

@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/pixelandtonic/go-input"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -54,7 +54,7 @@ var initCommand = &cobra.Command{
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space??", "40G", true)
+		disk, err := prompt.Ask(ui, "How much disk space?", "40G", true)
 		if err != nil {
 			return err
 		}
