@@ -60,7 +60,7 @@ func SetDatabaseUserPermissions(machine string, database config.Database) (*Acti
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-set-database-user-permissions.sh", database.Name(), database.Engine},
+		Args:       []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-set-database-user-permissions.sh", database.Name(), database.Engine, ">", "/dev/null", "2>&1"},
 	}, nil
 }
 
