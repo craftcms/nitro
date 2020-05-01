@@ -1,35 +1,91 @@
 #!/bin/bash
 
-export GH_ORG=craftcms
-export SUCCESS_CMD="nitro"
-export BINLOCATION="/usr/local/bin"
 export TEMP_FOLDER="temp_nitro_extract"
+export FINAL_DIR_LOCATION="/usr/local/bin"
+export DOWNLOAD_SUFFIX=""
+export DOWNLOAD_ZIP_EXTENSION=".tar.gz"
+export IS_WINDOWS=false
+export EXECUTABLE_NAME="nitro"
+
+checkPlatform() {
+  uname=$(uname)
+
+  case $uname in
+
+  "Darwin")
+    DOWNLOAD_SUFFIX="_darwin"
+    ;;
+
+  "Linux")
+    DOWNLOAD_SUFFIX="_linux"
+    ;;
+
+  *)
+    IS_WINDOWS=true
+    DOWNLOAD_SUFFIX="_windows"
+    DOWNLOAD_ZIP_EXTENSION=".zip"
+    FINAL_DIR_LOCATION="$HOME/Nitro"
+    EXECUTABLE_NAME="nitro.exe"
+    ;;
+
+  esac
+}
+
+checkPlatform
 
 version=$(curl -s https://api.github.com/repos/craftcms/nitro/releases/latest | grep -i tag_name | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install Nitro. You can try to install manually:"
   echo
-  echo "1. Open your web browser and go to https://github.com/craftcms/nitro/releases"
-  echo "2. Download the latest release for your platform and unzip it."
-  echo "3. Run 'chmod +x ./nitro' on the unzipped 'nitro' executable."
-  echo "4. Run 'mv ./nitro $BINLOCATION'"
+
+  if [ "$IS_WINDOWS" = true ]; then
+    echo "1. Open your web browser and go to https://github.com/craftcms/nitro/releases"
+    echo "2. Download \"nitro_windows_x86_64.zip\" for latest release of Nitro and unzip it."
+    echo "3. Make sure $FINAL_DIR_LOCATION exists, then copy $EXECUTABLE_NAME from the unzipped folder into it."
+    echo "4. Open Git Bash and run the following commands:"
+    echo
+    echo "       export PATH=$FINAL_DIR_LOCATION:\$PATH"
+    echo "       $EXECUTABLE_NAME"
+  else
+    echo "1. Open your web browser and go to https://github.com/craftcms/nitro/releases"
+    echo "2. Download the latest release for your platform and unzip it."
+    echo "3. Run 'chmod +x ./$EXECUTABLE_NAME' on the unzipped \"$EXECUTABLE_NAME\" executable."
+    echo "4. Run 'mv ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION'"
+  fi
+
   exit 1
 fi
 
 hasCurl() {
-  result=$(command -v curl)
-  if [ "$?" = "1" ]; then
-    echo "You need curl to use this script."
-    exit 1
+  if [ "$IS_WINDOWS" = true ]; then
+    result=$(where curl)
+    if [[ "$?" == *"Could not find files"* ]]; then
+      echo "You need curl to use Nitro."
+      exit 1
+    fi
+  else
+    result=$(command -v curl)
+    if [ "$?" = "1" ]; then
+      echo "You need curl to use Nitro."
+      exit 1
+    fi
   fi
 }
 
 hasMultipass() {
-  result=$(command -v multipass)
-  if [ "$?" = "1" ]; then
-    echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
-    exit 1
+  if [ "$IS_WINDOWS" = true ]; then
+    result=$(where multipass)
+    if [[ "$?" == *"Could not find files"* ]]; then
+      echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
+      exit 1
+    fi
+  else
+    result=$(command -v multipass)
+    if [ "$?" = "1" ]; then
+      echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
+      exit 1
+    fi
   fi
 }
 
@@ -68,41 +124,19 @@ checkHash() {
 }
 
 getNitro() {
-  uname=$(uname)
-  userid=$(id -u)
+  # if it's Windows, make sure the final destination exists
+  if [ "$IS_WINDOWS" = true ] && [ ! -d "$FINAL_DIR_LOCATION" ]; then
+    mkdir -p "$FINAL_DIR_LOCATION"
+  fi
 
-  suffix=""
-  case $uname in
-
-  "Darwin")
-    suffix="_darwin"
-    ;;
-
-  "MINGW"*)
-    suffix=".exe"
-    BINLOCATION="$HOME/bin"
-    mkdir -p "$BINLOCATION"
-    ;;
-
-  "Linux")
-    arch=$(uname -m)
-    suffix="_linux"
-
-    case $arch in
-    "aarch64")
-      suffix="_linux"
-      ;;
-    esac
-    ;;
-  esac
-
+  # create our temp folder
   if [ ! -d $(pwd)/$TEMP_FOLDER ]; then
     mkdir $(pwd)/$TEMP_FOLDER
   fi
 
   targetTempFolder="$(pwd)/$TEMP_FOLDER"
 
-  fileName=nitro"$suffix"_x86_64.tar.gz
+  fileName=nitro"$DOWNLOAD_SUFFIX"_x86_64"$DOWNLOAD_ZIP_EXTENSION"
   packageUrl=https://github.com/craftcms/nitro/releases/download/$version/"$fileName"
   targetZipFile="$targetTempFolder"/$fileName
 
@@ -113,48 +147,83 @@ getNitro() {
   if [ "$?" = "0" ]; then
 
     # unzip
-    tar xvzf "$targetZipFile" -C "$targetTempFolder"
+    if [ "$IS_WINDOWS" = true ]; then
+      unzip "$targetZipFile" -d "$targetTempFolder"
+    else
+      tar xvzf "$targetZipFile" -C "$targetTempFolder"
+    fi
 
     # verify
     checkHash "$targetZipFile" "$version" "$targetTempFolder" "$fileName"
 
-    mv "$targetTempFolder"/nitro ./nitro
-    chmod +x ./nitro
+    # move executable up a level
+    mv "$targetTempFolder"/"$EXECUTABLE_NAME" ./"$EXECUTABLE_NAME"
+
+    # make it executable
+    if [ "$IS_WINDOWS" = false ]; then
+      chmod +x ./$EXECUTABLE_NAME
+    fi
 
     echo
     echo "Download complete."
 
-    if [ ! -w "$BINLOCATION" ]; then
-      echo
-      echo "============================================================"
-      echo "  The script was run as a user who is unable to write"
-      echo "  to $BINLOCATION. To complete the installation the"
-      echo "  following commands may need to be run manually."
-      echo "============================================================"
-      echo
-      echo "  sudo cp ./nitro $BINLOCATION/nitro"
-      echo "  nitro"
-      echo
+    if [ ! -w "$FINAL_DIR_LOCATION" ]; then
+      if [ "$IS_WINDOWS" = true ]; then
+        echo
+        echo "============================================================"
+        echo "  The script was run as a user who is unable to write"
+        echo "  to $FINAL_DIR_LOCATION. To complete the installation make"
+        echo "  sure $FINAL_DIR_LOCATION exists, then copy $EXECUTABLE_NAME"
+        echo "  from the current folder into it, then run the following:"
+        echo "============================================================"
+        echo
+        echo "  export PATH=$FINAL_DIR_LOCATION:\$PATH"
+        echo "  $EXECUTABLE_NAME"
+        echo
+      else
+        echo
+        echo "============================================================"
+        echo "  The script was run as a user who is unable to write"
+        echo "  to $FINAL_DIR_LOCATION. To complete the installation the"
+        echo "  following commands may need to be run manually:"
+        echo "============================================================"
+        echo
+        echo "  sudo cp ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION/$EXECUTABLE_NAME"
+        echo "  $EXECUTABLE_NAME"
+        echo
+      fi
     else
       echo
-      echo "Running with sufficient permissions to attempt to move the nitro executable to $BINLOCATION"
+      echo "Running with sufficient permissions to attempt to move $EXECUTABLE_NAME to $FINAL_DIR_LOCATION"
       echo
 
-      if [ ! -w "$BINLOCATION/nitro" ] && [ -f "$BINLOCATION/nitro" ]; then
-        echo
-        echo "================================================================"
-        echo "  $BINLOCATION/nitro already exists and is not writeable"
-        echo "  by the current user.  Please adjust the binary ownership"
-        echo "  or run sh/bash with sudo."
-        echo "================================================================"
-        echo
-        exit 1
+      if [ ! -w "$FINAL_DIR_LOCATION/$EXECUTABLE_NAME" ] && [ -f "$FINAL_DIR_LOCATION/$EXECUTABLE_NAME" ]; then
+        if [ "$IS_WINDOWS" = true ]; then
+          echo
+          echo "================================================================"
+          echo "  $FINAL_DIR_LOCATION/$EXECUTABLE_NAME already exists and is"
+          echo "  not writeable by this installer.  Please manually copy"
+          echo "  $EXECUTABLE_NAME from the current directory $FINAL_DIR_LOCATION"
+          echo "================================================================"
+          echo
+          exit 1
+        else
+          echo
+          echo "================================================================"
+          echo "  $FINAL_DIR_LOCATION/nitro already exists and is not writeable"
+          echo "  by the current user.  Please adjust the binary ownership"
+          echo "  or run with sudo."
+          echo "================================================================"
+          echo
+          exit 1
+        fi
       fi
 
-      mv ./nitro "$BINLOCATION"/nitro
+      # move to final location
+      mv ./$EXECUTABLE_NAME "$FINAL_DIR_LOCATION"/$EXECUTABLE_NAME
 
       if [ "$?" = "0" ]; then
-        echo "Nitro $version has been installed to $BINLOCATION"
+        echo "Nitro $version has been installed to $FINAL_DIR_LOCATION"
       fi
 
       if [ -e "$targetTempFolder" ]; then
@@ -162,7 +231,7 @@ getNitro() {
         echo
       fi
 
-      ${SUCCESS_CMD}
+      nitro
       init
     fi
   fi
