@@ -16,7 +16,11 @@ checkPlatform() {
     DOWNLOAD_SUFFIX="_darwin"
     ;;
 
-  "MINGW"*)
+  "Linux")
+    DOWNLOAD_SUFFIX="_linux"
+    ;;
+
+  *)
     IS_WINDOWS=true
     DOWNLOAD_SUFFIX="_windows"
     DOWNLOAD_ZIP_EXTENSION=".zip"
@@ -24,9 +28,6 @@ checkPlatform() {
     EXECUTABLE_NAME="nitro.exe"
     ;;
 
-  "Linux")
-    DOWNLOAD_SUFFIX="_linux"
-    ;;
   esac
 }
 
@@ -57,18 +58,34 @@ if [ ! "$version" ]; then
 fi
 
 hasCurl() {
-  result=$(command -v curl)
-  if [ "$?" = "1" ]; then
-    echo "You need curl to use Nitro."
-    exit 1
+  if [ "$IS_WINDOWS" = true ]; then
+    result=$(where curl)
+    if [[ "$?" == *"Could not find files"* ]]; then
+      echo "You need curl to use Nitro."
+      exit 1
+    fi
+  else
+    result=$(command -v curl)
+    if [ "$?" = "1" ]; then
+      echo "You need curl to use Nitro."
+      exit 1
+    fi
   fi
 }
 
 hasMultipass() {
-  result=$(command -v multipass)
-  if [ "$?" = "1" ]; then
-    echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
-    exit 1
+  if [ "$IS_WINDOWS" = true ]; then
+    result=$(where multipass)
+    if [[ "$?" == *"Could not find files"* ]]; then
+      echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
+      exit 1
+    fi
+  else
+    result=$(command -v multipass)
+    if [ "$?" = "1" ]; then
+      echo "You need Multipass to use Nitro. Please install it for your platform https://multipass.run/"
+      exit 1
+    fi
   fi
 }
 
