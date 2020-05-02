@@ -165,7 +165,11 @@ var initCommand = &cobra.Command{
 
 		fmt.Println("Applying the changes now...")
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		return infoCommand.RunE(cmd, args)
 	},
 }
 
