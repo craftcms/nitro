@@ -103,6 +103,7 @@ write_files:
       xdebug.remote_autostart=1
       xdebug.idekey=PHPSTORM
 runcmd:
+  - sudo sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
   - sudo add-apt-repository --no-update -y ppa:nginx/stable
   - sudo add-apt-repository --no-update -y ppa:ondrej/php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
