@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Changed
+- The [GMP](https://www.php.net/manual/en/book.gmp.php) and [BCMath](https://www.php.net/manual/en/book.bc.php) PHP extensions are now installed by default.
+
 ## Fixed
 - Fixed a permission error when provisioning a PostgreSQL database.
 - Fix a bug where the `import` command wasn’t importing.
