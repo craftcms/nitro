@@ -1,0 +1,58 @@
+.container {
+  margin: 0 auto;
+  padding: 2rem 0;
+  font-family: sans-serif;
+  max-width: 35rem;
+
+}
+
+.heading {
+  background: #fafafa;
+  text-align: center;
+}
+
+.heading p {
+  font-size: larger;
+  line-height: 1.4em;
+}
+
+h2 {
+  margin-top: 2rem;
+}
+
+a {
+  color: #4a7cf6;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul.included {
+  padding: 0;
+}
+
+ul.included li {
+  list-style-type: none;
+}
+
+ul.included li:before {
+  content: '✅';
+  margin-right: 2px;
+}
+
+pre {
+  padding: 0.7rem 1rem;
+  background: #333;
+  color: #fff;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+*:not(pre) > code {
+  padding: 0.2rem 0.3rem;
+  background: #eee;
+  font-weight: bold;
+  font-size: large;
+}

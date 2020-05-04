@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8">
+  <title>Craft Nitro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body {% if bodyClass is defined %}class="{{ bodyClass }}"{% endif %}>
+  <div class="heading">
+    <div class="container">
+      <img width="100" src="https://raw.githubusercontent.com/craftcms/nitro/master/resources/craft-nitro.svg" alt="Craft Nitro logo">
+      <h1>Craft Nitro</h1>
+      <p>
+        Speedy local dev environment for <a href="https://craftcms.com/">Craft CMS</a>.<br>
+        Powered by <a href="https://multipass.run/" target="_blank">Multipass</a>.
+      </p>
+    </div>
+  </div>
+  <div class="container">
+    <h2>What’s included</h2>
+    <ul class="included">
+      <li>PHP 7.4</li>
+      <li>MySQL</li>
+      <li>PostgreSQL</li>
+      <li>Redis</li>
+      <li>Xdebug</li>
+      <li>Blackfire</li>
+    </ul>
+
+    <h2>Getting Started</h2>
+    <p>First install <a href="https://multipass.run/" target="_blank">Multipass</a>, then run this command to install the Nitro CLI and create your machine:</p>
+    <pre><code>curl -sLS http://installer.getnitro.sh | bash</code></pre>
+    <p>To add a site to your machine, <code>cd</code> to your Craft project and run:</p>
+    <pre><code>nitro add</code></pre>
+    <p>See the full list of commands over at <a href="https://github.com/craftcms/nitro">github.com/craftcms/nitro</a>.</p>
+  </div>
+</body>
+</html>
