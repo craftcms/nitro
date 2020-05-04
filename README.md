@@ -30,6 +30,8 @@ Nitro installs the following on every machine:
 
 ## Installation
 
+> {warning} Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
+
 1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
 
