@@ -66,7 +66,7 @@ write_files:
           docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           echo "setting root permissions on user nitro"
       else
-          docker exec "$container" psql -U nitro -c "ALTER USER nitro WITH SUPERUSER;"
+          docker exec "$container" psql -U postgres -c "ALTER USER nitro WITH SUPERUSER;"
           echo "setting superuser permissions on user nitro"
       fi
   - path: /opt/nitro/nginx/template.conf

@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Fixed
+- Fixed a permission error when provisioning a PostgreSQL database.
+
 ### 0.11.2 - 2020-04-09
 
 ## Changed
