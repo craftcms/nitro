@@ -1,0 +1,7 @@
+/nitro
+/dist
+composer.lock
+/.idea
+/demo-site
+/coverage.txt
+/production-site
