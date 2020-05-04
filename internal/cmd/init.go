@@ -54,7 +54,7 @@ var initCommand = &cobra.Command{
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space??", "40G", true)
+		disk, err := prompt.Ask(ui, "How much disk space?", "40G", true)
 		if err != nil {
 			return err
 		}
