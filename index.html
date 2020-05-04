@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="heading">
-    <div class="container">
+    <div class="mx-auto">
       <img width="100" height="100" src="https://raw.githubusercontent.com/craftcms/nitro/master/resources/craft-nitro.svg" alt="Craft Nitro logo">
       <h1>Craft Nitro</h1>
       <p>
@@ -18,23 +18,36 @@
       </p>
     </div>
   </div>
+  <div class="hot-bar"></div>
   <div class="container">
-    <h2>What’s included</h2>
-    <ul class="included">
-      <li>PHP 7.4</li>
-      <li>MySQL</li>
-      <li>PostgreSQL</li>
-      <li>Redis</li>
-      <li>Xdebug</li>
-      <li>Blackfire</li>
-    </ul>
-
-    <h2>Getting Started</h2>
-    <p>First install <a href="https://multipass.run/" target="_blank">Multipass</a>, then run this command to install the Nitro CLI and create your machine:</p>
-    <pre><code>curl -sLS http://installer.getnitro.sh | bash</code></pre>
-    <p>To add a site to your machine, <code>cd</code> to your Craft project and run:</p>
-    <pre><code>nitro add</code></pre>
-    <p>See the full list of commands over at <a href="https://github.com/craftcms/nitro">github.com/craftcms/nitro</a>.</p>
+    <div class="w-1/4 px-8">
+      <h2>What’s included</h2>
+      <ul class="included">
+        <li>PHP 7.4</li>
+        <li>MySQL</li>
+        <li>PostgreSQL</li>
+        <li>Redis</li>
+        <li>Xdebug</li>
+        <li>Blackfire</li>
+      </ul>
+    </div>
+    <div class="w-3/4 px-8">
+      <h2>Getting Started</h2>
+      <p>First install <a href="https://multipass.run/" target="_blank">Multipass</a>, then run this command to install the Nitro CLI and create your machine:</p>
+      <div class="install-command">
+        <pre><code id="copy-target">curl -sLS http://installer.getnitro.sh | bash</code></pre>
+        <button class="copy" data-clipboard-target="#copy-target">
+            <img src="img/copy.svg" alt="Copy to clipboard">
+        </button>
+      </div>
+      <p>To add a site to your machine, <code>cd</code> to your Craft project and run:</p>
+      <pre><code>nitro add</code></pre>
+      <p>See the full list of commands over at <a href="https://github.com/craftcms/nitro">github.com/craftcms/nitro</a>.</p>
+    </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+  <script>
+    new ClipboardJS('.copy');
+  </script>
 </body>
 </html>

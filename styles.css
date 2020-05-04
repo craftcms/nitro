@@ -10,21 +10,31 @@ html {
 .container {
   margin: 0 auto;
   padding: 2rem;
-  max-width: 35rem;
+  display: flex;
+  max-width: 800px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .heading {
   background: #f1f5fd;
+  background: #32404d;
+  background: #29333c;
   text-align: center;
-  height: 40vh;
+  height: 50vh;
   min-height: 345px;
   display: flex;
   align-items: center;
+  padding: 2rem;
 }
 
 .heading p {
   font-size: larger;
   color: #4f4f4f;
+  color: rgba(255,255,255,0.4);
   margin-top: 0.5rem;
 }
 
@@ -32,6 +42,7 @@ h1 {
   font-size: 2.5rem;
   font-weight: bolder;
   margin-bottom: 0;
+  color: #fff;
 }
 
 h2 {
@@ -51,6 +62,13 @@ a:hover {
   text-decoration: underline;
 }
 
+.hot-bar {
+  display: block;
+  height: 10px;
+  width: 100%;
+  background: linear-gradient(90deg,#184cef 0,#e5422b);
+}
+
 ul.included {
   padding: 0;
 }
@@ -58,11 +76,12 @@ ul.included {
 ul.included li {
   list-style-type: none;
   line-height: 1.5;
+  margin: 0.25rem 0;
 }
 
 ul.included li:before {
-  content: ' ';
-  margin-right: 0.5rem;
+  content: " ";
+  margin-right: 0.75rem;
   display: inline-block;
   background: url("img/check.svg");
   background-size: 18px;
@@ -88,4 +107,66 @@ pre {
   border-radius: 3px;
   font-weight: bold;
   font-size: 1.1rem;
+}
+
+.w-1\/4 {
+  width: 25%;
+}
+
+.w-3\/4 {
+  width: 75%;
+}
+
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+pre ::selection {
+  background: #e5422b;
+}
+
+.install-command {
+  position: relative;
+}
+
+.copy {
+  appearance: none;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  border: 0;
+  background: transparent;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.copy:hover {
+  opacity: 1;
+}
+
+.copy img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media screen and (max-width: 880px) {
+  .container {
+    display: block;
+    max-width: 35rem;
+  }
+
+  .w-1\/4,
+  .w-3\/4 {
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 580px) {
+  .copy {
+    display: none;
+  }
 }
