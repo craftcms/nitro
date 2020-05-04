@@ -8,6 +8,7 @@
 ## Fixed
 - Fixed a permission error when provisioning a PostgreSQL database.
 - Fix a bug where the `import` command wasn’t importing.
+- Fixed an issue where the machine DNS was not resolving in some environments. ([#91](https://github.com/craftcms/nitro/issues/91))
 
 ### 0.11.2 - 2020-04-09
 
@@ -21,7 +22,7 @@
 
 ## Changed
 - The `destroy` command now has a `--clean` option which will delete a config file after destroying the machine.
-- The `nitro` database user now has root privileges for `mysql` and `postgres` databases. [#79](https://github.com/craftcms/nitro/issues/79)
+- The `nitro` database user now has root privileges for `mysql` and `postgres` databases. ([#79](https://github.com/craftcms/nitro/issues/79))
 - Added the `php` option back to the config file.
 - All commands that perform config changes (e.g. `add`, `remove`, and `rename`) now use the same logic as the `apply` command.
 - When importing a database using the `import` command, users will be prompted for the database name which will be created if it does not exist. 
@@ -31,8 +32,8 @@
 - Commands now output more _statuses_ where possible to provide the user more feedback.
 
 ## Fixed
-- When using the `add` command, the config file checks for duplicate sites and mounts. [#86](https://github.com/craftcms/nitro/issues/86)
-- Fixed an issue when using some commands on Windows. [#88](https://github.com/craftcms/nitro/issues/88)
+- When using the `add` command, the config file checks for duplicate sites and mounts. ([#86](https://github.com/craftcms/nitro/issues/86))
+- Fixed an issue when using some commands on Windows. ([#88](https://github.com/craftcms/nitro/issues/88))
 - Fixed an issue in the `apply` command that would not detect new changes to the config file. 
 
 ## 0.10.0 - 2020-04-23
