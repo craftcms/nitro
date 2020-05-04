@@ -36,13 +36,13 @@ write_files:
       engine="$4"
       
       if [ "$engine" == "mysql" ]; then
-          docker exec "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
-          docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
-          docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
-          cat "$filename" | pv | docker exec "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
+          docker exec -i "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
+          docker exec -i "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
+          docker exec -i "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
+          cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
       else
           docker exec "$container" psql -U nitro -c "CREATE DATABASE IF NOT EXISTS $database OWNER nitro;"
-          cat "$filename" | pv | docker exec "$container" psql -U nitro -d "$database"
+          cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |
