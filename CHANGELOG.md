@@ -2,8 +2,10 @@
 
 ### Unreleased
 
+### 1.0.0-alpha.1 - 2020-05-05
+
 ## Changed
-- Changed the input package to use our own which has better windows support. 
+- Changed the input package to use [Prompt](https://github.com/pixelandtonic/prompt). 
 
 ### 0.11.4 - 2020-05-04
 
