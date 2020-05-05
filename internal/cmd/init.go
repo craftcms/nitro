@@ -66,14 +66,21 @@ var initCommand = &cobra.Command{
 
 		// which version of PHP
 		if !existingConfig {
-			php, _, err := p.Select("Which version of PHP", nitro.PHPVersions, &prompt.InputOptions{
-				Default:   "1",
-				Validator: validate.PHPVersion,
-			})
-			if err != nil {
-				return err
+			var loop bool
+			for ok := true; ok; ok = !loop {
+				php, err := p.Ask("Which version of PHP", &prompt.InputOptions{
+					Default:   "7.4",
+					Validator: validate.PHPVersion,
+				})
+
+				if err == nil {
+					loop = true
+					cfg.PHP = php
+				} else {
+					loop = false
+					fmt.Println("Invalid input. Possible PHP versions are:", strings.Join(nitro.PHPVersions, ", "))
+				}
 			}
-			cfg.PHP = php
 		} else {
 			cfg.PHP = config.GetString("php", flagPhpVersion)
 
@@ -85,22 +92,40 @@ var initCommand = &cobra.Command{
 
 		if !existingConfig {
 			// what database engine?
-			engine, _, err := p.Select("Which database engine", nitro.DBEngines, &prompt.InputOptions{
-				Default:   "1",
-				Validator: validate.DatabaseEngine,
-			})
-			if err != nil {
-				return err
+			var dbEngineLoop bool
+			var engine string
+			for ok := true; ok; ok = !dbEngineLoop {
+				engine, err = p.Ask("Which database engine", &prompt.InputOptions{
+					Default:   "mysql",
+					Validator: validate.DatabaseEngine,
+				})
+
+				if err == nil {
+					dbEngineLoop = true
+				} else {
+					fmt.Println("Invalid input. Possible database engines are:", strings.Join(nitro.DBEngines, ", "))
+					dbEngineLoop = false
+				}
 			}
 
-			// which version should we use?
-			versions := nitro.DBVersions[engine]
-			version, _, err := p.Select("Which version of "+engine, versions, &prompt.InputOptions{
-				Default:   "1",
-				Validator: nil,
-			})
-			if err != nil {
-				return err
+			// get the database version
+			var dbVersionLoop bool
+			var version string
+			for ok := true; ok; ok = !dbVersionLoop {
+				versions := nitro.DBVersions[engine]
+				defaultVersion := versions[0]
+				version, _ = p.Ask("Which version of "+engine, &prompt.InputOptions{
+					Default: defaultVersion,
+				})
+
+				err := validate.DatabaseEngineAndVersion(engine, version)
+
+				if err == nil {
+					dbVersionLoop = true
+				} else {
+					fmt.Println("Invalid input. Possible database versions are:", strings.Join(nitro.DBVersions[engine], ", "))
+					dbVersionLoop = false
+				}
 			}
 
 			// get the port for the engine
