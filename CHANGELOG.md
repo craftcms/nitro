@@ -2,8 +2,10 @@
 
 ### Unreleased
 
+### 1.0.0-alpha.2 - 2020-05-05
+
 ## Changed 
-- When running `init`, there are no selects prompts and invalid data is displayed and the user is provided another chance to enter valid input.
+- Improved prompt validation and workflow when running `init`.
 
 ### 1.0.0-alpha.1 - 2020-05-05
 
