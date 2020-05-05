@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Changed
+- Remove MySQL 8.0 as a compatible database engine. 
+
 ### 1.0.0-alpha.3 - 2020-05-05
 
 ## Changed
