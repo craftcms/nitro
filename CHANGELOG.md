@@ -3,7 +3,10 @@
 ### Unreleased
 
 ## Changed
-- Remove options for installing PHP 7.0 and 7.1.  
+- Remove PHP 7.0 and 7.1 support.  
+
+## Fixed
+- Fix a potential permission error when installing/updating.
 
 ### 1.0.0-alpha.2 - 2020-05-05
 

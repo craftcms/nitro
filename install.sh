@@ -226,7 +226,7 @@ getNitro() {
         echo "Nitro $version has been installed to $FINAL_DIR_LOCATION"
       fi
 
-      if [ -e "$targetTempFolder" ]; then
+      if [ -e "$targetTempFolder" ] && [ -w "$targetTempFolder" ]; then
         rm -rf "$targetTempFolder"
         echo
       fi
