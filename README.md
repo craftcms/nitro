@@ -66,8 +66,8 @@ plugins-dev has been added to config file.
 Apply changes from config? [yes]    
 Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
 Editing your hosts file
-Password:
-✔ example.test added successfully!
+Password: ******
+example.test added successfully!
 ```
 
 ### Add a site manually
@@ -212,7 +212,7 @@ plugins-dev has been added to config file.
 Apply changes from config? [yes]    
 Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
 Editing your hosts file
-Password:
+Password: ******
 plugins-dev added successfully!
 ```
 
