@@ -9,6 +9,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Adding Sites](#adding-sites)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
+- [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
 
 ---
@@ -23,9 +24,6 @@ Nitro installs the following on every machine:
 - Redis
 - Xdebug
 - Blackfire
-
-> Note: For a more detailed writeup on how to configure Xdebug and Nitro with PhpStorm, view this document on
-> [how to configure Xdebug and PhpStorm for both web and console debugging](XDEBUG.md).
 
 ## Installation
 
@@ -130,6 +128,10 @@ Nitro. Once it’s done, you’ll have a new Multipass machine, as well as a new
 
 All of Nitro’s [commands](#commands) accept an `-m` option, which you can use to specify which machine the command
 should be run against. (`nitro-dev` will always be used by default.)
+
+## Using Xdebug
+
+See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to configure Xdebug and PhpStorm for web/console debugging.
 
 ## Commands
 
