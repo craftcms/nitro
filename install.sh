@@ -249,3 +249,4 @@ init() {
 hasCurl
 hasMultipass
 getNitro
+init
