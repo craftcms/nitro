@@ -4,7 +4,7 @@
 
 ## Changed
 - The [GMP](https://www.php.net/manual/en/book.gmp.php) and [BCMath](https://www.php.net/manual/en/book.bc.php) PHP extensions are now installed by default.
-- Creating a new machine will now install composer globally. ([#92](https://github.com/craftcms/nitro/issues/92))
+- Composer is now installed globally on machines. ([#92](https://github.com/craftcms/nitro/issues/92))
 
 ## Fixed
 - Fixed a permission error when provisioning a PostgreSQL database.
