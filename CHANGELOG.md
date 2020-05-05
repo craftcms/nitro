@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Changed 
+- When running `init`, there are no selects prompts and invalid data is displayed and the user is provided another chance to enter valid input.
+
 ### 1.0.0-alpha.1 - 2020-05-05
 
 ## Changed
