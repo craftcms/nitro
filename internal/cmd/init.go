@@ -2,18 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -29,32 +27,38 @@ var initCommand = &cobra.Command{
 			existingConfig = true
 		}
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
-
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
 
+		p := prompt.NewPrompt()
+
 		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
 		// ask how many cores
-		cpuCores, err := prompt.Ask(ui, "How many CPU cores?", "2", true)
+		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
+			Default:   "2",
+			Validator: nil,
+		})
 		if err != nil {
 			return err
 		}
 		cfg.CPUs = cpuCores
 
 		// ask how much memory
-		memory, err := prompt.Ask(ui, "How much memory?", "4G", true)
+		memory, err := p.Ask("How much memory", &prompt.InputOptions{
+			Default:   "4G",
+			Validator: validate.Memory,
+		})
 		if err != nil {
 			return err
 		}
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space?", "40G", true)
+		disk, err := p.Ask("How much disk space", &prompt.InputOptions{
+			Default:   "40G",
+			Validator: validate.DiskSize,
+		})
 		if err != nil {
 			return err
 		}
@@ -62,7 +66,10 @@ var initCommand = &cobra.Command{
 
 		// which version of PHP
 		if !existingConfig {
-			php, _, err := prompt.Select(ui, "Which version of PHP?", "7.4", nitro.PHPVersions)
+			php, _, err := p.Select("Which version of PHP", nitro.PHPVersions, &prompt.InputOptions{
+				Default:   "1",
+				Validator: validate.PHPVersion,
+			})
 			if err != nil {
 				return err
 			}
@@ -78,15 +85,20 @@ var initCommand = &cobra.Command{
 
 		if !existingConfig {
 			// what database engine?
-			engine, _, err := prompt.Select(ui, "Which database engine?", "mysql", nitro.DBEngines)
+			engine, _, err := p.Select("Which database engine", nitro.DBEngines, &prompt.InputOptions{
+				Default:   "1",
+				Validator: validate.DatabaseEngine,
+			})
 			if err != nil {
 				return err
 			}
 
 			// which version should we use?
 			versions := nitro.DBVersions[engine]
-			defaultVersion := versions[0]
-			version, _, err := prompt.Select(ui, "Select a version of "+engine+"?", defaultVersion, versions)
+			version, _, err := p.Select("Which version of "+engine, versions, &prompt.InputOptions{
+				Default:   "1",
+				Validator: nil,
+			})
 			if err != nil {
 				return err
 			}
