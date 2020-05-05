@@ -12,6 +12,8 @@ packages:
   - sshfs
   - pv
   - httpie
+  - php-cli
+  - unzip
 write_files:
   - path: /opt/nitro/scripts/site-exists.sh
     content: |
@@ -103,16 +105,20 @@ write_files:
       xdebug.remote_autostart=1
       xdebug.idekey=PHPSTORM
 runcmd:
-  - sudo sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
-  - sudo add-apt-repository --no-update -y ppa:nginx/stable
-  - sudo add-apt-repository --no-update -y ppa:ondrej/php
+  - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
+  - add-apt-repository --no-update -y ppa:nginx/stable
+  - add-apt-repository --no-update -y ppa:ondrej/php
+  - curl -sS https://getcomposer.org/installer -o composer-setup.php
+  - export COMPOSER_HOME=/home/ubuntu/composer
+  - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-  - sudo apt-get update -y
-  - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
-  - sudo usermod -aG docker ubuntu
-  - sudo mkdir -p /nitro/sites
-  - sudo chown -R ubuntu:ubuntu /nitro/sites
+  - apt-get update -y
+  - apt install -y nginx docker-ce docker-ce-cli containerd.io
+  - usermod -aG docker ubuntu
+  - mkdir -p /nitro/sites
+  - chown -R ubuntu:ubuntu /nitro/sites
 `
