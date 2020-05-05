@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+### 1.0.0-alpha.3 - 2020-05-05
+
 ## Changed
 - Remove PHP 7.0 and 7.1 support.  
 
