@@ -238,9 +238,6 @@ function getNitro {
         rm -rf "$targetTempFolder"
         echo
       fi
-
-      nitro
-      promptInstall
     fi
   fi
 }
