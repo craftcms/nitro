@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Changed
+- Changed the input package to use our own which has better windows support. 
+
 ### 0.11.4 - 2020-05-04
 
 ## Fixed
