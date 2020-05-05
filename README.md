@@ -30,6 +30,8 @@ Nitro installs the following on every machine:
 
 ## Installation
 
+> {warning} Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
+
 1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
 
@@ -145,6 +147,7 @@ The following commands will help you manage your virtual server.
 - [`logs`](#logs)
 - [`remove`](#remove)
 - [`redis`](#redis)
+- [`rename`](#rename)
 - [`restart`](#restart)
 - [`self-update`](#self-update)
 - [`ssh`](#ssh)
@@ -267,6 +270,8 @@ Options:
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--clean</code></dt>
+<dd>Remove the configuration file after destroying the machine. Defaults to `false`</dd>
 </dl>
 
 ### `edit`
@@ -443,6 +448,21 @@ Stops the machine.
 
 ```sh
 nitro stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `rename`
+
+Rename a site in a configuration file. Will prompt for which site to rename.
+
+```sh
+nitro rename [<options>]
 ```
 
 Options:

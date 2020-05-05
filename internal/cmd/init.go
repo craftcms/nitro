@@ -54,7 +54,7 @@ var initCommand = &cobra.Command{
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space??", "40G", true)
+		disk, err := prompt.Ask(ui, "How much disk space?", "40G", true)
 		if err != nil {
 			return err
 		}
@@ -165,7 +165,11 @@ var initCommand = &cobra.Command{
 
 		fmt.Println("Applying the changes now...")
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		return infoCommand.RunE(cmd, args)
 	},
 }
 

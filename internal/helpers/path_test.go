@@ -1,6 +1,10 @@
 package helpers
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestParentPathName(t *testing.T) {
 	type args struct {
@@ -30,6 +34,51 @@ func TestParentPathName(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("PathName() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetDirectoryArg(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	abspath, err := filepath.Abs(wd)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type args struct {
+		args []string
+	}
+	tests := []struct {
+		name         string
+		args         args
+		directory    string
+		absolutePath string
+		wantErr      bool
+	}{
+		{
+			name:         "can get the directory and abs path when not sending args",
+			args:         args{args: nil},
+			directory:    "helpers",
+			absolutePath: abspath,
+			wantErr:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := GetDirectoryArg(tt.args.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetDirectoryArg() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.directory {
+				t.Errorf("GetDirectoryArg() got = %v, want %v", got, tt.directory)
+			}
+			if got1 != tt.absolutePath {
+				t.Errorf("GetDirectoryArg() got1 = %v, want %v", got1, tt.absolutePath)
 			}
 		})
 	}

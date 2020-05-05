@@ -108,7 +108,7 @@ var addCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s has been added to nitro.yaml\n", hostname)
+		fmt.Printf("%s has been added to config file.\n", hostname)
 
 		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
 		if err != nil {
