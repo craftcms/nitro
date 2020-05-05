@@ -1,4 +1,4 @@
-# Using Xdebug with Nitro and PHPStorm
+# Using Xdebug with Nitro and PhpStorm
 
 Once you have a machine created, you can run `nitro xdebug on` and `nitro xdebug configure` to enable Xdebug and set it up for automatic remote connections from your host machine. These make the 
 

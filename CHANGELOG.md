@@ -1,24 +1,17 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
-
-### 1.0.0-alpha.3 - 2020-05-05
+### 1.0.0-beta.1 - 2020-05-05
 
 ## Changed
-- Remove PHP 7.0 and 7.1 support.  
+- Improved the `init` command workflow.
+- Changed the input package to use [pixelandtonic/prompt](https://github.com/pixelandtonic/prompt).
+
+## Removed
+- Removed MySQL 8.0 support for now.
+- Removed PHP 7.0 and 7.1 support.
 
 ## Fixed
-- Fix a potential permission error when installing/updating.
-
-### 1.0.0-alpha.2 - 2020-05-05
-
-## Changed 
-- Improved prompt validation and workflow when running `init`.
-
-### 1.0.0-alpha.1 - 2020-05-05
-
-## Changed
-- Changed the input package to use [Prompt](https://github.com/pixelandtonic/prompt). 
+- Fixed a potential permission error when installing/updating.
 
 ### 0.11.4 - 2020-05-04
 
@@ -52,7 +45,7 @@
 - The `nitro` database user now has root privileges for `mysql` and `postgres` databases. ([#79](https://github.com/craftcms/nitro/issues/79))
 - Added the `php` option back to the config file.
 - All commands that perform config changes (e.g. `add`, `remove`, and `rename`) now use the same logic as the `apply` command.
-- When importing a database using the `import` command, users will be prompted for the database name which will be created if it does not exist. 
+- When importing a database using the `import` command, users will be prompted for the database name which will be created if it does not exist.
 - The `apply` command will automatically update the machine's hosts file.
 - The `destroy` command will now remove any sites in the machine config from the hosts file.
 - The `init` command will use an existing config file and recreate the entire environment.
@@ -61,7 +54,7 @@
 ## Fixed
 - When using the `add` command, the config file checks for duplicate sites and mounts. ([#86](https://github.com/craftcms/nitro/issues/86))
 - Fixed an issue when using some commands on Windows. ([#88](https://github.com/craftcms/nitro/issues/88))
-- Fixed an issue in the `apply` command that would not detect new changes to the config file. 
+- Fixed an issue in the `apply` command that would not detect new changes to the config file.
 
 ## 0.10.0 - 2020-04-23
 

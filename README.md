@@ -2,14 +2,15 @@
 
 # Craft Nitro
 
-Nitro is a command-line tool focused on making local Craft development quick and easy. Nitro’s one dependency is
-[Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
+Nitro is a speedy local development environment that’s tuned for [Craft CMS](https://craftcms.com/), powered by [Multipass](https://multipass.run/).
 
 - [What’s Included](#whats-included)
 - [Installation](#installation)
 - [Adding Sites](#adding-sites)
+- [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
+- [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
 
 ---
@@ -18,19 +19,16 @@ Nitro is a command-line tool focused on making local Craft development quick and
 
 Nitro installs the following on every machine:
 
-- PHP 7.4 (+ option to use 7.3, 7.2, 7.1, 7.0)
+- PHP 7.4 (+ option to use 7.3 or 7.2)
 - MySQL
 - PostgreSQL
 - Redis
 - Xdebug
 - Blackfire
 
-> Note: For a more detailed writeup on how to configure Xdebug and Nitro with PhpStorm, view this document on
-> [how to configure Xdebug and PhpStorm for both web and console debugging](XDEBUG.md).
-
 ## Installation
 
-> {warning} Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
+> ⚠️ **Note:** Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
 
 1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
@@ -60,14 +58,14 @@ the [`add`](#add) command:
 ```sh
 $ cd /path/to/project
 $ nitro add
-→ What should the hostname be? $ example.test
-→ Where is the webroot? $ web
-✔ example.test has been added to nitro.yaml.
-→ apply nitro.yaml changes now? $ yes
-✔ Applied the changes and added example.test to nitro-dev                  
-Adding nitro-dev to your hosts file 
-Password:
-✔ example.test added successfully!
+What should the hostname be? [plugins-dev] example.test 
+Where is the webroot? [web] 
+plugins-dev has been added to config file.
+Apply changes from config? [yes]    
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Editing your hosts file
+Password: ******
+example.test added successfully!
 ```
 
 ### Add a site manually
@@ -89,6 +87,36 @@ If you would prefer to add a site manually, follow these steps:
    Nitro can add the new hostname to your system’s `hosts` file.
 
 You should now be able to point your web browser at your new hostname.
+
+## Connecting to the Database
+
+To connect to the machine from a Craft install, set the following environment variables in your `.env` file:
+
+```
+DB_USER="nitro"
+DB_PASSWORD="nitro"
+```
+
+To connect to the database from your host operating system, you’ll first need to get the IP address of your Nitro machine. You can find that by running the [info](#info) command.
+
+```sh
+$ nitro info
+Name:           nitro-dev
+State:          Running
+IPv4:           192.168.64.2
+Release:        Ubuntu 18.04.4 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Load:           0.71 0.74 0.60
+Disk usage:     2.7G out of 38.6G
+Memory usage:   526.4M out of 3.9G
+```
+
+Then from your SQL client of choice, create a new database connection with the following settings:
+
+- **Host**: _The `IPv4` value from `nitro info`_
+- **Port**: _The port you configured your database with (3306 for MySQL or 5432 for PostgreSQL by default)._
+- **Username**: `nitro`
+- **Password**: `nitro`
 
 ## Adding Mounts
 
@@ -131,6 +159,10 @@ Nitro. Once it’s done, you’ll have a new Multipass machine, as well as a new
 
 All of Nitro’s [commands](#commands) accept an `-m` option, which you can use to specify which machine the command
 should be run against. (`nitro-dev` will always be used by default.)
+
+## Using Xdebug
+
+See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to configure Xdebug and PhpStorm for web/console debugging.
 
 ## Commands
 
@@ -206,14 +238,14 @@ Example:
 ```sh
 $ cd /path/to/project
 $ nitro add
-→ What should the hostname be? $ example.test
-→ Where is the webroot? $ web
-✔ example.test has been added to nitro.yaml.
-→ apply nitro.yaml changes now? $ yes
-✔ Applied the changes and added example.test to nitro-dev                  
-Adding nitro-dev to your hosts file 
-Password:
-✔ example.test added successfully!
+What should the hostname be? [plugins-dev] 
+Where is the webroot? [web] 
+plugins-dev has been added to config file.
+Apply changes from config? [yes]    
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Editing your hosts file
+Password: ******
+plugins-dev added successfully!
 ```
 
 ### `context`
