@@ -60,12 +60,12 @@ the [`add`](#add) command:
 ```sh
 $ cd /path/to/project
 $ nitro add
-→ What should the hostname be? $ example.test
-→ Where is the webroot? $ web
-✔ example.test has been added to nitro.yaml.
-→ apply nitro.yaml changes now? $ yes
-✔ Applied the changes and added example.test to nitro-dev                  
-Adding nitro-dev to your hosts file 
+What should the hostname be? [plugins-dev] example.test 
+Where is the webroot? [web] 
+plugins-dev has been added to config file.
+Apply changes from config? [yes]    
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Editing your hosts file
 Password:
 ✔ example.test added successfully!
 ```
@@ -206,14 +206,14 @@ Example:
 ```sh
 $ cd /path/to/project
 $ nitro add
-→ What should the hostname be? $ example.test
-→ Where is the webroot? $ web
-✔ example.test has been added to nitro.yaml.
-→ apply nitro.yaml changes now? $ yes
-✔ Applied the changes and added example.test to nitro-dev                  
-Adding nitro-dev to your hosts file 
+What should the hostname be? [plugins-dev] 
+Where is the webroot? [web] 
+plugins-dev has been added to config file.
+Apply changes from config? [yes]    
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Editing your hosts file
 Password:
-✔ example.test added successfully!
+plugins-dev added successfully!
 ```
 
 ### `context`
