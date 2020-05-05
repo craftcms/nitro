@@ -3,14 +3,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/prompt"
+	"github.com/craftcms/nitro/validate"
 )
 
 var renameCommand = &cobra.Command{
@@ -28,14 +27,13 @@ var renameCommand = &cobra.Command{
 			return errors.New("there are no sites to rename")
 		}
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
+		p := prompt.NewPrompt()
 
 		// ask to select a site
 		var site config.Site
-		_, i, err := prompt.Select(ui, "Select a site to rename:", sites[0].Hostname, configFile.SitesAsList())
+		_, i, err := p.Select("Which site do you want to rename", configFile.SitesAsList(), &prompt.InputOptions{
+			Default: "1",
+		})
 		if err != nil {
 			return err
 		}
@@ -43,7 +41,10 @@ var renameCommand = &cobra.Command{
 
 		// ask for the new newHostname
 		var newHostname string
-		newHostname, err = prompt.Ask(ui, "What should the new hostname be?", site.Hostname, true)
+		newHostname, err = p.Ask("What should the new hostname be", &prompt.InputOptions{
+			Default:   "",
+			Validator: validate.Hostname,
+		})
 		if err != nil {
 			return err
 		}
@@ -63,12 +64,12 @@ var renameCommand = &cobra.Command{
 			}
 		}
 
-		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
+		apply, err := p.Confirm("Apply changes from config", &prompt.InputOptions{Default: "yes"})
 		if err != nil {
 			return err
 		}
 
-		if applyChanges {
+		if apply {
 			fmt.Println("Applying changes from the config file...")
 			return applyCommand.RunE(cmd, args)
 		}

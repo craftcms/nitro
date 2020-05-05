@@ -3,19 +3,17 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/normalize"
-	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var importCommand = &cobra.Command{
@@ -50,18 +48,16 @@ var importCommand = &cobra.Command{
 		for _, db := range databases {
 			dbs = append(dbs, db.Name())
 		}
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
 
 		if len(dbs) == 0 {
 			return errors.New("there are no databases that we can import the file into")
 		}
 
-		containerName, _, err := prompt.Select(ui, "Select a database engine to import the backup into", dbs[0], dbs)
+		p := prompt.NewPrompt()
 
-		databaseName, err := prompt.Ask(ui, "What is the database name?", "", true)
+		containerName, _, err := p.Select("Which database engine to import the backup", dbs, &prompt.InputOptions{Default: "1"})
+
+		databaseName, err := p.Ask("What is the database name to create for the import", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
 			return err
 		}

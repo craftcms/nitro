@@ -2,16 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/internal/webroot"
+	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
@@ -32,17 +31,17 @@ var addCommand = &cobra.Command{
 			return err
 		}
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
+		p := prompt.NewPrompt()
 
 		// prompt for the hostname if --hostname == ""
 		// else get the name of the current directory (e.g. nitro)
 		var hostname string
 		switch flagHostname {
 		case "":
-			hostname, err = prompt.Ask(ui, "What should the hostname be?", directoryName, true)
+			hostname, err = p.Ask("What should the hostname be", &prompt.InputOptions{
+				Default:   directoryName,
+				Validator: validate.Hostname,
+			})
 			if err != nil {
 				return err
 			}
@@ -60,7 +59,10 @@ var addCommand = &cobra.Command{
 				return err
 			}
 
-			webrootDir, err = prompt.Ask(ui, "Where is the webroot?", foundDir, true)
+			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{
+				Default:   foundDir,
+				Validator: nil,
+			})
 			if err != nil {
 				return err
 			}
@@ -110,7 +112,9 @@ var addCommand = &cobra.Command{
 
 		fmt.Printf("%s has been added to config file.\n", hostname)
 
-		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
+		applyChanges, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
+			Default: "yes",
+		})
 		if err != nil {
 			return err
 		}
