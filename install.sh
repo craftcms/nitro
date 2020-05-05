@@ -7,7 +7,7 @@ export DOWNLOAD_ZIP_EXTENSION=".tar.gz"
 export IS_WINDOWS=false
 export EXECUTABLE_NAME="nitro"
 
-checkPlatform() {
+function checkPlatform {
   uname=$(uname)
 
   case $uname in
@@ -52,12 +52,13 @@ if [ ! "$version" ]; then
     echo "2. Download the latest release for your platform and unzip it."
     echo "3. Run 'chmod +x ./$EXECUTABLE_NAME' on the unzipped \"$EXECUTABLE_NAME\" executable."
     echo "4. Run 'mv ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION'"
+    echo "5. Run 'nitro init' to create your first machine."
   fi
 
   exit 1
 fi
 
-hasCurl() {
+function hasCurl {
   if [ "$IS_WINDOWS" = true ]; then
     result=$(where curl)
     if [[ "$?" == *"Could not find files"* ]]; then
@@ -73,7 +74,7 @@ hasCurl() {
   fi
 }
 
-hasMultipass() {
+function hasMultipass {
   if [ "$IS_WINDOWS" = true ]; then
     result=$(where multipass)
     if [[ "$?" == *"Could not find files"* ]]; then
@@ -89,7 +90,7 @@ hasMultipass() {
   fi
 }
 
-checkHash() {
+function checkHash {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
   filePath=$(pwd)/$TEMP_FOLDER/$fileName
@@ -117,13 +118,13 @@ checkHash() {
     # Make sure the file names match up.
     if [ "$4" != "$checkResultFileName" ]; then
       rm "$1"
-      echo "Checksums do not match. Exiting."
+      echo "It looks like there was an incomplete download. Please try again."
       exit 1
     fi
   fi
 }
 
-getNitro() {
+function getNitro {
   # if it's Windows, make sure the final destination exists
   if [ "$IS_WINDOWS" = true ] && [ ! -d "$FINAL_DIR_LOCATION" ]; then
     mkdir -p "$FINAL_DIR_LOCATION"
@@ -178,7 +179,7 @@ getNitro() {
         echo "============================================================"
         echo
         echo "  export PATH=$FINAL_DIR_LOCATION:\$PATH"
-        echo "  $EXECUTABLE_NAME"
+        echo "  $EXECUTABLE_NAME init"
         echo
       else
         echo
@@ -189,7 +190,7 @@ getNitro() {
         echo "============================================================"
         echo
         echo "  sudo cp ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION/$EXECUTABLE_NAME"
-        echo "  $EXECUTABLE_NAME"
+        echo "  $EXECUTABLE_NAME init"
         echo
       fi
     else
@@ -200,20 +201,27 @@ getNitro() {
       if [ ! -w "$FINAL_DIR_LOCATION/$EXECUTABLE_NAME" ] && [ -f "$FINAL_DIR_LOCATION/$EXECUTABLE_NAME" ]; then
         if [ "$IS_WINDOWS" = true ]; then
           echo
-          echo "================================================================"
-          echo "  $FINAL_DIR_LOCATION/$EXECUTABLE_NAME already exists and is"
-          echo "  not writeable by this installer.  Please manually copy"
-          echo "  $EXECUTABLE_NAME from the current directory $FINAL_DIR_LOCATION"
-          echo "================================================================"
+          echo "============================================================"
+          echo "  $FINAL_DIR_LOCATION/$EXECUTABLE_NAME alraedy exists and is"
+          echo "  not writable by this installer. To complete the installation make"
+          echo "  sure $FINAL_DIR_LOCATION exists, then copy $EXECUTABLE_NAME"
+          echo "  from the current folder into it, then run the following:"
+          echo "============================================================"
+          echo
+          echo "  export PATH=$FINAL_DIR_LOCATION:\$PATH"
+          echo "  $EXECUTABLE_NAME init"
           echo
           exit 1
         else
           echo
-          echo "================================================================"
-          echo "  $FINAL_DIR_LOCATION/nitro already exists and is not writeable"
-          echo "  by the current user.  Please adjust the binary ownership"
-          echo "  or run with sudo."
-          echo "================================================================"
+          echo "============================================================"
+          echo "  $FINAL_DIR_LOCATION/$EXECUTABLE_NAME already exists and is"
+          echo "  not writeable by this installer. To complete the installation the"
+          echo "  following commands may need to be run manually:"
+          echo "============================================================"
+          echo
+          echo "  sudo cp ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION/$EXECUTABLE_NAME"
+          echo "  $EXECUTABLE_NAME init"
           echo
           exit 1
         fi
@@ -230,14 +238,11 @@ getNitro() {
         rm -rf "$targetTempFolder"
         echo
       fi
-
-      nitro
-      $(promptInstall)
     fi
   fi
 }
 
-promptInstall() {
+function promptInstall {
   echo
   read -p "Initialize the primary machine now? " -n 1 -r
   echo
