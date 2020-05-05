@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+### 0.11.4 - 2020-05-04
+
+## Fixed
+- Fixed a broken test which prevented a release.
+
 ### 0.11.3 - 2020-05-04
 
 ## Changed
