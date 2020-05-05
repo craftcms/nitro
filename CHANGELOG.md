@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Changed
+- Remove options for installing PHP 7.0 and 7.1.  
+
 ### 1.0.0-alpha.2 - 2020-05-05
 
 ## Changed 

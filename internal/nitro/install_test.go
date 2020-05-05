@@ -56,32 +56,6 @@ func TestInstallCorePackages(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "can get commands to install PHP 7.1",
-			args: args{
-				name: "somename",
-				php:  "7.1",
-			},
-			want: &Action{
-				Type:       "exec",
-				UseSyscall: false,
-				Args:       []string{"exec", "somename", "--", "sudo", "apt-get", "install", "-y", "php7.1", "php7.1-mbstring", "php7.1-cli", "php7.1-curl", "php7.1-fpm", "php7.1-gd", "php7.1-intl", "php7.1-json", "php7.1-mysql", "php7.1-opcache", "php7.1-pgsql", "php7.1-zip", "php7.1-xml", "php7.1-soap", "php7.1-bcmath", "php7.1-gmp", "php-xdebug", "php-imagick", "blackfire-agent", "blackfire-php"},
-			},
-			wantErr: false,
-		},
-		{
-			name: "can get commands to install PHP 7.0",
-			args: args{
-				name: "somename",
-				php:  "7.0",
-			},
-			want: &Action{
-				Type:       "exec",
-				UseSyscall: false,
-				Args:       []string{"exec", "somename", "--", "sudo", "apt-get", "install", "-y", "php7.0", "php7.0-mbstring", "php7.0-cli", "php7.0-curl", "php7.0-fpm", "php7.0-gd", "php7.0-intl", "php7.0-json", "php7.0-mysql", "php7.0-opcache", "php7.0-pgsql", "php7.0-zip", "php7.0-xml", "php7.0-soap", "php7.0-bcmath", "php7.0-gmp", "php-xdebug", "php-imagick", "blackfire-agent", "blackfire-php"},
-			},
-			wantErr: false,
-		},
-		{
 			name: "wrong version of php returns an error",
 			args: args{
 				name: "somename",
