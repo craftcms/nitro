@@ -62,10 +62,6 @@ func PHPVersion(v string) error {
 		return nil
 	case "7.2":
 		return nil
-	case "7.1":
-		return nil
-	case "7.0":
-		return nil
 	}
 
 	return errors.New(fmt.Sprintf("the PHP version %q is not valid", v))
