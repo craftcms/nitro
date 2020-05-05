@@ -240,12 +240,12 @@ getNitro() {
       fi
 
       nitro
-      init
+      promptInstall
     fi
   fi
 }
 
-init() {
+promptInstall() {
   echo
   read -p "Initialize the primary machine now? " -n 1 -r
   echo
@@ -257,4 +257,4 @@ init() {
 hasCurl
 hasMultipass
 getNitro
-init
+promptInstall
