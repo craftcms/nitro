@@ -18,7 +18,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 
 Nitro installs the following on every machine:
 
-- PHP 7.4 (+ option to use 7.3, 7.2, 7.1, 7.0)
+- PHP 7.4 (+ option to use 7.3 or 7.2)
 - MySQL
 - PostgreSQL
 - Redis
