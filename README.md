@@ -7,6 +7,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [What’s Included](#whats-included)
 - [Installation](#installation)
 - [Adding Sites](#adding-sites)
+- [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Using Xdebug](#using-xdebug)
@@ -86,6 +87,36 @@ If you would prefer to add a site manually, follow these steps:
    Nitro can add the new hostname to your system’s `hosts` file.
 
 You should now be able to point your web browser at your new hostname.
+
+## Connecting to the Database
+
+To connect to the machine from a Craft install, set the following environment variables in your `.env` file:
+
+```
+DB_USER="nitro"
+DB_PASSWORD="nitro"
+```
+
+To connect to the database from your host operating system, you’ll first need to get the IP address of your Nitro machine. You can find that by running the [info](#info) command.
+
+```sh
+$ nitro info
+Name:           nitro-dev
+State:          Running
+IPv4:           192.168.64.2
+Release:        Ubuntu 18.04.4 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Load:           0.71 0.74 0.60
+Disk usage:     2.7G out of 38.6G
+Memory usage:   526.4M out of 3.9G
+```
+
+Then from your SQL client of choice, create a new database connection with the following settings:
+
+- **Host**: _The `IPv4` value from `nitro info`_
+- **Port**: _The port you configured your database with (3306 for MySQL or 5432 for PostgreSQL by default)._
+- **Username**: `nitro`
+- **Password**: `nitro`
 
 ## Adding Mounts
 
