@@ -232,7 +232,7 @@ getNitro() {
       fi
 
       nitro
-      promptInstall
+      $(promptInstall)
     fi
   fi
 }
