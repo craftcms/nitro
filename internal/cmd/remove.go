@@ -4,15 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tcnksm/go-input"
 	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var removeCommand = &cobra.Command{
@@ -30,13 +28,12 @@ var removeCommand = &cobra.Command{
 			return errors.New("there are no sites to remove")
 		}
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
+		p := prompt.NewPrompt()
 
 		var site config.Site
-		_, i, err := prompt.Select(ui, "Select a site to remove:", sites[0].Hostname, configFile.SitesAsList())
+		_, i, err := p.Select("Select a site to remove", configFile.SitesAsList(), &prompt.InputOptions{
+			Default: "1",
+		})
 		if err != nil {
 			return err
 		}
@@ -85,7 +82,10 @@ var removeCommand = &cobra.Command{
 		}
 		// END HACK
 
-		applyChanges, err := prompt.Verify(ui, "Apply changes from config now?", "y")
+		applyChanges, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
+			Default:   "yes",
+			Validator: nil,
+		})
 		if err != nil {
 			return err
 		}
