@@ -7,7 +7,7 @@ export DOWNLOAD_ZIP_EXTENSION=".tar.gz"
 export IS_WINDOWS=false
 export EXECUTABLE_NAME="nitro"
 
-checkPlatform() {
+function checkPlatform {
   uname=$(uname)
 
   case $uname in
@@ -57,7 +57,7 @@ if [ ! "$version" ]; then
   exit 1
 fi
 
-hasCurl() {
+function hasCurl {
   if [ "$IS_WINDOWS" = true ]; then
     result=$(where curl)
     if [[ "$?" == *"Could not find files"* ]]; then
@@ -73,7 +73,7 @@ hasCurl() {
   fi
 }
 
-hasMultipass() {
+function hasMultipass {
   if [ "$IS_WINDOWS" = true ]; then
     result=$(where multipass)
     if [[ "$?" == *"Could not find files"* ]]; then
@@ -89,7 +89,7 @@ hasMultipass() {
   fi
 }
 
-checkHash() {
+function checkHash {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
   filePath=$(pwd)/$TEMP_FOLDER/$fileName
@@ -123,7 +123,7 @@ checkHash() {
   fi
 }
 
-getNitro() {
+function getNitro {
   # if it's Windows, make sure the final destination exists
   if [ "$IS_WINDOWS" = true ] && [ ! -d "$FINAL_DIR_LOCATION" ]; then
     mkdir -p "$FINAL_DIR_LOCATION"
@@ -232,12 +232,12 @@ getNitro() {
       fi
 
       nitro
-      $(promptInstall)
+      promptInstall
     fi
   fi
 }
 
-promptInstall() {
+function promptInstall {
   echo
   read -p "Initialize the primary machine now? " -n 1 -r
   echo
