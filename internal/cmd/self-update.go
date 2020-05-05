@@ -42,7 +42,7 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return os.Remove(tempFolder)
+		return nil
 	},
 }
 

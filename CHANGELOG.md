@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+### 1.0.0-alpha.2 - 2020-05-05
+
+## Changed 
+- Improved prompt validation and workflow when running `init`.
+
 ### 1.0.0-alpha.1 - 2020-05-05
 
 ## Changed
