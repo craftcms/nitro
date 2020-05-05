@@ -2,8 +2,7 @@
 
 # Craft Nitro
 
-Nitro is a command-line tool focused on making local Craft development quick and easy. Nitro’s one dependency is
-[Multipass](https://multipass.run/), which allows you to create Ubuntu virtual machines.
+Nitro is a speedy local development environment that’s tuned for [Craft CMS](https://craftcms.com/), powered by [Multipass](https://multipass.run/).
 
 - [What’s Included](#whats-included)
 - [Installation](#installation)
