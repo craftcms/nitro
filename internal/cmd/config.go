@@ -43,7 +43,7 @@ write_files:
           docker exec -i "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
       else
-          docker exec "$container" psql -U nitro -c "CREATE DATABASE IF NOT EXISTS $database OWNER nitro;"
+          docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh

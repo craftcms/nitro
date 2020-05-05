@@ -10,6 +10,7 @@
 - Fixed a permission error when provisioning a PostgreSQL database.
 - Fix a bug where the `import` command wasn’t importing.
 - Fixed an issue where the machine DNS was not resolving in some environments. ([#91](https://github.com/craftcms/nitro/issues/91))
+- Fixed an error when trying to create a database during PostgreSQL import. ([#94](https://github.com/craftcms/nitro/issues/94))
 
 ### 0.11.2 - 2020-04-09
 
