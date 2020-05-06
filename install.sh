@@ -243,10 +243,10 @@ function getNitro {
 }
 
 function promptInstall {
+  echo -n "Initialize the primary machine now? [n] "
+  read -n 1 -r initprompt
   echo
-  read -p "Initialize the primary machine now? " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+  if [[ $initprompt =~ ^[Yy]$ ]]; then
     nitro init
   fi
 }
