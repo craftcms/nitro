@@ -13,6 +13,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
+- [Adding Multiple Database Engines](#adding-multiple-database-engines)
 - [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
   - [`apply`](#apply)
