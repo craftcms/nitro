@@ -53,16 +53,16 @@ To add a site to Nitro, three things need to happen:
 ### Add a site with `nitro add`
 
 If your project files are completely contained within a single folder, then you can quickly accomplish these using
-the [`add`](#add) command:  
+the [`add`](#add) command:
 
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] example.test 
-Where is the webroot? [web] 
+What should the hostname be? [plugins-dev] example.test
+Where is the webroot? [web]
 plugins-dev has been added to config file.
-Apply changes from config? [yes]    
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Apply changes from config? [yes]
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
 example.test added successfully!
@@ -80,7 +80,7 @@ If you would prefer to add a site manually, follow these steps:
        dest: /nitro/sites/example.test
    sites:
      - hostname: example.test
-       webroot: /nitro/sites/example.test/web 
+       webroot: /nitro/sites/example.test/web
    ```
 
 2. Run `nitro apply` to apply your `nitro.yaml` changes to the machine. You will be prompted for your password so
@@ -148,7 +148,7 @@ To create a new machine, run the following command:
 
 ```sh
 $ nitro init -m <machine>
-``` 
+```
 
 Replace `<machine>` with the name you want to give your new machine. Machine names can only include letters,
 numbers, underscores, and hyphen.
@@ -238,11 +238,11 @@ Example:
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] 
-Where is the webroot? [web] 
+What should the hostname be? [plugins-dev]
+Where is the webroot? [web]
 plugins-dev has been added to config file.
-Apply changes from config? [yes]    
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Apply changes from config? [yes]
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
 plugins-dev added successfully!
@@ -333,7 +333,7 @@ nitro edit
 > ```sh
 > export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
 > ```
-> 
+>
 > After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
 
 ### `info`
@@ -413,7 +413,7 @@ Example:
 
 ```sh
 $ nitro import mybackup.sql
-Use the arrow keys to navigate: ↓ ↑ → ← 
+Use the arrow keys to navigate: ↓ ↑ → ←
 ? Select database:
   ▸ mysql_5.7_3306
 ```
@@ -421,7 +421,7 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 ### `logs`
 
 Views the machine’s logs. This command will prompt you for a type of logs to view, including e.g. `nginx`,
-`database`, or `docker` (for a specific container). 
+`database`, or `docker` (for a specific container).
 
 ```sh
 nitro logs [<options>]
@@ -567,7 +567,7 @@ Options:
 
 ### `version`
 
-Checks the currently version of nitro against the releases and shows any updated versions.  
+Checks the currently version of nitro against the releases and shows any updated versions.
 
 ```sh
 nitro version
