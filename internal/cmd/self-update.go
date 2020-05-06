@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/craftcms/nitro/internal/helpers"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -17,37 +19,37 @@ var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
 	Short: "Update Nitro to the latest",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println(runtime.GOOS)
+		currentOs := runtime.GOOS
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
-		tempFile, _ := os.Getwd()
-		tempFile += "/temp_nitro_update.sh"
+		tempDirectory, _ := os.Getwd()
+		tempShell := tempDirectory + "/temp_nitro_update.sh"
+		tempBat := tempDirectory + "/temp_nitro_update.bat"
 
-		// localFile := filepath.Join(tempFolder, "temp_nitro_update.sh")
-
-		if err := DownloadFile(tempFile, fileUrl); err != nil {
+		if err := DownloadFile(tempShell, fileUrl); err != nil {
 			return err
 		}
-		fmt.Println("successfully downloaded file to "+tempFile)
-		if err := os.Chmod(tempFile, 0777); err != nil {
+
+		if err := os.Chmod(tempShell, 0777); err != nil {
 			return err
 		}
-//		test := exec.Command()
-//		output, err := test.StdoutPipe()
-//		if err != nil {
-//			return err
-//		}
 
-//		if err := test.Start(); err != nil {
-//			fmt.Println(err)
-//		}
-//		fmt.Println(output)
-//		return nil
 		ch := make(chan string)
 		go func() {
-			//if err := RunCommandCh(ch, "\r\n", "C:\\Windows\\system32\\cmd.exe", "/c", "\"\"C:\\Program Files\\Git\\bin\\sh.exe\" --login -i -- D:\\dev\\nitro\\temp_nitro_update.sh\""); err != nil {
-			if err := RunCommandCh(ch, "\r\n", tempFile); err != nil {
-				log.Fatal(err)
+			if currentOs == "windows" {
+
+				batOutput := []byte("sh.exe --login -i -- " + tempShell)
+				if err := ioutil.WriteFile(tempBat, batOutput, 0644); err != nil {
+					log.Fatal(err)
+				}
+
+				if err := RunCommandCh(ch, "\r\n", os.ExpandEnv("$ComSpec"), "/c", tempBat); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				if err := RunCommandCh(ch, "\r\n", tempShell); err != nil {
+					log.Fatal(err)
+				}
 			}
 		}()
 
@@ -55,7 +57,11 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return nil
+		if helpers.FileExists(tempBat) {
+			os.Remove(tempBat)
+		}
+
+		return os.Remove(tempShell)
 	},
 }
 
