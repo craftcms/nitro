@@ -3,15 +3,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
-	"github.com/pixelandtonic/go-input"
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/prompt"
 )
 
 var logsCommand = &cobra.Command{
@@ -20,14 +18,14 @@ var logsCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
+		p := prompt.NewPrompt()
+
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
 
-		kind, _, err := prompt.Select(ui, "Select the type of logs to view", "nginx", opts)
+		kind, _, err := p.Select("What type of logs", opts, &prompt.SelectOptions{
+			Default: 1,
+		})
 		if err != nil {
 			return err
 		}
@@ -35,7 +33,10 @@ var logsCommand = &cobra.Command{
 		var actions []nitro.Action
 		switch kind {
 		case "docker":
-			containerName, err := prompt.Ask(ui, "Enter container name:", "", true)
+			containerName, err := p.Ask("What is the name of the container", &prompt.InputOptions{
+				Default:   "",
+				Validator: nil,
+			})
 			if err != nil {
 				return err
 			}
@@ -64,7 +65,10 @@ var logsCommand = &cobra.Command{
 				return errors.New("there are no databases to view logs from")
 			}
 
-			containerName, _, err := prompt.Select(ui, "Select database", dbs[0], dbs)
+			containerName, _, err := p.Select("Which database", dbs, &prompt.SelectOptions{
+				Default:   1,
+				Validator: nil,
+			})
 			if err != nil {
 				return err
 			}

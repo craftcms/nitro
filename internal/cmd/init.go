@@ -2,18 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/pixelandtonic/go-input"
+	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/prompt"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -29,32 +27,38 @@ var initCommand = &cobra.Command{
 			existingConfig = true
 		}
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
-		}
-
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
 
+		p := prompt.NewPrompt()
+
 		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
 		// ask how many cores
-		cpuCores, err := prompt.Ask(ui, "How many CPU cores?", "2", true)
+		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
+			Default:   "2",
+			Validator: nil,
+		})
 		if err != nil {
 			return err
 		}
 		cfg.CPUs = cpuCores
 
 		// ask how much memory
-		memory, err := prompt.Ask(ui, "How much memory?", "4G", true)
+		memory, err := p.Ask("How much memory", &prompt.InputOptions{
+			Default:   "4G",
+			Validator: validate.Memory,
+		})
 		if err != nil {
 			return err
 		}
 		cfg.Memory = memory
 
 		// how much disk space
-		disk, err := prompt.Ask(ui, "How much disk space?", "40G", true)
+		disk, err := p.Ask("How much disk space", &prompt.InputOptions{
+			Default:   "40G",
+			Validator: validate.DiskSize,
+		})
 		if err != nil {
 			return err
 		}
@@ -62,11 +66,21 @@ var initCommand = &cobra.Command{
 
 		// which version of PHP
 		if !existingConfig {
-			php, _, err := prompt.Select(ui, "Which version of PHP?", "7.4", nitro.PHPVersions)
-			if err != nil {
-				return err
+			var loop bool
+			for ok := true; ok; ok = !loop {
+				php, err := p.Ask("Which version of PHP", &prompt.InputOptions{
+					Default:   "7.4",
+					Validator: validate.PHPVersion,
+				})
+
+				if err == nil {
+					loop = true
+					cfg.PHP = php
+				} else {
+					loop = false
+					fmt.Println("Invalid input. Possible PHP versions are:", strings.Join(nitro.PHPVersions, ", "))
+				}
 			}
-			cfg.PHP = php
 		} else {
 			cfg.PHP = config.GetString("php", flagPhpVersion)
 
@@ -78,17 +92,40 @@ var initCommand = &cobra.Command{
 
 		if !existingConfig {
 			// what database engine?
-			engine, _, err := prompt.Select(ui, "Which database engine?", "mysql", nitro.DBEngines)
-			if err != nil {
-				return err
+			var dbEngineLoop bool
+			var engine string
+			for ok := true; ok; ok = !dbEngineLoop {
+				engine, err = p.Ask("Which database engine", &prompt.InputOptions{
+					Default:   "mysql",
+					Validator: validate.DatabaseEngine,
+				})
+
+				if err == nil {
+					dbEngineLoop = true
+				} else {
+					fmt.Println("Invalid input. Possible database engines are:", strings.Join(nitro.DBEngines, ", "))
+					dbEngineLoop = false
+				}
 			}
 
-			// which version should we use?
-			versions := nitro.DBVersions[engine]
-			defaultVersion := versions[0]
-			version, _, err := prompt.Select(ui, "Select a version of "+engine+"?", defaultVersion, versions)
-			if err != nil {
-				return err
+			// get the database version
+			var dbVersionLoop bool
+			var version string
+			for ok := true; ok; ok = !dbVersionLoop {
+				versions := nitro.DBVersions[engine]
+				defaultVersion := versions[0]
+				version, _ = p.Ask("Which version of "+engine, &prompt.InputOptions{
+					Default: defaultVersion,
+				})
+
+				err := validate.DatabaseEngineAndVersion(engine, version)
+
+				if err == nil {
+					dbVersionLoop = true
+				} else {
+					fmt.Println("Invalid input. Possible database versions are:", strings.Join(nitro.DBVersions[engine], ", "))
+					dbVersionLoop = false
+				}
 			}
 
 			// get the port for the engine

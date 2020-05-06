@@ -1,6 +1,39 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-beta.2 - 2020-05-06
+
+## Fixed
+- Fixed an error when using the select prompt. ([#104](https://github.com/craftcms/nitro/issues/104))
+
+### 1.0.0-beta.1 - 2020-05-05
+
+## Changed
+- Improved the `init` command workflow.
+- Changed the input package to use [pixelandtonic/prompt](https://github.com/pixelandtonic/prompt).
+
+## Removed
+- Removed MySQL 8.0 support for now.
+- Removed PHP 7.0 and 7.1 support.
+
+## Fixed
+- Fixed a potential permission error when installing/updating.
+
+### 0.11.4 - 2020-05-04
+
+## Fixed
+- Fixed a broken test which prevented a release.
+
+### 0.11.3 - 2020-05-04
+
+## Changed
+- The [GMP](https://www.php.net/manual/en/book.gmp.php) and [BCMath](https://www.php.net/manual/en/book.bc.php) PHP extensions are now installed by default.
+- Composer is now installed globally on machines. ([#92](https://github.com/craftcms/nitro/issues/92))
+
+## Fixed
+- Fixed a permission error when provisioning a PostgreSQL database.
+- Fix a bug where the `import` command wasn’t importing.
+- Fixed an issue where the machine DNS was not resolving in some environments. ([#91](https://github.com/craftcms/nitro/issues/91))
+- Fixed an error when trying to create a database during PostgreSQL import. ([#94](https://github.com/craftcms/nitro/issues/94))
 
 ### 0.11.2 - 2020-04-09
 
@@ -14,19 +47,19 @@
 
 ## Changed
 - The `destroy` command now has a `--clean` option which will delete a config file after destroying the machine.
-- The `nitro` database user now has root privileges for `mysql` and `postgres` databases. [#79](https://github.com/craftcms/nitro/issues/79)
+- The `nitro` database user now has root privileges for `mysql` and `postgres` databases. ([#79](https://github.com/craftcms/nitro/issues/79))
 - Added the `php` option back to the config file.
 - All commands that perform config changes (e.g. `add`, `remove`, and `rename`) now use the same logic as the `apply` command.
-- When importing a database using the `import` command, users will be prompted for the database name which will be created if it does not exist. 
+- When importing a database using the `import` command, users will be prompted for the database name which will be created if it does not exist.
 - The `apply` command will automatically update the machine's hosts file.
 - The `destroy` command will now remove any sites in the machine config from the hosts file.
 - The `init` command will use an existing config file and recreate the entire environment.
 - Commands now output more _statuses_ where possible to provide the user more feedback.
 
 ## Fixed
-- When using the `add` command, the config file checks for duplicate sites and mounts. [#86](https://github.com/craftcms/nitro/issues/86)
-- Fixed an issue when using some commands on Windows. [#88](https://github.com/craftcms/nitro/issues/88)
-- Fixed an issue in the `apply` command that would not detect new changes to the config file. 
+- When using the `add` command, the config file checks for duplicate sites and mounts. ([#86](https://github.com/craftcms/nitro/issues/86))
+- Fixed an issue when using some commands on Windows. ([#88](https://github.com/craftcms/nitro/issues/88))
+- Fixed an issue in the `apply` command that would not detect new changes to the config file.
 
 ## 0.10.0 - 2020-04-23
 

@@ -12,6 +12,8 @@ packages:
   - sshfs
   - pv
   - httpie
+  - php-cli
+  - unzip
 write_files:
   - path: /opt/nitro/scripts/site-exists.sh
     content: |
@@ -36,13 +38,13 @@ write_files:
       engine="$4"
       
       if [ "$engine" == "mysql" ]; then
-          docker exec "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
-          docker exec "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
-          docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
-          cat "$filename" | pv | docker exec "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
+          docker exec -i "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
+          docker exec -i "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
+          docker exec -i "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
+          cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
       else
-          docker exec "$container" psql -U nitro -c "CREATE DATABASE IF NOT EXISTS $database OWNER nitro;"
-          cat "$filename" | pv | docker exec "$container" psql -U nitro -d "$database"
+          docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
+          cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |
@@ -66,7 +68,7 @@ write_files:
           docker exec "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
           echo "setting root permissions on user nitro"
       else
-          docker exec "$container" psql -U nitro -c "ALTER USER nitro WITH SUPERUSER;"
+          docker exec "$container" psql -U postgres -c "ALTER USER nitro WITH SUPERUSER;"
           echo "setting superuser permissions on user nitro"
       fi
   - path: /opt/nitro/nginx/template.conf
@@ -103,15 +105,20 @@ write_files:
       xdebug.remote_autostart=1
       xdebug.idekey=PHPSTORM
 runcmd:
-  - sudo add-apt-repository --no-update -y ppa:nginx/stable
-  - sudo add-apt-repository --no-update -y ppa:ondrej/php
+  - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
+  - add-apt-repository --no-update -y ppa:nginx/stable
+  - add-apt-repository --no-update -y ppa:ondrej/php
+  - curl -sS https://getcomposer.org/installer -o composer-setup.php
+  - export COMPOSER_HOME=/home/ubuntu/composer
+  - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-  - sudo apt-get update -y
-  - sudo apt install -y nginx docker-ce docker-ce-cli containerd.io
-  - sudo usermod -aG docker ubuntu
-  - sudo mkdir -p /nitro/sites
-  - sudo chown -R ubuntu:ubuntu /nitro/sites
+  - apt-get update -y
+  - apt install -y nginx docker-ce docker-ce-cli containerd.io
+  - usermod -aG docker ubuntu
+  - mkdir -p /nitro/sites
+  - chown -R ubuntu:ubuntu /nitro/sites
 `

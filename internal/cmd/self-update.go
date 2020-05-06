@@ -55,7 +55,7 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return os.Remove(tempFile)
+		return nil
 	},
 }
 

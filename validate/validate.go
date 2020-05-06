@@ -62,10 +62,6 @@ func PHPVersion(v string) error {
 		return nil
 	case "7.2":
 		return nil
-	case "7.1":
-		return nil
-	case "7.0":
-		return nil
 	}
 
 	return errors.New(fmt.Sprintf("the PHP version %q is not valid", v))
@@ -104,10 +100,6 @@ func DatabaseEngineAndVersion(e, v string) error {
 
 	if e == "mysql" {
 		switch v {
-		case "8.0":
-			return nil
-		case "8":
-			return nil
 		case "5.8":
 			return nil
 		case "5.7":
