@@ -328,6 +328,14 @@ Example:
 nitro edit
 ```
 
+> 💡 **Tip:** If you’re running macOS or Linux, you can set an `EDITOR` environment variable in `~/.bash_profile` to your preferred text editor of choice.
+>
+> ```sh
+> export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
+> ```
+> 
+> After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
+
 ### `info`
 
 Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
