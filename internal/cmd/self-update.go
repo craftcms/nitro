@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,23 +17,36 @@ var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
 	Short: "Update Nitro to the latest",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println(runtime.GOOS)
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
-		tempFolder := os.TempDir()
+		tempFile, _ := os.Getwd()
+		tempFile += "/temp_nitro_update.sh"
 
-		localFile := filepath.Join(tempFolder, "install.sh")
+		// localFile := filepath.Join(tempFolder, "temp_nitro_update.sh")
 
-		if err := DownloadFile(localFile, fileUrl); err != nil {
+		if err := DownloadFile(tempFile, fileUrl); err != nil {
 			return err
 		}
-
-		if err := os.Chmod(localFile, 0777); err != nil {
+		fmt.Println("successfully downloaded file to "+tempFile)
+		if err := os.Chmod(tempFile, 0777); err != nil {
 			return err
 		}
+//		test := exec.Command()
+//		output, err := test.StdoutPipe()
+//		if err != nil {
+//			return err
+//		}
 
+//		if err := test.Start(); err != nil {
+//			fmt.Println(err)
+//		}
+//		fmt.Println(output)
+//		return nil
 		ch := make(chan string)
 		go func() {
-			if err := RunCommandCh(ch, "\r\n", localFile); err != nil {
+			//if err := RunCommandCh(ch, "\r\n", "C:\\Windows\\system32\\cmd.exe", "/c", "\"\"C:\\Program Files\\Git\\bin\\sh.exe\" --login -i -- D:\\dev\\nitro\\temp_nitro_update.sh\""); err != nil {
+			if err := RunCommandCh(ch, "\r\n", tempFile); err != nil {
 				log.Fatal(err)
 			}
 		}()
@@ -42,7 +55,7 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return os.Remove(tempFolder)
+		return os.Remove(tempFile)
 	},
 }
 
