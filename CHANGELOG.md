@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-beta.2 - 2020-05-06
 
 ## Fixed
 - Fixed an error when using the select prompt. ([#104](https://github.com/craftcms/nitro/issues/104))
