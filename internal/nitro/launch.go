@@ -2,6 +2,7 @@ package nitro
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/craftcms/nitro/validate"
@@ -9,6 +10,7 @@ import (
 
 type Action struct {
 	Type       string
+	Output     string
 	UseSyscall bool
 	Input      string
 	Args       []string
@@ -36,6 +38,7 @@ func Launch(name string, cpus int, memory, disk, input string) (*Action, error) 
 	return &Action{
 		Type:       "launch",
 		UseSyscall: false,
+		Output:     fmt.Sprintf("Creating new machine %s with %d CPU(s), %s of RAM, and %s disk space", name, cpus, memory, disk),
 		Input:      input,
 		Args:       []string{"launch", "--name", name, "--cpus", strconv.Itoa(cpus), "--mem", memory, "--disk", disk, "bionic", "--cloud-init", "-"},
 	}, nil

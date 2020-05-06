@@ -13,6 +13,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
+- [Adding Multiple Database Engines](#adding-multiple-database-engines)
 - [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
   - [`apply`](#apply)
@@ -216,6 +217,28 @@ Nitro. Once it’s done, you’ll have a new Multipass machine, as well as a new
 
 All of Nitro’s [commands](#commands) accept an `-m` option, which you can use to specify which machine the command
 should be run against. (`nitro-dev` will always be used by default.)
+
+## Adding Multiple Database Engines
+
+Nitro uses Docker to run your database engines. This means that you can run multiple database engines on the same nitro machine 
+(`nitro-dev`). For example, this allows you to try newer versions of MySQL or PostgreSQL locally. 
+
+If you wanted to run multiple versions of MySQL you can run `nitro edit` and add a new version:
+
+   ```yaml
+   databases:
+     - engine: mysql
+       version: "5.7"
+       port: "3306"
+     - engine: mysql
+       version: "5.6"
+       port: "33061"
+     - engine: postgres
+       version: "11"
+       port: "5432"
+   ```   
+
+The running `nitro apply` will create the missing database engines and make them available at the port defined in the config. 
 
 ## Using Xdebug
 
