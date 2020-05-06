@@ -6,6 +6,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 
 - [What’s Included](#whats-included)
 - [Installation](#installation)
+  - [Uninstalling Nitro](#uninstalling-nitro)
 - [Adding Sites](#adding-sites)
   - [Adding a site with `nitro add`](#add-a-site-with-nitro-add)
   - [Add a site manually](#add-a-site-manually)
@@ -65,6 +66,38 @@ Nitro installs the following on every machine:
 
 Once complete, you will have a Multipass machine called `nitro-dev`, and a new configuration file for the machine
  stored at `~/.nitro/nitro-dev.yaml`.
+
+### Uninstalling Nitro
+
+To completely remove Nitro, first [destroy](#destroy) your machine:
+
+```sh
+nitro destroy
+```
+
+> 💡 **Tip:** If you have multiple machines, you can destroy them all using the `multipass delete` command:
+>
+> ```sh
+> multipass delete --all -p
+> ```
+
+Then remove your `nitro` command:
+
+```sh
+sudo rm /usr/local/bin/nitro
+```
+
+You can optionally remove your machine configs as well:
+
+```sh
+rm -rf ~/.nitro
+```
+
+If you wish to uninstall Multipass as well, uninstall instructions can be found on the installation guide for your platform:
+
+- [macOS](https://multipass.run/docs/installing-on-macos)
+- [Windows](https://multipass.run/docs/installing-on-windows)
+- [Linux](https://multipass.run/docs/installing-on-linux)
 
 ## Adding Sites
 
