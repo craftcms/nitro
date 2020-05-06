@@ -34,7 +34,7 @@ Nitro installs the following on every machine:
 2. Run this terminal command:
 
     ```sh
-    curl -sLS http://installer.getnitro.sh | bash
+    bash <(curl -sLS http://installer.getnitro.sh)
     ```
 
 3. Follow the prompts to create your machine.
@@ -327,6 +327,14 @@ Example:
 ```sh
 nitro edit
 ```
+
+> 💡 **Tip:** If you’re running macOS or Linux, you can set an `EDITOR` environment variable in `~/.bash_profile` to your preferred text editor of choice.
+>
+> ```sh
+> export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
+> ```
+> 
+> After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
 
 ### `info`
 

@@ -23,8 +23,8 @@ var logsCommand = &cobra.Command{
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
 
-		kind, _, err := p.Select("What type of logs", opts, &prompt.InputOptions{
-			Default: "1",
+		kind, _, err := p.Select("What type of logs", opts, &prompt.SelectOptions{
+			Default: 1,
 		})
 		if err != nil {
 			return err
@@ -65,8 +65,8 @@ var logsCommand = &cobra.Command{
 				return errors.New("there are no databases to view logs from")
 			}
 
-			containerName, _, err := p.Select("Which database", dbs, &prompt.InputOptions{
-				Default:   "1",
+			containerName, _, err := p.Select("Which database", dbs, &prompt.SelectOptions{
+				Default:   1,
 				Validator: nil,
 			})
 			if err != nil {

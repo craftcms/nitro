@@ -31,8 +31,8 @@ var removeCommand = &cobra.Command{
 		p := prompt.NewPrompt()
 
 		var site config.Site
-		_, i, err := p.Select("Select a site to remove", configFile.SitesAsList(), &prompt.InputOptions{
-			Default: "1",
+		_, i, err := p.Select("Select a site to remove", configFile.SitesAsList(), &prompt.SelectOptions{
+			Default: 1,
 		})
 		if err != nil {
 			return err
