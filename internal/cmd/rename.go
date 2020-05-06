@@ -31,8 +31,8 @@ var renameCommand = &cobra.Command{
 
 		// ask to select a site
 		var site config.Site
-		_, i, err := p.Select("Which site do you want to rename", configFile.SitesAsList(), &prompt.InputOptions{
-			Default: "1",
+		_, i, err := p.Select("Which site do you want to rename", configFile.SitesAsList(), &prompt.SelectOptions{
+			Default: 1,
 		})
 		if err != nil {
 			return err

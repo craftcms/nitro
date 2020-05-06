@@ -55,7 +55,7 @@ var importCommand = &cobra.Command{
 
 		p := prompt.NewPrompt()
 
-		containerName, _, err := p.Select("Which database engine to import the backup", dbs, &prompt.InputOptions{Default: "1"})
+		containerName, _, err := p.Select("Which database engine to import the backup", dbs, &prompt.SelectOptions{Default: 1})
 
 		databaseName, err := p.Ask("What is the database name to create for the import", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
