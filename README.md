@@ -34,7 +34,7 @@ Nitro installs the following on every machine:
 2. Run this terminal command:
 
     ```sh
-    curl -sLS http://installer.getnitro.sh | bash
+    bash <(curl -sLS http://installer.getnitro.sh)
     ```
 
 3. Follow the prompts to create your machine.
