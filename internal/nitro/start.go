@@ -9,6 +9,7 @@ func Start(name string) (*Action, error) {
 
 	return &Action{
 		Type:       "start",
+		Output:     "Starting machine " + name,
 		UseSyscall: false,
 		Args:       []string{"start", name},
 	}, nil

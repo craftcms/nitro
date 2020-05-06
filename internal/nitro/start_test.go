@@ -20,6 +20,7 @@ func TestStart(t *testing.T) {
 			args: args{name: "somename"},
 			want: &Action{
 				Type:       "start",
+				Output:     "Starting machine somename",
 				UseSyscall: false,
 				Args:       []string{"start", "somename"},
 			},

@@ -44,6 +44,7 @@ func TestMountDiffActions(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "mount",
+					Output:     "Mounting ./testdata/mounts to /some/destination",
 					UseSyscall: false,
 					Args:       []string{"mount", "./testdata/mounts", "somemachine:/some/destination"},
 				},
@@ -74,6 +75,7 @@ func TestMountDiffActions(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "umount",
+					Output:     "Unmounting /some/destination from somemachine",
 					UseSyscall: false,
 					Args:       []string{"umount", "somemachine:/some/destination"},
 				},

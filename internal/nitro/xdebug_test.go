@@ -21,6 +21,7 @@ func TestEnableXdebug(t *testing.T) {
 			args: args{name: "somename", php: "7.4"},
 			want: &Action{
 				Type:       "exec",
+				Output:     "Enabling xdebug for 7.4",
 				UseSyscall: false,
 				Args:       []string{"exec", "somename", "--", "sudo", "phpenmod", "-v", "7.4", "xdebug"},
 			},
@@ -69,6 +70,7 @@ func TestDisableXdebug(t *testing.T) {
 			args: args{name: "somename", php: "7.4"},
 			want: &Action{
 				Type:       "exec",
+				Output:     "Disabling xdebug for 7.4",
 				UseSyscall: false,
 				Args:       []string{"exec", "somename", "--", "sudo", "phpdismod", "-v", "7.4", "xdebug"},
 			},

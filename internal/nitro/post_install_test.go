@@ -26,6 +26,7 @@ func TestConfigurePHPMemoryLimit(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "exec",
+				Output:     "Configuring PHP 7.4 memory limit to 256M",
 				UseSyscall: false,
 				Args:       []string{"exec", "somename", "--", "sudo", "sed", "-i", "s|memory_limit = 128M|memory_limit = 256M|g", "/etc/php/7.4/fpm/php.ini"},
 			},

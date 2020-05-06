@@ -21,6 +21,7 @@ func TestRestartPhpFpm(t *testing.T) {
 			args: args{name: "somename", php: "7.4"},
 			want: &Action{
 				Type:       "exec",
+				Output:     "Restarting php-fpm 7.4",
 				UseSyscall: false,
 				Args:       []string{"exec", "somename", "--", "sudo", "service", "php7.4-fpm", "restart"},
 			},

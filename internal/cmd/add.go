@@ -110,7 +110,7 @@ var addCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s has been added to config file.\n", hostname)
+		fmt.Printf("Added %s to config file.\n", hostname)
 
 		applyChanges, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
 			Default: "yes",

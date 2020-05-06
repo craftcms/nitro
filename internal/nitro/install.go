@@ -1,6 +1,7 @@
 package nitro
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/craftcms/nitro/validate"
@@ -35,6 +36,7 @@ func InstallPackages(name, php string) (*Action, error) {
 
 	return &Action{
 		Type:       "exec",
+		Output:     fmt.Sprintf("Installing PHP version %s", php),
 		UseSyscall: false,
 		Args:       args,
 	}, nil
