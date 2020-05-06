@@ -54,7 +54,7 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-> ⚠️ **Note:** Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
+> 💡 **Tip:** Windows requires [Git bash](https://git-scm.com/downloads) and all commands must be executed through the Git bash shell. 
 
 1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
@@ -84,14 +84,30 @@ nitro destroy
 
 Then remove your `nitro` command:
 
+macOS and Linux:
+
 ```sh
 sudo rm /usr/local/bin/nitro
 ```
 
+Windows:
+
+```sh
+rm -rf $HOME/Nitro
+```
+
 You can optionally remove your machine configs as well:
+
+macOS and Linux
 
 ```sh
 rm -rf ~/.nitro
+```
+
+Windows:
+
+```sh
+rm -rf $HOME/.nitro
 ```
 
 If you wish to uninstall Multipass as well, uninstall instructions can be found on the installation guide for your platform:
