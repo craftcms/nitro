@@ -6,12 +6,37 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 
 - [What’s Included](#whats-included)
 - [Installation](#installation)
+  - [Uninstalling Nitro](#uninstalling-nitro)
 - [Adding Sites](#adding-sites)
+  - [Adding a site with `nitro add`](#add-a-site-with-nitro-add)
+  - [Add a site manually](#add-a-site-manually)
 - [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
+  - [`apply`](#apply)
+  - [`add`](#add)
+  - [`context`](#context)
+  - [`destroy`](#destroy)
+  - [`edit`](#edit)
+  - [`info`](#info)
+  - [`init`](#init)
+  - [`import`](#import)
+  - [`logs`](#logs)
+  - [`remove`](#remove)
+  - [`redis`](#redis)
+  - [`start`](#start)
+  - [`stop`](#stop)
+  - [`rename`](#rename)
+  - [`restart`](#restart)
+  - [`self-update`](#self-update)
+  - [`ssh`](#ssh)
+  - [`update`](#update)
+  - [`version`](#version)
+  - [`xdebug configure`](#xdebug-configure)
+  - [`xdebug on`](#xdebug-on)
+  - [`xdebug off`](#xdebug-off)
 
 ---
 
@@ -42,6 +67,38 @@ Nitro installs the following on every machine:
 Once complete, you will have a Multipass machine called `nitro-dev`, and a new configuration file for the machine
  stored at `~/.nitro/nitro-dev.yaml`.
 
+### Uninstalling Nitro
+
+To completely remove Nitro, first [destroy](#destroy) your machine:
+
+```sh
+nitro destroy
+```
+
+> 💡 **Tip:** If you have multiple machines, you can destroy them all using the `multipass delete` command:
+>
+> ```sh
+> multipass delete --all -p
+> ```
+
+Then remove your `nitro` command:
+
+```sh
+sudo rm /usr/local/bin/nitro
+```
+
+You can optionally remove your machine configs as well:
+
+```sh
+rm -rf ~/.nitro
+```
+
+If you wish to uninstall Multipass as well, uninstall instructions can be found on the installation guide for your platform:
+
+- [macOS](https://multipass.run/docs/installing-on-macos)
+- [Windows](https://multipass.run/docs/installing-on-windows)
+- [Linux](https://multipass.run/docs/installing-on-linux)
+
 ## Adding Sites
 
 To add a site to Nitro, three things need to happen:
@@ -53,16 +110,16 @@ To add a site to Nitro, three things need to happen:
 ### Add a site with `nitro add`
 
 If your project files are completely contained within a single folder, then you can quickly accomplish these using
-the [`add`](#add) command:  
+the [`add`](#add) command:
 
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] example.test 
-Where is the webroot? [web] 
+What should the hostname be? [plugins-dev] example.test
+Where is the webroot? [web]
 plugins-dev has been added to config file.
-Apply changes from config? [yes]    
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Apply changes from config? [yes]
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
 example.test added successfully!
@@ -80,7 +137,7 @@ If you would prefer to add a site manually, follow these steps:
        dest: /nitro/sites/example.test
    sites:
      - hostname: example.test
-       webroot: /nitro/sites/example.test/web 
+       webroot: /nitro/sites/example.test/web
    ```
 
 2. Run `nitro apply` to apply your `nitro.yaml` changes to the machine. You will be prompted for your password so
@@ -148,7 +205,7 @@ To create a new machine, run the following command:
 
 ```sh
 $ nitro init -m <machine>
-``` 
+```
 
 Replace `<machine>` with the name you want to give your new machine. Machine names can only include letters,
 numbers, underscores, and hyphen.
@@ -238,11 +295,11 @@ Example:
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] 
-Where is the webroot? [web] 
+What should the hostname be? [plugins-dev]
+Where is the webroot? [web]
 plugins-dev has been added to config file.
-Apply changes from config? [yes]    
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml              
+Apply changes from config? [yes]
+Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
 plugins-dev added successfully!
@@ -333,7 +390,7 @@ nitro edit
 > ```sh
 > export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
 > ```
-> 
+>
 > After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
 
 ### `info`
@@ -413,7 +470,7 @@ Example:
 
 ```sh
 $ nitro import mybackup.sql
-Use the arrow keys to navigate: ↓ ↑ → ← 
+Use the arrow keys to navigate: ↓ ↑ → ←
 ? Select database:
   ▸ mysql_5.7_3306
 ```
@@ -421,7 +478,7 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 ### `logs`
 
 Views the machine’s logs. This command will prompt you for a type of logs to view, including e.g. `nginx`,
-`database`, or `docker` (for a specific container). 
+`database`, or `docker` (for a specific container).
 
 ```sh
 nitro logs [<options>]
@@ -567,7 +624,7 @@ Options:
 
 ### `version`
 
-Checks the currently version of nitro against the releases and shows any updated versions.  
+Checks the currently version of nitro against the releases and shows any updated versions.
 
 ```sh
 nitro version
