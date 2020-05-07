@@ -126,26 +126,33 @@ Password: ******
 example.test added successfully!
 ```
 
-### Add a site manually
+### Mounting your entire dev folder at once
 
-If you would prefer to add a site manually, follow these steps:
+If you manage all of your projects within a single dev folder, you can mount that entire folder once within Nitro,
+and point your sites’ webroots to the appropriate folders within it.
 
-1. Open your `~/.nitro/nitro-dev.yaml` file in a text editor (or run the [`edit`](#edit) command), and add a new
-   [mount](#adding-mounts) and site to it:
+To do that, open your `~/.nitro/nitro-dev.yaml` file in a text editor (or run the [`edit`](#edit) command), and add
+a new mount for the folder that contains all of your projects, plus list out all of your sites you wish to add to
+Nitro within that folder:
 
-    ```yaml
-   mounts:
-     - source: /path/to/project
-       dest: /nitro/sites/example.test
-   sites:
-     - hostname: example.test
-       webroot: /nitro/sites/example.test/web
-   ```
+```yaml
+mounts:
+ - source: ~/dev
+   dest: /nitro/dev
+sites:
+ - hostname: example1.test
+   webroot: /nitro/dev/example1.test/web
+ - hostname: example2.test
+   webroot: /nitro/dev/example2.test/web
+```
 
-2. Run `nitro apply` to apply your `nitro.yaml` changes to the machine. You will be prompted for your password so
-   Nitro can add the new hostname to your system’s `hosts` file.
+Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 
-You should now be able to point your web browser at your new hostname.
+> 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/nitro/*` within the
+  machine.
+
+> ⚠️ **Warning:** If your projects contain any symlnks, such as `path` Composer repositories, those symlinks
+  **must** be relative (`../`), not absolute (`/` or `~/`).
 
 ## Connecting to the Database
 
