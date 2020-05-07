@@ -130,7 +130,8 @@ example.test added successfully!
 
 If you would prefer to add a site manually, follow these steps:
 
-1. Open your `~/.nitro/nitro-dev.yaml` file in a text editor, and add a new [mount](#adding-mounts) and site to it:
+1. Open your `~/.nitro/nitro-dev.yaml` file in a text editor (or run the [`edit`](#edit) command), and add a new
+   [mount](#adding-mounts) and site to it:
 
     ```yaml
    mounts:
