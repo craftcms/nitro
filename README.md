@@ -221,25 +221,25 @@ should be run against. (`nitro-dev` will always be used by default.)
 
 ## Adding Multiple Database Engines
 
-Nitro uses Docker to run your database engines. This means that you can run multiple database engines on the same nitro machine 
-(`nitro-dev`). For example, this allows you to try newer versions of MySQL or PostgreSQL locally. 
+To run multiple database engines on the same machine, open your `~/.nitro/nitro-dev.yaml` file in a text editor (or
+run the [`edit`](#edit) command), and list additional databases under the `databases` key:
 
-If you wanted to run multiple versions of MySQL you can run `nitro edit` and add a new version:
+```yaml
+databases:
+ - engine: mysql
+   version: "5.7"
+   port: "3306"
+ - engine: mysql
+   version: "5.6"
+   port: "33061"
+ - engine: postgres
+   version: "11"
+   port: "5432"
+```   
 
-   ```yaml
-   databases:
-     - engine: mysql
-       version: "5.7"
-       port: "3306"
-     - engine: mysql
-       version: "5.6"
-       port: "33061"
-     - engine: postgres
-       version: "11"
-       port: "5432"
-   ```   
+> ⚠️ **Warning:** Each database engine needs its own unique port.
 
-The running `nitro apply` will create the missing database engines and make them available at the port defined in the config. 
+Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 
 ## Using Xdebug
 
