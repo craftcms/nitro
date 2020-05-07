@@ -18,9 +18,7 @@ var selfUpdateCommand = &cobra.Command{
 	Short: "Update Nitro to the latest",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
-
 		tempFolder := os.TempDir()
-
 		localFile := filepath.Join(tempFolder, "install.sh")
 
 		if err := DownloadFile(localFile, fileUrl); err != nil {
@@ -33,7 +31,7 @@ var selfUpdateCommand = &cobra.Command{
 
 		ch := make(chan string)
 		go func() {
-			if err := RunCommandCh(ch, "\r\n", localFile); err != nil {
+			if err := RunCommandCh(ch, "\r\n", localFile, "update"); err != nil {
 				log.Fatal(err)
 			}
 		}()
