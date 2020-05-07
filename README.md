@@ -9,7 +9,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [Uninstalling Nitro](#uninstalling-nitro)
 - [Adding Sites](#adding-sites)
   - [Adding a site with `nitro add`](#add-a-site-with-nitro-add)
-  - [Add a site manually](#add-a-site-manually)
+  - [Mounting your entire dev folder at once](#mounting-your-entire-dev-folder-at-once)
 - [Connecting to the Database](#connecting-to-the-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
