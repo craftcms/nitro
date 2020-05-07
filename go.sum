@@ -75,8 +75,6 @@ github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRW
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
-github.com/pixelandtonic/prompt v0.0.0-20200505130838-0cbd21e84462 h1:VwB/GtXbdPqYSETxOglb9xNJg3mjZdOMQGqtUngh8hc=
-github.com/pixelandtonic/prompt v0.0.0-20200505130838-0cbd21e84462/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
 github.com/pixelandtonic/prompt v0.0.0-20200506140144-6c881e819f61 h1:pq0TVVnXDZweDHHfHqP64xHFYZgbphimiKmE8eUVZLY=
 github.com/pixelandtonic/prompt v0.0.0-20200506140144-6c881e819f61/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

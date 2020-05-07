@@ -1,5 +1,11 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Changed
+- The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
+- The `self-update` command no longer prompts for installation upon completion. ([#115](https://github.com/craftcms/nitro/issues/115))
+
 ### 1.0.0-beta.2 - 2020-05-06
 
 ## Fixed

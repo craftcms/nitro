@@ -38,7 +38,7 @@ var selfUpdateCommand = &cobra.Command{
 		go func() {
 			if currentOs == "windows" {
 
-				batOutput := []byte("sh.exe --login -i -- " + tempShell)
+				batOutput := []byte("sh.exe --login -i -- " + tempShell + "update")
 				if err := ioutil.WriteFile(tempBat, batOutput, 0644); err != nil {
 					log.Fatal(err)
 				}
@@ -47,7 +47,7 @@ var selfUpdateCommand = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-				if err := RunCommandCh(ch, "\r\n", tempShell); err != nil {
+				if err := RunCommandCh(ch, "\r\n", tempShell, "update"); err != nil {
 					log.Fatal(err)
 				}
 			}
