@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Changed
+- The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
+
 ### 1.0.0-beta.2 - 2020-05-06
 
 ## Fixed

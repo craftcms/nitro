@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/pixelandtonic/prompt"
 	"os"
 	"os/exec"
 
@@ -30,6 +31,20 @@ var destroyCommand = &cobra.Command{
 			domains = append(domains, site.Hostname)
 		}
 
+		p := prompt.NewPrompt()
+
+		reallyDestroy, err := p.Confirm("Are you sure you want to permanently destroy your " + machine + " machine", &prompt.InputOptions{
+			Default:   "no",
+			Validator: nil,
+		})
+		if err != nil {
+			return err
+		}
+
+		if !reallyDestroy {
+			return nil
+		}
+
 		destroyAction, err := nitro.Destroy(machine)
 		if err != nil {
 			return err
@@ -46,7 +61,7 @@ var destroyCommand = &cobra.Command{
 		}
 
 		if len(domains) == 0 {
-			fmt.Println("Permanently removed", machine)
+			fmt.Println("Permanently destroyed", machine)
 			return nil
 		}
 
