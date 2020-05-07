@@ -254,4 +254,8 @@ function promptInstall {
 hasCurl
 hasMultipass
 getNitro
-promptInstall
+
+if [ "$1" != "update" ]; then
+  promptInstall
+fi
+
