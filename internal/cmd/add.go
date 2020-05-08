@@ -56,7 +56,8 @@ var addCommand = &cobra.Command{
 			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
-				return err
+				fmt.Println("Unable to locate a webroot, setting to web")
+				foundDir = "web"
 			}
 
 			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{
