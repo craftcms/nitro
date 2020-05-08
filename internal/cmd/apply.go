@@ -80,8 +80,6 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
-		// TODO show output
-
 		if flagDebug {
 			for _, a := range actions {
 				fmt.Println(a.Args)
