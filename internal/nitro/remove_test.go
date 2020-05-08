@@ -24,7 +24,6 @@ func TestRemoveSymlink(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "exec",
-				Output:     "Removing symlink for example.test",
 				UseSyscall: false,
 				Args:       []string{"exec", "somemachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/example.test"},
 			},

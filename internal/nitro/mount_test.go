@@ -26,7 +26,6 @@ func TestMount(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "mount",
-				Output:     "Mounting /tmp to /nitro/sites/example.test",
 				UseSyscall: false,
 				Args:       []string{"mount", "/tmp", "somename:/nitro/sites/example.test"},
 			},

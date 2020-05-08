@@ -30,7 +30,6 @@ func TestLaunch(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "launch",
-				Output:     "Creating new machine machine with 4 CPU(s), 2G of RAM, and 20G disk space",
 				UseSyscall: false,
 				Input:      "someinput",
 				Args:       []string{"launch", "--name", "machine", "--cpus", "4", "--mem", "2G", "--disk", "20G", "bionic", "--cloud-init", "-"},

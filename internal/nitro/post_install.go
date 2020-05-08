@@ -18,7 +18,6 @@ func ConfigurePHPMemoryLimit(name, php, limit string) (*Action, error) {
 
 	return &Action{
 		Type:       "exec",
-		Output:     fmt.Sprintf("Configuring PHP %s memory limit to %s", php, limit),
 		UseSyscall: false,
 		Args:       []string{"exec", name, "--", "sudo", "sed", "-i", cmd, "/etc/php/" + php + "/fpm/php.ini"},
 	}, nil

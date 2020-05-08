@@ -26,7 +26,6 @@ func TestMountDir(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "mount",
-				Output:     "Mounting ./testdata/source-folder to /home/ubuntu/sites",
 				UseSyscall: false,
 				Args:       []string{"mount", "./testdata/source-folder", "somename:/home/ubuntu/sites"},
 			},
@@ -41,7 +40,6 @@ func TestMountDir(t *testing.T) {
 			},
 			want: &Action{
 				Type:       "mount",
-				Output:     "Mounting ./testdata/source-folder to /home/ubuntu/sites",
 				UseSyscall: false,
 				Args:       []string{"mount", "./testdata/source-folder", "somename:/home/ubuntu/sites"},
 			},

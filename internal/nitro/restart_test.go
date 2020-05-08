@@ -20,7 +20,6 @@ func TestRestart(t *testing.T) {
 			args: args{name: "somename"},
 			want: &Action{
 				Type:       "restart",
-				Output:     `Restarting machine "somename"`,
 				UseSyscall: false,
 				Args:       []string{"restart", "somename"},
 			},
