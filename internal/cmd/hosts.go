@@ -3,11 +3,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
-
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
+	"os"
+	"runtime"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/hosts"
@@ -23,8 +24,14 @@ var hostsCommand = &cobra.Command{
 
 		if !flagDebug {
 			uid := os.Geteuid()
-			if uid != 0 {
+			if (uid != 0) && (uid != -1) {
 				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
+			}
+		}
+
+		if runtime.GOOS == "windows" {
+			if err := runas.Elevated(args); err != nil {
+				return err
 			}
 		}
 

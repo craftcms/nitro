@@ -9,6 +9,7 @@ require (
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/txn2/txeh v1.3.0
+	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

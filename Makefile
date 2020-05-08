@@ -8,8 +8,10 @@ build-win:
 local: build
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
-	mv nitro.exe ${HOME}/Nitro/nitro.exe
+	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 test:
 	go test ./...
 releaser:
 	goreleaser --skip-publish --rm-dist --skip-validate
+win-home:
+	mkdir "${HOME}"/Nitro

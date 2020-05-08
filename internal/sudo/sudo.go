@@ -6,8 +6,6 @@ import (
 )
 
 func RunCommand(nitro, machine string, commands ...string) error {
-	// TODO update this for windows support
-
 	b := []string{nitro, "-m", machine}
 	for _, command := range commands {
 		b = append(b, command)
