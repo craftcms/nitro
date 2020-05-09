@@ -3,7 +3,7 @@
 ### Unreleased
 
 ## Added
-- Added the `--skip-hosts` option to th `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
+- Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
 
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
