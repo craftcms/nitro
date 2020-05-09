@@ -94,6 +94,11 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
+		if flagSkipHosts {
+			fmt.Println("Skipping editing the hosts file")
+			return nil
+		}
+
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
@@ -104,4 +109,8 @@ var applyCommand = &cobra.Command{
 		// TODO check the current OS and call commands for windows
 		return sudo.RunCommand(nitro, machine, "hosts")
 	},
+}
+
+func init() {
+	applyCommand.Flags().BoolVar(&flagSkipHosts, "skip-hosts", false, "skip editing the hosts file")
 }
