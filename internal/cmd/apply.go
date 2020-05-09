@@ -11,7 +11,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/task"
 )
 
@@ -106,8 +106,7 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Editing your hosts file")
 
-		// TODO check the current OS and call commands for windows
-		return sudo.RunCommand(nitro, machine, "hosts")
+		return runas.Elevated(nitro, machine, []string{"hosts"})
 	},
 }
 
