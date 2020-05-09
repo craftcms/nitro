@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/pixelandtonic/prompt"
 	"os"
 	"os/exec"
+
+	"github.com/pixelandtonic/prompt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/runas"
 )
 
 var destroyCommand = &cobra.Command{
@@ -33,7 +34,7 @@ var destroyCommand = &cobra.Command{
 
 		p := prompt.NewPrompt()
 
-		reallyDestroy, err := p.Confirm("Are you sure you want to permanently destroy your " + machine + " machine", &prompt.InputOptions{
+		reallyDestroy, err := p.Confirm("Are you sure you want to permanently destroy your "+machine+" machine", &prompt.InputOptions{
 			Default:   "no",
 			Validator: nil,
 		})
@@ -78,7 +79,7 @@ var destroyCommand = &cobra.Command{
 
 		fmt.Println("Removing sites from your hosts file")
 
-		return sudo.RunCommand(nitro, machine, cmds...)
+		return runas.Elevated(nitro, machine, cmds)
 	},
 }
 
