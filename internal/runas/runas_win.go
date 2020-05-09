@@ -14,7 +14,7 @@ import (
 // user. We explicitly pass the name of the machine, and
 // args that we are going to pass to the cli.
 // (e.g runas nitro -m machine-name hosts remove)
-func Elevated(machine, string, args []string) error {
+func Elevated(machine string, args []string) error {
 	verb := "runas"
 	exe, _ := os.Executable()
 	cwd, _ := os.Getwd()
