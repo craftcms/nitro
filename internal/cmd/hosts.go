@@ -3,12 +3,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/craftcms/nitro/internal/runas"
+	"os"
+	"runtime"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
-	"os"
-	"runtime"
+
+	"github.com/craftcms/nitro/internal/runas"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/hosts"
@@ -30,7 +32,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if runtime.GOOS == "windows" {
-			if err := runas.Elevated(args); err != nil {
+			if err := runas.Elevated("", machine, args); err != nil {
 				return err
 			}
 		}

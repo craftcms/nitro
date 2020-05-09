@@ -22,6 +22,7 @@ func Elevated(nitro, machine, string, args []string) error {
 	verbPtr, _ := syscall.UTF16PtrFromString(verb)
 	exePtr, _ := syscall.UTF16PtrFromString(exe)
 	cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
+	// TODO tack the `-m machine` onto the first arg
 	argPtr, _ := syscall.UTF16PtrFromString(strings.Join(args, " "))
 
 	var showCmd int32 = 1 //SW_NORMAL

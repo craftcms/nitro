@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/craftcms/nitro/internal/runas"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/internal/runas"
 )
 
 var (
@@ -12,7 +13,7 @@ var (
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			args = append(args, "--machine=nitro-dev", "hosts")
-			if err := runas.Elevated(args); err != nil {
+			if err := runas.Elevated("", "nitro-dev", args); err != nil {
 				return err
 			}
 
