@@ -3,13 +3,18 @@
 package runas
 
 import (
-	"golang.org/x/sys/windows"
 	"os"
 	"strings"
 	"syscall"
+
+	"golang.org/x/sys/windows"
 )
 
-func Elevated(args []string) error {
+// Elevated allows the command to be run as a administrator
+// user. We explicit pass the path to the nitro binary, the name
+// of the machine, and args that we are going to use
+// (e.g runas nitro -m machine-name hosts remove)
+func Elevated(nitro, machine, string, args []string) error {
 	verb := "runas"
 	exe, _ := os.Executable()
 	cwd, _ := os.Getwd()
