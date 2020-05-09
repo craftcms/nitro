@@ -99,14 +99,9 @@ var applyCommand = &cobra.Command{
 			return nil
 		}
 
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
 		fmt.Println("Editing your hosts file")
 
-		return runas.Elevated(nitro, machine, []string{"hosts"})
+		return runas.Elevated(machine, []string{"hosts"})
 	},
 }
 

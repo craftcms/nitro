@@ -11,13 +11,15 @@ import (
 )
 
 // Elevated allows the command to be run as a administrator
-// user. We explicit pass the path to the nitro binary, the name
-// of the machine, and args that we are going to use
+// user. We explicitly pass the name of the machine, and
+// args that we are going to pass to the cli.
 // (e.g runas nitro -m machine-name hosts remove)
-func Elevated(nitro, machine, string, args []string) error {
+func Elevated(machine, string, args []string) error {
 	verb := "runas"
 	exe, _ := os.Executable()
 	cwd, _ := os.Getwd()
+
+	// TODO append the exe path?
 
 	verbPtr, _ := syscall.UTF16PtrFromString(verb)
 	exePtr, _ := syscall.UTF16PtrFromString(exe)

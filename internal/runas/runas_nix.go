@@ -8,11 +8,15 @@ import (
 )
 
 // Elevated allows the command to be run as sudo user. We
-// explicit pass the path to the nitro binary, the name
-// of the machine, and args that we are going to use
+// explicit pass the name of the machine, and args that
+// we are going to pass to the nitro cli.
 // (e.g sudo nitro -m machine-name hosts remove)
-func Elevated(nitro, machine string, args []string) error {
-	b := []string{nitro, "-m", machine}
+func Elevated(machine string, args []string) error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	b := []string{exe, "-m", machine}
 	for _, command := range args {
 		b = append(b, command)
 	}

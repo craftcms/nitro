@@ -32,7 +32,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if runtime.GOOS == "windows" {
-			if err := runas.Elevated("", machine, args); err != nil {
+			if err := runas.Elevated(machine, args); err != nil {
 				return err
 			}
 		}

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/pixelandtonic/prompt"
 
@@ -71,15 +70,9 @@ var destroyCommand = &cobra.Command{
 			cmds = append(cmds, domain)
 		}
 
-		// prompt to remove hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
-
 		fmt.Println("Removing sites from your hosts file")
 
-		return runas.Elevated(nitro, machine, cmds)
+		return runas.Elevated(machine, cmds)
 	},
 }
 

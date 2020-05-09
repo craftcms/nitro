@@ -13,7 +13,7 @@ var (
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			args = append(args, "--machine=nitro-dev", "hosts")
-			if err := runas.Elevated("", "nitro-dev", args); err != nil {
+			if err := runas.Elevated("nitro-dev", args); err != nil {
 				return err
 			}
 
