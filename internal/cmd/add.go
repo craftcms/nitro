@@ -9,6 +9,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
@@ -17,6 +18,22 @@ var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add a site to a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+
+		p := prompt.NewPrompt()
+		runner := nitro.NewMultipassRunner("multipass")
+
+		// check if the machine exists
+		if ip := nitro.IP(machine, runner); ip == "" {
+			create, err := p.Confirm(fmt.Sprintf("Unable to find machine %q, want to create it", machine), &prompt.InputOptions{Default: "yes"})
+			if err != nil {
+				return err
+			}
+			if create {
+				return initCommand.RunE(cmd, args)
+			}
+		}
+
 		// load the config
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
@@ -30,8 +47,6 @@ var addCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		p := prompt.NewPrompt()
 
 		// prompt for the hostname if --hostname == ""
 		// else get the name of the current directory (e.g. nitro)
@@ -56,7 +71,8 @@ var addCommand = &cobra.Command{
 			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
-				return err
+				fmt.Println("Unable to locate a webroot, setting to web")
+				foundDir = "web"
 			}
 
 			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{

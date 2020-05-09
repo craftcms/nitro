@@ -1,8 +1,6 @@
 package nitro
 
 import (
-	"fmt"
-
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -16,7 +14,6 @@ func RestartPhpFpm(name, php string) (*Action, error) {
 
 	return &Action{
 		Type:       "exec",
-		Output:     fmt.Sprintf("Restarting php-fpm %s", php),
 		UseSyscall: false,
 		Args:       []string{"exec", name, "--", "sudo", "service", "php" + php + "-fpm", "restart"},
 	}, nil

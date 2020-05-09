@@ -2,9 +2,13 @@
 
 ### Unreleased
 
+## Added
+- Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
+
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
 - The `self-update` command no longer prompts for installation upon completion. ([#115](https://github.com/craftcms/nitro/issues/115))
+- The `import` command now shows the requirement for the first argument of a database backup. ([#124](https://github.com/craftcms/nitro/issues/124))
 
 ### 1.0.0-beta.2 - 2020-05-06
 

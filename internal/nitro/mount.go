@@ -1,8 +1,6 @@
 package nitro
 
 import (
-	"fmt"
-
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -21,7 +19,6 @@ func Mount(name, folder, site string) (*Action, error) {
 
 	return &Action{
 		Type:       "mount",
-		Output:     fmt.Sprintf("Mounting %s to %s", folder, target),
 		UseSyscall: false,
 		Args:       []string{"mount", folder, name + ":" + target},
 	}, nil

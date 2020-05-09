@@ -11,7 +11,6 @@ import (
 func NginxReload(name string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
-		Output:     "Restarting NGINX",
 		UseSyscall: false,
 		Args:       []string{"exec", name, "--", "sudo", "service", "nginx", "restart"},
 	}, nil
@@ -20,7 +19,6 @@ func NginxReload(name string) (*Action, error) {
 func CreateSiteSymllink(name, site string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
-		Output:     fmt.Sprintf("Creating symlink for %s", site),
 		UseSyscall: false,
 		Args:       []string{"exec", name, "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/" + site, "/etc/nginx/sites-enabled/"},
 	}, nil

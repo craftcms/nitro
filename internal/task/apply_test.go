@@ -33,7 +33,6 @@ func TestApply(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "exec",
-					Output:     "Installing PHP version 7.4",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "apt-get", "install", "-y", "php7.4", "php7.4-mbstring", "php7.4-cli", "php7.4-curl", "php7.4-fpm", "php7.4-gd", "php7.4-intl", "php7.4-json", "php7.4-mysql", "php7.4-opcache", "php7.4-pgsql", "php7.4-zip", "php7.4-xml", "php7.4-soap", "php7.4-bcmath", "php7.4-gmp", "php-xdebug", "php-imagick", "blackfire-agent", "blackfire-php"},
 				},
@@ -171,19 +170,16 @@ func TestApply(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "umount",
-					Output:     "Unmounting /nitro/sites/leftoversite.test from mytestmachine",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/leftoversite.test"},
 				},
 				{
 					Type:       "exec",
-					Output:     "Removing symlink for leftoversite.test",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
 				},
 				{
 					Type:       "exec",
-					Output:     "Restarting NGINX",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
 				},
@@ -249,13 +245,11 @@ func TestApply(t *testing.T) {
 				},
 				{
 					Type:       "exec",
-					Output:     "Creating symlink for new-site",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/new-site", "/etc/nginx/sites-enabled/"},
 				},
 				{
 					Type:       "exec",
-					Output:     "Restarting NGINX",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
 				},
@@ -322,13 +316,11 @@ func TestApply(t *testing.T) {
 				},
 				{
 					Type:       "exec",
-					Output:     "Creating symlink for new-site",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/new-site", "/etc/nginx/sites-enabled/"},
 				},
 				{
 					Type:       "exec",
-					Output:     "Restarting NGINX",
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
 				},
@@ -361,7 +353,6 @@ func TestApply(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "mount",
-					Output:     "Mounting ./testdata/new-mount to /nitro/sites/new-site",
 					UseSyscall: false,
 					Args:       []string{"mount", "./testdata/new-mount", "mytestmachine:/nitro/sites/new-site"},
 				},
@@ -395,7 +386,6 @@ func TestApply(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "umount",
-					Output:     "Unmounting /nitro/sites/example-site from mytestmachine",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/example-site"},
 				},
@@ -424,13 +414,11 @@ func TestApply(t *testing.T) {
 			want: []nitro.Action{
 				{
 					Type:       "umount",
-					Output:     "Unmounting /nitro/sites/existing-site from mytestmachine",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/existing-site"},
 				},
 				{
 					Type:       "mount",
-					Output:     "Mounting ./testdata/new-mount to /nitro/sites/new-site",
 					UseSyscall: false,
 					Args:       []string{"mount", "./testdata/new-mount", "mytestmachine:/nitro/sites/new-site"},
 				},

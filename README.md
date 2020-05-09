@@ -154,12 +154,12 @@ Nitro within that folder:
 ```yaml
 mounts:
  - source: ~/dev
-   dest: /nitro/dev
+   dest: /nitro/sites
 sites:
  - hostname: example1.test
-   webroot: /nitro/dev/example1.test/web
+   webroot: /nitro/sites/example1.test/web
  - hostname: example2.test
-   webroot: /nitro/dev/example2.test/web
+   webroot: /nitro/sites/example2.test/web
 ```
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
@@ -213,7 +213,7 @@ To add a new mount, follow these steps:
    ```yaml
    mounts:
      - source: /Users/cathy/dev
-       dest: /nitro/dev
+       dest: /nitro/sites
    ```
 
 2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
@@ -258,7 +258,7 @@ databases:
  - engine: postgres
    version: "11"
    port: "5432"
-```   
+```
 
 > ⚠️ **Warning:** Each database engine needs its own unique port.
 

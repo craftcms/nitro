@@ -2,7 +2,6 @@ package nitro
 
 import (
 	"errors"
-	"fmt"
 )
 
 func Restart(machine string) (*Action, error) {
@@ -12,7 +11,6 @@ func Restart(machine string) (*Action, error) {
 
 	return &Action{
 		Type:       "restart",
-		Output:     fmt.Sprintf("Restarting machine %q", machine),
 		UseSyscall: false,
 		Args:       []string{"restart", machine},
 	}, nil
