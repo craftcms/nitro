@@ -3,12 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
-	"runtime"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
+	"os"
 
 	"github.com/craftcms/nitro/internal/runas"
 
@@ -31,10 +29,8 @@ var hostsCommand = &cobra.Command{
 			}
 		}
 
-		if runtime.GOOS == "windows" {
-			if err := runas.Elevated(machine, args); err != nil {
-				return err
-			}
+		if err := runas.Elevated(machine, args); err != nil {
+			return err
 		}
 
 		// get the requested machines ip
