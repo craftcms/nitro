@@ -34,13 +34,21 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 			continue
 		}
 
-		for _, m := range strings.Split(record[12], ";") {
+		// the output from multipass on windows is strange, when splitting the record the windows shows the m as
+		// C:/Users/Jason McCallister/go/src/github.com/craftcms/nitro/demo-site => /nitro/sites/demo-site;
+		sep := ";"
+		for _, m := range strings.Split(record[12], sep) {
 			// since we split on the ;, the last element could be empty
 			if len(m) == 0 {
 				break
 			}
 
 			mount := strings.Split(m, " ")
+
+			if len(mount) > 3 {
+				// TODO we need to split this by the => and handle the space in the file path (mount[0])
+				fmt.Println("There appears to be a space in the source")
+			}
 
 			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[2]})
 		}
