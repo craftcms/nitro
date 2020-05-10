@@ -341,7 +341,7 @@ plugins-dev added successfully!
 Shows the machine’s configuration.
 
 ```sh
-nitro contex [<options>]
+nitro context [<options>]
 ```
 
 Options:
