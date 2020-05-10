@@ -1,7 +1,6 @@
 package nitro
 
 import (
-	"fmt"
 	"github.com/craftcms/nitro/validate"
 	"strings"
 )
@@ -12,7 +11,6 @@ func UnmountDir(name, target string) (*Action, error) {
 	}
 
 	if strings.Contains(target, " ") {
-		fmt.Println("The target to t contains a string, removing")
 		target = strings.TrimSpace(target)
 	}
 
