@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -43,14 +44,26 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 				break
 			}
 
-			mount := strings.Split(m, " ")
+			m = strings.TrimSpace(m)
+
+			mount := strings.Split(m, "=>")
+
+			if strings.Contains(mount[0], " ") {
+				fmt.Println("The path to mount contains a string")
+				absPath, err  := filepath.Abs(mount[0])
+				if err != nil {
+					return nil, err
+				}
+				mount[0] = absPath
+
+			}
 
 			if len(mount) > 3 {
 				// TODO we need to split this by the => and handle the space in the file path (mount[0])
 				fmt.Println("There appears to be a space in the source")
 			}
 
-			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[2]})
+			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[1]})
 		}
 	}
 
