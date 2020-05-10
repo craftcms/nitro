@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
-
-	"github.com/craftcms/nitro/internal/runas"
+	"runtime"
 )
 
 var (
@@ -11,13 +11,16 @@ var (
 		Use:   "x",
 		Short: "working on windows hosts",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println(runtime.GOOS)
 
-			args = append(args, "--machine=nitro-dev", "hosts")
-			if err := runas.Elevated("nitro-dev", args); err != nil {
-				return err
-			}
+			return nil
 
-			return hostsCommand.RunE(cmd, args)
+			//args = append(args, "--machine=nitro-dev", "hosts")
+			//if err := runas.Elevated("nitro-dev", args); err != nil {
+			//	return err
+			//}
+			//
+			//return hostsCommand.RunE(cmd, args)
 		},
 	}
 )
