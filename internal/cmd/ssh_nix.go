@@ -1,9 +1,10 @@
+// +build linux, darwin, !windows
+
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/spf13/cobra"
 )
 
 var sshCommand = &cobra.Command{
