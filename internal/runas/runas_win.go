@@ -15,14 +15,14 @@ import (
 // args that we are going to pass to the cli.
 // (e.g runas nitro -m machine-name hosts remove)
 func Elevated(machine string, args []string) error {
-	verb := "runas"
-	exe, _ := os.Executable()
+	verb := "runas /profile /user:`Jason McCallister`\administrator"
+	nitro, _ := os.Executable()
 	cwd, _ := os.Getwd()
 
 	// TODO append the exe path?
 
 	verbPtr, _ := syscall.UTF16PtrFromString(verb)
-	exePtr, _ := syscall.UTF16PtrFromString(exe)
+	exePtr, _ := syscall.UTF16PtrFromString(nitro)
 	cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
 	// TODO tack the `-m machine` onto the first arg
 	// TODO or set the env var NITRO_MACHINE?

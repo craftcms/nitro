@@ -12,11 +12,12 @@ import (
 // we are going to pass to the nitro cli.
 // (e.g sudo nitro -m machine-name hosts remove)
 func Elevated(machine string, args []string) error {
-	exe, err := os.Executable()
+	nitro, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	b := []string{exe, "-m", machine}
+
+	b := []string{nitro, "-m", machine}
 	for _, command := range args {
 		b = append(b, command)
 	}
