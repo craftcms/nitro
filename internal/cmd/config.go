@@ -84,6 +84,7 @@ write_files:
           error_page 404 /index.php?$query_string;
           ssi on;
           server_name CHANGESERVERNAME;
+          client_max_body_size 100M;
 
           location / {
               try_files $uri $uri/ /index.php$is_args$args;
