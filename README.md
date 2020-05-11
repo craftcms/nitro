@@ -69,7 +69,7 @@ macOS and Linux:
 
 ----------
 
-Windows 10:
+Windows 10 Pro (with Hyper-V enabled):
 
 > 💡 **Tip:** Windows doesn't currently have an automated install script, so installation and updating must be done manually. 
 
