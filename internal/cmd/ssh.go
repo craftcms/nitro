@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var sshCommand = &cobra.Command{
