@@ -24,6 +24,83 @@ func TestApply(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "changing a sites webroot will update the nginx configuration",
+			args: args{
+				machine: "mytestmachine",
+				configFile: config.Config{
+					PHP: "7.4",
+					Mounts: []config.Mount{
+						{
+							Source: "./testdata/existing-mount",
+							Dest:   "/nitro/sites/existing-site",
+						},
+					},
+					Sites: []config.Site{
+						{
+							Hostname: "existing-site",
+							Webroot:  "/nitro/sites/existing-site/public", // renamed in the config to public
+						},
+					},
+				},
+				fromMultipassMounts: []config.Mount{
+					{
+						Source: "./testdata/existing-mount",
+						Dest:   "/nitro/sites/existing-site",
+					},
+				},
+				sites: []config.Site{
+					{
+						Hostname: "existing-site",
+						Webroot:  "/nitro/sites/existing-site/web",
+					},
+				},
+				php: "7.4",
+			},
+			want: []nitro.Action{
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-available/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "cp", "/opt/nitro/nginx/template.conf", "/etc/nginx/sites-available/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEWEBROOTDIR|/nitro/sites/existing-site/public|g", "/etc/nginx/sites-available/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGESERVERNAME|existing-site|g", "/etc/nginx/sites-available/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "sed", "-i", "s|CHANGEPHPVERSION|7.4|g", "/etc/nginx/sites-available/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "ln", "-s", "/etc/nginx/sites-available/existing-site", "/etc/nginx/sites-enabled/"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "service", "nginx", "restart"},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "mismatched versions of PHP installs the request version from the config file",
 			args: args{
 				machine:    "mytestmachine",
@@ -176,7 +253,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-available/leftoversite.test"},
 				},
 				{
 					Type:       "exec",
