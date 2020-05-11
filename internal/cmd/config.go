@@ -119,6 +119,7 @@ runcmd:
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+  - echo "CRAFT_NITRO=1" >> /etc/environment
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
   - apt-get update -y
