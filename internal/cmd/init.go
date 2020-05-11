@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -204,6 +206,18 @@ var initCommand = &cobra.Command{
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
+		}
+
+		// if there are sites, edit the hosts file
+		if len(sites) > 0 {
+			nitro, err := exec.LookPath("nitro")
+			if err != nil {
+				return err
+			}
+
+			if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
+				return err
+			}
 		}
 
 		return infoCommand.RunE(cmd, args)

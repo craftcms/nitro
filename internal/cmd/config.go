@@ -84,6 +84,7 @@ write_files:
           error_page 404 /index.php?$query_string;
           ssi on;
           server_name CHANGESERVERNAME;
+          client_max_body_size 100M;
 
           location / {
               try_files $uri $uri/ /index.php$is_args$args;
@@ -116,6 +117,8 @@ runcmd:
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+  - echo "DB_USER=nitro" >> /etc/environment
+  - echo "DB_PASSWORD=nitro" >> /etc/environment
   - apt-get update -y
   - apt install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
