@@ -35,19 +35,18 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 			continue
 		}
 
-		// the output from multipass on windows is strange, when splitting the record the windows shows the m as
-		// C:/Users/Jason McCallister/go/src/github.com/craftcms/nitro/demo-site => /nitro/sites/demo-site;
-		sep := ";"
-		for _, m := range strings.Split(record[12], sep) {
+		for _, m := range strings.Split(record[12], ";") {
 			// since we split on the ;, the last element could be empty
 			if len(m) == 0 {
 				break
 			}
 
+			// remove trailing and leading spaces
 			m = strings.TrimSpace(m)
 
-			mount := strings.Split(m, "=>")
+			mount := strings.Split(m, " ")
 
+			// if the source contains a space - we need to get the abs path
 			if strings.Contains(mount[0], " ") {
 				absPath, err  := filepath.Abs(mount[0])
 				if err != nil {
@@ -57,7 +56,7 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 				mount[0] = absPath
 			}
 
-			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[1]})
+			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[2]})
 		}
 	}
 
