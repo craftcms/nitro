@@ -5,6 +5,7 @@
 ## Added
 - Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
+- The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
 
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
