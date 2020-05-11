@@ -33,6 +33,23 @@ func TestMounts(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:    "returns no mounts from the machine if they are not present",
+			args:    args{name: "nitro-dev", b: []byte("Name,State,Ipv4,Ipv6,Release,Image hash,Image release,Load,Disk usage,Disk total,Memory usage,Memory total,Mounts\n")},
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "sources with a space still return a mount",
+			args: args{name: "nitro-dev", b: []byte("Name,State,Ipv4,Ipv6,Release,Image hash,Image release,Load,Disk usage,Disk total,Memory usage,Memory total,Mounts\nnitro-dev,Running,192.168.64.21,,Ubuntu 18.04.4 LTS,3b2e3aaaebf2bc364da70fbc7e9619a7c0bb847932496a1903cd4913cf9b1a26,18.04 LTS,0.01 0.21 0.22,2544762880,41442029568,393465856,4136783872,/Users/jason mccallister/go/src/github.com/craftcms/nitro/production-site => /nitro/sites/production-site;/Users/jason mccallister/go/src/github.com/craftcms/nitro/demo-site => /nitro/sites/demo-site;\n")},
+			want: []config.Mount{
+				{
+					Source: "/Users/jason mccallister/go/src/github.com/craftcms/nitro/production-site",
+					Dest:   "/nitro/sites/production-site",
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
