@@ -396,8 +396,7 @@ Options:
 
 ### `edit`
 
-Edit allows you to quickly open your machine configuration to make changes. However, it is recommended to use
-`nitro` commands to edit your config.
+Edit allows you to quickly open your machine configuration to make changes.
 
 ```sh
 nitro edit [<options>]
@@ -423,6 +422,14 @@ nitro edit
 > ```
 >
 > After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
+>
+> Alternatively, you can open the configuration file using your operating system’s default text editor for `.yaml` files by running this command:
+>
+> ```sh
+> open ~/.nitro/nitro-dev.yaml
+> ```
+> 
+> (Replace `nitro-dev` with the appropriate machine name if it’s not that.)
 
 ### `info`
 
