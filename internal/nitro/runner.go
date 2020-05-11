@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"syscall"
 )
@@ -62,11 +61,6 @@ func (m *MultipassRunner) Run(args []string) error {
 
 	if m.input != "" {
 		cmd.Stdin = strings.NewReader(m.input)
-	}
-
-	// if we are using windows, we need to run start
-	if runtime.GOOS == "windows" {
-		return cmd.Start()
 	}
 
 	return cmd.Run()

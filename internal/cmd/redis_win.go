@@ -1,11 +1,11 @@
-// +build linux, darwin, !windows
+// +build !linux, !darwin, windows
 
 package cmd
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/craftcms/nitro/internal/nitro"
+	"os"
+	"os/exec"
 )
 
 var redisCommand = &cobra.Command{
@@ -14,11 +14,16 @@ var redisCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
-		redisAction, err := nitro.Redis(machine)
+		mp, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*redisAction})
+		c := exec.Command(mp, "exec", machine, "--", "redis-cli")
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
+
+		return c.Run()
 	},
 }
