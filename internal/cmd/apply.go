@@ -54,6 +54,7 @@ var applyCommand = &cobra.Command{
 		// find sites that are created
 		var sites []config.Site
 		for _, site := range configFile.Sites {
+			// check if the nginx config exists
 			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
 			if err != nil {
 				return err
@@ -61,6 +62,9 @@ var applyCommand = &cobra.Command{
 			if strings.Contains(string(output), "exists") {
 				sites = append(sites, site)
 			}
+
+			// TODO check if the webroot has changed
+			// https://github.com/craftcms/nitro/issues/122
 		}
 
 		// find all existing databases
