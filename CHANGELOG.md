@@ -11,6 +11,8 @@
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
 - The `self-update` command no longer prompts for installation upon completion. ([#115](https://github.com/craftcms/nitro/issues/115))
 - The `import` command now shows the requirement for the first argument of a database backup. ([#124](https://github.com/craftcms/nitro/issues/124))
+- When a new machine is created the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119)) 
+- The `init` command will prompt you to initialize a new machine if a config file is not found.
 
 ### 1.0.0-beta.2 - 2020-05-06
 

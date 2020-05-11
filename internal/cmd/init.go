@@ -20,18 +20,29 @@ var initCommand = &cobra.Command{
 	Short: "Initialize a new machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-
 		existingConfig := false
+
 		if viper.ConfigFileUsed() != "" {
 			fmt.Println("Using an existing config:", viper.ConfigFileUsed())
 			existingConfig = true
 		}
 
+		p := prompt.NewPrompt()
+
+		if existingConfig == false {
+			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "n"})
+			if err != nil {
+				return err
+			}
+			if initMachine == false {
+				fmt.Println("You can create a new machine later by running `nitro init`")
+				return nil
+			}
+		}
+
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
-
-		p := prompt.NewPrompt()
 
 		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
 		// ask how many cores
