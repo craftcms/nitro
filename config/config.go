@@ -59,6 +59,8 @@ func (c *Config) MountExists(dest string) bool {
 	return false
 }
 
+// SiteExists will check if a site exists withing the current config,
+// it uses .IsExact to verify the site hostname and webroot.
 func (c *Config) SiteExists(site Site) bool {
 	for _, s := range c.Sites {
 		if s.IsExact(site) {
@@ -69,6 +71,8 @@ func (c *Config) SiteExists(site Site) bool {
 	return false
 }
 
+// DatabaseExists check a provided database against the config file
+// to see if the database already exists.
 func (c *Config) DatabaseExists(database Database) bool {
 	for _, d := range c.Databases {
 		if d.Engine == database.Engine && d.Version == database.Version && d.Port == database.Port {
@@ -79,6 +83,8 @@ func (c *Config) DatabaseExists(database Database) bool {
 	return false
 }
 
+// SitesAsList returns the sites a slice of strings
+// which is useful for select lists.
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {
@@ -127,6 +133,9 @@ func (c *Config) AddMount(m Mount) error {
 	return nil
 }
 
+// RenameSite takes a site and a hostname and will replace the
+// hostname in the config file for that site. If the site
+// cannot be found, it will return an error.
 func (c *Config) RenameSite(site Site, hostname string) error {
 	for i, s := range c.Sites {
 		if s.Hostname == site.Hostname {
@@ -157,6 +166,8 @@ func (c *Config) RenameMountBySite(site Site) error {
 	return errors.New("unable to find the mount for the site " + site.Hostname)
 }
 
+// RemoveSite takes a hostname and will remove the site by its
+// hostname from the config file.
 func (c *Config) RemoveSite(hostname string) error {
 	for i := len(c.Sites) - 1; i >= 0; i-- {
 		site := c.Sites[i]
