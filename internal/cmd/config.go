@@ -46,16 +46,15 @@ write_files:
           docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
       fi
-  - path: /opt/nitro/scripts/webroot-changed.sh
+  - path: /opt/nitro/scripts/get-site-webroot.sh
     content: |
       #!/usr/bin/env bash
       site="$1"
-      webroot="$2"
-      
+
       if test -f /etc/nginx/sites-enabled/"$site"; then
-          if grep -q "$webroot" /etc/nginx/sites-enabled/"$site"; then
-              echo "matches"
-          fi
+          grep "root " /etc/nginx/sites-enabled/"$site" | while read -r line; do
+              echo "$line"
+          done
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |

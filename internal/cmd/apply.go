@@ -13,6 +13,7 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/internal/task"
+	"github.com/craftcms/nitro/internal/webroot"
 )
 
 var applyCommand = &cobra.Command{
@@ -54,18 +55,39 @@ var applyCommand = &cobra.Command{
 		// find sites that are created
 		var sites []config.Site
 		for _, site := range configFile.Sites {
+			shouldAppend := false
 			// check if the nginx config exists
 			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
 			if err != nil {
 				return err
 			}
 			if strings.Contains(string(output), "exists") {
-				sites = append(sites, site)
+				shouldAppend = true
 			}
 
-			// TODO check if the webroot has changed
-			// https://github.com/craftcms/nitro/issues/122
+			// see if the webroot is the same
+			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname).Output()
+			if err != nil {
+				return err
+			}
+
+			sp := strings.Split(strings.TrimSpace(string(webrootOutput)), " ")
+
+			// remove the trailing ;
+			sp[1] = strings.TrimRight(sp[1], ";")
+
+			// if the webroot matches
+			if !webroot.Matches(sp[1], site.Webroot) {
+				// replace the site in the sites with the new found
+				site.Webroot = sp[1]
+			}
+
+			if shouldAppend {
+				sites = append(sites, site)
+			}
 		}
+
+		// find sites that
 
 		// find all existing databases
 		databases, err := find.AllDatabases(exec.Command(path, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))

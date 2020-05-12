@@ -42,3 +42,14 @@ func Find(path string) (string, error) {
 
 	return w, nil
 }
+
+// Matches takes the found webroot from a nitro machine
+// and compares the config webroot and returns
+// a boolean if they match.
+func Matches(found, actual string) bool {
+	if found == actual {
+		return true
+	}
+
+	return false
+}
