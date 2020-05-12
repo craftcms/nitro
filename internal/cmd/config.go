@@ -94,6 +94,7 @@ write_files:
              include snippets/fastcgi-php.conf;
              fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
              fastcgi_read_timeout 240;
+             fastcgi_param CRAFT_NITRO 1;
              fastcgi_param DB_USER nitro;
              fastcgi_param DB_PASSWORD nitro;
           }
