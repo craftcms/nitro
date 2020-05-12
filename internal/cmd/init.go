@@ -32,7 +32,7 @@ var initCommand = &cobra.Command{
 		p := prompt.NewPrompt()
 
 		if existingConfig == false {
-			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "n"})
+			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes"})
 			if err != nil {
 				return err
 			}
