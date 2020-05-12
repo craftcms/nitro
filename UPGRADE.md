@@ -1,4 +1,4 @@
-# Release Notes for Craft Nitro
+# Upgrade Notes
 
 ## Upgrading to Nitro 0.10.0
 
