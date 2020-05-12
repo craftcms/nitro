@@ -55,27 +55,26 @@ var initCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		cfg.CPUs = cpuCores
 
 		// ask how much memory
-		memory, err := p.Ask("How much memory", &prompt.InputOptions{
+		mem, err := p.Ask("How much memory", &prompt.InputOptions{
 			Default:   "4G",
 			Validator: validate.Memory,
 		})
 		if err != nil {
 			return err
 		}
-		cfg.Memory = memory
+		memory := mem
 
 		// how much disk space
-		disk, err := p.Ask("How much disk space", &prompt.InputOptions{
+		di, err := p.Ask("How much disk space", &prompt.InputOptions{
 			Default:   "40G",
 			Validator: validate.DiskSize,
 		})
 		if err != nil {
 			return err
 		}
-		cfg.Disk = disk
+		disk := di
 
 		// which version of PHP
 		if !existingConfig {
