@@ -64,11 +64,16 @@ var applyCommand = &cobra.Command{
 			if strings.Contains(string(output), "exists") {
 				shouldAppend = true
 			}
-
+			
 			// see if the webroot is the same
-			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname).Output()
+			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname, "||", " ").Output()
 			if err != nil {
-				return err
+				// if the error is because the script does not exist
+				if strings.Contains(err.Error(), "status 127") {
+					fmt.Println("Could not find `/opt/nitro/scripts/get-site-webroot.sh`, skipping checks on site webroot")
+				} else {
+					return err
+				}
 			}
 
 			if len(webrootOutput) > 0 {
