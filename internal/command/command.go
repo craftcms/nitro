@@ -12,6 +12,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
+// Add is not implemented abd will be moved to task.Add
 func Add(args []string, cfg *config.Config, pmt *prompt.Prompt, foundWebroot, flagHostname, flagWebroot string, flagDebug bool) error {
 	dirName, _, err := helpers.GetDirectoryArg(args)
 	if err != nil {
