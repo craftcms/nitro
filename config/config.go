@@ -264,11 +264,3 @@ func GetString(key, flag string) string {
 
 	return flag
 }
-
-func GetInt(key string, flag int) int {
-	if viper.IsSet(key) && flag == 0 {
-		return viper.GetInt(key)
-	}
-
-	return flag
-}

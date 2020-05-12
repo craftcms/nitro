@@ -94,8 +94,6 @@ var initCommand = &cobra.Command{
 				}
 			}
 		} else {
-			cfg.PHP = config.GetString("php", flagPhpVersion)
-
 			// double check from the major update
 			if cfg.PHP == "" {
 				cfg.PHP = "7.4"
