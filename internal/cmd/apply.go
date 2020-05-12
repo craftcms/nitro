@@ -71,15 +71,17 @@ var applyCommand = &cobra.Command{
 				return err
 			}
 
-			sp := strings.Split(strings.TrimSpace(string(webrootOutput)), " ")
+			if len(webrootOutput) > 0 {
+				sp := strings.Split(strings.TrimSpace(string(webrootOutput)), " ")
 
-			// remove the trailing ;
-			sp[1] = strings.TrimRight(sp[1], ";")
+				// remove the trailing ;
+				sp[1] = strings.TrimRight(sp[1], ";")
 
-			// if the webroot matches
-			if !webroot.Matches(sp[1], site.Webroot) {
-				// replace the site in the sites with the new found
-				site.Webroot = sp[1]
+				// if the webroot matches
+				if !webroot.Matches(sp[1], site.Webroot) {
+					// replace the site in the sites with the new found
+					site.Webroot = sp[1]
+				}
 			}
 
 			if shouldAppend {

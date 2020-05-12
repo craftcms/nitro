@@ -1,9 +1,9 @@
 php: "7.4"
 mounts:
   - source: ~/go/src/github.com/craftcms/nitro/demo-site
-    dest: /nitro/sites/demo-site
+    dest: /home/ubuntu/sites/demo-site
   - source: ~/go/src/github.com/craftcms/nitro/production-site
-    dest: /nitro/sites/production-site
+    dest: /home/ubuntu/sites/production-site
 databases:
   - engine: mysql
     version: "5.7"
@@ -13,6 +13,6 @@ databases:
     port: "5432"
 sites:
   - hostname: demo-site
-    webroot: /nitro/sites/demo-site/web
+    webroot: /home/ubuntu/sites/demo-site/web
   - hostname: prod.test
-    webroot: /nitro/sites/production-site/web
+    webroot: /home/ubuntu/sites/production-site/web

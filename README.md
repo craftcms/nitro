@@ -138,12 +138,12 @@ Nitro within that folder:
 ```yaml
 mounts:
  - source: ~/dev
-   dest: /nitro/sites
+   dest: /home/ubuntu/sites
 sites:
  - hostname: example1.test
-   webroot: /nitro/sites/example1.test/web
+   webroot: /home/ubuntu/sites/example1.test/web
  - hostname: example2.test
-   webroot: /nitro/sites/example2.test/web
+   webroot: /home/ubuntu/sites/example2.test/web
 ```
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
@@ -197,7 +197,7 @@ To add a new mount, follow these steps:
    ```yaml
    mounts:
      - source: /Users/cathy/dev
-       dest: /nitro/sites
+       dest: /home/ubuntu/sites
    ```
 
 2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
@@ -363,7 +363,7 @@ disk: 40G
 memory: 4G
 mounts:
 - source: ~/sites/demo-site
-  dest: /nitro/sites/demo-site
+  dest: /home/ubuntu/sites/demo-site
 databases:
 - engine: mysql
   version: "5.7"
@@ -373,7 +373,7 @@ databases:
   port: "5432"
 sites:
 - hostname: demo-site
-  webroot: /nitro/sites/demo-site/web
+  webroot: /home/ubuntu/sites/demo-site/web
 ------
 ```
 
@@ -458,7 +458,7 @@ Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
 Load:           0.09 0.15 0.22
 Disk usage:     2.7G out of 38.6G
 Memory usage:   379.8M out of 3.9G
-Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-site
+Mounts:         /Users/jasonmccallister/sites/demo-site => /home/ubuntu/sites/demo-site
                     UID map: 501:default
                     GID map: 20:default
 ```
@@ -538,7 +538,7 @@ nitro remove [<options>]
 ```
 
 You will be prompted to select the site that should be removed. If the site has a corresponding
-[mount](#adding-mounts) at `/nitro/sites/<hostname>`, the mount will be removed as well.
+[mount](#adding-mounts) at `/home/ubuntu/sites/<hostname>`, the mount will be removed as well.
 
 Options:
 

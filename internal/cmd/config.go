@@ -136,6 +136,5 @@ runcmd:
   - apt-get update -y
   - apt install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
-  - mkdir -p /nitro/sites
-  - chown -R ubuntu:ubuntu /nitro/sites
+  - mkdir -p /home/ubuntu/sites
 `
