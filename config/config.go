@@ -51,6 +51,7 @@ func (c *Config) GetExpandedMounts() []Mount {
 // dest or a parent of an existing dest
 func (c *Config) MountExists(dest string) bool {
 	for _, mount := range c.Mounts {
+		// todo expand the paths for the mounts?
 		if mount.IsExact(dest) || mount.IsParent(dest) {
 			return true
 		}

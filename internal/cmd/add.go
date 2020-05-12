@@ -19,7 +19,6 @@ var addCommand = &cobra.Command{
 	Short: "Add a site to a machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-
 		p := prompt.NewPrompt()
 		runner := nitro.NewMultipassRunner("multipass")
 
