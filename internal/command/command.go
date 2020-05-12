@@ -1,6 +1,9 @@
 package command
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/viper"
 
@@ -10,7 +13,7 @@ import (
 )
 
 func Add(args []string, cfg *config.Config, pmt *prompt.Prompt, foundWebroot, flagHostname, flagWebroot string, flagDebug bool) error {
-	dirName, absPath, err := helpers.GetDirectoryArg(args)
+	dirName, _, err := helpers.GetDirectoryArg(args)
 	if err != nil {
 		return err
 	}
@@ -38,6 +41,11 @@ func Add(args []string, cfg *config.Config, pmt *prompt.Prompt, foundWebroot, fl
 	} else {
 
 	}
+
+	fmt.Println(hostname)
+	fmt.Println(webroot)
+
+	return errors.New("not implemented")
 
 	// create a mount
 	// create a site
