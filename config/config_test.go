@@ -190,9 +190,6 @@ func TestConfig_RemoveSite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
 			}
@@ -301,9 +298,6 @@ func TestConfig_AddMount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -325,9 +319,6 @@ func TestConfig_AddSite(t *testing.T) {
 	type fields struct {
 		Name      string
 		PHP       string
-		CPUs      string
-		Disk      string
-		Memory    string
 		Mounts    []Mount
 		Databases []Database
 		Sites     []Site
@@ -361,9 +352,6 @@ func TestConfig_AddSite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -385,9 +373,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 	type fields struct {
 		Name      string
 		PHP       string
-		CPUs      string
-		Disk      string
-		Memory    string
 		Mounts    []Mount
 		Databases []Database
 		Sites     []Site
@@ -407,9 +392,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 			fields: fields{
 				Name:   "somename",
 				PHP:    "7.4",
-				CPUs:   "3",
-				Disk:   "20G",
-				Memory: "4G",
 				Mounts: []Mount{
 					{
 						Source: "./testdata/test-mount",
@@ -445,9 +427,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -519,9 +498,6 @@ func TestConfig_RemoveSite1(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -677,9 +653,6 @@ func TestConfig_MountExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -747,9 +720,6 @@ func TestConfig_SiteExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -821,9 +791,6 @@ func TestConfig_DatabaseExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,

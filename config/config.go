@@ -15,9 +15,6 @@ import (
 
 type Config struct {
 	PHP       string     `yaml:"php"`
-	CPUs      string     `yaml:"-"`
-	Disk      string     `yaml:"-"`
-	Memory    string     `yaml:"-"`
 	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites,omitempty"`
