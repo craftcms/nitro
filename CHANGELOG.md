@@ -15,6 +15,7 @@
 - The `init` command will prompt you to initialize a new machine if a config file is not found.
 - The OpCache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 - Running the `apply` command will now check sites webroot and apply any changes. ([#113](https://github.com/craftcms/nitro/issues/113))
+- Adding new sites with `add` will no place the site in `/home/ubuntu/sites/site-name`, making symlinks between projects possible. ([#134](https://github.com/craftcms/nitro/issues/134))
 
 ### 1.0.0-beta.2 - 2020-05-06
 
