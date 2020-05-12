@@ -15,9 +15,6 @@ import (
 
 type Config struct {
 	PHP       string     `yaml:"php"`
-	CPUs      string     `yaml:"-"`
-	Disk      string     `yaml:"-"`
-	Memory    string     `yaml:"-"`
 	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites,omitempty"`
@@ -263,14 +260,6 @@ func (c *Config) SaveAs(home, machine string) error {
 func GetString(key, flag string) string {
 	if viper.IsSet(key) && flag == "" {
 		return viper.GetString(key)
-	}
-
-	return flag
-}
-
-func GetInt(key string, flag int) int {
-	if viper.IsSet(key) && flag == 0 {
-		return viper.GetInt(key)
 	}
 
 	return flag
