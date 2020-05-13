@@ -15,13 +15,6 @@ packages:
   - php-cli
   - unzip
 write_files:
-  - path: /opt/nitro/scripts/site-exists.sh
-    content: |
-      #!/usr/bin/env bash
-      site="$1"
-      if test -f /etc/nginx/sites-enabled/"$site"; then
-          echo "exists"
-      fi
   - path: /opt/nitro/scripts/docker-container-exists.sh
     content: |
       #!/usr/bin/env bash
@@ -45,16 +38,6 @@ write_files:
       else
           docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
-      fi
-  - path: /opt/nitro/scripts/get-site-webroot.sh
-    content: |
-      #!/usr/bin/env bash
-      site="$1"
-
-      if test -f /etc/nginx/sites-enabled/"$site"; then
-          grep "root " /etc/nginx/sites-enabled/"$site" | while read -r line; do
-              echo "$line"
-          done
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |
