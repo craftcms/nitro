@@ -4,6 +4,11 @@ Once you have a machine created, you can configure and run [Blackfire](https://b
 
 View the [full installation docs](https://blackfire.io/docs/up-and-running/installation?action=install&mode=full&location=local&os=debian&language=php).
 
+> If XDebug is installed then it may alter performance measures significantly. You can disable it as follows:
+>```
+>nitro xdebug off
+>```
+
 ## With Browser Extensions
  
 1. Log in or sign up for an account at [https://blackfire.io/](https://blackfire.io/).
