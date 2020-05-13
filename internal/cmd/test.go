@@ -44,7 +44,7 @@ var testCommand = &cobra.Command{
 		//	return err
 		//}
 
-		return nil
+		// return nil
 	},
 }
 
