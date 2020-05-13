@@ -66,7 +66,7 @@ var applyCommand = &cobra.Command{
 			}
 			
 			// see if the webroot is the same
-			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname, "||", " ").Output()
+			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname).Output()
 			if err != nil {
 				// if the error is because the script does not exist
 				if strings.Contains(err.Error(), "status 127") {
