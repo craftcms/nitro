@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	FmtNginxSiteAvailable = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
-	FmtNginxSiteEnabled   = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
-	FmtNginxSiteWebroot   = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
+	FmtNginxSiteAvailable    = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
+	FmtNginxSiteEnabled      = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
+	FmtNginxSiteWebroot      = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
+	FmtDockerContainerExists = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo 'exists'; fi`
 )
 
 type Script struct {
