@@ -73,6 +73,7 @@ var applyCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
+
 			matches, found := webroot.Matches(webrootOutput, site.Webroot)
 			switch matches {
 			case true:
@@ -86,8 +87,6 @@ var applyCommand = &cobra.Command{
 				sites = append(sites, site)
 			}
 		}
-
-		// find sites that
 
 		// find all existing databases
 		databases, err := find.AllDatabases(exec.Command(multipass, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
