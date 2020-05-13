@@ -7,8 +7,10 @@ import (
 	"github.com/craftcms/nitro/config"
 )
 
-var (
-	FmtSiteAvailable = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
+const (
+	FmtNginxSiteAvailable = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
+	FmtNginxSiteEnabled   = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
+	FmtNginxSiteWebroot   = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
 )
 
 // SiteIsAvailable takes a site and returns the commands used
@@ -18,7 +20,7 @@ func SiteIsAvailable(s config.Site) (string, error) {
 		return "", errors.New("site hostname is empty")
 	}
 
-	return fmt.Sprintf(`if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`, s.Hostname), nil
+	return fmt.Sprintf(FmtNginxSiteAvailable, s.Hostname), nil
 }
 
 // SiteIsEnabled takes a site and returns the commands used
@@ -28,7 +30,7 @@ func SiteIsEnabled(s config.Site) (string, error) {
 		return "", errors.New("site hostname is empty")
 	}
 
-	return fmt.Sprintf(`if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`, s.Hostname), nil
+	return fmt.Sprintf(FmtNginxSiteEnabled, s.Hostname), nil
 }
 
 // SiteWebroot is used to return the root of the NGINX
@@ -38,5 +40,5 @@ func SiteWebroot(s config.Site) (string, error) {
 		return "", errors.New("site hostname is empty")
 	}
 
-	return fmt.Sprintf(`grep "root " %s | while read -r line; do echo "$line"; done`, "/etc/nginx/sites-available/"+s.Hostname), nil
+	return fmt.Sprintf(FmtNginxSiteWebroot, "/etc/nginx/sites-available/"+s.Hostname), nil
 }
