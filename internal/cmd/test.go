@@ -35,9 +35,10 @@ var testCommand = &cobra.Command{
 
 		mp, err := exec.LookPath("multipass")
 		if err != nil {
-			fmt.Println("error with executable")
 			return err
 		}
+
+		script := scripts.New(mp, machine)
 
 		var site config.Site
 		_, i, err := p.Select("Select a site to check", configFile.SitesAsList(), &prompt.SelectOptions{
@@ -49,8 +50,7 @@ var testCommand = &cobra.Command{
 		site = sites[i]
 
 		// check if the site it available
-		siteExistsScript := fmt.Sprintf(scripts.FmtSiteAvailable, site.Hostname)
-		output, err := scripts.Run(mp, []string{"exec", machine, "--", "bash", "-c", siteExistsScript})
+		output, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
 		if err != nil {
 			return err
 		}
@@ -59,23 +59,14 @@ var testCommand = &cobra.Command{
 		}
 
 		// check if the site webroot matches
-		webrootMatchesScript := fmt.Sprintf(`grep "root " %s | while read -r line; do echo "$line"; done`, "/etc/nginx/sites-available/"+site.Hostname)
-		webrootOutput, err := scripts.Run(mp, []string{"exec", machine, "--", "bash", "-c", webrootMatchesScript})
+		webrootOutput, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
 		if err != nil {
 			return err
 		}
-
-		if len(webrootOutput) > 0 {
-			sp := strings.Split(strings.TrimSpace(string(webrootOutput)), " ")
-
-			// remove the trailing ;
-			sp[1] = strings.TrimRight(sp[1], ";")
-
-			if webroot.Matches(sp[1], site.Webroot) {
-				fmt.Println(fmt.Sprintf("The site webroot %q matches", site.Webroot))
-			} else {
-				fmt.Println(fmt.Sprintf("The site webroot %q does not match, got %q", site.Webroot, sp[1]))
-			}
+		if webroot.Matches(webrootOutput, site.Webroot) {
+			fmt.Println(fmt.Sprintf("The webroot %q matches", site.Webroot))
+		} else {
+			fmt.Println(fmt.Sprintf("The webroot %q does NOT match", site.Webroot))
 		}
 
 		return nil
