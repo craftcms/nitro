@@ -11,6 +11,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/scripts"
 	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/internal/webroot"
@@ -34,12 +35,12 @@ var applyCommand = &cobra.Command{
 		}
 
 		// ABSTRACT
-		path, err := exec.LookPath("multipass")
+		multipass, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
 		}
 
-		c := exec.Command(path, []string{"info", machine, "--format=csv"}...)
+		c := exec.Command(multipass, []string{"info", machine, "--format=csv"}...)
 		output, err := c.Output()
 		if err != nil {
 			return err
@@ -52,41 +53,33 @@ var applyCommand = &cobra.Command{
 		}
 		// END ABSTRACT
 
+		script := scripts.New(multipass, machine)
+
 		// find sites that are created
 		var sites []config.Site
 		for _, site := range configFile.Sites {
 			shouldAppend := false
 			// check if the nginx config exists
-			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
+			existsOutput, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
 			if err != nil {
 				return err
 			}
-			if strings.Contains(string(output), "exists") {
+			if strings.Contains(existsOutput, "exists") {
 				shouldAppend = true
 			}
-			
+
 			// see if the webroot is the same
-			webrootOutput, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/get-site-webroot.sh", site.Hostname).Output()
+			webrootOutput, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
 			if err != nil {
-				// if the error is because the script does not exist
-				if strings.Contains(err.Error(), "status 127") {
-					fmt.Println("Could not find `/opt/nitro/scripts/get-site-webroot.sh`, skipping checks on site webroot")
-				} else {
-					return err
-				}
+				return err
 			}
-
-			if len(webrootOutput) > 0 {
-				sp := strings.Split(strings.TrimSpace(string(webrootOutput)), " ")
-
-				// remove the trailing ;
-				sp[1] = strings.TrimRight(sp[1], ";")
-
-				// if the webroot matches
-				if !webroot.Matches(sp[1], site.Webroot) {
-					// replace the site in the sites with the new found
-					site.Webroot = sp[1]
-				}
+			matches, found := webroot.Matches(webrootOutput, site.Webroot)
+			switch matches {
+			case true:
+				fmt.Println(fmt.Sprintf("Webroot for %q matches", site.Hostname))
+			default:
+				fmt.Println(fmt.Sprintf("Webroot for %q does not match, found %q", site.Hostname, found))
+				site.Webroot = found
 			}
 
 			if shouldAppend {
@@ -97,13 +90,13 @@ var applyCommand = &cobra.Command{
 		// find sites that
 
 		// find all existing databases
-		databases, err := find.AllDatabases(exec.Command(path, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
+		databases, err := find.AllDatabases(exec.Command(multipass, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
 		if err != nil {
 			return err
 		}
 
 		// find the current version of php installed
-		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
+		php, err := find.PHPVersion(exec.Command(multipass, "exec", machine, "--", "php", "--version"))
 		if err != nil {
 			return err
 		}

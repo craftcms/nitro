@@ -47,9 +47,9 @@ func Find(path string) (string, error) {
 // Matches takes the found webroot from a nitro machine
 // and compares the config webroot and returns
 // a boolean if they match.
-func Matches(output, webroot string) bool {
+func Matches(output, webroot string) (bool, string) {
 	if len(output) == 0 {
-		return false
+		return false, ""
 	}
 
 	sp := strings.Split(strings.TrimSpace(output), " ")
@@ -58,8 +58,8 @@ func Matches(output, webroot string) bool {
 	sp[1] = strings.TrimRight(sp[1], ";")
 
 	if sp[1] == webroot {
-		return true
+		return true, sp[1]
 	}
 
-	return false
+	return false, sp[1]
 }
