@@ -29,7 +29,7 @@ var testCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 
 		// check if the site it available
-		output, err := script.Run(`docker container ls --format '{{ .Names }}'`)
+		output, err := script.Run(fmt.Sprintf(scripts.FmtDockerContainerExists, "postgres_12_5432"))
 		if err != nil {
 			return err
 		}

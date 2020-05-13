@@ -15,13 +15,6 @@ packages:
   - php-cli
   - unzip
 write_files:
-  - path: /opt/nitro/scripts/docker-container-exists.sh
-    content: |
-      #!/usr/bin/env bash
-      NAME="$1"
-      if [ -n "$(docker ps -q -f name="$NAME")" ]; then
-        echo "exists"
-      fi
   - path: /opt/nitro/scripts/docker-exec-import.sh
     content: |
       #!/usr/bin/env bash
