@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Find takes a directory and will search for the "webroot" automatically.
@@ -46,8 +47,17 @@ func Find(path string) (string, error) {
 // Matches takes the found webroot from a nitro machine
 // and compares the config webroot and returns
 // a boolean if they match.
-func Matches(found, actual string) bool {
-	if found == actual {
+func Matches(output, webroot string) bool {
+	if len(output) == 0 {
+		return false
+	}
+
+	sp := strings.Split(strings.TrimSpace(output), " ")
+
+	// remove the trailing ;
+	sp[1] = strings.TrimRight(sp[1], ";")
+
+	if sp[1] == webroot {
 		return true
 	}
 
