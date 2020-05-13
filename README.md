@@ -14,6 +14,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Adding Multiple Database Engines](#adding-multiple-database-engines)
+- [Using Blackfire](#using-blackfire)
 - [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
   - [`apply`](#apply)
@@ -247,6 +248,10 @@ databases:
 > ⚠️ **Warning:** Each database engine needs its own unique port.
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
+
+## Using Blackfire
+
+See [Using Blackfire with Nitro](BLACKFIRE.md) for instructions on how to configure and run Blackfire.
 
 ## Using Xdebug
 
