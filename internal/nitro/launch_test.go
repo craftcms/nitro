@@ -32,7 +32,7 @@ func TestLaunch(t *testing.T) {
 				Type:       "launch",
 				UseSyscall: false,
 				Input:      "someinput",
-				Args:       []string{"launch", "--name", "machine", "--cpus", "4", "--mem", "2G", "--disk", "20G", "bionic", "--cloud-init", "-"},
+				Args:       []string{"launch", "--name", "machine", "--cpus", "4", "--mem", "2G", "--disk", "20G", "18.04", "--cloud-init", "-"},
 			},
 			wantErr: false,
 		},
