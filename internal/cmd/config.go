@@ -99,16 +99,16 @@ runcmd:
   - add-apt-repository --no-update -y ppa:nginx/stable
   - add-apt-repository --no-update -y ppa:ondrej/php
   - curl -sS https://getcomposer.org/installer -o composer-setup.php
-  - export COMPOSER_HOME=/home/ubuntu/composer
+  - echo "CRAFT_NITRO=1" >> /etc/environment
+  - echo "DB_USER=nitro" >> /etc/environment
+  - echo "DB_PASSWORD=nitro" >> /etc/environment
+  - echo "COMPOSER_HOME=/home/ubuntu/.composer" >> /etc/environment
   - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-  - echo "CRAFT_NITRO=1" >> /etc/environment
-  - echo "DB_USER=nitro" >> /etc/environment
-  - echo "DB_PASSWORD=nitro" >> /etc/environment
   - apt-get update -y
   - apt-get install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
