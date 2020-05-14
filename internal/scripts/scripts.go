@@ -1,15 +1,18 @@
 package scripts
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
 
 const (
-	FmtNginxSiteAvailable    = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
-	FmtNginxSiteEnabled      = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
-	FmtNginxSiteWebroot      = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
-	FmtDockerContainerExists = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
+	FmtNginxSiteAvailable                   = `if test -f '/etc/nginx/sites-available/%s'; then echo 'exists'; fi`
+	FmtNginxSiteEnabled                     = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
+	FmtNginxSiteWebroot                     = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
+	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
+	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -uroot -e "CREATE DATABASE IF NOT EXISTS %s;"`
+	FmtDockerMysqlGrantPrivileges           = `docker exec -i %s mysql -uroot -e "GRANT ALL PRIVILEGES ON '*'.'*' TO 'nitro'@'localhost' WITH GRANT OPTION;"`
 )
 
 type Script struct {
@@ -32,17 +35,18 @@ func New(multipass, machine string) *Script {
 // nitro path and machine name. Run will then run
 // the script on the machine and
 func (s Script) Run(arg ...string) (string, error) {
-	args := []string{"exec", s.machine, "--", "bash", "-c"}
+	args := []string{"exec", s.machine, "--"}
+	args = append(args, []string{"bash", "-c"}...)
 	args = append(args, arg...)
 
 	cmd := exec.Command(s.path, args...)
 
 	bytes, err := cmd.CombinedOutput()
+	output := strings.TrimSpace(string(bytes))
 	if err != nil {
+		fmt.Println(output)
 		return "", err
 	}
 
-	output := strings.TrimSpace(string(bytes))
-
-	return output, nil
+	return strings.TrimSpace(output), nil
 }
