@@ -15,6 +15,11 @@ packages:
   - php-cli
   - unzip
 write_files:
+  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/mysql.cnf
+    content: |
+      [mysqld]
+      max_allowed_packet=1000M
+      wait_timeout=3000
   - path: /opt/nitro/scripts/docker-exec-import.sh
     content: |
       #!/usr/bin/env bash
@@ -24,13 +29,13 @@ write_files:
       engine="$4"
       
       if [ "$engine" == "mysql" ]; then
-          docker exec -i "$container" mysql -uroot -pnitro -e "CREATE DATABASE IF NOT EXISTS $database;"
-          docker exec -i "$container" mysql -uroot -pnitro -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
-          docker exec -i "$container" mysql -uroot -pnitro -e "FLUSH PRIVILEGES;"
-          cat "$filename" | pv | docker exec -i "$container" mysql -unitro -pnitro "$database" --init-command="SET autocommit=0;"
+          docker exec -i "$container" mysql -e "CREATE DATABASE IF NOT EXISTS $database;"
+          docker exec -i "$container" mysql -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
+          docker exec -i "$container" mysql -e "FLUSH PRIVILEGES;"
+          cat "$filename" | docker exec -i "$container" mysql "$database" --init-command="SET autocommit=0;"
       else
           docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
-          cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
+          cat "$filename" | docker exec -i "$container" psql -U nitro -d "$database"
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |
@@ -113,4 +118,11 @@ runcmd:
   - apt-get install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
   - mkdir -p /home/ubuntu/sites
+  - mkdir -p /home/ubuntu/.nitro/databases/imports
+  - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
+  - mkdir -p /home/ubuntu/.nitro/databases/mysql/backups
+  - mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
+  - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
+  - mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
+  - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
 `
