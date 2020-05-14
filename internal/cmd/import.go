@@ -68,7 +68,7 @@ var importCommand = &cobra.Command{
 		transferAction := nitro.Action{
 			Type:       "transfer",
 			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, machine + ":" + filename},
+			Args:       []string{"transfer", fileAbsPath, machine + ":/home/ubuntu/.nitro/databases/imports/" + filename},
 		}
 		actions = append(actions, transferAction)
 
