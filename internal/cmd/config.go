@@ -15,20 +15,6 @@ packages:
   - php-cli
   - unzip
 write_files:
-  - path: /opt/nitro/scripts/site-exists.sh
-    content: |
-      #!/usr/bin/env bash
-      site="$1"
-      if test -f /etc/nginx/sites-enabled/"$site"; then
-          echo "exists"
-      fi
-  - path: /opt/nitro/scripts/docker-container-exists.sh
-    content: |
-      #!/usr/bin/env bash
-      NAME="$1"
-      if [ -n "$(docker ps -q -f name="$NAME")" ]; then
-        echo "exists"
-      fi
   - path: /opt/nitro/scripts/docker-exec-import.sh
     content: |
       #!/usr/bin/env bash
@@ -45,16 +31,6 @@ write_files:
       else
           docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
           cat "$filename" | pv | docker exec -i "$container" psql -U nitro -d "$database"
-      fi
-  - path: /opt/nitro/scripts/get-site-webroot.sh
-    content: |
-      #!/usr/bin/env bash
-      site="$1"
-
-      if test -f /etc/nginx/sites-enabled/"$site"; then
-          grep "root " /etc/nginx/sites-enabled/"$site" | while read -r line; do
-              echo "$line"
-          done
       fi
   - path: /opt/nitro/scripts/docker-set-database-user-permissions.sh
     content: |
@@ -123,19 +99,18 @@ runcmd:
   - add-apt-repository --no-update -y ppa:nginx/stable
   - add-apt-repository --no-update -y ppa:ondrej/php
   - curl -sS https://getcomposer.org/installer -o composer-setup.php
-  - export COMPOSER_HOME=/home/ubuntu/composer
+  - echo "CRAFT_NITRO=1" >> /etc/environment
+  - echo "DB_USER=nitro" >> /etc/environment
+  - echo "DB_PASSWORD=nitro" >> /etc/environment
+  - echo "COMPOSER_HOME=/home/ubuntu/.composer" >> /etc/environment
   - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
   - echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-  - echo "CRAFT_NITRO=1" >> /etc/environment
-  - echo "DB_USER=nitro" >> /etc/environment
-  - echo "DB_PASSWORD=nitro" >> /etc/environment
   - apt-get update -y
-  - apt install -y nginx docker-ce docker-ce-cli containerd.io
+  - apt-get install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
-  - mkdir -p /nitro/sites
-  - chown -R ubuntu:ubuntu /nitro/sites
+  - mkdir -p /home/ubuntu/sites
 `
