@@ -18,15 +18,21 @@ func CreateDatabaseContainer(machine, engine, version, port string) (*Action, er
 	// get the container path and port based on the engine
 	var containerPath string
 	var containerPort string
+	var containerConfPath string
+	var hostConfPath string
 	var containerEnvVars []string
 	switch engine {
 	case "postgres":
 		containerPort = "5432"
 		containerPath = "/var/lib/postgresql/data"
+		hostConfPath = "/home/ubuntu/.nitro/databases/postgres/conf.d/"
+		containerConfPath = "/etc/mysql/conf.d"
 		containerEnvVars = []string{"-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro"}
 	default:
 		containerPort = "3306"
 		containerPath = "/var/lib/mysql"
+		hostConfPath = "/home/ubuntu/.nitro/databases/mysql/conf.d/"
+		containerConfPath = "/etc/mysql/conf.d"
 		containerEnvVars = []string{"-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro"}
 	}
 
@@ -40,7 +46,7 @@ func CreateDatabaseContainer(machine, engine, version, port string) (*Action, er
 	// create the port mapping
 	portMapping := fmt.Sprintf("%v:%v", port, containerPort)
 
-	args := []string{"exec", machine, "--", "docker", "run", "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping}
+	args := []string{"exec", machine, "--", "docker", "run", "-v", hostConfPath + ":" + containerConfPath, "-v", volumeMount, "--name", containerName, "-d", "--restart=always", "-p", portMapping}
 
 	// append the env vars
 	args = append(args, containerEnvVars...)
