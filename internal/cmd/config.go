@@ -110,7 +110,7 @@ runcmd:
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
   - apt-get update -y
-  - apt install -y nginx docker-ce docker-ce-cli containerd.io
+  - apt-get install -y nginx docker-ce docker-ce-cli containerd.io
   - usermod -aG docker ubuntu
   - mkdir -p /home/ubuntu/sites
 `
