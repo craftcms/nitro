@@ -56,6 +56,7 @@ func Matches(output, webroot string) (bool, string) {
 
 	// remove the trailing ;
 	sp[1] = strings.TrimRight(sp[1], ";")
+	sp[1] = strings.TrimRight(sp[1], ":")
 
 	if sp[1] == webroot {
 		return true, sp[1]
