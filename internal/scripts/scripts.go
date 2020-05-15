@@ -11,8 +11,14 @@ const (
 	FmtNginxSiteEnabled                     = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
 	FmtNginxSiteWebroot                     = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
 	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
-	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -uroot -e "CREATE DATABASE IF NOT EXISTS %s;"`
-	FmtDockerMysqlGrantPrivileges           = `docker exec -i %s mysql -uroot -e "GRANT ALL PRIVILEGES ON '*'.'*' TO 'nitro'@'localhost' WITH GRANT OPTION;"`
+	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
+	FmtDockerPostgresCreateDatabase         = `docker exec -i %s psql --username nitro -c "CREATE DATABASE %s;"`
+	FmtDockerMysqlImportDatabase            = `cat %s | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`
+	DockerListContainerNames                = `docker container ls --all --format '{{ .Names }}'`
+	FmtDockerRestartContainer               = `docker container restart %s`
+	FmtDockerStopContainer                  = `docker container stop %s`
+	FmtDockerRemoveContainer                = `docker container rm -f %s`
+	FmtDockerStartContainer                 = `docker container start %s`
 )
 
 type Script struct {

@@ -299,12 +299,6 @@ func createActions(machine, memory, disk string, cpus int, phpVersion string, da
 			return nil, err
 		}
 		actions = append(actions, *createDatabaseAction)
-
-		setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, *setUserPermissions)
 	}
 
 	var siteErrs []error

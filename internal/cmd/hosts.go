@@ -38,7 +38,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if sites == nil {
-			fmt.Println("There are no sites in the config file to remove")
+			fmt.Println("There are no sites in the config file")
 			return nil
 		}
 

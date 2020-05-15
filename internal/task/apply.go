@@ -119,11 +119,6 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *createContainer)
 
-			setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
-			if err != nil {
-				return nil, err
-			}
-			actions = append(actions, *setUserPermissions)
 			fmt.Println("Creating database", database.Name(), "on", machine)
 		}
 	}

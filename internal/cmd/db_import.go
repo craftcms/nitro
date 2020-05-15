@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
@@ -14,12 +15,13 @@ import (
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/normalize"
+	"github.com/craftcms/nitro/internal/scripts"
 )
 
-var importCommand = &cobra.Command{
-	Use:     "import my-backup.sql",
-	Short:   "Import database into machine",
-	Args:    cobra.MinimumNArgs(1),
+var dbImportCommand = &cobra.Command{
+	Use:   "import my-backup.sql",
+	Short: "Import database into machine",
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
@@ -65,30 +67,44 @@ var importCommand = &cobra.Command{
 		var actions []nitro.Action
 
 		// syntax is strange, see this issue: https://github.com/canonical/multipass/issues/1165#issuecomment-548763143
+		fileFullPath := "/home/ubuntu/.nitro/databases/imports/" + filename
 		transferAction := nitro.Action{
 			Type:       "transfer",
 			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, machine + ":/home/ubuntu/.nitro/databases/imports/" + filename},
+			Args:       []string{"transfer", fileAbsPath, machine + ":" + fileFullPath},
 		}
 		actions = append(actions, transferAction)
 
-		engine := "mysql"
-		if strings.Contains(containerName, "postgres") {
-			engine = "postgres"
-		}
-
-		importArgs := []string{"exec", machine, "--", "bash", "/opt/nitro/scripts/docker-exec-import.sh", containerName, databaseName, filename, engine}
-		dockerExecAction := nitro.Action{
-			Type:       "exec",
-			UseSyscall: false,
-			Args:       importArgs,
-		}
-		actions = append(actions, dockerExecAction)
-
-		fmt.Printf("Importing %q into %q (large files may take a while)...\n", filename, containerName)
+		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
+		}
+
+		// run the import scripts
+
+		mp, err := exec.LookPath("multipass")
+		if err != nil {
+			return err
+		}
+
+		script := scripts.New(mp, machine)
+
+		if strings.Contains(containerName, "mysql") {
+			_, err := script.Run(fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
+			if err != nil {
+				return err
+			}
+			fmt.Println("Created database", databaseName)
+
+			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName))
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("Successfully imported the database backup into", containerName)
+
+			return nil
 		}
 
 		fmt.Println("Successfully imported the database backup into", containerName)

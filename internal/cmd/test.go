@@ -61,12 +61,6 @@ var testCommand = &cobra.Command{
 				return err
 			}
 			fmt.Println("Created database", databaseName)
-
-			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerMysqlGrantPrivileges, containerName))
-			if err != nil {
-				return err
-			}
-			fmt.Println("Set permissions for the user nitro on", databaseName)
 		}
 
 		return nil
