@@ -18,7 +18,7 @@ import (
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
-var importCommand = &cobra.Command{
+var dbImportCommand = &cobra.Command{
 	Use:   "import my-backup.sql",
 	Short: "Import database into machine",
 	Args:  cobra.MinimumNArgs(1),

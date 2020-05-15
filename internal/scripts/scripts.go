@@ -12,6 +12,7 @@ const (
 	FmtNginxSiteWebroot                     = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
 	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
 	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
+	FmtDockerPostgresCreateDatabase         = `docker exec -i %s psql --username nitro -c "CREATE DATABASE %s;"`
 	FmtDockerMysqlImportDatabase            = `cat %s | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`
 	DockerListContainerNames                = `docker container ls --all --format '{{ .Names }}'`
 	FmtDockerRestartContainer               = `docker container restart %s`
