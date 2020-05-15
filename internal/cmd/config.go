@@ -71,11 +71,12 @@ runcmd:
   - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
   - add-apt-repository --no-update -y ppa:nginx/stable
   - add-apt-repository --no-update -y ppa:ondrej/php
-  - curl -sS https://getcomposer.org/installer -o composer-setup.php
   - echo "CRAFT_NITRO=1" >> /etc/environment
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
+  - mkdir -p /home/ubuntu/.composer
   - echo "COMPOSER_HOME=/home/ubuntu/.composer" >> /etc/environment
+  - curl -sS https://getcomposer.org/installer -o composer-setup.php
   - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -93,4 +94,5 @@ runcmd:
   - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
   - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
+  - chown -R ubuntu:ubuntu /home/ubuntu/sites
 `

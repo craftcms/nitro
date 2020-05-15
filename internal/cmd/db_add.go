@@ -37,7 +37,7 @@ var dbAddCommand = &cobra.Command{
 		}
 
 		// which database
-		container, _, err := p.Select("Which database should we restart", containers, &prompt.SelectOptions{
+		container, _, err := p.Select("Which database type", containers, &prompt.SelectOptions{
 			Default: 1,
 		})
 		if err != nil {
@@ -45,7 +45,7 @@ var dbAddCommand = &cobra.Command{
 		}
 
 		// get the name
-		database, err := p.Ask("What is the name of the database to add", &prompt.InputOptions{Default: "", Validator: nil})
+		database, err := p.Ask("What should be the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
 			return err
 		}
