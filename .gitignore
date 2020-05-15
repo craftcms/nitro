@@ -5,3 +5,4 @@ composer.lock
 /demo-site
 /coverage.txt
 /production-site
+*.sql
