@@ -22,9 +22,8 @@ var dockerCommand = &cobra.Command{
 			return err
 		}
 		p := prompt.NewPrompt()
-		actionsList := []string{"restart", "stop", "start", "remove"}
 
-		action, _, err := p.Select("What action would you like to perform", actionsList, &prompt.SelectOptions{
+		action, _, err := p.Select("What action would you like to perform", []string{"restart", "stop", "start", "remove"}, &prompt.SelectOptions{
 			Default: 1,
 		})
 		if err != nil {
