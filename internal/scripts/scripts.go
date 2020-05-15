@@ -11,8 +11,7 @@ const (
 	FmtNginxSiteEnabled                     = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
 	FmtNginxSiteWebroot                     = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
 	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
-	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -uroot -e "CREATE DATABASE IF NOT EXISTS %s;"`
-	FmtDockerMysqlGrantPrivileges           = `docker exec -i %s mysql -uroot -e "GRANT ALL PRIVILEGES ON '*'.'*' TO 'nitro'@'localhost' WITH GRANT OPTION;"`
+	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
 )
 
 type Script struct {

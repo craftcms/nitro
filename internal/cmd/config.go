@@ -30,23 +30,6 @@ write_files:
   - path: /home/ubuntu/.nitro/databases/postgres/setup.sql
     content: |
       ALTER USER nitro WITH SUPERUSER;
-  - path: /opt/nitro/scripts/docker-exec-import.sh
-    content: |
-      #!/usr/bin/env bash
-      container="$1"
-      database="$2"
-      filename="$3"
-      engine="$4"
-      
-      if [ "$engine" == "mysql" ]; then
-          docker exec -i "$container" mysql -e "CREATE DATABASE IF NOT EXISTS $database;"
-          docker exec -i "$container" mysql -e "GRANT ALL ON $database.* TO 'nitro'@'%';"
-          docker exec -i "$container" mysql -e "FLUSH PRIVILEGES;"
-          cat "$filename" | docker exec -i "$container" mysql "$database" --init-command="SET autocommit=0;"
-      else
-          docker exec "$container" psql -U nitro -c "CREATE DATABASE $database OWNER nitro;"
-          cat "$filename" | docker exec -i "$container" psql -U nitro -d "$database"
-      fi
   - path: /opt/nitro/nginx/template.conf
     content: |
       server {
