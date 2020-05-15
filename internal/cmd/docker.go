@@ -22,7 +22,7 @@ var dockerCommand = &cobra.Command{
 			return err
 		}
 		p := prompt.NewPrompt()
-		actionsList := []string{"restart", "stop", "remove"}
+		actionsList := []string{"restart", "stop", "start", "remove"}
 
 		action, _, err := p.Select("What action would you like to perform", actionsList, &prompt.SelectOptions{
 			Default: 1,
@@ -59,6 +59,20 @@ var dockerCommand = &cobra.Command{
 			}
 
 			fmt.Println("Stopped container", container)
+		case "start":
+			container, _, err := p.Select("Which container should we start", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
+
+			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerStartContainer, container))
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("Started container", container)
 		case "remove":
 			container, _, err := p.Select("Which container should we remove", containers, &prompt.SelectOptions{
 				Default: 1,
@@ -67,7 +81,6 @@ var dockerCommand = &cobra.Command{
 				return err
 			}
 
-			// TODO prompt for confirmation
 			remove, err := p.Confirm("Are you sure you want to permanently remove the container "+container, &prompt.InputOptions{
 				Default:   "no",
 				Validator: nil,

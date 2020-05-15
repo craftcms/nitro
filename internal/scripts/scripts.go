@@ -13,10 +13,11 @@ const (
 	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
 	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
 	FmtDockerMysqlImportDatabase            = `cat %s | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`
-	DockerListContainerNames                = `docker container ls --format '{{ .Names }}'`
+	DockerListContainerNames                = `docker container ls --all --format '{{ .Names }}'`
 	FmtDockerRestartContainer               = `docker container restart %s`
 	FmtDockerStopContainer                  = `docker container stop %s`
-	FmtDockerRemoveContainer                  = `docker container rm -f %s`
+	FmtDockerRemoveContainer                = `docker container rm -f %s`
+	FmtDockerStartContainer                 = `docker container start %s`
 )
 
 type Script struct {
