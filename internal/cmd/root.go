@@ -44,6 +44,7 @@ func init() {
 		importCommand,
 		hostsCommand,
 		renameCommand,
+		dockerCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 }

@@ -97,7 +97,7 @@ var importCommand = &cobra.Command{
 			}
 			fmt.Println("Created database", databaseName)
 
-			_, err = script.Run(fmt.Sprintf(`cat %s | pv | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`, fileFullPath, containerName, databaseName))
+			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName))
 			if err != nil {
 				return err
 			}
@@ -106,8 +106,6 @@ var importCommand = &cobra.Command{
 
 			return nil
 		}
-
-
 
 		fmt.Println("Successfully imported the database backup into", containerName)
 
