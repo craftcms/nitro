@@ -6,15 +6,15 @@
 - Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
 - The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
-- Introduced the `db` command with sub-commands to restart, stop, add, and remove databases. The `import` is also nested under `db` but will remain as a top level command.
+- Introduced the `db` command with sub-commands to restart, stop, add, and remove databases. The `import` is also nested under `db` but will remain as a top-level command.
 - Added a new `refresh` command to keep scripts and configs updated between versions of Nitro.
 
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
 - The `self-update` command no longer prompts for installation upon completion. ([#115](https://github.com/craftcms/nitro/issues/115))
 - The `import` command now shows the requirement for the first argument of a database backup. ([#124](https://github.com/craftcms/nitro/issues/124))
-- When a new machine is created the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119)) 
-- The `init` command will prompt you to initialize a new machine if a config file is not found.
+- When creating a new machine, the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119)) 
+- The `init` command will prompt you to initialize a new machine if there is no config file.
 - The OpCache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 - Running the `apply` command will now check sites webroot and apply any changes. ([#113](https://github.com/craftcms/nitro/issues/113))
 - Adding new sites with `add` will no place the site in `/home/ubuntu/sites/site-name`, making symlinks between projects possible. ([#134](https://github.com/craftcms/nitro/issues/134))
