@@ -19,7 +19,7 @@ import (
 
 var initCommand = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a new machine",
+	Short: "Create new machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		existingConfig := false

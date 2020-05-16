@@ -12,7 +12,7 @@ import (
 var (
 	refreshCommand = &cobra.Command{
 		Use:   "refresh",
-		Short: "Refresh templates and configs",
+		Short: "Refresh machine",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			machine := flagMachineName
 			mp, err := exec.LookPath("multipass")
