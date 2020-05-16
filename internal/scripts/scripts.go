@@ -40,9 +40,14 @@ func New(multipass, machine string) *Script {
 // a lot easier, using New will store the path to the
 // nitro path and machine name. Run will then run
 // the script on the machine and
-func (s Script) Run(arg ...string) (string, error) {
+func (s Script) Run(sudo bool, arg ...string) (string, error) {
 	args := []string{"exec", s.machine, "--"}
-	args = append(args, []string{"bash", "-c"}...)
+	switch sudo {
+	case true:
+		args = append(args, []string{"sudo", "bash", "-c"}...)
+	default:
+		args = append(args, []string{"bash", "-c"}...)
+	}
 	args = append(args, arg...)
 
 	cmd := exec.Command(s.path, args...)

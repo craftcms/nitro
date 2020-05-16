@@ -91,13 +91,13 @@ var dbImportCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 
 		if strings.Contains(containerName, "mysql") {
-			_, err := script.Run(fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
+			_, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
 			if err != nil {
 				return err
 			}
 			fmt.Println("Created database", databaseName)
 
-			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName))
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName))
 			if err != nil {
 				return err
 			}

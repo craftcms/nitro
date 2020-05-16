@@ -7,6 +7,7 @@
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
 - The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
 - Introduced the `db` command with sub-commands to restart, stop, add, and remove databases. The `import` is also nested under `db` but will remain as a top level command.
+- Added a new `refresh` command to keep scripts and configs updated between versions of Nitro.
 
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))

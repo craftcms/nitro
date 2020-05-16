@@ -25,7 +25,7 @@ var dbAddCommand = &cobra.Command{
 
 		// get all of the docker containers by name
 		script := scripts.New(mp, machine)
-		output, err := script.Run(scripts.DockerListContainerNames)
+		output, err := script.Run(false, scripts.DockerListContainerNames)
 		if err != nil {
 			return err
 		}
@@ -52,12 +52,12 @@ var dbAddCommand = &cobra.Command{
 
 		// run the scripts
 		if strings.Contains(container, "mysql") {
-			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, container, database))
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, container, database))
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err = script.Run(fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, container, database))
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, container, database))
 			if err != nil {
 				return err
 			}

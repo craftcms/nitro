@@ -56,7 +56,7 @@ var testCommand = &cobra.Command{
 
 		// check if the site it available
 		if strings.Contains(containerName, "mysql") {
-			_, err := script.Run(fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
+			_, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
 			if err != nil {
 				return err
 			}

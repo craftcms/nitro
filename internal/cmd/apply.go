@@ -60,7 +60,7 @@ var applyCommand = &cobra.Command{
 		for _, site := range configFile.Sites {
 			shouldAppend := false
 			// check if the nginx config exists
-			existsOutput, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
+			existsOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
 			if err != nil {
 				return err
 			}
@@ -69,7 +69,7 @@ var applyCommand = &cobra.Command{
 			}
 
 			// see if the webroot is the same
-			webrootOutput, err := script.Run(fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
+			webrootOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
 			if err != nil {
 				return err
 			}

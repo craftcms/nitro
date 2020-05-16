@@ -27,7 +27,7 @@ var dbRestartCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 
 		// make a list
-		output, err := script.Run(scripts.DockerListContainerNames)
+		output, err := script.Run(false, scripts.DockerListContainerNames)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ var dbRestartCommand = &cobra.Command{
 			return err
 		}
 
-		_, err = script.Run(fmt.Sprintf(scripts.FmtDockerRestartContainer, container))
+		_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerRestartContainer, container))
 		if err != nil {
 			return err
 		}

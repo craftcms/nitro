@@ -25,7 +25,7 @@ var dbStartCommand = &cobra.Command{
 
 		// get all of the docker containers by name
 		script := scripts.New(mp, machine)
-		output, err := script.Run(scripts.DockerListContainerNames)
+		output, err := script.Run(false, scripts.DockerListContainerNames)
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ var dbStartCommand = &cobra.Command{
 			return err
 		}
 
-		_, err = script.Run(fmt.Sprintf(scripts.FmtDockerStartContainer, container))
+		_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerStartContainer, container))
 		if err != nil {
 			return err
 		}
