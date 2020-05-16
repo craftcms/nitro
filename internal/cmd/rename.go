@@ -14,7 +14,7 @@ import (
 
 var renameCommand = &cobra.Command{
 	Use:   "rename",
-	Short: "Rename a site",
+	Short: "Rename site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {

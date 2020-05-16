@@ -16,7 +16,7 @@ import (
 
 var destroyCommand = &cobra.Command{
 	Use:   "destroy",
-	Short: "Destroy a machine",
+	Short: "Destroy machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 

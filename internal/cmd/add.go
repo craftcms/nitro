@@ -16,7 +16,7 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a site to a machine",
+	Short: "Add a site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		p := prompt.NewPrompt()

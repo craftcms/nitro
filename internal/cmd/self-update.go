@@ -15,7 +15,7 @@ import (
 
 var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
-	Short: "Update Nitro to the latest",
+	Short: "Update Nitro",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 		tempFolder := os.TempDir()

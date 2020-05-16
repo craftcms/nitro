@@ -20,7 +20,7 @@ import (
 
 var dbImportCommand = &cobra.Command{
 	Use:   "import my-backup.sql",
-	Short: "Import database into machine",
+	Short: "Import database",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName

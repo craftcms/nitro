@@ -6,7 +6,7 @@ import (
 
 var dbCommand = &cobra.Command{
 	Use:   "db",
-	Short: "Perform database related actions",
+	Short: "Manage databases",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},

@@ -12,7 +12,7 @@ import (
 
 var editCommand = &cobra.Command{
 	Use:   "edit",
-	Short: "Edit your config",
+	Short: "Edit config",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgFile := viper.ConfigFileUsed()
 		if cfgFile == "" {

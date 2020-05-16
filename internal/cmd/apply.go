@@ -19,7 +19,7 @@ import (
 
 var applyCommand = &cobra.Command{
 	Use:   "apply",
-	Short: "Apply changes from config",
+	Short: "Apply changes",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
