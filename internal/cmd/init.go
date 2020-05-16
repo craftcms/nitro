@@ -23,13 +23,19 @@ var initCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		existingConfig := false
+		runner := nitro.NewMultipassRunner("multipass")
+		p := prompt.NewPrompt()
+
+		// check if the machine exists
+		if ip := nitro.IP(machine, runner); ip != "" {
+			fmt.Println(fmt.Sprintf("Machine %q already exists, skipping the init process"))
+			return nil
+		}
 
 		if viper.ConfigFileUsed() != "" {
 			fmt.Println("Using an existing config:", viper.ConfigFileUsed())
 			existingConfig = true
 		}
-
-		p := prompt.NewPrompt()
 
 		if existingConfig == false {
 			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes"})
@@ -212,7 +218,7 @@ var initCommand = &cobra.Command{
 
 		fmt.Println("Applying the changes now...")
 
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+		if err := nitro.Run(runner, actions); err != nil {
 			return err
 		}
 

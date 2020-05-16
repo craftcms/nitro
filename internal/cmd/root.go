@@ -47,7 +47,6 @@ func init() {
 		dbCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
-	// restartCommand.AddCommand(dbCommand)
 }
 
 func Execute() {
