@@ -13,5 +13,5 @@ var dbCommand = &cobra.Command{
 }
 
 func init() {
-	dbCommand.AddCommand(dbAddCommand, dbImportCommand, dbRestartCommand, dbStopCommand, dbStartCommand, dbRemoveCommand)
+	dbCommand.AddCommand(dbAddCommand, dbImportCommand, dbRestartCommand, dbStopCommand, dbStartCommand, dbRemoveCommand, dbBackupCommand)
 }
