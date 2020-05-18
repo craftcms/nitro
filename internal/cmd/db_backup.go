@@ -50,6 +50,7 @@ var dbBackupCommand = &cobra.Command{
 		var dbs []string
 		switch strings.Contains(container, "mysql") {
 		case false:
+			// TODO implement db list for postgres
 			return errors.New("backing up postgres is not yet implemented")
 		default:
 			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -e "SHOW DATABASES;"`, container)); err != nil {
@@ -64,7 +65,7 @@ var dbBackupCommand = &cobra.Command{
 		}
 
 		if len(dbs) == 0 {
-			return errors.New("no databases to backup for " + container)
+			return errors.New("no databases to backup in " + container)
 		}
 
 		// append the all option
@@ -83,18 +84,19 @@ var dbBackupCommand = &cobra.Command{
 
 			// if its everything, back them all up
 			if database == "all-databases" {
-				if output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump --all-databases -unitro > %s`, container, fullBackupPath)); err != nil {
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
 			}
 
 			// backup a specific database
-			if output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump -unitro %s > %s`, container, database, fullBackupPath)); err != nil {
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, database, fullBackupPath)); err != nil {
 				fmt.Println(output)
 				return err
 			}
 		default:
+			// TODO implement db backup for postgres
 			fullBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 			output, err := script.Run(false, fmt.Sprintf(`echo "missing commands for %s %s"`, container, fullBackupPath))
 			if err != nil {

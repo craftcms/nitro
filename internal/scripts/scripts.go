@@ -19,6 +19,8 @@ const (
 	FmtDockerStopContainer                  = `docker container stop %s`
 	FmtDockerRemoveContainer                = `docker container rm -f %s`
 	FmtDockerStartContainer                 = `docker container start %s`
+	FmtDockerBackupAllMysqlDatabases        = `docker exec %s /usr/bin/mysqldump --all-databases -unitro > %s`
+	FmtDockerBackupIndividualMysqlDatabase   = `docker exec %s /usr/bin/mysqldump -unitro %s > %s`
 )
 
 type Script struct {
