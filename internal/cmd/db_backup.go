@@ -28,12 +28,11 @@ var dbBackupCommand = &cobra.Command{
 		p := prompt.NewPrompt()
 		script := scripts.New(mp, machine)
 
+		// create a list of containers
 		output, err := script.Run(false, scripts.DockerListContainerNames)
 		if err != nil {
 			return err
 		}
-
-		// create a list
 		containers := strings.Split(output, "\n")
 		if len(containers) == 0 {
 			return errors.New("there are no databases we can add to")
@@ -51,19 +50,16 @@ var dbBackupCommand = &cobra.Command{
 		var dbs []string
 		switch strings.Contains(container, "mysql") {
 		case false:
-
+			return errors.New("backing up postgres is not yet implemented")
 		default:
-			output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -e "SHOW DATABASES;"`, container))
-			if err != nil {
-				return err
-			}
-
-			for _, db := range strings.Split(output, "\n") {
-				// ignore the system defaults
-				if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" {
-					continue
+			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -e "SHOW DATABASES;"`, container)); err != nil {
+				for _, db := range strings.Split(output, "\n") {
+					// ignore the system defaults
+					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" {
+						continue
+					}
+					dbs = append(dbs, db)
 				}
-				dbs = append(dbs, db)
 			}
 		}
 
@@ -79,27 +75,27 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
-		datetime := time.Now().Format("01-01-2020")
-		backupFile := container + "-" + database + "-" + datetime + ".sql"
 		var fullBackupPath string
+		backupFileName := container + "-" + database + "-" + time.Now().Format("01-01-2020") + ".sql"
 		switch strings.Contains(container, "mysql") {
 		case true:
-			fullBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFile
+			fullBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
+
+			// if its everything, back them all up
 			if database == "all-databases" {
-				output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump --all-databases -unitro > %s`, container, fullBackupPath))
-				if err != nil {
-					fmt.Println(output)
-					return err
-				}
-			} else {
-				output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump -unitro %s > %s`, container, database, fullBackupPath))
-				if err != nil {
+				if output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump --all-databases -unitro > %s`, container, fullBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
 			}
+
+			// backup a specific database
+			if output, err := script.Run(false, fmt.Sprintf(`docker exec %s /usr/bin/mysqldump -unitro %s > %s`, container, database, fullBackupPath)); err != nil {
+				fmt.Println(output)
+				return err
+			}
 		default:
-			fullBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFile
+			fullBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 			output, err := script.Run(false, fmt.Sprintf(`echo "missing commands for %s %s"`, container, fullBackupPath))
 			if err != nil {
 				fmt.Println(output)
@@ -107,7 +103,7 @@ var dbBackupCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Println(fmt.Sprintf("Created backup %q, downloading...", backupFile))
+		fmt.Println(fmt.Sprintf("Created backup %q, downloading...", backupFileName))
 
 		home, err := homedir.Dir()
 		if err != nil {
@@ -125,11 +121,7 @@ var dbBackupCommand = &cobra.Command{
 		}
 
 		// transfer the folder into the host machine
-		action := nitro.Action{
-			Type: "transfer",
-			Args: []string{"transfer", machine + ":" + fullBackupPath, backupsFolder},
-		}
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{action}); err != nil {
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{nitro.Action{Type: "transfer", Args: []string{"transfer", machine + ":" + fullBackupPath, backupsFolder}}}); err != nil {
 			return err
 		}
 
@@ -138,7 +130,7 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+backupFile))
+		fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+backupFileName))
 
 		return nil
 	},
