@@ -50,8 +50,16 @@ var dbBackupCommand = &cobra.Command{
 		var dbs []string
 		switch strings.Contains(container, "mysql") {
 		case false:
-			// TODO implement db list for postgres
-			return errors.New("backing up postgres is not yet implemented")
+			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s psql --username nitro --command "SELECT datname FROM pg_database WHERE datistemplate = false;"`, container)); err == nil {
+				sp := strings.Split(output, "\n")
+				for i, d := range sp {
+					if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") {
+						continue
+					}
+
+					dbs = append(dbs, strings.TrimSpace(d))
+				}
+			}
 		default:
 			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -e "SHOW DATABASES;"`, container)); err != nil {
 				for _, db := range strings.Split(output, "\n") {
@@ -88,20 +96,28 @@ var dbBackupCommand = &cobra.Command{
 					fmt.Println(output)
 					return err
 				}
-			}
-
-			// backup a specific database
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, database, fullBackupPath)); err != nil {
-				fmt.Println(output)
-				return err
+			} else {
+				// backup a specific database
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, database, fullBackupPath)); err != nil {
+					fmt.Println(output)
+					return err
+				}
 			}
 		default:
-			// TODO implement db backup for postgres
 			fullBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
-			output, err := script.Run(false, fmt.Sprintf(`echo "missing commands for %s %s"`, container, fullBackupPath))
-			if err != nil {
-				fmt.Println(output)
-				return err
+
+			// if its all the databases
+			if database == "all-databases" {
+				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dumpall -U nitro > %s`, container, fullBackupPath)); err != nil {
+					fmt.Println(output)
+					return err
+				}
+			} else {
+				// backup a specific database
+				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dump -U nitro %s > %s`, container, database, fullBackupPath)); err != nil {
+					fmt.Println(output)
+					return err
+				}
 			}
 		}
 
