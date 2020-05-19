@@ -11,16 +11,18 @@ const (
 	FmtNginxSiteEnabled                     = `if test -f '/etc/nginx/sites-enabled/%s'; then echo 'exists'; fi`
 	FmtNginxSiteWebroot                     = `grep "root " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`
 	FmtDockerContainerExists                = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
-	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
+	FmtDockerMysqlCreateDatabaseIfNotExists = `docker exec -i %s mysql -unitro -pnitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
 	FmtDockerPostgresCreateDatabase         = `docker exec -i %s psql --username nitro -c "CREATE DATABASE %s;"`
 	FmtDockerMysqlImportDatabase            = `cat %s | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`
 	DockerListContainerNames                = `docker container ls --all --format '{{ .Names }}'`
 	FmtDockerRestartContainer               = `docker container restart %s`
 	FmtDockerStopContainer                  = `docker container stop %s`
-	FmtDockerRemoveContainer                = `docker container rm -f %s`
+	FmtDockerRemoveContainer                = `docker container rm -f -v %s`
+	FmtDockerRemoveVolume                   = `docker volume rm -f %s`
 	FmtDockerStartContainer                 = `docker container start %s`
-	FmtDockerBackupAllMysqlDatabases        = `docker exec %s /usr/bin/mysqldump --all-databases -unitro > %s`
-	FmtDockerBackupIndividualMysqlDatabase   = `docker exec %s /usr/bin/mysqldump -unitro %s > %s`
+	FmtDockerBackupAllMysqlDatabases        = `docker exec %s /usr/bin/mysqldump --all-databases -unitro -pnitro > %s`
+	FmtDockerBackupIndividualMysqlDatabase  = `docker exec %s /usr/bin/mysqldump -unitro -pnitro %s > %s`
+	FmtCreateDirectory                      = `mkdir -p %s`
 )
 
 type Script struct {
