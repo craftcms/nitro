@@ -23,8 +23,8 @@ if [ $version == "1.0.0-beta.3" ]; then
   echo "setting the default mysql conf"
   cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/mysql.conf" <<-EndOfMessage
 [mysqld]
-max_allowed_packet=1000M
-wait_timeout=3000
+max_allowed_packet=256M
+wait_timeout=86400
 EndOfMessage
 
   echo "setting the default mysql setup"

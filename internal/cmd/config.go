@@ -18,8 +18,8 @@ write_files:
   - path: /home/ubuntu/.nitro/databases/mysql/conf.d/mysql.cnf
     content: |
       [mysqld]
-      max_allowed_packet=1000M
-      wait_timeout=3000
+      max_allowed_packet=256M
+      wait_timeout=86400
   - path: /home/ubuntu/.nitro/databases/mysql/setup.sql
     content: |
       CREATE USER IF NOT EXISTS 'nitro'@'localhost' IDENTIFIED BY 'nitro';
