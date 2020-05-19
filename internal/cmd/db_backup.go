@@ -82,6 +82,7 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
+		// task
 		var fullVmBackupPath string
 		backupFileName := database + "-" + datetime.Parse(time.Now()) + ".sql"
 		switch strings.Contains(container, "mysql") {
@@ -155,6 +156,7 @@ var dbBackupCommand = &cobra.Command{
 		}
 
 		fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+backupFileName))
+		// end action
 
 		return nil
 	},
