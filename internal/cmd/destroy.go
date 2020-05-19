@@ -135,7 +135,7 @@ var destroyCommand = &cobra.Command{
 					return err
 				}
 
-				fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+backupFileName))
+				fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+"/"+backupFileName))
 			}
 		}
 
