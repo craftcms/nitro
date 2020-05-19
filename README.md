@@ -309,6 +309,8 @@ Options:
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>-m</code>, <code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
 </dl>
 
 Example:
