@@ -28,6 +28,7 @@
 ## Fixed
 - The `init` command checks if the machine already exists before prompting for input ([#102](https://github.com/craftcms/nitro/issues/102)) 
 - Fixed a typo in the documentation, thanks [@spib](https://github.com/spib)! ([#128](https://github.com/craftcms/nitro/issues/128))
+- Nitro will now create a `nitro` database for MySQL engines. 
 
 ### 1.0.0-beta.2 - 2020-05-06
 

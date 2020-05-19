@@ -45,7 +45,7 @@ func CreateDatabaseContainer(machine, engine, version, port string) (*Action, er
 		hostInitPath = "/home/ubuntu/.nitro/databases/mysql/setup.sql"
 		containerInitPath = "/docker-entrypoint-initdb.d/setup.sql"
 
-		containerEnvVars = []string{"-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro"}
+		containerEnvVars = []string{"-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro"}
 	}
 
 	// create the volumeMount path using the engine, version, and port
