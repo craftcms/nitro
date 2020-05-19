@@ -6,8 +6,10 @@
 - Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
 - The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
-- Introduced the `db` command with sub-commands to restart, stop, add, and remove databases. The `import` is also nested under `db` but will remain as a top-level command.
+- Introduced the `db` command with sub-commands to `restart`, `stop`, `add`, `remove`, and `backup` databases. The `import` is also nested under `db` but will remain as a top-level command.
 - Added a new `refresh` command to keep scripts and configs updated between versions of Nitro.
+- Databases now support custom configuration files. ([#133](https://github.com/craftcms/nitro/issues/133))
+- Added Blackfire setup instructions, thanks [@bencroker](https://github.com/bencroker)! ([#137](https://github.com/craftcms/nitro/issues/137))
 
 ## Changed
 - The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
@@ -18,9 +20,14 @@
 - The OpCache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 - Running the `apply` command will now check sites webroot and apply any changes. ([#113](https://github.com/craftcms/nitro/issues/113))
 - Adding new sites with `add` will no place the site in `/home/ubuntu/sites/site-name`, making symlinks between projects possible. ([#134](https://github.com/craftcms/nitro/issues/134))
+- Destroying a machine will now backup the databases in the machine. ([#136](https://github.com/craftcms/nitro/issues/136))
+- Added a `sync` command to help update machine configurations and scripts between versions.
+- The `apply` command now provides more information. ([#95](https://github.com/craftcms/nitro/issues/95))
+- Updated the NGINX upload to 100MB. ([#123](https://github.com/craftcms/nitro/issues/123)) 
 
 ## Fixed
 - The `init` command checks if the machine already exists before prompting for input ([#102](https://github.com/craftcms/nitro/issues/102)) 
+- Fixed a typo in the documentation, thanks [@spib](https://github.com/spib)! ([#128](https://github.com/craftcms/nitro/issues/128))
 
 ### 1.0.0-beta.2 - 2020-05-06
 
