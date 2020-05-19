@@ -62,10 +62,10 @@ var dbBackupCommand = &cobra.Command{
 				}
 			}
 		default:
-			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -e "SHOW DATABASES;"`, container)); err != nil {
+			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -pnitro -e "SHOW DATABASES;"`, container)); err == nil {
 				for _, db := range strings.Split(output, "\n") {
 					// ignore the system defaults
-					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" {
+					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") {
 						continue
 					}
 					dbs = append(dbs, db)
@@ -87,6 +87,12 @@ var dbBackupCommand = &cobra.Command{
 		backupFileName := database + "-" + datetime.Parse(time.Now()) + ".sql"
 		switch strings.Contains(container, "mysql") {
 		case true:
+			// create the backup directory if not found
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/mysql/backups/")); err != nil {
+				fmt.Println(output)
+				return err
+			}
+
 			fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
 
 			// if its everything, back them all up
@@ -103,6 +109,12 @@ var dbBackupCommand = &cobra.Command{
 				}
 			}
 		default:
+			// create the backup directory if not found
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/postgres/backups/")); err != nil {
+				fmt.Println(output)
+				return err
+			}
+
 			fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 
 			// if its all the databases
