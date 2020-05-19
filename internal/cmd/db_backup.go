@@ -11,6 +11,7 @@ import (
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/scripts"
@@ -47,7 +48,7 @@ var dbBackupCommand = &cobra.Command{
 		}
 
 		// get all of the databases from the container
-		var dbs []string
+		dbs := []string{"all-dbs"}
 		switch strings.Contains(container, "mysql") {
 		case false:
 			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s psql --username nitro --command "SELECT datname FROM pg_database WHERE datistemplate = false;"`, container)); err == nil {
@@ -76,45 +77,42 @@ var dbBackupCommand = &cobra.Command{
 			return errors.New("no databases to backup in " + container)
 		}
 
-		// append the all option
-		dbs = append(dbs, "all-databases")
-
-		database, _, err := p.Select("Which database should we backup", dbs, &prompt.SelectOptions{Default: len(dbs)})
+		database, _, err := p.Select("Which database should we backup", dbs, &prompt.SelectOptions{Default: 1})
 		if err != nil {
 			return err
 		}
 
-		var fullBackupPath string
-		backupFileName := container + "-" + database + "-" + time.Now().Format("01-01-2020") + ".sql"
+		var fullVmBackupPath string
+		backupFileName := database + "-" + datetime.Parse(time.Now()) + ".sql"
 		switch strings.Contains(container, "mysql") {
 		case true:
-			fullBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
+			fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
 
 			// if its everything, back them all up
-			if database == "all-databases" {
-				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullBackupPath)); err != nil {
+			if database == "all-dbs" {
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
 			} else {
 				// backup a specific database
-				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, database, fullBackupPath)); err != nil {
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, database, fullVmBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
 			}
 		default:
-			fullBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
+			fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 
 			// if its all the databases
-			if database == "all-databases" {
-				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dumpall -U nitro > %s`, container, fullBackupPath)); err != nil {
+			if database == "all-dbs" {
+				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dumpall -U nitro > %s`, container, fullVmBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
 			} else {
 				// backup a specific database
-				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dump -U nitro %s > %s`, container, database, fullBackupPath)); err != nil {
+				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dump -U nitro %s > %s`, container, database, fullVmBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}
@@ -128,22 +126,30 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
-		machineFolder := home + "/.nitro/" + machine
-		if err := helpers.MkdirIfNotExists(machineFolder); err != nil {
+		// make sure the backups folder exists
+		backupsFolder := home + "/.nitro/backups/"
+		if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
 			return err
 		}
 
-		backupsFolder := machineFolder + "/backups/"
+		// make sure the machine folder exists
+		backupsFolder = backupsFolder + machine
+		if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
+			return err
+		}
+
+		// create a container name
+		backupsFolder = backupsFolder + "/" + container
 		if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
 			return err
 		}
 
 		// transfer the folder into the host machine
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{nitro.Action{Type: "transfer", Args: []string{"transfer", machine + ":" + fullBackupPath, backupsFolder}}}); err != nil {
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{{Type: "transfer", Args: []string{"transfer", machine + ":" + fullVmBackupPath, backupsFolder}}}); err != nil {
 			return err
 		}
 
-		_, err = script.Run(false, fmt.Sprintf(`rm %s`, fullBackupPath))
+		_, err = script.Run(false, fmt.Sprintf(`rm %s`, fullVmBackupPath))
 		if err != nil {
 			return err
 		}
