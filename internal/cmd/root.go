@@ -27,6 +27,7 @@ func init() {
 		initCommand,
 		addCommand,
 		sshCommand,
+		keysCommand,
 		updateCommand,
 		infoCommand,
 		stopCommand,
