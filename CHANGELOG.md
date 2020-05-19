@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-beta.3 - 2020-05-19
 
 ## Added
 - Added the `--skip-hosts` option to the `apply` command. ([#110](https://github.com/craftcms/nitro/issues/110))
