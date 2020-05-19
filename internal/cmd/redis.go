@@ -8,7 +8,7 @@ import (
 
 var redisCommand = &cobra.Command{
 	Use:   "redis",
-	Short: "Enter a redis shell",
+	Short: "Enter redis",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 

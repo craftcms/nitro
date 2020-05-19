@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
@@ -25,6 +27,22 @@ var xdebugOnCommand = &cobra.Command{
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*enableXdebugAction})
+		actions := []nitro.Action{*enableXdebugAction}
+
+		restartPhpFpmAction, err := nitro.RestartPhpFpm(machine, php)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *restartPhpFpmAction)
+
+		fmt.Println("Enabling xdebug for", php, "on", machine)
+
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		fmt.Println("Xdebug was enabled for", php, "on", machine)
+
+		return nil
 	},
 }

@@ -14,24 +14,31 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Adding Multiple Database Engines](#adding-multiple-database-engines)
+- [Using Blackfire](#using-blackfire)
 - [Using Xdebug](#using-xdebug)
 - [Commands](#commands)
   - [`apply`](#apply)
   - [`add`](#add)
   - [`context`](#context)
+  - [`db add`](#db-add)
+  - [`db backup`](#db-backup)
+  - [`db import`](#db-import)
+  - [`db remove`](#db-remove)
+  - [`db restart`](#db-restart)
+  - [`db start`](#db-start)
+  - [`db stop`](#db-stop)
   - [`destroy`](#destroy)
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
-  - [`import`](#import)
   - [`logs`](#logs)
   - [`remove`](#remove)
   - [`redis`](#redis)
-  - [`start`](#start)
-  - [`stop`](#stop)
   - [`rename`](#rename)
   - [`restart`](#restart)
   - [`self-update`](#self-update)
+  - [`start`](#start)
+  - [`stop`](#stop)
   - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
@@ -138,12 +145,12 @@ Nitro within that folder:
 ```yaml
 mounts:
  - source: ~/dev
-   dest: /nitro/sites
+   dest: /home/ubuntu/sites
 sites:
  - hostname: example1.test
-   webroot: /nitro/sites/example1.test/web
+   webroot: /home/ubuntu/sites/example1.test/web
  - hostname: example2.test
-   webroot: /nitro/sites/example2.test/web
+   webroot: /home/ubuntu/sites/example2.test/web
 ```
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
@@ -197,7 +204,7 @@ To add a new mount, follow these steps:
    ```yaml
    mounts:
      - source: /Users/cathy/dev
-       dest: /nitro/sites
+       dest: /home/ubuntu/sites
    ```
 
 2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
@@ -248,6 +255,10 @@ databases:
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 
+## Using Blackfire
+
+See [Using Blackfire with Nitro](BLACKFIRE.md) for instructions on how to configure and run Blackfire.
+
 ## Using Xdebug
 
 See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to configure Xdebug and PhpStorm for web/console debugging.
@@ -259,11 +270,17 @@ The following commands will help you manage your virtual server.
 - [`apply`](#apply)
 - [`add`](#add)
 - [`context`](#context)
+- [`db add`](#db-add)
+- [`db backup`](#db-backup)
+- [`db import`](#db-import)
+- [`db remove`](#db-remove)
+- [`db restart`](#db-restart)
+- [`db start`](#db-start)
+- [`db stop`](#db-stop)
 - [`destroy`](#destroy)
 - [`edit`](#edit)
 - [`info`](#info)
 - [`init`](#init)
-- [`import`](#import)
 - [`logs`](#logs)
 - [`remove`](#remove)
 - [`redis`](#redis)
@@ -292,6 +309,8 @@ Options:
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>-m</code>, <code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
 </dl>
 
 Example:
@@ -341,7 +360,7 @@ plugins-dev added successfully!
 Shows the machine’s configuration.
 
 ```sh
-nitro contex [<options>]
+nitro context [<options>]
 ```
 
 Options:
@@ -363,7 +382,7 @@ disk: 40G
 memory: 4G
 mounts:
 - source: ~/sites/demo-site
-  dest: /nitro/sites/demo-site
+  dest: /home/ubuntu/sites/demo-site
 databases:
 - engine: mysql
   version: "5.7"
@@ -373,7 +392,7 @@ databases:
   port: "5432"
 sites:
 - hostname: demo-site
-  webroot: /nitro/sites/demo-site/web
+  webroot: /home/ubuntu/sites/demo-site/web
 ------
 ```
 
@@ -458,7 +477,7 @@ Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
 Load:           0.09 0.15 0.22
 Disk usage:     2.7G out of 38.6G
 Memory usage:   379.8M out of 3.9G
-Mounts:         /Users/jasonmccallister/sites/demo-site => /nitro/sites/demo-site
+Mounts:         /Users/jasonmccallister/sites/demo-site => /home/ubuntu/sites/demo-site
                     UID map: 501:default
                     GID map: 20:default
 ```
@@ -488,13 +507,70 @@ Options:
 
 If the machine already exists, it will be reconfigured.
 
-### `import`
+### `db add`
+
+Create a new database for the machine. You will be asked which type of database to add based on your config (e.g. postgres or mysql).
+
+```shell script
+nitro db add [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro db add
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database type? [1] 2
+What should be the name of the database? mynewproject
+Added database "mynewproject" to "mysql_5.7_3306"
+```
+
+### `db backup`
+
+Backup one or all databases from a machine. 
+
+```shell script
+nitro db backup [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro db backup
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database engine? [1] 
+  1 - all-dbs
+  2 - postgres
+  3 - nitro
+  4 - project-one
+Which database should we backup? [1] 
+Created backup "all-dbs-200519_100730.sql", downloading...
+Backup completed and stored in "/Users/jasonmccallister/.nitro/backups/nitro-dev/postgres_11_5432/all-dbs-200519_100730.sql"
+```
+
+### `db import`
 
 Import a SQL file into a database in the machine. You will be prompted with a list of running database engines
 (MySQL and PostgreSQL) to import the file into.
 
 ```sh
-nitro import <file> [<options>]
+nitro db import <file> [<options>]
 ```
 
 Options:
@@ -507,10 +583,110 @@ Options:
 Example:
 
 ```sh
-$ nitro import mybackup.sql
-Use the arrow keys to navigate: ↓ ↑ → ←
-? Select database:
-  ▸ mysql_5.7_3306
+$ nitro db import mybackup.sql
+  1 - mysql_5.7_3306
+  2 - postgres_11_5432
+Which database engine to import the backup? [1] 
+What is the database name to create for the import? new-project
+Uploading "mybackup.sql" into "nitro-dev" (large files may take a while)...
+Created database new-project
+```
+
+### `db remove`
+
+Will remove a database from the machine, but not from the config file.
+
+```sh
+nitro db remove [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db remove
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we remove? [1] 
+Are you sure you want to permanently remove the database postgres_11_5432? [no] 
+```
+
+### `db restart`
+
+Will restart a database in machine.
+
+```sh
+nitro db restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db restart
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we restart? [1]  
+```
+
+### `db start`
+
+Will start a database in machine.
+
+```sh
+nitro db start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db start
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we start? [1]  
+```
+
+### `db stop`
+
+Will stop a database in machine.
+
+```sh
+nitro db stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db stop
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we stop? [1]  
 ```
 
 ### `logs`
@@ -538,7 +714,7 @@ nitro remove [<options>]
 ```
 
 You will be prompted to select the site that should be removed. If the site has a corresponding
-[mount](#adding-mounts) at `/nitro/sites/<hostname>`, the mount will be removed as well.
+[mount](#adding-mounts) at `/home/ubuntu/sites/<hostname>`, the mount will be removed as well.
 
 Options:
 

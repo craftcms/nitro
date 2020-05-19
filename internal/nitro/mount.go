@@ -1,7 +1,10 @@
 package nitro
 
-import "github.com/craftcms/nitro/validate"
+import (
+	"github.com/craftcms/nitro/validate"
+)
 
+// Mount is used to mount a folder for a specific website
 func Mount(name, folder, site string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {
 		return nil, err
@@ -16,6 +19,6 @@ func Mount(name, folder, site string) (*Action, error) {
 	return &Action{
 		Type:       "mount",
 		UseSyscall: false,
-		Args:       []string{"mount", folder, name + ":/nitro/sites/" + site},
+		Args:       []string{"mount", folder, name + ":" + "/home/ubuntu/sites/" + site},
 	}, nil
 }

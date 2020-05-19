@@ -1,6 +1,8 @@
 package nitro
 
-import "github.com/craftcms/nitro/validate"
+import (
+	"github.com/craftcms/nitro/validate"
+)
 
 func RestartPhpFpm(name, php string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {

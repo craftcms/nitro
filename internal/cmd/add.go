@@ -9,14 +9,30 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
 )
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a site to a machine",
+	Short: "Add a site",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+		p := prompt.NewPrompt()
+		runner := nitro.NewMultipassRunner("multipass")
+
+		// check if the machine exists
+		if ip := nitro.IP(machine, runner); ip == "" {
+			create, err := p.Confirm(fmt.Sprintf("Unable to find machine %q, want to create it", machine), &prompt.InputOptions{Default: "yes"})
+			if err != nil {
+				return err
+			}
+			if create {
+				return initCommand.RunE(cmd, args)
+			}
+		}
+
 		// load the config
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
@@ -30,8 +46,6 @@ var addCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		p := prompt.NewPrompt()
 
 		// prompt for the hostname if --hostname == ""
 		// else get the name of the current directory (e.g. nitro)
@@ -56,7 +70,8 @@ var addCommand = &cobra.Command{
 			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
-				return err
+				fmt.Println("Unable to locate a webroot, setting to web")
+				foundDir = "web"
 			}
 
 			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{
@@ -70,12 +85,11 @@ var addCommand = &cobra.Command{
 			webrootDir = flagWebroot
 		}
 
-		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
+		webRootPath := fmt.Sprintf("/home/ubuntu/sites/%s/%s", hostname, webrootDir)
 
 		// create a new mount
 		skipMount := true
-		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
+		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + hostname}
 		if configFile.MountExists(mount.Dest) {
 			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
 		} else {
@@ -110,7 +124,7 @@ var addCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s has been added to config file.\n", hostname)
+		fmt.Printf("Added %s to config file\n", hostname)
 
 		applyChanges, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
 			Default: "yes",

@@ -25,7 +25,7 @@ func TestRemoveSymlink(t *testing.T) {
 			want: &Action{
 				Type:       "exec",
 				UseSyscall: false,
-				Args:       []string{"exec", "somemachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/example.test"},
+				Args:       []string{"exec", "somemachine", "--", "sudo", "rm", "/etc/nginx/sites-available/example.test"},
 			},
 			wantErr: false,
 		},

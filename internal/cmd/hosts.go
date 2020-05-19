@@ -16,7 +16,7 @@ import (
 
 var hostsCommand = &cobra.Command{
 	Use:    "hosts",
-	Short:  "Add sites to your hosts file",
+	Short:  "Edit hosts file",
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
@@ -38,7 +38,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if sites == nil {
-			fmt.Println("There are no sites in the config file to remove")
+			fmt.Println("There are no sites in the config file")
 			return nil
 		}
 

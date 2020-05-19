@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
@@ -32,6 +34,14 @@ var xdebugOffCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)
+		fmt.Println("Disabling xdebug for", php, "on", machine)
+
+		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+			return err
+		}
+
+		fmt.Println("Xdebug was disabled for", php, "on", machine)
+
+		return nil
 	},
 }

@@ -15,7 +15,7 @@ import (
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove site from a machine",
+	Short: "Remove site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {

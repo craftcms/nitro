@@ -27,7 +27,7 @@ func TestMount(t *testing.T) {
 			want: &Action{
 				Type:       "mount",
 				UseSyscall: false,
-				Args:       []string{"mount", "/tmp", "somename:/nitro/sites/example.test"},
+				Args:       []string{"mount", "/tmp", "somename:/home/ubuntu/sites/example.test"},
 			},
 			wantErr: false,
 		},
@@ -70,7 +70,7 @@ func TestMount(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Mount() got = %v, want %v", got, tt.want)
+				t.Errorf("Mount() got = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}

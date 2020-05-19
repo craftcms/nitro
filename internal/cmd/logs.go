@@ -14,7 +14,7 @@ import (
 
 var logsCommand = &cobra.Command{
 	Use:   "logs",
-	Short: "Show machine logs",
+	Short: "Show logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 

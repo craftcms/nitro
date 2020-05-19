@@ -243,12 +243,7 @@ function getNitro {
 }
 
 function promptInstall {
-  echo -n "Initialize the primary machine now? [n] "
-  read -n 1 -r initprompt
-  echo
-  if [[ $initprompt =~ ^[Yy]$ ]]; then
     nitro init
-  fi
 }
 
 hasCurl

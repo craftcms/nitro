@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -12,26 +13,44 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/validate"
 )
 
 var initCommand = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a new machine",
+	Short: "Create new machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-
 		existingConfig := false
+		runner := nitro.NewMultipassRunner("multipass")
+		p := prompt.NewPrompt()
+
+		// check if the machine exists
+		if ip := nitro.IP(machine, runner); ip != "" {
+			fmt.Println(fmt.Sprintf("Machine %q already exists, skipping the init process", machine))
+			return nil
+		}
+
 		if viper.ConfigFileUsed() != "" {
 			fmt.Println("Using an existing config:", viper.ConfigFileUsed())
 			existingConfig = true
 		}
 
+		if existingConfig == false {
+			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes"})
+			if err != nil {
+				return err
+			}
+			if initMachine == false {
+				fmt.Println("You can create a new machine later by running `nitro init`")
+				return nil
+			}
+		}
+
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
-
-		p := prompt.NewPrompt()
 
 		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
 		// ask how many cores
@@ -42,27 +61,26 @@ var initCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		cfg.CPUs = cpuCores
 
 		// ask how much memory
-		memory, err := p.Ask("How much memory", &prompt.InputOptions{
+		mem, err := p.Ask("How much memory", &prompt.InputOptions{
 			Default:   "4G",
 			Validator: validate.Memory,
 		})
 		if err != nil {
 			return err
 		}
-		cfg.Memory = memory
+		memory := mem
 
 		// how much disk space
-		disk, err := p.Ask("How much disk space", &prompt.InputOptions{
+		di, err := p.Ask("How much disk space", &prompt.InputOptions{
 			Default:   "40G",
 			Validator: validate.DiskSize,
 		})
 		if err != nil {
 			return err
 		}
-		cfg.Disk = disk
+		disk := di
 
 		// which version of PHP
 		if !existingConfig {
@@ -82,8 +100,6 @@ var initCommand = &cobra.Command{
 				}
 			}
 		} else {
-			cfg.PHP = config.GetString("php", flagPhpVersion)
-
 			// double check from the major update
 			if cfg.PHP == "" {
 				cfg.PHP = "7.4"
@@ -202,8 +218,20 @@ var initCommand = &cobra.Command{
 
 		fmt.Println("Applying the changes now...")
 
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
+		if err := nitro.Run(runner, actions); err != nil {
 			return err
+		}
+
+		// if there are sites, edit the hosts file
+		if len(sites) > 0 {
+			nitro, err := exec.LookPath("nitro")
+			if err != nil {
+				return err
+			}
+
+			if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
+				return err
+			}
 		}
 
 		return infoCommand.RunE(cmd, args)
@@ -277,12 +305,6 @@ func createActions(machine, memory, disk string, cpus int, phpVersion string, da
 			return nil, err
 		}
 		actions = append(actions, *createDatabaseAction)
-
-		setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, *setUserPermissions)
 	}
 
 	var siteErrs []error

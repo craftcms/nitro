@@ -1,6 +1,8 @@
 package nitro
 
-import "github.com/craftcms/nitro/validate"
+import (
+	"github.com/craftcms/nitro/validate"
+)
 
 func RemoveSymlink(name, site string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {
@@ -13,7 +15,7 @@ func RemoveSymlink(name, site string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "sudo", "rm", "/etc/nginx/sites-enabled/" + site},
+		Args:       []string{"exec", name, "--", "sudo", "rm", "/etc/nginx/sites-available/" + site},
 	}, nil
 }
 

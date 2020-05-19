@@ -39,14 +39,6 @@ func CopyNginxTemplate(name, hostname string) (*Action, error) {
 	}, nil
 }
 
-func CreateNginxSiteDirectory(name, site string) (*Action, error) {
-	return &Action{
-		Type:       "exec",
-		UseSyscall: false,
-		Args:       []string{"exec", name, "--", "mkdir", "-p", "/nitro/sites/" + site},
-	}, nil
-}
-
 func ChangeTemplateVariables(name, webroot, hostname, php string, aliases []string) (*[]Action, error) {
 	var actions []Action
 	template := hostname

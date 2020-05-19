@@ -13,4 +13,7 @@ var (
 	// flags for the add command
 	flagHostname string
 	flagWebroot  string
+
+	// flags for apply
+	flagSkipHosts bool
 )

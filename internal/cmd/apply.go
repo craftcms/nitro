@@ -11,13 +11,15 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/scripts"
 	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/internal/task"
+	"github.com/craftcms/nitro/internal/webroot"
 )
 
 var applyCommand = &cobra.Command{
 	Use:   "apply",
-	Short: "Apply changes from config",
+	Short: "Apply changes",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
@@ -33,12 +35,12 @@ var applyCommand = &cobra.Command{
 		}
 
 		// ABSTRACT
-		path, err := exec.LookPath("multipass")
+		multipass, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
 		}
 
-		c := exec.Command(path, []string{"info", machine, "--format=csv"}...)
+		c := exec.Command(multipass, []string{"info", machine, "--format=csv"}...)
 		output, err := c.Output()
 		if err != nil {
 			return err
@@ -51,26 +53,49 @@ var applyCommand = &cobra.Command{
 		}
 		// END ABSTRACT
 
+		script := scripts.New(multipass, machine)
+
 		// find sites that are created
 		var sites []config.Site
 		for _, site := range configFile.Sites {
-			output, err := exec.Command(path, "exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/site-exists.sh", site.Hostname).Output()
+			shouldAppend := false
+			// check if the nginx config exists
+			existsOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
 			if err != nil {
 				return err
 			}
-			if strings.Contains(string(output), "exists") {
+			if strings.Contains(existsOutput, "exists") {
+				shouldAppend = true
+			}
+
+			// see if the webroot is the same
+			webrootOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
+			if err != nil {
+				return err
+			}
+
+			matches, found := webroot.Matches(webrootOutput, site.Webroot)
+			switch matches {
+			case true:
+				fmt.Println(fmt.Sprintf("Webroot for %q matches", site.Hostname))
+			default:
+				fmt.Println(fmt.Sprintf("Webroot for %q does not match, found %q", site.Hostname, found))
+				site.Webroot = found
+			}
+
+			if shouldAppend {
 				sites = append(sites, site)
 			}
 		}
 
 		// find all existing databases
-		databases, err := find.AllDatabases(exec.Command(path, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
+		databases, err := find.AllDatabases(exec.Command(multipass, []string{"exec", machine, "--", "docker", "container", "ls", "--format", `'{{ .Names }}'`}...))
 		if err != nil {
 			return err
 		}
 
 		// find the current version of php installed
-		php, err := find.PHPVersion(exec.Command(path, "exec", machine, "--", "php", "--version"))
+		php, err := find.PHPVersion(exec.Command(multipass, "exec", machine, "--", "php", "--version"))
 		if err != nil {
 			return err
 		}
@@ -94,6 +119,11 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
+		if flagSkipHosts || len(configFile.Sites) == 0 {
+			fmt.Println("Skipping editing the hosts file")
+			return nil
+		}
+
 		nitro, err := exec.LookPath("nitro")
 		if err != nil {
 			return err
@@ -104,4 +134,8 @@ var applyCommand = &cobra.Command{
 		// TODO check the current OS and call commands for windows
 		return sudo.RunCommand(nitro, machine, "hosts")
 	},
+}
+
+func init() {
+	applyCommand.Flags().BoolVar(&flagSkipHosts, "skip-hosts", false, "skip editing the hosts file")
 }

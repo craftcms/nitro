@@ -1,6 +1,8 @@
 package task
 
 import (
+	"fmt"
+
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -20,6 +22,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *unmountAction)
+			fmt.Println("Removing mount", mount.Source, "from", machine)
 		}
 	}
 
@@ -31,6 +34,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *mountAction)
+			fmt.Println("Mounting", mount.Source, "to", machine)
 		}
 	}
 
@@ -50,6 +54,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *reloadNginxAction)
+			fmt.Println("Removing site", site.Hostname, "from", machine)
 		}
 	}
 
@@ -83,6 +88,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *reloadNginxAction)
+			fmt.Println("Adding site", site.Hostname, "to", machine)
 		}
 	}
 
@@ -94,6 +100,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				UseSyscall: false,
 				Args:       []string{"exec", machine, "--", "docker", "rm", "-v", database.Name(), "-f"},
 			})
+			fmt.Println("Removing database", database.Name(), "from", machine)
 		}
 	}
 
@@ -112,11 +119,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *createContainer)
 
-			setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
-			if err != nil {
-				return nil, err
-			}
-			actions = append(actions, *setUserPermissions)
+			fmt.Println("Creating database", database.Name(), "on", machine)
 		}
 	}
 
@@ -127,7 +130,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			return nil, err
 		}
 		actions = append(actions, *installPhp)
-
+		fmt.Println("Installing PHP", configFile.PHP, "on", machine)
 	}
 
 	return actions, nil

@@ -29,7 +29,7 @@ func TestCreateDatabaseContainer(t *testing.T) {
 			want: &Action{
 				Type:       "exec",
 				UseSyscall: false,
-				Args:       []string{"exec", "machinename", "--", "docker", "run", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
+				Args:       []string{"exec", "machinename", "--", "docker", "run", "-v", "/home/ubuntu/.nitro/databases/mysql/setup.sql:/docker-entrypoint-initdb.d/setup.sql", "-v", "/home/ubuntu/.nitro/databases/mysql/conf.d/:/etc/mysql/conf.d", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
 			},
 			wantErr: false,
 		},
@@ -44,7 +44,7 @@ func TestCreateDatabaseContainer(t *testing.T) {
 			want: &Action{
 				Type:       "exec",
 				UseSyscall: false,
-				Args:       []string{"exec", "postgresmachine", "--", "docker", "run", "-v", "postgres_11.7_5432:/var/lib/postgresql/data", "--name", "postgres_11.7_5432", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "postgres:11.7"},
+				Args:       []string{"exec", "postgresmachine", "--", "docker", "run", "-v", "/home/ubuntu/.nitro/databases/postgres/setup.sql:/docker-entrypoint-initdb.d/setup.sql", "-v", "/home/ubuntu/.nitro/databases/postgres/conf.d/:/etc/postgresql/", "-v", "postgres_11.7_5432:/var/lib/postgresql/data", "--name", "postgres_11.7_5432", "-d", "--restart=always", "-p", "5432:5432", "-e", "POSTGRES_PASSWORD=nitro", "-e", "POSTGRES_USER=nitro", "postgres:11.7"},
 			},
 			wantErr: false,
 		},
