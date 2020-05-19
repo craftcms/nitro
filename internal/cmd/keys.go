@@ -13,7 +13,7 @@ import (
 
 var keysCommand = &cobra.Command{
 	Use:   "keys",
-	Short: "Import SSH keys",
+	Short: "Add keys to machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// machine := flagMachineName
 		home, err := homedir.Dir()
