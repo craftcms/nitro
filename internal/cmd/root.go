@@ -41,7 +41,6 @@ func init() {
 		removeCommand,
 		destroyCommand,
 		editCommand,
-		dbImportCommand,
 		hostsCommand,
 		renameCommand,
 		dbCommand,

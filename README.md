@@ -21,18 +21,18 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`add`](#add)
   - [`context`](#context)
   - [`destroy`](#destroy)
+  - [`db import`](#import)
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
-  - [`import`](#import)
   - [`logs`](#logs)
   - [`remove`](#remove)
   - [`redis`](#redis)
-  - [`start`](#start)
-  - [`stop`](#stop)
   - [`rename`](#rename)
   - [`restart`](#restart)
   - [`self-update`](#self-update)
+  - [`start`](#start)
+  - [`stop`](#stop)
   - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
@@ -264,11 +264,17 @@ The following commands will help you manage your virtual server.
 - [`apply`](#apply)
 - [`add`](#add)
 - [`context`](#context)
+- [`db add`](#db-add)
+- [`db backup`](#db-backup)
+- [`db import`](#db-import)
+- [`db remove`](#db-remove)
+- [`db restart`](#db-restart)
+- [`db start`](#db-start)
+- [`db stop`](#db-stop)
 - [`destroy`](#destroy)
 - [`edit`](#edit)
 - [`info`](#info)
 - [`init`](#init)
-- [`import`](#import)
 - [`logs`](#logs)
 - [`remove`](#remove)
 - [`redis`](#redis)
@@ -493,13 +499,70 @@ Options:
 
 If the machine already exists, it will be reconfigured.
 
-### `import`
+### `db add`
+
+Create a new database for the machine. You will be asked which type of database to add based on your config (e.g. postgres or mysql).
+
+```shell script
+nitro db add [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro db add
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database type? [1] 2
+What should be the name of the database? mynewproject
+Added database "mynewproject" to "mysql_5.7_3306"
+```
+
+### `db backup`
+
+Backup one or all databases from a machine. 
+
+```shell script
+nitro db backup [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro db backup
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database engine? [1] 
+  1 - all-dbs
+  2 - postgres
+  3 - nitro
+  4 - project-one
+Which database should we backup? [1] 
+Created backup "all-dbs-200519_100730.sql", downloading...
+Backup completed and stored in "/Users/jasonmccallister/.nitro/backups/nitro-dev/postgres_11_5432/all-dbs-200519_100730.sql"
+```
+
+### `db import`
 
 Import a SQL file into a database in the machine. You will be prompted with a list of running database engines
 (MySQL and PostgreSQL) to import the file into.
 
 ```sh
-nitro import <file> [<options>]
+nitro db import <file> [<options>]
 ```
 
 Options:
@@ -512,10 +575,110 @@ Options:
 Example:
 
 ```sh
-$ nitro import mybackup.sql
-Use the arrow keys to navigate: ↓ ↑ → ←
-? Select database:
-  ▸ mysql_5.7_3306
+$ nitro db import mybackup.sql
+  1 - mysql_5.7_3306
+  2 - postgres_11_5432
+Which database engine to import the backup? [1] 
+What is the database name to create for the import? new-project
+Uploading "mybackup.sql" into "nitro-dev" (large files may take a while)...
+Created database new-project
+```
+
+### `db remove`
+
+Will remove a database from the machine, but not from the config file.
+
+```sh
+nitro db remove [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db remove
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we remove? [1] 
+Are you sure you want to permanently remove the database postgres_11_5432? [no] 
+```
+
+### `db restart`
+
+Will restart a database in machine.
+
+```sh
+nitro db restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db restart
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we restart? [1]  
+```
+
+### `db start`
+
+Will start a database in machine.
+
+```sh
+nitro db start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db start
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we start? [1]  
+```
+
+### `db stop`
+
+Will stop a database in machine.
+
+```sh
+nitro db stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```sh
+$ nitro db stop
+  1 - postgres_11_5432
+  2 - mysql_5.7_3306
+Which database should we stop? [1]  
 ```
 
 ### `logs`
