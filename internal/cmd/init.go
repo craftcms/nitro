@@ -28,7 +28,7 @@ var initCommand = &cobra.Command{
 
 		// check if the machine exists
 		if ip := nitro.IP(machine, runner); ip != "" {
-			fmt.Println(fmt.Sprintf("Machine %q already exists, skipping the init process"))
+			fmt.Println(fmt.Sprintf("Machine %q already exists, skipping the init process", machine))
 			return nil
 		}
 
