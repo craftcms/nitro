@@ -3,32 +3,29 @@
 ### Unreleased
 
 ## Added
-- Added the `--skip-hosts` option to the `apply` command to skip editing the hosts file. ([#110](https://github.com/craftcms/nitro/issues/110))
+- Added the `--skip-hosts` option to the `apply` command. ([#110](https://github.com/craftcms/nitro/issues/110))
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
 - The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
-- Introduced the `db` command with sub-commands to `restart`, `stop`, `add`, `remove`, and `backup` databases. The `import` is also nested under `db` but will remain as a top-level command.
-- Added a new `refresh` command to keep scripts and configs updated between versions of Nitro.
+- Added the `db restart`, `db stop`, `db add`, `db remove`, and `db backup` commands. The `import` command has also been renamed to `db import`.
+- Added the `refresh` command, which helps keep scripts and configs updated between versions of Nitro.
 - Databases now support custom configuration files. ([#133](https://github.com/craftcms/nitro/issues/133))
-- Added Blackfire setup instructions, thanks [@bencroker](https://github.com/bencroker)! ([#137](https://github.com/craftcms/nitro/issues/137))
 
 ## Changed
-- The `destroy` command now prompts for verification before machine destruction. ([#116](https://github.com/craftcms/nitro/issues/116))
-- The `self-update` command no longer prompts for installation upon completion. ([#115](https://github.com/craftcms/nitro/issues/115))
-- The `import` command now shows the requirement for the first argument of a database backup. ([#124](https://github.com/craftcms/nitro/issues/124))
-- When creating a new machine, the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119)) 
-- The `init` command will prompt you to initialize a new machine if there is no config file.
+- Nginx is now configured to allow file uploads up to 100MB. ([#126](https://github.com/craftcms/nitro/issues/126))
+- Databases are now backed up automatically when a machine is destroyed. ([#136](https://github.com/craftcms/nitro/issues/136))
 - The OpCache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
-- Running the `apply` command will now check sites webroot and apply any changes. ([#113](https://github.com/craftcms/nitro/issues/113))
-- Adding new sites with `add` will no place the site in `/home/ubuntu/sites/site-name`, making symlinks between projects possible. ([#134](https://github.com/craftcms/nitro/issues/134))
-- Destroying a machine will now backup the databases in the machine. ([#136](https://github.com/craftcms/nitro/issues/136))
-- Added a `sync` command to help update machine configurations and scripts between versions.
+- When creating a new machine, the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119))
+- The default database is now called `nitro` for MySQL engines, to be consistent with PostgreSQL.
+- The `destroy` command now prompts for confirmation. ([#116](https://github.com/craftcms/nitro/issues/116))
+- The `init` command now prompts to initialize a new machine if there is no config file.
+- The `add` command now mounts project files in `/home/ubuntu/sites/<name>` instead of `/nitro/sites/<name>`. ([#134](https://github.com/craftcms/nitro/issues/134))
 - The `apply` command now provides more information. ([#95](https://github.com/craftcms/nitro/issues/95))
-- Updated the NGINX upload to 100MB. ([#123](https://github.com/craftcms/nitro/issues/123)) 
+- The `init` command now checks if the machine already exists before prompting for input ([#102](https://github.com/craftcms/nitro/issues/102))
 
 ## Fixed
-- The `init` command checks if the machine already exists before prompting for input ([#102](https://github.com/craftcms/nitro/issues/102)) 
-- Fixed a typo in the documentation, thanks [@spib](https://github.com/spib)! ([#128](https://github.com/craftcms/nitro/issues/128))
-- Nitro will now create a `nitro` database for MySQL engines. 
+- Fixed a bug where the `self-update` command would non-interactively prompt to initialize the primary machine. ([#115](https://github.com/craftcms/nitro/issues/115))
+- Fixed a bug where `import --help` didn’t show the required SQL file argument in the usage example. ([#124](https://github.com/craftcms/nitro/issues/124))
+- Fixed a bug where the `apply` command wasn’t applying changes to sites’ webroots. ([#113](https://github.com/craftcms/nitro/issues/113))
 
 ### 1.0.0-beta.2 - 2020-05-06
 
