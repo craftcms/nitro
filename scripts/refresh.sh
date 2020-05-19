@@ -68,12 +68,12 @@ EndOfMessage
 EndOfMessage
 
   echo "setting DB_USER and DB_PASSWORD environment variables"
-  sudo echo "CRAFT_NITRO=1" >> /etc/environment
-  sudo echo "DB_USER=nitro" >> /etc/environment
-  sudo echo "DB_PASSWORD=nitro" >> /etc/environment
+  echo "CRAFT_NITRO=1" >> "/etc/environment"
+  echo "DB_USER=nitro" >> "/etc/environment"
+  echo "DB_PASSWORD=nitro" >> "/etc/environment"
 
   echo "removing old scripts"
-  sudo rm -rf /opt/nitro/scripts
+  rm -rf /opt/nitro/scripts
 
   echo "setup script has completed!"
   exit 0
