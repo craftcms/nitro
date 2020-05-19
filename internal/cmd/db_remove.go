@@ -57,11 +57,16 @@ var dbRemoveCommand = &cobra.Command{
 				return err
 			}
 
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerRemoveVolume, container))
+			if err != nil {
+				return err
+			}
+
 			fmt.Println("Removed database", container)
 			return nil
 		}
 
-		fmt.Print("We did not remove the database ", container)
+		fmt.Println("We did not remove the database ", container)
 
 		return nil
 	},
