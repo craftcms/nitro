@@ -10,6 +10,7 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion",
 	Short: "Generate completion scripts",
+	Hidden: true,
 	Long: `To load completion for bash run
 
 . <(nitro completion bash)
