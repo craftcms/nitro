@@ -266,38 +266,6 @@ See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to
 
 ## Commands
 
-The following commands will help you manage your virtual server.
-
-- [`apply`](#apply)
-- [`add`](#add)
-- [`context`](#context)
-- [`db add`](#db-add)
-- [`db backup`](#db-backup)
-- [`db import`](#db-import)
-- [`db remove`](#db-remove)
-- [`db restart`](#db-restart)
-- [`db start`](#db-start)
-- [`db stop`](#db-stop)
-- [`destroy`](#destroy)
-- [`edit`](#edit)
-- [`info`](#info)
-- [`init`](#init)
-- [`keys`](#keys)
-- [`logs`](#logs)
-- [`remove`](#remove)
-- [`redis`](#redis)
-- [`rename`](#rename)
-- [`restart`](#restart)
-- [`self-update`](#self-update)
-- [`ssh`](#ssh)
-- [`start`](#start)
-- [`stop`](#stop)
-- [`update`](#update)
-- [`version`](#version)
-- [`xdebug configure`](#xdebug-configure)
-- [`xdebug on`](#xdebug-on)
-- [`xdebug off`](#xdebug-off)
-
 ### `apply`
 
 Ensures that the machine exists, and applies any changes in its config file to it.
