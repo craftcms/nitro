@@ -65,7 +65,7 @@ var dbBackupCommand = &cobra.Command{
 			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlShowAllDatabases, container)); err == nil {
 				for _, db := range strings.Split(output, "\n") {
 					// ignore the system defaults
-					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") {
+					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") || db == "mysql" {
 						continue
 					}
 					dbs = append(dbs, db)

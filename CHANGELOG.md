@@ -4,9 +4,11 @@
 
 ## Added
 - Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
+- Added the `--no-backups` flag to `destroy` which will skip database backups.
 
 ## Changed
 - The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))
+- The `mysql` system database is no longer backed up using `nitro db backup` or `nitro destroy`. ([#147](https://github.com/craftcms/nitro/issues/147))
 
 ## Fixed
 - Fixed a bug where the `refresh` command was failing silently.
