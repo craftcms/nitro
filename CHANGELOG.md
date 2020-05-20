@@ -5,6 +5,7 @@
 ## Added
 - Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
 - Added the `--no-backups` flag to `destroy` which will skip database backups.
+- Added `completion` commands for `bash` and `zshrc`.
 
 ## Changed
 - The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))

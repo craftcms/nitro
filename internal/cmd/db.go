@@ -5,8 +5,9 @@ import (
 )
 
 var dbCommand = &cobra.Command{
-	Use:   "db",
-	Short: "Manage databases",
+	Use:       "db",
+	Short:     "Manage databases",
+	ValidArgs: []string{"add", "backup", "import", "restart", "stop", "start"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
