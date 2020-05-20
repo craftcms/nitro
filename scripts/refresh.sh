@@ -6,7 +6,7 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-if [ "$version" == "1.0.0-beta.3" ]; then
+if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   echo "running sync script for 1.0.0-beta.3"
 
   # create setup scripts
