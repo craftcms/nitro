@@ -5,6 +5,12 @@
 ## Added
 - Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
 
+## Changed
+- The `refresh` command will now show the output of the script.
+
+## Fixed
+- Fixed an issue with `refresh.sh` script. 
+
 ### 1.0.0-beta.3 - 2020-05-19
 
 ## Added
