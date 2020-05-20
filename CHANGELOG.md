@@ -5,8 +5,12 @@
 ## Added
 - Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
 
+## Changed
+- The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))
+
 ## Fixed
 - Fixed a bug where the `refresh` command was failing silently.
+- Fixed a permissions issue. ([#145](https://github.com/craftcms/nitro/issues/145))
 
 ### 1.0.0-beta.3 - 2020-05-19
 

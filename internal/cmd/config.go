@@ -93,6 +93,5 @@ runcmd:
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
-  - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
-  - chown -R ubuntu:ubuntu /home/ubuntu/sites
+  - chown -R ubuntu:ubuntu /home/ubuntu/
 `
