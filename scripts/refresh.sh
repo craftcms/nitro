@@ -16,8 +16,7 @@ if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   mkdir -p /home/ubuntu/.nitro/databases/mysql/backups
   mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
   mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
-  chown -R ubuntu:ubuntu /home/ubuntu/.nitro
-  chown -R ubuntu:ubuntu /home/ubuntu/sites
+  chown -R ubuntu:ubuntu /home/ubuntu/
 
   # create the files
   echo "setting the default mysql conf"
