@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Added
+- Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
+
 ### 1.0.0-beta.3 - 2020-05-19
 
 ## Added

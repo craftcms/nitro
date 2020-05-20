@@ -31,6 +31,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
+  - [`keys`](#keys)
   - [`logs`](#logs)
   - [`remove`](#remove)
   - [`redis`](#redis)
@@ -281,6 +282,7 @@ The following commands will help you manage your virtual server.
 - [`edit`](#edit)
 - [`info`](#info)
 - [`init`](#init)
+- [`keys`](#keys)
 - [`logs`](#logs)
 - [`remove`](#remove)
 - [`redis`](#redis)
@@ -506,6 +508,31 @@ Options:
 </dl>
 
 If the machine already exists, it will be reconfigured.
+
+### `keys`
+
+Import SSH keys intro a virtual machine for use with composer, git, etc.
+
+```shell script
+nitro keys [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro keys
+  1 - id_rsa
+  2 - personal_rsa
+Which key should we add to "nitro-dev"? [1]
+Transferred the key "id_rsa" into "nitro-dev"
+```
 
 ### `db add`
 
