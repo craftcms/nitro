@@ -6,8 +6,7 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-# shellcheck disable=SC2086
-if [ $version == "1.0.0-beta.3" ]; then
+if [ "$version" == "1.0.0-beta.3" ]; then
   echo "running sync script for 1.0.0-beta.3"
 
   # create setup scripts
