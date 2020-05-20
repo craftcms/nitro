@@ -51,7 +51,7 @@ var dbBackupCommand = &cobra.Command{
 		dbs := []string{"all-dbs"}
 		switch strings.Contains(container, "mysql") {
 		case false:
-			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s psql --username nitro --command "SELECT datname FROM pg_database WHERE datistemplate = false;"`, container)); err == nil {
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresShowAllDatabases, container)); err == nil {
 				sp := strings.Split(output, "\n")
 				for i, d := range sp {
 					if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") {
@@ -62,7 +62,7 @@ var dbBackupCommand = &cobra.Command{
 				}
 			}
 		default:
-			if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s mysql -unitro -pnitro -e "SHOW DATABASES;"`, container)); err == nil {
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlShowAllDatabases, container)); err == nil {
 				for _, db := range strings.Split(output, "\n") {
 					// ignore the system defaults
 					if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") {
@@ -125,7 +125,7 @@ var dbBackupCommand = &cobra.Command{
 				}
 			} else {
 				// backup a specific database
-				if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dump -U nitro %s > %s`, container, database, fullVmBackupPath)); err != nil {
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualPostgresDatabase, container, database, fullVmBackupPath)); err != nil {
 					fmt.Println(output)
 					return err
 				}

@@ -56,87 +56,133 @@ var destroyCommand = &cobra.Command{
 			return nil
 		}
 
-		// TODO backup all databases in the
-
-		var containers []string
-		for _, db := range cfg.Databases {
-			containers = append(containers, db.Name())
-		}
-
 		// if we have any containers to backup, do so now
-		if len(containers) != 0 {
+		if flagNoBackups == false && len(cfg.Databases) != 0 {
 			// backup the container
-			for _, container := range containers {
-				var fullVmBackupPath string
-				backupFileName := "all-dbs-" + datetime.Parse(time.Now()) + ".sql"
+			for _, db := range cfg.Databases {
+				container := db.Name()
 
-				switch strings.Contains(container, "mysql") {
-				case false:
-					// create the backup directory if not found
-					if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/postgres/backups/")); err != nil {
-						fmt.Println(output)
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						return err
-					}
+				// run the script to get all databases
+				var dbs []string
+				switch db.Engine {
+				case "postgres":
+					if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresShowAllDatabases, container)); err == nil {
+						sp := strings.Split(output, "\n")
+						for i, d := range sp {
+							d = strings.TrimSpace(d)
+							if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") || d == "mysql" {
+								continue
+							}
 
-					fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
-					if output, err := script.Run(false, fmt.Sprintf(`docker exec -i %s pg_dumpall -U nitro > %s`, container, fullVmBackupPath)); err != nil {
-						fmt.Println(output)
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						return err
+							dbs = append(dbs, d)
+						}
 					}
 				default:
-					// create the backup directory if not found
-					if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/mysql/backups/")); err != nil {
-						fmt.Println(output)
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						return err
-					}
-
-					fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
-					if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
-						fmt.Println(output)
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						return err
+					if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlShowAllDatabases, container)); err == nil {
+						for _, db := range strings.Split(output, "\n") {
+							// ignore the system defaults
+							if db == "Database" || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") {
+								continue
+							}
+							dbs = append(dbs, db)
+						}
 					}
 				}
 
-				fmt.Println(fmt.Sprintf("Created backup %q, downloading...", backupFileName))
-
-				home, err := homedir.Dir()
-				if err != nil {
-					return err
+				if len(dbs) == 0 {
+					fmt.Println(fmt.Sprintf("There are no databases in %s %s (port %s) to backup", db.Engine, db.Version, db.Port))
+					continue
 				}
 
-				// make sure the backups folder exists
-				backupsFolder := home + "/.nitro/backups/"
-				if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
-					fmt.Println("We had an issue backing up the databases, aborting destroy")
-					return err
-				}
+				// backup each database
+				for _, database := range dbs {
+					var fullVmBackupPath string
+					backupFileName := database + "-" + datetime.Parse(time.Now()) + ".sql"
 
-				// make sure the machine folder exists
-				backupsFolder = backupsFolder + machine
-				if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
-					fmt.Println("We had an issue backing up the databases, aborting destroy")
-					return err
-				}
+					switch db.Engine {
+					case "postgres":
+						// create the backup directory if not found
+						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/postgres/backups/")); err != nil {
+							fmt.Println(output)
+							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							return err
+						}
 
-				// create a container name
-				backupsFolder = backupsFolder + "/" + container
-				if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
-					fmt.Println("We had an issue backing up the databases, aborting destroy")
-					return err
-				}
+						// run the backup
+						fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
+						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualPostgresDatabase, container, database, fullVmBackupPath)); err != nil {
+							fmt.Println(output)
+							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							return err
+						}
+					default:
+						// create the backup directory if not found
+						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/mysql/backups/")); err != nil {
+							fmt.Println(output)
+							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							return err
+						}
 
-				// transfer the folder into the host machine
-				if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{{Type: "transfer", Args: []string{"transfer", machine + ":" + fullVmBackupPath, backupsFolder}}}); err != nil {
-					fmt.Println("We had an issue backing up the databases, aborting destroy")
-					return err
-				}
+						fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
+						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
+							fmt.Println(output)
+							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							return err
+						}
+					}
 
-				fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+"/"+backupFileName))
+					// show the status
+					fmt.Println(fmt.Sprintf("Created backup %q, downloading...", backupFileName))
+
+					home, err := homedir.Dir()
+					if err != nil {
+						return err
+					}
+
+					// make sure the backups folder exists
+					backupsFolder := home + "/.nitro/backups/"
+					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
+						fmt.Println("We had an issue backing up the databases, aborting destroy")
+						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						return err
+					}
+
+					// make sure the machine folder exists
+					backupsFolder = backupsFolder + machine
+					// TODO fix this
+					if err := helpers.MkdirIfNotExists(backupsFolder); err == nil {
+						fmt.Println("We had an issue backing up the databases, aborting destroy")
+						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						return err
+					}
+
+					// create a container name
+					backupsFolder = backupsFolder + "/" + container
+					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
+						fmt.Println("We had an issue backing up the databases, aborting destroy")
+						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						return err
+					}
+
+					// transfer the folder into the host machine
+					if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{{Type: "transfer", Args: []string{"transfer", machine + ":" + fullVmBackupPath, backupsFolder}}}); err != nil {
+						fmt.Println("We had an issue backing up the databases, aborting destroy")
+						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						return err
+					}
+
+					fmt.Println(fmt.Sprintf("Backup saved to %q", backupsFolder+"/"+backupFileName))
+				}
 			}
+		}
+
+		if flagDebug {
+			fmt.Println("DEBUG: not removing the machine")
+			return nil
 		}
 
 		destroyAction, err := nitro.Destroy(machine)
@@ -178,4 +224,5 @@ var destroyCommand = &cobra.Command{
 
 func init() {
 	destroyCommand.Flags().BoolVar(&flagClean, "clean", false, "remove the config file when destroying the machine")
+	destroyCommand.Flags().BoolVar(&flagNoBackups, "no-backups", false, "skip database backups when destroying the machine")
 }
