@@ -30,10 +30,12 @@ var (
 			}
 
 			// run the script
-			_, err = script.Run(true, `sh /tmp/refresh.sh `+Version)
+			output, err := script.Run(true, `sh /tmp/refresh.sh `+Version)
 			if err != nil {
 				return err
 			}
+
+			fmt.Println(output)
 
 			fmt.Println("Refreshed the templates and configs for the machine to ", Version)
 
