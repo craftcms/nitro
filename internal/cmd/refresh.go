@@ -29,6 +29,8 @@ var (
 				return err
 			}
 
+			fmt.Println("Running...")
+
 			// run the script
 			output, err := script.Run(true, `bash /tmp/refresh.sh `+Version)
 			if err != nil {
