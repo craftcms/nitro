@@ -8,11 +8,12 @@
 
 ## Changed
 - The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))
-- The `mysql` system database is no longer backed up using `nitro db backup` or `nitro destroy`. ([#147](https://github.com/craftcms/nitro/issues/147))
+- The `mysql` system database is no longer backed up using `db backup` or `destroy`. ([#147](https://github.com/craftcms/nitro/issues/147))
 
 ## Fixed
 - Fixed a bug where the `refresh` command was failing silently.
 - Fixed a permissions issue. ([#145](https://github.com/craftcms/nitro/issues/145))
+- Fixed an issue when importing mysql databases using `db import`.
 
 ### 1.0.0-beta.3 - 2020-05-19
 

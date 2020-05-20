@@ -13,7 +13,7 @@ const (
 	FmtDockerContainerExists                  = `if [ -n "$(docker ps -q -f name="%s")" ]; then echo "exists"; fi`
 	FmtDockerMysqlCreateDatabaseIfNotExists   = `docker exec -i %s mysql -unitro -pnitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
 	FmtDockerPostgresCreateDatabase           = `docker exec -i %s psql --username nitro -c "CREATE DATABASE %s;"`
-	FmtDockerMysqlImportDatabase              = `cat %s | docker exec -i %s mysql %s --init-command="SET autocommit=0;"`
+	FmtDockerMysqlImportDatabase              = `cat %s | docker exec -i %s mysql -unitro -pnitro %s --init-command="SET autocommit=0;"`
 	FmtDockerMysqlShowAllDatabases            = `docker exec -i %s mysql -unitro -pnitro -e "SHOW DATABASES;"`
 	FmtDockerPostgresShowAllDatabases         = `docker exec -i %s psql --username nitro --command "SELECT datname FROM pg_database WHERE datistemplate = false;"`
 	DockerListContainerNames                  = `docker container ls --all --format '{{ .Names }}'`
