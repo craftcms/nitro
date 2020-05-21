@@ -20,6 +20,7 @@ write_files:
       [mysqld]
       max_allowed_packet=256M
       wait_timeout=86400
+      default-authentication-plugin=mysql_native_password
   - path: /home/ubuntu/.nitro/databases/mysql/setup.sql
     content: |
       CREATE USER IF NOT EXISTS 'nitro'@'localhost' IDENTIFIED BY 'nitro';

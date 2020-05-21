@@ -6,6 +6,19 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
+if [ "$version" == "1.0.0-beta.5" ]; then
+  echo "running sync script for 1.0.0-beta.5"
+
+  echo "setting the default mysql conf"
+  cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/mysql.conf" <<-EndOfMessage
+[mysqld]
+max_allowed_packet=256M
+wait_timeout=86400
+default-authentication-plugin=mysql_native_password
+EndOfMessage
+fi
+
+# beta 3 and beta 4 scripts
 if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   echo "running sync script for 1.0.0-beta.3"
 
@@ -35,6 +48,7 @@ if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
 [mysqld]
 max_allowed_packet=256M
 wait_timeout=86400
+default-authentication-plugin=mysql_native_password
 EndOfMessage
 
   echo "setting the default mysql setup"
@@ -52,7 +66,7 @@ ALTER USER nitro WITH SUPERUSER;
 EndOfMessage
 
   echo "updating the nginx template"
-  cat > "/opt/nitro/nginx/template.conf" <<-EndOfMessage
+  cat >"/opt/nitro/nginx/template.conf" <<-EndOfMessage
   server {
     listen 80;
     listen [::]:80;
@@ -78,9 +92,9 @@ EndOfMessage
 EndOfMessage
 
   echo "setting DB_USER and DB_PASSWORD environment variables"
-  echo "CRAFT_NITRO=1" >> "/etc/environment"
-  echo "DB_USER=nitro" >> "/etc/environment"
-  echo "DB_PASSWORD=nitro" >> "/etc/environment"
+  echo "CRAFT_NITRO=1" >>"/etc/environment"
+  echo "DB_USER=nitro" >>"/etc/environment"
+  echo "DB_PASSWORD=nitro" >>"/etc/environment"
 
   echo "removing old scripts"
   rm -rf /opt/nitro/scripts
