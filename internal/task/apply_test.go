@@ -248,6 +248,11 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/leftoversite.test"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-available/leftoversite.test"},
 				},
 				{
@@ -461,6 +466,11 @@ func TestApply(t *testing.T) {
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/example-site"},
 				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/example-site"},
+				},
 			},
 			wantErr: false,
 		},
@@ -488,6 +498,11 @@ func TestApply(t *testing.T) {
 					Type:       "umount",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/existing-site"},
 				},
 				{
 					Type:       "mount",

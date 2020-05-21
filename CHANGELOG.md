@@ -9,6 +9,9 @@
 ## Changed
 - MySQL 8.0 is now a supported database engine. ([#97](https://github.com/craftcms/nitro/issues/97))
 
+## Fixed
+- Fixed an issue with the `apply` command was not removing directories inside the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
+
 ### 1.0.0-beta.4 - 2020-05-21
 
 ## Added

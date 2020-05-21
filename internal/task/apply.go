@@ -23,6 +23,12 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *unmountAction)
 			fmt.Println("Removing mount", mount.Source, "from", machine)
+
+			actions = append(actions, nitro.Action{
+				Type:       "exec",
+				UseSyscall: false,
+				Args:       []string{"exec", machine, "--", "rm", "-rf", mount.Dest},
+			})
 		}
 	}
 
