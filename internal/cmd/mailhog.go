@@ -31,7 +31,7 @@ var mailhogCommand = &cobra.Command{
 		fmt.Println("Created maildir for mailhog at /home/ubuntu/.nitro/mailhog")
 
 		// run mailhog container
-		if output, err := script.Run(false, `docker run --name mailhog -d -e "MH_STORAGE=maildir" -v /home/ubuntu/.nitro/mailhog:/maildir -p 1025:1025 -p 8025:8025 mailhog/mailhog`); err != nil {
+		if output, err := script.Run(false, `docker run --name mailhog --restart always -d -e "MH_STORAGE=maildir" -v /home/ubuntu/.nitro/mailhog:/maildir -p 1025:1025 -p 8025:8025 mailhog/mailhog`); err != nil {
 			fmt.Println(output)
 			return err
 		}
