@@ -134,6 +134,8 @@ Password: ******
 example.test added successfully!
 ```
 
+> 💡 **Tip:** Multipass requires Full Disk Access on macOS. If you’re seeing mount “not readable” issues, ensure `multipassd` is checked under System Preferences → Security & Privacy → Privacy → Full Disk Access.
+
 ### Mounting your entire dev folder at once
 
 If you manage all of your projects within a single dev folder, you can mount that entire folder once within Nitro,
