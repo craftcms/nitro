@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -22,6 +23,14 @@ var mailhogCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 		ip := nitro.IP(machine, nitro.NewMultipassRunner(mp))
 
+		// check if the container is already running
+		if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerContainerExists, "mailhog")); err == nil {
+			if strings.Contains(output, "exists") {
+				fmt.Println(fmt.Sprintf("Mailhog is already running, try accessing http://%s:8025", ip))
+				return nil
+			}
+		}
+
 		// create the local directory for mailhog
 		if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/mailhog")); err != nil {
 			fmt.Println(output)
@@ -36,7 +45,7 @@ var mailhogCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Mailhog is now running on SMTP %s:1025, you can view mailhog at %s:8025", ip, ip))
+		fmt.Println(fmt.Sprintf("Mailhog is now running on SMTP %s:1025, you can view mailhog at http://%s:8025", ip, ip))
 
 		return nil
 	},
