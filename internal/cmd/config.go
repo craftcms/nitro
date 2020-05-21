@@ -75,7 +75,7 @@ runcmd:
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
   - mkdir -p /home/ubuntu/.composer
-  - echo "COMPOSER_HOME=/home/ubuntu/.composer" >> /etc/environment
+  - export COMPOSER_HOME=/home/ubuntu/composer
   - curl -sS https://getcomposer.org/installer -o composer-setup.php
   - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   - rm composer-setup.php
@@ -93,6 +93,8 @@ runcmd:
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
-  - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
-  - chown -R ubuntu:ubuntu /home/ubuntu/sites
+  - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
+  - cp /etc/skel/.profile /home/ubuntu/.profile
+  - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
+  - chown -R ubuntu:ubuntu /home/ubuntu/
 `

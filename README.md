@@ -31,6 +31,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
+  - [`keys`](#keys)
   - [`logs`](#logs)
   - [`remove`](#remove)
   - [`redis`](#redis)
@@ -265,37 +266,6 @@ See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to
 
 ## Commands
 
-The following commands will help you manage your virtual server.
-
-- [`apply`](#apply)
-- [`add`](#add)
-- [`context`](#context)
-- [`db add`](#db-add)
-- [`db backup`](#db-backup)
-- [`db import`](#db-import)
-- [`db remove`](#db-remove)
-- [`db restart`](#db-restart)
-- [`db start`](#db-start)
-- [`db stop`](#db-stop)
-- [`destroy`](#destroy)
-- [`edit`](#edit)
-- [`info`](#info)
-- [`init`](#init)
-- [`logs`](#logs)
-- [`remove`](#remove)
-- [`redis`](#redis)
-- [`rename`](#rename)
-- [`restart`](#restart)
-- [`self-update`](#self-update)
-- [`ssh`](#ssh)
-- [`start`](#start)
-- [`stop`](#stop)
-- [`update`](#update)
-- [`version`](#version)
-- [`xdebug configure`](#xdebug-configure)
-- [`xdebug on`](#xdebug-on)
-- [`xdebug off`](#xdebug-off)
-
 ### `apply`
 
 Ensures that the machine exists, and applies any changes in its config file to it.
@@ -506,6 +476,31 @@ Options:
 </dl>
 
 If the machine already exists, it will be reconfigured.
+
+### `keys`
+
+Import SSH keys intro a virtual machine for use with composer, git, etc.
+
+```shell script
+nitro keys [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro keys
+  1 - id_rsa
+  2 - personal_rsa
+Which key should we add to "nitro-dev"? [1]
+Transferred the key "id_rsa" into "nitro-dev"
+```
 
 ### `db add`
 

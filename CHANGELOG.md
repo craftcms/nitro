@@ -1,5 +1,22 @@
 # Release Notes for Craft Nitro
 
+### 1.0.0-beta.4 - 2020-05-21
+
+## Added
+- Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
+- Added the `--no-backups` flag to `destroy` which will skip database backups.
+- Added `completion` commands for `bash` and `zshrc`.
+
+## Changed
+- The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))
+- The `mysql` system database is no longer backed up using `db backup` or `destroy`. ([#147](https://github.com/craftcms/nitro/issues/147))
+
+## Fixed
+- Fixed a bug where the `refresh` command was failing silently.
+- Fixed a permissions issue. ([#145](https://github.com/craftcms/nitro/issues/145))
+- Fixed an issue when importing mysql databases using `db import`.
+- Fixed an issue installing composer on new machines. ([#149](https://github.com/craftcms/nitro/issues/149))
+
 ### 1.0.0-beta.3 - 2020-05-19
 
 ## Added

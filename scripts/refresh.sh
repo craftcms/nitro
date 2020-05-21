@@ -6,8 +6,19 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-if [ "$version" == "1.0.0-beta.3" ]; then
+if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   echo "running sync script for 1.0.0-beta.3"
+
+  echo "ensuring composer is installed"
+  export COMPOSER_HOME=/home/ubuntu/composer
+  curl -sS https://getcomposer.org/installer -o composer-setup.php
+  php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  rm composer-setup.php
+
+  # copy skeleton
+  cp /etc/skel/.bashrc /home/ubuntu/.bashrc
+  cp /etc/skel/.profile /home/ubuntu/.profile
+  cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
 
   # create setup scripts
   mkdir -p /home/ubuntu/sites
@@ -16,8 +27,7 @@ if [ "$version" == "1.0.0-beta.3" ]; then
   mkdir -p /home/ubuntu/.nitro/databases/mysql/backups
   mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
   mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
-  chown -R ubuntu:ubuntu /home/ubuntu/.nitro
-  chown -R ubuntu:ubuntu /home/ubuntu/sites
+  chown -R ubuntu:ubuntu /home/ubuntu/
 
   # create the files
   echo "setting the default mysql conf"
