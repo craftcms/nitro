@@ -15,6 +15,7 @@
 - Fixed a bug where the `refresh` command was failing silently.
 - Fixed a permissions issue. ([#145](https://github.com/craftcms/nitro/issues/145))
 - Fixed an issue when importing mysql databases using `db import`.
+- Fixed an issue installing composer on new machines. ([#149](https://github.com/craftcms/nitro/issues/149))
 
 ### 1.0.0-beta.3 - 2020-05-19
 

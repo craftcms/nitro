@@ -75,7 +75,7 @@ runcmd:
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
   - mkdir -p /home/ubuntu/.composer
-  - echo "COMPOSER_HOME=/home/ubuntu/.composer" >> /etc/environment
+  - export COMPOSER_HOME=/home/ubuntu/composer
   - curl -sS https://getcomposer.org/installer -o composer-setup.php
   - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   - rm composer-setup.php

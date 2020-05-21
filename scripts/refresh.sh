@@ -9,6 +9,12 @@ fi
 if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   echo "running sync script for 1.0.0-beta.3"
 
+  echo "ensuring composer is installed"
+  export COMPOSER_HOME=/home/ubuntu/composer
+  curl -sS https://getcomposer.org/installer -o composer-setup.php
+  php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  rm composer-setup.php
+
   # create setup scripts
   mkdir -p /home/ubuntu/sites
   mkdir -p /home/ubuntu/.nitro/databases/imports
