@@ -99,5 +99,6 @@ runcmd:
   - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
   - cp /etc/skel/.profile /home/ubuntu/.profile
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
-  - chown -R ubuntu:ubuntu /home/ubuntu/
+  - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
+  - chown -R ubuntu:ubuntu /home/ubuntu/sites
 `
