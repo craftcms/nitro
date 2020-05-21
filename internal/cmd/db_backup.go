@@ -10,7 +10,9 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -30,13 +32,17 @@ var dbBackupCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 
 		// create a list of containers
-		output, err := script.Run(false, scripts.DockerListContainerNames)
-		if err != nil {
+		var cfg config.Config
+		if err := viper.Unmarshal(&cfg); err != nil {
 			return err
 		}
-		containers := strings.Split(output, "\n")
-		if len(containers) == 0 {
+		if len(cfg.Databases) == 0 {
 			return errors.New("there are no databases we can add to")
+		}
+
+		var containers []string
+		for _, db := range cfg.Databases {
+			containers = append(containers, db.Name())
 		}
 
 		// which database
