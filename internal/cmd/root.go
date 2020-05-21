@@ -46,6 +46,7 @@ func init() {
 		renameCommand,
 		dbCommand,
 		completionCmd,
+		mailhogCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 }

@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Added
+- Added the `mailhog` command for setting up mailhog for local email testing. ([#49](https://github.com/craftcms/nitro/issues/49))
+
 ### 1.0.0-beta.4 - 2020-05-21
 
 ## Added
