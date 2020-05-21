@@ -93,5 +93,8 @@ runcmd:
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d
   - mkdir -p /home/ubuntu/.nitro/databases/postgres/backups
+  - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
+  - cp /etc/skel/.profile /home/ubuntu/.profile
+  - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
   - chown -R ubuntu:ubuntu /home/ubuntu/
 `

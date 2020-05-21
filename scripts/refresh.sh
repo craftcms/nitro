@@ -15,6 +15,11 @@ if [ "$version" == "1.0.0-beta.3" ] || [ "$version" == "1.0.0-beta.4" ]; then
   php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   rm composer-setup.php
 
+  # copy skeleton
+  cp /etc/skel/.bashrc /home/ubuntu/.bashrc
+  cp /etc/skel/.profile /home/ubuntu/.profile
+  cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
+
   # create setup scripts
   mkdir -p /home/ubuntu/sites
   mkdir -p /home/ubuntu/.nitro/databases/imports
