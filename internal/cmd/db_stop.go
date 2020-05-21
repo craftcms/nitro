@@ -42,11 +42,18 @@ var dbStopCommand = &cobra.Command{
 			containers = append(containers, db.Name())
 		}
 
-		container, _, err := p.Select("Which database should we stop", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Which database should we stop", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerStopContainer, container))

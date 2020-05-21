@@ -42,12 +42,18 @@ var dbAddCommand = &cobra.Command{
 			containers = append(containers, db.Name())
 		}
 
-		// which database
-		container, _, err := p.Select("Which database type", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Which database type", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		// get the name

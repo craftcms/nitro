@@ -42,11 +42,18 @@ var dbRemoveCommand = &cobra.Command{
 			containers = append(containers, db.Name())
 		}
 
-		container, _, err := p.Select("Which database should we remove", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Which database should we remove", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		remove, err := p.Confirm("Are you sure you want to permanently remove the database "+container, &prompt.InputOptions{
