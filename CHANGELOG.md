@@ -4,6 +4,7 @@
 
 ## Added
 - Added the `mailhog` command for setting up mailhog for local email testing. ([#49](https://github.com/craftcms/nitro/issues/49))
+- The `postgresql-client` and `mysql-client` are installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54)) ([#139](https://github.com/craftcms/nitro/issues/139))
 
 ## Changed
 - MySQL 8.0 is now a supported database engine. ([#97](https://github.com/craftcms/nitro/issues/97))

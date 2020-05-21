@@ -9,6 +9,9 @@ fi
 if [ "$version" == "1.0.0-beta.5" ]; then
   echo "running sync script for 1.0.0-beta.5"
 
+  echo "installing mysql-client and postgresql-client tools"
+  apt install -y mysql-client postgresql-client
+
   echo "setting the default mysql conf"
   cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/mysql.conf" <<-EndOfMessage
 [mysqld]

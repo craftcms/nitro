@@ -14,6 +14,8 @@ packages:
   - httpie
   - php-cli
   - unzip
+  - mysql-client
+  - postgresql-client
 write_files:
   - path: /home/ubuntu/.nitro/databases/mysql/conf.d/mysql.cnf
     content: |
