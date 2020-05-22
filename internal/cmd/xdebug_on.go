@@ -41,7 +41,7 @@ var xdebugOnCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Xdebug was enabled for", php, "on", machine)
+		fmt.Println("Xdebug was enabled for PHP", php, "on", machine)
 
 		return nil
 	},
