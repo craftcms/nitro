@@ -11,11 +11,14 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [Adding a site with `nitro add`](#add-a-site-with-nitro-add)
   - [Mounting your entire dev folder at once](#mounting-your-entire-dev-folder-at-once)
 - [Connecting to the Database](#connecting-to-the-database)
+- [Adding a Database](#adding-a-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Adding Multiple Database Engines](#adding-multiple-database-engines)
 - [Using Blackfire](#using-blackfire)
 - [Using Xdebug](#using-xdebug)
+- [Using MailHog](#using-mailhog)
+- [Advanced Configuration](#advanced-configuration)
 - [Commands](#commands)
   - [`apply`](#apply)
   - [`add`](#add)
@@ -194,6 +197,14 @@ Then from your SQL client of choice, create a new database connection with the f
 - **Username**: `nitro`
 - **Password**: `nitro`
 
+## Adding a Database
+
+Nitro creates its initial database for you. You can add as many as you’d like running the following command, which will prompt for your desired database engine and name:
+
+```sh
+$ nitro db add
+```
+
 ## Adding Mounts
 
 Nitro can mount various system directories into your Nitro machine. You can either mount each of your projects’
@@ -265,6 +276,14 @@ See [Using Blackfire with Nitro](BLACKFIRE.md) for instructions on how to config
 ## Using Xdebug
 
 See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to configure Xdebug and PhpStorm for web/console debugging.
+
+## Using MailHog
+
+See [Using MailHog with Craft](MAILHOG.md) for instructions on configuring Craft to send email to MailHog for local development and troubleshooting.
+
+## Advanced Configuration
+
+See [Advanced Configuration](ADVANCED.md) for instructions on customizing Nitro’s default settings.
 
 ## Commands
 
