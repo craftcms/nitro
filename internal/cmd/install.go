@@ -7,12 +7,12 @@ import (
 var installCommand = &cobra.Command{
 	Use:       "install",
 	Short:     "Install software",
-	ValidArgs: []string{"mailhog"},
+	ValidArgs: []string{"composer", "mailhog"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
 }
 
 func init() {
-	installCommand.AddCommand(mailhogCommand)
+	installCommand.AddCommand(mailhogCommand, composerCommand)
 }
