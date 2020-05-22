@@ -6,6 +6,7 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
+# scripts for beta 5
 if [ "$version" == "1.0.0-beta.5" ]; then
   echo "running sync script for 1.0.0-beta.5"
 
@@ -19,13 +20,26 @@ if [ "$version" == "1.0.0-beta.5" ]; then
   apt upgrade -y
   apt install -y nginx
 
-  echo "setting the default mysql conf"
-  cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/mysql.conf" <<-EndOfMessage
+  echo "setting the default mysql conf for 5.x"
+  mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d/5/
+  cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/5/mysql.conf" <<-EndOfMessage
 [mysqld]
 max_allowed_packet=256M
 wait_timeout=86400
 default-authentication-plugin=mysql_native_password
 EndOfMessage
+
+  echo "setting the default mysql conf for 8.x"
+  mkdir -p /home/ubuntu/.nitro/databases/mysql/conf.d/8/
+  cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/8/mysql.conf" <<-EndOfMessage
+[mysqld]
+max_allowed_packet=256M
+wait_timeout=86400
+default-authentication-plugin=mysql_native_password
+EndOfMessage
+
+  echo "refresh script has completed!"
+  exit 0
 fi
 
 # beta 3 and beta 4 scripts

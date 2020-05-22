@@ -16,12 +16,20 @@ packages:
   - mysql-client
   - postgresql-client
 write_files:
-  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/mysql.cnf
+  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/5/mysql.cnf
     content: |
       [mysqld]
       max_allowed_packet=256M
       wait_timeout=86400
       default-authentication-plugin=mysql_native_password
+  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/8/mysql.cnf
+    content: |
+      [mysqld]
+      max_allowed_packet=256M
+      wait_timeout=86400
+      default-authentication-plugin=mysql_native_password
+      [mysqldump]
+      column-statistics=0
   - path: /home/ubuntu/.nitro/databases/mysql/setup.sql
     content: |
       CREATE USER IF NOT EXISTS 'nitro'@'localhost' IDENTIFIED BY 'nitro';
