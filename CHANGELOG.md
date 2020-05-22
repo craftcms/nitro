@@ -8,6 +8,7 @@
 
 ## Changed
 - MySQL 8.0 is now a supported database engine. ([#97](https://github.com/craftcms/nitro/issues/97))
+- Creating new machines install Ubuntu 20.04 LTS by default.
 
 ## Fixed
 - Fixed an issue with the `apply` command was not removing directories inside the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
