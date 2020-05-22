@@ -7,12 +7,12 @@ Nitro comes with [MailHog](https://github.com/mailhog/MailHog) for convenient lo
 MailHog requires setup for each machine you’d like to use it on. Run this command to spin it up:
 
 ```sh
-nitro mailhog
+nitro install mailhog
 ```
 
 ## Configure Craft Email for MailHog
 
-MailHog’s ready to be used once it’s running, but it doesn’t change any of your mail setitngs by default. You can tell Craft or any app to send mail using MailHog’s SMTP settings.
+MailHog’s ready to be used once it’s running, but it doesn’t change any of your mail settings by default. You can tell Craft or any app to send mail using MailHog’s SMTP settings.
 
 From the Craft control panel, visit Settings → Email and enter the following:
 
