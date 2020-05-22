@@ -57,7 +57,7 @@ var destroyCommand = &cobra.Command{
 		}
 
 		// if we have any containers to backup, do so now
-		if flagNoBackups == false && len(cfg.Databases) != 0 {
+		if flagSkipBackup == false && len(cfg.Databases) != 0 {
 			// backup the container
 			for _, db := range cfg.Databases {
 				container := db.Name()
@@ -224,5 +224,5 @@ var destroyCommand = &cobra.Command{
 
 func init() {
 	destroyCommand.Flags().BoolVar(&flagClean, "clean", false, "remove the config file when destroying the machine")
-	destroyCommand.Flags().BoolVar(&flagNoBackups, "no-backups", false, "skip database backups when destroying the machine")
+	destroyCommand.Flags().BoolVar(&flagSkipBackup, "skip-backup", false, "skip database backups when destroying the machine")
 }
