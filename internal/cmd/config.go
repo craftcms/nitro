@@ -72,7 +72,6 @@ write_files:
       xdebug.idekey=PHPSTORM
 runcmd:
   - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
-  - add-apt-repository --no-update -y ppa:nginx/stable
   - add-apt-repository --no-update -y ppa:ondrej/php
   - echo "CRAFT_NITRO=1" >> /etc/environment
   - echo "DB_USER=nitro" >> /etc/environment
@@ -99,6 +98,5 @@ runcmd:
   - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
   - cp /etc/skel/.profile /home/ubuntu/.profile
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
-  - chown -R ubuntu:ubuntu /home/ubuntu/.nitro
-  - chown -R ubuntu:ubuntu /home/ubuntu/sites
+  - chown -R ubuntu:ubuntu /home/ubuntu/
 `

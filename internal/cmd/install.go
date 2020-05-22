@@ -7,7 +7,7 @@ import (
 var installCommand = &cobra.Command{
 	Use:       "install",
 	Short:     "Install software",
-	ValidArgs: []string{"mailhog", "node"},
+	ValidArgs: []string{"mailhog"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},

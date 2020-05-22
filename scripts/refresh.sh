@@ -12,6 +12,13 @@ if [ "$version" == "1.0.0-beta.5" ]; then
   echo "installing mysql-client and postgresql-client tools"
   apt install -y mysql-client postgresql-client
 
+  echo "removing the NGINX ppa"
+  add-apt-repository --remove ppa:nginx/stable
+  apt remove nginx
+  apt update
+  apt upgrade -y
+  apt install -y nginx
+
   echo "setting the default mysql conf"
   cat >"/home/ubuntu/.nitro/databases/mysql/conf.d/mysql.conf" <<-EndOfMessage
 [mysqld]
