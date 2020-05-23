@@ -264,3 +264,14 @@ func GetString(key, flag string) string {
 
 	return flag
 }
+
+// Read is used to read in a config file or
+// return an error
+func Read() (*Config, error) {
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
+}
