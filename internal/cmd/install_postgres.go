@@ -4,14 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/scripts"
 	"github.com/craftcms/nitro/validate"
 )
@@ -70,8 +68,7 @@ var postgresCommand = &cobra.Command{
 			Validator: validator.ValidateVersion,
 		})
 		if err != nil {
-			fmt.Println("Invalid input. Possible versions are:", strings.Join(nitro.DBVersions["postgres"], ", "))
-			return nil
+			return err
 		}
 
 		// ask for the port assignment
@@ -95,7 +92,7 @@ var postgresCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Installing PostgreSQL version %q listening on port %q", version, port))
+		fmt.Println(fmt.Sprintf("Adding PostgreSQL version %q on port %q", version, port))
 
 		// prompt for the apply command
 		apply, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
