@@ -92,6 +92,12 @@ github.com/pelletier/go-toml v1.7.0 h1:7utD74fnzVc/cpcyy8sjrlFr5vYpypUixARcHIMIG
 github.com/pelletier/go-toml v1.7.0/go.mod h1:vwGMzjaWMwyfHwgIBhI2YUM4fB6nL6lVAvS1LBMMhTE=
 github.com/pixelandtonic/prompt v0.0.0-20200506140144-6c881e819f61 h1:pq0TVVnXDZweDHHfHqP64xHFYZgbphimiKmE8eUVZLY=
 github.com/pixelandtonic/prompt v0.0.0-20200506140144-6c881e819f61/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
+github.com/pixelandtonic/prompt v0.0.0-20200523155708-a515aecfb670 h1:vi1yBHzV/SB6UDJvp6H/39SfjFTukSI8PqRxyWd3UUw=
+github.com/pixelandtonic/prompt v0.0.0-20200523155708-a515aecfb670/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
+github.com/pixelandtonic/prompt v0.0.0-20200523160541-c55654a614c2 h1:H9geQbzwzAJh0PDUcXDHqnQNvk6428YiZSIwheg6UB0=
+github.com/pixelandtonic/prompt v0.0.0-20200523160541-c55654a614c2/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
+github.com/pixelandtonic/prompt v1.1.2 h1:pSOdAUFJP74bQQ4pDLXQylsNwbjP/JysopfADfL625s=
+github.com/pixelandtonic/prompt v1.1.2/go.mod h1:46FVcLYd9TRiHXOLQ6nXzeaYO1Twh8ZH0nhLP5fnLww=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
