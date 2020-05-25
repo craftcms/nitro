@@ -14,5 +14,5 @@ var installCommand = &cobra.Command{
 }
 
 func init() {
-	installCommand.AddCommand(mailhogCommand, composerCommand, postgresCommand)
+	installCommand.AddCommand(mailhogCommand, composerCommand, postgresCommand, mysqlCommand)
 }
