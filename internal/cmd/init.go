@@ -53,10 +53,10 @@ var initCommand = &cobra.Command{
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
-
+		actual := runtime.NumCPU()
 		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
-			Default:   suggest.NumberOfCPUs(runtime.NumCPU()),
-			Validator: validate.NewCPUValidator(runtime.NumCPU()).Validate,
+			Default:   suggest.NumberOfCPUs(actual),
+			Validator: validate.NewCPUValidator(actual).Validate,
 		})
 		if err != nil {
 			return err
