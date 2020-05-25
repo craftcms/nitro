@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/suggest"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -52,11 +54,9 @@ var initCommand = &cobra.Command{
 		// set the config file
 		var cfg config.Config
 
-		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
-		// ask how many cores
 		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
-			Default:   "2",
-			Validator: nil,
+			Default:   suggest.NumberOfCPUs(runtime.NumCPU()),
+			Validator: validate.NewCPUValidator(runtime.NumCPU()).Validate,
 		})
 		if err != nil {
 			return err
