@@ -345,8 +345,8 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 		{
 			name: "can remove a mount by a site webroot",
 			fields: fields{
-				Name:   "somename",
-				PHP:    "7.4",
+				Name: "somename",
+				PHP:  "7.4",
 				Mounts: []Mount{
 					{
 						Source: "./testdata/test-mount",
@@ -752,6 +752,62 @@ func TestConfig_DatabaseExists(t *testing.T) {
 			}
 			if got := c.DatabaseExists(tt.args.database); got != tt.want {
 				t.Errorf("DatabaseExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_FindMountBySiteWebroot(t *testing.T) {
+	type fields struct {
+		PHP       string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		webroot string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *Mount
+	}{
+		{
+			name: "",
+			fields: fields{
+				PHP: "7.4",
+				Mounts: []Mount{
+					{
+						Source: "./testdata/dev/nitro",
+						Dest:   "/home/ubuntu/sites/nitro",
+					},
+				},
+				Databases: nil,
+				Sites: []Site{
+					{
+						Hostname: "nitro",
+						Webroot:  "/home/ubuntu/sites/nitro/www",
+					},
+				},
+			},
+			args: args{webroot: "/home/ubuntu/sites/nitro/www"},
+			want: &Mount{
+				Source: "./testdata/dev/nitro",
+				Dest:   "/home/ubuntu/sites/nitro",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.FindMountBySiteWebroot(tt.args.webroot); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindMountBySiteWebroot() = %v, want %v", got, tt.want)
 			}
 		})
 	}
