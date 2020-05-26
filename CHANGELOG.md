@@ -3,24 +3,24 @@
 ### Unreleased
 
 ## Added
-- The PostgreSQL and MySQL client tools are now installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54)) ([#139](https://github.com/craftcms/nitro/issues/139))
-- Added the `install postgres`, `install mysql`, `install composer`, and `install mailhog` commands.
-- Greatly improved support for Windows. 
+- Added Windows support.
 - Added support for MySQL 8.0. ([#97](https://github.com/craftcms/nitro/issues/97))
-- Added support for Ubuntu 20.04 on newly created machines.
+- The PostgreSQL and MySQL client tools are now installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54), [#139](https://github.com/craftcms/nitro/issues/139))
+- Added the `install postgres`, `install mysql`, `install composer`, and `install mailhog` commands.
 
 ## Changed
-- Renamed `--no-backups` to `--skip-backup` on the `destroy` command.
-- Composer is no longer installed during `init` and can be installed by running `nitro install composer`.
-- When creating a new machine the default number of CPUs are suggested dynamically based on CPU count of the host machine.
-- When removing a site the sites configuration in `/etc/nginx/sites-available/<site-name>` is also removed.
-- MySQL 5 and 8 now use separate conf directories based on the version (e.g. `/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
-- Removed `xdebug configure` and moved logic into the `xdebug on` command. 
+- New machines now use Ubuntu 20 LTS.
+- Renamed the `--no-backups` option to `--skip-backup` for the `destroy` command.
+- Composer is no longer installed on machines by default, but can be installed by running `nitro install composer`.
+- The `init` command now sets the default CPU count based on the number of CPUs on the host machine.
+- MySQL 5 and 8 now use version-specific configuration directories (`/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
+- Removed the `xdebug configure` command, and moved its logic into the `xdebug on` command.
 
 ## Fixed
-- Fixed an issue with the `apply` command was not removing directories inside the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
-- fixed an issue where some `init` commands would return exit code 100. ([#96](https://github.com/craftcms/nitro/issues/96))
-- The OPcache PHP extension is now _really_ not installed by default.
+- Fixed a bug where Nitro wasn’t removing Nginx server configs when removing sites.
+- Fixed a bug where the `apply` command wasn’t removing deleted mounts’ root directories within the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
+- Fixed a bug where the `init` command could return an exit code of 100. ([#96](https://github.com/craftcms/nitro/issues/96))
+- The OPcache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 
 ### 1.0.0-beta.4 - 2020-05-21
 
@@ -52,7 +52,6 @@
 ## Changed
 - Nginx is now configured to allow file uploads up to 100MB. ([#126](https://github.com/craftcms/nitro/issues/126))
 - Databases are now backed up automatically when a machine is destroyed. ([#136](https://github.com/craftcms/nitro/issues/136))
-- The OPcache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 - When creating a new machine, the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119))
 - The default database is now called `nitro` for MySQL engines, to be consistent with PostgreSQL.
 - The `destroy` command now prompts for confirmation. ([#116](https://github.com/craftcms/nitro/issues/116))
