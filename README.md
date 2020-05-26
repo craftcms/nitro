@@ -11,11 +11,14 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [Adding a site with `nitro add`](#add-a-site-with-nitro-add)
   - [Mounting your entire dev folder at once](#mounting-your-entire-dev-folder-at-once)
 - [Connecting to the Database](#connecting-to-the-database)
+- [Adding a Database](#adding-a-database)
 - [Adding Mounts](#adding-mounts)
 - [Running Multiple Machines](#running-multiple-machines)
 - [Adding Multiple Database Engines](#adding-multiple-database-engines)
 - [Using Blackfire](#using-blackfire)
 - [Using Xdebug](#using-xdebug)
+- [Using MailHog](#using-mailhog)
+- [Advanced Configuration](#advanced-configuration)
 - [Commands](#commands)
   - [`apply`](#apply)
   - [`add`](#add)
@@ -31,6 +34,9 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
+  - [`install composer`](#install-composer)
+  - [`install mysql`](#install-mysql)
+  - [`install postgres`](#install-postgres)
   - [`keys`](#keys)
   - [`logs`](#logs)
   - [`remove`](#remove)
@@ -43,7 +49,6 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug configure`](#xdebug-configure)
   - [`xdebug on`](#xdebug-on)
   - [`xdebug off`](#xdebug-off)
 
@@ -62,7 +67,9 @@ Nitro installs the following on every machine:
 
 ## Installation
 
-> ⚠️ **Note:** Windows support is a [work-in-progress](https://github.com/craftcms/nitro/issues/88).
+----------
+
+macOS and Linux:
 
 1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
 2. Run this terminal command:
@@ -73,6 +80,21 @@ Nitro installs the following on every machine:
 
 3. Follow the prompts to create your machine.
 
+----------
+
+Windows 10 Pro (with Hyper-V enabled):
+
+> 💡 **Tip:** Windows doesn't currently have an automated install script, so installation and updating must be done manually.
+
+1. Install [Multipass](https://multipass.run) (requires 1.2.0+).
+2. Download `nitro_windows_x86_64.zip` from the latest [release](https://github.com/craftcms/nitro/releases)
+3. Create a `Nitro` folder in your home folder, if it does not exist. i.e. `C:\Users\<username>\Nitro`
+4. Extract the zip file and copy `nitro.exe` into the `Nitro` folder you just created in your home folder.
+5. If this is your first installation, run this from the command line to add `nitro` to your global path: `setx path "%PATH%;%USERPROFILE%\Nitro"`
+6. Start the Windows terminal (cmd.exe) with Administrator permissions and run `nitro init` to create your first machine.
+
+----------
+
 Once complete, you will have a Multipass machine called `nitro-dev`, and a new configuration file for the machine
  stored at `~/.nitro/nitro-dev.yaml`.
 
@@ -80,7 +102,7 @@ Once complete, you will have a Multipass machine called `nitro-dev`, and a new c
 
 To completely remove Nitro, first [destroy](#destroy) your machine:
 
-```sh
+```shell script
 nitro destroy
 ```
 
@@ -92,14 +114,30 @@ nitro destroy
 
 Then remove your `nitro` command:
 
-```sh
+macOS and Linux:
+
+```shell script
 sudo rm /usr/local/bin/nitro
+```
+
+Windows:
+
+```shell script
+rm -rf $HOME/Nitro
 ```
 
 You can optionally remove your machine configs as well:
 
-```sh
+macOS and Linux
+
+```shell script
 rm -rf ~/.nitro
+```
+
+Windows:
+
+```shell script
+rm -rf $HOME/.nitro
 ```
 
 If you wish to uninstall Multipass as well, uninstall instructions can be found on the installation guide for your platform:
@@ -121,18 +159,21 @@ To add a site to Nitro, three things need to happen:
 If your project files are completely contained within a single folder, then you can quickly accomplish these using
 the [`add`](#add) command:
 
-```sh
+```shell script
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] example.test
-Where is the webroot? [web]
-plugins-dev has been added to config file.
+Enter the hostname [plugins-dev] example.test
+Enter the webroot [web]
+Added plugins-dev to config file.
 Apply changes from config? [yes]
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
+Mounting /path/to/project to nitro-dev
+Adding site example.test to nitro-dev
+Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
-example.test added successfully!
 ```
+
+> 💡 **Tip:** Multipass requires Full Disk Access on macOS. If you’re seeing mount “not readable” issues, ensure `multipassd` is checked under System Preferences → Security & Privacy → Privacy → Full Disk Access.
 
 ### Mounting your entire dev folder at once
 
@@ -159,7 +200,7 @@ Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 > 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/nitro/*` within the
   machine.
 
-> ⚠️ **Warning:** If your projects contain any symlnks, such as `path` Composer repositories, those symlinks
+> ⚠️ **Warning:** If your projects contain any symlinks, such as `path` Composer repositories, those symlinks
   **must** be relative (`../`), not absolute (`/` or `~/`).
 
 ## Connecting to the Database
@@ -173,7 +214,7 @@ DB_PASSWORD="nitro"
 
 To connect to the database from your host operating system, you’ll first need to get the IP address of your Nitro machine. You can find that by running the [info](#info) command.
 
-```sh
+```shell script
 $ nitro info
 Name:           nitro-dev
 State:          Running
@@ -192,6 +233,14 @@ Then from your SQL client of choice, create a new database connection with the f
 - **Username**: `nitro`
 - **Password**: `nitro`
 
+## Adding a Database
+
+Nitro creates its initial database for you. You can add as many as you’d like running the following command, which will prompt for your desired database engine and name:
+
+```shell script
+$ nitro db add
+```
+
 ## Adding Mounts
 
 Nitro can mount various system directories into your Nitro machine. You can either mount each of your projects’
@@ -204,7 +253,7 @@ To add a new mount, follow these steps:
 
    ```yaml
    mounts:
-     - source: /Users/cathy/dev
+     - source: /Users/vin/dev
        dest: /home/ubuntu/sites
    ```
 
@@ -220,7 +269,7 @@ create a machine for a specific dev project.
 
 To create a new machine, run the following command:
 
-```sh
+```shell script
 $ nitro init -m <machine>
 ```
 
@@ -264,13 +313,21 @@ See [Using Blackfire with Nitro](BLACKFIRE.md) for instructions on how to config
 
 See [Using Xdebug with Nitro and PhpStorm](XDEBUG.md) for instructions on how to configure Xdebug and PhpStorm for web/console debugging.
 
+## Using MailHog
+
+See [Using MailHog with Craft](MAILHOG.md) for instructions on configuring Craft to send email to MailHog for local development and troubleshooting.
+
+## Advanced Configuration
+
+See [Advanced Configuration](ADVANCED.md) for instructions on customizing Nitro’s default settings.
+
 ## Commands
 
 ### `apply`
 
 Ensures that the machine exists, and applies any changes in its config file to it.
 
-```sh
+```shell script
 nitro apply [<options>]
 ```
 
@@ -285,7 +342,7 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro apply
 There are 2 mounted directories and 1 new mount(s) in the config file.
 Applied changes from nitro.yaml.
@@ -295,7 +352,7 @@ Applied changes from nitro.yaml.
 
 Adds a new site to the machine.
 
-```sh
+```shell script
 nitro add [<options>]
 ```
 
@@ -312,24 +369,25 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev]
-Where is the webroot? [web]
-plugins-dev has been added to config file.
+Enter the hostname [plugins-dev] example.test
+Enter the webroot [web]
+Added plugins-dev to config file.
 Apply changes from config? [yes]
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
+Mounting /path/to/project to nitro-dev
+Adding site example.test to nitro-dev
+Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
-plugins-dev added successfully!
 ```
 
 ### `context`
 
 Shows the machine’s configuration.
 
-```sh
+```shell script
 nitro context [<options>]
 ```
 
@@ -342,7 +400,7 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro context
 Machine: nitro-dev
 ------
@@ -366,145 +424,9 @@ sites:
 ------
 ```
 
-### `destroy`
-
-Destroys a machine.
-
-```sh
-nitro destroy [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--clean</code></dt>
-<dd>Remove the configuration file after destroying the machine. Defaults to `false`</dd>
-</dl>
-
-### `edit`
-
-Edit allows you to quickly open your machine configuration to make changes.
-
-```sh
-nitro edit [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-Example:
-
-```sh
-nitro edit
-```
-
-> 💡 **Tip:** If you’re running macOS or Linux, you can set an `EDITOR` environment variable in `~/.bash_profile` to your preferred text editor of choice.
->
-> ```sh
-> export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
-> ```
->
-> After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
->
-> Alternatively, you can open the configuration file using your operating system’s default text editor for `.yaml` files by running this command:
->
-> ```sh
-> open ~/.nitro/nitro-dev.yaml
-> ```
-> 
-> (Replace `nitro-dev` with the appropriate machine name if it’s not that.)
-
-### `info`
-
-Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
-
-```sh
-nitro info [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-Example:
-
-```sh
-$ nitro info
-Name:           nitro-dev
-State:          Running
-IPv4:           192.168.64.48
-Release:        Ubuntu 18.04.4 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
-Load:           0.09 0.15 0.22
-Disk usage:     2.7G out of 38.6G
-Memory usage:   379.8M out of 3.9G
-Mounts:         /Users/jasonmccallister/sites/demo-site => /home/ubuntu/sites/demo-site
-                    UID map: 501:default
-                    GID map: 20:default
-```
-
-### `init`
-
-Initializes a machine.
-
-```sh
-nitro init [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--php-version</code></dt>
-<dd>The PHP version to use. If not passed, the command will prompt for it.</dd>
-<dt><code>--cpus</code></dt>
-<dd>The max number of CPUs that the machine can use. If not passed, one CPU will be used by default.</dd>
-<dt><code>--memory</code></dt>
-<dd>The max amount of system RAM that the machine can use. If not passed, the command will prompt for it.</dd>
-<dt><code>--disk</code></dt>
-<dd>The max amount of disk space that the machine can use. If not passed, the command will prompt for it.</dd>
-</dl>
-
-If the machine already exists, it will be reconfigured.
-
-### `keys`
-
-Import SSH keys intro a virtual machine for use with composer, git, etc.
-
-```shell script
-nitro keys [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-Example:
-
-```shell script
-$ nitro keys
-  1 - id_rsa
-  2 - personal_rsa
-Which key should we add to "nitro-dev"? [1]
-Transferred the key "id_rsa" into "nitro-dev"
-```
-
 ### `db add`
 
-Create a new database for the machine. You will be asked which type of database to add based on your config (e.g. postgres or mysql).
+Create a new database on a database engine in a machine.
 
 ```shell script
 nitro db add [<options>]
@@ -523,14 +445,14 @@ Example:
 $ nitro db add
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database type? [1] 2
-What should be the name of the database? mynewproject
-Added database "mynewproject" to "mysql_5.7_3306"
+Select database engine [1] 2
+Enter the name of the database: mynewproject
+Added database "mynewproject" to "mysql_5.7_3306".
 ```
 
 ### `db backup`
 
-Backup one or all databases from a machine. 
+Backup one or all databases from a database engine in a machine. 
 
 ```shell script
 nitro db backup [<options>]
@@ -549,22 +471,22 @@ Example:
 $ nitro db backup
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database engine? [1] 
+Select database engine [1] 
   1 - all-dbs
   2 - postgres
   3 - nitro
   4 - project-one
-Which database should we backup? [1] 
+Select database to backup? [1] 
 Created backup "all-dbs-200519_100730.sql", downloading...
-Backup completed and stored in "/Users/jasonmccallister/.nitro/backups/nitro-dev/postgres_11_5432/all-dbs-200519_100730.sql"
+Backup completed and stored in "/Users/vin/.nitro/backups/nitro-dev/postgres_11_5432/all-dbs-200519_100730.sql"
 ```
 
 ### `db import`
 
-Import a SQL file into a database in the machine. You will be prompted with a list of running database engines
+Import a SQL file into a database engine in a machine. You will be prompted with a list of running database engines
 (MySQL and PostgreSQL) to import the file into.
 
-```sh
+```shell script
 nitro db import <file> [<options>]
 ```
 
@@ -577,21 +499,21 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro db import mybackup.sql
   1 - mysql_5.7_3306
   2 - postgres_11_5432
-Which database engine to import the backup? [1] 
-What is the database name to create for the import? new-project
+Select database engine [1] 
+Enter the database name to create for the import: new-project
 Uploading "mybackup.sql" into "nitro-dev" (large files may take a while)...
-Created database new-project
+Successfully import the database backup into new-project
 ```
 
 ### `db remove`
 
-Will remove a database from the machine, but not from the config file.
+Will remove a database from a database engine in a machine, but not from the config file.
 
-```sh
+```shell script
 nitro db remove [<options>]
 ```
 
@@ -604,19 +526,23 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro db remove
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we remove? [1] 
-Are you sure you want to permanently remove the database postgres_11_5432? [no] 
+Select database engine: [1] 
+  1 - nitro
+  2 - project-one
+ 
+Are you sure you want to permanently remove the database nitro? [no] 
+Removed database nitro
 ```
 
 ### `db restart`
 
-Will restart a database in machine.
+Will restart a database engine in a machine.
 
-```sh
+```shell script
 nitro db restart [<options>]
 ```
 
@@ -629,18 +555,19 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro db restart
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we restart? [1]  
+Select database engine to restart: [1]  
+Restarted database engine postgres_11_5432
 ```
 
 ### `db start`
 
-Will start a database in machine.
+Will start a stopped database engine in a machine.
 
-```sh
+```shell script
 nitro db start [<options>]
 ```
 
@@ -653,18 +580,19 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro db start
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we start? [1]  
+Select database engine to start: [1]  
+Started database engine postgres_11_5432
 ```
 
 ### `db stop`
 
-Will stop a database in machine.
+Will stop a database engine in a machine.
 
-```sh
+```shell script
 nitro db stop [<options>]
 ```
 
@@ -677,11 +605,220 @@ Options:
 
 Example:
 
-```sh
+```shell script
 $ nitro db stop
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we stop? [1]  
+Select database engine to stop: [1]
+Stopped database engine postgres_11_5432
+```
+
+### `destroy`
+
+Destroys a machine.
+
+```shell script
+nitro destroy [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--clean</code></dt>
+<dd>Remove the configuration file after destroying the machine. Defaults to `false`</dd>
+</dl>
+
+### `edit`
+
+Edit allows you to quickly open your machine configuration to make changes.
+
+```shell script
+nitro edit [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+nitro edit
+```
+
+> 💡 **Tip:** If you’re running macOS or Linux, you can set an `EDITOR` environment variable in `~/.bash_profile` to your preferred text editor of choice.
+>
+> ```shell script
+> export EDITOR="/Applications/Sublime Text.app/Contents/MacOS/Sublime Text"
+> ```
+>
+> After adding that line, restart your terminal or run `source ~/.bash_profile` for the change to take effect.
+>
+> Alternatively, you can open the configuration file using your operating system’s default text editor for `.yaml` files by running this command:
+>
+> ```shell script
+> open ~/.nitro/nitro-dev.yaml
+> ```
+> 
+> (Replace `nitro-dev` with the appropriate machine name if it’s not that.)
+
+### `info`
+
+Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
+
+```shell script
+nitro info [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro info
+Name:           nitro-dev
+State:          Running
+IPv4:           192.168.64.48
+Release:        Ubuntu 18.04.4 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Load:           0.09 0.15 0.22
+Disk usage:     2.7G out of 38.6G
+Memory usage:   379.8M out of 3.9G
+Mounts:         /Users/vin/sites/demo-site => /home/ubuntu/sites/demo-site
+                    UID map: 501:default
+                    GID map: 20:default
+```
+
+### `init`
+
+Initializes a machine.
+
+```shell script
+nitro init [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to use. If not passed, the command will prompt for it.</dd>
+<dt><code>--cpus</code></dt>
+<dd>The max number of CPUs that the machine can use. If not passed, Nitro will try to determine the best number based on the host computer.</dd>
+<dt><code>--memory</code></dt>
+<dd>The max amount of system RAM that the machine can use. If not passed, the command will prompt for it.</dd>
+<dt><code>--disk</code></dt>
+<dd>The max amount of disk space that the machine can use. If not passed, the command will prompt for it.</dd>
+</dl>
+
+If the machine already exists, it will be reconfigured.
+
+### `install composer`
+
+Install composer inside of a virtual machine.
+
+```shell script
+nitro install composer
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install composer
+Composer is now installed on "nitro-dev".
+```
+
+### `install mysql`
+
+This will add a new MySQL database engine. 
+
+```shell script
+nitro install mysql
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install mysql
+Enter the MySQL version to install: 5.6
+Enter the MySQL port number: 3306
+Adding MySQL version "5.6" on port "3306"
+Apply changes from config now? [yes]
+```
+
+### `install postgres`
+
+This will add a new PostgreSQL database engine. 
+
+```shell script
+nitro install postgres
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install postgres
+Enter the PostgreSQL version to install: 11
+Enter the MySQL port number: 5432
+Adding MySQL version "11" on port "5432"
+Apply changes from config now? [yes]
+```
+
+### `keys`
+
+Import SSH keys intro a virtual machine for use with Composer, git, etc.
+
+```shell script
+nitro keys [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro keys
+  1 - id_rsa
+  2 - personal_rsa
+Select the key to add to "nitro-dev"? [1]
+Transferred the key "id_rsa" into "nitro-dev".
 ```
 
 ### `logs`
@@ -689,8 +826,23 @@ Which database should we stop? [1]
 Views the machine’s logs. This command will prompt you for a type of logs to view, including e.g. `nginx`,
 `database`, or `docker` (for a specific container).
 
-```sh
+```shell script
 nitro logs [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `redis`
+
+Starts a Redis shell.
+
+```shell script
+nitro redis [<options>]
 ```
 
 Options:
@@ -704,7 +856,7 @@ Options:
 
 Removes a site from the machine.
 
-```sh
+```shell script
 nitro remove [<options>]
 ```
 
@@ -718,56 +870,11 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
-### `redis`
-
-Starts a Redis shell.
-
-```sh
-nitro redis [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-### `start`
-
-Starts the machine.
-
-```sh
-nitro start [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-### `stop`
-
-Stops the machine.
-
-```sh
-nitro stop [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
 ### `rename`
 
 Rename a site in a configuration file. Will prompt for which site to rename.
 
-```sh
+```shell script
 nitro rename [<options>]
 ```
 
@@ -782,7 +889,7 @@ Options:
 
 Restarts a machine.
 
-```sh
+```shell script
 nitro restart [<options>]
 ```
 
@@ -797,16 +904,48 @@ Options:
 
 Perform updates to the Nitro CLI.
 
-```sh
+```shell script
 nitro self-update
 ```
+
+> ⚠️ **Warning:** This command does not work on Windows. You will need to perform a [manual installation.](https://github.com/craftcms/nitro/blob/master/README.md#installation)
 
 ### `ssh`
 
 Tunnels into the machine as the default `ubuntu` user over SSH.
 
-```sh
+```shell script
 nitro ssh [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `start`
+
+Starts the machine.
+
+```shell script
+nitro start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `stop`
+
+Stops the machine.
+
+```shell script
+nitro stop [<options>]
 ```
 
 Options:
@@ -820,7 +959,7 @@ Options:
 
 Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
 
-```sh
+```shell script
 nitro update [<options>]
 ```
 
@@ -835,32 +974,15 @@ Options:
 
 Checks the currently version of nitro against the releases and shows any updated versions.
 
-```sh
+```shell script
 nitro version
 ```
-
-### `xdebug configure`
-
-Configures Xdebug for remote access and debugging with PhpStorm or other IDEs.
-
-```sh
-nitro xdebug configure [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--php-version</code></dt>
-<dd>The PHP version to configure Xdebug for</dd>
-</dl>
 
 ### `xdebug on`
 
 Enables Xdebug, which is installed and disabled by default on each machine.
 
-```sh
+```shell script
 nitro xdebug on [<options>]
 ```
 
@@ -873,13 +995,13 @@ Options:
 <dd>The PHP version to enable Xdebug for</dd>
 </dl>
 
-This ensures Xdebug is installed for PHP 7.3 and enables it:
+This ensures Xdebug is installed for PHP and enables it:
 
 ### `xdebug off`
 
 Disables Xdebug on a machine.
 
-```sh
+```shell script
 nitro xdebug off [<options>]
 ```
 

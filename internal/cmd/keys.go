@@ -52,7 +52,7 @@ var keysCommand = &cobra.Command{
 		}
 
 		// ask the user which key to select
-		selected, _, err := p.Select(fmt.Sprintf("Which key should we add to %q", machine), opts, &prompt.SelectOptions{
+		selected, _, err := p.Select(fmt.Sprintf("Select the key to add to %q", machine), opts, &prompt.SelectOptions{
 			Default: 1,
 		})
 		if err != nil {
@@ -95,7 +95,7 @@ var keysCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Transferred the key %q into %q", selected, machine))
+		fmt.Println(fmt.Sprintf("Transferred the key %q into %q.", selected, machine))
 
 		return nil
 	},

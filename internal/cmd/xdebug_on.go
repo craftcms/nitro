@@ -22,12 +22,19 @@ var xdebugOnCommand = &cobra.Command{
 			return err
 		}
 
+		var actions []nitro.Action
+
+		xdebugConfigureAction, err := nitro.ConfigureXdebug(machine, php)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *xdebugConfigureAction)
+
 		enableXdebugAction, err := nitro.EnableXdebug(machine, php)
 		if err != nil {
 			return err
 		}
-
-		actions := []nitro.Action{*enableXdebugAction}
+		actions = append(actions, *enableXdebugAction)
 
 		restartPhpFpmAction, err := nitro.RestartPhpFpm(machine, php)
 		if err != nil {
@@ -35,13 +42,13 @@ var xdebugOnCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
-		fmt.Println("Enabling xdebug for", php, "on", machine)
+		fmt.Println("Enabling xdebug for PHP", php, "on", machine)
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
-		fmt.Println("Xdebug was enabled for", php, "on", machine)
+		fmt.Println("Xdebug was enabled for PHP", php, "on", machine)
 
 		return nil
 	},

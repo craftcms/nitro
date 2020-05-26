@@ -37,6 +37,6 @@ func Launch(name string, cpus int, memory, disk, input string) (*Action, error) 
 		Type:       "launch",
 		UseSyscall: false,
 		Input:      input,
-		Args:       []string{"launch", "--name", name, "--cpus", strconv.Itoa(cpus), "--mem", memory, "--disk", disk, "18.04", "--cloud-init", "-"},
+		Args:       []string{"launch", "--name", name, "--cpus", strconv.Itoa(cpus), "--mem", memory, "--disk", disk, "20.04", "--cloud-init", "-"},
 	}, nil
 }

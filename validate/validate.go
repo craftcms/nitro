@@ -100,6 +100,10 @@ func DatabaseEngineAndVersion(e, v string) error {
 
 	if e == "mysql" {
 		switch v {
+		case "8.0":
+			return nil
+		case "8":
+			return nil
 		case "5.8":
 			return nil
 		case "5.7":

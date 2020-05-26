@@ -12,14 +12,24 @@ packages:
   - sshfs
   - pv
   - httpie
-  - php-cli
   - unzip
+  - mysql-client
+  - postgresql-client
 write_files:
-  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/mysql.cnf
+  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/5/mysql.cnf
     content: |
       [mysqld]
       max_allowed_packet=256M
       wait_timeout=86400
+      default-authentication-plugin=mysql_native_password
+  - path: /home/ubuntu/.nitro/databases/mysql/conf.d/8/mysql.cnf
+    content: |
+      [mysqld]
+      max_allowed_packet=256M
+      wait_timeout=86400
+      default-authentication-plugin=mysql_native_password
+      [mysqldump]
+      column-statistics=0
   - path: /home/ubuntu/.nitro/databases/mysql/setup.sql
     content: |
       CREATE USER IF NOT EXISTS 'nitro'@'localhost' IDENTIFIED BY 'nitro';
@@ -69,16 +79,10 @@ write_files:
       xdebug.idekey=PHPSTORM
 runcmd:
   - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
-  - add-apt-repository --no-update -y ppa:nginx/stable
   - add-apt-repository --no-update -y ppa:ondrej/php
   - echo "CRAFT_NITRO=1" >> /etc/environment
   - echo "DB_USER=nitro" >> /etc/environment
   - echo "DB_PASSWORD=nitro" >> /etc/environment
-  - mkdir -p /home/ubuntu/.composer
-  - export COMPOSER_HOME=/home/ubuntu/composer
-  - curl -sS https://getcomposer.org/installer -o composer-setup.php
-  - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-  - rm composer-setup.php
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository --no-update -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -

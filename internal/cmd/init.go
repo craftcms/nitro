@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -13,7 +13,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
+	"github.com/craftcms/nitro/internal/suggest"
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -38,7 +38,7 @@ var initCommand = &cobra.Command{
 		}
 
 		if existingConfig == false {
-			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes"})
+			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes", AppendQuestionMark: true})
 			if err != nil {
 				return err
 			}
@@ -51,12 +51,11 @@ var initCommand = &cobra.Command{
 		// we don't have a config file
 		// set the config file
 		var cfg config.Config
-
-		// TODO validate with https://golang.org/pkg/runtime/#NumCPU
-		// ask how many cores
+		actual := runtime.NumCPU()
 		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
-			Default:   "2",
-			Validator: nil,
+			Default:   suggest.NumberOfCPUs(actual),
+			Validator: validate.NewCPUValidator(actual).Validate,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -66,6 +65,7 @@ var initCommand = &cobra.Command{
 		mem, err := p.Ask("How much memory", &prompt.InputOptions{
 			Default:   "4G",
 			Validator: validate.Memory,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -76,6 +76,7 @@ var initCommand = &cobra.Command{
 		di, err := p.Ask("How much disk space", &prompt.InputOptions{
 			Default:   "40G",
 			Validator: validate.DiskSize,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -89,6 +90,7 @@ var initCommand = &cobra.Command{
 				php, err := p.Ask("Which version of PHP", &prompt.InputOptions{
 					Default:   "7.4",
 					Validator: validate.PHPVersion,
+					AppendQuestionMark: true,
 				})
 
 				if err == nil {
@@ -114,6 +116,7 @@ var initCommand = &cobra.Command{
 				engine, err = p.Ask("Which database engine", &prompt.InputOptions{
 					Default:   "mysql",
 					Validator: validate.DatabaseEngine,
+					AppendQuestionMark: true,
 				})
 
 				if err == nil {
@@ -132,6 +135,7 @@ var initCommand = &cobra.Command{
 				defaultVersion := versions[0]
 				version, _ = p.Ask("Which version of "+engine, &prompt.InputOptions{
 					Default: defaultVersion,
+					AppendQuestionMark: true,
 				})
 
 				err := validate.DatabaseEngineAndVersion(engine, version)
@@ -224,14 +228,14 @@ var initCommand = &cobra.Command{
 
 		// if there are sites, edit the hosts file
 		if len(sites) > 0 {
-			nitro, err := exec.LookPath("nitro")
-			if err != nil {
-				return err
-			}
+			//nitro, err := exec.LookPath("nitro")
+			//if err != nil {
+			//	return err
+			//}
 
-			if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
-				return err
-			}
+			//if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
+			//	return err
+			//}
 		}
 
 		return infoCommand.RunE(cmd, args)

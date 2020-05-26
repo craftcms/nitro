@@ -8,13 +8,15 @@ import (
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
 var dbAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a new databases",
+	Short: "Add new database",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -23,29 +25,39 @@ var dbAddCommand = &cobra.Command{
 		}
 		p := prompt.NewPrompt()
 
-		// get all of the docker containers by name
 		script := scripts.New(mp, machine)
-		output, err := script.Run(false, scripts.DockerListContainerNames)
-		if err != nil {
+
+		var cfg config.Config
+		if err := viper.Unmarshal(&cfg); err != nil {
 			return err
 		}
 
-		// create a list
-		containers := strings.Split(output, "\n")
-		if len(containers) == 0 {
-			return errors.New("there are no databases we can add to")
+		if len(cfg.Databases) == 0 {
+			return errors.New("there are no databases engines we can add to")
 		}
 
-		// which database
-		container, _, err := p.Select("Which database type", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		// get all of the docker containers by name
+		var containers []string
+		for _, db := range cfg.Databases {
+			containers = append(containers, db.Name())
+		}
+
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Select database engine", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		// get the name
-		database, err := p.Ask("What should be the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
+		database, err := p.Ask("Enter the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
 			return err
 		}
@@ -63,7 +75,7 @@ var dbAddCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Println(fmt.Sprintf("Added database %q to %q", database, container))
+		fmt.Println(fmt.Sprintf("Added database %q to %q.", database, container))
 
 		return nil
 	},

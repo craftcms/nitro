@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+
 	"github.com/pixelandtonic/prompt"
 
 	"github.com/spf13/cobra"
@@ -17,8 +18,8 @@ import (
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/internal/sudo"
 )
 
 var destroyCommand = &cobra.Command{
@@ -44,9 +45,10 @@ var destroyCommand = &cobra.Command{
 			domains = append(domains, site.Hostname)
 		}
 
-		confirmed, err := p.Confirm("Are you sure you want to permanently destroy your "+machine+" machine", &prompt.InputOptions{
+		confirmed, err := p.Confirm("Are you sure you want to permanently destroy the "+machine+" machine", &prompt.InputOptions{
 			Default:   "no",
 			Validator: nil,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -57,7 +59,7 @@ var destroyCommand = &cobra.Command{
 		}
 
 		// if we have any containers to backup, do so now
-		if flagNoBackups == false && len(cfg.Databases) != 0 {
+		if flagSkipBackup == false && len(cfg.Databases) != 0 {
 			// backup the container
 			for _, db := range cfg.Databases {
 				container := db.Name()
@@ -90,9 +92,11 @@ var destroyCommand = &cobra.Command{
 				}
 
 				if len(dbs) == 0 {
-					fmt.Println(fmt.Sprintf("There are no databases in %s %s (port %s) to backup", db.Engine, db.Version, db.Port))
+					fmt.Println(fmt.Sprintf("There are no databases in %s %s (port %s) to backup.", db.Engine, db.Version, db.Port))
 					continue
 				}
+
+				var backupErrorMessage = "There was a problem backing up the databases.\nIf you wish to destroy "+machine+" without backups use --skip-backup."
 
 				// backup each database
 				for _, database := range dbs {
@@ -104,8 +108,8 @@ var destroyCommand = &cobra.Command{
 						// create the backup directory if not found
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/postgres/backups/")); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
-							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							fmt.Println(err)
+							fmt.Println(backupErrorMessage)
 							return err
 						}
 
@@ -113,24 +117,24 @@ var destroyCommand = &cobra.Command{
 						fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualPostgresDatabase, container, database, fullVmBackupPath)); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
-							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							fmt.Println(err)
+							fmt.Println(backupErrorMessage)
 							return err
 						}
 					default:
 						// create the backup directory if not found
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/mysql/backups/")); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
-							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							fmt.Println(err)
+							fmt.Println(backupErrorMessage)
 							return err
 						}
 
 						fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
-							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+							fmt.Println(err)
+							fmt.Println(backupErrorMessage)
 							return err
 						}
 					}
@@ -146,32 +150,31 @@ var destroyCommand = &cobra.Command{
 					// make sure the backups folder exists
 					backupsFolder := home + "/.nitro/backups/"
 					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						fmt.Println(err)
+						fmt.Println(backupErrorMessage)
 						return err
 					}
 
 					// make sure the machine folder exists
 					backupsFolder = backupsFolder + machine
-					// TODO fix this
-					if err := helpers.MkdirIfNotExists(backupsFolder); err == nil {
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
+						fmt.Println(err)
+						fmt.Println(backupErrorMessage)
 						return err
 					}
 
 					// create a container name
 					backupsFolder = backupsFolder + "/" + container
 					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						fmt.Println(err)
+						fmt.Println(backupErrorMessage)
 						return err
 					}
 
 					// transfer the folder into the host machine
 					if err := nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{{Type: "transfer", Args: []string{"transfer", machine + ":" + fullVmBackupPath, backupsFolder}}}); err != nil {
-						fmt.Println("We had an issue backing up the databases, aborting destroy")
-						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
+						fmt.Println(err)
+						fmt.Println(backupErrorMessage)
 						return err
 					}
 
@@ -196,7 +199,7 @@ var destroyCommand = &cobra.Command{
 
 		if flagClean {
 			if err := os.Remove(viper.ConfigFileUsed()); err != nil {
-				fmt.Println("unable to remove the config:", viper.ConfigFileUsed())
+				fmt.Println("Unable to remove the config: ", viper.ConfigFileUsed())
 			}
 		}
 
@@ -210,19 +213,14 @@ var destroyCommand = &cobra.Command{
 			cmds = append(cmds, domain)
 		}
 
-		// prompt to remove hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
 
-		fmt.Println("Removing sites from your hosts file")
+		fmt.Println("Removing sites from your hosts file.")
 
-		return sudo.RunCommand(nitro, machine, cmds...)
+		return runas.Elevated(machine, cmds)
 	},
 }
 
 func init() {
-	destroyCommand.Flags().BoolVar(&flagClean, "clean", false, "remove the config file when destroying the machine")
-	destroyCommand.Flags().BoolVar(&flagNoBackups, "no-backups", false, "skip database backups when destroying the machine")
+	destroyCommand.Flags().BoolVar(&flagClean, "clean", false, "Remove the config file when destroying the machine")
+	destroyCommand.Flags().BoolVar(&flagSkipBackup, "skip-backup", false, "Skip database backups when destroying the machine")
 }

@@ -60,6 +60,11 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-available/existing-site"},
 				},
 				{
@@ -139,7 +144,7 @@ func TestApply(t *testing.T) {
 				{
 					Type:       "exec",
 					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "docker", "run", "-v", "/home/ubuntu/.nitro/databases/mysql/setup.sql:/docker-entrypoint-initdb.d/setup.sql", "-v", "/home/ubuntu/.nitro/databases/mysql/conf.d/:/etc/mysql/conf.d", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
+					Args:       []string{"exec", "mytestmachine", "--", "docker", "run", "-v", "/home/ubuntu/.nitro/databases/mysql/setup.sql:/docker-entrypoint-initdb.d/setup.sql", "-v", "/home/ubuntu/.nitro/databases/mysql/conf.d/5/:/etc/mysql/conf.d", "-v", "mysql_5.7_3306:/var/lib/mysql", "--name", "mysql_5.7_3306", "-d", "--restart=always", "-p", "3306:3306", "-e", "MYSQL_ROOT_PASSWORD=nitro", "-e", "MYSQL_DATABASE=nitro", "-e", "MYSQL_USER=nitro", "-e", "MYSQL_PASSWORD=nitro", "mysql:5.7"},
 				},
 			},
 		},
@@ -244,6 +249,16 @@ func TestApply(t *testing.T) {
 					Type:       "umount",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/leftoversite.test"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/leftoversite.test"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "sudo", "rm", "/etc/nginx/sites-enabled/leftoversite.test"},
 				},
 				{
 					Type:       "exec",
@@ -461,6 +476,11 @@ func TestApply(t *testing.T) {
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/example-site"},
 				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/example-site"},
+				},
 			},
 			wantErr: false,
 		},
@@ -488,6 +508,11 @@ func TestApply(t *testing.T) {
 					Type:       "umount",
 					UseSyscall: false,
 					Args:       []string{"umount", "mytestmachine:/nitro/sites/existing-site"},
+				},
+				{
+					Type:       "exec",
+					UseSyscall: false,
+					Args:       []string{"exec", "mytestmachine", "--", "rm", "-rf", "/nitro/sites/existing-site"},
 				},
 				{
 					Type:       "mount",

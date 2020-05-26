@@ -46,8 +46,9 @@ func init() {
 		renameCommand,
 		dbCommand,
 		completionCmd,
+		installCommand,
 	)
-	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
+	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
 func Execute() {

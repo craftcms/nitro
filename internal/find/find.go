@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -39,9 +40,32 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 				break
 			}
 
+			// remove trailing and leading spaces
+			m = strings.TrimSpace(m)
+
 			mount := strings.Split(m, " ")
 
-			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[2]})
+			// check if there are too many elements in the mount
+			if len(mount) > 3 {
+				// we need to split by the => instead
+				mount = strings.Split(m, "=>")
+				// trim the spaces
+				for i, sp := range mount {
+					mount[i] = strings.TrimSpace(sp)
+				}
+
+				// if the source contains a space - we need to get the abs path
+				if strings.Contains(mount[0], " ") {
+					absPath, err := filepath.Abs(mount[0])
+					if err != nil {
+						return nil, err
+					}
+
+					mount[0] = absPath
+				}
+			}
+
+			mounts = append(mounts, config.Mount{Source: mount[0], Dest: mount[len(mount)-1]})
 		}
 	}
 

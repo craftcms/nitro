@@ -16,7 +16,7 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a site",
+	Short: "Add site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		p := prompt.NewPrompt()
@@ -52,7 +52,7 @@ var addCommand = &cobra.Command{
 		var hostname string
 		switch flagHostname {
 		case "":
-			hostname, err = p.Ask("What should the hostname be", &prompt.InputOptions{
+			hostname, err = p.Ask("Enter the hostname", &prompt.InputOptions{
 				Default:   directoryName,
 				Validator: validate.Hostname,
 			})
@@ -70,11 +70,11 @@ var addCommand = &cobra.Command{
 			// look for the www,public,public_html,www using the absolutePath variable
 			foundDir, err := webroot.Find(absolutePath)
 			if err != nil {
-				fmt.Println("Unable to locate a webroot, setting to web")
+				fmt.Println("Unable to locate a webroot, setting to web.")
 				foundDir = "web"
 			}
 
-			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{
+			webrootDir, err = p.Ask("Enter the webroot", &prompt.InputOptions{
 				Default:   foundDir,
 				Validator: nil,
 			})
@@ -128,6 +128,7 @@ var addCommand = &cobra.Command{
 
 		applyChanges, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
 			Default: "yes",
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err

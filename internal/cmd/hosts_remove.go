@@ -13,7 +13,7 @@ import (
 
 var hostsRemoveCommand = &cobra.Command{
 	Use:    "remove",
-	Short:  "Remove a site from your hosts file",
+	Short:  "Remove site from your hosts file",
 	Hidden: true,
 	Args:   cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -36,7 +36,7 @@ var hostsRemoveCommand = &cobra.Command{
 
 		if flagDebug {
 			for _, domain := range domains {
-				fmt.Println("removing", domain, "from hosts file")
+				fmt.Println("Removing", domain, "from hosts file.")
 			}
 
 			return nil

@@ -4,17 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
 var dbRestartCommand = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart databases",
+	Short: "Restart database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -26,24 +27,33 @@ var dbRestartCommand = &cobra.Command{
 		// get all of the docker containers by name
 		script := scripts.New(mp, machine)
 
-		// make a list
-		output, err := script.Run(false, scripts.DockerListContainerNames)
-		if err != nil {
+		var cfg config.Config
+		if err := viper.Unmarshal(&cfg); err != nil {
 			return err
 		}
 
-		// check it twice
-		containers := strings.Split(output, "\n")
-		// find out if nice
-		if len(containers) == 0 {
-			return errors.New("there are no containers to perform actions on")
+		if len(cfg.Databases) == 0 {
+			return errors.New("there are no databases we can add to")
 		}
 
-		container, _, err := p.Select("Which database should we restart", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		// get all of the docker containers by name
+		var containers []string
+		for _, db := range cfg.Databases {
+			containers = append(containers, db.Name())
+		}
+
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Select database engine to restart", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerRestartContainer, container))
@@ -51,7 +61,7 @@ var dbRestartCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Restarted database", container)
+		fmt.Println("Restarted database engine ", container)
 
 		return nil
 	},

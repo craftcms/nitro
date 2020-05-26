@@ -5,4 +5,5 @@ composer.lock
 /demo-site
 /coverage.txt
 /production-site
+nitro.exe
 *.sql

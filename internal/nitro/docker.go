@@ -2,6 +2,7 @@ package nitro
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/craftcms/nitro/validate"
 )
@@ -39,7 +40,12 @@ func CreateDatabaseContainer(machine, engine, version, port string) (*Action, er
 		containerPort = "3306"
 		containerPath = "/var/lib/mysql"
 
-		hostConfPath = "/home/ubuntu/.nitro/databases/mysql/conf.d/"
+		v := "5"
+		if strings.Contains(version, "8") {
+			v = "8"
+		}
+
+		hostConfPath = "/home/ubuntu/.nitro/databases/mysql/conf.d/" + v + "/"
 		containerConfPath = "/etc/mysql/conf.d"
 
 		hostInitPath = "/home/ubuntu/.nitro/databases/mysql/setup.sql"

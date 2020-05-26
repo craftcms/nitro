@@ -3,11 +3,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
+	"os"
+
+	"github.com/craftcms/nitro/internal/runas"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/hosts"
@@ -23,9 +24,13 @@ var hostsCommand = &cobra.Command{
 
 		if !flagDebug {
 			uid := os.Geteuid()
-			if uid != 0 {
+			if (uid != 0) && (uid != -1) {
 				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
 			}
+		}
+
+		if err := runas.Elevated(machine, args); err != nil {
+			return err
 		}
 
 		// get the requested machines ip
@@ -38,7 +43,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if sites == nil {
-			fmt.Println("There are no sites in the config file")
+			fmt.Println("There are no sites in the config file.")
 			return nil
 		}
 
@@ -54,13 +59,18 @@ var hostsCommand = &cobra.Command{
 
 		if flagDebug {
 			for _, domain := range domains {
-				fmt.Println("adding", domain, "to hosts file")
+				fmt.Println("Adding", domain, "to hosts file.")
 			}
 
 			return nil
 		}
 
-		return hosts.Add(he, ip, domains)
+		// try to edit the hosts file
+		if err := hosts.Add(he, ip, domains); err != nil {
+			fmt.Println("Unable to edit your hosts file, please edit it manually at", he.ReadFilePath)
+		}
+
+		return nil
 	},
 }
 

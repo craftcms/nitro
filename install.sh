@@ -128,6 +128,7 @@ function getNitro {
   # if it's Windows, make sure the final destination exists
   if [ "$IS_WINDOWS" = true ] && [ ! -d "$FINAL_DIR_LOCATION" ]; then
     mkdir -p "$FINAL_DIR_LOCATION"
+    export PATH=$FINAL_DIR_LOCATION:$PATH
   fi
 
   # create our temp folder

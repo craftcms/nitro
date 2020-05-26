@@ -34,13 +34,13 @@ var xdebugOffCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
-		fmt.Println("Disabling xdebug for", php, "on", machine)
+		fmt.Println("Disabling xdebug for PHP", php, "on", machine)
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
-		fmt.Println("Xdebug was disabled for", php, "on", machine)
+		fmt.Println("Xdebug was disabled for PHP", php, "on", machine)
 
 		return nil
 	},

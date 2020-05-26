@@ -8,7 +8,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/internal/helpers"
 )
@@ -48,7 +48,7 @@ func (c *Config) GetExpandedMounts() []Mount {
 // dest or a parent of an existing dest
 func (c *Config) MountExists(dest string) bool {
 	for _, mount := range c.Mounts {
-		// todo expand the paths for the mounts?
+		// TODO expand the paths for the mounts?
 		if mount.IsExact(dest) || mount.IsParent(dest) {
 			return true
 		}
@@ -137,12 +137,16 @@ func (c *Config) AddMount(m Mount) error {
 func (c *Config) RenameSite(site Site, hostname string) error {
 	for i, s := range c.Sites {
 		if s.Hostname == site.Hostname {
-			w := strings.Replace(s.Webroot, s.Hostname, hostname, 1)
-			c.Sites[i] = Site{Hostname: hostname, Webroot: w}
+			c.Sites[i] = Site{
+				Hostname: hostname,
+				Webroot:  strings.Replace(s.Webroot, s.Hostname, hostname, 1),
+			}
 
 			return nil
 		}
 	}
+
+	// TODO rename the mount as well if it is a direct mount
 
 	return errors.New("unable to locate the site with the hostname: " + site.Hostname)
 }
@@ -183,9 +187,9 @@ func (c *Config) RemoveSite(hostname string) error {
 // find the dest by splitting a path and removing the webroot
 // directory name. If it cannot find the mount, it errors.
 func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
-	path := strings.Split(webroot, string(os.PathSeparator))
+	path := strings.Split(webroot, "/")
 	t := path[:len(path)-1]
-	dest := strings.Join(t, string(os.PathSeparator))
+	dest := strings.Join(t, "/")
 
 	for i := len(c.Mounts) - 1; i >= 0; i-- {
 		mount := c.Mounts[i]
@@ -199,9 +203,9 @@ func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
 }
 
 func (c *Config) FindMountBySiteWebroot(webroot string) *Mount {
-	path := strings.Split(webroot, string(os.PathSeparator))
+	path := strings.Split(webroot, "/")
 	t := path[:len(path)-1]
-	dest := strings.Join(t, string(os.PathSeparator))
+	dest := strings.Join(t, "/")
 
 	for _, mount := range c.Mounts {
 		if mount.Dest == dest {
@@ -263,4 +267,15 @@ func GetString(key, flag string) string {
 	}
 
 	return flag
+}
+
+// Read is used to read in a config file or
+// return an error
+func Read() (*Config, error) {
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }

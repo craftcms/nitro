@@ -9,7 +9,7 @@ var (
 	flagPhpVersion    string
 	flagNginxLogsKind string
 	flagClean         bool
-	flagNoBackups      bool
+	flagSkipBackup    bool
 
 	// flags for the add command
 	flagHostname string

@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/craftcms/nitro/internal/helpers"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,22 +19,42 @@ var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
 	Short: "Update Nitro",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		currentOs := runtime.GOOS
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
-		tempFolder := os.TempDir()
-		localFile := filepath.Join(tempFolder, "install.sh")
 
-		if err := DownloadFile(localFile, fileUrl); err != nil {
+		if currentOs == "windows" {
+			fmt.Println("Self updating is not available in Windows, please visit https://github.com/craftcms/nitro to update")
+			return nil
+		}
+
+		tempDirectory, _ := os.Getwd()
+		tempShell := tempDirectory + "/temp_nitro_update.sh"
+		tempBat := tempDirectory + "/temp_nitro_update.bat"
+
+		if err := DownloadFile(tempShell, fileUrl); err != nil {
 			return err
 		}
 
-		if err := os.Chmod(localFile, 0777); err != nil {
+		if err := os.Chmod(tempShell, 0777); err != nil {
 			return err
 		}
 
 		ch := make(chan string)
 		go func() {
-			if err := RunCommandCh(ch, "\r\n", localFile, "update"); err != nil {
-				log.Fatal(err)
+			if currentOs == "windows" {
+
+				batOutput := []byte("sh.exe --login -i -- " + tempShell + " update")
+				if err := ioutil.WriteFile(tempBat, batOutput, 0644); err != nil {
+					log.Fatal(err)
+				}
+
+				if err := RunCommandCh(ch, "\r\n", os.ExpandEnv("$ComSpec"), "/c", tempBat); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				if err := RunCommandCh(ch, "\r\n", tempShell, "update"); err != nil {
+					log.Fatal(err)
+				}
 			}
 		}()
 
@@ -40,7 +62,11 @@ var selfUpdateCommand = &cobra.Command{
 			fmt.Println(v)
 		}
 
-		return nil
+		if helpers.FileExists(tempBat) {
+			os.Remove(tempBat)
+		}
+
+		return os.Remove(tempShell)
 	},
 }
 

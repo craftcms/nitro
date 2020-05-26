@@ -10,7 +10,9 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
@@ -19,7 +21,7 @@ import (
 
 var dbBackupCommand = &cobra.Command{
 	Use:   "backup",
-	Short: "Backup a database",
+	Short: "Backup database",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -30,21 +32,31 @@ var dbBackupCommand = &cobra.Command{
 		script := scripts.New(mp, machine)
 
 		// create a list of containers
-		output, err := script.Run(false, scripts.DockerListContainerNames)
-		if err != nil {
+		var cfg config.Config
+		if err := viper.Unmarshal(&cfg); err != nil {
 			return err
 		}
-		containers := strings.Split(output, "\n")
-		if len(containers) == 0 {
+		if len(cfg.Databases) == 0 {
 			return errors.New("there are no databases we can add to")
 		}
 
-		// which database
-		container, _, err := p.Select("Which database engine", containers, &prompt.SelectOptions{
-			Default: 1,
-		})
-		if err != nil {
-			return err
+		var containers []string
+		for _, db := range cfg.Databases {
+			containers = append(containers, db.Name())
+		}
+
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Select database engine", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
 		// get all of the databases from the container
@@ -77,7 +89,7 @@ var dbBackupCommand = &cobra.Command{
 			return errors.New("no databases to backup in " + container)
 		}
 
-		database, _, err := p.Select("Which database should we backup", dbs, &prompt.SelectOptions{Default: 1})
+		database, _, err := p.Select("Select database to backup", dbs, &prompt.SelectOptions{Default: 1})
 		if err != nil {
 			return err
 		}
@@ -167,7 +179,7 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+"/"+backupFileName))
+		fmt.Println(fmt.Sprintf("Backup completed and stored in %q.", backupsFolder+"/"+backupFileName))
 		// end action
 
 		return nil
