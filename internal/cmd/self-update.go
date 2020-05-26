@@ -22,6 +22,11 @@ var selfUpdateCommand = &cobra.Command{
 		currentOs := runtime.GOOS
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
 
+		if currentOs == "windows" {
+			fmt.Println("Self updating is not available in Windows, please visit https://github.com/craftcms/nitro to update")
+			return nil
+		}
+
 		tempDirectory, _ := os.Getwd()
 		tempShell := tempDirectory + "/temp_nitro_update.sh"
 		tempBat := tempDirectory + "/temp_nitro_update.bat"
