@@ -6,9 +6,7 @@ package suggest
 func NumberOfCPUs(num int) string {
 	// on 8 core systems, the num from runtime.NumCPU() will return
 	// 18. So we need to divide the number of CPUs by half
-	num = num / 2
-
-	switch num {
+	switch num / 2 {
 	case 4:
 		return "2"
 	case 2:
