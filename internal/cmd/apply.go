@@ -13,7 +13,6 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/internal/sudo"
 
 	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/internal/webroot"

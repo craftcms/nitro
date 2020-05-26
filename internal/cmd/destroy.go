@@ -18,10 +18,10 @@ import (
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/internal/sudo"
 )
-s
+
 var destroyCommand = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy machine",
@@ -44,8 +44,6 @@ var destroyCommand = &cobra.Command{
 		for _, site := range cfg.Sites {
 			domains = append(domains, site.Hostname)
 		}
-
-		p := prompt.NewPrompt()
 
 		confirmed, err := p.Confirm("Are you sure you want to permanently destroy your "+machine+" machine", &prompt.InputOptions{
 			Default:   "no",

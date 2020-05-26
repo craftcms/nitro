@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/sudo"
 	"github.com/craftcms/nitro/internal/suggest"
 	"github.com/craftcms/nitro/validate"
 )
