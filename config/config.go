@@ -203,9 +203,9 @@ func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
 }
 
 func (c *Config) FindMountBySiteWebroot(webroot string) *Mount {
-	path := strings.Split(webroot, string(os.PathSeparator))
+	path := strings.Split(webroot, "/")
 	t := path[:len(path)-1]
-	dest := strings.Join(t, string(os.PathSeparator))
+	dest := strings.Join(t, "/")
 
 	for _, mount := range c.Mounts {
 		if mount.Dest == dest {
