@@ -15,7 +15,7 @@ import (
 
 var dbRemoveCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove databases",
+	Short: "Remove database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -48,7 +48,7 @@ var dbRemoveCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Select database to remove", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine to remove", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -56,7 +56,7 @@ var dbRemoveCommand = &cobra.Command{
 			}
 		}
 
-		remove, err := p.Confirm("Are you sure you want to permanently remove the database "+container, &prompt.InputOptions{
+		remove, err := p.Confirm("Are you sure you want to permanently remove the database engine "+container, &prompt.InputOptions{
 			Default:   "no",
 			Validator: nil,
 			AppendQuestionMark: true,
@@ -76,11 +76,11 @@ var dbRemoveCommand = &cobra.Command{
 				return err
 			}
 
-			fmt.Println("Removed database", container)
+			fmt.Println("Removed database engine ", container)
 			return nil
 		}
 
-		fmt.Println("There was a problem removing the database ", container)
+		fmt.Println("There was a problem removing the database", container)
 
 		return nil
 	},

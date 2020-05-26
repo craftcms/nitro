@@ -16,7 +16,7 @@ import (
 
 var dbAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add new databases",
+	Short: "Add new database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -48,7 +48,7 @@ var dbAddCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Select database type", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {

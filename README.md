@@ -127,14 +127,15 @@ the [`add`](#add) command:
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev] example.test
-Where is the webroot? [web]
-plugins-dev has been added to config file.
+Enter the hostname [plugins-dev] example.test
+Enter the webroot [web]
+Added plugins-dev to config file.
 Apply changes from config? [yes]
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
+Mounting /path/to/project to nitro-dev
+Adding site example.test to nitro-dev
+Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
-example.test added successfully!
 ```
 
 > 💡 **Tip:** Multipass requires Full Disk Access on macOS. If you’re seeing mount “not readable” issues, ensure `multipassd` is checked under System Preferences → Security & Privacy → Privacy → Full Disk Access.
@@ -217,7 +218,7 @@ To add a new mount, follow these steps:
 
    ```yaml
    mounts:
-     - source: /Users/cathy/dev
+     - source: /Users/vin/dev
        dest: /home/ubuntu/sites
    ```
 
@@ -336,14 +337,15 @@ Example:
 ```sh
 $ cd /path/to/project
 $ nitro add
-What should the hostname be? [plugins-dev]
-Where is the webroot? [web]
-plugins-dev has been added to config file.
+Enter the hostname [plugins-dev] example.test
+Enter the webroot [web]
+Added plugins-dev to config file.
 Apply changes from config? [yes]
-Applied changes from /Users/jasonmccallister/.nitro/nitro-dev.yaml
+Mounting /path/to/project to nitro-dev
+Adding site example.test to nitro-dev
+Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
-plugins-dev added successfully!
 ```
 
 ### `context`
@@ -489,7 +491,7 @@ Options:
 <dt><code>--php-version</code></dt>
 <dd>The PHP version to use. If not passed, the command will prompt for it.</dd>
 <dt><code>--cpus</code></dt>
-<dd>The max number of CPUs that the machine can use. If not passed, one CPU will be used by default.</dd>
+<dd>The max number of CPUs that the machine can use. If not passed, Nitro will try to determine the best number based on the host computer.</dd>
 <dt><code>--memory</code></dt>
 <dd>The max amount of system RAM that the machine can use. If not passed, the command will prompt for it.</dd>
 <dt><code>--disk</code></dt>
@@ -500,7 +502,7 @@ If the machine already exists, it will be reconfigured.
 
 ### `keys`
 
-Import SSH keys intro a virtual machine for use with composer, git, etc.
+Import SSH keys intro a virtual machine for use with Composer, git, etc.
 
 ```shell script
 nitro keys [<options>]
@@ -519,13 +521,13 @@ Example:
 $ nitro keys
   1 - id_rsa
   2 - personal_rsa
-Which key should we add to "nitro-dev"? [1]
-Transferred the key "id_rsa" into "nitro-dev"
+Select the key to add to "nitro-dev"? [1]
+Transferred the key "id_rsa" into "nitro-dev".
 ```
 
 ### `db add`
 
-Create a new database for the machine. You will be asked which type of database to add based on your config (e.g. postgres or mysql).
+Create a new database engine for the machine. You will be asked which type of database to add based on your config (e.g. PostgreSQL or MySQL).
 
 ```shell script
 nitro db add [<options>]
@@ -544,9 +546,9 @@ Example:
 $ nitro db add
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database type? [1] 2
-What should be the name of the database? mynewproject
-Added database "mynewproject" to "mysql_5.7_3306"
+Select database engine [1] 2
+Enter the name of the database: mynewproject
+Added database "mynewproject" to "mysql_5.7_3306".
 ```
 
 ### `db backup`
@@ -570,12 +572,12 @@ Example:
 $ nitro db backup
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database engine? [1] 
+Select database engine [1] 
   1 - all-dbs
   2 - postgres
   3 - nitro
   4 - project-one
-Which database should we backup? [1] 
+Select database to backup? [1] 
 Created backup "all-dbs-200519_100730.sql", downloading...
 Backup completed and stored in "/Users/jasonmccallister/.nitro/backups/nitro-dev/postgres_11_5432/all-dbs-200519_100730.sql"
 ```
@@ -602,15 +604,15 @@ Example:
 $ nitro db import mybackup.sql
   1 - mysql_5.7_3306
   2 - postgres_11_5432
-Which database engine to import the backup? [1] 
-What is the database name to create for the import? new-project
+Select database engine [1] 
+Enter the database name to create for the import: new-project
 Uploading "mybackup.sql" into "nitro-dev" (large files may take a while)...
-Created database new-project
+Successfully import the database backup into new-project
 ```
 
 ### `db remove`
 
-Will remove a database from the machine, but not from the config file.
+Will remove a database engine from the machine, but not from the config file.
 
 ```sh
 nitro db remove [<options>]
@@ -629,13 +631,14 @@ Example:
 $ nitro db remove
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we remove? [1] 
-Are you sure you want to permanently remove the database postgres_11_5432? [no] 
+Select database engine to remove: [1] 
+Are you sure you want to permanently remove the database engine postgres_11_5432? [no] 
+Removed database engine postgres_11_5432
 ```
 
 ### `db restart`
 
-Will restart a database in machine.
+Will restart a database engine in a machine.
 
 ```sh
 nitro db restart [<options>]
@@ -654,12 +657,13 @@ Example:
 $ nitro db restart
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we restart? [1]  
+Select database engine to restart: [1]  
+Restarted database engine postgres_11_5432
 ```
 
 ### `db start`
 
-Will start a database in machine.
+Will start a stopped database engine in a machine.
 
 ```sh
 nitro db start [<options>]
@@ -678,12 +682,13 @@ Example:
 $ nitro db start
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we start? [1]  
+Select database engine to start: [1]  
+Started database engine postgres_11_5432
 ```
 
 ### `db stop`
 
-Will stop a database in machine.
+Will stop a database engine in a machine.
 
 ```sh
 nitro db stop [<options>]
@@ -702,7 +707,8 @@ Example:
 $ nitro db stop
   1 - postgres_11_5432
   2 - mysql_5.7_3306
-Which database should we stop? [1]  
+Select database engine to stop: [1]
+Stopped database engine postgres_11_5432
 ```
 
 ### `logs`
@@ -894,7 +900,7 @@ Options:
 <dd>The PHP version to enable Xdebug for</dd>
 </dl>
 
-This ensures Xdebug is installed for PHP 7.3 and enables it:
+This ensures Xdebug is installed for PHP and enables it:
 
 ### `xdebug off`
 

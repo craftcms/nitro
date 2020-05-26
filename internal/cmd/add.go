@@ -74,7 +74,7 @@ var addCommand = &cobra.Command{
 				foundDir = "web"
 			}
 
-			webrootDir, err = p.Ask("Where is the webroot", &prompt.InputOptions{
+			webrootDir, err = p.Ask("Enter the webroot", &prompt.InputOptions{
 				Default:   foundDir,
 				Validator: nil,
 			})

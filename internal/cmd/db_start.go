@@ -15,7 +15,7 @@ import (
 
 var dbStartCommand = &cobra.Command{
 	Use:   "start",
-	Short: "Start databases",
+	Short: "Start database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -48,7 +48,7 @@ var dbStartCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Select database to start", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine to start", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -61,7 +61,7 @@ var dbStartCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Started database.", container)
+		fmt.Println("Started database engine ", container)
 
 		return nil
 	},

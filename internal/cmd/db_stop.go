@@ -15,7 +15,7 @@ import (
 
 var dbStopCommand = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop databases",
+	Short: "Stop database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -48,7 +48,7 @@ var dbStopCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Select database to stop", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine to stop", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -61,7 +61,7 @@ var dbStopCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Stopped database.", container)
+		fmt.Println("Stopped database engine ", container)
 
 		return nil
 	},

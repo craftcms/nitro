@@ -15,7 +15,7 @@ import (
 
 var dbRestartCommand = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart databases",
+	Short: "Restart database engine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -48,7 +48,7 @@ var dbRestartCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Select database to restart", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine to restart", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -61,7 +61,7 @@ var dbRestartCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Restarted database.", container)
+		fmt.Println("Restarted database engine ", container)
 
 		return nil
 	},
