@@ -16,7 +16,7 @@ import (
 
 var dbAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add new database engine",
+	Short: "Add new database",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -33,7 +33,7 @@ var dbAddCommand = &cobra.Command{
 		}
 
 		if len(cfg.Databases) == 0 {
-			return errors.New("there are no databases we can add to")
+			return errors.New("there are no databases engines we can add to")
 		}
 
 		// get all of the docker containers by name
