@@ -187,9 +187,9 @@ func (c *Config) RemoveSite(hostname string) error {
 // find the dest by splitting a path and removing the webroot
 // directory name. If it cannot find the mount, it errors.
 func (c *Config) RemoveMountBySiteWebroot(webroot string) error {
-	path := strings.Split(webroot, string(os.PathSeparator))
+	path := strings.Split(webroot, "/")
 	t := path[:len(path)-1]
-	dest := strings.Join(t, string(os.PathSeparator))
+	dest := strings.Join(t, "/")
 
 	for i := len(c.Mounts) - 1; i >= 0; i-- {
 		mount := c.Mounts[i]
