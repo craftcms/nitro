@@ -16,6 +16,7 @@
 - When creating a new machine the default number of CPUs are suggested dynamically based on CPU count of the host machine.
 - When removing a site the sites configuration in `/etc/nginx/sites-available/<site-name>` is also removed.
 - MySQL 5 and 8 use separate conf directories based on the version (e.g. `/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
+- Removed `xdebug configure` and moved logic into the `xdebug on` command. 
 
 ## Fixed
 - Fixed an issue with the `apply` command was not removing directories inside the machine. ([#96](https://github.com/craftcms/nitro/issues/96))

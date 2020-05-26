@@ -48,7 +48,7 @@ func init() {
 		completionCmd,
 		installCommand,
 	)
-	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
+	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
 func Execute() {
