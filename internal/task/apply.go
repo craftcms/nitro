@@ -54,6 +54,13 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *removeSymlink)
 
+			// remove symlink
+			removeSiteAvailable, err := nitro.RemoveNginxSiteAvailable(machine, site.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *removeSiteAvailable)
+
 			// reload nginx
 			reloadNginxAction, err := nitro.NginxReload(machine)
 			if err != nil {
