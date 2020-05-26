@@ -13,7 +13,7 @@ import (
 
 var mailhogCommand = &cobra.Command{
 	Use:   "mailhog",
-	Short: "Setup mailhog",
+	Short: "Install mailhog",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")

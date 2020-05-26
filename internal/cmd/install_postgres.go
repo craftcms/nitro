@@ -45,7 +45,7 @@ func (v newPostgresValidator) ValidatePort(port string) error {
 var postgresCommand = &cobra.Command{
 	Use:     "postgres",
 	Aliases: []string{"postgresql", "psql", "pg"},
-	Short:   "Setup PostgreSQL",
+	Short:   "Install PostgreSQL",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -64,7 +64,7 @@ var postgresCommand = &cobra.Command{
 		validator := newPostgresValidator{cfg: cfg}
 
 		// ask for the version
-		version, err := p.Ask(fmt.Sprintf("Which version of postgres should we install"), &prompt.InputOptions{
+		version, err := p.Ask(fmt.Sprintf("Which version of PostgreSQL should we install"), &prompt.InputOptions{
 			Validator: validator.ValidateVersion,
 		})
 		if err != nil {
@@ -72,7 +72,7 @@ var postgresCommand = &cobra.Command{
 		}
 
 		// ask for the port assignment
-		port, err := p.Ask(fmt.Sprintf("Which port should postgres listen on"), &prompt.InputOptions{
+		port, err := p.Ask(fmt.Sprintf("Which port should PostgreSQL listen on"), &prompt.InputOptions{
 			Validator: validator.ValidatePort,
 		})
 		if err != nil {

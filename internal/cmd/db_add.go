@@ -16,7 +16,7 @@ import (
 
 var dbAddCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a new databases",
+	Short: "Add new databases",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")

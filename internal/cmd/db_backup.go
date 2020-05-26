@@ -21,7 +21,7 @@ import (
 
 var dbBackupCommand = &cobra.Command{
 	Use:   "backup",
-	Short: "Backup a database",
+	Short: "Backup database",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")

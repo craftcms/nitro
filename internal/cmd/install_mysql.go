@@ -44,7 +44,7 @@ func (v newMysqlValidator) ValidatePort(port string) error {
 
 var mysqlCommand = &cobra.Command{
 	Use:     "mysql",
-	Short:   "Setup MySQL",
+	Short:   "Install MySQL",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		mp, err := exec.LookPath("multipass")
@@ -63,7 +63,7 @@ var mysqlCommand = &cobra.Command{
 		validator := newMysqlValidator{cfg: cfg}
 
 		// ask for the version
-		version, err := p.Ask(fmt.Sprintf("Which version of mysql should we install"), &prompt.InputOptions{
+		version, err := p.Ask(fmt.Sprintf("Which version of MySQL should we install"), &prompt.InputOptions{
 			Validator: validator.ValidateVersion,
 		})
 		if err != nil {
@@ -71,7 +71,7 @@ var mysqlCommand = &cobra.Command{
 		}
 
 		// ask for the port assignment
-		port, err := p.Ask(fmt.Sprintf("Which port should mysql listen on"), &prompt.InputOptions{
+		port, err := p.Ask(fmt.Sprintf("Which port should MySQL listen on"), &prompt.InputOptions{
 			Validator: validator.ValidatePort,
 		})
 		if err != nil {
