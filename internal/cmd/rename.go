@@ -42,7 +42,6 @@ var renameCommand = &cobra.Command{
 		// ask for the new newHostname
 		var newHostname string
 		newHostname, err = p.Ask("What should the new hostname be", &prompt.InputOptions{
-			Default:   "",
 			Validator: validate.Hostname,
 		})
 		if err != nil {
