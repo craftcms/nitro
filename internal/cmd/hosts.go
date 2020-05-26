@@ -65,7 +65,12 @@ var hostsCommand = &cobra.Command{
 			return nil
 		}
 
-		return hosts.Add(he, ip, domains)
+		// try to edit the hosts file
+		if err := hosts.Add(he, ip, domains); err != nil {
+			fmt.Println("Unable to edit your hosts file, please edit it manually at", he.ReadFilePath)
+		}
+
+		return nil
 	},
 }
 
