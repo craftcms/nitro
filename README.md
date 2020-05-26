@@ -34,6 +34,9 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`edit`](#edit)
   - [`info`](#info)
   - [`init`](#init)
+  - [`install composer`](#install-composer)
+  - [`install mysql`](#install-mysql)
+  - [`install postgres`](#install-postgres)
   - [`keys`](#keys)
   - [`logs`](#logs)
   - [`remove`](#remove)
@@ -531,6 +534,78 @@ Options:
 </dl>
 
 If the machine already exists, it will be reconfigured.
+
+### `install composer`
+
+Install composer inside of a virtual machine.
+
+```shell script
+nitro install composer
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install composer
+Composer is now installed on "nitro-dev".
+```
+
+### `install mysql`
+
+This will add a new MySQL database engine. 
+
+```shell script
+nitro install mysql
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install mysql
+Enter the MySQL version to install 5.6
+Enter the MySQL port number 3306
+Adding MySQL version "5.6" on port "3306"
+Apply changes from config now? [yes]
+```
+
+### `install postgres`
+
+This will add a new PostgreSQL database engine. 
+
+```shell script
+nitro install postgres
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro install postgres
+Enter the PostgreSQL version to install 11
+Enter the MySQL port number 543
+Adding MySQL version "11" on port "5432"
+Apply changes from config now? [yes]
+```
 
 ### `keys`
 
