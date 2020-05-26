@@ -137,12 +137,16 @@ func (c *Config) AddMount(m Mount) error {
 func (c *Config) RenameSite(site Site, hostname string) error {
 	for i, s := range c.Sites {
 		if s.Hostname == site.Hostname {
-			w := strings.Replace(s.Webroot, s.Hostname, hostname, 1)
-			c.Sites[i] = Site{Hostname: hostname, Webroot: w}
+			c.Sites[i] = Site{
+				Hostname: hostname,
+				Webroot:  strings.Replace(s.Webroot, s.Hostname, hostname, 1),
+			}
 
 			return nil
 		}
 	}
+
+	// TODO rename the mount as well if it is a direct mount
 
 	return errors.New("unable to locate the site with the hostname: " + site.Hostname)
 }
