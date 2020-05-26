@@ -46,7 +46,6 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug configure`](#xdebug-configure)
   - [`xdebug on`](#xdebug-on)
   - [`xdebug off`](#xdebug-off)
 
@@ -865,23 +864,6 @@ Checks the currently version of nitro against the releases and shows any updated
 ```sh
 nitro version
 ```
-
-### `xdebug configure`
-
-Configures Xdebug for remote access and debugging with PhpStorm or other IDEs.
-
-```sh
-nitro xdebug configure [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--php-version</code></dt>
-<dd>The PHP version to configure Xdebug for</dd>
-</dl>
 
 ### `xdebug on`
 
