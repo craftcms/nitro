@@ -113,7 +113,7 @@ var destroyCommand = &cobra.Command{
 						fullVmBackupPath = "/home/ubuntu/.nitro/databases/postgres/backups/" + backupFileName
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualPostgresDatabase, container, database, fullVmBackupPath)); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("We had an issue backing up the databases, aborting destroy", err)
 							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
 							return err
 						}
@@ -121,7 +121,7 @@ var destroyCommand = &cobra.Command{
 						// create the backup directory if not found
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.nitro/databases/mysql/backups/")); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("We had an issue backing up the databases, aborting destroy", err)
 							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
 							return err
 						}
@@ -129,7 +129,7 @@ var destroyCommand = &cobra.Command{
 						fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
 						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
 							fmt.Println(output)
-							fmt.Println("We had an issue backing up the databases, aborting destroy")
+							fmt.Println("We had an issue backing up the databases, aborting destroy", err)
 							fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
 							return err
 						}
@@ -153,8 +153,7 @@ var destroyCommand = &cobra.Command{
 
 					// make sure the machine folder exists
 					backupsFolder = backupsFolder + machine
-					// TODO fix this
-					if err := helpers.MkdirIfNotExists(backupsFolder); err == nil {
+					if err := helpers.MkdirIfNotExists(backupsFolder); err != nil {
 						fmt.Println("We had an issue backing up the databases, aborting destroy")
 						fmt.Println("If you wish to destroy", machine, "without backups use --no-backups")
 						return err
