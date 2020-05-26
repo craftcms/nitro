@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+### 1.0.0-beta.5 - 2020-05-26
+
 ## Added
 - Added Windows support.
 - Added support for MySQL 8.0. ([#97](https://github.com/craftcms/nitro/issues/97))
