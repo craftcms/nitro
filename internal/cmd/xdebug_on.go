@@ -22,12 +22,19 @@ var xdebugOnCommand = &cobra.Command{
 			return err
 		}
 
+		var actions []nitro.Action
+
+		xdebugConfigureAction, err := nitro.ConfigureXdebug(machine, php)
+		if err != nil {
+			return err
+		}
+		actions = append(actions, *xdebugConfigureAction)
+
 		enableXdebugAction, err := nitro.EnableXdebug(machine, php)
 		if err != nil {
 			return err
 		}
-
-		actions := []nitro.Action{*enableXdebugAction}
+		actions = append(actions, *enableXdebugAction)
 
 		restartPhpFpmAction, err := nitro.RestartPhpFpm(machine, php)
 		if err != nil {
