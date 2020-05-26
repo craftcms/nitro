@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+
 	"github.com/pixelandtonic/prompt"
 
 	"github.com/spf13/cobra"
@@ -17,8 +18,8 @@ import (
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/internal/sudo"
 )
 
 var destroyCommand = &cobra.Command{
@@ -212,15 +213,10 @@ var destroyCommand = &cobra.Command{
 			cmds = append(cmds, domain)
 		}
 
-		// prompt to remove hosts file
-		nitro, err := exec.LookPath("nitro")
-		if err != nil {
-			return err
-		}
 
 		fmt.Println("Removing sites from your hosts file.")
 
-		return sudo.RunCommand(nitro, machine, cmds...)
+		return runas.Elevated(machine, cmds)
 	},
 }
 

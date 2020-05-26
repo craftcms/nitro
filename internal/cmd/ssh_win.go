@@ -1,10 +1,11 @@
-// +build linux, darwin, !windows
+// +build !linux, !darwin, windows
 
 package cmd
 
 import (
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/spf13/cobra"
+	"os"
+	"os/exec"
 )
 
 var sshCommand = &cobra.Command{
@@ -13,11 +14,16 @@ var sshCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
-		sshAction, err := nitro.SSH(machine)
+		mp, err := exec.LookPath("multipass")
 		if err != nil {
 			return err
 		}
 
-		return nitro.Run(nitro.NewMultipassRunner("multipass"), []nitro.Action{*sshAction})
+		c := exec.Command(mp, "shell", machine)
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
+
+		return c.Run()
 	},
 }

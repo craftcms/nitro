@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -20,6 +21,10 @@ type PreferredEditorResolver func() string
 // `$EDITOR` environment variable, or the `DefaultEditor` if it is not set.
 func GetPreferredEditorFromEnvironment() string {
 	editor := os.Getenv("EDITOR")
+
+	if runtime.GOOS == "windows" {
+		return "notepad.exe"
+	}
 
 	if editor == "" {
 		return DefaultEditor
