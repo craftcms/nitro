@@ -19,7 +19,7 @@ func TestNumberOfCPUs(t *testing.T) {
 		{
 			name: "eight cpus returns two",
 			args: args{num: 8},
-			want: "2",
+			want: "4",
 		},
 		{
 			name: "six cpus returns four",
@@ -29,7 +29,7 @@ func TestNumberOfCPUs(t *testing.T) {
 		{
 			name: "four cpus returns two",
 			args: args{num: 4},
-			want: "1",
+			want: "2",
 		},
 		{
 			name: "two cpus returns one",

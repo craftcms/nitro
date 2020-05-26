@@ -4,9 +4,10 @@ package suggest
 // machine should be created with based on the
 // current systems CPU count at runtime.
 func NumberOfCPUs(num int) string {
-	// on 8 core systems, the num from runtime.NumCPU() will return
-	// 18. So we need to divide the number of CPUs by half
-	switch num / 2 {
+	// Go counts the number of logical CPUs with runtime.NumCPU()
+	// we are only concerned about low end CPUs where performance
+	// is really impacted.
+	switch num {
 	case 4:
 		return "2"
 	case 2:
