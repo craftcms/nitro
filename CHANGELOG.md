@@ -3,25 +3,24 @@
 ### Unreleased
 
 ## Added
-- Added support fpr setting up mailhog for local email testing. ([#49](https://github.com/craftcms/nitro/issues/49))
-- The `postgresql-client` and `mysql-client` are installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54)) ([#139](https://github.com/craftcms/nitro/issues/139))
-- Added the `install postgres`, `install mysql`, `install composer`, and `install mailhog` commands. 
-
+- The PostgreSQL and MySQL client tools are now installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54)) ([#139](https://github.com/craftcms/nitro/issues/139))
+- Added the `install postgres`, `install mysql`, `install composer`, and `install mailhog` commands.
+- Greatly improved support for Windows. 
+- Added support for MySQL 8.0. ([#97](https://github.com/craftcms/nitro/issues/97))
+- Added support for Ubuntu 20.04 on newly created machines.
 
 ## Changed
-- MySQL 8.0 is now a supported database engine. ([#97](https://github.com/craftcms/nitro/issues/97))
-- Creating new machines install Ubuntu 20.04 LTS by default.
 - Renamed `--no-backups` to `--skip-backup` on the `destroy` command.
-- `composer` is not installed during `init`. To install composer run `nitro install composer`.
+- Composer is no longer installed during `init` and can be installed by running `nitro install composer`.
 - When creating a new machine the default number of CPUs are suggested dynamically based on CPU count of the host machine.
 - When removing a site the sites configuration in `/etc/nginx/sites-available/<site-name>` is also removed.
-- MySQL 5 and 8 use separate conf directories based on the version (e.g. `/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
+- MySQL 5 and 8 now use separate conf directories based on the version (e.g. `/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
 - Removed `xdebug configure` and moved logic into the `xdebug on` command. 
 
 ## Fixed
 - Fixed an issue with the `apply` command was not removing directories inside the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
-- Resolved an issue where some `init` commands would return exit code 100. ([#96](https://github.com/craftcms/nitro/issues/96))
-- The OPcache PHP extension is now _really_ not installed by default anymore.
+- fixed an issue where some `init` commands would return exit code 100. ([#96](https://github.com/craftcms/nitro/issues/96))
+- The OPcache PHP extension is now _really_ not installed by default.
 
 ### 1.0.0-beta.4 - 2020-05-21
 
