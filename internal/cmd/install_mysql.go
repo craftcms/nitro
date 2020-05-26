@@ -25,7 +25,7 @@ func (v newMysqlValidator) ValidateVersion(version string) error {
 
 	for _, db := range v.cfg.Databases {
 		if version == db.Version {
-			return errors.New(fmt.Sprintf("mysql version %q is already installed", version))
+			return errors.New(fmt.Sprintf("MySQL version %q is already installed.", version))
 		}
 	}
 
@@ -35,7 +35,7 @@ func (v newMysqlValidator) ValidateVersion(version string) error {
 func (v newMysqlValidator) ValidatePort(port string) error {
 	for _, db := range v.cfg.Databases {
 		if port == db.Port {
-			return errors.New(fmt.Sprintf("mysql port %q is already in use", port))
+			return errors.New(fmt.Sprintf("MySQL port %q is already in use.", port))
 		}
 	}
 
@@ -63,7 +63,7 @@ var mysqlCommand = &cobra.Command{
 		validator := newMysqlValidator{cfg: cfg}
 
 		// ask for the version
-		version, err := p.Ask(fmt.Sprintf("Which version of MySQL should we install"), &prompt.InputOptions{
+		version, err := p.Ask(fmt.Sprintf("Enter the MySQL version to install"), &prompt.InputOptions{
 			Validator: validator.ValidateVersion,
 		})
 		if err != nil {
@@ -71,7 +71,7 @@ var mysqlCommand = &cobra.Command{
 		}
 
 		// ask for the port assignment
-		port, err := p.Ask(fmt.Sprintf("Which port should MySQL listen on"), &prompt.InputOptions{
+		port, err := p.Ask(fmt.Sprintf("Enter the MySQL port number"), &prompt.InputOptions{
 			Validator: validator.ValidatePort,
 		})
 		if err != nil {
@@ -87,7 +87,7 @@ var mysqlCommand = &cobra.Command{
 
 		// save the file
 		if err := cfg.Save(viper.ConfigFileUsed()); err != nil {
-			fmt.Println("Error saving the config file")
+			fmt.Println("Error saving the config file.")
 			return err
 		}
 
@@ -97,6 +97,7 @@ var mysqlCommand = &cobra.Command{
 		apply, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
 			Default:   "yes",
 			Validator: nil,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err

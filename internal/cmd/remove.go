@@ -85,6 +85,7 @@ var removeCommand = &cobra.Command{
 		applyChanges, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
 			Default:   "yes",
 			Validator: nil,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err

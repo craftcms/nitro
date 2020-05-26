@@ -38,7 +38,7 @@ var hostsCommand = &cobra.Command{
 		}
 
 		if sites == nil {
-			fmt.Println("There are no sites in the config file")
+			fmt.Println("There are no sites in the config file.")
 			return nil
 		}
 
@@ -54,7 +54,7 @@ var hostsCommand = &cobra.Command{
 
 		if flagDebug {
 			for _, domain := range domains {
-				fmt.Println("adding", domain, "to hosts file")
+				fmt.Println("Adding", domain, "to hosts file.")
 			}
 
 			return nil

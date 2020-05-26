@@ -48,7 +48,7 @@ var dbAddCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Which database type", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database type", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -57,7 +57,7 @@ var dbAddCommand = &cobra.Command{
 		}
 
 		// get the name
-		database, err := p.Ask("What should be the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
+		database, err := p.Ask("Enter the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ var dbAddCommand = &cobra.Command{
 			}
 		}
 
-		fmt.Println(fmt.Sprintf("Added database %q to %q", database, container))
+		fmt.Println(fmt.Sprintf("Added database %q to %q.", database, container))
 
 		return nil
 	},

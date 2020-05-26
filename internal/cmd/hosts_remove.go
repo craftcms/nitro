@@ -36,7 +36,7 @@ var hostsRemoveCommand = &cobra.Command{
 
 		if flagDebug {
 			for _, domain := range domains {
-				fmt.Println("removing", domain, "from hosts file")
+				fmt.Println("Removing", domain, "from hosts file.")
 			}
 
 			return nil

@@ -31,7 +31,7 @@ var renameCommand = &cobra.Command{
 
 		// ask to select a site
 		var site config.Site
-		_, i, err := p.Select("Which site do you want to rename", configFile.SitesAsList(), &prompt.SelectOptions{
+		_, i, err := p.Select("Select site to rename", configFile.SitesAsList(), &prompt.SelectOptions{
 			Default: 1,
 		})
 		if err != nil {
@@ -41,7 +41,7 @@ var renameCommand = &cobra.Command{
 
 		// ask for the new newHostname
 		var newHostname string
-		newHostname, err = p.Ask("What should the new hostname be", &prompt.InputOptions{
+		newHostname, err = p.Ask("Enter the new hostname", &prompt.InputOptions{
 			Validator: validate.Hostname,
 		})
 		if err != nil {
@@ -63,7 +63,7 @@ var renameCommand = &cobra.Command{
 			}
 		}
 
-		apply, err := p.Confirm("Apply changes from config", &prompt.InputOptions{Default: "yes"})
+		apply, err := p.Confirm("Apply changes from config", &prompt.InputOptions{Default: "yes", AppendQuestionMark: true})
 		if err != nil {
 			return err
 		}

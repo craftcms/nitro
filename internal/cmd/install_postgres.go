@@ -64,7 +64,7 @@ var postgresCommand = &cobra.Command{
 		validator := newPostgresValidator{cfg: cfg}
 
 		// ask for the version
-		version, err := p.Ask(fmt.Sprintf("Which version of PostgreSQL should we install"), &prompt.InputOptions{
+		version, err := p.Ask(fmt.Sprintf("Enter the PostgreSQL version to install"), &prompt.InputOptions{
 			Validator: validator.ValidateVersion,
 		})
 		if err != nil {
@@ -72,7 +72,7 @@ var postgresCommand = &cobra.Command{
 		}
 
 		// ask for the port assignment
-		port, err := p.Ask(fmt.Sprintf("Which port should PostgreSQL listen on"), &prompt.InputOptions{
+		port, err := p.Ask(fmt.Sprintf("Enter the PostgreSQL port number"), &prompt.InputOptions{
 			Validator: validator.ValidatePort,
 		})
 		if err != nil {
@@ -88,7 +88,7 @@ var postgresCommand = &cobra.Command{
 
 		// save the file
 		if err := cfg.Save(viper.ConfigFileUsed()); err != nil {
-			fmt.Println("Error saving the config file")
+			fmt.Println("Error saving the config file.")
 			return err
 		}
 
@@ -98,6 +98,7 @@ var postgresCommand = &cobra.Command{
 		apply, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
 			Default:   "yes",
 			Validator: nil,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err

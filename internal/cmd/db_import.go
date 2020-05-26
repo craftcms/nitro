@@ -38,7 +38,7 @@ var dbImportCommand = &cobra.Command{
 
 		// make sure the file exists
 		if !helpers.FileExists(fileAbsPath) {
-			return errors.New(fmt.Sprintf("Unable to locate the file %q", fileAbsPath))
+			return errors.New(fmt.Sprintf("Unable to locate the file %q.", fileAbsPath))
 		}
 
 		// which database engine?
@@ -63,7 +63,7 @@ var dbImportCommand = &cobra.Command{
 		case 1:
 			containerName = dbs[0]
 		default:
-			containerName, _, err = p.Select("Which database engine to import the backup", dbs, &prompt.SelectOptions{
+			containerName, _, err = p.Select("Select database engine", dbs, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -71,7 +71,7 @@ var dbImportCommand = &cobra.Command{
 			}
 		}
 
-		databaseName, err := p.Ask("What is the database name to create for the import", &prompt.InputOptions{Default: "", Validator: nil})
+		databaseName, err := p.Ask("Enter the database name to create for the import", &prompt.InputOptions{Default: "", Validator: nil})
 		if err != nil {
 			return err
 		}

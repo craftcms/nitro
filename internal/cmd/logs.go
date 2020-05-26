@@ -23,7 +23,7 @@ var logsCommand = &cobra.Command{
 		// define the flags
 		opts := []string{"nginx", "database", "docker"}
 
-		kind, _, err := p.Select("What type of logs", opts, &prompt.SelectOptions{
+		kind, _, err := p.Select("Select the type of logs", opts, &prompt.SelectOptions{
 			Default: 1,
 		})
 		if err != nil {
@@ -33,7 +33,7 @@ var logsCommand = &cobra.Command{
 		var actions []nitro.Action
 		switch kind {
 		case "docker":
-			containerName, err := p.Ask("What is the name of the container", &prompt.InputOptions{
+			containerName, err := p.Ask("Enter the name of the container", &prompt.InputOptions{
 				Default:   "",
 				Validator: nil,
 			})
@@ -50,7 +50,7 @@ var logsCommand = &cobra.Command{
 				return err
 			}
 			actions = append(actions, *dockerLogsAction)
-			fmt.Println("Here are the docker logs for", containerName, "...")
+			fmt.Println("Docker logs for", containerName, "...")
 		case "database":
 			var databases []config.Database
 			if err := viper.UnmarshalKey("databases", &databases); err != nil {
@@ -65,7 +65,7 @@ var logsCommand = &cobra.Command{
 				return errors.New("there are no databases to view logs from")
 			}
 
-			containerName, _, err := p.Select("Which database", dbs, &prompt.SelectOptions{
+			containerName, _, err := p.Select("Select database", dbs, &prompt.SelectOptions{
 				Default:   1,
 				Validator: nil,
 			})
@@ -78,15 +78,14 @@ var logsCommand = &cobra.Command{
 				return err
 			}
 			actions = append(actions, *dockerLogsAction)
-			fmt.Println("Here are the database logs for", containerName, "...")
+			fmt.Println("Database logs for", containerName, "...")
 		default:
-			fmt.Println("Here are the nginx logs...")
 			nginxLogsAction, err := nitro.LogsNginx(machine, flagNginxLogsKind)
 			if err != nil {
 				return err
 			}
 			actions = append(actions, *nginxLogsAction)
-			fmt.Println("Here are the nginx logs...")
+			fmt.Println("nginx logs...")
 		}
 
 		return nitro.Run(nitro.NewMultipassRunner("multipass"), actions)

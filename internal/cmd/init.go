@@ -40,7 +40,7 @@ var initCommand = &cobra.Command{
 		}
 
 		if existingConfig == false {
-			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes"})
+			initMachine, err := p.Confirm("Initialize the primary machine now", &prompt.InputOptions{Default: "yes", AppendQuestionMark: true})
 			if err != nil {
 				return err
 			}
@@ -57,6 +57,7 @@ var initCommand = &cobra.Command{
 		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
 			Default:   suggest.NumberOfCPUs(actual),
 			Validator: validate.NewCPUValidator(actual).Validate,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -66,6 +67,7 @@ var initCommand = &cobra.Command{
 		mem, err := p.Ask("How much memory", &prompt.InputOptions{
 			Default:   "4G",
 			Validator: validate.Memory,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -76,6 +78,7 @@ var initCommand = &cobra.Command{
 		di, err := p.Ask("How much disk space", &prompt.InputOptions{
 			Default:   "40G",
 			Validator: validate.DiskSize,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -89,6 +92,7 @@ var initCommand = &cobra.Command{
 				php, err := p.Ask("Which version of PHP", &prompt.InputOptions{
 					Default:   "7.4",
 					Validator: validate.PHPVersion,
+					AppendQuestionMark: true,
 				})
 
 				if err == nil {
@@ -114,6 +118,7 @@ var initCommand = &cobra.Command{
 				engine, err = p.Ask("Which database engine", &prompt.InputOptions{
 					Default:   "mysql",
 					Validator: validate.DatabaseEngine,
+					AppendQuestionMark: true,
 				})
 
 				if err == nil {
@@ -132,6 +137,7 @@ var initCommand = &cobra.Command{
 				defaultVersion := versions[0]
 				version, _ = p.Ask("Which version of "+engine, &prompt.InputOptions{
 					Default: defaultVersion,
+					AppendQuestionMark: true,
 				})
 
 				err := validate.DatabaseEngineAndVersion(engine, version)

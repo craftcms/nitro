@@ -48,7 +48,7 @@ var dbStartCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Which database should we start", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database to start", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -61,7 +61,7 @@ var dbStartCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println("Started database", container)
+		fmt.Println("Started database.", container)
 
 		return nil
 	},

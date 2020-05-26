@@ -51,7 +51,7 @@ var dbBackupCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Which database engine", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -89,7 +89,7 @@ var dbBackupCommand = &cobra.Command{
 			return errors.New("no databases to backup in " + container)
 		}
 
-		database, _, err := p.Select("Which database should we backup", dbs, &prompt.SelectOptions{Default: 1})
+		database, _, err := p.Select("Select database to backup", dbs, &prompt.SelectOptions{Default: 1})
 		if err != nil {
 			return err
 		}
@@ -179,7 +179,7 @@ var dbBackupCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Backup completed and stored in %q", backupsFolder+"/"+backupFileName))
+		fmt.Println(fmt.Sprintf("Backup completed and stored in %q.", backupsFolder+"/"+backupFileName))
 		// end action
 
 		return nil

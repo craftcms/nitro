@@ -38,7 +38,7 @@ var composerCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(fmt.Sprintf("Composer is now installed on %q", machine))
+		fmt.Println(fmt.Sprintf("Composer is now installed on %q.", machine))
 
 		return nil
 	},

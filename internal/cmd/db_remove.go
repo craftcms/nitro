@@ -48,7 +48,7 @@ var dbRemoveCommand = &cobra.Command{
 		case 1:
 			container = containers[0]
 		default:
-			container, _, err = p.Select("Which database should we remove", containers, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database to remove", containers, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
@@ -59,6 +59,7 @@ var dbRemoveCommand = &cobra.Command{
 		remove, err := p.Confirm("Are you sure you want to permanently remove the database "+container, &prompt.InputOptions{
 			Default:   "no",
 			Validator: nil,
+			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
@@ -79,7 +80,7 @@ var dbRemoveCommand = &cobra.Command{
 			return nil
 		}
 
-		fmt.Println("We did not remove the database ", container)
+		fmt.Println("There was a problem removing the database ", container)
 
 		return nil
 	},
