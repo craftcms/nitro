@@ -36,6 +36,8 @@ EndOfMessage
 max_allowed_packet=256M
 wait_timeout=86400
 default-authentication-plugin=mysql_native_password
+[mysqldump]
+column-statistics=0
 EndOfMessage
 
   echo "refresh script has completed!"
