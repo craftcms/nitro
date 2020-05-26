@@ -15,6 +15,21 @@ func RemoveSymlink(name, site string) (*Action, error) {
 	return &Action{
 		Type:       "exec",
 		UseSyscall: false,
+		Args:       []string{"exec", name, "--", "sudo", "rm", "/etc/nginx/sites-enabled/" + site},
+	}, nil
+}
+
+func RemoveNginxSiteAvailable(name, site string) (*Action, error) {
+	if err := validate.MachineName(name); err != nil {
+		return nil, err
+	}
+	if err := validate.Hostname(site); err != nil {
+		return nil, err
+	}
+
+	return &Action{
+		Type:       "exec",
+		UseSyscall: false,
 		Args:       []string{"exec", name, "--", "sudo", "rm", "/etc/nginx/sites-available/" + site},
 	}, nil
 }

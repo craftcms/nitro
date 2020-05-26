@@ -1,0 +1,82 @@
+package cmd
+
+import (
+	"errors"
+	"fmt"
+	"os/exec"
+	"strings"
+
+	"github.com/pixelandtonic/prompt"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/scripts"
+)
+
+var dbAddCommand = &cobra.Command{
+	Use:   "add",
+	Short: "Add a new databases",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+		mp, err := exec.LookPath("multipass")
+		if err != nil {
+			return err
+		}
+		p := prompt.NewPrompt()
+
+		script := scripts.New(mp, machine)
+
+		var cfg config.Config
+		if err := viper.Unmarshal(&cfg); err != nil {
+			return err
+		}
+
+		if len(cfg.Databases) == 0 {
+			return errors.New("there are no databases we can add to")
+		}
+
+		// get all of the docker containers by name
+		var containers []string
+		for _, db := range cfg.Databases {
+			containers = append(containers, db.Name())
+		}
+
+		// if there is only one
+		var container string
+		switch len(containers) {
+		case 1:
+			container = containers[0]
+		default:
+			container, _, err = p.Select("Which database type", containers, &prompt.SelectOptions{
+				Default: 1,
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		// get the name
+		database, err := p.Ask("What should be the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
+		if err != nil {
+			return err
+		}
+
+		// run the scripts
+		if strings.Contains(container, "mysql") {
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, container, database))
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, container, database))
+			if err != nil {
+				return err
+			}
+		}
+
+		fmt.Println(fmt.Sprintf("Added database %q to %q", database, container))
+
+		return nil
+	},
+}

@@ -7,50 +7,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-func TestGetInt(t *testing.T) {
-	type args struct {
-		key  string
-		flag int
-	}
-	tests := []struct {
-		name       string
-		keyToSet   string
-		valueToSet interface{}
-		args       args
-		want       int
-	}{
-		{
-			name: "can get the flag when viper is not set",
-			args: args{
-				key:  "some.key",
-				flag: 4,
-			},
-			want: 4,
-		},
-		{
-			name:       "can get the flag when viper is set",
-			keyToSet:   "some.key",
-			valueToSet: 5,
-			args: args{
-				key:  "some.key",
-				flag: 0,
-			},
-			want: 5,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.keyToSet != "" {
-				viper.Set(tt.keyToSet, tt.valueToSet)
-			}
-
-			if got := GetInt(tt.args.key, tt.args.flag); got != tt.want {
-				t.Errorf("GetString() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestGetString(t *testing.T) {
 	type args struct {
 		key  string
@@ -190,9 +146,6 @@ func TestConfig_RemoveSite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
 			}
@@ -212,8 +165,7 @@ func TestConfig_RemoveSite(t *testing.T) {
 }
 
 func TestConfig_AddMount(t *testing.T) {
-	// since paths are different across systems, we automate the ~ directory
-	t.Skip("skipping for now, need to update for relative paths")
+	// TODO fix this and add the full paths
 
 	type fields struct {
 		Name      string
@@ -301,9 +253,6 @@ func TestConfig_AddMount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -325,9 +274,6 @@ func TestConfig_AddSite(t *testing.T) {
 	type fields struct {
 		Name      string
 		PHP       string
-		CPUs      string
-		Disk      string
-		Memory    string
 		Mounts    []Mount
 		Databases []Database
 		Sites     []Site
@@ -361,9 +307,6 @@ func TestConfig_AddSite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -385,9 +328,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 	type fields struct {
 		Name      string
 		PHP       string
-		CPUs      string
-		Disk      string
-		Memory    string
 		Mounts    []Mount
 		Databases []Database
 		Sites     []Site
@@ -407,9 +347,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 			fields: fields{
 				Name:   "somename",
 				PHP:    "7.4",
-				CPUs:   "3",
-				Disk:   "20G",
-				Memory: "4G",
 				Mounts: []Mount{
 					{
 						Source: "./testdata/test-mount",
@@ -445,9 +382,6 @@ func TestConfig_RemoveMountBySiteWebroot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -519,9 +453,6 @@ func TestConfig_RemoveSite1(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -677,9 +608,6 @@ func TestConfig_MountExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -747,9 +675,6 @@ func TestConfig_SiteExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
@@ -821,9 +746,6 @@ func TestConfig_DatabaseExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
 				PHP:       tt.fields.PHP,
-				CPUs:      tt.fields.CPUs,
-				Disk:      tt.fields.Disk,
-				Memory:    tt.fields.Memory,
 				Mounts:    tt.fields.Mounts,
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,

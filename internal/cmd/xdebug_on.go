@@ -35,13 +35,13 @@ var xdebugOnCommand = &cobra.Command{
 		}
 		actions = append(actions, *restartPhpFpmAction)
 
-		fmt.Println("Enabling xdebug for", php, "on", machine)
+		fmt.Println("Enabling xdebug for PHP", php, "on", machine)
 
 		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
 			return err
 		}
 
-		fmt.Println("Xdebug was enabled for", php, "on", machine)
+		fmt.Println("Xdebug was enabled for PHP", php, "on", machine)
 
 		return nil
 	},

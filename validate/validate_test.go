@@ -293,6 +293,22 @@ func TestDatabaseVersion(t *testing.T) {
 			name: "supported engine and version does not return error",
 			args: args{
 				e: "mysql",
+				v: "8.0",
+			},
+			wantErr: false,
+		},
+		{
+			name: "supported engine and version does not return error",
+			args: args{
+				e: "mysql",
+				v: "8",
+			},
+			wantErr: false,
+		},
+		{
+			name: "supported engine and version does not return error",
+			args: args{
+				e: "mysql",
 				v: "5.8",
 			},
 			wantErr: false,

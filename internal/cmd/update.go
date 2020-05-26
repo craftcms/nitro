@@ -11,7 +11,7 @@ import (
 var updateCommand = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"upgrade"},
-	Short:   "Update a machine",
+	Short:   "Update machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 

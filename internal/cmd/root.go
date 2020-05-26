@@ -27,6 +27,7 @@ func init() {
 		initCommand,
 		addCommand,
 		sshCommand,
+		keysCommand,
 		updateCommand,
 		infoCommand,
 		stopCommand,
@@ -41,9 +42,11 @@ func init() {
 		removeCommand,
 		destroyCommand,
 		editCommand,
-		importCommand,
 		hostsCommand,
 		renameCommand,
+		dbCommand,
+		completionCmd,
+		installCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand, xdebugConfigureCommand)
 }

@@ -8,14 +8,14 @@ import (
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/config"
 )
 
 var removeCommand = &cobra.Command{
 	Use:   "remove",
-	Short: "Remove site from a machine",
+	Short: "Remove site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {

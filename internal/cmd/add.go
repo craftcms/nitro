@@ -16,10 +16,9 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a site to a machine",
+	Short: "Add a site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-
 		p := prompt.NewPrompt()
 		runner := nitro.NewMultipassRunner("multipass")
 
@@ -86,12 +85,11 @@ var addCommand = &cobra.Command{
 			webrootDir = flagWebroot
 		}
 
-		// create the vmWebRootPath (e.g. "/nitro/sites/"+ hostName + "/" | webrootName
-		webRootPath := fmt.Sprintf("/nitro/sites/%s/%s", hostname, webrootDir)
+		webRootPath := fmt.Sprintf("/home/ubuntu/sites/%s/%s", hostname, webrootDir)
 
 		// create a new mount
 		skipMount := true
-		mount := config.Mount{Source: absolutePath, Dest: "/nitro/sites/" + hostname}
+		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + hostname}
 		if configFile.MountExists(mount.Dest) {
 			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
 		} else {

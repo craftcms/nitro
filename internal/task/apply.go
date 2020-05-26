@@ -23,6 +23,12 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *unmountAction)
 			fmt.Println("Removing mount", mount.Source, "from", machine)
+
+			actions = append(actions, nitro.Action{
+				Type:       "exec",
+				UseSyscall: false,
+				Args:       []string{"exec", machine, "--", "rm", "-rf", mount.Dest},
+			})
 		}
 	}
 
@@ -47,6 +53,13 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 				return nil, err
 			}
 			actions = append(actions, *removeSymlink)
+
+			// remove symlink
+			removeSiteAvailable, err := nitro.RemoveNginxSiteAvailable(machine, site.Hostname)
+			if err != nil {
+				return nil, err
+			}
+			actions = append(actions, *removeSiteAvailable)
 
 			// reload nginx
 			reloadNginxAction, err := nitro.NginxReload(machine)
@@ -119,11 +132,6 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 			}
 			actions = append(actions, *createContainer)
 
-			setUserPermissions, err := nitro.SetDatabaseUserPermissions(machine, database)
-			if err != nil {
-				return nil, err
-			}
-			actions = append(actions, *setUserPermissions)
 			fmt.Println("Creating database", database.Name(), "on", machine)
 		}
 	}

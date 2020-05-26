@@ -5,8 +5,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -71,65 +69,6 @@ func Mounts(name string, b []byte) ([]config.Mount, error) {
 	}
 
 	return mounts, nil
-}
-
-func ExistingContainer(f Finder, database config.Database) (*config.Database, error) {
-	output, err := f.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	if strings.Contains(string(output), "exists") {
-		return &database, nil
-	}
-
-	return nil, nil
-}
-
-func ContainersToCreate(machine string, cfg config.Config) ([]config.Database, error) {
-	path, err := exec.LookPath("multipass")
-	if err != nil {
-		return nil, err
-	}
-
-	var dbs []config.Database
-	for _, db := range cfg.Databases {
-		c := exec.Command(path, []string{"exec", machine, "--", "sudo", "bash", "/opt/nitro/scripts/docker-container-exists.sh", db.Name()}...)
-		output, err := c.Output()
-		if err != nil {
-			return nil, err
-		}
-
-		if !strings.Contains(string(output), "exists") {
-			dbs = append(dbs, db)
-		}
-	}
-
-	return dbs, nil
-}
-
-// SitesEnabled takes a finder which is a command executed
-// by the multipass cli tool that outputs the contents
-// (symlinks) or sites-enabled and returns sites.
-func SitesEnabled(f Finder) ([]config.Site, error) {
-	out, err := f.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	// parse the out
-	var sites []config.Site
-	sc := bufio.NewScanner(strings.NewReader(string(out)))
-	for sc.Scan() {
-		if l := sc.Text(); l != "" {
-			sp := strings.Split(strings.TrimSpace(sc.Text()), "/")
-			if h := sp[len(sp)-1]; h != "default" {
-				sites = append(sites, config.Site{Hostname: h})
-			}
-		}
-	}
-
-	return sites, nil
 }
 
 // PHPVersion is used to get the "current" or "default" version

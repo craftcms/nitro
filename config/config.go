@@ -8,16 +8,13 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/internal/helpers"
 )
 
 type Config struct {
 	PHP       string     `yaml:"php"`
-	CPUs      string     `yaml:"-"`
-	Disk      string     `yaml:"-"`
-	Memory    string     `yaml:"-"`
 	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Databases []Database `yaml:"databases"`
 	Sites     []Site     `yaml:"sites,omitempty"`
@@ -51,6 +48,7 @@ func (c *Config) GetExpandedMounts() []Mount {
 // dest or a parent of an existing dest
 func (c *Config) MountExists(dest string) bool {
 	for _, mount := range c.Mounts {
+		// TODO expand the paths for the mounts?
 		if mount.IsExact(dest) || mount.IsParent(dest) {
 			return true
 		}
@@ -59,6 +57,8 @@ func (c *Config) MountExists(dest string) bool {
 	return false
 }
 
+// SiteExists will check if a site exists withing the current config,
+// it uses .IsExact to verify the site hostname and webroot.
 func (c *Config) SiteExists(site Site) bool {
 	for _, s := range c.Sites {
 		if s.IsExact(site) {
@@ -69,6 +69,8 @@ func (c *Config) SiteExists(site Site) bool {
 	return false
 }
 
+// DatabaseExists check a provided database against the config file
+// to see if the database already exists.
 func (c *Config) DatabaseExists(database Database) bool {
 	for _, d := range c.Databases {
 		if d.Engine == database.Engine && d.Version == database.Version && d.Port == database.Port {
@@ -79,6 +81,8 @@ func (c *Config) DatabaseExists(database Database) bool {
 	return false
 }
 
+// SitesAsList returns the sites a slice of strings
+// which is useful for select lists.
 func (c *Config) SitesAsList() []string {
 	var s []string
 	for _, site := range c.Sites {
@@ -127,6 +131,9 @@ func (c *Config) AddMount(m Mount) error {
 	return nil
 }
 
+// RenameSite takes a site and a hostname and will replace the
+// hostname in the config file for that site. If the site
+// cannot be found, it will return an error.
 func (c *Config) RenameSite(site Site, hostname string) error {
 	for i, s := range c.Sites {
 		if s.Hostname == site.Hostname {
@@ -157,6 +164,8 @@ func (c *Config) RenameMountBySite(site Site) error {
 	return errors.New("unable to find the mount for the site " + site.Hostname)
 }
 
+// RemoveSite takes a hostname and will remove the site by its
+// hostname from the config file.
 func (c *Config) RemoveSite(hostname string) error {
 	for i := len(c.Sites) - 1; i >= 0; i-- {
 		site := c.Sites[i]
@@ -256,10 +265,13 @@ func GetString(key, flag string) string {
 	return flag
 }
 
-func GetInt(key string, flag int) int {
-	if viper.IsSet(key) && flag == 0 {
-		return viper.GetInt(key)
+// Read is used to read in a config file or
+// return an error
+func Read() (*Config, error) {
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, err
 	}
 
-	return flag
+	return &cfg, nil
 }

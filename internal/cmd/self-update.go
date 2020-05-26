@@ -17,7 +17,7 @@ import (
 
 var selfUpdateCommand = &cobra.Command{
 	Use:   "self-update",
-	Short: "Update Nitro to the latest",
+	Short: "Update Nitro",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		currentOs := runtime.GOOS
 		fileUrl := "https://raw.githubusercontent.com/craftcms/nitro/master/install.sh"
