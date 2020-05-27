@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+### 1.0.0-beta.6 - 2020-05-26
+
+## Changed
+- Removed an unnecessary debug command.
+
 ### 1.0.0-beta.5 - 2020-05-26
 
 ## Added
