@@ -14,6 +14,7 @@ const (
 	FmtDockerMysqlCreateDatabaseIfNotExists   = `docker exec -i %s mysql -unitro -pnitro -e "CREATE DATABASE IF NOT EXISTS %s;"`
 	FmtDockerPostgresCreateDatabase           = `docker exec -i %s psql --username nitro -c "CREATE DATABASE %s;"`
 	FmtDockerMysqlImportDatabase              = `cat %s | docker exec -i %s mysql -unitro -pnitro %s --init-command="SET autocommit=0;"`
+	FmtDockerPostgresImportDatabase           = `docker exec -i %s psql -U nitro -h 127.0.0.1 %s < %s`
 	FmtDockerMysqlShowAllDatabases            = `docker exec -i %s mysql -unitro -pnitro -e "SHOW DATABASES;"`
 	FmtDockerPostgresShowAllDatabases         = `docker exec -i %s psql --username nitro --command "SELECT datname FROM pg_database WHERE datistemplate = false;"`
 	DockerListContainerNames                  = `docker container ls --all --format '{{ .Names }}'`
