@@ -42,6 +42,12 @@ var keysCommand = &cobra.Command{
 			return err
 		}
 
+		// if there are no keys
+		if len(keys) == 0 {
+			fmt.Println("Unable to find keys to add")
+			return nil
+		}
+
 		// create the options to present
 		var opts []string
 		for k, v := range keys {
