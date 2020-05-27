@@ -125,14 +125,13 @@ var applyCommand = &cobra.Command{
 			return nil
 		}
 
-		// windows requires admin - pass it along
-		if runtime.GOOS == "windows" {
+		switch runtime.GOOS {
+		case "windows":
 			return hostsCommand.RunE(cmd, args)
-		}
-
-		// we are on nix, run the hosts command
-		if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
-			return err
+		default:
+			if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
+				return err
+			}
 		}
 
 		return nil
