@@ -82,7 +82,7 @@ var removeCommand = &cobra.Command{
 		}
 		// END HACK
 
-		applyChanges, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
+		apply, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
 			Default:   "yes",
 			Validator: nil,
 			AppendQuestionMark: true,
@@ -91,7 +91,7 @@ var removeCommand = &cobra.Command{
 			return err
 		}
 
-		if applyChanges {
+		if apply {
 			fmt.Println("Applying changes from the config file...")
 			return applyCommand.RunE(cmd, args)
 		}

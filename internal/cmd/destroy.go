@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 
@@ -19,7 +18,6 @@ import (
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
@@ -209,18 +207,9 @@ var destroyCommand = &cobra.Command{
 			return nil
 		}
 
-		cmds := []string{"hosts", "remove"}
-		for _, domain := range domains {
-			cmds = append(cmds, domain)
-		}
-
 		fmt.Println("Removing sites from your hosts file.")
 
-		if runtime.GOOS == "windows" {
-			return hostsRemoveCommand.RunE(cmd, cmds)
-		}
-
-		return runas.Elevated(machine, cmds)
+		return hostsRemoveCommand.RunE(cmd, domains)
 	},
 }
 

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -12,7 +11,6 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/find"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
 	"github.com/craftcms/nitro/internal/task"
 	"github.com/craftcms/nitro/internal/webroot"
@@ -125,12 +123,7 @@ var applyCommand = &cobra.Command{
 			return nil
 		}
 
-		// if this is windows, its always root - we should clean this up eventually
-		if runtime.GOOS == "windows" {
-			return hostsCommand.RunE(cmd, args)
-		}
-
-		return runas.Elevated(machine, []string{"hosts"})
+		return hostsCommand.RunE(cmd, args)
 	},
 }
 

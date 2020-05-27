@@ -13,7 +13,6 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/suggest"
 	"github.com/craftcms/nitro/validate"
 )
@@ -229,14 +228,8 @@ var initCommand = &cobra.Command{
 
 		// if there are sites, edit the hosts file
 		if len(sites) > 0 {
-			if runtime.GOOS == "windows" {
-				if err := hostsCommand.RunE(cmd, args); err != nil {
-					fmt.Println("Unable to edit the hosts file, please edit it manually or run `nitro apply`")
-				}
-			} else {
-				if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
-					fmt.Println("Unable to edit the hosts file, please edit it manually or run `nitro apply`")
-				}
+			if err := hostsCommand.RunE(cmd, args); err != nil {
+				return err
 			}
 		}
 
