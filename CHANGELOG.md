@@ -4,6 +4,7 @@
 
 ## Fixed
 - Set proper permissions when transferring keys to a virtual machine. ([#154](https://github.com/craftcms/nitro/issues/154))
+- Fixed an error when `init` would not edit the hosts file and output nitro commands instead. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
 
 ### 1.0.0-beta.6 - 2020-05-26
 

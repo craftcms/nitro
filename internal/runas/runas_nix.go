@@ -8,7 +8,7 @@ import (
 )
 
 // Elevated allows the command to be run as sudo user. We
-// explicit pass the name of the machine, and args that
+// explicit pass the name of the machine and args that
 // we are going to pass to the nitro cli.
 // (e.g sudo nitro -m machine-name hosts remove)
 func Elevated(machine string, args []string) error {
