@@ -123,7 +123,7 @@ func (c *Config) AddMount(m Mount) error {
 		if err != nil {
 			return err
 		}
-		m.Dest = "/nitro/sites/" + dirname
+		m.Dest = "/home/ubuntu/sites/" + dirname
 	}
 
 	c.Mounts = append(c.Mounts, m)
