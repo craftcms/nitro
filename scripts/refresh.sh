@@ -7,8 +7,8 @@ if [ -z "$version" ]; then
 fi
 
 # scripts for beta 5
-if [ "$version" == "1.0.0-beta.5" ]; then
-  echo "running sync script for 1.0.0-beta.5"
+if [ "$version" == "1.0.0-beta.5" ] || [ "$version" == "1.0.0-beta.6" ]; then
+  echo "running sync script for 1.0.0-beta.6"
 
   echo "installing mysql-client and postgresql-client tools"
   apt install -y mysql-client postgresql-client
