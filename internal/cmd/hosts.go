@@ -3,12 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/craftcms/nitro/internal/runas"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
-	"os"
-	"runtime"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/hosts"
@@ -21,12 +20,6 @@ var hostsCommand = &cobra.Command{
 	Hidden:       true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-
-		if runtime.GOOS != "windows" {
-			if err := runas.Elevated(machine, args); err != nil {
-				return err
-			}
-		}
 
 		if !flagDebug {
 			uid := os.Geteuid()
