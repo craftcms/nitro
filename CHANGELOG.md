@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+## Fixed
+- Set proper permissions when transferring keys to a virtual machine. ([#154](https://github.com/craftcms/nitro/issues/154))
+
 ### 1.0.0-beta.6 - 2020-05-26
 
 ## Changed
