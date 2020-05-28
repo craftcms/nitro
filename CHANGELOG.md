@@ -3,9 +3,9 @@
 ### Unreleased
 
 ## Fixed
-- Set proper permissions when transferring keys to a virtual machine. ([#154](https://github.com/craftcms/nitro/issues/154))
-- Fixed an error when `init` would not edit the hosts file and output nitro commands instead. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
-- Fixed an issue where using `db import` would not import for PostgreSQL.
+- Fixed a bug where keys transferred into the machine did not have the proper permissions. ([#154](https://github.com/craftcms/nitro/issues/154))
+- Fixed a bug where the `init` command was not editing the hosts file. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
+- Fixed a bug where the `db import` command was not working on PostgreSQL.
 
 ### 1.0.0-beta.6 - 2020-05-26
 
