@@ -80,7 +80,7 @@ var applyCommand = &cobra.Command{
 			case true:
 				fmt.Println(fmt.Sprintf("Webroot for %q matches", site.Hostname))
 			default:
-				fmt.Println(fmt.Sprintf("Webroot for %q does not match, found %q", site.Hostname, found))
+				fmt.Println(fmt.Sprintf("Webroot for %q does not match", site.Hostname))
 				site.Webroot = found
 			}
 
