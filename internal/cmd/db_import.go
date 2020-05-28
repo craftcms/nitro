@@ -71,7 +71,7 @@ var dbImportCommand = &cobra.Command{
 			}
 		}
 
-		databaseName, err := p.Ask("Enter the database name to create for the import", &prompt.InputOptions{Default: "", Validator: nil})
+		databaseName, err := p.Ask("Enter the database name to create for the import", &prompt.InputOptions{Validator: nil})
 		if err != nil {
 			return err
 		}
@@ -102,21 +102,31 @@ var dbImportCommand = &cobra.Command{
 
 		script := scripts.New(mp, machine)
 
-		if strings.Contains(containerName, "mysql") {
-			_, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName))
-			if err != nil {
+		switch strings.Contains(containerName, "mysql") {
+		case false:
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, containerName, databaseName)); err != nil {
+				fmt.Println(output)
 				return err
 			}
+
 			fmt.Println("Created database", databaseName)
 
-			_, err = script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName))
-			if err != nil {
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, containerName, databaseName, fileFullPath)); err != nil {
+				fmt.Println(output)
+				return err
+			}
+		default:
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName)); err != nil {
+				fmt.Println(output)
 				return err
 			}
 
-			fmt.Println("Successfully imported the database backup into", containerName)
+			fmt.Println("Created database", databaseName)
 
-			return nil
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName)); err != nil {
+				fmt.Println(output)
+				return err
+			}
 		}
 
 		fmt.Println("Successfully imported the database backup into", containerName)

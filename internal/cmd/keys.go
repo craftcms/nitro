@@ -42,6 +42,12 @@ var keysCommand = &cobra.Command{
 			return err
 		}
 
+		// if there are no keys
+		if len(keys) == 0 {
+			fmt.Println("Unable to find keys to add")
+			return nil
+		}
+
 		// create the options to present
 		var opts []string
 		for k, v := range keys {
@@ -69,9 +75,22 @@ var keysCommand = &cobra.Command{
 					Args: []string{"transfer", path + k, machine + ":/home/ubuntu/.ssh/" + k},
 				})
 
+				// set permissions to 600
+				actions = append(actions, nitro.Action{
+					Type: "exec",
+					Args: []string{"exec", machine, "--", "chmod", "600", "/home/ubuntu/.ssh/" + k},
+				})
+
+				// transfer .pub
 				actions = append(actions, nitro.Action{
 					Type: "transfer",
 					Args: []string{"transfer", path + v, machine + ":/home/ubuntu/.ssh/" + v},
+				})
+
+				// set permissions to 644
+				actions = append(actions, nitro.Action{
+					Type: "exec",
+					Args: []string{"exec", machine, "--", "chmod", "644", "/home/ubuntu/.ssh/" + v},
 				})
 			}
 		}

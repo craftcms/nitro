@@ -15,7 +15,7 @@ func PathName(path string) (string, error) {
 		return "", err
 	}
 
-	s := strings.Split(p, string(os.PathSeparator))
+	s := strings.Split(p, "/")
 
 	if len(s) < 2 {
 		return "", errors.New("unexpected wrong number of paths")

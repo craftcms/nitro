@@ -19,7 +19,7 @@ var hostsRemoveCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !flagDebug {
 			uid := os.Geteuid()
-			if uid != 0 {
+			if (uid != 0) && (uid != -1) {
 				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
 			}
 		}

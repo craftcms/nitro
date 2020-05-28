@@ -3,12 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
-	"os"
-
-	"github.com/craftcms/nitro/internal/runas"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/hosts"
@@ -16,9 +15,9 @@ import (
 )
 
 var hostsCommand = &cobra.Command{
-	Use:    "hosts",
-	Short:  "Edit hosts file",
-	Hidden: true,
+	Use:          "hosts",
+	Short:        "Edit hosts file",
+	Hidden:       true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 
@@ -27,10 +26,6 @@ var hostsCommand = &cobra.Command{
 			if (uid != 0) && (uid != -1) {
 				return errors.New("you do not appear to be running this command as root, so we cannot modify your hosts file")
 			}
-		}
-
-		if err := runas.Elevated(machine, args); err != nil {
-			return err
 		}
 
 		// get the requested machines ip

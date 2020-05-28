@@ -13,6 +13,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/suggest"
 	"github.com/craftcms/nitro/validate"
 )
@@ -53,8 +54,8 @@ var initCommand = &cobra.Command{
 		var cfg config.Config
 		actual := runtime.NumCPU()
 		cpuCores, err := p.Ask("How many CPU cores", &prompt.InputOptions{
-			Default:   suggest.NumberOfCPUs(actual),
-			Validator: validate.NewCPUValidator(actual).Validate,
+			Default:            suggest.NumberOfCPUs(actual),
+			Validator:          validate.NewCPUValidator(actual).Validate,
 			AppendQuestionMark: true,
 		})
 		if err != nil {
@@ -63,8 +64,8 @@ var initCommand = &cobra.Command{
 
 		// ask how much memory
 		mem, err := p.Ask("How much memory", &prompt.InputOptions{
-			Default:   "4G",
-			Validator: validate.Memory,
+			Default:            "4G",
+			Validator:          validate.Memory,
 			AppendQuestionMark: true,
 		})
 		if err != nil {
@@ -74,8 +75,8 @@ var initCommand = &cobra.Command{
 
 		// how much disk space
 		di, err := p.Ask("How much disk space", &prompt.InputOptions{
-			Default:   "40G",
-			Validator: validate.DiskSize,
+			Default:            "40G",
+			Validator:          validate.DiskSize,
 			AppendQuestionMark: true,
 		})
 		if err != nil {
@@ -88,8 +89,8 @@ var initCommand = &cobra.Command{
 			var loop bool
 			for ok := true; ok; ok = !loop {
 				php, err := p.Ask("Which version of PHP", &prompt.InputOptions{
-					Default:   "7.4",
-					Validator: validate.PHPVersion,
+					Default:            "7.4",
+					Validator:          validate.PHPVersion,
 					AppendQuestionMark: true,
 				})
 
@@ -114,8 +115,8 @@ var initCommand = &cobra.Command{
 			var engine string
 			for ok := true; ok; ok = !dbEngineLoop {
 				engine, err = p.Ask("Which database engine", &prompt.InputOptions{
-					Default:   "mysql",
-					Validator: validate.DatabaseEngine,
+					Default:            "mysql",
+					Validator:          validate.DatabaseEngine,
 					AppendQuestionMark: true,
 				})
 
@@ -134,7 +135,7 @@ var initCommand = &cobra.Command{
 				versions := nitro.DBVersions[engine]
 				defaultVersion := versions[0]
 				version, _ = p.Ask("Which version of "+engine, &prompt.InputOptions{
-					Default: defaultVersion,
+					Default:            defaultVersion,
 					AppendQuestionMark: true,
 				})
 
@@ -228,14 +229,16 @@ var initCommand = &cobra.Command{
 
 		// if there are sites, edit the hosts file
 		if len(sites) > 0 {
-			//nitro, err := exec.LookPath("nitro")
-			//if err != nil {
-			//	return err
-			//}
-
-			//if err := sudo.RunCommand(nitro, machine, "hosts"); err != nil {
-			//	return err
-			//}
+			switch runtime.GOOS {
+			case "windows":
+				if err := hostsCommand.RunE(cmd, args); err != nil {
+					return err
+				}
+			default:
+				if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
+					return err
+				}
+			}
 		}
 
 		return infoCommand.RunE(cmd, args)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -46,8 +47,8 @@ var destroyCommand = &cobra.Command{
 		}
 
 		confirmed, err := p.Confirm("Are you sure you want to permanently destroy the "+machine+" machine", &prompt.InputOptions{
-			Default:   "no",
-			Validator: nil,
+			Default:            "no",
+			Validator:          nil,
 			AppendQuestionMark: true,
 		})
 		if err != nil {
@@ -96,7 +97,7 @@ var destroyCommand = &cobra.Command{
 					continue
 				}
 
-				var backupErrorMessage = "There was a problem backing up the databases.\nIf you wish to destroy "+machine+" without backups use --skip-backup."
+				var backupErrorMessage = "There was a problem backing up the databases.\nIf you wish to destroy " + machine + " without backups use --skip-backup."
 
 				// backup each database
 				for _, database := range dbs {
@@ -208,15 +209,18 @@ var destroyCommand = &cobra.Command{
 			return nil
 		}
 
-		cmds := []string{"hosts", "remove"}
-		for _, domain := range domains {
-			cmds = append(cmds, domain)
-		}
-
-
 		fmt.Println("Removing sites from your hosts file.")
 
-		return runas.Elevated(machine, cmds)
+		switch runtime.GOOS {
+		case "windows":
+			return hostsRemoveCommand.RunE(cmd, domains)
+		default:
+			if err := runas.Elevated(machine, append([]string{"hosts", "remove"}, domains...)); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	},
 }
 
