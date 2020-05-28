@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+### 1.0.0-beta.7 - 2020-05-27
+
 ## Fixed
 - Fixed a bug where keys transferred into the machine did not have the proper permissions. ([#154](https://github.com/craftcms/nitro/issues/154))
 - Fixed a bug where the `init` command was not editing the hosts file. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
