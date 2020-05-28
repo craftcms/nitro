@@ -81,23 +81,23 @@ write_files:
               # FastCGI params
               fastcgi_param CRAFT_NITRO 1;
               fastcgi_param DB_USER nitro;
-			  fastcgi_param DB_PASSWORD nitro;
-			  fastcgi_param HTTP_PROXY "";
-			  fastcgi_param HTTP_HOST CHANGESERVERNAME;
-	
-			  # Don't allow browser caching of dynamically generated content
-			  add_header Last-Modified $date_gmt;
-			  add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
-			  if_modified_since off;
-			  expires off;
-			  etag off;
-	
-			  fastcgi_intercept_errors off;
-			  fastcgi_buffer_size 16k;
-			  fastcgi_buffers 4 16k;
-			  fastcgi_connect_timeout 240;
-			  fastcgi_send_timeout 240;
-			  fastcgi_read_timeout 240;
+              fastcgi_param DB_PASSWORD nitro;
+              fastcgi_param HTTP_PROXY "";
+              fastcgi_param HTTP_HOST CHANGESERVERNAME;
+    
+              # Don't allow browser caching of dynamically generated content
+              add_header Last-Modified $date_gmt;
+              add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+              if_modified_since off;
+              expires off;
+              etag off;
+    
+              fastcgi_intercept_errors off;
+              fastcgi_buffer_size 16k;
+              fastcgi_buffers 4 16k;
+              fastcgi_connect_timeout 240;
+              fastcgi_send_timeout 240;
+              fastcgi_read_timeout 240;
           }
 
           # Disable reading of Apache .htaccess files
