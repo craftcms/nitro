@@ -1,9 +1,11 @@
 package config
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -809,6 +811,88 @@ func TestConfig_FindMountBySiteWebroot(t *testing.T) {
 			}
 			if got := c.FindMountBySiteWebroot(tt.args.webroot); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FindMountBySiteWebroot() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_AlreadyMounted(t *testing.T) {
+	_, err := homedir.Dir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	current, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type fields struct {
+		PHP       string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		m Mount
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			name: "mounts that have a parent path return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: current + "/testdata/new-mount",
+						Dest:   "/home/ubuntu/sites/example",
+					},
+				},
+			},
+			args: args{m: Mount{
+				Source: current,
+				Dest:   "/home/ubuntu/sites/example",
+			}},
+			want: true,
+		},
+		{
+			name: "mounts that exists return true",
+			fields: fields{
+				Mounts: []Mount{
+					{
+						Source: current,
+						Dest:   "/home/ubuntu/sites/example",
+					},
+				},
+			},
+			args: args{m: Mount{
+				Source: current,
+				Dest:   "/home/ubuntu/sites/example",
+			}},
+			want: true,
+		},
+		{
+			name:   "mounts that do not exist return false",
+			fields: fields{Mounts: nil},
+			args: args{m: Mount{
+				Source: current,
+				Dest:   "/home/ubuntu/sites/example.site",
+			}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.AlreadyMounted(tt.args.m); got != tt.want {
+				t.Errorf("AlreadyMounted() = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}
