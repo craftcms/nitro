@@ -40,9 +40,11 @@ var removeCommand = &cobra.Command{
 		site = sites[i]
 
 		// find the mount
+		removeMount := true
 		mount := configFile.FindMountBySiteWebroot(site.Webroot)
 		if mount == nil {
-			return errors.New("unable to find an associated mount")
+			fmt.Println("unable to find an associated mount")
+			removeMount = false
 		}
 
 		// remove site
@@ -51,8 +53,10 @@ var removeCommand = &cobra.Command{
 		}
 
 		// remove the mount
-		if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
-			return err
+		if removeMount {
+			if err := configFile.RemoveMountBySiteWebroot(site.Webroot); err != nil {
+				return err
+			}
 		}
 
 		// START HACK
@@ -83,8 +87,8 @@ var removeCommand = &cobra.Command{
 		// END HACK
 
 		apply, err := p.Confirm("Apply changes from config now", &prompt.InputOptions{
-			Default:   "yes",
-			Validator: nil,
+			Default:            "yes",
+			Validator:          nil,
 			AppendQuestionMark: true,
 		})
 		if err != nil {
