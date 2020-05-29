@@ -8,12 +8,6 @@ import (
 )
 
 func TestAbsPath(t *testing.T) {
-	// skip if this is a buddy build
-	if os.Getenv("BUDDY") != "" {
-		t.Log("Skipping buddy builds for now")
-		t.Skip("Skipping buddy builds for now")
-	}
-
 	home, err := homedir.Dir()
 	if err != nil {
 		t.Fatal(err)
@@ -41,8 +35,8 @@ func TestAbsPath(t *testing.T) {
 		},
 		{
 			name:    "can resolve tilde path references",
-			args:    args{path: "~/go/src/github.com/craftcms/nitro/internal/resolve", home: home},
-			want:    dir,
+			args:    args{path: "~/", home: home},
+			want:    home,
 			wantErr: false,
 		},
 		{
