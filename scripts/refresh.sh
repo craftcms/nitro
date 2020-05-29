@@ -6,6 +6,80 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
+# script for beta 7
+if [ "$version" == "1.0.0-beta.7" ]; then
+  echo "running script for 1.0.0-beta.7"
+
+  cat >"/opt/nitro/nginx/template.conf" <<-EndOfMessage
+# Hat tip to https://github.com/nystudio107/nginx-craft
+
+server {
+  # Listen for both IPv4 & IPv6 on port 80
+  listen 80;
+  listen [::]:80;
+
+  # General virtual host settings
+  server_name CHANGESERVERNAME;
+  root CHANGEWEBROOTDIR;
+  index index.html index.htm index.php;
+  charset utf-8;
+
+  # Enable serving of static gzip files as per: http://nginx.org/en/docs/http/ngx_http_gzip_static_module.html
+  gzip_static  on;
+
+  # Enable server-side includes as per: http://nginx.org/en/docs/http/ngx_http_ssi_module.html
+  ssi on;
+
+  # Disable limits on the maximum allowed size of the client request body
+  client_max_body_size 0;
+
+  # 404 error handler
+  error_page 404 /index.php$is_args$args;
+
+  # Root directory location handler
+  location / {
+    try_files $uri/index.html $uri $uri/ /index.php$is_args$args;
+  }
+
+  # php-fpm configuration
+  location ~ [^/]\.php(/|$) {
+    include snippets/fastcgi-php.conf;
+
+    fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
+
+    # FastCGI params
+    fastcgi_param CRAFT_NITRO 1;
+    fastcgi_param DB_USER nitro;
+    fastcgi_param DB_PASSWORD nitro;
+    fastcgi_param HTTP_PROXY "";
+    fastcgi_param HTTP_HOST CHANGESERVERNAME;
+
+    # Don't allow browser caching of dynamically generated content
+    add_header Last-Modified $date_gmt;
+    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+    if_modified_since off;
+    expires off;
+    etag off;
+
+    fastcgi_intercept_errors off;
+    fastcgi_buffer_size 16k;
+    fastcgi_buffers 4 16k;
+    fastcgi_connect_timeout 240;
+    fastcgi_send_timeout 240;
+    fastcgi_read_timeout 240;
+  }
+
+  # Disable reading of Apache .htaccess files
+  location ~ /\.ht {
+    deny all;
+  }
+
+  # Misc settings
+  sendfile off;
+}
+EndOfMessage
+fi
+
 # scripts for beta 5
 if [ "$version" == "1.0.0-beta.5" ] || [ "$version" == "1.0.0-beta.6" ]; then
   echo "running sync script for 1.0.0-beta.6"
