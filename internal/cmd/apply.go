@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -16,7 +17,6 @@ import (
 	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
 	"github.com/craftcms/nitro/internal/task"
-	"github.com/craftcms/nitro/internal/webroot"
 )
 
 var applyCommand = &cobra.Command{
@@ -63,60 +63,43 @@ var applyCommand = &cobra.Command{
 
 		script := scripts.New(multipass, machine)
 
-		// find sites that are created
 		var sites []config.Site
-		for _, site := range configFile.Sites {
-			shouldAppend := false
-			// check if its enabled
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteEnabled, site.Hostname)); err == nil {
-				if strings.Contains(output, "exists") {
-					shouldAppend = true
+
+		// find sites that are enabled
+		var confs []string
+		if output, err := script.Run(false, `ls /etc/nginx/sites-enabled`); err == nil {
+			sc := bufio.NewScanner(strings.NewReader(output))
+			for sc.Scan() {
+				if sc.Text() == "default" {
+					continue
+				}
+
+				confs = append(confs, strings.TrimSpace(sc.Text()))
+			}
+		}
+
+		// generate a list of sites that
+		for _, conf := range confs {
+			s := config.Site{}
+			// get the webroot
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, conf)); err == nil {
+				sp := strings.Fields(output)
+				if len(sp) >= 2 {
+					s.Webroot = strings.TrimRight(sp[1], ";")
 				}
 			}
 
-			// check if its available
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname)); err == nil {
-				if strings.Contains(output, "exists") {
-					shouldAppend = true
+			// get the server_name
+			if output, err := script.Run(false, fmt.Sprintf(`grep "server_name " /etc/nginx/sites-available/%s | while read -r line; do echo "$line"; done`, conf)); err == nil {
+				sp := strings.Fields(output)
+				if len(sp) >= 2 {
+					s.Hostname = strings.TrimRight(sp[1], ";")
 				}
 			}
 
-			// check the the
-			p := strings.Split(site.Webroot, "/")
-			if len(p) > 3 {
-				sitedir := p[len(p)-2]
-				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteEnabled, sitedir)); err == nil {
-					if strings.Contains(output, "exists") {
-						shouldAppend = true
-					}
-				}
-
-				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, sitedir)); err == nil {
-					if strings.Contains(output, "exists") {
-						shouldAppend = true
-					}
-				}
-			}
-
-			// see if the webroot is the same
-			var matches bool
-			var found string
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname)); err != nil {
-				return err
-			} else {
-				matches, found = webroot.Matches(output, site.Webroot)
-			}
-
-			switch matches {
-			case true:
-				fmt.Println(fmt.Sprintf("Webroot for %q matches", site.Hostname))
-			default:
-				fmt.Println(fmt.Sprintf("Webroot for %q does not match", site.Hostname))
-				site.Webroot = found
-			}
-
-			if shouldAppend {
-				sites = append(sites, site)
+			// get the hostname
+			if s.Webroot != "" && s.Hostname != "" {
+				sites = append(sites, s)
 			}
 		}
 
