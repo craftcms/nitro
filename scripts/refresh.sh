@@ -7,8 +7,8 @@ if [ -z "$version" ]; then
 fi
 
 # script for beta 7
-if [ "$version" == "1.0.0-beta.7" ]; then
-  echo "running script for 1.0.0-beta.7"
+if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ]; then
+  echo "running script for 1.0.0-beta.8"
 
   cat >"/opt/nitro/nginx/template.conf" <<-EndOfMessage
 # Hat tip to https://github.com/nystudio107/nginx-craft

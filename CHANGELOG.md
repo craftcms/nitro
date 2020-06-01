@@ -4,6 +4,9 @@
 
 ## 1.0.0-beta.8 - 2020-06-01
 
+### Changed
+- Newly-created site configs are now based on the Nginx config provided by <https://github.com/nystudio107/nginx-craft> (requires running the `nitro refresh` command first). ([#35](https://github.com/craftcms/nitro/issues/161))
+
 ### Fixed
 - Fixed an error that could remove mounted sites. ([#162](https://github.com/craftcms/nitro/issues/162))
 - Fixed a bug where the `apply` command wasn’t removing deleted sites’ hostnames from the hosts file. ([#161](https://github.com/craftcms/nitro/issues/161))
