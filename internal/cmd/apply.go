@@ -90,6 +90,12 @@ var applyCommand = &cobra.Command{
 						shouldAppend = true
 					}
 				}
+
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, sitedir)); err == nil {
+					if strings.Contains(output, "exists") {
+						shouldAppend = true
+					}
+				}
 			}
 
 			// see if the webroot is the same
