@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/jasonmccallister/hosts"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -47,6 +48,12 @@ var applyCommand = &cobra.Command{
 			return err
 		}
 
+		// find the machines IP
+		ip, err := find.IP(machine, output)
+		if err != nil {
+			return err
+		}
+
 		// find mounts that already exist
 		mounts, err := find.Mounts(machine, output)
 		if err != nil {
@@ -60,22 +67,21 @@ var applyCommand = &cobra.Command{
 		var sites []config.Site
 		for _, site := range configFile.Sites {
 			shouldAppend := false
-			// check if the nginx config exists
-			existsOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname))
-			if err != nil {
-				return err
-			}
-			if strings.Contains(existsOutput, "exists") {
-				shouldAppend = true
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname)); err == nil {
+				if strings.Contains(output, "exists") {
+					shouldAppend = true
+				}
 			}
 
 			// see if the webroot is the same
-			webrootOutput, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname))
-			if err != nil {
+			var matches bool
+			var found string
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteWebroot, site.Hostname)); err != nil {
 				return err
+			} else {
+				matches, found = webroot.Matches(output, site.Webroot)
 			}
 
-			matches, found := webroot.Matches(webrootOutput, site.Webroot)
 			switch matches {
 			case true:
 				fmt.Println(fmt.Sprintf("Webroot for %q matches", site.Hostname))
@@ -120,15 +126,37 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
-		if flagSkipHosts || len(configFile.Sites) == 0 {
+		if flagSkipHosts {
 			fmt.Println("Skipping editing the hosts file.")
 			return nil
 		}
 
+		// find all records by IP
+		var hostRecords []string
+		if records, err := hosts.FindIP(ip); err == nil {
+			for _, hr := range records {
+				if hr.IP == ip {
+					hostRecords = hr.Hosts
+				}
+			}
+		}
+
 		switch runtime.GOOS {
 		case "windows":
+			if len(hostRecords) > 0 {
+				if err := hostsRemoveCommand.RunE(cmd, hostRecords); err != nil {
+					return err
+				}
+			}
+
 			return hostsCommand.RunE(cmd, args)
 		default:
+			if len(hostRecords) > 0 {
+				if err := runas.Elevated(machine, append([]string{"hosts", "remove"}, hostRecords...)); err != nil {
+					return err
+				}
+			}
+
 			if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
 				return err
 			}
