@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+## 1.0.0-beta.8 - 2020-06-01
+
 ### Fixed
 - Fixed an error that could remove mounted sites. ([#162](https://github.com/craftcms/nitro/issues/162))
 - Fixed a bug where the `apply` command wasn’t removing deleted sites’ hostnames from the hosts file. ([#161](https://github.com/craftcms/nitro/issues/161))
