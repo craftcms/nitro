@@ -64,7 +64,7 @@ func (c *Config) AlreadyMounted(mount Mount) bool {
 		}
 
 		// if it is a sub folder of the mount
-		if strings.Contains(existingLocal, newLocal) {
+		if strings.Contains(newLocal, existingLocal) {
 			return true
 		}
 	}

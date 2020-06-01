@@ -846,13 +846,13 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 			fields: fields{
 				Mounts: []Mount{
 					{
-						Source: current + "/testdata/new-mount",
+						Source: current,
 						Dest:   "/home/ubuntu/sites/example",
 					},
 				},
 			},
 			args: args{m: Mount{
-				Source: current,
+				Source: current + "/testdata/new-mount",
 				Dest:   "/home/ubuntu/sites/example",
 			}},
 			want: true,
