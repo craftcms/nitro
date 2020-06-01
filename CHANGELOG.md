@@ -4,8 +4,8 @@
 
 ### Fixed
 - Fixed an error that could remove mounted sites. ([#162](https://github.com/craftcms/nitro/issues/162))
-- Fix an issue where sites were not removed from the hosts file. ([#161](https://github.com/craftcms/nitro/issues/161))
-- Fixed an error where nginx configurations we not being removed from the virtual machine.
+- Fixed a bug where the `apply` command wasn’t removing deleted sites’ hostnames from the hosts file. ([#161](https://github.com/craftcms/nitro/issues/161))
+- Fixed a bug where the `apply` command wasn’t removing deleted sites’ Nginx configurations from the virtual machine.
 
 ## 1.0.0-beta.7 - 2020-05-27
 
