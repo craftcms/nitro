@@ -67,9 +67,28 @@ var applyCommand = &cobra.Command{
 		var sites []config.Site
 		for _, site := range configFile.Sites {
 			shouldAppend := false
+			// check if its enabled
+			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteEnabled, site.Hostname)); err == nil {
+				if strings.Contains(output, "exists") {
+					shouldAppend = true
+				}
+			}
+
+			// check if its available
 			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteAvailable, site.Hostname)); err == nil {
 				if strings.Contains(output, "exists") {
 					shouldAppend = true
+				}
+			}
+
+			// check the the
+			p := strings.Split(site.Webroot, "/")
+			if len(p) > 3 {
+				sitedir := p[len(p)-2]
+				if output, err := script.Run(false, fmt.Sprintf(scripts.FmtNginxSiteEnabled, sitedir)); err == nil {
+					if strings.Contains(output, "exists") {
+						shouldAppend = true
+					}
 				}
 			}
 
