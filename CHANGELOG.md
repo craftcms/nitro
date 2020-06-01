@@ -7,27 +7,27 @@
 - Fix an issue where sites were not removed from the hosts file. ([#161](https://github.com/craftcms/nitro/issues/161))
 - Fixed an error where nginx configurations we not being removed from the virtual machine.
 
-### 1.0.0-beta.7 - 2020-05-27
+## 1.0.0-beta.7 - 2020-05-27
 
-## Fixed
+### Fixed
 - Fixed a bug where keys transferred into the machine did not have the proper permissions. ([#154](https://github.com/craftcms/nitro/issues/154))
 - Fixed a bug where the `init` command was not editing the hosts file. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
 - Fixed a bug where the `db import` command was not working on PostgreSQL.
 
-### 1.0.0-beta.6 - 2020-05-26
+## 1.0.0-beta.6 - 2020-05-26
 
-## Changed
+### Changed
 - Removed an unnecessary debug command.
 
-### 1.0.0-beta.5 - 2020-05-26
+## 1.0.0-beta.5 - 2020-05-26
 
-## Added
+### Added
 - Added Windows support.
 - Added support for MySQL 8.0. ([#97](https://github.com/craftcms/nitro/issues/97))
 - The PostgreSQL and MySQL client tools are now installed on new machines. ([#54](https://github.com/craftcms/nitro/issues/54), [#139](https://github.com/craftcms/nitro/issues/139))
 - Added the `install postgres`, `install mysql`, `install composer`, and `install mailhog` commands.
 
-## Changed
+### Changed
 - New machines now use Ubuntu 20 LTS.
 - Renamed the `--no-backups` option to `--skip-backup` for the `destroy` command.
 - Composer is no longer installed on machines by default, but can be installed by running `nitro install composer`.
@@ -35,32 +35,32 @@
 - MySQL 5 and 8 now use version-specific configuration directories (`/home/ubuntu/.nitro/databases/mysql/conf.d/<version>/`).
 - Removed the `xdebug configure` command, and moved its logic into the `xdebug on` command.
 
-## Fixed
+### Fixed
 - Fixed a bug where Nitro wasn’t removing Nginx server configs when removing sites.
 - Fixed a bug where the `apply` command wasn’t removing deleted mounts’ root directories within the machine. ([#96](https://github.com/craftcms/nitro/issues/96))
 - Fixed a bug where the `init` command could return an exit code of 100. ([#96](https://github.com/craftcms/nitro/issues/96))
 - The OPcache extension is no longer installed by default. ([#129](https://github.com/craftcms/nitro/issues/129))
 
-### 1.0.0-beta.4 - 2020-05-21
+## 1.0.0-beta.4 - 2020-05-21
 
-## Added
+### Added
 - Added the `keys` command which prompts which keys should be imported into a machine. ([#141](https://github.com/craftcms/nitro/issues/141))
 - Added the `--no-backups` flag to `destroy` which will skip database backups.
 - Added `completion` commands for `bash` and `zshrc`.
 
-## Changed
+### Changed
 - The `destroy` command creates individual databases backups. ([#146](https://github.com/craftcms/nitro/issues/146))
 - The `mysql` system database is no longer backed up using `db backup` or `destroy`. ([#147](https://github.com/craftcms/nitro/issues/147))
 
-## Fixed
+### Fixed
 - Fixed a bug where the `refresh` command was failing silently.
 - Fixed a permissions issue. ([#145](https://github.com/craftcms/nitro/issues/145))
 - Fixed an issue when importing mysql databases using `db import`.
 - Fixed an issue installing composer on new machines. ([#149](https://github.com/craftcms/nitro/issues/149))
 
-### 1.0.0-beta.3 - 2020-05-19
+## 1.0.0-beta.3 - 2020-05-19
 
-## Added
+### Added
 - Added the `--skip-hosts` option to the `apply` command. ([#110](https://github.com/craftcms/nitro/issues/110))
 - The `add` command will now prompt to create a machine if it does not exist. ([#103](https://github.com/craftcms/nitro/issues/103))
 - The `init` command will edit the hosts file if sites are present in the config. ([#123](https://github.com/craftcms/nitro/issues/123))
@@ -68,7 +68,7 @@
 - Added the `refresh` command, which helps keep scripts and configs updated between versions of Nitro.
 - Databases now support custom configuration files. ([#133](https://github.com/craftcms/nitro/issues/133))
 
-## Changed
+### Changed
 - Nginx is now configured to allow file uploads up to 100MB. ([#126](https://github.com/craftcms/nitro/issues/126))
 - Databases are now backed up automatically when a machine is destroyed. ([#136](https://github.com/craftcms/nitro/issues/136))
 - When creating a new machine, the `DB_USER` and `DB_PASSWORD` are automatically set in the environment. ([#119](https://github.com/craftcms/nitro/issues/119))
@@ -79,57 +79,57 @@
 - The `apply` command now provides more information. ([#95](https://github.com/craftcms/nitro/issues/95))
 - The `init` command now checks if the machine already exists before prompting for input ([#102](https://github.com/craftcms/nitro/issues/102))
 
-## Fixed
+### Fixed
 - Fixed a bug where the `self-update` command would non-interactively prompt to initialize the primary machine. ([#115](https://github.com/craftcms/nitro/issues/115))
 - Fixed a bug where `import --help` didn’t show the required SQL file argument in the usage example. ([#124](https://github.com/craftcms/nitro/issues/124))
 - Fixed a bug where the `apply` command wasn’t applying changes to sites’ webroots. ([#113](https://github.com/craftcms/nitro/issues/113))
 
-### 1.0.0-beta.2 - 2020-05-06
+## 1.0.0-beta.2 - 2020-05-06
 
-## Fixed
+### Fixed
 - Fixed an error when using the select prompt. ([#104](https://github.com/craftcms/nitro/issues/104))
 
-### 1.0.0-beta.1 - 2020-05-05
+## 1.0.0-beta.1 - 2020-05-05
 
-## Changed
+### Changed
 - Improved the `init` command workflow.
 - Changed the input package to use [pixelandtonic/prompt](https://github.com/pixelandtonic/prompt).
 
-## Removed
+### Removed
 - Removed MySQL 8.0 support for now.
 - Removed PHP 7.0 and 7.1 support.
 
-## Fixed
+### Fixed
 - Fixed a potential permission error when installing/updating.
 
-### 0.11.4 - 2020-05-04
+## 0.11.4 - 2020-05-04
 
-## Fixed
+### Fixed
 - Fixed a broken test which prevented a release.
 
-### 0.11.3 - 2020-05-04
+## 0.11.3 - 2020-05-04
 
-## Changed
+### Changed
 - The [GMP](https://www.php.net/manual/en/book.gmp.php) and [BCMath](https://www.php.net/manual/en/book.bc.php) PHP extensions are now installed by default.
 - Composer is now installed globally on machines. ([#92](https://github.com/craftcms/nitro/issues/92))
 
-## Fixed
+### Fixed
 - Fixed a permission error when provisioning a PostgreSQL database.
 - Fix a bug where the `import` command wasn’t importing.
 - Fixed an issue where the machine DNS was not resolving in some environments. ([#91](https://github.com/craftcms/nitro/issues/91))
 - Fixed an error when trying to create a database during PostgreSQL import. ([#94](https://github.com/craftcms/nitro/issues/94))
 
-### 0.11.2 - 2020-04-09
+## 0.11.2 - 2020-04-09
 
-## Changed
+### Changed
 - The `init` command now prompts for how many CPU cores should be assigned to the machine.
 
-### 0.11.0 - 2020-04-29
+## 0.11.0 - 2020-04-29
 
-## Added
+### Added
 - Added the `rename` command to allow users to quickly rename sites.
 
-## Changed
+### Changed
 - The `destroy` command now has a `--clean` option which will delete a config file after destroying the machine.
 - The `nitro` database user now has root privileges for `mysql` and `postgres` databases. ([#79](https://github.com/craftcms/nitro/issues/79))
 - Added the `php` option back to the config file.
@@ -140,7 +140,7 @@
 - The `init` command will use an existing config file and recreate the entire environment.
 - Commands now output more _statuses_ where possible to provide the user more feedback.
 
-## Fixed
+### Fixed
 - When using the `add` command, the config file checks for duplicate sites and mounts. ([#86](https://github.com/craftcms/nitro/issues/86))
 - Fixed an issue when using some commands on Windows. ([#88](https://github.com/craftcms/nitro/issues/88))
 - Fixed an issue in the `apply` command that would not detect new changes to the config file.
@@ -150,7 +150,7 @@
 > **Warning:** This release contains breaking changes. See the [upgrade notes](UPGRADE.md#upgrading-to-nitro-0100)
 > for details.
 
-## Added
+### Added
 - Added the `init` command, which initializes new machines.
 - Added the `remove` command, which removes a site from a machine.
 
