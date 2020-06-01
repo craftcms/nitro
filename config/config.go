@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/resolve"
 )
 
 type Config struct {
@@ -31,6 +32,44 @@ func (c *Config) AddSite(site Site) error {
 
 func (c *Config) GetSites() []Site {
 	return c.Sites
+}
+
+// AlreadyMounted takes a new mount and will check if the
+// mount source is already mounted to the virtual machine
+// and will also check if the new mount is a parent mount
+func (c *Config) AlreadyMounted(mount Mount) bool {
+	// get the home directory
+	home, err := homedir.Dir()
+	if err != nil {
+		return false
+	}
+
+	// get the local path of the mount
+	newLocal, err := resolve.AbsPath(mount.Source, home)
+	if err != nil {
+		return false
+	}
+
+	// check each of the mounts in the config
+	for _, m := range c.Mounts {
+		// get the abs path of the existing mount
+		existingLocal, err := resolve.AbsPath(m.Source, home)
+		if err != nil {
+			continue
+		}
+
+		// if it is an exact match
+		if existingLocal == newLocal {
+			return true
+		}
+
+		// if it is a sub folder of the mount
+		if strings.Contains(newLocal, existingLocal) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // GetExpandedMounts will take all of the mounts in a config file

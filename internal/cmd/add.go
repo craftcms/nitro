@@ -85,12 +85,12 @@ var addCommand = &cobra.Command{
 			webrootDir = flagWebroot
 		}
 
-		webRootPath := fmt.Sprintf("/home/ubuntu/sites/%s/%s", hostname, webrootDir)
+		webRootPath := fmt.Sprintf("/home/ubuntu/sites/%s/%s", directoryName, webrootDir)
 
 		// create a new mount
 		skipMount := true
-		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + hostname}
-		if configFile.MountExists(mount.Dest) {
+		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + directoryName}
+		if configFile.AlreadyMounted(mount) {
 			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
 		} else {
 			// add the mount to configfile
@@ -99,6 +99,8 @@ var addCommand = &cobra.Command{
 			}
 			skipMount = false
 		}
+
+		// TODO if the mount already exists, we need to get the path for the folder, not the hostname
 
 		// create a new site
 		// add site to config file
@@ -126,15 +128,15 @@ var addCommand = &cobra.Command{
 
 		fmt.Printf("Added %s to config file\n", hostname)
 
-		applyChanges, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
-			Default: "yes",
+		apply, err := p.Confirm("Apply changes from config", &prompt.InputOptions{
+			Default:            "yes",
 			AppendQuestionMark: true,
 		})
 		if err != nil {
 			return err
 		}
 
-		if !applyChanges {
+		if !apply {
 			fmt.Println("You can apply new config file changes later by running `nitro apply`.")
 
 			return nil

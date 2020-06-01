@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,30 @@ import (
 // it is used by this package to parse output of the exec.Command
 type Finder interface {
 	Output() ([]byte, error)
+}
+
+func IP(name string, b []byte) (string, error) {
+	var ip string
+
+	records, err := csv.NewReader(bytes.NewReader(b)).ReadAll()
+	if err != nil {
+		return "", err
+	}
+
+	for i, record := range records {
+		// first or the name does not match
+		if i == 0 || record[0] != name {
+			continue
+		}
+
+		ip = record[2]
+	}
+
+	if ip == "" {
+		return "", errors.New("unable to find the ip address for " + name)
+	}
+
+	return ip, nil
 }
 
 // Mounts will take a name of a machine and the output of an exec.Command as a slice of bytes
