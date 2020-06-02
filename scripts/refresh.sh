@@ -7,8 +7,8 @@ if [ -z "$version" ]; then
 fi
 
 # script for beta 7
-if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ]; then
-  echo "running script for 1.0.0-beta.8"
+if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ] || [ "$version" == "1.0.0-beta.9" ]; then
+  echo "running script for 1.0.0-beta.9"
 
   cat >"/opt/nitro/nginx/template.conf" <<-EndOfMessage
 # Hat tip to https://github.com/nystudio107/nginx-craft
@@ -34,11 +34,11 @@ server {
   client_max_body_size 0;
 
   # 404 error handler
-  error_page 404 /index.php$is_args$args;
+  error_page 404 /index.php\$is_args\$args;
 
   # Root directory location handler
   location / {
-    try_files $uri/index.html $uri $uri/ /index.php$is_args$args;
+    try_files \$uri/index.html \$uri \$uri/ /index.php\$is_args\$args;
   }
 
   # php-fpm configuration
@@ -55,7 +55,7 @@ server {
     fastcgi_param HTTP_HOST CHANGESERVERNAME;
 
     # Don't allow browser caching of dynamically generated content
-    add_header Last-Modified $date_gmt;
+    add_header Last-Modified \$date_gmt;
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     if_modified_since off;
     expires off;
@@ -173,14 +173,14 @@ EndOfMessage
     root CHANGEWEBROOTDIR;
     index index.php;
     gzip_static  on;
-    error_page 404 /index.php?$query_string;
+    error_page 404 /index.php?\$query_string;
     ssi on;
     server_name CHANGESERVERNAME;
     client_max_body_size 100M;
     location / {
-      try_files $uri $uri/ /index.php$is_args$args;
+      try_files \$uri \$uri/ /index.php\$is_args\$args;
     }
-    location ~ \.php$ {
+    location ~ \.php\$ {
       include snippets/fastcgi-php.conf;
       fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
       fastcgi_read_timeout 240;

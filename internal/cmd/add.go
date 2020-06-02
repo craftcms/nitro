@@ -86,21 +86,23 @@ var addCommand = &cobra.Command{
 		}
 
 		webRootPath := fmt.Sprintf("/home/ubuntu/sites/%s/%s", directoryName, webrootDir)
-
 		// create a new mount
 		skipMount := true
-		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + directoryName}
-		if configFile.AlreadyMounted(mount) {
-			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
+		mount := config.Mount{Source: absolutePath}
+		exists, foundMount := configFile.AlreadyMounted(mount)
+		if exists {
+			fmt.Println(mount.Source, "is already mounted at", foundMount.Dest, ". Using existing instead of creating new mount.")
+
+			webRootPath = foundMount.Dest + "/" + directoryName + "/" + webrootDir
+			fmt.Println("Setting webroot to", webRootPath)
 		} else {
+			mount.Dest = "/home/ubuntu/sites/" + directoryName
 			// add the mount to configfile
 			if err := configFile.AddMount(mount); err != nil {
 				return err
 			}
 			skipMount = false
 		}
-
-		// TODO if the mount already exists, we need to get the path for the folder, not the hostname
 
 		// create a new site
 		// add site to config file
@@ -149,4 +151,5 @@ var addCommand = &cobra.Command{
 func init() {
 	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "Hostname of the site (e.g client.test)")
 	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
+	addCommand.Flags().BoolVar(&flagSkipHosts, "skip-hosts", false, "Skip editing the hosts file.")
 }

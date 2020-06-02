@@ -2,10 +2,19 @@
 
 ### Unreleased
 
+## 1.0.0-beta.9 - 2020-06-02
+
+### Changed
+- The `add` now has a `--skip-hosts` option. ([#163](https://github.com/craftcms/nitro/issues/163))
+- The `db add` command now validates the database name. ([#160](https://github.com/craftcms/nitro/issues/160))
+
+### Fixed
+- Fixed a bug with the Nginx config template (run `nitro refresh` for the change to take effect). 
+
 ## 1.0.0-beta.8 - 2020-06-01
 
 ### Changed
-- Newly-created site configs are now based on the Nginx config provided by <https://github.com/nystudio107/nginx-craft> (requires running the `nitro refresh` command first). ([#35](https://github.com/craftcms/nitro/issues/161))
+- Newly-created site configs are now based on the Nginx config provided by <https://github.com/nystudio107/nginx-craft> (run `nitro refresh` for the change to take effect). ([#35](https://github.com/craftcms/nitro/issues/161))
 
 ### Fixed
 - Fixed an error that could remove mounted sites. ([#162](https://github.com/craftcms/nitro/issues/162))
