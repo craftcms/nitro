@@ -34,11 +34,11 @@ server {
   client_max_body_size 0;
 
   # 404 error handler
-  error_page 404 /index.php$is_args$args;
+  error_page 404 /index.php\$is_args\$args;
 
   # Root directory location handler
   location / {
-    try_files $uri/index.html $uri $uri/ /index.php$is_args$args;
+    try_files \$uri/index.html \$uri \$uri/ /index.php\$is_args\$args;
   }
 
   # php-fpm configuration
@@ -55,7 +55,7 @@ server {
     fastcgi_param HTTP_HOST CHANGESERVERNAME;
 
     # Don't allow browser caching of dynamically generated content
-    add_header Last-Modified \$\date_gmt;
+    add_header Last-Modified \$date_gmt;
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     if_modified_since off;
     expires off;
