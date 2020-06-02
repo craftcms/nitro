@@ -836,10 +836,11 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 		m Mount
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   bool
+		name      string
+		fields    fields
+		args      args
+		want      bool
+		wantMount Mount
 	}{
 		{
 			name: "mounts that have a parent path return true",
@@ -856,6 +857,10 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 				Dest:   "/home/ubuntu/sites/example",
 			}},
 			want: true,
+			wantMount: Mount{
+				Source: current,
+				Dest:   "/home/ubuntu/sites/example",
+			},
 		},
 		{
 			name: "mounts that exists return true",
@@ -872,6 +877,10 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 				Dest:   "/home/ubuntu/sites/example",
 			}},
 			want: true,
+			wantMount: Mount{
+				Source: current,
+				Dest:   "/home/ubuntu/sites/example",
+			},
 		},
 		{
 			name:   "mounts that do not exist return false",
@@ -891,8 +900,14 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 				Databases: tt.fields.Databases,
 				Sites:     tt.fields.Sites,
 			}
-			if got := c.AlreadyMounted(tt.args.m); got != tt.want {
+			got, m := c.AlreadyMounted(tt.args.m)
+
+			if got != tt.want {
 				t.Errorf("AlreadyMounted() = \n%v, \nwant \n%v", got, tt.want)
+			}
+
+			if m != tt.wantMount {
+				t.Errorf("AlreadyMounted() = \n%v, \nwant \n%v", m, tt.wantMount)
 			}
 		})
 	}

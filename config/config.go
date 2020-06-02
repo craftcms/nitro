@@ -37,17 +37,17 @@ func (c *Config) GetSites() []Site {
 // AlreadyMounted takes a new mount and will check if the
 // mount source is already mounted to the virtual machine
 // and will also check if the new mount is a parent mount
-func (c *Config) AlreadyMounted(mount Mount) bool {
+func (c *Config) AlreadyMounted(mount Mount) (bool, Mount) {
 	// get the home directory
 	home, err := homedir.Dir()
 	if err != nil {
-		return false
+		return false, Mount{}
 	}
 
 	// get the local path of the mount
 	newLocal, err := resolve.AbsPath(mount.Source, home)
 	if err != nil {
-		return false
+		return false, Mount{}
 	}
 
 	// check each of the mounts in the config
@@ -60,16 +60,16 @@ func (c *Config) AlreadyMounted(mount Mount) bool {
 
 		// if it is an exact match
 		if existingLocal == newLocal {
-			return true
+			return true, m
 		}
 
 		// if it is a sub folder of the mount
 		if strings.Contains(newLocal, existingLocal) {
-			return true
+			return true, m
 		}
 	}
 
-	return false
+	return false, Mount{}
 }
 
 // GetExpandedMounts will take all of the mounts in a config file

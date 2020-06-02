@@ -16,7 +16,8 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 
 	// check if there are mounts we need to remove
 	for _, mount := range inMemoryConfig.Mounts {
-		if !configFile.AlreadyMounted(mount) {
+		exists, _ := configFile.AlreadyMounted(mount)
+		if !exists {
 			unmountAction, err := nitro.UnmountDir(machine, mount.Dest)
 			if err != nil {
 				return nil, err
@@ -34,7 +35,8 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 
 	// check if there are mounts we need to create
 	for _, mount := range configFile.Mounts {
-		if !inMemoryConfig.AlreadyMounted(mount) {
+		exists, _ := inMemoryConfig.AlreadyMounted(mount)
+		if !exists {
 			mountAction, err := nitro.MountDir(machine, mount.AbsSourcePath(), mount.Dest)
 			if err != nil {
 				return nil, err
