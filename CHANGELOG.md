@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+## 1.0.0-beta.9 - 2020-06-02
+
 ### Changed
 - The `add` now has a `--skip-hosts` option. ([#163](https://github.com/craftcms/nitro/issues/163))
 - The `db add` command now validates the database name. ([#160](https://github.com/craftcms/nitro/issues/160))
