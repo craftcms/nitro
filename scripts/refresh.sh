@@ -55,7 +55,7 @@ server {
     fastcgi_param HTTP_HOST CHANGESERVERNAME;
 
     # Don't allow browser caching of dynamically generated content
-    add_header Last-Modified $date_gmt;
+    add_header Last-Modified \$\date_gmt;
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
     if_modified_since off;
     expires off;
