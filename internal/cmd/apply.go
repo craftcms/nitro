@@ -160,7 +160,7 @@ var applyCommand = &cobra.Command{
 			return hostsCommand.RunE(cmd, args)
 		default:
 			if len(hostRecords) > 0 {
-				if err := runas.Elevated(machine, append([]string{"hosts", "remove"}, hostRecords...)); err != nil {
+				if err := runas.Elevated(machine, append([]string{"hosts", "remove", "--skip-hosts=false"}, hostRecords...)); err != nil {
 					return err
 				}
 			}

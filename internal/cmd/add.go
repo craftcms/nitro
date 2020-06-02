@@ -89,10 +89,13 @@ var addCommand = &cobra.Command{
 
 		// create a new mount
 		skipMount := true
-		mount := config.Mount{Source: absolutePath, Dest: "/home/ubuntu/sites/" + directoryName}
+		mount := config.Mount{Source: absolutePath}
 		if configFile.AlreadyMounted(mount) {
+			// TODO get the mount dest
+			// get mount by source
 			fmt.Println(mount.Source, "is already mounted at", mount.Dest, ". Using that instead of creating a new mount.")
 		} else {
+			mount.Dest = "/home/ubuntu/sites/" + directoryName
 			// add the mount to configfile
 			if err := configFile.AddMount(mount); err != nil {
 				return err
