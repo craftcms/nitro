@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### Changed
+- Database names are validated when using `db add`. ([#160](https://github.com/craftcms/nitro/issues/160)) 
+
 ## 1.0.0-beta.8 - 2020-06-01
 
 ### Changed
