@@ -134,7 +134,7 @@ var applyCommand = &cobra.Command{
 
 		fmt.Println("Applied changes from", viper.ConfigFileUsed())
 
-		if flagSkipHosts {
+		if flagSkipHosts || len(configFile.Sites) == 0 {
 			fmt.Println("Skipping editing the hosts file.")
 			return nil
 		}
