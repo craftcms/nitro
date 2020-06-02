@@ -104,8 +104,6 @@ var addCommand = &cobra.Command{
 			skipMount = false
 		}
 
-		// TODO if the mount already exists, we need to get the path for the folder, not the hostname
-
 		// create a new site
 		// add site to config file
 		skipSite := true
