@@ -12,6 +12,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/scripts"
+	"github.com/craftcms/nitro/validate"
 )
 
 var dbAddCommand = &cobra.Command{
@@ -57,7 +58,7 @@ var dbAddCommand = &cobra.Command{
 		}
 
 		// get the name
-		database, err := p.Ask("Enter the name of the database", &prompt.InputOptions{Default: "", Validator: nil})
+		database, err := p.Ask("Enter the name of the database", &prompt.InputOptions{Default: "", Validator: validate.DatabaseName})
 		if err != nil {
 			return err
 		}
