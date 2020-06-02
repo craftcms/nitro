@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -167,6 +168,36 @@ func DatabaseConfig(databases []config.Database) error {
 
 		ports[database.Port] = database.Port
 		versions[database.Engine] = database.Version
+	}
+
+	return nil
+}
+
+// DatabaseName is used to validate a give database name to ensure its valid
+func DatabaseName(s string) error {
+	// if the string is empty
+	if s == "" {
+		return errors.New("no name was provided")
+	}
+
+	// cant be longer than 65
+	if len(s) > 64 {
+		return errors.New("length of the name must be less than 64 chars")
+	}
+
+	// check if the first character is an int
+	if f, err := strconv.Atoi(string(s[0])); err == nil && f != 0 {
+		return errors.New("name cannot start with a number")
+	}
+
+	// check the string for any special chars
+	if strings.ContainsAny(s, " $-") {
+		return errors.New("invalid name, can only contain letters, numbers, and underscores")
+	}
+
+	// check for pg_
+	if strings.HasPrefix(s, "pg_") {
+		return errors.New("name cannot contain pg_")
 	}
 
 	return nil

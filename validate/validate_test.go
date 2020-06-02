@@ -450,3 +450,78 @@ func TestPath(t *testing.T) {
 		})
 	}
 }
+
+func TestDatabaseName(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid database names do not return an error",
+			args: args{
+				s: "this_is_a_valid_9_name",
+			},
+			wantErr: false,
+		},
+		{
+			name: "longer than 64 chars returns an error",
+			args: args{
+				s: "A5C35D63132B33B572C6E8A7A24B4BE875015AC21AF972D0FF8F3D1396680D878",
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty strings returns an error",
+			args: args{
+				s: "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "dollar signs return an error",
+			args: args{
+				s: "$1234",
+			},
+			wantErr: true,
+		},
+		{
+			name: "dashes return an error",
+			args: args{
+				s: "test-database-name",
+			},
+			wantErr: true,
+		},
+		{
+			name: "cannot start with pg_",
+			args: args{
+				s: "pg_databasename",
+			},
+			wantErr: true,
+		},
+		{
+			name: "numbers in the front return error",
+			args: args{
+				s: "9this",
+			},
+			wantErr: true,
+		},
+		{
+			name: "spaces return error",
+			args: args{
+				s: " this is a space",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := DatabaseName(tt.args.s); (err != nil) != tt.wantErr {
+				t.Errorf("DatabaseName() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
