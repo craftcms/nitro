@@ -173,14 +173,14 @@ EndOfMessage
     root CHANGEWEBROOTDIR;
     index index.php;
     gzip_static  on;
-    error_page 404 /index.php?$query_string;
+    error_page 404 /index.php?\$query_string;
     ssi on;
     server_name CHANGESERVERNAME;
     client_max_body_size 100M;
     location / {
-      try_files $uri $uri/ /index.php$is_args$args;
+      try_files \$uri \$uri/ /index.php\$is_args\$args;
     }
-    location ~ \.php$ {
+    location ~ \.php\$ {
       include snippets/fastcgi-php.conf;
       fastcgi_pass unix:/var/run/php/phpCHANGEPHPVERSION-fpm.sock;
       fastcgi_read_timeout 240;
