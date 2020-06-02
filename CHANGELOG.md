@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### Added
+- Added `--skip-hosts` flag to the `add` command. ([#163](https://github.com/craftcms/nitro/issues/163))
+
 ### Changed
 - Database names are validated when using `db add`. ([#160](https://github.com/craftcms/nitro/issues/160)) 
 
