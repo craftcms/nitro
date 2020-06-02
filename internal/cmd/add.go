@@ -152,4 +152,5 @@ var addCommand = &cobra.Command{
 func init() {
 	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "Hostname of the site (e.g client.test)")
 	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
+	addCommand.Flags().BoolVar(&flagSkipHosts, "skip-hosts", false, "Skip editing the hosts file.")
 }
