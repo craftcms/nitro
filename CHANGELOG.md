@@ -6,7 +6,10 @@
 - Added `--skip-hosts` flag to the `add` command. ([#163](https://github.com/craftcms/nitro/issues/163))
 
 ### Changed
-- Database names are validated when using `db add`. ([#160](https://github.com/craftcms/nitro/issues/160)) 
+- Database names are validated when using `db add`. ([#160](https://github.com/craftcms/nitro/issues/160))
+
+### Fixed
+- Fixed an error running `refresh` that would create a broken nginx template. 
 
 ## 1.0.0-beta.8 - 2020-06-01
 
