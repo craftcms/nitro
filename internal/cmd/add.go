@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
@@ -91,12 +89,11 @@ var addCommand = &cobra.Command{
 		// create a new mount
 		skipMount := true
 		mount := config.Mount{Source: absolutePath}
-		exists, foundMount := configFile.AlreadyMounted(mount)
+		exists, found := configFile.AlreadyMounted(mount)
 		if exists {
-			fmt.Println(mount.Source, "is already mounted at", foundMount.Dest, ". Using existing instead of creating new mount.")
+			fmt.Println(mount.Source, "is already mounted at", found.Dest, ". Using existing instead of creating new mount.")
 
-			// TODO combine the foundMount.Dest with the current working directory, then find the diff and combine the directoryName and Webroot dir
-			webRootPath = webrootForExistingMount(foundMount, absolutePath, webrootDir)
+			webRootPath = webroot.ForExistingMount(found, absolutePath, webrootDir)
 
 			fmt.Println("Setting webroot to", webRootPath)
 		} else {
@@ -156,35 +153,4 @@ func init() {
 	addCommand.Flags().StringVar(&flagHostname, "hostname", "", "Hostname of the site (e.g client.test)")
 	addCommand.Flags().StringVar(&flagWebroot, "webroot", "", "webroot of the site (e.g. web)")
 	addCommand.Flags().BoolVar(&flagSkipHosts, "skip-hosts", false, "Skip editing the hosts file.")
-}
-
-func webrootForExistingMount(mount config.Mount, absPath, webrootDir string) string {
-	existing := strings.Split(mount.AbsSourcePath(), string(os.PathSeparator))
-	newPath := strings.Split(absPath, string(os.PathSeparator))
-
-	// find where things don't match up
-	index := 0
-	for i, e := range existing {
-		if e != newPath[i] {
-			index = i
-			continue
-		}
-
-		index = i
-	}
-
-	// combine the
-	dest := []string{mount.Dest}
-
-	// append the remaining elements
-	remainder := newPath[index+1:]
-	dest = append(dest, remainder...)
-
-	// append the webroot directory
-	dest = append(dest, webrootDir)
-
-	// join with the linux path separator
-	wr := strings.Join(dest, "/")
-
-	return wr
 }

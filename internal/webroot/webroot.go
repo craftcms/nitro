@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/craftcms/nitro/config"
 )
 
 // Find takes a directory and will search for the "webroot" automatically.
@@ -63,4 +65,35 @@ func Matches(output, webroot string) (bool, string) {
 	}
 
 	return false, sp[1]
+}
+
+// ForExistingMount will determine the webroot on the virtual machine using an existing mount
+// it accounts for nested folders.
+func ForExistingMount(mount config.Mount, absolutePath, webrootDirectory string) string {
+	existing := strings.Split(mount.AbsSourcePath(), string(os.PathSeparator))
+	newPath := strings.Split(absolutePath, string(os.PathSeparator))
+
+	// find where things don't match up
+	index := 0
+	for i, e := range existing {
+		if e != newPath[i] {
+			index = i
+			continue
+		}
+
+		index = i
+	}
+
+	// combine the
+	dest := []string{mount.Dest}
+
+	// append the remaining elements
+	remainder := newPath[index+1:]
+	dest = append(dest, remainder...)
+
+	// append the webroot directory
+	dest = append(dest, webrootDirectory)
+
+	// join with the linux path separator
+	return strings.Join(dest, "/")
 }
