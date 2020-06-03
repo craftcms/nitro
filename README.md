@@ -197,7 +197,7 @@ sites:
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 
-> 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/nitro/*` within the
+> 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/home/ubuntu/*` within the
   machine.
 
 > ⚠️ **Warning:** If your projects contain any symlinks, such as `path` Composer repositories, those symlinks
