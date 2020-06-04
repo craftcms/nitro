@@ -7,7 +7,7 @@ if [ -z "$version" ]; then
 fi
 
 # script for beta 7
-if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ] || [ "$version" == "1.0.0-beta.9" ] // [ "$version" == "1.0.0-beta.10" ]; then
+if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ] || [ "$version" == "1.0.0-beta.9" ] || [ "$version" == "1.0.0-beta.10" ]; then
   echo "running script for 1.0.0-beta.9"
 
   cat >"/opt/nitro/nginx/template.conf" <<-EndOfMessage
