@@ -63,8 +63,8 @@ func loadConfig() {
 	viper.AddConfigPath(home + "/" + ".nitro")
 	viper.SetConfigType("yaml")
 
+	// check for a default machine
 	defaultMachine := os.Getenv("NITRO_DEFAULT_MACHINE")
-
 	if flagMachineName != "" {
 		viper.SetConfigName(flagMachineName)
 	} else if defaultMachine != "" {
@@ -73,6 +73,11 @@ func loadConfig() {
 	} else {
 		flagMachineName = "nitro-dev"
 		viper.SetConfigName("nitro-dev")
+	}
+
+	// if hosts editing is disabled, always skip hosts editing on the host machine
+	if os.Getenv("NITRO_EDIT_HOSTS") == "false" {
+		flagSkipHosts = true
 	}
 
 	_ = viper.ReadInConfig()

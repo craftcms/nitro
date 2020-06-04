@@ -197,7 +197,7 @@ sites:
 
 Then run `nitro apply` to apply your `nitro.yaml` changes to the machine.
 
-> 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/nitro/*` within the
+> 💡 **Tip:** To avoid permission issues, we recommend you always mount folders into `/home/ubuntu/*` within the
   machine.
 
 > ⚠️ **Warning:** If your projects contain any symlinks, such as `path` Composer repositories, those symlinks
@@ -336,7 +336,7 @@ Options:
 <dl>
 <dt><code>-m</code>, <code>--machine</code></dt>
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>-m</code>, <code>--skip-hosts</code></dt>
+<dt><code>--skip-hosts</code></dt>
 <dd>Skips updating the <code>hosts</code> file.</dd>
 </dl>
 
@@ -365,6 +365,8 @@ Options:
 <dd>The hostname to use for accessing the site. If not passed, the command will prompt for it.</dd>
 <dt><code>--webroot</code></dt>
 <dd>The relative path to the site’s webroot. If not passed, the command will prompt for it.</dd>
+<dt><code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
 </dl>
 
 Example:
@@ -628,6 +630,8 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 <dt><code>--clean</code></dt>
 <dd>Remove the configuration file after destroying the machine. Defaults to `false`</dd>
+<dt><code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
 </dl>
 
 ### `edit`

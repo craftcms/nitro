@@ -2,6 +2,14 @@
 
 ### Unreleased
 
+### 1.0.0-beta.10 - 2020-06-04
+
+## Added
+- Added support for a `NITRO_EDIT_HOSTS` environment variable so that when set to `false`, Nitro will never edit the host machine’s `hosts` file.
+
+## Changed
+- The `destroy` command now has a `--skip-hosts` option.
+
 ## 1.0.0-beta.9 - 2020-06-02
 
 ### Changed

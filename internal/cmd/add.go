@@ -89,11 +89,12 @@ var addCommand = &cobra.Command{
 		// create a new mount
 		skipMount := true
 		mount := config.Mount{Source: absolutePath}
-		exists, foundMount := configFile.AlreadyMounted(mount)
+		exists, found := configFile.AlreadyMounted(mount)
 		if exists {
-			fmt.Println(mount.Source, "is already mounted at", foundMount.Dest, ". Using existing instead of creating new mount.")
+			fmt.Println(mount.Source, "is already mounted at", found.Dest, ". Using existing instead of creating new mount.")
 
-			webRootPath = foundMount.Dest + "/" + directoryName + "/" + webrootDir
+			webRootPath = webroot.ForExistingMount(found, absolutePath, webrootDir)
+
 			fmt.Println("Setting webroot to", webRootPath)
 		} else {
 			mount.Dest = "/home/ubuntu/sites/" + directoryName
