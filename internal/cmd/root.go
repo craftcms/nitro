@@ -75,8 +75,8 @@ func loadConfig() {
 		viper.SetConfigName("nitro-dev")
 	}
 
-	// if hosts editing is disabled, always skip hosts editing
-	if os.Getenv("NITRO_HOST_EDITING") == "false" {
+	// if hosts editing is disabled, always skip hosts editing on the host machine
+	if os.Getenv("NITRO_EDIT_HOSTS") == "false" {
 		flagSkipHosts = true
 	}
 
