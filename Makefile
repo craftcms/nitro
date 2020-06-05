@@ -1,5 +1,5 @@
 .PHONY: install
-VERSION ?= 1.0.0-beta.9
+VERSION ?= 1.0.0-beta.11
 
 build:
 	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro ./cmd/cli
