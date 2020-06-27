@@ -259,7 +259,7 @@ To add a new mount, follow these steps:
 
 2. Run `nitro apply` to apply the `nitro.yaml` change to the machine.
 
-Once that’s done, yous should be able to tunnel into your machine using the [`ssh`](#ssh) command, and see the
+Once that’s done, you should be able to tunnel into your machine using the [`ssh`](#ssh) command, and see the
 newly-mounted directory in there.
 
 ## Running Multiple Machines
@@ -274,7 +274,7 @@ $ nitro init -m <machine>
 ```
 
 Replace `<machine>` with the name you want to give your new machine. Machine names can only include letters,
-numbers, underscores, and hyphen.
+numbers, underscores, and hyphens.
 
 This command will run through the same prompts you saw when creating your primary machine after you first installed
 Nitro. Once it’s done, you’ll have a new Multipass machine, as well as a new configuration file for it at
