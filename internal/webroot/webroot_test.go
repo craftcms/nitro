@@ -21,7 +21,7 @@ func TestFindWebRoot(t *testing.T) {
 			args: args{
 				path: "./testdata/good-example",
 			},
-			want: "web",
+			want:    "web",
 			wantErr: false,
 		},
 		{
@@ -29,7 +29,7 @@ func TestFindWebRoot(t *testing.T) {
 			args: args{
 				path: "./testdata/public-example",
 			},
-			want: "public",
+			want:    "public",
 			wantErr: false,
 		},
 		{
@@ -37,7 +37,7 @@ func TestFindWebRoot(t *testing.T) {
 			args: args{
 				path: "./testdata/public_html-example",
 			},
-			want: "public_html",
+			want:    "public_html",
 			wantErr: false,
 		},
 		{
@@ -45,7 +45,7 @@ func TestFindWebRoot(t *testing.T) {
 			args: args{
 				path: "./testdata/www-example",
 			},
-			want: "www",
+			want:    "www",
 			wantErr: false,
 		},
 	}
@@ -65,9 +65,9 @@ func TestFindWebRoot(t *testing.T) {
 
 func TestForExistingMount(t *testing.T) {
 	type args struct {
-		mount         config.Mount
-		absPath       string
-		webrootDir    string
+		mount      config.Mount
+		absPath    string
+		webrootDir string
 	}
 	tests := []struct {
 		name string
@@ -77,9 +77,9 @@ func TestForExistingMount(t *testing.T) {
 		{
 			name: "use case",
 			args: args{
-				mount:      config.Mount{
+				mount: config.Mount{
 					Source: "/Users/jasonmccallister/dev",
-					Dest: "/home/ubuntu/sites",
+					Dest:   "/home/ubuntu/sites",
 				},
 				absPath:    "/Users/jasonmccallister/dev/someproject",
 				webrootDir: "web",
@@ -93,8 +93,8 @@ func TestForExistingMount(t *testing.T) {
 					Source: "/Users/someuser/dev-folder",
 					Dest:   "/home/ubuntu/dev-folder",
 				},
-				absPath:       "/Users/someuser/dev-folder/something/nested",
-				webrootDir:    "web",
+				absPath:    "/Users/someuser/dev-folder/something/nested",
+				webrootDir: "web",
 			},
 			want: "/home/ubuntu/dev-folder/something/nested/web",
 		},
@@ -105,8 +105,8 @@ func TestForExistingMount(t *testing.T) {
 					Source: "/Users/someuser/dev-folder",
 					Dest:   "/home/ubuntu/dev-folder",
 				},
-				absPath:       "/Users/someuser/dev-folder/something",
-				webrootDir:    "web",
+				absPath:    "/Users/someuser/dev-folder/something",
+				webrootDir: "web",
 			},
 			want: "/home/ubuntu/dev-folder/something/web",
 		},
