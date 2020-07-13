@@ -1,0 +1,15 @@
+[Unit]
+Description=nitrod-api
+Documentation=https://getnitro.sh
+Wants=network-pre.target
+After=network-pre.target
+StartLimitIntervalSec=0
+StartLimitBurst=0
+
+[Service]
+ExecStart=/usr/sbin/nitrod -port 9999
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
