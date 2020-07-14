@@ -14,41 +14,31 @@ var phpCommand = &cobra.Command{
 	Use:   "php",
 	Short: "Perform PHP actions",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Usage()
+	},
+}
+
+var phpRestartCommand = &cobra.Command{
+	Use:   "php",
+	Short: "Perform PHP actions",
+	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
 		client := nitrod.NewClient(ip)
 		php := config.GetString("php", flagPhpVersion)
-		action := ""
 
-		if flagRestart {
-			action = "restart"
+		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
+			Version: php,
+			Action:  "restart",
+		})
+		if err != nil {
+			return err
 		}
 
-		if flagStop {
-			action = "stop"
-		}
+		fmt.Println(success.Output)
 
-		if flagStart {
-			action = "start"
-		}
-
-		switch action {
-		case "":
-			return cmd.Usage()
-		default:
-			success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
-				Version: php,
-				Action:  action,
-			})
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(success.Output)
-
-			return nil
-		}
+		return nil
 	},
 }
 

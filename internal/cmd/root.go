@@ -49,6 +49,7 @@ func init() {
 		installCommand,
 		phpCommand,
 	)
+	phpCommand.AddCommand(phpRestartCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
