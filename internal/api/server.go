@@ -14,6 +14,7 @@ type server struct {
 
 func (s *server) Routes() {
 	s.router.HandleFunc("/v1/services/php-fpm", s.handlePhpFpmService())
+	s.router.HandleFunc("/v1/services/nginx", s.handleNginxService())
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
