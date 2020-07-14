@@ -3,8 +3,9 @@
 ### Unreleased
 
 ## Added
+- Added the `nginx` command to with `restart`, `stop`, and `start` commands. 
 - Added the `nitrod` daemon that runs in the virtual machine and exposes an API on port `9999`. New Nitro features will be implemented using the API.
-- Added the `php` command to with `--restart`, `--stop`, and `--start` flags. 
+- Added the `php` command to with `restart`, `stop`, and `start` commands. 
 
 ### 1.0.0-beta.10 - 2020-06-04
 
