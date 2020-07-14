@@ -19,8 +19,8 @@ var phpCommand = &cobra.Command{
 }
 
 var phpRestartCommand = &cobra.Command{
-	Use:   "php",
-	Short: "Perform PHP actions",
+	Use:   "restart",
+	Short: "Restart php-fpm",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
@@ -42,9 +42,56 @@ var phpRestartCommand = &cobra.Command{
 	},
 }
 
+var phpStartCommand = &cobra.Command{
+	Use:   "start",
+	Short: "Start php-fpm",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+		runner := nitro.NewMultipassRunner("multipass")
+		ip := nitro.IP(machine, runner)
+		client := nitrod.NewClient(ip)
+		php := config.GetString("php", flagPhpVersion)
+
+		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
+			Version: php,
+			Action:  "start",
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(success.Output)
+
+		return nil
+	},
+}
+
+var phpStopCommand = &cobra.Command{
+	Use:   "stop",
+	Short: "Stop php-fpm",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		machine := flagMachineName
+		runner := nitro.NewMultipassRunner("multipass")
+		ip := nitro.IP(machine, runner)
+		client := nitrod.NewClient(ip)
+		php := config.GetString("php", flagPhpVersion)
+
+		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
+			Version: php,
+			Action:  "stop",
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(success.Output)
+
+		return nil
+	},
+}
+
 func init() {
-	phpCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
-	phpCommand.Flags().BoolVar(&flagRestart, "restart", false, "restart PHP-FPM")
-	phpCommand.Flags().BoolVar(&flagStop, "stop", false, "stop PHP-FPM")
-	phpCommand.Flags().BoolVar(&flagStart, "start", false, "start PHP-FPM")
+	phpRestartCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
+	phpStartCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
+	phpStopCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
 }
