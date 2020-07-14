@@ -47,6 +47,7 @@ func init() {
 		dbCommand,
 		completionCmd,
 		installCommand,
+		phpCommand,
 	)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
