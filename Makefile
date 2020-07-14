@@ -16,7 +16,7 @@ releaser:
 win-home:
 	mkdir "${HOME}"/Nitro
 api:
-	go build -ldflags="-s -w" -o nitrod ./cmd/nitrod
+	GOOS=linux go build -ldflags="-s -w" -o nitrod ./cmd/nitrod
 setup: api
 	multipass transfer nitrod nitro-dev:/home/ubuntu/nitrod
 	multipass exec nitro-dev -- sudo systemctl stop nitrod
