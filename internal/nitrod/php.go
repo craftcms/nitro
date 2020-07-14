@@ -44,15 +44,18 @@ func (c *Client) ServicePhpFpm(ctx context.Context, options *PhpFpmOptions) (*Su
 	// check for validation error
 	if resp.StatusCode == http.StatusUnprocessableEntity {
 		errResp := ErrorResponse{}
+
 		if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
 			return nil, err
 		}
+
 		// action errors
 		for _, e := range errResp.Errors.Action {
 			if e != "" {
 				fmt.Println(e)
 			}
 		}
+
 		// version errors
 		for _, e := range errResp.Errors.Version {
 			if e != "" {
