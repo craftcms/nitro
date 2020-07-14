@@ -22,13 +22,13 @@ api: api-build
 	multipass exec nitro-dev -- sudo systemctl stop nitrod
 	multipass exec nitro-dev -- sudo cp /home/ubuntu/nitrod /usr/sbin/
 	multipass exec nitro-dev -- sudo chmod u+x /usr/sbin/nitrod
-	multipass transfer nitrod.service nitro-dev:/home/ubuntu/nitrod.service
+	multipass transfer cmd/nitrod/nitrod.service nitro-dev:/home/ubuntu/nitrod.service
 	multipass exec nitro-dev -- sudo cp /home/ubuntu/nitrod.service /etc/systemd/system/
 	multipass exec nitro-dev -- sudo systemctl daemon-reload
 	multipass exec nitro-dev -- sudo systemctl start nitrod
 setup: api-build
 	multipass transfer nitrod nitro-dev:/home/ubuntu/nitrod
-	multipass transfer nitrod.service nitro-dev:/home/ubuntu/nitrod.service
+	multipass transfer cmd/nitrod/nitrod.service nitro-dev:/home/ubuntu/nitrod.service
 	multipass exec nitro-dev -- sudo cp /home/ubuntu/nitrod.service /etc/systemd/system/
 	multipass exec nitro-dev -- sudo systemctl daemon-reload
 	multipass exec nitro-dev -- sudo systemctl start nitrod
