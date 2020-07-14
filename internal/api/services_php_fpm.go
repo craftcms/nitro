@@ -21,7 +21,20 @@ func (s *server) handlePhpFpmService() http.HandlerFunc {
 		req := request{}
 		resp := Response{}
 
-		s.validateRequest(w, r, rules, req)
+		errors := govalidator.New(govalidator.Options{
+			Request:         r,
+			Rules:           rules,
+			Data:            &req,
+			RequiredDefault: true,
+		}).ValidateJSON()
+
+		// TODO abstract the error check
+		if len(errors) > 0 {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			err := map[string]interface{}{"errors": errors}
+			_ = json.NewEncoder(w).Encode(err)
+			return
+		}
 
 		out, err := s.service.Run("service", []string{"php" + req.Version + "-fpm", req.Action})
 		if err != nil {
@@ -53,21 +66,5 @@ func (s *server) handlePhpFpmService() http.HandlerFunc {
 			jsonError(w, err, http.StatusInternalServerError)
 			return
 		}
-	}
-}
-
-func (s *server) validateRequest(w http.ResponseWriter, r *http.Request, rules govalidator.MapData, data interface{}) {
-	errors := govalidator.New(govalidator.Options{
-		Request:         r,
-		Rules:           rules,
-		Data:            &data,
-		RequiredDefault: true,
-	}).ValidateJSON()
-
-	if len(errors) > 0 {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		err := map[string]interface{}{"errors": errors}
-		_ = json.NewEncoder(w).Encode(err)
-		return
 	}
 }

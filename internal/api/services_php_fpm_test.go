@@ -23,7 +23,7 @@ func Test_server_handlePhpFpmService(t *testing.T) {
 			name: "testing request validation",
 			fields: fields{
 				router: http.NewServeMux(),
-				logger: log.New(ioutil.Discard, "nitrod test ", 0),
+				logger: log.New(ioutil.Discard, "testing", 0),
 			},
 			statusCode: http.StatusUnprocessableEntity,
 		},
