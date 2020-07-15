@@ -37,6 +37,6 @@ First, you’ll need to configure PhpStorm to listen for requests from the brows
 
 4. Load the site in your browser and whatever breakpoints you’ve set will be hit.
 
-## Debugging PHP console requests
+## Debugging Console Requests
 
 SSH into your Nitro machine using `nitro ssh`, then run your PHP script from the console and any breakpoints you’ve set will be hit.
