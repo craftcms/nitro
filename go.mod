@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/golang/protobuf v1.4.2
 	github.com/jasonmccallister/hosts v0.0.0-20200601172247-0748f05d919e
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
@@ -17,8 +18,12 @@ require (
 	github.com/spf13/viper v1.6.3
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/txn2/txeh v1.3.0
-	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
-	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
+	golang.org/x/sys v0.0.0-20200722175500-76b94024e4b6 // indirect
+	golang.org/x/text v0.3.3 // indirect
+	google.golang.org/genproto v0.0.0-20200722002428-88e341933a54 // indirect
+	google.golang.org/grpc v1.30.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/ini.v1 v1.55.0 // indirect
 	gopkg.in/thedevsaddam/govalidator.v1 v1.9.10
 	gopkg.in/yaml.v2 v2.3.0

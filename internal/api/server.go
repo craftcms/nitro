@@ -1,37 +1,57 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"log"
-	"net/http"
 	"os"
+
+	"github.com/craftcms/nitro/validate"
 )
 
-type server struct {
-	router  *http.ServeMux
+type NitrodServer struct {
+	command Runner
 	logger  *log.Logger
-	service Runner
 }
 
-func (s *server) Routes() {
-	s.router.HandleFunc("/v1/services/php-fpm", s.handlePhpFpmService())
-	s.router.HandleFunc("/v1/services/nginx", s.handleNginxService())
+func (s *NitrodServer) PhpFpmService(ctx context.Context, request *PhpFpmServiceRequest) (*ServiceResponse, error) {
+	// valdiate the request
+	if err := validate.PHPVersion(request.GetVersion()); err != nil {
+		s.logger.Println(err)
+		return nil, err
+	}
+
+	var action string
+	var message string
+	switch request.GetAction() {
+	case PhpFpmServiceRequest_START:
+		message = "started"
+		action = "start"
+	case PhpFpmServiceRequest_STOP:
+		message = "stopped"
+		action = "stop"
+	default:
+		message = "restarted"
+		action = "restart"
+	}
+
+	// perform the action on the php-fpm service
+	_, err := s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", action})
+	if err != nil {
+		s.logger.Println(err)
+		return nil, err
+	}
+
+	return &ServiceResponse{Message: "successfully " + message + " php-fpm " + request.GetVersion()}, nil
 }
 
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// always set the content type
-	w.Header().Set("Content-type", "application/json")
-
-	// log the request
-	s.logger.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
-
-	s.router.ServeHTTP(w, r)
+func (s *NitrodServer) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
+	return nil, errors.New("this is an error")
 }
 
-func New() *server {
-	r := ServiceRunner{}
-	return &server{
-		router:  http.NewServeMux(),
+func NewNitrodServer() *NitrodServer {
+	return &NitrodServer{
+		command: &ServiceRunner{},
 		logger:  log.New(os.Stdout, "nitrod ", 0),
-		service: r,
 	}
 }

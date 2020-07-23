@@ -3,20 +3,26 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
+	"net"
+
+	"google.golang.org/grpc"
 
 	"github.com/craftcms/nitro/internal/api"
 )
 
 func main() {
-	port := flag.String("port", "9999", "which port the nitro API should listen on")
+	port := flag.String("port", "50051", "which port nitro API should listen on")
 	flag.Parse()
 
-	srv := api.New()
+	lis, err := net.Listen("tcp", "0.0.0.0:"+*port)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	srv.Routes()
+	s := grpc.NewServer()
+	api.RegisterNitroServiceServer(s, api.NewNitrodServer())
 
-	log.Println("listening on port", *port)
-
-	log.Fatal(http.ListenAndServe(":"+*port, srv))
+	if err := s.Serve(lis); err != nil {
+		log.Fatal("error when running the server", err)
+	}
 }

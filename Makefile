@@ -32,3 +32,5 @@ setup: api-build
 	multipass exec nitro-dev -- sudo cp /home/ubuntu/nitrod.service /etc/systemd/system/
 	multipass exec nitro-dev -- sudo systemctl daemon-reload
 	multipass exec nitro-dev -- sudo systemctl start nitrod
+proto:
+	protoc internal/api/api.proto --go_out=plugins=grpc:.

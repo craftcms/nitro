@@ -8,7 +8,7 @@ StartLimitBurst=0
 MemoryMax=256M
 
 [Service]
-ExecStart=/usr/sbin/nitrod -port 9999
+ExecStart=/usr/sbin/nitrod
 Restart=on-failure
 User=root
 

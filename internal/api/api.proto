@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "internal/api";
+
+message PhpFpmServiceRequest {
+  string version = 1;
+  enum Action {
+    RESTART = 0;
+    STOP = 1;
+    START = 2;
+  }
+  Action action = 2;
+}
+
+message NginxServiceRequest {
+  enum Action {
+    RESTART = 0;
+    STOP = 1;
+    START = 2;
+  }
+  Action action = 1;
+}
+
+message ServiceResponse {
+  string message = 1;
+}
+
+service NitroService {
+  rpc PhpFpmService(PhpFpmServiceRequest) returns (ServiceResponse) {}
+  rpc NginxService(NginxServiceRequest) returns (ServiceResponse) {}
+}
