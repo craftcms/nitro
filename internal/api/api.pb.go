@@ -29,102 +29,174 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type PhpFpmServiceRequest_Action int32
+type PhpIniSetting int32
 
 const (
-	PhpFpmServiceRequest_RESTART PhpFpmServiceRequest_Action = 0
-	PhpFpmServiceRequest_STOP    PhpFpmServiceRequest_Action = 1
-	PhpFpmServiceRequest_START   PhpFpmServiceRequest_Action = 2
+	PhpIniSetting_MAX_EXECUTION_TIME  PhpIniSetting = 0
+	PhpIniSetting_UPLOAD_MAX_FILESIZE PhpIniSetting = 1
+	PhpIniSetting_MAX_INPUT_TIME      PhpIniSetting = 2
+	PhpIniSetting_MAX_INPUT_VARS      PhpIniSetting = 3
+	PhpIniSetting_MAX_FILE_UPLOADS    PhpIniSetting = 4
+	PhpIniSetting_MEMORY_LIMIT        PhpIniSetting = 5
 )
 
-// Enum value maps for PhpFpmServiceRequest_Action.
+// Enum value maps for PhpIniSetting.
 var (
-	PhpFpmServiceRequest_Action_name = map[int32]string{
-		0: "RESTART",
-		1: "STOP",
-		2: "START",
+	PhpIniSetting_name = map[int32]string{
+		0: "MAX_EXECUTION_TIME",
+		1: "UPLOAD_MAX_FILESIZE",
+		2: "MAX_INPUT_TIME",
+		3: "MAX_INPUT_VARS",
+		4: "MAX_FILE_UPLOADS",
+		5: "MEMORY_LIMIT",
 	}
-	PhpFpmServiceRequest_Action_value = map[string]int32{
-		"RESTART": 0,
-		"STOP":    1,
-		"START":   2,
+	PhpIniSetting_value = map[string]int32{
+		"MAX_EXECUTION_TIME":  0,
+		"UPLOAD_MAX_FILESIZE": 1,
+		"MAX_INPUT_TIME":      2,
+		"MAX_INPUT_VARS":      3,
+		"MAX_FILE_UPLOADS":    4,
+		"MEMORY_LIMIT":        5,
 	}
 )
 
-func (x PhpFpmServiceRequest_Action) Enum() *PhpFpmServiceRequest_Action {
-	p := new(PhpFpmServiceRequest_Action)
+func (x PhpIniSetting) Enum() *PhpIniSetting {
+	p := new(PhpIniSetting)
 	*p = x
 	return p
 }
 
-func (x PhpFpmServiceRequest_Action) String() string {
+func (x PhpIniSetting) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (PhpFpmServiceRequest_Action) Descriptor() protoreflect.EnumDescriptor {
+func (PhpIniSetting) Descriptor() protoreflect.EnumDescriptor {
 	return file_internal_api_api_proto_enumTypes[0].Descriptor()
 }
 
-func (PhpFpmServiceRequest_Action) Type() protoreflect.EnumType {
+func (PhpIniSetting) Type() protoreflect.EnumType {
 	return &file_internal_api_api_proto_enumTypes[0]
 }
 
-func (x PhpFpmServiceRequest_Action) Number() protoreflect.EnumNumber {
+func (x PhpIniSetting) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use PhpFpmServiceRequest_Action.Descriptor instead.
-func (PhpFpmServiceRequest_Action) EnumDescriptor() ([]byte, []int) {
-	return file_internal_api_api_proto_rawDescGZIP(), []int{0, 0}
+// Deprecated: Use PhpIniSetting.Descriptor instead.
+func (PhpIniSetting) EnumDescriptor() ([]byte, []int) {
+	return file_internal_api_api_proto_rawDescGZIP(), []int{0}
 }
 
-type NginxServiceRequest_Action int32
+type ServiceAction int32
 
 const (
-	NginxServiceRequest_RESTART NginxServiceRequest_Action = 0
-	NginxServiceRequest_STOP    NginxServiceRequest_Action = 1
-	NginxServiceRequest_START   NginxServiceRequest_Action = 2
+	ServiceAction_RESTART ServiceAction = 0
+	ServiceAction_STOP    ServiceAction = 1
+	ServiceAction_START   ServiceAction = 2
 )
 
-// Enum value maps for NginxServiceRequest_Action.
+// Enum value maps for ServiceAction.
 var (
-	NginxServiceRequest_Action_name = map[int32]string{
+	ServiceAction_name = map[int32]string{
 		0: "RESTART",
 		1: "STOP",
 		2: "START",
 	}
-	NginxServiceRequest_Action_value = map[string]int32{
+	ServiceAction_value = map[string]int32{
 		"RESTART": 0,
 		"STOP":    1,
 		"START":   2,
 	}
 )
 
-func (x NginxServiceRequest_Action) Enum() *NginxServiceRequest_Action {
-	p := new(NginxServiceRequest_Action)
+func (x ServiceAction) Enum() *ServiceAction {
+	p := new(ServiceAction)
 	*p = x
 	return p
 }
 
-func (x NginxServiceRequest_Action) String() string {
+func (x ServiceAction) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (NginxServiceRequest_Action) Descriptor() protoreflect.EnumDescriptor {
+func (ServiceAction) Descriptor() protoreflect.EnumDescriptor {
 	return file_internal_api_api_proto_enumTypes[1].Descriptor()
 }
 
-func (NginxServiceRequest_Action) Type() protoreflect.EnumType {
+func (ServiceAction) Type() protoreflect.EnumType {
 	return &file_internal_api_api_proto_enumTypes[1]
 }
 
-func (x NginxServiceRequest_Action) Number() protoreflect.EnumNumber {
+func (x ServiceAction) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use NginxServiceRequest_Action.Descriptor instead.
-func (NginxServiceRequest_Action) EnumDescriptor() ([]byte, []int) {
-	return file_internal_api_api_proto_rawDescGZIP(), []int{1, 0}
+// Deprecated: Use ServiceAction.Descriptor instead.
+func (ServiceAction) EnumDescriptor() ([]byte, []int) {
+	return file_internal_api_api_proto_rawDescGZIP(), []int{1}
+}
+
+type ChangePhpIniSettingRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Version string        `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Setting PhpIniSetting `protobuf:"varint,2,opt,name=setting,proto3,enum=api.PhpIniSetting" json:"setting,omitempty"`
+	Value   string        `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *ChangePhpIniSettingRequest) Reset() {
+	*x = ChangePhpIniSettingRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_internal_api_api_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChangePhpIniSettingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePhpIniSettingRequest) ProtoMessage() {}
+
+func (x *ChangePhpIniSettingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_api_api_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePhpIniSettingRequest.ProtoReflect.Descriptor instead.
+func (*ChangePhpIniSettingRequest) Descriptor() ([]byte, []int) {
+	return file_internal_api_api_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ChangePhpIniSettingRequest) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *ChangePhpIniSettingRequest) GetSetting() PhpIniSetting {
+	if x != nil {
+		return x.Setting
+	}
+	return PhpIniSetting_MAX_EXECUTION_TIME
+}
+
+func (x *ChangePhpIniSettingRequest) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
 }
 
 type PhpFpmServiceRequest struct {
@@ -132,14 +204,14 @@ type PhpFpmServiceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Version string                      `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
-	Action  PhpFpmServiceRequest_Action `protobuf:"varint,2,opt,name=action,proto3,enum=api.PhpFpmServiceRequest_Action" json:"action,omitempty"`
+	Version string        `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Action  ServiceAction `protobuf:"varint,2,opt,name=action,proto3,enum=api.ServiceAction" json:"action,omitempty"`
 }
 
 func (x *PhpFpmServiceRequest) Reset() {
 	*x = PhpFpmServiceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_api_api_proto_msgTypes[0]
+		mi := &file_internal_api_api_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -152,7 +224,7 @@ func (x *PhpFpmServiceRequest) String() string {
 func (*PhpFpmServiceRequest) ProtoMessage() {}
 
 func (x *PhpFpmServiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_api_api_proto_msgTypes[0]
+	mi := &file_internal_api_api_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -165,7 +237,7 @@ func (x *PhpFpmServiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PhpFpmServiceRequest.ProtoReflect.Descriptor instead.
 func (*PhpFpmServiceRequest) Descriptor() ([]byte, []int) {
-	return file_internal_api_api_proto_rawDescGZIP(), []int{0}
+	return file_internal_api_api_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *PhpFpmServiceRequest) GetVersion() string {
@@ -175,11 +247,11 @@ func (x *PhpFpmServiceRequest) GetVersion() string {
 	return ""
 }
 
-func (x *PhpFpmServiceRequest) GetAction() PhpFpmServiceRequest_Action {
+func (x *PhpFpmServiceRequest) GetAction() ServiceAction {
 	if x != nil {
 		return x.Action
 	}
-	return PhpFpmServiceRequest_RESTART
+	return ServiceAction_RESTART
 }
 
 type NginxServiceRequest struct {
@@ -187,13 +259,13 @@ type NginxServiceRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Action NginxServiceRequest_Action `protobuf:"varint,1,opt,name=action,proto3,enum=api.NginxServiceRequest_Action" json:"action,omitempty"`
+	Action ServiceAction `protobuf:"varint,1,opt,name=action,proto3,enum=api.ServiceAction" json:"action,omitempty"`
 }
 
 func (x *NginxServiceRequest) Reset() {
 	*x = NginxServiceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_api_api_proto_msgTypes[1]
+		mi := &file_internal_api_api_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -206,7 +278,7 @@ func (x *NginxServiceRequest) String() string {
 func (*NginxServiceRequest) ProtoMessage() {}
 
 func (x *NginxServiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_api_api_proto_msgTypes[1]
+	mi := &file_internal_api_api_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,14 +291,14 @@ func (x *NginxServiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NginxServiceRequest.ProtoReflect.Descriptor instead.
 func (*NginxServiceRequest) Descriptor() ([]byte, []int) {
-	return file_internal_api_api_proto_rawDescGZIP(), []int{1}
+	return file_internal_api_api_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *NginxServiceRequest) GetAction() NginxServiceRequest_Action {
+func (x *NginxServiceRequest) GetAction() ServiceAction {
 	if x != nil {
 		return x.Action
 	}
-	return NginxServiceRequest_RESTART
+	return ServiceAction_RESTART
 }
 
 type ServiceResponse struct {
@@ -240,7 +312,7 @@ type ServiceResponse struct {
 func (x *ServiceResponse) Reset() {
 	*x = ServiceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_api_api_proto_msgTypes[2]
+		mi := &file_internal_api_api_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -253,7 +325,7 @@ func (x *ServiceResponse) String() string {
 func (*ServiceResponse) ProtoMessage() {}
 
 func (x *ServiceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_api_api_proto_msgTypes[2]
+	mi := &file_internal_api_api_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -266,7 +338,7 @@ func (x *ServiceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceResponse.ProtoReflect.Descriptor instead.
 func (*ServiceResponse) Descriptor() ([]byte, []int) {
-	return file_internal_api_api_proto_rawDescGZIP(), []int{2}
+	return file_internal_api_api_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ServiceResponse) GetMessage() string {
@@ -280,38 +352,56 @@ var File_internal_api_api_proto protoreflect.FileDescriptor
 
 var file_internal_api_api_proto_rawDesc = []byte{
 	0x0a, 0x16, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61,
-	0x70, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69, 0x22, 0x96, 0x01,
-	0x0a, 0x14, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
-	0x12, 0x38, 0x0a, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e,
-	0x32, 0x20, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x41, 0x63, 0x74, 0x69,
-	0x6f, 0x6e, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x2a, 0x0a, 0x06, 0x41, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0b, 0x0a, 0x07, 0x52, 0x45, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10,
-	0x00, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x54, 0x4f, 0x50, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53,
-	0x54, 0x41, 0x52, 0x54, 0x10, 0x02, 0x22, 0x7a, 0x0a, 0x13, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x37, 0x0a,
-	0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x1f, 0x2e,
-	0x61, 0x70, 0x69, 0x2e, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x06,
-	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x2a, 0x0a, 0x06, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x12, 0x0b, 0x0a, 0x07, 0x52, 0x45, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x00, 0x12, 0x08, 0x0a,
-	0x04, 0x53, 0x54, 0x4f, 0x50, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53, 0x54, 0x41, 0x52, 0x54,
-	0x10, 0x02, 0x22, 0x2b, 0x0a, 0x0f, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x32,
-	0x94, 0x01, 0x0a, 0x0c, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x12, 0x42, 0x0a, 0x0d, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x12, 0x19, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65,
+	0x70, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69, 0x22, 0x7a, 0x0a,
+	0x1a, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74,
+	0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x76,
+	0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65,
+	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x2c, 0x0a, 0x07, 0x73, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x68, 0x70,
+	0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x07, 0x73, 0x65, 0x74, 0x74,
+	0x69, 0x6e, 0x67, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x5c, 0x0a, 0x14, 0x50, 0x68, 0x70,
+	0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x2a, 0x0a, 0x06, 0x61,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x41, 0x0a, 0x13, 0x4e, 0x67, 0x69, 0x6e, 0x78,
+	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2a,
+	0x0a, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x2b, 0x0a, 0x0f, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a,
+	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2a, 0x90, 0x01, 0x0a, 0x0d, 0x50, 0x68, 0x70, 0x49,
+	0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x16, 0x0a, 0x12, 0x4d, 0x41, 0x58,
+	0x5f, 0x45, 0x58, 0x45, 0x43, 0x55, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x54, 0x49, 0x4d, 0x45, 0x10,
+	0x00, 0x12, 0x17, 0x0a, 0x13, 0x55, 0x50, 0x4c, 0x4f, 0x41, 0x44, 0x5f, 0x4d, 0x41, 0x58, 0x5f,
+	0x46, 0x49, 0x4c, 0x45, 0x53, 0x49, 0x5a, 0x45, 0x10, 0x01, 0x12, 0x12, 0x0a, 0x0e, 0x4d, 0x41,
+	0x58, 0x5f, 0x49, 0x4e, 0x50, 0x55, 0x54, 0x5f, 0x54, 0x49, 0x4d, 0x45, 0x10, 0x02, 0x12, 0x12,
+	0x0a, 0x0e, 0x4d, 0x41, 0x58, 0x5f, 0x49, 0x4e, 0x50, 0x55, 0x54, 0x5f, 0x56, 0x41, 0x52, 0x53,
+	0x10, 0x03, 0x12, 0x14, 0x0a, 0x10, 0x4d, 0x41, 0x58, 0x5f, 0x46, 0x49, 0x4c, 0x45, 0x5f, 0x55,
+	0x50, 0x4c, 0x4f, 0x41, 0x44, 0x53, 0x10, 0x04, 0x12, 0x10, 0x0a, 0x0c, 0x4d, 0x45, 0x4d, 0x4f,
+	0x52, 0x59, 0x5f, 0x4c, 0x49, 0x4d, 0x49, 0x54, 0x10, 0x05, 0x2a, 0x31, 0x0a, 0x0d, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0b, 0x0a, 0x07, 0x52,
+	0x45, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x54, 0x4f, 0x50,
+	0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x02, 0x32, 0xdf, 0x01,
+	0x0a, 0x0c, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x42,
+	0x0a, 0x0d, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
+	0x19, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x12, 0x40, 0x0a, 0x0c, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x12, 0x18, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65,
 	0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x61,
 	0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x0c, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x12, 0x18, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x4e, 0x67, 0x69, 0x6e, 0x78,
-	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x49, 0x0a, 0x0e, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65,
+	0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x12, 0x1f, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x68, 0x61,
+	0x6e, 0x67, 0x65, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42,
+	0x0e, 0x5a, 0x0c, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x61, 0x70, 0x69, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -327,26 +417,30 @@ func file_internal_api_api_proto_rawDescGZIP() []byte {
 }
 
 var file_internal_api_api_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_internal_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_internal_api_api_proto_goTypes = []interface{}{
-	(PhpFpmServiceRequest_Action)(0), // 0: api.PhpFpmServiceRequest.Action
-	(NginxServiceRequest_Action)(0),  // 1: api.NginxServiceRequest.Action
-	(*PhpFpmServiceRequest)(nil),     // 2: api.PhpFpmServiceRequest
-	(*NginxServiceRequest)(nil),      // 3: api.NginxServiceRequest
-	(*ServiceResponse)(nil),          // 4: api.ServiceResponse
+	(PhpIniSetting)(0),                 // 0: api.PhpIniSetting
+	(ServiceAction)(0),                 // 1: api.ServiceAction
+	(*ChangePhpIniSettingRequest)(nil), // 2: api.ChangePhpIniSettingRequest
+	(*PhpFpmServiceRequest)(nil),       // 3: api.PhpFpmServiceRequest
+	(*NginxServiceRequest)(nil),        // 4: api.NginxServiceRequest
+	(*ServiceResponse)(nil),            // 5: api.ServiceResponse
 }
 var file_internal_api_api_proto_depIdxs = []int32{
-	0, // 0: api.PhpFpmServiceRequest.action:type_name -> api.PhpFpmServiceRequest.Action
-	1, // 1: api.NginxServiceRequest.action:type_name -> api.NginxServiceRequest.Action
-	2, // 2: api.NitroService.PhpFpmService:input_type -> api.PhpFpmServiceRequest
-	3, // 3: api.NitroService.NginxService:input_type -> api.NginxServiceRequest
-	4, // 4: api.NitroService.PhpFpmService:output_type -> api.ServiceResponse
-	4, // 5: api.NitroService.NginxService:output_type -> api.ServiceResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: api.ChangePhpIniSettingRequest.setting:type_name -> api.PhpIniSetting
+	1, // 1: api.PhpFpmServiceRequest.action:type_name -> api.ServiceAction
+	1, // 2: api.NginxServiceRequest.action:type_name -> api.ServiceAction
+	3, // 3: api.NitroService.PhpFpmService:input_type -> api.PhpFpmServiceRequest
+	4, // 4: api.NitroService.NginxService:input_type -> api.NginxServiceRequest
+	2, // 5: api.NitroService.PhpIniSettings:input_type -> api.ChangePhpIniSettingRequest
+	5, // 6: api.NitroService.PhpFpmService:output_type -> api.ServiceResponse
+	5, // 7: api.NitroService.NginxService:output_type -> api.ServiceResponse
+	5, // 8: api.NitroService.PhpIniSettings:output_type -> api.ServiceResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_internal_api_api_proto_init() }
@@ -356,7 +450,7 @@ func file_internal_api_api_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_internal_api_api_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PhpFpmServiceRequest); i {
+			switch v := v.(*ChangePhpIniSettingRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -368,7 +462,7 @@ func file_internal_api_api_proto_init() {
 			}
 		}
 		file_internal_api_api_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NginxServiceRequest); i {
+			switch v := v.(*PhpFpmServiceRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -380,6 +474,18 @@ func file_internal_api_api_proto_init() {
 			}
 		}
 		file_internal_api_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NginxServiceRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_internal_api_api_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ServiceResponse); i {
 			case 0:
 				return &v.state
@@ -398,7 +504,7 @@ func file_internal_api_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_internal_api_api_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -427,6 +533,7 @@ const _ = grpc.SupportPackageIsVersion6
 type NitroServiceClient interface {
 	PhpFpmService(ctx context.Context, in *PhpFpmServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
 	NginxService(ctx context.Context, in *NginxServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
+	PhpIniSettings(ctx context.Context, in *ChangePhpIniSettingRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
 }
 
 type nitroServiceClient struct {
@@ -455,10 +562,20 @@ func (c *nitroServiceClient) NginxService(ctx context.Context, in *NginxServiceR
 	return out, nil
 }
 
+func (c *nitroServiceClient) PhpIniSettings(ctx context.Context, in *ChangePhpIniSettingRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
+	err := c.cc.Invoke(ctx, "/api.NitroService/PhpIniSettings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NitroServiceServer is the server API for NitroService service.
 type NitroServiceServer interface {
 	PhpFpmService(context.Context, *PhpFpmServiceRequest) (*ServiceResponse, error)
 	NginxService(context.Context, *NginxServiceRequest) (*ServiceResponse, error)
+	PhpIniSettings(context.Context, *ChangePhpIniSettingRequest) (*ServiceResponse, error)
 }
 
 // UnimplementedNitroServiceServer can be embedded to have forward compatible implementations.
@@ -470,6 +587,9 @@ func (*UnimplementedNitroServiceServer) PhpFpmService(context.Context, *PhpFpmSe
 }
 func (*UnimplementedNitroServiceServer) NginxService(context.Context, *NginxServiceRequest) (*ServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NginxService not implemented")
+}
+func (*UnimplementedNitroServiceServer) PhpIniSettings(context.Context, *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PhpIniSettings not implemented")
 }
 
 func RegisterNitroServiceServer(s *grpc.Server, srv NitroServiceServer) {
@@ -512,6 +632,24 @@ func _NitroService_NginxService_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NitroService_PhpIniSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangePhpIniSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NitroServiceServer).PhpIniSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.NitroService/PhpIniSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NitroServiceServer).PhpIniSettings(ctx, req.(*ChangePhpIniSettingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _NitroService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.NitroService",
 	HandlerType: (*NitroServiceServer)(nil),
@@ -523,6 +661,10 @@ var _NitroService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NginxService",
 			Handler:    _NitroService_NginxService_Handler,
+		},
+		{
+			MethodName: "PhpIniSettings",
+			Handler:    _NitroService_PhpIniSettings_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
