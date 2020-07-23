@@ -21,7 +21,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	api.RegisterNitroServiceServer(s, api.NewNitrodServer())
+	api.RegisterNitroServiceServer(s, api.NewNitrodService())
 
 	fmt.Println("running nitrod on port", *port)
 

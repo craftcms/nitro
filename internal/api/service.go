@@ -8,12 +8,12 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
-type NitrodServer struct {
+type NitrodService struct {
 	command Runner
 	logger  *log.Logger
 }
 
-func (s *NitrodServer) PhpFpmService(ctx context.Context, request *PhpFpmServiceRequest) (*ServiceResponse, error) {
+func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServiceRequest) (*ServiceResponse, error) {
 	// validate the request
 	if err := validate.PHPVersion(request.GetVersion()); err != nil {
 		s.logger.Println(err)
@@ -44,7 +44,7 @@ func (s *NitrodServer) PhpFpmService(ctx context.Context, request *PhpFpmService
 	return &ServiceResponse{Message: "successfully " + message + " php-fpm " + request.GetVersion()}, nil
 }
 
-func (s *NitrodServer) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
+func (s *NitrodService) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
 	var action string
 	var message string
 	switch request.GetAction() {
@@ -69,8 +69,8 @@ func (s *NitrodServer) NginxService(ctx context.Context, request *NginxServiceRe
 	return &ServiceResponse{Message: "successfully " + message + " nginx"}, nil
 }
 
-func NewNitrodServer() *NitrodServer {
-	return &NitrodServer{
+func NewNitrodService() *NitrodService {
+	return &NitrodService{
 		command: &ServiceRunner{},
 		logger:  log.New(os.Stdout, "nitrod ", 0),
 	}

@@ -96,7 +96,7 @@ func TestNitrodServer_PhpFpmService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyServiceRunner{}
-			s := &NitrodServer{
+			s := &NitrodService{
 				command: spy,
 				logger:  tt.fields.logger,
 			}
@@ -159,7 +159,7 @@ func TestNitrodServer_NginxService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyServiceRunner{}
-			s := &NitrodServer{
+			s := &NitrodService{
 				command: spy,
 				logger:  tt.fields.logger,
 			}
