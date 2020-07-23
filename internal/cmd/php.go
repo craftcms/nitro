@@ -29,7 +29,7 @@ var phpRestartCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_RESTART})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_RESTART})
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ var phpStartCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_START})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_START})
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ var phpStopCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_STOP})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_STOP})
 		if err != nil {
 			return err
 		}

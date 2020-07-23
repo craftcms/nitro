@@ -27,7 +27,7 @@ var nginxRestartCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_RESTART})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_RESTART})
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ var nginxStartCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_START})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_START})
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ var nginxStopCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_STOP})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_STOP})
 		if err != nil {
 			return err
 		}
