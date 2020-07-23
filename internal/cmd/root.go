@@ -50,7 +50,7 @@ func init() {
 		phpCommand,
 		nginxCommand,
 	)
-	phpCommand.AddCommand(phpRestartCommand, phpStartCommand, phpStopCommand)
+	phpCommand.AddCommand(phpRestartCommand, phpStartCommand, phpStopCommand, inisetCommand)
 	nginxCommand.AddCommand(nginxStartCommand, nginxStopCommand, nginxRestartCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
