@@ -10,7 +10,6 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion",
 	Short: "Generate completion scripts",
-	Hidden: true,
 	Long: `To load completion for bash run
 
 . <(nitro completion bash)
@@ -18,11 +17,11 @@ var completionCmd = &cobra.Command{
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(nitro completion bash)
+source <(nitro completion bash)
 
 If you are using ZSH, run
 
-. <(nitro completion zsh)
+source <(nitro completion zsh)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
