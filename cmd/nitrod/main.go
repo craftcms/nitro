@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net"
 
@@ -21,6 +22,8 @@ func main() {
 
 	s := grpc.NewServer()
 	api.RegisterNitroServiceServer(s, api.NewNitrodServer())
+
+	fmt.Println("running nitrod on port", *port)
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatal("error when running the server", err)

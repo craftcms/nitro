@@ -5,12 +5,12 @@ Wants=network-pre.target
 After=network-pre.target
 StartLimitIntervalSec=0
 StartLimitBurst=0
-MemoryMax=256M
 
 [Service]
 ExecStart=/usr/sbin/nitrod
 Restart=on-failure
 User=root
+MemoryMax=256M
 
 [Install]
 WantedBy=multi-user.target
