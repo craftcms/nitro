@@ -6,8 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/nitrod"
 )
 
 var phpCommand = &cobra.Command{
@@ -25,18 +26,15 @@ var phpRestartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
-			Version: php,
-			Action:  "restart",
-		})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_RESTART})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},
@@ -49,18 +47,15 @@ var phpStartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
-			Version: php,
-			Action:  "start",
-		})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_START})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},
@@ -73,18 +68,15 @@ var phpStopCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		success, err := client.ServicePhpFpm(cmd.Context(), &nitrod.PhpFpmOptions{
-			Version: php,
-			Action:  "stop",
-		})
+		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.PhpFpmServiceRequest_STOP})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},

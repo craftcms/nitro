@@ -5,8 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/nitrod"
 )
 
 var nginxCommand = &cobra.Command{
@@ -24,16 +25,14 @@ var nginxRestartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 
-		success, err := client.ServiceNginx(cmd.Context(), &nitrod.NginxServiceOptions{
-			Action: "restart",
-		})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_RESTART})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},
@@ -46,16 +45,14 @@ var nginxStartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 
-		success, err := client.ServiceNginx(cmd.Context(), &nitrod.NginxServiceOptions{
-			Action: "start",
-		})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_START})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},
@@ -68,16 +65,14 @@ var nginxStopCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		client := nitrod.NewClient(ip)
+		c := client.NewClient(ip, "50051")
 
-		success, err := client.ServiceNginx(cmd.Context(), &nitrod.NginxServiceOptions{
-			Action: "stop",
-		})
+		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.NginxServiceRequest_STOP})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(success.Output)
+		fmt.Println(resp.Message)
 
 		return nil
 	},
