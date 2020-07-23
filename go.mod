@@ -25,7 +25,6 @@ require (
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/ini.v1 v1.55.0 // indirect
-	gopkg.in/thedevsaddam/govalidator.v1 v1.9.10
 	gopkg.in/yaml.v2 v2.3.0
 	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86
 )
