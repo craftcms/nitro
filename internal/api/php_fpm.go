@@ -34,5 +34,9 @@ func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServic
 		return nil, err
 	}
 
-	return &ServiceResponse{Message: "successfully " + message + " php-fpm " + request.GetVersion()}, nil
+	msg := "successfully " + message + " php-fpm " + request.GetVersion()
+
+	s.logger.Println(msg)
+
+	return &ServiceResponse{Message: msg}, nil
 }

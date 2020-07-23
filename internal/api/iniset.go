@@ -22,14 +22,17 @@ func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIn
 		return nil, e
 	}
 
-	// nitro php iniset max_execution_time val
-	// sed -i "/aaa=/c\aaa=xxx" your_file_here
 	_, err := s.command.Run("sed", []string{"-i", "s|" + setting + "|" + setting + " = " + request.GetValue() + "|g", "/etc/php/" + request.GetVersion() + "/fpm/php.ini"})
 	if err != nil {
+		s.logger.Println("error changing ini setting, error:", err)
 		return nil, err
 	}
-	// todo edit the cli
-	// todo restart the php-fpm service
 
-	return &ServiceResponse{Message: "successfully changed the ini setting for max_execution_time to 300"}, nil
+	_, err = s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", "restart"})
+	if err != nil {
+		s.logger.Println("error restarting php-fpm, error:", err)
+		return nil, err
+	}
+
+	return &ServiceResponse{Message: "successfully changed the ini setting for " + setting + " to " + request.GetValue()}, nil
 }
