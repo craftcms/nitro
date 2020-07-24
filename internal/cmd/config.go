@@ -140,5 +140,6 @@ runcmd:
   - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
   - cp /etc/skel/.profile /home/ubuntu/.profile
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
+  - sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' /home/ubuntu/.bashrc
   - chown -R ubuntu:ubuntu /home/ubuntu/
 `
