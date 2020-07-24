@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"strconv"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,12 +26,38 @@ func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIn
 		if err := validate.MaxExecutionTime(value); err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, err.Error())
 		}
+
 		setting = "max_execution_time"
+	case PhpIniSetting_UPLOAD_MAX_FILESIZE:
+		if err := validate.IsMegabytes(value); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+
+		setting = "upload_max_filesize"
+	case PhpIniSetting_MAX_INPUT_TIME:
+		if _, err := strconv.Atoi(value); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+
+		setting = "max_input_time"
 	case PhpIniSetting_MAX_INPUT_VARS:
 		if err := validate.MaxInputVars(value); err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, err.Error())
 		}
+
 		setting = "max_input_vars"
+	case PhpIniSetting_MAX_FILE_UPLOADS:
+		if err := validate.MaxInputVars(value); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+
+		setting = "max_file_uploads"
+	case PhpIniSetting_MEMORY_LIMIT:
+		if err := validate.IsMegabytes(value); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+
+		setting = "memory_limit"
 	default:
 		msg := "changing " + PhpIniSetting_name[int32(request.GetSetting())] + " is not authorized"
 		s.logger.Println(msg)

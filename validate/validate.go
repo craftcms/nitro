@@ -113,3 +113,16 @@ func IsMegabytes(v string) error {
 
 	return nil
 }
+
+func PhpMaxFileUploads(v string) error {
+	num, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_input_vars must be a valid integer")
+	}
+
+	if num >= 500 {
+		return errors.New("max_file_uploads must be less than 500")
+	}
+
+	return nil
+}

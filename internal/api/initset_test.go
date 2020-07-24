@@ -27,6 +27,111 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 		wantArgs     []map[string][]string
 	}{
 		{
+			name: "can modify the php ini setting for memory_limit",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MEMORY_LIMIT, Value: "512M"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for memory_limit to 512M"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|memory_limit|memory_limit = 512M|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
+			name: "can modify the php ini setting for max_file_uploads",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_FILE_UPLOADS, Value: "400"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_file_uploads to 400"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|max_file_uploads|max_file_uploads = 400|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
+			name: "can modify the php ini setting for max_input_time",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_INPUT_TIME, Value: "4000"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_input_time to 4000"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|max_input_time|max_input_time = 4000|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
+			name: "can modify the php ini setting for upload_max_filesize",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_UPLOAD_MAX_FILESIZE, Value: "10M"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for upload_max_filesize to 10M"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|upload_max_filesize|upload_max_filesize = 10M|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
+			name: "can modify the php ini setting for upload_max_filesize",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_UPLOAD_MAX_FILESIZE, Value: "10M"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for upload_max_filesize to 10M"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|upload_max_filesize|upload_max_filesize = 10M|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
 			name: "can modify the php ini setting for max_input_vars",
 			fields: fields{
 				logger: log.New(ioutil.Discard, "testing", 0),
