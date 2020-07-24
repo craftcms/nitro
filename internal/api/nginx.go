@@ -1,6 +1,11 @@
 package api
 
-import "context"
+import (
+	"context"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
 func (s *NitrodService) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
 	var action string
@@ -18,10 +23,10 @@ func (s *NitrodService) NginxService(ctx context.Context, request *NginxServiceR
 	}
 
 	// perform the action on the php-fpm service
-	_, err := s.command.Run("service", []string{"nginx", action})
-	if err != nil {
+	if output, err := s.command.Run("service", []string{"nginx", action}); err != nil {
 		s.logger.Println(err)
-		return nil, err
+		s.logger.Println("output:", string(output))
+		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
 	return &ServiceResponse{Message: "successfully " + message + " nginx"}, nil

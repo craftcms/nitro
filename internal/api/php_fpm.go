@@ -34,7 +34,7 @@ func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServic
 	if output, err := s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", action}); err != nil {
 		s.logger.Println(err)
 		s.logger.Println("output:", string(output))
-		return nil, status.Errorf(codes.Unknown, err.Error())
+		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
 	msg := "successfully " + message + " php-fpm " + request.GetVersion()
