@@ -5,12 +5,12 @@ import "github.com/spf13/cobra"
 var inisetCommand = &cobra.Command{
 	Use:       "iniset",
 	Short:     "Change php.ini",
-	ValidArgs: []string{"max_execution_time"},
+	ValidArgs: []string{"max_execution_time", "max_input_vars"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
 }
 
 func init() {
-	inisetCommand.AddCommand(inisetMaxExecutionTimeCommand)
+	inisetCommand.AddCommand(inisetMaxExecutionTimeCommand, inisetMaxInputVarsCommand)
 }

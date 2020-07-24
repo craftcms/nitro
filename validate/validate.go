@@ -101,3 +101,15 @@ func MaxInputVars(v string) error {
 
 	return nil
 }
+
+func IsMegabytes(v string) error {
+	if len(v) == 1 {
+		return errors.New("memory must be larger than 1 character (e.g. 256M)")
+	}
+
+	if !strings.HasSuffix(v, "M") {
+		return errors.New("memory must end with a M")
+	}
+
+	return nil
+}
