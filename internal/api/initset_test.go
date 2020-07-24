@@ -27,6 +27,51 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 		wantArgs     []map[string][]string
 	}{
 		{
+			name: "can modify the php ini setting for max_input_vars",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_INPUT_VARS, Value: "1000"},
+			},
+			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_input_vars to 1000"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", "s|max_input_vars|max_input_vars = 1000|g", "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
+			name: "setting max_input_vars to a non-integer returns an error",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_INPUT_VARS, Value: "300b"},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "setting max_input_vars must be less than 10000",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.3", Setting: PhpIniSetting_MAX_INPUT_VARS, Value: "10000"},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name: "can modify the php ini setting for max_execution_time",
 			fields: fields{
 				logger: log.New(ioutil.Discard, "testing", 0),
@@ -43,7 +88,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 					"sed": {"-i", "s|max_execution_time|max_execution_time = 300|g", "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
-					"service": {"php7.4-fpm restart"},
+					"service": {"php7.4-fpm", "restart"},
 				},
 			},
 		},
@@ -80,9 +125,9 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				t.Errorf("expected the commands to be:\n%v\n, got:\n%v", tt.wantCommands, spy.Commands)
 			}
 
-			//if !reflect.DeepEqual(spy.Args, tt.wantArgs) {
-			//	t.Errorf("expected the args to be:\n%v\ngot:\n%v", tt.wantArgs, spy.Args)
-			//}
+			if !reflect.DeepEqual(spy.Args, tt.wantArgs) {
+				t.Errorf("expected the args to be:\n%v\ngot:\n%v", tt.wantArgs, spy.Args)
+			}
 		})
 	}
 }

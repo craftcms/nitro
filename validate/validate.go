@@ -88,3 +88,16 @@ func MaxExecutionTime(v string) error {
 
 	return nil
 }
+
+func MaxInputVars(v string) error {
+	num, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_input_vars must be a valid integer")
+	}
+
+	if num >= 10000 {
+		return errors.New("max_input_vars must be less than 10000")
+	}
+
+	return nil
+}

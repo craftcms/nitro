@@ -16,6 +16,9 @@ func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIn
 		}
 		setting = "max_execution_time"
 	case PhpIniSetting_MAX_INPUT_VARS:
+		if err := validate.MaxInputVars(request.GetValue()); err != nil {
+			return nil, err
+		}
 		setting = "max_input_vars"
 	default:
 		e := errors.New("changing this setting is not authorized")
@@ -23,15 +26,15 @@ func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIn
 		return nil, e
 	}
 
-	_, err := s.command.Run("sed", []string{"-i", "s|" + setting + "|" + setting + " = " + request.GetValue() + "|g", "/etc/php/" + request.GetVersion() + "/fpm/php.ini"})
-	if err != nil {
+	if output, err := s.command.Run("sed", []string{"-i", "s|" + setting + "|" + setting + " = " + request.GetValue() + "|g", "/etc/php/" + request.GetVersion() + "/fpm/php.ini"}); err != nil {
 		s.logger.Println("error changing ini setting, error:", err)
+		s.logger.Println("output:", string(output))
 		return nil, err
 	}
 
-	_, err = s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", "restart"})
-	if err != nil {
+	if output, err := s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", "restart"}); err != nil {
 		s.logger.Println("error restarting php-fpm, error:", err)
+		s.logger.Println("output:", string(output))
 		return nil, err
 	}
 
