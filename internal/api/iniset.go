@@ -3,19 +3,20 @@ package api
 import (
 	"context"
 	"errors"
-	"strconv"
+
+	"github.com/craftcms/nitro/validate"
 )
 
 func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
-	// TODO add validation to the value based on the setting
 	var setting string
 	switch request.GetSetting() {
 	case PhpIniSetting_MAX_EXECUTION_TIME:
-		_, err := strconv.Atoi(request.GetValue())
-		if err != nil {
-			return nil, errors.New("max_execution_time must be a valid integer")
+		if err := validate.MaxExecutionTime(request.GetValue()); err != nil {
+			return nil, err
 		}
 		setting = "max_execution_time"
+	case PhpIniSetting_MAX_INPUT_VARS:
+		setting = "max_input_vars"
 	default:
 		e := errors.New("changing this setting is not authorized")
 		s.logger.Println(e)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -74,6 +75,15 @@ func MachineName(v string) error {
 	}
 	if strings.Contains(v, " ") {
 		return errors.New("machine name cannot contain spaces")
+	}
+
+	return nil
+}
+
+func MaxExecutionTime(v string) error {
+	_, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_execution_time must be a valid integer")
 	}
 
 	return nil
