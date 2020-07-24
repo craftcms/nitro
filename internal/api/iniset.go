@@ -47,7 +47,7 @@ func (s *NitrodService) PhpIniSettings(ctx context.Context, request *ChangePhpIn
 
 		setting = "max_input_vars"
 	case PhpIniSetting_MAX_FILE_UPLOADS:
-		if err := validate.MaxInputVars(value); err != nil {
+		if err := validate.PhpMaxFileUploads(value); err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, err.Error())
 		}
 
