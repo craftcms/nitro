@@ -6,7 +6,7 @@ build:
 build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro.exe ./cmd/cli
 local: build
-	mv nitro /usr/local/bin/nitro
+	sudo mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 test:
