@@ -3,6 +3,9 @@ package api
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/craftcms/nitro/validate"
 )
 
@@ -10,7 +13,7 @@ func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServic
 	// validate the request
 	if err := validate.PHPVersion(request.GetVersion()); err != nil {
 		s.logger.Println(err)
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	}
 
 	var action string
@@ -28,10 +31,10 @@ func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServic
 	}
 
 	// perform the action on the php-fpm service
-	_, err := s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", action})
-	if err != nil {
+	if output, err := s.command.Run("service", []string{"php" + request.GetVersion() + "-fpm", action}); err != nil {
 		s.logger.Println(err)
-		return nil, err
+		s.logger.Println("output:", string(output))
+		return nil, status.Errorf(codes.Unknown, err.Error())
 	}
 
 	msg := "successfully " + message + " php-fpm " + request.GetVersion()
