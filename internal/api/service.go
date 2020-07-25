@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var Version string
+
 type NitrodService struct {
 	command Runner
 	logger  *log.Logger
