@@ -30,7 +30,11 @@ func (s *SystemService) Nginx(ctx context.Context, req *NginxServiceRequest) (*S
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	return &ServiceResponse{Message: "successfully " + message + " nginx"}, nil
+	msg := "successfully " + message + " nginx"
+
+	s.logger.Println(msg)
+
+	return &ServiceResponse{Message: msg}, nil
 }
 
 // PhpFpm is used to manage the php<version>-fpm service.
