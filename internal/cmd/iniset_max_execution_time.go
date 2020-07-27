@@ -11,6 +11,30 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
+// TODO work this into a new commands pkg with a func that returns the command for testing.
+// func NewInisetMaxExecutionCommand(addr IPer) &cobra.Command {
+//	return &cobra.Command{
+//		Use:   "max_execution_time",
+//		Short: "Change max_execution_time",
+//		Args:  cobra.MinimumNArgs(1),
+//		RunE: func(cmd *cobra.Command, args []string) error {
+// 			ip := addr.Get(flagMachineName)
+// 			c := client.NewClient(ip, "50051")
+//			php := config.GetString("php", flagPhpVersion)
+//			resp, err := c.PhpIniSettings(cmd.Context(), &nitrod.ChangePhpIniSettingRequest{
+//				Version: php,
+//				Setting: nitrod.PhpIniSetting_MAX_EXECUTION_TIME,
+//				Value:   args[0],
+//			})
+//			if err != nil {
+//				return err
+//			}
+//
+//			fmt.Println(resp.Message)
+//
+//			return nil
+//		},
+// }
 var inisetMaxExecutionTimeCommand = &cobra.Command{
 	Use:   "max_execution_time",
 	Short: "Change max_execution_time",
