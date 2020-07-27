@@ -33,4 +33,4 @@ setup: api-build
 	multipass exec nitro-dev -- sudo systemctl daemon-reload
 	multipass exec nitro-dev -- sudo systemctl start nitrod
 proto:
-	protoc internal/api/api.proto --go_out=plugins=grpc:.
+	protoc internal/nitrod/nitrod.proto --go_out=plugins=grpc:.

@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -29,7 +29,7 @@ var phpRestartCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_RESTART})
+		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_RESTART})
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ var phpStartCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_START})
+		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_START})
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ var phpStopCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &api.PhpFpmServiceRequest{Version: php, Action: api.ServiceAction_STOP})
+		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_STOP})
 		if err != nil {
 			return err
 		}

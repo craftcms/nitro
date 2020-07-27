@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package api;
+package nitrod;
 
-option go_package = "internal/api";
+option go_package = "internal/nitrod";
 
 service NitroService {
   rpc PhpFpmService(PhpFpmServiceRequest) returns (ServiceResponse) {}

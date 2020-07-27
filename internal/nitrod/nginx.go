@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *NitrodService) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
+func (s *Service) NginxService(ctx context.Context, request *NginxServiceRequest) (*ServiceResponse, error) {
 	var action string
 	var message string
 	switch request.GetAction() {

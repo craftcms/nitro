@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -27,7 +27,7 @@ var nginxRestartCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_RESTART})
+		resp, err := c.NginxService(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_RESTART})
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ var nginxStartCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_START})
+		resp, err := c.NginxService(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_START})
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ var nginxStopCommand = &cobra.Command{
 		ip := nitro.IP(machine, runner)
 		c := client.NewClient(ip, "50051")
 
-		resp, err := c.NginxService(cmd.Context(), &api.NginxServiceRequest{Action: api.ServiceAction_STOP})
+		resp, err := c.NginxService(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_STOP})
 		if err != nil {
 			return err
 		}

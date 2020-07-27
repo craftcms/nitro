@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
 )
@@ -22,9 +22,9 @@ var inisetMaxInputVarsCommand = &cobra.Command{
 		c := client.NewClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpIniSettings(cmd.Context(), &api.ChangePhpIniSettingRequest{
+		resp, err := c.PhpIniSettings(cmd.Context(), &nitrod.ChangePhpIniSettingRequest{
 			Version: php,
-			Setting: api.PhpIniSetting_MAX_INPUT_VARS,
+			Setting: nitrod.PhpIniSetting_MAX_INPUT_VARS,
 			Value:   args[0],
 		})
 		if err != nil {

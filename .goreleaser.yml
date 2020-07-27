@@ -23,7 +23,7 @@ builds:
     goarch:
       - amd64
       - arm64
-    ldflags: -s -w -X github.com/craftcms/nitro/internal/api.Version={{.Version}}
+    ldflags: -s -w -X github.com/craftcms/nitro/internal/nitrod.Version={{.Version}}
 archives:
   -
     name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"

@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
-func (s *NitrodService) PhpFpmService(ctx context.Context, request *PhpFpmServiceRequest) (*ServiceResponse, error) {
+func (s *Service) PhpFpmService(ctx context.Context, request *PhpFpmServiceRequest) (*ServiceResponse, error) {
 	// validate the request
 	if err := validate.PHPVersion(request.GetVersion()); err != nil {
 		s.logger.Println(err)

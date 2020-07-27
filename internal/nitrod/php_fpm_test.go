@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 import (
 	"context"
@@ -84,7 +84,7 @@ func TestNitrodServer_PhpFpmService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyServiceRunner{}
-			s := &NitrodService{
+			s := &Service{
 				command: spy,
 				logger:  tt.fields.logger,
 			}

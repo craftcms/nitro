@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 // spyChainRunner is used for services that run multiple
 // Run commands such as editing an ini file and then

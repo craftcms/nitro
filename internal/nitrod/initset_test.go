@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 import (
 	"context"
@@ -213,7 +213,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyChainRunner{}
-			s := &NitrodService{
+			s := &Service{
 				command: spy,
 				logger:  tt.fields.logger,
 			}

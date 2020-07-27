@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/craftcms/nitro/internal/api"
+	"github.com/craftcms/nitro/internal/nitrod"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	api.RegisterNitroServiceServer(s, api.NewNitrodService())
+	nitrod.RegisterNitroServiceServer(s, nitrod.New())
 
 	fmt.Println("running nitrod on port", *port)
 

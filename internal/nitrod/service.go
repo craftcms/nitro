@@ -1,4 +1,4 @@
-package api
+package nitrod
 
 import (
 	"log"
@@ -7,13 +7,13 @@ import (
 
 var Version string
 
-type NitrodService struct {
+type Service struct {
 	command Runner
 	logger  *log.Logger
 }
 
-func NewNitrodService() *NitrodService {
-	return &NitrodService{
+func New() *Service {
+	return &Service{
 		command: &ServiceRunner{},
 		logger:  log.New(os.Stdout, "nitrod ", 0),
 	}
