@@ -25,8 +25,9 @@ func main() {
 	// create the grpc server
 	s := grpc.NewServer()
 
-	// register our service
-	nitrod.RegisterNitroServiceServer(s, nitrod.New())
+	// register our services
+	nitrod.RegisterNitroServiceServer(s, nitrod.NewNitroService())
+	nitrod.RegisterSystemServiceServer(s, nitrod.NewSystemService())
 
 	fmt.Println("running nitrod on port", *port)
 

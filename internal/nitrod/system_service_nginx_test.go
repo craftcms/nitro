@@ -44,11 +44,11 @@ func TestNitrodServer_NginxService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyServiceRunner{}
-			s := &Service{
+			s := &SystemService{
 				command: spy,
 				logger:  tt.fields.logger,
 			}
-			got, err := s.NginxService(tt.args.ctx, tt.args.request)
+			got, err := s.Nginx(tt.args.ctx, tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NginxService() error = %v, wantErr %v", err, tt.wantErr)
 				return

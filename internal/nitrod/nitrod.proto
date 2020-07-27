@@ -5,9 +5,12 @@ package nitrod;
 option go_package = "internal/nitrod";
 
 service NitroService {
-  rpc PhpFpmService(PhpFpmServiceRequest) returns (ServiceResponse) {}
-  rpc NginxService(NginxServiceRequest) returns (ServiceResponse) {}
   rpc PhpIniSettings(ChangePhpIniSettingRequest) returns (ServiceResponse) {}
+}
+
+service SystemService {
+  rpc Nginx(NginxServiceRequest) returns (ServiceResponse) {}
+  rpc PhpFpm(PhpFpmServiceRequest) returns (ServiceResponse) {}
 }
 
 enum PhpIniSetting {

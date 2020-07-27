@@ -7,13 +7,13 @@ import (
 
 var Version string
 
-type Service struct {
+type NitroService struct {
 	command Runner
 	logger  *log.Logger
 }
 
-func New() *Service {
-	return &Service{
+func NewNitroService() *NitroService {
+	return &NitroService{
 		command: &ServiceRunner{},
 		logger:  log.New(os.Stdout, "nitrod ", 0),
 	}

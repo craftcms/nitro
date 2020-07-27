@@ -84,11 +84,11 @@ func TestNitrodServer_PhpFpmService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spy := &spyServiceRunner{}
-			s := &Service{
+			s := &SystemService{
 				command: spy,
 				logger:  tt.fields.logger,
 			}
-			got, err := s.PhpFpmService(tt.args.ctx, tt.args.request)
+			got, err := s.PhpFpm(tt.args.ctx, tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PhpFpmService() error = %v, wantErr %v", err, tt.wantErr)
 				return

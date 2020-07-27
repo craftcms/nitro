@@ -19,3 +19,12 @@ func NewClient(ip, port string) nitrod.NitroServiceClient {
 
 	return nitrod.NewNitroServiceClient(cc)
 }
+
+func NewSystemClient(ip, port string) nitrod.SystemServiceClient {
+	cc, err := grpc.Dial(ip+":"+port, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal("error creating nitrod system client, error:", err)
+	}
+
+	return nitrod.NewSystemServiceClient(cc)
+}

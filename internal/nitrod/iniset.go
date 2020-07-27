@@ -10,7 +10,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
-func (s *Service) PhpIniSettings(ctx context.Context, request *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
+func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
 	var setting string
 	value := request.GetValue()
 	version := request.GetVersion()

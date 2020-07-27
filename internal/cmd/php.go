@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/nitrod"
 )
 
 var phpCommand = &cobra.Command{
@@ -26,10 +26,10 @@ var phpRestartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewClient(ip, "50051")
+		c := client.NewSystemClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_RESTART})
+		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_RESTART})
 		if err != nil {
 			return err
 		}
@@ -47,10 +47,10 @@ var phpStartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewClient(ip, "50051")
+		c := client.NewSystemClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_START})
+		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_START})
 		if err != nil {
 			return err
 		}
@@ -68,10 +68,10 @@ var phpStopCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewClient(ip, "50051")
+		c := client.NewSystemClient(ip, "50051")
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpmService(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_STOP})
+		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_STOP})
 		if err != nil {
 			return err
 		}

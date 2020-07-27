@@ -387,23 +387,24 @@ var file_internal_nitrod_nitrod_proto_rawDesc = []byte{
 	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0b, 0x0a,
 	0x07, 0x52, 0x45, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x54,
 	0x4f, 0x50, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x02, 0x32,
-	0xf1, 0x01, 0x0a, 0x0c, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x12, 0x48, 0x0a, 0x0d, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x12, 0x1c, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x50, 0x68, 0x70, 0x46, 0x70,
-	0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x17, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x46, 0x0a, 0x0c, 0x4e, 0x67,
-	0x69, 0x6e, 0x78, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x1b, 0x2e, 0x6e, 0x69, 0x74,
-	0x72, 0x6f, 0x64, 0x2e, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64,
-	0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x4f, 0x0a, 0x0e, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74,
-	0x69, 0x6e, 0x67, 0x73, 0x12, 0x22, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x43, 0x68,
-	0x61, 0x6e, 0x67, 0x65, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e,
-	0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f,
+	0x5f, 0x0a, 0x0c, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
+	0x4f, 0x0a, 0x0e, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67,
+	0x73, 0x12, 0x22, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x43, 0x68, 0x61, 0x6e, 0x67,
+	0x65, 0x50, 0x68, 0x70, 0x49, 0x6e, 0x69, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x53,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x32, 0x93, 0x01, 0x0a, 0x0d, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x12, 0x3f, 0x0a, 0x05, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x12, 0x1b, 0x2e, 0x6e, 0x69,
+	0x74, 0x72, 0x6f, 0x64, 0x2e, 0x4e, 0x67, 0x69, 0x6e, 0x78, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f,
 	0x64, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x42, 0x11, 0x5a, 0x0f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f,
-	0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x06, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x12, 0x1c, 0x2e,
+	0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x50, 0x68, 0x70, 0x46, 0x70, 0x6d, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6e, 0x69,
+	0x74, 0x72, 0x6f, 0x64, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x11, 0x5a, 0x0f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
+	0x61, 0x6c, 0x2f, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -432,12 +433,12 @@ var file_internal_nitrod_nitrod_proto_depIdxs = []int32{
 	0, // 0: nitrod.ChangePhpIniSettingRequest.setting:type_name -> nitrod.PhpIniSetting
 	1, // 1: nitrod.PhpFpmServiceRequest.action:type_name -> nitrod.ServiceAction
 	1, // 2: nitrod.NginxServiceRequest.action:type_name -> nitrod.ServiceAction
-	3, // 3: nitrod.NitroService.PhpFpmService:input_type -> nitrod.PhpFpmServiceRequest
-	4, // 4: nitrod.NitroService.NginxService:input_type -> nitrod.NginxServiceRequest
-	2, // 5: nitrod.NitroService.PhpIniSettings:input_type -> nitrod.ChangePhpIniSettingRequest
-	5, // 6: nitrod.NitroService.PhpFpmService:output_type -> nitrod.ServiceResponse
-	5, // 7: nitrod.NitroService.NginxService:output_type -> nitrod.ServiceResponse
-	5, // 8: nitrod.NitroService.PhpIniSettings:output_type -> nitrod.ServiceResponse
+	2, // 3: nitrod.NitroService.PhpIniSettings:input_type -> nitrod.ChangePhpIniSettingRequest
+	4, // 4: nitrod.SystemService.Nginx:input_type -> nitrod.NginxServiceRequest
+	3, // 5: nitrod.SystemService.PhpFpm:input_type -> nitrod.PhpFpmServiceRequest
+	5, // 6: nitrod.NitroService.PhpIniSettings:output_type -> nitrod.ServiceResponse
+	5, // 7: nitrod.SystemService.Nginx:output_type -> nitrod.ServiceResponse
+	5, // 8: nitrod.SystemService.PhpFpm:output_type -> nitrod.ServiceResponse
 	6, // [6:9] is the sub-list for method output_type
 	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -508,7 +509,7 @@ func file_internal_nitrod_nitrod_proto_init() {
 			NumEnums:      2,
 			NumMessages:   4,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_internal_nitrod_nitrod_proto_goTypes,
 		DependencyIndexes: file_internal_nitrod_nitrod_proto_depIdxs,
@@ -533,8 +534,6 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NitroServiceClient interface {
-	PhpFpmService(ctx context.Context, in *PhpFpmServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
-	NginxService(ctx context.Context, in *NginxServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
 	PhpIniSettings(ctx context.Context, in *ChangePhpIniSettingRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
 }
 
@@ -544,24 +543,6 @@ type nitroServiceClient struct {
 
 func NewNitroServiceClient(cc grpc.ClientConnInterface) NitroServiceClient {
 	return &nitroServiceClient{cc}
-}
-
-func (c *nitroServiceClient) PhpFpmService(ctx context.Context, in *PhpFpmServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/nitrod.NitroService/PhpFpmService", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *nitroServiceClient) NginxService(ctx context.Context, in *NginxServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/nitrod.NitroService/NginxService", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *nitroServiceClient) PhpIniSettings(ctx context.Context, in *ChangePhpIniSettingRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
@@ -575,8 +556,6 @@ func (c *nitroServiceClient) PhpIniSettings(ctx context.Context, in *ChangePhpIn
 
 // NitroServiceServer is the server API for NitroService service.
 type NitroServiceServer interface {
-	PhpFpmService(context.Context, *PhpFpmServiceRequest) (*ServiceResponse, error)
-	NginxService(context.Context, *NginxServiceRequest) (*ServiceResponse, error)
 	PhpIniSettings(context.Context, *ChangePhpIniSettingRequest) (*ServiceResponse, error)
 }
 
@@ -584,54 +563,12 @@ type NitroServiceServer interface {
 type UnimplementedNitroServiceServer struct {
 }
 
-func (*UnimplementedNitroServiceServer) PhpFpmService(context.Context, *PhpFpmServiceRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PhpFpmService not implemented")
-}
-func (*UnimplementedNitroServiceServer) NginxService(context.Context, *NginxServiceRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NginxService not implemented")
-}
 func (*UnimplementedNitroServiceServer) PhpIniSettings(context.Context, *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PhpIniSettings not implemented")
 }
 
 func RegisterNitroServiceServer(s *grpc.Server, srv NitroServiceServer) {
 	s.RegisterService(&_NitroService_serviceDesc, srv)
-}
-
-func _NitroService_PhpFpmService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PhpFpmServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NitroServiceServer).PhpFpmService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/nitrod.NitroService/PhpFpmService",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NitroServiceServer).PhpFpmService(ctx, req.(*PhpFpmServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NitroService_NginxService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NginxServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NitroServiceServer).NginxService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/nitrod.NitroService/NginxService",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NitroServiceServer).NginxService(ctx, req.(*NginxServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _NitroService_PhpIniSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -657,16 +594,116 @@ var _NitroService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*NitroServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "PhpFpmService",
-			Handler:    _NitroService_PhpFpmService_Handler,
-		},
-		{
-			MethodName: "NginxService",
-			Handler:    _NitroService_NginxService_Handler,
-		},
-		{
 			MethodName: "PhpIniSettings",
 			Handler:    _NitroService_PhpIniSettings_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "internal/nitrod/nitrod.proto",
+}
+
+// SystemServiceClient is the client API for SystemService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type SystemServiceClient interface {
+	Nginx(ctx context.Context, in *NginxServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
+	PhpFpm(ctx context.Context, in *PhpFpmServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
+}
+
+type systemServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSystemServiceClient(cc grpc.ClientConnInterface) SystemServiceClient {
+	return &systemServiceClient{cc}
+}
+
+func (c *systemServiceClient) Nginx(ctx context.Context, in *NginxServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
+	err := c.cc.Invoke(ctx, "/nitrod.SystemService/Nginx", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) PhpFpm(ctx context.Context, in *PhpFpmServiceRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
+	err := c.cc.Invoke(ctx, "/nitrod.SystemService/PhpFpm", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SystemServiceServer is the server API for SystemService service.
+type SystemServiceServer interface {
+	Nginx(context.Context, *NginxServiceRequest) (*ServiceResponse, error)
+	PhpFpm(context.Context, *PhpFpmServiceRequest) (*ServiceResponse, error)
+}
+
+// UnimplementedSystemServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedSystemServiceServer struct {
+}
+
+func (*UnimplementedSystemServiceServer) Nginx(context.Context, *NginxServiceRequest) (*ServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Nginx not implemented")
+}
+func (*UnimplementedSystemServiceServer) PhpFpm(context.Context, *PhpFpmServiceRequest) (*ServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PhpFpm not implemented")
+}
+
+func RegisterSystemServiceServer(s *grpc.Server, srv SystemServiceServer) {
+	s.RegisterService(&_SystemService_serviceDesc, srv)
+}
+
+func _SystemService_Nginx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NginxServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).Nginx(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nitrod.SystemService/Nginx",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).Nginx(ctx, req.(*NginxServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_PhpFpm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PhpFpmServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).PhpFpm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nitrod.SystemService/PhpFpm",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).PhpFpm(ctx, req.(*PhpFpmServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _SystemService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "nitrod.SystemService",
+	HandlerType: (*SystemServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Nginx",
+			Handler:    _SystemService_Nginx_Handler,
+		},
+		{
+			MethodName: "PhpFpm",
+			Handler:    _SystemService_PhpFpm_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
