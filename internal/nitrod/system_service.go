@@ -11,25 +11,17 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
+// SystemService is used to start, stop, and restart
+// system services on the virtual machine such as
+// nginx, php-fpm, docker, and etc.
 type SystemService struct {
 	command Runner
 	logger  *log.Logger
 }
 
+// Nginx is used to manage the nginx service.
 func (s *SystemService) Nginx(ctx context.Context, req *NginxServiceRequest) (*ServiceResponse, error) {
-	var action string
-	var message string
-	switch req.GetAction() {
-	case ServiceAction_START:
-		message = "started"
-		action = "start"
-	case ServiceAction_STOP:
-		message = "stopped"
-		action = "stop"
-	default:
-		message = "restarted"
-		action = "restart"
-	}
+	message, action := s.messageAndAction(req.GetAction())
 
 	// perform the action on the php-fpm service
 	if output, err := s.command.Run("service", []string{"nginx", action}); err != nil {
@@ -41,6 +33,7 @@ func (s *SystemService) Nginx(ctx context.Context, req *NginxServiceRequest) (*S
 	return &ServiceResponse{Message: "successfully " + message + " nginx"}, nil
 }
 
+// PhpFpm is used to manage the php<version>-fpm service.
 func (s *SystemService) PhpFpm(ctx context.Context, req *PhpFpmServiceRequest) (*ServiceResponse, error) {
 	// validate the request
 	if err := validate.PHPVersion(req.GetVersion()); err != nil {
@@ -48,19 +41,7 @@ func (s *SystemService) PhpFpm(ctx context.Context, req *PhpFpmServiceRequest) (
 		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	}
 
-	var action string
-	var message string
-	switch req.GetAction() {
-	case ServiceAction_START:
-		message = "started"
-		action = "start"
-	case ServiceAction_STOP:
-		message = "stopped"
-		action = "stop"
-	default:
-		message = "restarted"
-		action = "restart"
-	}
+	message, action := s.messageAndAction(req.GetAction())
 
 	// perform the action on the php-fpm service
 	if output, err := s.command.Run("service", []string{"php" + req.GetVersion() + "-fpm", action}); err != nil {
@@ -76,6 +57,20 @@ func (s *SystemService) PhpFpm(ctx context.Context, req *PhpFpmServiceRequest) (
 	return &ServiceResponse{Message: msg}, nil
 }
 
+func (s *SystemService) messageAndAction(action ServiceAction) (string, string) {
+	switch action {
+	case ServiceAction_START:
+		return "started", "start"
+	case ServiceAction_STOP:
+		return "stopped", "stop"
+	default:
+		return "restarted", "restart"
+	}
+}
+
+// NewSystemService will create a new
+// service with the default command
+// runner and logging to stdout
 func NewSystemService() *SystemService {
 	return &SystemService{
 		command: &ServiceRunner{},
