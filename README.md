@@ -210,6 +210,8 @@ To connect to the machine from a Craft install, set the following environment va
 ```
 DB_USER="nitro"
 DB_PASSWORD="nitro"
+# `nitro` is the default database
+DB_DATABASE="nitro"
 ```
 
 To connect to the database from your host operating system, you’ll first need to get the IP address of your Nitro machine. You can find that by running the [info](#info) command.
@@ -235,7 +237,7 @@ Then from your SQL client of choice, create a new database connection with the f
 
 ## Adding a Database
 
-Nitro creates its initial database for you. You can add as many as you’d like running the following command, which will prompt for your desired database engine and name:
+Nitro creates its initial `nitro` database for you. You can add as many databases as you’d like running the following command, which will prompt for your desired database engine and name:
 
 ```shell script
 $ nitro db add
