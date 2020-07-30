@@ -8,6 +8,9 @@
 - Added the `php` command to with `restart`, `stop`, and `start` commands. ([#57](https://github.com/craftcms/nitro/issues/57))
 - Added the `iniset` command under `php` to quickly modify init settings for `max_execution_time`, `max_input_vars`, `max_input_time`, `upload_max_filesize`, `max_file_uploads`, and `memory_limit`. ([#138](https://github.com/craftcms/nitro/issues/138))
 
+## Fixed
+- Fixed an issue where composer was slow when ran from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
+
 ### 1.0.0-beta.10 - 2020-06-04
 
 ## Added
