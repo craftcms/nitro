@@ -10,6 +10,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
+// PhpIniSettings enables changing specific values for the php ini
 func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIniSettingRequest) (*ServiceResponse, error) {
 	var setting string
 	value := request.GetValue()
