@@ -44,6 +44,8 @@ archives:
       - nitrod
     replacements:
       amd64: x86_64
+    files:
+      - nitrod.service
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
