@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO if there is an argument, assume its an apt request (e.g. apt install golang)
 var installCommand = &cobra.Command{
 	Use:       "install",
 	Short:     "Install software",

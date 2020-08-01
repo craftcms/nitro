@@ -10,6 +10,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
+// TODO move this to the nitrod API
 var xdebugOffCommand = &cobra.Command{
 	Use:   "off",
 	Short: "Disable Xdebug on a machine",

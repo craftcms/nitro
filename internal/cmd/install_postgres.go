@@ -42,6 +42,7 @@ func (v newPostgresValidator) ValidatePort(port string) error {
 	return nil
 }
 
+// TODO move this to the nitrod API
 var postgresCommand = &cobra.Command{
 	Use:     "postgres",
 	Aliases: []string{"postgresql", "psql", "pg"},
