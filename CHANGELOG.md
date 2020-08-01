@@ -10,6 +10,7 @@
 
 ## Fixed
 - Fixed an issue where composer was slow when ran from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
+- Fixed an issue where switching the PHP version was not setting the version as the default. ([#192](https://github.com/craftcms/nitro/issues/192))
 
 ### 1.0.0-beta.10 - 2020-06-04
 

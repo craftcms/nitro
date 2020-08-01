@@ -140,11 +140,53 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 
 	// if the php versions do not match, install the requested version - which makes it the default
 	if configFile.PHP != php {
+		// install the php version
 		installPhp, err := nitro.InstallPackages(machine, configFile.PHP)
 		if err != nil {
 			return nil, err
 		}
 		actions = append(actions, *installPhp)
+
+		// set the default php
+		setPhpDefault := &nitro.Action{
+			Type:       "exec",
+			UseSyscall: false,
+			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php", "/usr/bin/php" + configFile.PHP},
+		}
+		actions = append(actions, *setPhpDefault)
+
+		// set the default phar
+		setDefaultPhar := &nitro.Action{
+			Type:       "exec",
+			UseSyscall: false,
+			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phar", "/usr/bin/phar" + configFile.PHP},
+		}
+		actions = append(actions, *setDefaultPhar)
+
+		// set the default phar.phar
+		setDefaultPharPhar := &nitro.Action{
+			Type:       "exec",
+			UseSyscall: false,
+			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phar.phar", "/usr/bin/phar.phar" + configFile.PHP},
+		}
+		actions = append(actions, *setDefaultPharPhar)
+
+		// set the default phpize
+		setDefaultPhpize := &nitro.Action{
+			Type:       "exec",
+			UseSyscall: false,
+			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize" + configFile.PHP},
+		}
+		actions = append(actions, *setDefaultPhpize)
+
+		// set the default php-config
+		setDefaultPhpConfig := &nitro.Action{
+			Type:       "exec",
+			UseSyscall: false,
+			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config" + configFile.PHP},
+		}
+		actions = append(actions, *setDefaultPhpConfig)
+
 		fmt.Println("Installing PHP", configFile.PHP, "on", machine)
 	}
 
