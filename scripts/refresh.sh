@@ -6,6 +6,13 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
+if [ "$version" == "1.0.0-beta.11" ]; then
+  echo "running script for 1.0.0-beta.11"
+  echo "TODO:"
+  echo "1. update /etc/resolv.conf"
+  echo "2. install nitrod and nitrod.service"
+fi
+
 # script for beta 7
 if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ] || [ "$version" == "1.0.0-beta.9" ] || [ "$version" == "1.0.0-beta.10" ]; then
   echo "running script for 1.0.0-beta.9"

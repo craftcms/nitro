@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package nitrod;
+
+option go_package = "internal/nitrod";
+
+service NitroService {
+  rpc PhpIniSettings(ChangePhpIniSettingRequest) returns (ServiceResponse) {}
+}
+
+service SystemService {
+  rpc Nginx(NginxServiceRequest) returns (ServiceResponse) {}
+  rpc PhpFpm(PhpFpmServiceRequest) returns (ServiceResponse) {}
+}
+
+enum PhpIniSetting {
+  MAX_EXECUTION_TIME = 0;
+  UPLOAD_MAX_FILESIZE = 1;
+  MAX_INPUT_TIME = 2;
+  MAX_INPUT_VARS = 3;
+  MAX_FILE_UPLOADS = 4;
+  MEMORY_LIMIT = 5;
+}
+
+enum ServiceAction {
+  RESTART = 0;
+  STOP = 1;
+  START = 2;
+}
+
+message ChangePhpIniSettingRequest {
+  string version = 1;
+  PhpIniSetting setting = 2;
+  string value = 3;
+}
+
+message PhpFpmServiceRequest {
+  string version = 1;
+  ServiceAction action = 2;
+}
+
+message NginxServiceRequest {
+  ServiceAction action = 1;
+}
+
+message ServiceResponse {
+  string message = 1;
+}

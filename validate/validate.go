@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -74,6 +75,53 @@ func MachineName(v string) error {
 	}
 	if strings.Contains(v, " ") {
 		return errors.New("machine name cannot contain spaces")
+	}
+
+	return nil
+}
+
+func MaxExecutionTime(v string) error {
+	_, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_execution_time must be a valid integer")
+	}
+
+	return nil
+}
+
+func MaxInputVars(v string) error {
+	num, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_input_vars must be a valid integer")
+	}
+
+	if num >= 10000 {
+		return errors.New("max_input_vars must be less than 10000")
+	}
+
+	return nil
+}
+
+func IsMegabytes(v string) error {
+	if len(v) == 1 {
+		return errors.New("memory must be larger than 1 character (e.g. 256M)")
+	}
+
+	if !strings.HasSuffix(v, "M") {
+		return errors.New("memory must end with a M")
+	}
+
+	return nil
+}
+
+func PhpMaxFileUploads(v string) error {
+	num, err := strconv.Atoi(v)
+	if err != nil {
+		return errors.New("max_input_vars must be a valid integer")
+	}
+
+	if num >= 500 {
+		return errors.New("max_file_uploads must be less than 500")
 	}
 
 	return nil

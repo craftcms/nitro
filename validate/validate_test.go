@@ -137,3 +137,32 @@ func TestPath(t *testing.T) {
 		})
 	}
 }
+
+func TestIsMegabytes(t *testing.T) {
+	type args struct {
+		v string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "must end in M",
+			args:    args{v: "256"},
+			wantErr: true,
+		},
+		{
+			name:    "valid values pass",
+			args:    args{v: "256M"},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := IsMegabytes(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("IsMegabytes() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

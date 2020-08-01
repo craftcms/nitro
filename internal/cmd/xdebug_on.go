@@ -10,6 +10,7 @@ import (
 	"github.com/craftcms/nitro/validate"
 )
 
+// TODO move this to the nitrod API
 var xdebugOnCommand = &cobra.Command{
 	Use:     "on",
 	Aliases: []string{"xon"},

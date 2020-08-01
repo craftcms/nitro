@@ -118,7 +118,7 @@ write_files:
       xdebug.remote_autostart=1
       xdebug.idekey=PHPSTORM
 runcmd:
-  - sed -i 's|127.0.0.53|1.1.1.1|g' /etc/resolv.conf
+  - sed -i 's|nameserver 127.0.0.53|nameserver 127.0.0.53\nnameserver 1.1.1.1\nnameserver 1.0.0.1\nnameserver 8.8.8.8\nnameserver 8.8.4.4|g' /etc/resolv.conf
   - add-apt-repository --no-update -y ppa:ondrej/php
   - echo "CRAFT_NITRO=1" >> /etc/environment
   - echo "DB_USER=nitro" >> /etc/environment
@@ -140,5 +140,12 @@ runcmd:
   - cp /etc/skel/.bashrc /home/ubuntu/.bashrc
   - cp /etc/skel/.profile /home/ubuntu/.profile
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
+  - sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' /home/ubuntu/.bashrc
   - chown -R ubuntu:ubuntu /home/ubuntu/
+  - curl -fsSL -o /tmp/nitrod_linux_x86_64.tar.gz https://craft-cms-nitro.nyc3.digitaloceanspaces.com/nitrod_linux_x86_64.tar.gz
+  - cd /tmp && tar xfz /tmp/nitrod_linux_x86_64.tar.gz
+  - mv /tmp/nitrod /usr/sbin/
+  - mv /tmp/nitrod.service /etc/systemd/system/
+  - systemctl daemon-reload
+  - systemctl start nitrod
 `

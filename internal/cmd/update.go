@@ -8,6 +8,7 @@ import (
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
+// TODO move this to the nitrod API
 var updateCommand = &cobra.Command{
 	Use:     "update",
 	Aliases: []string{"upgrade"},

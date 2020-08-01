@@ -15,6 +15,7 @@ import (
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
+// TODO move this to the nitrod API
 var keysCommand = &cobra.Command{
 	Use:   "keys",
 	Short: "Add keys to machine",

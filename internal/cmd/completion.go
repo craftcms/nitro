@@ -10,24 +10,23 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion",
 	Short: "Generate completion scripts",
-	Hidden: true,
 	Long: `To load completion for bash run
 
-. <(nitro completion bash)
+source <(nitro completion bash)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(nitro completion bash)
+source <(nitro completion bash)
 
 If you are using ZSH, run
 
-. <(nitro completion zsh)
+source <(nitro completion zsh)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.zshrc
-. <(nitro completion zsh)
+source <(nitro completion zsh)
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
@@ -44,12 +43,12 @@ var zshCompletionCommand = &cobra.Command{
 	Short: "Generates bash completion scripts",
 	Long: `To load completion run
 
-. <(nitro completion zsh)
+source <(nitro completion zsh)
 
 To configure your zsh shell to load completions for each session add to your zshrc
 
 # ~/.zshrc
-. <(nitro completion zsh)
+source <(nitro completion zsh)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := rootCmd.GenZshCompletion(os.Stdout)
@@ -65,12 +64,12 @@ var bashCompletionCommand = &cobra.Command{
 	Short: "Generates bash completion scripts",
 	Long: `To load completion run
 
-. <(nitro completion bash)
+source <(nitro completion bash)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(nitro completion bash)
+source <(nitro completion bash)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := rootCmd.GenBashCompletion(os.Stdout)

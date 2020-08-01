@@ -42,6 +42,7 @@ func (v newMysqlValidator) ValidatePort(port string) error {
 	return nil
 }
 
+// TODO move this to the nitrod API
 var mysqlCommand = &cobra.Command{
 	Use:     "mysql",
 	Short:   "Install MySQL",
