@@ -148,4 +148,5 @@ runcmd:
   - mv /tmp/nitrod.service /etc/systemd/system/
   - systemctl daemon-reload
   - systemctl start nitrod
+  - systemctl enable nitrod
 `
