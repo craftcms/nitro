@@ -133,16 +133,16 @@ func TestApply(t *testing.T) {
 					UseSyscall: false,
 					Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phar.phar", "/usr/bin/phar.phar7.4"},
 				},
-				{
-					Type:       "exec",
-					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize7.4"},
-				},
-				{
-					Type:       "exec",
-					UseSyscall: false,
-					Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config7.4"},
-				},
+				// {
+				// 	Type:       "exec",
+				// 	UseSyscall: false,
+				// 	Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize7.4"},
+				// },
+				// {
+				// 	Type:       "exec",
+				// 	UseSyscall: false,
+				// 	Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config7.4"},
+				// },
 			},
 		},
 		{

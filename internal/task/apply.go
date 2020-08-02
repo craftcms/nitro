@@ -172,20 +172,20 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		actions = append(actions, *setDefaultPharPhar)
 
 		// set the default phpize
-		setDefaultPhpize := &nitro.Action{
-			Type:       "exec",
-			UseSyscall: false,
-			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize" + configFile.PHP},
-		}
-		actions = append(actions, *setDefaultPhpize)
+		// setDefaultPhpize := &nitro.Action{
+		// 	Type:       "exec",
+		// 	UseSyscall: false,
+		// 	Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize" + configFile.PHP},
+		// }
+		// actions = append(actions, *setDefaultPhpize)
 
 		// set the default php-config
-		setDefaultPhpConfig := &nitro.Action{
-			Type:       "exec",
-			UseSyscall: false,
-			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config" + configFile.PHP},
-		}
-		actions = append(actions, *setDefaultPhpConfig)
+		// setDefaultPhpConfig := &nitro.Action{
+		// 	Type:       "exec",
+		// 	UseSyscall: false,
+		// 	Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config" + configFile.PHP},
+		// }
+		// actions = append(actions, *setDefaultPhpConfig)
 
 		fmt.Println("Installing PHP", configFile.PHP, "on", machine)
 	}
