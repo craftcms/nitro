@@ -151,7 +151,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		setPhpDefault := &nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
-			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php", "/usr/bin/php" + configFile.PHP},
+			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "php", "/usr/bin/php" + configFile.PHP},
 		}
 		actions = append(actions, *setPhpDefault)
 
@@ -159,7 +159,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		setDefaultPhar := &nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
-			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phar", "/usr/bin/phar" + configFile.PHP},
+			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "phar", "/usr/bin/phar" + configFile.PHP},
 		}
 		actions = append(actions, *setDefaultPhar)
 
@@ -167,7 +167,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		setDefaultPharPhar := &nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
-			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phar.phar", "/usr/bin/phar.phar" + configFile.PHP},
+			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "phar.phar", "/usr/bin/phar.phar" + configFile.PHP},
 		}
 		actions = append(actions, *setDefaultPharPhar)
 
@@ -175,7 +175,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		setDefaultPhpize := &nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
-			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize" + configFile.PHP},
+			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "phpize", "/usr/bin/phpize" + configFile.PHP},
 		}
 		actions = append(actions, *setDefaultPhpize)
 
@@ -183,7 +183,7 @@ func Apply(machine string, configFile config.Config, mounts []config.Mount, site
 		setDefaultPhpConfig := &nitro.Action{
 			Type:       "exec",
 			UseSyscall: false,
-			Args:       []string{"exec", "mytestmachine", "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config" + configFile.PHP},
+			Args:       []string{"exec", machine, "--", "sudo", "update-alternatives", "--set", "php-config", "/usr/bin/php-config" + configFile.PHP},
 		}
 		actions = append(actions, *setDefaultPhpConfig)
 
