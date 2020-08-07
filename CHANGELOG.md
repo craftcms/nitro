@@ -10,10 +10,12 @@
 - Added the `nitrod` daemon that runs in the virtual machine and exposes a gRPC API on port 50051.
 - Enabling and disabling Xdebug is now performed via the gRPC API, and is much faster now.
 
+### Changed
+Improved Composer performance when run from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
+
 ## Fixed
-- Fixed an issue where composer was slow when ran from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
-- Fixed an issue where switching the PHP version was not setting the version as the default. ([#192](https://github.com/craftcms/nitro/issues/192))
-- Fixed `completion` command with proper instructions to enable tab completion for nitro commands.
+- Fixed a bug where the default PHP version was not getting updated when running the `apply` command. ([#192](https://github.com/craftcms/nitro/issues/192))
+- Fixed command completion when pressing the <kbd>Tab</kbd> key.
 
 ### 1.0.0-beta.10 - 2020-06-04
 
