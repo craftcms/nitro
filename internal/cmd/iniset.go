@@ -17,6 +17,6 @@ func init() {
 		inisetMaxInputVarsCommand,
 		inisetUploadMaxFilesizeCommand,
 		inisetMaxInputTimeCommand,
-		inisetMaxfileuploadsCommand,
+		inisetMaxFileUploadsCommand,
 	)
 }

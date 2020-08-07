@@ -11,7 +11,7 @@ import (
 	"github.com/craftcms/nitro/internal/nitrod"
 )
 
-var inisetMaxfileuploadsCommand = &cobra.Command{
+var inisetMaxFileUploadsCommand = &cobra.Command{
 	Use:   "max_file_uploads",
 	Short: "Change max_file_uploads",
 	Args:  cobra.MinimumNArgs(1),
