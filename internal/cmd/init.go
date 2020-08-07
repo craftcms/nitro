@@ -13,7 +13,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/runas"
+	"github.com/craftcms/nitro/runas"
 	"github.com/craftcms/nitro/suggest"
 	"github.com/craftcms/nitro/validate"
 )

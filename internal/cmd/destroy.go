@@ -19,8 +19,8 @@ import (
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/runas"
 	"github.com/craftcms/nitro/internal/scripts"
+	"github.com/craftcms/nitro/runas"
 )
 
 var destroyCommand = &cobra.Command{
