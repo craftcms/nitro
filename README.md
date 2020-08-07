@@ -56,8 +56,8 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`stop`](#stop)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug off` / `xoff`](#xdebug-off--xon)
-  - [`xdebug on` / `xon`](#xdebug--on)
+  - [`xdebug off` / `xoff`](#xdebug-off--xoff)
+  - [`xdebug on` / `xon`](#xdebug-on--xon)
 
 ---
 
@@ -1103,7 +1103,7 @@ Checks the currently version of nitro against the releases and shows any updated
 nitro version
 ```
 
-### `xdebug off` / `xon`
+### `xdebug off` / `xoff`
 
 Disables Xdebug on a machine.
 
@@ -1120,12 +1120,12 @@ Options:
 <dd>The PHP version to disable Xdebug for</dd>
 </dl>
 
-### `xdebug on` / `xoff`
+### `xdebug on` / `xon`
 
 Enables Xdebug, which is installed and disabled by default on each machine.
 
 ```shell script
-nitro xoff [<options>]
+nitro xon [<options>]
 ```
 
 Options:
