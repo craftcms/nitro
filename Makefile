@@ -1,6 +1,6 @@
 .PHONY: install scripts
 
-VERSION ?= 1.0.0-beta.11
+VERSION ?= 1.0.0-rc.1
 NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:
@@ -11,7 +11,7 @@ build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro.exe ./cmd/cli
 
 local: build
-	sudo mv nitro /usr/local/bin/nitro
+	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 
