@@ -841,6 +841,148 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
+### `nginx`
+
+Perform actions on machines Nginx installation. This command allows you to `start`, `stop`, `restart` nginx for the nitro machine. 
+
+```shell script
+nitro nginx [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `nginx restart`
+
+Restart nginx on nitro machine. 
+
+```shell script
+nitro nginx restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `nginx start`
+
+Start nginx on nitro machine. 
+
+```shell script
+nitro nginx start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `nginx stop`
+
+Stop nginx on nitro machine. 
+
+```shell script
+nitro nginx stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php`
+
+Perform actions on machines PHP installation. This command allows you to `start`, `stop`, `restart` the PHP-FPM for the nitro machine. There is also `iniset` to change PHP settings. 
+
+```shell script
+nitro php [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php iniset`
+
+Change PHP ini settings from the command line. This command will prompt you for which setting to change, including e.g. `max_execution_time`,
+`max_input_vars`, `max_input_time`, `max_file_upload`, `memory_limit`, `upload_max_filesize`.
+
+```shell script
+nitro php iniset [<options>] <setting> <value> 
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php restart`
+
+Restart PHP-FPM on a machine. 
+
+```shell script
+nitro php restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
+### `php start`
+
+Start PHP-FPM on a machine. 
+
+```shell script
+nitro php start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
+### `php stop`
+
+Stop PHP-FPM on a machine. 
+
+```shell script
+nitro php stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
 ### `redis`
 
 Starts a Redis shell.
