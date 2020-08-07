@@ -142,11 +142,6 @@ runcmd:
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
   - sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' /home/ubuntu/.bashrc
   - chown -R ubuntu:ubuntu /home/ubuntu/
-  - curl -s https://api.github.com/repos/craftcms/nitro/releases/latest | grep "browser_download_url" | grep "nitrod_linux_x86_64" | cut -d : -f 2,3 | tr -d \" | wget --directory-prefix=/tmp -qi -
-  - cd /tmp && tar xfz /tmp/nitrod_linux_x86_64.tar.gz
-  - mv /tmp/nitrod /usr/sbin/
-  - mv /tmp/nitrod.service /etc/systemd/system/
-  - systemctl daemon-reload
-  - systemctl start nitrod
-  - systemctl enable nitrod
+  - wget https://raw.githubusercontent.com/craftcms/nitro/master/nitrod.sh -O /tmp/nitrod.sh
+  - bash /tmp/nitrod.sh
 `
