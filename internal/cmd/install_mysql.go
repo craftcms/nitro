@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 type newMysqlValidator struct {
@@ -42,6 +42,7 @@ func (v newMysqlValidator) ValidatePort(port string) error {
 	return nil
 }
 
+// TODO move this to the nitrod API
 var mysqlCommand = &cobra.Command{
 	Use:     "mysql",
 	Short:   "Install MySQL",

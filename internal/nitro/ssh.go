@@ -3,7 +3,7 @@ package nitro
 import (
 	"runtime"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func SSH(name string) (*Action, error) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 type Action struct {

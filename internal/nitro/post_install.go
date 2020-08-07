@@ -3,7 +3,7 @@ package nitro
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func ConfigurePHPMemoryLimit(name, php, limit string) (*Action, error) {

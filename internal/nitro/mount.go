@@ -1,7 +1,7 @@
 package nitro
 
 import (
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 // Mount is used to mount a folder for a specific website

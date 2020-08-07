@@ -11,6 +11,11 @@ var (
 	flagClean         bool
 	flagSkipBackup    bool
 
+	// services flags
+	flagRestart bool
+	flagStop    bool
+	flagStart   bool
+
 	// flags for the add command
 	flagHostname string
 	flagWebroot  string

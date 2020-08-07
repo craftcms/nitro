@@ -1,6 +1,6 @@
 package nitro
 
-import "github.com/craftcms/nitro/validate"
+import "github.com/craftcms/nitro/internal/validate"
 
 func LogsNginx(name, kind string) (*Action, error) {
 	if err := validate.MachineName(name); err != nil {

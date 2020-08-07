@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 )
 
 func TestMounts(t *testing.T) {

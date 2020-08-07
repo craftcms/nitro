@@ -24,7 +24,7 @@ var (
 
 			fmt.Println("Downloading the latest refresh script.")
 
-			_, err = script.Run(false, `wget https://raw.githubusercontent.com/craftcms/nitro/master/scripts/refresh.sh -O /tmp/refresh.sh`)
+			_, err = script.Run(false, `wget https://raw.githubusercontent.com/craftcms/nitro/master/refresh.sh -O /tmp/refresh.sh`)
 			if err != nil {
 				return err
 			}

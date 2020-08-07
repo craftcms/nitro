@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 // CreateDatabaseContainer is responsible for the creation of a new Docker database and will

@@ -9,6 +9,7 @@ import (
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
+// TODO move this to the nitrod API
 var composerCommand = &cobra.Command{
 	Use:   "composer",
 	Short: "Install composer",

@@ -9,15 +9,16 @@ import (
 	"github.com/spf13/viper"
 	"github.com/txn2/txeh"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/hosts"
+
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
 var hostsCommand = &cobra.Command{
-	Use:          "hosts",
-	Short:        "Edit hosts file",
-	Hidden:       true,
+	Use:    "hosts",
+	Short:  "Edit hosts file",
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 

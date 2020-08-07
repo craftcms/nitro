@@ -6,6 +6,26 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
+if [ "$version" == "1.0.0-RC1" ]; then
+  echo "running script for 1.0.0-RC1"
+
+  echo "updating /etc/resolv.conf"
+  sed -i 's|nameserver 1.1.1.1|nameserver 127.0.0.53\nnameserver 1.1.1.1\nnameserver 1.0.0.1\nnameserver 8.8.8.8\nnameserver 8.8.4.4|g' /etc/resolv.conf
+
+  echo "installing nitrod and nitrod.service"
+  curl -s https://api.github.com/repos/craftcms/nitro/releases/latest \
+    | grep "browser_download_url" \
+    | grep "nitrod_linux_x86_64" \
+    | cut -d : -f 2,3 | tr -d \" \
+    | wget --directory-prefix=/tmp -qi -
+  cd /tmp && tar xfz /tmp/nitrod_linux_x86_64.tar.gz
+  mv /tmp/nitrod /usr/sbin/
+  mv /tmp/nitrod.service /etc/systemd/system/
+  systemctl daemon-reload
+  systemctl start nitrod
+  systemctl enable nitrod
+fi
+
 # script for beta 7
 if [ "$version" == "1.0.0-beta.7" ] || [ "$version" == "1.0.0-beta.8" ] || [ "$version" == "1.0.0-beta.9" ] || [ "$version" == "1.0.0-beta.10" ]; then
   echo "running script for 1.0.0-beta.9"

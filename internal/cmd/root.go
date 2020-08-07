@@ -47,7 +47,13 @@ func init() {
 		dbCommand,
 		completionCmd,
 		installCommand,
+		phpCommand,
+		nginxCommand,
+		xonCommand,
+		xoffCommand,
 	)
+	phpCommand.AddCommand(phpRestartCommand, phpStartCommand, phpStopCommand, inisetCommand, inigetCommand)
+	nginxCommand.AddCommand(nginxStartCommand, nginxStopCommand, nginxRestartCommand)
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 

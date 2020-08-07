@@ -3,7 +3,7 @@ package webroot
 import (
 	"testing"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 )
 
 func TestFindWebRoot(t *testing.T) {

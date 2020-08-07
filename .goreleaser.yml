@@ -3,6 +3,7 @@
 before:
   hooks:
     - go mod download
+    - go test ./...
 builds:
   - binary: nitro
     id: nitro
@@ -13,7 +14,17 @@ builds:
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags: -s -w -X github.com/craftcms/nitro/internal/cmd.Version={{.Version}}
+  - binary: nitrod
+    id: nitrod
+    main: ./cmd/nitrod/main.go
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags: -s -w -X github.com/craftcms/nitro/internal/nitrod.Version={{.Version}}
 archives:
   -
     name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
@@ -26,6 +37,15 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+  -
+    name_template: "nitrod_{{.Os}}_{{.Arch}}"
+    id: nitrod
+    builds:
+      - nitrod
+    replacements:
+      amd64: x86_64
+    files:
+      - nitrod.service
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:

@@ -1,6 +1,22 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-RC1 - 2020-08-07
+
+## Added
+- Added the `nginx start`, `nginx stop`, and `nginx restart` commands.
+- Added the `php start`, `php stop`, and `php restart` commands. ([#57](https://github.com/craftcms/nitro/issues/57))
+- Added the `php iniget` command, which can be used to see current php.ini values.
+- Added the `php iniset` command, which can be used to modify the `max_execution_time`, `max_input_vars`, `max_input_time`, `upload_max_filesize`, `max_file_uploads`, and `memory_limit` php.ini settings. ([#138](https://github.com/craftcms/nitro/issues/138))
+- Added the `xon` and `xoff` commands, which are shortcuts for `xdebug on` and `xdebug off`.
+- Added the `nitrod` daemon that runs in the virtual machine and exposes a gRPC API on port 50051.
+- Enabling and disabling Xdebug is now performed via the gRPC API, and is much faster now.
+
+### Changed
+Improved Composer performance when run from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
+
+## Fixed
+- Fixed a bug where the default PHP version was not getting updated when running the `apply` command. ([#192](https://github.com/craftcms/nitro/issues/192))
+- Fixed command completion when pressing the <kbd>Tab</kbd> key.
 
 ### 1.0.0-beta.10 - 2020-06-04
 
@@ -17,7 +33,7 @@
 - The `db add` command now validates the database name. ([#160](https://github.com/craftcms/nitro/issues/160))
 
 ### Fixed
-- Fixed a bug with the Nginx config template (run `nitro refresh` for the change to take effect). 
+- Fixed a bug with the Nginx config template (run `nitro refresh` for the change to take effect).
 
 ## 1.0.0-beta.8 - 2020-06-01
 
@@ -33,7 +49,7 @@
 
 ### Fixed
 - Fixed a bug where keys transferred into the machine did not have the proper permissions. ([#154](https://github.com/craftcms/nitro/issues/154))
-- Fixed a bug where the `init` command was not editing the hosts file. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156)) 
+- Fixed a bug where the `init` command was not editing the hosts file. ([#155](https://github.com/craftcms/nitro/issues/155)) ([#156](https://github.com/craftcms/nitro/issues/156))
 - Fixed a bug where the `db import` command was not working on PostgreSQL.
 
 ## 1.0.0-beta.6 - 2020-05-26

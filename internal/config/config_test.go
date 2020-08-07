@@ -199,7 +199,7 @@ func TestConfig_AddMount(t *testing.T) {
 			},
 			want: []Mount{
 				{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 					Dest:   "/nitro/sites/test-mount",
 				},
 			},
@@ -214,7 +214,7 @@ func TestConfig_AddMount(t *testing.T) {
 			},
 			want: []Mount{
 				{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 					Dest:   "/nitro/sites/test-mount",
 				},
 			},
@@ -224,12 +224,12 @@ func TestConfig_AddMount(t *testing.T) {
 			name: "adds a new mount and sets a default dest path for relative",
 			args: args{
 				m: Mount{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 				},
 			},
 			want: []Mount{
 				{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 					Dest:   "/nitro/sites/test-mount",
 				},
 			},
@@ -239,13 +239,13 @@ func TestConfig_AddMount(t *testing.T) {
 			name: "adds a new mount",
 			args: args{
 				m: Mount{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 					Dest:   "/home/ubuntu/sites",
 				},
 			},
 			want: []Mount{
 				{
-					Source: "~/go/src/github.com/craftcms/nitro/config/testdata/test-mount",
+					Source: "~/go/src/github.com/craftcms/nitro/internal/config/testdata/test-mount",
 					Dest:   "/home/ubuntu/sites",
 				},
 			},

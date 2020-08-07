@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 type newPostgresValidator struct {
@@ -42,6 +42,7 @@ func (v newPostgresValidator) ValidatePort(port string) error {
 	return nil
 }
 
+// TODO move this to the nitrod API
 var postgresCommand = &cobra.Command{
 	Use:     "postgres",
 	Aliases: []string{"postgresql", "psql", "pg"},

@@ -20,8 +20,8 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Using MailHog](#using-mailhog)
 - [Advanced Configuration](#advanced-configuration)
 - [Commands](#commands)
-  - [`apply`](#apply)
   - [`add`](#add)
+  - [`apply`](#apply)
   - [`context`](#context)
   - [`db add`](#db-add)
   - [`db backup`](#db-backup)
@@ -39,18 +39,26 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`install postgres`](#install-postgres)
   - [`keys`](#keys)
   - [`logs`](#logs)
-  - [`remove`](#remove)
+  - [`nginx restart`](#nginx-restart)
+  - [`nginx start`](#nginx-start)
+  - [`nginx stop`](#nginx-stop)
+  - [`php iniget`](#php-iniget)
+  - [`php iniset`](#php-iniset)
+  - [`php restart`](#php-restart)
+  - [`php start`](#php-start)
+  - [`php stop`](#php-stop)
   - [`redis`](#redis)
+  - [`remove`](#remove)
   - [`rename`](#rename)
   - [`restart`](#restart)
   - [`self-update`](#self-update)
+  - [`ssh`](#ssh)
   - [`start`](#start)
   - [`stop`](#stop)
-  - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug on`](#xdebug-on)
-  - [`xdebug off`](#xdebug-off)
+  - [`xdebug off` / `xoff`](#xdebug-off--xoff)
+  - [`xdebug on` / `xon`](#xdebug-on--xon)
 
 ---
 
@@ -221,8 +229,8 @@ $ nitro info
 Name:           nitro-dev
 State:          Running
 IPv4:           192.168.64.2
-Release:        Ubuntu 18.04.4 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Release:        Ubuntu 20.04 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 20.04 LTS)
 Load:           0.71 0.74 0.60
 Disk usage:     2.7G out of 38.6G
 Memory usage:   526.4M out of 3.9G
@@ -325,31 +333,6 @@ See [Advanced Configuration](ADVANCED.md) for instructions on customizing Nitro�
 
 ## Commands
 
-### `apply`
-
-Ensures that the machine exists, and applies any changes in its config file to it.
-
-```shell script
-nitro apply [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--skip-hosts</code></dt>
-<dd>Skips updating the <code>hosts</code> file.</dd>
-</dl>
-
-Example:
-
-```shell script
-$ nitro apply
-There are 2 mounted directories and 1 new mount(s) in the config file.
-Applied changes from nitro.yaml.
-```
-
 ### `add`
 
 Adds a new site to the machine.
@@ -385,6 +368,31 @@ Adding site example.test to nitro-dev
 Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
+```
+
+### `apply`
+
+Ensures that the machine exists, and applies any changes in its config file to it.
+
+```shell script
+nitro apply [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro apply
+There are 2 mounted directories and 1 new mount(s) in the config file.
+Applied changes from nitro.yaml.
 ```
 
 ### `context`
@@ -695,8 +703,8 @@ $ nitro info
 Name:           nitro-dev
 State:          Running
 IPv4:           192.168.64.48
-Release:        Ubuntu 18.04.4 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Release:        Ubuntu 20.04 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 20.04 LTS)
 Load:           0.09 0.15 0.22
 Disk usage:     2.7G out of 38.6G
 Memory usage:   379.8M out of 3.9G
@@ -843,6 +851,133 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
+### `nginx restart`
+
+Restart nginx on nitro machine. 
+
+```shell script
+nitro nginx restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `nginx start`
+
+Start nginx on nitro machine. 
+
+```shell script
+nitro nginx start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `nginx stop`
+
+Stop nginx on nitro machine. 
+
+```shell script
+nitro nginx stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php iniget`
+
+Outputs PHP ini setting values.
+
+```shell script
+nitro php iniset [<options>] <setting> 
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php iniset`
+
+Change PHP ini settings from the command line. This command will prompt you for which setting to change, including e.g. `max_execution_time`,
+`max_input_vars`, `max_input_time`, `max_file_upload`, `memory_limit`, `upload_max_filesize`.
+
+```shell script
+nitro php iniset [<options>] <setting> <value> 
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
+### `php restart`
+
+Restart PHP-FPM on a machine. 
+
+```shell script
+nitro php restart [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
+### `php start`
+
+Start PHP-FPM on a machine. 
+
+```shell script
+nitro php start [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
+### `php stop`
+
+Stop PHP-FPM on a machine. 
+
+```shell script
+nitro php stop [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to manage</dd>
+</dl>
+
 ### `redis`
 
 Starts a Redis shell.
@@ -984,12 +1119,29 @@ Checks the currently version of nitro against the releases and shows any updated
 nitro version
 ```
 
-### `xdebug on`
+### `xdebug off` / `xoff`
+
+Disables Xdebug on a machine.
+
+```shell script
+nitro xoff [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to disable Xdebug for</dd>
+</dl>
+
+### `xdebug on` / `xon`
 
 Enables Xdebug, which is installed and disabled by default on each machine.
 
 ```shell script
-nitro xdebug on [<options>]
+nitro xon [<options>]
 ```
 
 Options:
@@ -1002,20 +1154,3 @@ Options:
 </dl>
 
 This ensures Xdebug is installed for PHP and enables it:
-
-### `xdebug off`
-
-Disables Xdebug on a machine.
-
-```shell script
-nitro xdebug off [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--php-version</code></dt>
-<dd>The PHP version to disable Xdebug for</dd>
-</dl>
