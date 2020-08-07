@@ -4,14 +4,20 @@ package nitrod;
 
 option go_package = "internal/nitrod";
 
+// Services
+
 service NitroService {
   rpc PhpIniSettings(ChangePhpIniSettingRequest) returns (ServiceResponse) {}
+  rpc DisableXdebug(DisableXdebugRequest) returns (ServiceResponse) {}
+  rpc EnableXdebug(EnableXdebugRequest) returns (ServiceResponse) {}
 }
 
 service SystemService {
   rpc Nginx(NginxServiceRequest) returns (ServiceResponse) {}
   rpc PhpFpm(PhpFpmServiceRequest) returns (ServiceResponse) {}
 }
+
+// Fields
 
 enum PhpIniSetting {
   MAX_EXECUTION_TIME = 0;
@@ -28,10 +34,20 @@ enum ServiceAction {
   START = 2;
 }
 
+// Messages
+
 message ChangePhpIniSettingRequest {
   string version = 1;
   PhpIniSetting setting = 2;
   string value = 3;
+}
+
+message EnableXdebugRequest {
+  string version = 1;
+}
+
+message DisableXdebugRequest {
+  string version = 1;
 }
 
 message PhpFpmServiceRequest {
