@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/internal/version"
+	"github.com/craftcms/nitro/version"
 )
 
 var (
