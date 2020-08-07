@@ -23,7 +23,7 @@ type SystemService struct {
 func (s *SystemService) Nginx(ctx context.Context, req *NginxServiceRequest) (*ServiceResponse, error) {
 	message, action := s.messageAndAction(req.GetAction())
 
-	// perform the action on the php-fpm service
+	// perform the action on the nginx service
 	if output, err := s.command.Run("service", []string{"nginx", action}); err != nil {
 		s.logger.Println(err)
 		s.logger.Println("output:", string(output))
@@ -47,7 +47,7 @@ func (s *SystemService) PhpFpm(ctx context.Context, req *PhpFpmServiceRequest) (
 
 	message, action := s.messageAndAction(req.GetAction())
 
-	// perform the action on the php-fpm service
+	// perform the action on the nginx service
 	if output, err := s.command.Run("service", []string{"php" + req.GetVersion() + "-fpm", action}); err != nil {
 		s.logger.Println(err)
 		s.logger.Println("output:", string(output))
