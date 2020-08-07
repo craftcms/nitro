@@ -1,4 +1,4 @@
-.PHONY: install
+.PHONY: install scripts
 
 VERSION ?= 1.0.0-beta.11
 NITRO_DEFAULT_MACHINE ?= nitro-dev
@@ -14,6 +14,8 @@ local: build
 	sudo mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
+
+dev: scripts api
 
 test:
 	go test ./...
@@ -43,3 +45,6 @@ setup: build-api
 	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl enable nitrod
 proto:
 	protoc internal/nitrod/nitrod.proto --go_out=plugins=grpc:.
+
+scripts:
+	multipass mount scripts ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/scripts
