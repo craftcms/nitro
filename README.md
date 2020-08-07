@@ -219,8 +219,8 @@ $ nitro info
 Name:           nitro-dev
 State:          Running
 IPv4:           192.168.64.2
-Release:        Ubuntu 18.04.4 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Release:        Ubuntu 20.04 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 20.04 LTS)
 Load:           0.71 0.74 0.60
 Disk usage:     2.7G out of 38.6G
 Memory usage:   526.4M out of 3.9G
@@ -693,8 +693,8 @@ $ nitro info
 Name:           nitro-dev
 State:          Running
 IPv4:           192.168.64.48
-Release:        Ubuntu 18.04.4 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 18.04 LTS)
+Release:        Ubuntu 20.04 LTS
+Image hash:     2f6bc5e7d9ac (Ubuntu 20.04 LTS)
 Load:           0.09 0.15 0.22
 Disk usage:     2.7G out of 38.6G
 Memory usage:   379.8M out of 3.9G
