@@ -10,8 +10,8 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/webroot"
 	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/webroot"
 )
 
 var addCommand = &cobra.Command{
