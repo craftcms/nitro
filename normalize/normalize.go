@@ -12,7 +12,8 @@ import (
 func Path(path, home string) (string, string, error) {
 	p := strings.Split(path, string(os.PathSeparator))
 
-	if strings.Contains(p[0], "~") {p[0] = home
+	if strings.Contains(p[0], "~") {
+		p[0] = home
 		path = strings.Join(p, string(os.PathSeparator))
 	}
 
