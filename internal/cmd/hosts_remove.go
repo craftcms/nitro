@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/txn2/txeh"
 
-	"github.com/craftcms/nitro/internal/hosts"
+	"github.com/craftcms/nitro/hosts"
 )
 
 var hostsRemoveCommand = &cobra.Command{

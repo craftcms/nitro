@@ -10,7 +10,7 @@ import (
 	"github.com/txn2/txeh"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/hosts"
+	"github.com/craftcms/nitro/hosts"
 	"github.com/craftcms/nitro/internal/nitro"
 )
 
