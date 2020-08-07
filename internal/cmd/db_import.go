@@ -14,8 +14,8 @@ import (
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
-	"github.com/craftcms/nitro/internal/normalize"
 	"github.com/craftcms/nitro/internal/scripts"
+	"github.com/craftcms/nitro/normalize"
 )
 
 var dbImportCommand = &cobra.Command{
