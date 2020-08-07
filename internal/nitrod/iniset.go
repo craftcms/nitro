@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 // PhpIniSettings enables changing specific values for the php ini

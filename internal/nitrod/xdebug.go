@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func (s *NitroService) DisableXdebug(ctx context.Context, req *DisableXdebugRequest) (*ServiceResponse, error) {

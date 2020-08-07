@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 // SystemService is used to start, stop, and restart

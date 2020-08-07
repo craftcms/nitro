@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 )
 
 func DatabaseEngine(v string) error {

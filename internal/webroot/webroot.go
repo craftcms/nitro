@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 )
 
 // Find takes a directory and will search for the "webroot" automatically.

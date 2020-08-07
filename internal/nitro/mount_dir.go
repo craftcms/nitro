@@ -3,7 +3,7 @@ package nitro
 import (
 	"strings"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func MountDir(name, source, target string) (*Action, error) {

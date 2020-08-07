@@ -10,9 +10,9 @@ import (
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/internal/keys"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/scripts"
-	"github.com/craftcms/nitro/keys"
 )
 
 // TODO move this to the nitrod API

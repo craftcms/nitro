@@ -3,7 +3,7 @@ package validate
 import (
 	"testing"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/config"
 )
 
 func TestDatabaseEngine(t *testing.T) {
@@ -44,7 +44,6 @@ func TestDatabaseEngine(t *testing.T) {
 		})
 	}
 }
-
 
 func TestDatabaseVersion(t *testing.T) {
 	type args struct {

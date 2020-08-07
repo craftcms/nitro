@@ -1,8 +1,9 @@
 package nitro
 
 import (
-	"github.com/craftcms/nitro/validate"
 	"strings"
+
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func UnmountDir(name, target string) (*Action, error) {

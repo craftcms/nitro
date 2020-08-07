@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/resolve"
+	"github.com/craftcms/nitro/internal/resolve"
 )
 
 type Config struct {

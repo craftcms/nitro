@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/craftcms/nitro/editor"
+	"github.com/craftcms/nitro/internal/editor"
 )
 
 var editCommand = &cobra.Command{

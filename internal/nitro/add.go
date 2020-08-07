@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func NginxReload(name string) (*Action, error) {

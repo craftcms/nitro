@@ -3,7 +3,7 @@ package nitro
 import (
 	"errors"
 
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func LogsDocker(name, container string) (*Action, error) {

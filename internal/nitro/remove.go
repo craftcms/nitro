@@ -1,7 +1,7 @@
 package nitro
 
 import (
-	"github.com/craftcms/nitro/validate"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 func RemoveSymlink(name, site string) (*Action, error) {

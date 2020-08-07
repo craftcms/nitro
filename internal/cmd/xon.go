@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/internal/client"
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/nitrod"
 )
