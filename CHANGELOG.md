@@ -5,6 +5,7 @@
 ## Added
 - Added the `nginx start`, `nginx stop`, and `nginx restart` commands.
 - Added the `php start`, `php stop`, and `php restart` commands. ([#57](https://github.com/craftcms/nitro/issues/57))
+- Added the `php iniget` command, which can be used to see current php.ini values.
 - Added the `php iniset` command, which can be used to modify the `max_execution_time`, `max_input_vars`, `max_input_time`, `upload_max_filesize`, `max_file_uploads`, and `memory_limit` php.ini settings. ([#138](https://github.com/craftcms/nitro/issues/138))
 - Added the `xon` and `xoff` commands, which are shortcuts for `xdebug on` and `xdebug off`.
 - Added the `nitrod` daemon that runs in the virtual machine and exposes a gRPC API on port 50051.
