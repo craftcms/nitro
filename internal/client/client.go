@@ -10,21 +10,24 @@ import (
 
 // NewClient takes the ip address and port and creates
 // a new grpc client for interacting with nitrod nitrod
-func NewClient(ip, port string) nitrod.NitroServiceClient {
-	// TODO add certificate
+// service.
+func NewClient(ip, port string) (nitrod.NitroServiceClient, error) {
 	cc, err := grpc.Dial(ip+":"+port, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("error creating nitrod client, error:", err)
 	}
 
-	return nitrod.NewNitroServiceClient(cc)
+	return nitrod.NewNitroServiceClient(cc), nil
 }
 
-func NewSystemClient(ip, port string) nitrod.SystemServiceClient {
+// NewSystemClient takes the ip address and port and creates
+// a new gRPC client for interacting with the nitrod systems
+// service.
+func NewSystemClient(ip, port string) (nitrod.SystemServiceClient, error) {
 	cc, err := grpc.Dial(ip+":"+port, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal("error creating nitrod system client, error:", err)
+		return nil, err
 	}
 
-	return nitrod.NewSystemServiceClient(cc)
+	return nitrod.NewSystemServiceClient(cc), nil
 }
