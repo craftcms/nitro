@@ -20,8 +20,8 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
 - [Using MailHog](#using-mailhog)
 - [Advanced Configuration](#advanced-configuration)
 - [Commands](#commands)
-  - [`apply`](#apply)
   - [`add`](#add)
+  - [`apply`](#apply)
   - [`context`](#context)
   - [`db add`](#db-add)
   - [`db backup`](#db-backup)
@@ -42,22 +42,22 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`nginx restart`](#nginx-restart)
   - [`nginx start`](#nginx-start)
   - [`nginx stop`](#nginx-stop)
+  - [`php iniset`](#php-iniset)
   - [`php restart`](#php-restart)
   - [`php start`](#php-start)
   - [`php stop`](#php-stop)
-  - [`php iniset`](#php-iniset)
-  - [`remove`](#remove)
   - [`redis`](#redis)
+  - [`remove`](#remove)
   - [`rename`](#rename)
   - [`restart`](#restart)
   - [`self-update`](#self-update)
+  - [`ssh`](#ssh)
   - [`start`](#start)
   - [`stop`](#stop)
-  - [`ssh`](#ssh)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug on`](#xdebug-on)
-  - [`xdebug off`](#xdebug-off)
+  - [`xdebug off` / `xoff`](#xdebug-off-xon)
+  - [`xdebug on` / `xon`](#xdebug-on)
 
 ---
 
@@ -332,31 +332,6 @@ See [Advanced Configuration](ADVANCED.md) for instructions on customizing Nitro�
 
 ## Commands
 
-### `apply`
-
-Ensures that the machine exists, and applies any changes in its config file to it.
-
-```shell script
-nitro apply [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--skip-hosts</code></dt>
-<dd>Skips updating the <code>hosts</code> file.</dd>
-</dl>
-
-Example:
-
-```shell script
-$ nitro apply
-There are 2 mounted directories and 1 new mount(s) in the config file.
-Applied changes from nitro.yaml.
-```
-
 ### `add`
 
 Adds a new site to the machine.
@@ -392,6 +367,31 @@ Adding site example.test to nitro-dev
 Applied changes from /Users/vin/.nitro/nitro-dev.yaml
 Editing your hosts file
 Password: ******
+```
+
+### `apply`
+
+Ensures that the machine exists, and applies any changes in its config file to it.
+
+```shell script
+nitro apply [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--skip-hosts</code></dt>
+<dd>Skips updating the <code>hosts</code> file.</dd>
+</dl>
+
+Example:
+
+```shell script
+$ nitro apply
+There are 2 mounted directories and 1 new mount(s) in the config file.
+Applied changes from nitro.yaml.
 ```
 
 ### `context`
@@ -850,21 +850,6 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
-### `nginx`
-
-Perform actions on machines Nginx installation. This command allows you to `start`, `stop`, `restart` nginx for the nitro machine. 
-
-```shell script
-nitro nginx [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
 ### `nginx restart`
 
 Restart nginx on nitro machine. 
@@ -901,21 +886,6 @@ Stop nginx on nitro machine.
 
 ```shell script
 nitro nginx stop [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-</dl>
-
-### `php`
-
-Perform actions on machines PHP installation. This command allows you to `start`, `stop`, `restart` the PHP-FPM for the nitro machine. There is also `iniset` to change PHP settings. 
-
-```shell script
-nitro php [<options>]
 ```
 
 Options:
@@ -1133,12 +1103,29 @@ Checks the currently version of nitro against the releases and shows any updated
 nitro version
 ```
 
-### `xdebug on`
+### `xdebug off` / `xon`
+
+Disables Xdebug on a machine.
+
+```shell script
+nitro xoff [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+<dt><code>--php-version</code></dt>
+<dd>The PHP version to disable Xdebug for</dd>
+</dl>
+
+### `xdebug on` / `xoff`
 
 Enables Xdebug, which is installed and disabled by default on each machine.
 
 ```shell script
-nitro xdebug on [<options>]
+nitro xoff [<options>]
 ```
 
 Options:
@@ -1151,20 +1138,3 @@ Options:
 </dl>
 
 This ensures Xdebug is installed for PHP and enables it:
-
-### `xdebug off`
-
-Disables Xdebug on a machine.
-
-```shell script
-nitro xdebug off [<options>]
-```
-
-Options:
-
-<dl>
-<dt><code>-m</code>, <code>--machine</code></dt>
-<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
-<dt><code>--php-version</code></dt>
-<dd>The PHP version to disable Xdebug for</dd>
-</dl>
