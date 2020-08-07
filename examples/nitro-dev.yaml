@@ -1,7 +1,0 @@
-databases:
-- engine: mysql
-  version: "5.7"
-  port: "3306"
-- engine: postgres
-  version: "12"
-  port: "5432"
