@@ -42,7 +42,7 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`nginx restart`](#nginx-restart)
   - [`nginx start`](#nginx-start)
   - [`nginx stop`](#nginx-stop)
-  - [`php iniget`](#php-iniset)
+  - [`php iniget`](#php-iniget)
   - [`php iniset`](#php-iniset)
   - [`php restart`](#php-restart)
   - [`php start`](#php-start)
@@ -896,7 +896,7 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
-### `php iniset`
+### `php iniget`
 
 Outputs PHP ini setting values.
 
