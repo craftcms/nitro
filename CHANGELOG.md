@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-RC1.1 - 2020-08-07
 
 ## Fixed
 - Fixed an issue that occurred when creating new machines.
