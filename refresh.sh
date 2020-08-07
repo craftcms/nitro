@@ -6,8 +6,8 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-if [ "$version" == "1.0.0-beta.11" ]; then
-  echo "running script for 1.0.0-beta.11"
+if [ "$version" == "1.0.0-RC1" ]; then
+  echo "running script for 1.0.0-RC1"
 
   echo "updating /etc/resolv.conf"
   sed -i 's|nameserver 1.1.1.1|nameserver 127.0.0.53\nnameserver 1.1.1.1\nnameserver 1.0.0.1\nnameserver 8.8.8.8\nnameserver 8.8.4.4|g' /etc/resolv.conf
