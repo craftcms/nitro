@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.0-RC1 - 2020-08-07
 
 ## Added
 - Added the `nginx start`, `nginx stop`, and `nginx restart` commands.
