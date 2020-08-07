@@ -8,6 +8,7 @@ option go_package = "internal/nitrod";
 
 service NitroService {
   rpc PhpIniSettings(ChangePhpIniSettingRequest) returns (ServiceResponse) {}
+  rpc GetPhpIniSetting(GetPhpIniSettingRequest) returns (ServiceResponse) {}
   rpc DisableXdebug(DisableXdebugRequest) returns (ServiceResponse) {}
   rpc EnableXdebug(EnableXdebugRequest) returns (ServiceResponse) {}
 }
@@ -42,12 +43,17 @@ message ChangePhpIniSettingRequest {
   string value = 3;
 }
 
+message DisableXdebugRequest {
+  string version = 1;
+}
+
 message EnableXdebugRequest {
   string version = 1;
 }
 
-message DisableXdebugRequest {
+message GetPhpIniSettingRequest {
   string version = 1;
+  string setting = 2;
 }
 
 message PhpFpmServiceRequest {
