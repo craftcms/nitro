@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# download the
+# download the nitrod release
 curl -s https://api.github.com/repos/craftcms/nitro/releases/latest \
   | grep "browser_download_url" \
   | grep "nitrod_linux_x86_64" \
