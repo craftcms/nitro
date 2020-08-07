@@ -142,11 +142,4 @@ runcmd:
   - cp /etc/skel/.bash_logout /home/ubuntu/.bash_logout
   - sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' /home/ubuntu/.bashrc
   - chown -R ubuntu:ubuntu /home/ubuntu/
-  - curl -fsSL -o /tmp/nitrod_linux_x86_64.tar.gz https://craft-cms-nitro.nyc3.digitaloceanspaces.com/nitrod_linux_x86_64.tar.gz
-  - cd /tmp && tar xfz /tmp/nitrod_linux_x86_64.tar.gz
-  - mv /tmp/nitrod /usr/sbin/
-  - mv /tmp/nitrod.service /etc/systemd/system/
-  - systemctl daemon-reload
-  - systemctl start nitrod
-  - systemctl enable nitrod
 `
