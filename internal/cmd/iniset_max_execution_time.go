@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/nitrod"
 )
 
 // TODO work this into a new commands pkg with a func that returns the command for testing.
@@ -43,7 +43,10 @@ var inisetMaxExecutionTimeCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewClient(ip, "50051")
+		c, err := client.NewClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpIniSettings(cmd.Context(), &nitrod.ChangePhpIniSettingRequest{

@@ -26,7 +26,10 @@ var phpRestartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_RESTART})
@@ -47,7 +50,10 @@ var phpStartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_START})
@@ -65,10 +71,14 @@ var phpStopCommand = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop php-fpm",
 	RunE: func(cmd *cobra.Command, args []string) error {
+
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_STOP})

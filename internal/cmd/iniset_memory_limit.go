@@ -19,7 +19,10 @@ var inisetMemoryLimiCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewClient(ip, "50051")
+		c, err := client.NewClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpIniSettings(cmd.Context(), &nitrod.ChangePhpIniSettingRequest{

@@ -25,7 +25,10 @@ var nginxRestartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 
 		resp, err := c.Nginx(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_RESTART})
 		if err != nil {
@@ -45,7 +48,10 @@ var nginxStartCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 
 		resp, err := c.Nginx(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_START})
 		if err != nil {
@@ -65,7 +71,10 @@ var nginxStopCommand = &cobra.Command{
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
-		c := client.NewSystemClient(ip, "50051")
+		c, err := client.NewSystemClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 
 		resp, err := c.Nginx(cmd.Context(), &nitrod.NginxServiceRequest{Action: nitrod.ServiceAction_STOP})
 		if err != nil {
