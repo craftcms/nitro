@@ -56,8 +56,8 @@ Nitro is a speedy local development environment that’s tuned for [Craft CMS](h
   - [`stop`](#stop)
   - [`update`](#update)
   - [`version`](#version)
-  - [`xdebug off` / `xoff`](#xdebug-off-xon)
-  - [`xdebug on` / `xon`](#xdebug-on)
+  - [`xdebug off` / `xoff`](#xdebug-off--xon)
+  - [`xdebug on` / `xon`](#xdebug--on)
 
 ---
 
