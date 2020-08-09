@@ -6,7 +6,7 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-if [ "$version" == "1.0.0-RC1" || [ "$version" == "1.0.0-RC1.1" ] ]; then
+if [ "$version" == "1.0.0-RC1" ] || [ "$version" == "1.0.0-RC1.1" ]; then
   echo "running script for 1.0.0-RC1 and 1.0.0-RC1.1"
 
   echo "updating /etc/resolv.conf"
