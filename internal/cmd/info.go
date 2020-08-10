@@ -19,10 +19,10 @@ IP address: %s
 PHP version: %s
 
 Need help setting up Xdebug?
-https://github.com/craftcms/nitro/blob/master/XDEBUG.md
+https://craftcms.com/docs/nitro/xdebug.html
 
 Need help using Nitro? 
-https://github.com/craftcms/nitro/blob/master/README.md`
+https://craftcms.com/docs/nitro`
 
 var infoCommand = &cobra.Command{
 	Use:   "info",
