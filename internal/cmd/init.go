@@ -241,6 +241,11 @@ var initCommand = &cobra.Command{
 			}
 		}
 
+		// disable xdebug for better upfront performance
+		if err := xoffCommand.RunE(cmd, args); err != nil {
+			fmt.Println("Unable to disable xdebug, err: ", err.Error())
+		}
+
 		return infoCommand.RunE(cmd, args)
 	},
 }
