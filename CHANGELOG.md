@@ -5,6 +5,9 @@
 ## Added
 - Added the `support` command to quickly create GitHub issues that includes helpful details for support.
 
+## Changed
+- The `info` command now displays more helpful information such as IP, PHP version, and links to common tasks.
+
 ### 1.0.0-RC1.1 - 2020-08-07
 
 ## Fixed
