@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Added
+- Added the `support` command to quickly create GitHub issues that includes helpful details for support.
+
 ### 1.0.0-RC1.1 - 2020-08-07
 
 ## Fixed

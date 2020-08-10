@@ -10,6 +10,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const issueTemplate = `### Description
+
+### Steps to reproduce
+
+1.
+2.
+
+### Additional info
+
+- Nitro version: %s
+- Multipass version: %s
+- Host OS: %s
+`
+
 var supportCommand = &cobra.Command{
 	Use:   "support",
 	Short: "Get support",
@@ -27,25 +41,12 @@ var supportCommand = &cobra.Command{
 		sp := strings.Split(string(output), "\n")
 		mpVersion := strings.Split(sp[0], "  ")
 
-		url := "https://github.com/craftcms/nitro/issues/new?labels=bug&body=" + fmt.Sprintf(`### Description
-
-### Steps to reproduce
-
-1.
-2.
-
-### Additional info
-
-- Nitro version: %s
-- Multipass version: %s
-- Host OS: %s
-`, Version, mpVersion[1], runtime.GOOS)
+		url := "https://github.com/craftcms/nitro/issues/new?labels=bug&body=" + fmt.Sprintf(issueTemplate, Version, mpVersion[1], runtime.GOOS)
 
 		if err := browser.OpenURL(url); err != nil {
 			fmt.Println("Failed to open browser, please use this URL to create a new support ticket:", url)
 			return err
 		}
-
 
 		return nil
 	},

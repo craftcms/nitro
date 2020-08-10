@@ -1113,6 +1113,21 @@ Options:
 <dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
 </dl>
 
+### `support`
+
+Quickly create a GitHub issue with helpful details for getting support.
+
+```shell script
+nitro support [<options>]
+```
+
+Options:
+
+<dl>
+<dt><code>-m</code>, <code>--machine</code></dt>
+<dd>The name of the machine to use. Defaults to <code>nitro-dev</code>.</dd>
+</dl>
+
 ### `update`
 
 Performs system updates (e.g. `sudo apt get update && sudo apt upgrade -y`).
