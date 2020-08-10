@@ -241,7 +241,8 @@ var initCommand = &cobra.Command{
 			}
 		}
 
-		// disable xdebug for better upfront performance
+		// disable xdebug for better upfront performance, append the php arg
+		args = append(args, "--php-version", cfg.PHP)
 		if err := xoffCommand.RunE(cmd, args); err != nil {
 			fmt.Println("Unable to disable xdebug, err: ", err.Error())
 		}
