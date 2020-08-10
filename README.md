@@ -101,8 +101,6 @@ Windows 10 Pro (with Hyper-V enabled):
 5. If this is your first installation, run this from the command line to add `nitro` to your global path: `setx path "%PATH%;%USERPROFILE%\Nitro"`
 6. Start the Windows terminal (cmd.exe) with Administrator permissions and run `nitro init` to create your first machine.
 
-
-
 ----------
 
 Once complete, you will have a Multipass machine called `nitro-dev`, and a new configuration file for the machine
