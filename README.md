@@ -183,6 +183,23 @@ Password: ******
 
 > 💡 **Tip:** Multipass requires Full Disk Access on macOS. If you’re seeing mount “not readable” issues, ensure `multipassd` is checked under System Preferences → Security & Privacy → Privacy → Full Disk Access.
 
+**Windows 10:**
+
+To avoid runtime exceptions due to incorrect handling of file-based mutex locks, Windows users should add the following snippet to the array returned by `config/app.php`. This manual change is required since there is no reliable way for Craft to know that it is running in a VM with a Windows host. For more info see [Craft #4355](https://github.com/craftcms/cms/issues/4355) and [#195](https://github.com/craftcms/nitro/issues/195).
+```php
+return [
+    'components' => [
+        'mutex' => function() {
+            $config = craft\helpers\App::mutexConfig();
+            $config['isWindows'] = true;
+            return Craft::createObject($config);
+        },
+    ],
+];
+```
+
+> 💡 **Tip:** Instead of hardcoding the value of `isWindows` inside `config/app.php`, you can instead use an [environment variable](https://craftcms.com/docs/3.x/config/#config-files) defined in your `.env` file.
+
 ### Mounting your entire dev folder at once
 
 If you manage all of your projects within a single dev folder, you can mount that entire folder once within Nitro,
