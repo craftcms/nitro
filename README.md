@@ -700,7 +700,7 @@ nitro edit
 
 ### `info`
 
-Shows the _running_ information for a machine like the IP address, memory, disk usage, and mounts.
+Shows the information for a machine like the IP address and PHP version.
 
 ```shell script
 nitro info [<options>]
@@ -717,17 +717,21 @@ Example:
 
 ```shell script
 $ nitro info
-Name:           nitro-dev
-State:          Running
-IPv4:           192.168.64.48
-Release:        Ubuntu 20.04 LTS
-Image hash:     2f6bc5e7d9ac (Ubuntu 20.04 LTS)
-Load:           0.09 0.15 0.22
-Disk usage:     2.7G out of 38.6G
-Memory usage:   379.8M out of 3.9G
-Mounts:         /Users/vin/sites/demo-site => /home/ubuntu/sites/demo-site
-                    UID map: 501:default
-                    GID map: 20:default
+Nitro installed, ready for something incredible at 192.168.64.21.
+
+Add a project with "nitro add <directory>". 
+
+Server Information
+-------------------------
+IP address: 192.168.64.21
+PHP version: 7.4
+
+Need help setting up Xdebug?
+https://github.com/craftcms/nitro/blob/master/XDEBUG.md
+
+Need help using Nitro? 
+https://github.com/craftcms/nitro/blob/master/README.md
+
 ```
 
 ### `init`

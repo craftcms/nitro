@@ -35,7 +35,7 @@ var infoCommand = &cobra.Command{
 
 		// check if the machine is running, if not start it
 		if ip == "" {
-			fmt.Println("The " + machine + " is not running...")
+			fmt.Println("The " + machine + " machine is not running...")
 			if err := startCommand.RunE(cmd, args); err != nil {
 				return err
 			}
