@@ -35,7 +35,7 @@ func TestNitrodServer_NginxService(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &NginxServiceRequest{Action: ServiceAction_RESTART},
 			},
-			want:        &ServiceResponse{Message: "successfully restarted nginx"},
+			want:        &ServiceResponse{Message: "Successfully restarted nginx"},
 			wantErr:     false,
 			wantCommand: "service",
 			wantArgs:    []string{"nginx", "restart"},

@@ -29,7 +29,7 @@ func (s *NitroService) DisableXdebug(ctx context.Context, req *DisableXdebugRequ
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	return &ServiceResponse{Message: "disabled xdebug for PHP " + req.GetVersion()}, nil
+	return &ServiceResponse{Message: "Disabled xdebug for PHP " + req.GetVersion()}, nil
 }
 
 func (s *NitroService) EnableXdebug(ctx context.Context, req *EnableXdebugRequest) (*ServiceResponse, error) {
@@ -52,5 +52,5 @@ func (s *NitroService) EnableXdebug(ctx context.Context, req *EnableXdebugReques
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	return &ServiceResponse{Message: "enabled xdebug for PHP " + req.GetVersion()}, nil
+	return &ServiceResponse{Message: "Enabled xdebug for PHP " + req.GetVersion()}, nil
 }

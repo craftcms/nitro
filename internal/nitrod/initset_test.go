@@ -35,7 +35,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MEMORY_LIMIT, Value: "512M"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for memory_limit to 512M"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for memory_limit to 512M"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -56,7 +56,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_FILE_UPLOADS, Value: "400"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_file_uploads to 400"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for max_file_uploads to 400"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -77,7 +77,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_INPUT_TIME, Value: "4000"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_input_time to 4000"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for max_input_time to 4000"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -98,7 +98,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_UPLOAD_MAX_FILESIZE, Value: "10M"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for upload_max_filesize to 10M"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for upload_max_filesize to 10M"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -119,7 +119,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_UPLOAD_MAX_FILESIZE, Value: "10M"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for upload_max_filesize to 10M"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for upload_max_filesize to 10M"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -140,7 +140,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_INPUT_VARS, Value: "1000"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_input_vars to 1000"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for max_input_vars to 1000"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
@@ -185,7 +185,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_MAX_EXECUTION_TIME, Value: "300"},
 			},
-			want:         &ServiceResponse{Message: "successfully changed the ini setting for max_execution_time to 300"},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for max_execution_time to 300"},
 			wantErr:      false,
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{

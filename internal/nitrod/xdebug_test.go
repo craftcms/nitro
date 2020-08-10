@@ -35,7 +35,7 @@ func TestNitroService_DisableXdebug(t *testing.T) {
 				ctx: context.TODO(),
 				req: &DisableXdebugRequest{Version: "7.4"},
 			},
-			want:         &ServiceResponse{Message: "disabled xdebug for PHP 7.4"},
+			want:         &ServiceResponse{Message: "Disabled xdebug for PHP 7.4"},
 			wantErr:      false,
 			wantCommands: []string{"phpdismod", "service"},
 			wantArgs: []map[string][]string{
@@ -115,7 +115,7 @@ func TestNitroService_EnableXdebug(t *testing.T) {
 				ctx: context.TODO(),
 				req: &EnableXdebugRequest{Version: "7.4"},
 			},
-			want:         &ServiceResponse{Message: "enabled xdebug for PHP 7.4"},
+			want:         &ServiceResponse{Message: "Enabled xdebug for PHP 7.4"},
 			wantErr:      false,
 			wantCommands: []string{"phpenmod", "service"},
 			wantArgs: []map[string][]string{

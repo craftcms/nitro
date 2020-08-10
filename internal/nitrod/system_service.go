@@ -30,7 +30,7 @@ func (s *SystemService) Nginx(ctx context.Context, req *NginxServiceRequest) (*S
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	msg := "successfully " + message + " nginx"
+	msg := "Successfully " + message + " nginx"
 
 	s.logger.Println(msg)
 
