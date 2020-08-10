@@ -185,7 +185,7 @@ Password: ******
 
 **Windows 10:**
 
-To avoid runtime exceptions due to incorrect handling of file-based mutex locks, Windows users should add the following snippet to the array returned by `config/app.php`. This manual change is required since there is no reliable way for Craft to know that it is running on in a VM with a Windows host. For more info see [Craft #4355](https://github.com/craftcms/cms/issues/4355) and [#195](https://github.com/craftcms/nitro/issues/195).
+To avoid runtime exceptions due to incorrect handling of file-based mutex locks, Windows users should add the following snippet to the array returned by `config/app.php`. This manual change is required since there is no reliable way for Craft to know that it is running in a VM with a Windows host. For more info see [Craft #4355](https://github.com/craftcms/cms/issues/4355) and [#195](https://github.com/craftcms/nitro/issues/195).
 ```php
 return [
     'components' => [
