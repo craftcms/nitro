@@ -3,7 +3,7 @@
 ### Unreleased
 
 ## Fixed
-- Fixed a bug when checking for the latest version of nitro. ([#198](https://github.com/craftcms/nitro/issues/198))
+- Fixed a bug when checking for the latest version of nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
 
 ### 1.0.0 - 2020-08-11
 
