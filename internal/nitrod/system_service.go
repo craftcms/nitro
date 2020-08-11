@@ -54,7 +54,7 @@ func (s *SystemService) PhpFpm(ctx context.Context, req *PhpFpmServiceRequest) (
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	msg := "successfully " + message + " php-fpm " + req.GetVersion()
+	msg := "Successfully " + message + " php-fpm " + req.GetVersion()
 
 	s.logger.Println(msg)
 

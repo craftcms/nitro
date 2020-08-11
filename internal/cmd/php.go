@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -56,7 +57,10 @@ var phpStartCommand = &cobra.Command{
 		}
 		php := config.GetString("php", flagPhpVersion)
 
-		resp, err := c.PhpFpm(cmd.Context(), &nitrod.PhpFpmServiceRequest{Version: php, Action: nitrod.ServiceAction_START})
+		resp, err := c.PhpFpm(context.WithValue(cmd.Context(), "version", Version), &nitrod.PhpFpmServiceRequest{
+			Version: php,
+			Action:  nitrod.ServiceAction_START,
+		})
 		if err != nil {
 			return err
 		}
