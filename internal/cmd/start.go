@@ -18,7 +18,7 @@ var startCommand = &cobra.Command{
 
 		// check if the machine is not running
 		if nitro.IP(machine, runner) != "" {
-			fmt.Println("The " + machine + " machine is already running...")
+			fmt.Println("The " + machine + " machine is already running.")
 			return nil
 		}
 
