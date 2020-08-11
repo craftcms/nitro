@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/config"
@@ -20,6 +21,9 @@ var xoffCommand = &cobra.Command{
 	Short: "Disable Xdebug",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
 		runner := nitro.NewMultipassRunner("multipass")
 		ip := nitro.IP(machine, runner)
 		c, err := client.NewClient(ip, "50051")

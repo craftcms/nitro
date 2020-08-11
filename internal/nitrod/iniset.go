@@ -79,5 +79,5 @@ func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIni
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	return &ServiceResponse{Message: "successfully changed the ini setting for " + setting + " to " + value}, nil
+	return &ServiceResponse{Message: "Successfully changed the ini setting for " + setting + " to " + value}, nil
 }

@@ -13,6 +13,13 @@ var stopCommand = &cobra.Command{
 	Short: "Stop machine",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
+		runner := nitro.NewMultipassRunner("multipass")
+
+		// check if the machine is running
+		if nitro.IP(machine, runner) == "" {
+			fmt.Println("The " + machine + " machine is not running.")
+			return nil
+		}
 
 		stopAction, err := nitro.Stop(machine)
 		if err != nil {

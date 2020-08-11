@@ -1,5 +1,16 @@
 # Release Notes for Craft Nitro
 
+### 1.0.0 - 2020-08-11
+
+## Added
+- Added the `support` command to quickly create GitHub issues pre-populated with environment info.
+
+## Changed
+- The `info` command now displays additional info such as IP, PHP version, and links to common tasks.
+
+## Fixed
+- Fixed a bug confirmation prompts would take just about any input as a “yes”. ([#190](https://github.com/craftcms/nitro/issues/190))
+
 ### 1.0.0-RC1.1 - 2020-08-07
 
 ## Fixed

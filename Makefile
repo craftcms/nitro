@@ -1,6 +1,6 @@
 .PHONY: install scripts
 
-VERSION ?= 1.0.0-rc.1
+VERSION ?= 1.0.0-RC2
 NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:

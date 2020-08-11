@@ -17,6 +17,9 @@ import (
 var addCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add site",
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveFilterDirs
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		p := prompt.NewPrompt()
