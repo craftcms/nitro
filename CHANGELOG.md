@@ -7,7 +7,7 @@
 - The default Nginx site is now a friendly landing page with helpful links.
 
 ## Fixed
-- Fixed a bug when checking for the latest version of nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
+- Fixed an error that occurred when checking for the latest version of Nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
 
 ### 1.0.0 - 2020-08-11
 
