@@ -70,7 +70,7 @@ write_files:
             <svg width="75" height="75" enable-background="new 0 0 100 100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="m89.6 0h-79.2c-5.8 0-10.4 4.6-10.4 10.4v78.8c0 6.2 4.6 10.8 10.4 10.8h79.2c5.8 0 10.4-4.6 10.4-10.4v-79.2c0-5.8-4.6-10.4-10.4-10.4zm-26.7 71-1 .2-19.2-22.2-4.2 21.4h-9.5l8-41.3 1.3-.2 18.9 22.1 4.2-21.3h9.5z" fill="#e5422b"/></svg>
             <p>This is your Nitro machine’s default page.</p>
             <div class="links">
-              <a href="" target="_blank" rel="noopener">Adding a Site</a>
+              <a href="https://craftcms.com/docs/nitro/usage.html" target="_blank" rel="noopener">Adding a Site</a>
               <a href="https://craftcms.com/docs/nitro" target="_blank" rel="noopener">Nitro Documentation</a>
               <a href="https://github.com/craftcms/nitro" target="_blank" rel="noopener">Nitro Repository</a>
             </div>

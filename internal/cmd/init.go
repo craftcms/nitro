@@ -246,6 +246,11 @@ var initCommand = &cobra.Command{
 			fmt.Println("Unable to disable xdebug, err: ", err.Error())
 		}
 
+		// install composer by default
+		if err := composerCommand.RunE(cmd, args); err != nil {
+			fmt.Println("Unable to install composer, err: ", err.Error())
+		}
+
 		return infoCommand.RunE(cmd, args)
 	},
 }

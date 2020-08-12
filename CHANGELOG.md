@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+## Changed
+- Composer is now installed by default on new machines.
+- The default Nginx template is a friendly landing page with helpful links.
+
 ## Fixed
 - Fixed a bug when checking for the latest version of nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
 
