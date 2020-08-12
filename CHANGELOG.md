@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+### 1.0.1 - 2020-08-12
 
 ## Changed
 - Composer is now installed by default on new machines.
