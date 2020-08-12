@@ -8,3 +8,4 @@ composer.lock
 nitro.exe
 *.sql
 /nitrod
+/docs
