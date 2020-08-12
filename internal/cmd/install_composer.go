@@ -21,7 +21,7 @@ var composerCommand = &cobra.Command{
 		}
 		script := scripts.New(mp, machine)
 
-		// create the local directory for mailhog
+		// create the local directory for composer
 		if output, err := script.Run(false, fmt.Sprintf(scripts.FmtCreateDirectory, "/home/ubuntu/.composer")); err != nil {
 			fmt.Println(output)
 			return err

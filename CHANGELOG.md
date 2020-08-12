@@ -1,5 +1,14 @@
 # Release Notes for Craft Nitro
 
+### 1.0.1 - 2020-08-12
+
+## Changed
+- Composer is now installed by default on new machines.
+- The default Nginx site is now a friendly landing page with helpful links.
+
+## Fixed
+- Fixed an error that occurred when checking for the latest version of Nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
+
 ### 1.0.0 - 2020-08-11
 
 ## Added

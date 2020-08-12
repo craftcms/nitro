@@ -58,6 +58,10 @@ func init() {
 	xdebugCommand.AddCommand(xdebugOnCommand, xdebugOffCommand)
 }
 
+func New() *cobra.Command  {
+	return rootCmd
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
