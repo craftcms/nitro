@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+### Unreleased
+
+## Added 
+- Added the `--silent` flag to `xon`, `xoff`, and all `php iniset <command>`'s to not show output when running commands.
+
 ### 1.0.1 - 2020-08-12
 
 ## Changed
