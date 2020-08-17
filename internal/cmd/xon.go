@@ -33,8 +33,14 @@ var xonCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(resp.Message)
+		if !flagSilent {
+			fmt.Println(resp.Message)
+		}
 
 		return nil
 	},
+}
+
+func init() {
+	xonCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
 }
