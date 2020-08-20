@@ -25,5 +25,5 @@ func (r *spyServiceRunner) Run(command string, args []string) ([]byte, error) {
 
 	r.Args = args
 
-	return []byte("test"), nil
+	return []byte(command), nil
 }
