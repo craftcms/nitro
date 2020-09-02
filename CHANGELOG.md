@@ -5,6 +5,9 @@
 ## Added 
 - Added the `--silent` flag to `xon`, `xoff`, and all `php iniset <command>`'s to not show output.
 
+## Fixed
+- An issue causing `php iniset memory_limit` to not show as an available command. 
+
 ### 1.0.1 - 2020-08-12
 
 ## Changed
