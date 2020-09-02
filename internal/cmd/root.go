@@ -52,6 +52,7 @@ func init() {
 		xonCommand,
 		xoffCommand,
 		supportCommand,
+		createcommand,
 	)
 	phpCommand.AddCommand(phpRestartCommand, phpStartCommand, phpStopCommand, inisetCommand, inigetCommand)
 	nginxCommand.AddCommand(nginxStartCommand, nginxStopCommand, nginxRestartCommand)
