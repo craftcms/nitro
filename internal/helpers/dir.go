@@ -8,14 +8,15 @@ import (
 // if the provided directory does not exist. It only
 // argument is a dir, which is a path to a dir
 func MkdirIfNotExists(dir string) error {
-	if dirExists(dir) {
+	if DirExists(dir) {
 		return nil
 	}
 
 	return os.Mkdir(dir, 0755)
 }
 
-func dirExists(dir string) bool {
+// DirExists will return true if the directory exists
+func DirExists(dir string) bool {
 	i, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		return false
