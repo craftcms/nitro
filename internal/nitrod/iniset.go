@@ -66,7 +66,7 @@ func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIni
 	}
 
 	// change setting using sed
-	if output, err := s.command.Run("sed", []string{"-i", "s|" + setting + "|" + setting + " = " + value + "|g", "/etc/php/" + version + "/fpm/php.ini"}); err != nil {
+	if output, err := s.command.Run("sed", []string{"-i", "/" + setting + `/c\` + setting + " = " + value, "/etc/php/" + version + "/fpm/php.ini"}); err != nil {
 		s.logger.Println("error changing ini setting, error:", err)
 		s.logger.Println("output:", string(output))
 		return nil, status.Errorf(codes.Unknown, string(output))
