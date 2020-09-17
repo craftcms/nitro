@@ -45,6 +45,7 @@ setup: build-api
 	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl enable nitrod
 proto:
 	protoc internal/nitrod/nitrod.proto --go_out=plugins=grpc:.
-
+journalctl:
+	multipass exec ${NITRO_DEFAULT_MACHINE} -- journalctl -u nitrod -f
 scripts:
 	multipass mount scripts ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/scripts
