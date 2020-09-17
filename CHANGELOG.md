@@ -7,7 +7,8 @@
 
 ## Fixed
 - An issue causing `php iniset memory_limit` to not show as an available command. 
-- An issue where `php iniset` commands we not setting correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
+- An issue where `php iniset` commands were not the setting correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
+- An issue where `php iniget` would not return the correct values.
 
 ### 1.0.1 - 2020-08-12
 
