@@ -35,19 +35,21 @@ func TestNitrodService_GetPhpIniSetting(t *testing.T) {
 				ctx:     context.TODO(),
 				request: &GetPhpIniSettingRequest{Version: "7.4", Setting: "max_file_uploads"},
 			},
-			want:         &ServiceResponse{Message: "The setting \"max_file_uploads\" is currently set to something"},
+			want:         &ServiceResponse{Message: "The setting \"max_file_uploads\" is currently set to 512M"},
 			wantErr:      false,
-			wantCommands: []string{"php7.4"},
+			wantCommands: []string{"bash"},
 			wantArgs: []map[string][]string{
 				{
-					"php7.4": {"-r", "echo ini_get('max_file_uploads');"},
+					"bash": {"-c", "php-fpm7.4 -i | grep 'max_file_uploads'"},
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			spy := &spyChainRunner{}
+			spy := &spyChainRunner{
+				Output: "memory_limit => 512M => 512M",
+			}
 			s := &NitroService{
 				command: spy,
 				logger:  tt.fields.logger,

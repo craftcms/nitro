@@ -6,13 +6,19 @@ package nitrod
 type spyChainRunner struct {
 	Commands []string
 	Args     []map[string][]string
+	Output   string
 }
 
 func (r *spyChainRunner) Run(command string, args []string) ([]byte, error) {
 	r.Commands = append(r.Commands, command)
 	r.Args = append(r.Args, map[string][]string{command: args})
 
-	return []byte("something"), nil
+	output := "something"
+	if r.Output != "" {
+		output = r.Output
+	}
+
+	return []byte(output), nil
 }
 
 type spyServiceRunner struct {
