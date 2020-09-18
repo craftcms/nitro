@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/internal/validate"
 )
 
 const craftDownloadURL = "https://craftcms.com/latest-v3.zip"
@@ -26,6 +27,7 @@ var createcommand = &cobra.Command{
 		_ = flagMachineName
 		p := prompt.NewPrompt()
 
+		// prompt the user for input
 		dir, err := p.Ask("What is the name of the project?", &prompt.InputOptions{
 			AppendQuestionMark: false,
 		})
@@ -36,8 +38,26 @@ var createcommand = &cobra.Command{
 		// clean up the directory name
 		dir = strings.TrimSpace(strings.Replace(dir, " ", "-", -1))
 
+		// check if the directory exists
 		if helpers.DirExists(dir) {
-			return errors.New(fmt.Sprintf("the directory %q already exists", dir))
+			return errors.New(fmt.Sprintf("Directory %q already exists", dir))
+		}
+
+		// prompt the user for the sites hostname, default to the directory name
+		hostname, err := p.Ask("Enter the hostname", &prompt.InputOptions{
+			Default:   dir,
+			Validator: validate.Hostname,
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(hostname)
+
+		// download craft
+		file, err := download()
+		if err != nil {
+			return err
 		}
 
 		projectPath, err := filepath.Abs(dir)
@@ -45,37 +65,38 @@ var createcommand = &cobra.Command{
 			return err
 		}
 
-		// download craft
-		resp, err := http.Get(craftDownloadURL)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		tmpDir := os.TempDir()
-
-		// create the temp file
-		tempFile, err := ioutil.TempFile(tmpDir, "nitro")
-		if err != nil {
-			return err
-		}
-		defer tempFile.Close()
-
-		fmt.Println("Downloading Craft CMS...")
-
-		// copy the downloaded contents into the temp file
-		_, err = io.Copy(tempFile, resp.Body)
-		if err != nil {
-			return err
-		}
-
 		// unzip the files
-		if err := unzip(tempFile, projectPath); err != nil {
+		if err := unzip(file, projectPath); err != nil {
 			return err
 		}
 
 		return nil
 	},
+}
+
+func download() (*os.File, error) {
+	r, err := http.Get(craftDownloadURL)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Body.Close()
+
+	// create the temp file
+	f, err := ioutil.TempFile(os.TempDir(), "nitro")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	fmt.Println("Downloading Craft CMS...")
+
+	// copy the downloaded contents into the temp file
+	_, err = io.Copy(f, r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
 
 func unzip(source *os.File, path string) error {
