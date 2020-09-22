@@ -20,6 +20,9 @@ dev: scripts api
 test:
 	go test ./...
 
+vet:
+	go vet ./...
+
 releaser:
 	goreleaser --skip-publish --rm-dist --skip-validate
 
