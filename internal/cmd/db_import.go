@@ -1,21 +1,23 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"os/exec"
-	"strings"
+	"io"
+	"os"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/normalize"
-	"github.com/craftcms/nitro/internal/scripts"
 )
 
 var dbImportCommand = &cobra.Command{
@@ -27,6 +29,12 @@ var dbImportCommand = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
+		runner := nitro.NewMultipassRunner("multipass")
+		ip := nitro.IP(machine, runner)
+		c, err := client.NewClient(ip, "50051")
+		if err != nil {
+			return err
+		}
 
 		home, err := homedir.Dir()
 		if err != nil {
@@ -79,60 +87,53 @@ var dbImportCommand = &cobra.Command{
 			return err
 		}
 
-		var actions []nitro.Action
-
-		// syntax is strange, see this issue: https://github.com/canonical/multipass/issues/1165#issuecomment-548763143
-		fileFullPath := "/home/ubuntu/.nitro/databases/imports/" + filename
-		transferAction := nitro.Action{
-			Type:       "transfer",
-			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, machine + ":" + fileFullPath},
-		}
-		actions = append(actions, transferAction)
-
-		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
-
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			return err
-		}
-
-		// run the import scripts
-
-		mp, err := exec.LookPath("multipass")
+		f, err := os.Open(filename)
 		if err != nil {
 			return err
 		}
 
-		script := scripts.New(mp, machine)
+		// create the stream
+		stream, err := c.ImportDatabase(cmd.Context())
+		if err != nil {
+			return err
+		}
 
-		switch strings.Contains(containerName, "mysql") {
-		case false:
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, containerName, databaseName)); err != nil {
-				fmt.Println(output)
+		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
+
+		rdr := bufio.NewReader(f)
+		buf := make([]byte, 1024)
+
+		for {
+			n, err := rdr.Read(buf)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
 				return err
 			}
 
-			fmt.Println("Created database", databaseName)
-
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, containerName, databaseName, fileFullPath)); err != nil {
-				fmt.Println(output)
-				return err
-			}
-		default:
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName)); err != nil {
-				fmt.Println(output)
-				return err
+			req := &nitrod.ImportDatabaseRequest{
+				Container: containerName,
+				Database:  databaseName,
+				Data:    buf[:n],
 			}
 
-			fmt.Println("Created database", databaseName)
-
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName)); err != nil {
-				fmt.Println(output)
+			err = stream.Send(req)
+			if err == io.EOF {
+				fmt.Println("eof on client, breaking")
+				break
+			}
+			if err != nil {
 				return err
 			}
 		}
 
-		fmt.Println("Successfully imported the database backup into", containerName)
+		res, err := stream.CloseAndRecv()
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(res.Message)
 
 		return nil
 	},
