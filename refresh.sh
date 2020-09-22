@@ -6,7 +6,7 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-# always download and install the nitrod api regardless of the version
+# always download and install the nitrod api regardless of the version passed
 echo "installing nitrod and nitrod.service"
 curl -s https://api.github.com/repos/craftcms/nitro/releases/latest \
   | grep "browser_download_url" \

@@ -13,7 +13,9 @@ import (
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/validate"
 )
@@ -26,6 +28,11 @@ var createcommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		_ = flagMachineName
 		p := prompt.NewPrompt()
+		// load the config
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
 
 		// prompt the user for input
 		dir, err := p.Ask("What is the name of the project?", &prompt.InputOptions{
@@ -52,8 +59,6 @@ var createcommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(hostname)
-
 		// download craft
 		file, err := download()
 		if err != nil {
@@ -70,7 +75,17 @@ var createcommand = &cobra.Command{
 			return err
 		}
 
-		return nil
+		// apply flags to add command
+		args = append(args, dir)
+		add := addCommand
+		if err := add.Flag("hostname").Value.Set(hostname); err != nil {
+			return err
+		}
+		if err := add.Flag("webroot").Value.Set("web"); err != nil {
+			return err
+		}
+
+		return add.RunE(cmd, args)
 	},
 }
 
@@ -82,7 +97,7 @@ func download() (*os.File, error) {
 	defer r.Body.Close()
 
 	// create the temp file
-	f, err := ioutil.TempFile(os.TempDir(), "nitro")
+	f, err := ioutil.TempFile(os.TempDir(), "nitro-craft-cms-download")
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +126,10 @@ func unzip(source *os.File, path string) error {
 		path := filepath.Join(path, f.Name)
 
 		// zipslip
-		if !strings.HasPrefix(path, filepath.Clean(path)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", path)
-		}
+		//if !strings.HasPrefix(path, filepath.Clean(path)+string(os.PathSeparator)) {
+		//	log.Printf("%s: illegal file path", path)
+		//	continue
+		//}
 
 		// create if a directory
 		if f.FileInfo().IsDir() {
