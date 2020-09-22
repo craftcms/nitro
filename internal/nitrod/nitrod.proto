@@ -11,6 +11,7 @@ service NitroService {
   rpc GetPhpIniSetting(GetPhpIniSettingRequest) returns (ServiceResponse) {}
   rpc DisableXdebug(DisableXdebugRequest) returns (ServiceResponse) {}
   rpc EnableXdebug(EnableXdebugRequest) returns (ServiceResponse) {}
+  rpc ImportDatabase(stream UploadDatabaseRequest) returns (ServiceResponse) {}
 }
 
 service SystemService {
@@ -63,6 +64,10 @@ message PhpFpmServiceRequest {
 
 message NginxServiceRequest {
   ServiceAction action = 1;
+}
+
+message UploadDatabaseRequest {
+  bytes data = 1;
 }
 
 message ServiceResponse {
