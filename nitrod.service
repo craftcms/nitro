@@ -10,7 +10,7 @@ StartLimitBurst=0
 ExecStart=/usr/sbin/nitrod
 Restart=on-failure
 User=root
-MemoryMax=256M
+#MemoryMax=256M
 
 [Install]
 WantedBy=multi-user.target

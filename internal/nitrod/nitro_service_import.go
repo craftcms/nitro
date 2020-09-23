@@ -18,12 +18,13 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	var container string
 	var database string
 
-	backupBuff := bytes.Buffer{}
+	buffer := bytes.Buffer{}
 	backupSize := 0
 
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			s.logger.Println("size of backup is:", backupSize)
 			break
 		}
 		if err != nil {
@@ -37,13 +38,15 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		backup := req.GetData()
 		size := len(backup)
 
+		// TODO check the backup size is over x, if it is, clean the buffer?
+
 		backupSize += size
 		if size > maxSize {
 			return status.Errorf(codes.InvalidArgument, "the backup size is too large")
 		}
 
 		// write the backup content into the buffer
-		_, err = backupBuff.Write(backup)
+		_, err = buffer.Write(backup)
 		if err == bufio.ErrBufferFull {
 			return err
 		}
@@ -64,7 +67,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	s.logger.Println("Created temporary file for database import", tempFile.Name())
 
 	// save the data into the file
-	_, err = tempFile.Write(backupBuff.Bytes())
+	_, err = tempFile.Write(buffer.Bytes())
 	if err != nil {
 		return status.Errorf(codes.Internal, "unable to write the backup to the temp file")
 	}
