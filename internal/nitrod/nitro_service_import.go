@@ -38,8 +38,6 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		backup := req.GetData()
 		size := len(backup)
 
-		// TODO check the backup size is over x, if it is, clean the buffer?
-
 		backupSize += size
 		if size > maxSize {
 			return status.Errorf(codes.InvalidArgument, "the backup size is too large")
@@ -77,8 +75,6 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	if err := stream.SendAndClose(&ServiceResponse{Message: "Successfully imported the database"}); err != nil {
 		return status.Errorf(codes.Internal, "unable to send the response %v", err)
 	}
-
-	// TODO remove the temp file
 
 	return nil
 }
