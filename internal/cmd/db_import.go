@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/mitchellh/go-homedir"
@@ -75,18 +76,6 @@ var dbImportCommand = &cobra.Command{
 			return err
 		}
 
-		// check the size to make sure its under the size
-		info, err := f.Stat()
-		if err != nil {
-			return err
-		}
-
-		// see if its larger than the allowed size
-		if (req.Compressed == false) && (info.Size() >= 256000000) {
-			fmt.Println("The size of the SQL file is larger than 256MB, we recommended that you use a compressed file instead...")
-			return nil
-		}
-
 		// create a new prompt
 		p := prompt.NewPrompt()
 
@@ -122,7 +111,8 @@ var dbImportCommand = &cobra.Command{
 		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
 
 		reader := bufio.NewReader(f)
-		buffer := make([]byte, 1024)
+		start := time.Now()
+		buffer := make([]byte, 1024*20)
 
 		for {
 			n, err := reader.Read(buffer)
@@ -149,7 +139,7 @@ var dbImportCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(res.Message)
+		fmt.Println(res.Message+".", fmt.Sprintf("Import took %f seconds...", time.Since(start).Seconds()))
 
 		return nil
 	},
