@@ -70,6 +70,8 @@ message ImportDatabaseRequest {
   string database = 1;
   string container = 2;
   bytes data = 3;
+  bool compressed = 4;
+  string extension = 5;
 }
 
 message ServiceResponse {
