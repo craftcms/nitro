@@ -54,6 +54,7 @@ func (s Script) Run(sudo bool, arg ...string) (string, error) {
 	case true:
 		args = append(args, []string{"sudo", "bash", "-c"}...)
 	default:
+		// TODO add this functionality to the SSH command
 		args = append(args, []string{"bash", "-c"}...)
 	}
 	args = append(args, arg...)
