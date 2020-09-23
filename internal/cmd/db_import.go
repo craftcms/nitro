@@ -28,7 +28,7 @@ var dbImportCommand = &cobra.Command{
 	Short: "Import database",
 	Args:  cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"sql"}, cobra.ShellCompDirectiveFilterFileExt
+		return []string{"sql", "gz"}, cobra.ShellCompDirectiveFilterFileExt
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
