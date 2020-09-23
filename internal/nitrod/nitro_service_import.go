@@ -67,10 +67,6 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 
 		// create the gzip reader
 		reader, err := gzip.NewReader(f)
-		if err == io.EOF {
-			s.logger.Println("got eof in the compressed reader", err)
-			return nil
-		}
 		if err != nil {
 			s.logger.Println("error creating the gzip reader", err.Error())
 			return status.Errorf(codes.Unknown, "error reading the compressed file. %w", err.Error())
