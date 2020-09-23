@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.4.2
+	github.com/h2non/filetype v1.1.0
 	github.com/jasonmccallister/hosts v0.0.0-20200601172247-0748f05d919e
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
