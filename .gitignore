@@ -7,5 +7,7 @@ composer.lock
 /production-site
 nitro.exe
 *.sql
+*.sql.gz
+*.env*
 /nitrod
 /docs
