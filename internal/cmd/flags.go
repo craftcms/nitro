@@ -25,4 +25,7 @@ var (
 
 	// flag for not displaying output
 	flagSilent bool
+
+	// flag for overriding which config to use
+	flagConfigFile string
 )

@@ -32,6 +32,11 @@ var hostsCommand = &cobra.Command{
 		// get the requested machines ip
 		ip := nitro.IP(machine, nitro.NewMultipassRunner("multipass"))
 
+		// if we have the config-file flag, load it
+		if flagConfigFile != "" {
+			viper.SetConfigFile(flagConfigFile)
+		}
+
 		// get all of the sites from the config file
 		var sites []config.Site
 		if err := viper.UnmarshalKey("sites", &sites); err != nil {
@@ -72,4 +77,5 @@ var hostsCommand = &cobra.Command{
 
 func init() {
 	hostsCommand.AddCommand(hostsRemoveCommand)
+	hostsCommand.Flags().StringVar(&flagConfigFile, "config-file", "", "which config file to use")
 }

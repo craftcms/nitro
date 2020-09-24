@@ -165,7 +165,7 @@ var applyCommand = &cobra.Command{
 				}
 			}
 
-			if err := runas.Elevated(machine, []string{"hosts"}); err != nil {
+			if err := runas.Elevated(machine, []string{"hosts", "--config-file", viper.ConfigFileUsed()}); err != nil {
 				return err
 			}
 		}

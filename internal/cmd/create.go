@@ -70,6 +70,8 @@ var createcommand = &cobra.Command{
 			return err
 		}
 
+		fmt.Println(fmt.Sprintf("Creating project folder %s...", dir))
+
 		// unzip the files
 		if err := unzip(file, projectPath); err != nil {
 			return err
@@ -157,8 +159,8 @@ func unzip(source *os.File, path string) error {
 		_, err = io.Copy(out, readerCloser)
 
 		// cleanup
-		out.Close()
-		readerCloser.Close()
+		_ = out.Close()
+		_ = readerCloser.Close()
 
 		if err != nil {
 			return err
