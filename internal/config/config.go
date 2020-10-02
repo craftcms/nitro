@@ -130,6 +130,24 @@ func (c *Config) SitesAsList() []string {
 	return s
 }
 
+func (c *Config) DatabaseEnginesAsList(engine string) []string {
+	var dbs []string
+
+	for _, db := range c.Databases {
+		if engine != "" {
+			if strings.Contains(db.Name(), engine) {
+				dbs = append(dbs, db.Name())
+			}
+
+			continue
+		}
+
+		dbs = append(dbs, db.Name())
+	}
+
+	return dbs
+}
+
 func (c *Config) AddMount(m Mount) error {
 	// replace the homedir with the tilde
 	home, err := homedir.Dir()
