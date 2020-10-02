@@ -116,6 +116,7 @@ var dbImportCommand = &cobra.Command{
 				fmt.Println(err.Error())
 			}
 			fmt.Printf("The file %q will create a database during import...\n", filename)
+			req.UsesCreate = showCreatePrompt
 		}
 
 		// prompt for the database name to create if needed

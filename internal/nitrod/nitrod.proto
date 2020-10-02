@@ -72,6 +72,7 @@ message ImportDatabaseRequest {
   bytes data = 3;
   bool compressed = 4;
   string extension = 5;
+  bool usesCreate = 6;
 }
 
 message ServiceResponse {
