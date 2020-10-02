@@ -11,3 +11,4 @@ nitro.exe
 *.env*
 /nitrod
 /docs
+/cmd/test
