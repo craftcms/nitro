@@ -25,7 +25,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	file, err := s.createFile(os.TempDir(), "nitro-db-upload")
 	if err != nil {
 		s.logger.Println("Error creating a temp file for the upload:", err.Error())
-		return status.Errorf(codes.Internal, "Error creating a temp file for the upload")
+		return status.Errorf(codes.Internal, "Unable creating a temp file for the upload")
 	}
 
 	// handle the file streaming requests
@@ -35,7 +35,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 			break
 		}
 		if err != nil {
-			return status.Errorf(codes.Internal, "unable to create the stream", err)
+			return status.Errorf(codes.Internal, "unable to create the stream: %s", err.Error())
 		}
 
 		// set the variables for later use only if they are not empty
@@ -71,14 +71,14 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		f, err := os.Open(file.Name())
 		if err != nil {
 			s.logger.Println("error opening the database import file: ", file.Name())
-			return status.Errorf(codes.Unknown, "error opening the database import file", err.Error())
+			return status.Errorf(codes.Unknown, "error opening the database import file: err: %s", err.Error())
 		}
 
 		// create the gzip reader
 		reader, err := gzip.NewReader(f)
 		if err != nil {
 			s.logger.Println("error creating the gzip reader", err.Error())
-			return status.Errorf(codes.Unknown, "error reading the compressed file. %w", err.Error())
+			return status.Errorf(codes.Unknown, "error reading the compressed file. %s", err.Error())
 		}
 		reader.Multistream(true)
 
@@ -137,13 +137,23 @@ func (s *NitroService) importDatabase(mysql bool, container, database, file stri
 			s.logger.Println(string(output))
 			return err
 		}
-
 		s.logger.Printf("Created the database %q\n", database)
+
+		// copy the file into the containers tmp dir
+		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/", file, container)}); err != nil {
+			s.logger.Println(string(output))
+			return err
+		}
+		s.logger.Printf("Copied the file %q into the %q\n", file, container)
 
 		s.logger.Printf("Beginning import of file %q", file)
 
+		// remove the /tmp prefix since mysql defaults to /
+		sp := strings.Split(file, "/")
+		f := sp[len(sp)-1]
+
 		// import the database
-		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, file, container, database)})
+		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < /%s", container, database, f)})
 		if err != nil {
 			s.logger.Println(string(output))
 			return err
