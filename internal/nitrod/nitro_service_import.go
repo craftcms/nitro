@@ -102,7 +102,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 
 	// import the database
 	if err := s.importDatabase(isMySQL, container, database, file.Name()); err != nil {
-		s.logger.Printf("Error imported the database: %s\n", err)
+		s.logger.Printf("Error importing database: %s\n", err)
 		return err
 	}
 
@@ -140,20 +140,16 @@ func (s *NitroService) importDatabase(mysql bool, container, database, file stri
 		s.logger.Printf("Created the database %q\n", database)
 
 		// copy the file into the containers tmp dir
-		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/", file, container)}); err != nil {
+		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/tmp", file, container)}); err != nil {
 			s.logger.Println(string(output))
 			return err
 		}
-		s.logger.Printf("Copied the file %q into the %q\n", file, container)
+		s.logger.Printf("Copied file %q into container %q\n", file, container)
 
 		s.logger.Printf("Beginning import of file %q", file)
 
-		// remove the /tmp prefix since mysql defaults to /
-		sp := strings.Split(file, "/")
-		f := sp[len(sp)-1]
-
 		// import the database
-		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < /%s", container, database, f)})
+		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < %s", container, database, file)})
 		if err != nil {
 			s.logger.Println(string(output))
 			return err
