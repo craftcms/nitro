@@ -67,7 +67,7 @@ func HasCreateStatement(file string) (bool, error) {
 	line := 1
 	for s.Scan() {
 
-		// check if its mysql
+		// check if the line has a create database statement
 		if strings.Contains(s.Text(), "CREATE DATABASE") {
 			creates = true
 			break
