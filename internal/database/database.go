@@ -3,7 +3,7 @@ package database
 import (
 	"bufio"
 	"errors"
-	"os"
+	"io"
 	"strings"
 )
 
@@ -12,16 +12,12 @@ import (
 // imports. It will return the engine "mysql" or
 // "postgres" if it can determine the engine.
 // If it cannot, it will return an error.
-func DetermineEngine(file string) (string, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
+func DetermineEngine(file io.Reader) (string, error) {
 	engine := ""
-	s := bufio.NewScanner(f)
 	line := 1
+
+	s := bufio.NewScanner(file)
+
 	for s.Scan() {
 		// check if its postgres
 		if strings.Contains(s.Text(), "PostgreSQL") || strings.Contains(s.Text(), "pg_dump") {
@@ -54,16 +50,10 @@ func DetermineEngine(file string) (string, error) {
 // if the file will create a database during import.
 // If it creates a database, it will return true
 // otherwise it will return false.
-func HasCreateStatement(file string) (bool, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
+func HasCreateStatement(file io.Reader) (bool, error) {
 	creates := false
 
-	s := bufio.NewScanner(f)
+	s := bufio.NewScanner(file)
 	line := 1
 	for s.Scan() {
 

@@ -1,6 +1,10 @@
 package database
 
-import "testing"
+import (
+	"bufio"
+	"os"
+	"testing"
+)
 
 func TestDetermineEngine(t *testing.T) {
 	type args struct {
@@ -33,7 +37,14 @@ func TestDetermineEngine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := DetermineEngine(tt.args.file)
+			f, err := os.Open(tt.args.file)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rdr := bufio.NewReader(f)
+
+			got, err := DetermineEngine(rdr)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DetermineEngine() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -64,7 +75,13 @@ func TestHasCreateStatement(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := HasCreateStatement(tt.args.file)
+			f, err := os.Open(tt.args.file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rdr := bufio.NewReader(f)
+
+			got, err := HasCreateStatement(rdr)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HasCreateStatement() error = %v, wantErr %v", err, tt.wantErr)
 				return

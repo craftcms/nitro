@@ -17,6 +17,7 @@ import (
 
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/config"
+	"github.com/craftcms/nitro/internal/database"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/nitrod"
@@ -33,6 +34,10 @@ var dbImportCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
 		runner := nitro.NewMultipassRunner("multipass")
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
 		ip := nitro.IP(machine, runner)
 		c, err := client.NewClient(ip, "50051")
 		if err != nil {
@@ -64,20 +69,28 @@ var dbImportCommand = &cobra.Command{
 			return nil
 		}
 
-		engines, err := getDatabaseEngines()
-		if err != nil {
-			fmt.Println("Unable to get a list of the database engines, error:", err.Error())
-			return nil
-		}
+		// create a new prompt
+		p := prompt.NewPrompt()
 
-		// open the file so we can stream it to the server
-		f, err := os.Open(filename)
+		// open the file
+		file, err := os.Open(filename)
 		if err != nil {
 			return err
 		}
+		reader := bufio.NewReader(file)
 
-		// create a new prompt
-		p := prompt.NewPrompt()
+		// try to determine the database engine
+		detected, err := database.DetermineEngine(reader)
+		if err != nil {
+			fmt.Println("Unable to determine the database engine from the file", filename)
+		}
+
+		// get the databases as a list, limiting to the detected engine
+		engines := configFile.DatabaseEnginesAsList(detected)
+		if len(engines) == 0 {
+			fmt.Println("Unable to get a list of the database engines")
+			return nil
+		}
 
 		// if there is only on database engine
 		var container string
@@ -94,12 +107,25 @@ var dbImportCommand = &cobra.Command{
 		}
 		req.Container = container
 
-		// prompt for the database name to create
-		database, err := p.Ask("Enter the database name to create for the import:", &prompt.InputOptions{Validator: nil})
-		if err != nil {
-			return err
+		// if the detect engine is mysql
+		showCreatePrompt := true
+		if detected == "mysql" {
+			// check if there is a create database statement
+			showCreatePrompt, err = database.HasCreateStatement(reader)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			fmt.Printf("The file %q will create a database during import...\n", filename)
 		}
-		req.Database = database
+
+		// prompt for the database name to create if needed
+		if showCreatePrompt {
+			db, err := p.Ask("Enter the database name to create for the import:", &prompt.InputOptions{Validator: nil})
+			if err != nil {
+				return err
+			}
+			req.Database = db
+		}
 
 		// create the stream
 		stream, err := c.ImportDatabase(cmd.Context())
@@ -110,7 +136,6 @@ var dbImportCommand = &cobra.Command{
 
 		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
 
-		reader := bufio.NewReader(f)
 		start := time.Now()
 		buffer := make([]byte, 1024*20)
 
@@ -159,22 +184,4 @@ func isCompressed(file string, req *nitrod.ImportDatabaseRequest) error {
 	}
 
 	return nil
-}
-
-func getDatabaseEngines() ([]string, error) {
-	var dbs []string
-	var databases []config.Database
-	if err := viper.UnmarshalKey("databases", &databases); err != nil {
-		return dbs, err
-	}
-
-	for _, db := range databases {
-		dbs = append(dbs, db.Name())
-	}
-
-	if len(dbs) == 0 {
-		return dbs, errors.New("there are no databases that we can import the file into")
-	}
-
-	return dbs, nil
 }
