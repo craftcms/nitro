@@ -6,8 +6,8 @@ composer.lock
 /coverage.txt
 /production-site
 nitro.exe
-*.sql
-*.sql.gz
+/*.sql
+/*.sql.gz
 *.env*
 /nitrod
 /docs
