@@ -77,12 +77,15 @@ var dbImportCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		reader := bufio.NewReader(file)
+		defer file.Close()
 
+		detected := ""
 		// try to determine the database engine
-		detected, err := database.DetermineEngine(reader)
-		if err != nil {
-			fmt.Println("Unable to determine the database engine from the file", filename)
+		if req.Compressed == false {
+			detected, err = database.DetermineEngine(file)
+			if err != nil {
+				fmt.Println("Unable to determine the database engine from the file", filename)
+			}
 		}
 
 		// get the databases as a list, limiting to the detected engine
@@ -111,12 +114,15 @@ var dbImportCommand = &cobra.Command{
 		showCreatePrompt := true
 		if detected == "mysql" {
 			// check if there is a create database statement
-			showCreatePrompt, err = database.HasCreateStatement(reader)
+			hasCreate, err := database.HasCreateStatement(file)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
 			fmt.Printf("The file %q will create a database during import...\n", filename)
-			req.SkipCreate = showCreatePrompt
+			if hasCreate {
+				showCreatePrompt = false
+			}
+			req.CreateDatabase = hasCreate
 		}
 
 		// prompt for the database name to create if needed
@@ -139,6 +145,7 @@ var dbImportCommand = &cobra.Command{
 
 		start := time.Now()
 		buffer := make([]byte, 1024*20)
+		reader := bufio.NewReader(file)
 
 		for {
 			n, err := reader.Read(buffer)
