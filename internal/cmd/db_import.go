@@ -29,7 +29,7 @@ var dbImportCommand = &cobra.Command{
 	Short: "Import database",
 	Args:  cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"sql", "gz"}, cobra.ShellCompDirectiveFilterFileExt
+		return []string{"sql", "gz", "zip"}, cobra.ShellCompDirectiveFilterFileExt
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
@@ -64,7 +64,7 @@ var dbImportCommand = &cobra.Command{
 		req := &nitrod.ImportDatabaseRequest{}
 
 		// check if the file is compressed
-		if err := isCompressed(filename, req); err != nil {
+		if err := checkIfCompressed(filename, req); err != nil {
 			fmt.Println("Error checking if the file is compressed, error:", err.Error())
 			return nil
 		}
@@ -116,7 +116,7 @@ var dbImportCommand = &cobra.Command{
 				fmt.Println(err.Error())
 			}
 			fmt.Printf("The file %q will create a database during import...\n", filename)
-			req.UsesCreate = showCreatePrompt
+			req.SkipCreate = showCreatePrompt
 		}
 
 		// prompt for the database name to create if needed
@@ -171,7 +171,7 @@ var dbImportCommand = &cobra.Command{
 	},
 }
 
-func isCompressed(file string, req *nitrod.ImportDatabaseRequest) error {
+func checkIfCompressed(file string, req *nitrod.ImportDatabaseRequest) error {
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
@@ -181,7 +181,7 @@ func isCompressed(file string, req *nitrod.ImportDatabaseRequest) error {
 
 	if filetype.IsArchive(b) {
 		req.Compressed = true
-		req.Extension = kind.Extension
+		req.CompressionType = kind.Extension
 	}
 
 	return nil

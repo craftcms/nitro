@@ -67,12 +67,13 @@ message NginxServiceRequest {
 }
 
 message ImportDatabaseRequest {
-  string database = 1;
-  string container = 2;
-  bytes data = 3;
-  bool compressed = 4;
-  string extension = 5;
-  bool usesCreate = 6;
+  string engine = 1;
+  string database = 2;
+  string container = 3;
+  bytes data = 4;
+  bool compressed = 5;
+  string compressionType = 6;
+  bool skipCreate = 7;
 }
 
 message ServiceResponse {

@@ -1,12 +1,12 @@
 package nitrod
 
 import (
+	"archive/zip"
 	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,12 +14,18 @@ import (
 	"github.com/craftcms/nitro/internal/scripts"
 )
 
+type DatabaseImportOptions struct {
+	Engine          string
+	Database        string
+	Container       string
+	File            string
+	Compressed      bool
+	CompressionType string
+	SkipCreate      bool
+}
+
 func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) error {
-	var container string
-	var database string
-	var compressed bool
-	var isMySQL bool
-	var usesCreate bool
+	options := DatabaseImportOptions{}
 
 	// create a temp file
 	file, err := s.createFile(os.TempDir(), "nitro-db-upload")
@@ -27,6 +33,8 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		s.logger.Println("Error creating a temp file for the upload:", err.Error())
 		return status.Errorf(codes.Internal, "Unable creating a temp file for the upload")
 	}
+
+	options.File = file.Name()
 
 	// handle the file streaming requests
 	for {
@@ -39,17 +47,20 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		}
 
 		// set the variables for later use only if they are not empty
-		if container == "" {
-			container = req.GetContainer()
+		if options.Engine == "" {
+			options.Engine = req.GetEngine()
 		}
-		if database == "" {
-			database = req.GetDatabase()
+		if options.Container == "" {
+			options.Container = req.GetContainer()
 		}
-		if (compressed == false) && (req.GetCompressed()) {
-			compressed = req.GetCompressed()
+		if options.Database == "" {
+			options.Database = req.GetDatabase()
 		}
-		if (usesCreate == false) && (req.GetUsesCreate()) {
-			usesCreate = req.GetUsesCreate()
+		if (options.Compressed == false) && (req.GetCompressed()) {
+			options.Compressed = req.GetCompressed()
+		}
+		if (options.SkipCreate == false) && (req.GetSkipCreate()) {
+			options.SkipCreate = req.GetSkipCreate()
 		}
 
 		// write the backup content into the temp file
@@ -59,15 +70,8 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		}
 	}
 
-	s.logger.Printf("Importing database %q for container %q\n", database, container)
-
-	// check the database engine
-	if strings.Contains(container, "mysql") {
-		isMySQL = true
-	}
-
 	// if the file is compressed, extract it and we are done
-	if compressed {
+	if options.Compressed {
 		s.logger.Println("The file is compressed, extracting now")
 
 		// open the recently saved file
@@ -78,33 +82,40 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		}
 
 		// create the gzip reader
-		reader, err := gzip.NewReader(f)
-		if err != nil {
-			s.logger.Println("error creating the gzip reader", err.Error())
-			return status.Errorf(codes.Unknown, "error reading the compressed file. %s", err.Error())
+		switch options.CompressionType {
+		case "gz":
+			reader, err := gzip.NewReader(f)
+			if err != nil {
+				s.logger.Println("error creating the gzip reader", err.Error())
+				return status.Errorf(codes.Unknown, "error reading the compressed file. %s", err.Error())
+			}
+
+			reader.Multistream(true)
+
+			defer reader.Close()
+		default:
+			reader, err := zip.OpenReader(f.Name())
+			if err != nil {
+				return err
+			}
+
+			defer reader.Close()
 		}
-		reader.Multistream(true)
 
 		compressedFile, err := s.createFile(os.TempDir(), "nitro-compressed-db-")
 		if err != nil {
-			s.logger.Println("error creating the compress db file:", err.Error())
-			return err
-		}
-
-		// import the database
-		if err := s.importDatabase(isMySQL, container, database, compressedFile.Name(), usesCreate); err != nil {
+			s.logger.Println("error creating the compressed db file:", err.Error())
 			return err
 		}
 
 		if err := stream.SendAndClose(&ServiceResponse{Message: "Successfully imported the database"}); err != nil {
 			return status.Errorf(codes.Internal, "unable to send the response %v", err)
 		}
-
-		return nil
+		options.File = compressedFile.Name()
 	}
 
 	// import the database
-	if err := s.importDatabase(isMySQL, container, database, file.Name(), usesCreate); err != nil {
+	if _, err := s.importDatabase(options); err != nil {
 		s.logger.Printf("Error importing database: %s\n", err)
 		return err
 	}
@@ -114,6 +125,58 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	}
 
 	return nil
+}
+
+func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error) {
+	switch opts.Engine {
+	case "mysql":
+		// should we skip creating the database?
+		if opts.SkipCreate == false {
+			if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, opts.Container, opts.Database)}); err != nil {
+				s.logger.Println(string(output))
+				return string(output), err
+			}
+			s.logger.Printf("Created the database %q\n", opts.Database)
+		}
+
+		// copy the file into the containers tmp dir
+		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/tmp", opts.File, opts.Container)}); err != nil {
+			s.logger.Println()
+			return string(output), err
+		}
+		s.logger.Printf("Copied file %q into container %q\n", opts.File, opts.Container)
+
+		s.logger.Printf("Beginning import of file %q", opts.File)
+
+		// if we are skipping create, it has the use statement and no database name
+		if opts.SkipCreate {
+			opts.Database = "emptydatabase"
+		}
+
+		// import the database
+		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < %s", opts.Container, opts.Database, opts.File)})
+		if err != nil {
+			s.logger.Println(string(output))
+			return "", err
+		}
+	default:
+		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, opts.Container, opts.Database)})
+		if err != nil {
+			s.logger.Println(string(output))
+			return "", err
+		}
+		s.logger.Printf("created database %q for engine %q", opts.Database, opts.Container)
+
+		output, err = s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, opts.Container, opts.Database, opts.File)})
+		if err != nil {
+			s.logger.Println(string(output))
+			return "", err
+		}
+	}
+
+	s.logger.Printf("Imported database %q into %q", opts.Database, opts.Container)
+
+	return fmt.Sprintf("Imported database %q into %q", opts.Database, opts.Container), nil
 }
 
 func (s *NitroService) createFile(dir string, pattern string) (*os.File, error) {
@@ -131,62 +194,4 @@ func (s *NitroService) createFile(dir string, pattern string) (*os.File, error) 
 	s.logger.Println("Created file", f.Name())
 
 	return f, nil
-}
-
-func (s *NitroService) importDatabase(mysql bool, container, database, file string, skipCreate bool) error {
-	if mysql {
-		// create the mysql database only
-		if skipCreate {
-			if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, container, database)}); err != nil {
-				s.logger.Println(string(output))
-				return err
-			}
-			s.logger.Printf("Created the database %q\n", database)
-		}
-
-		// copy the file into the containers tmp dir
-		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/tmp", file, container)}); err != nil {
-			s.logger.Println(string(output))
-			return err
-		}
-		s.logger.Printf("Copied file %q into container %q\n", file, container)
-
-		s.logger.Printf("Beginning import of file %q", file)
-
-		// if we are skipping create, it has the use statement and no database name
-		if skipCreate {
-			database = "emptydatabase"
-		}
-
-		// import the database
-		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < %s", container, database, file)})
-		if err != nil {
-			s.logger.Println(string(output))
-			return err
-		}
-
-		s.logger.Println(string(output))
-
-		s.logger.Printf("Imported the database %q into %q", database, container)
-
-		return nil
-	}
-
-	s.logger.Println("creating postgres database")
-
-	// create the data
-	output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, container, database)})
-	if err != nil {
-		s.logger.Println(string(output))
-		return err
-	}
-	s.logger.Printf("created database %q for engine %q", database, container)
-
-	output, err = s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, container, database, file)})
-	if err != nil {
-		s.logger.Println(string(output))
-		return err
-	}
-
-	return nil
 }
