@@ -12,3 +12,4 @@ nitro.exe
 /nitrod
 /docs
 /cmd/test
+*.sql.zip
