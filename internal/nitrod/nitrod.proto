@@ -73,7 +73,7 @@ message ImportDatabaseRequest {
   bytes data = 4;
   bool compressed = 5;
   string compressionType = 6;
-  bool skipCreate = 7;
+  bool createDatabase = 7;
 }
 
 message ServiceResponse {
