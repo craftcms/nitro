@@ -3,7 +3,7 @@ package database
 import (
 	"bufio"
 	"errors"
-	"io"
+	"os"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ import (
 // imports. It will return the engine "mysql" or
 // "postgres" if it can determine the engine.
 // If it cannot, it will return an error.
-func DetermineEngine(file io.Reader) (string, error) {
+func DetermineEngine(file *os.File) (string, error) {
 	engine := ""
 	line := 1
 
@@ -50,25 +50,21 @@ func DetermineEngine(file io.Reader) (string, error) {
 // if the file will create a database during import.
 // If it creates a database, it will return true
 // otherwise it will return false.
-func HasCreateStatement(file io.Reader) (bool, error) {
-	creates := false
-
+func HasCreateStatement(file *os.File) (bool, error) {
 	s := bufio.NewScanner(file)
-	line := 1
+	line := 0
 	for s.Scan() {
-
 		// check if the line has a create database statement
 		if strings.Contains(s.Text(), "CREATE DATABASE") {
-			creates = true
-			break
+			return true, nil
 		}
 
-		if line >= 50 || creates != false {
+		if line >= 100 {
 			break
 		}
 
 		line++
 	}
 
-	return creates, nil
+	return false, nil
 }

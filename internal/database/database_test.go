@@ -1,7 +1,6 @@
 package database
 
 import (
-	"bufio"
 	"os"
 	"testing"
 )
@@ -42,9 +41,7 @@ func TestDetermineEngine(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			rdr := bufio.NewReader(f)
-
-			got, err := DetermineEngine(rdr)
+			got, err := DetermineEngine(f)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DetermineEngine() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -72,6 +69,18 @@ func TestHasCreateStatement(t *testing.T) {
 			want:    true,
 			wantErr: false,
 		},
+		{
+			name:    "can detect when mysql files have a create database statement example two",
+			args:    args{file: "./testdata/mysql-backup-example-two.sql"},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name:    "can detect when mysql files does not have a create database statement",
+			args:    args{file: "./testdata/mysql-backup.sql"},
+			want:    false,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -79,9 +88,8 @@ func TestHasCreateStatement(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			rdr := bufio.NewReader(f)
 
-			got, err := HasCreateStatement(rdr)
+			got, err := HasCreateStatement(f)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HasCreateStatement() error = %v, wantErr %v", err, tt.wantErr)
 				return
