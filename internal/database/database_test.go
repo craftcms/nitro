@@ -40,6 +40,7 @@ func TestDetermineEngine(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer f.Close()
 
 			got, err := DetermineEngine(f)
 			if (err != nil) != tt.wantErr {
@@ -88,6 +89,7 @@ func TestHasCreateStatement(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer f.Close()
 
 			got, err := HasCreateStatement(f)
 			if (err != nil) != tt.wantErr {
