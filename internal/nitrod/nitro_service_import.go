@@ -21,7 +21,7 @@ type DatabaseImportOptions struct {
 	File            string
 	Compressed      bool
 	CompressionType string
-	SkipCreate      bool
+	CreateDatabase  bool
 }
 
 func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) error {
@@ -59,8 +59,8 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		if (options.Compressed == false) && (req.GetCompressed()) {
 			options.Compressed = req.GetCompressed()
 		}
-		if (options.SkipCreate == false) && (req.GetSkipCreate()) {
-			options.SkipCreate = req.GetSkipCreate()
+		if (options.CreateDatabase == false) && (req.GetCreateDatabase()) {
+			options.CreateDatabase = req.GetCreateDatabase()
 		}
 
 		// write the backup content into the temp file
@@ -131,7 +131,7 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 	switch opts.Engine {
 	case "mysql":
 		// should we skip creating the database?
-		if opts.SkipCreate == false {
+		if opts.CreateDatabase == false {
 			if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, opts.Container, opts.Database)}); err != nil {
 				s.logger.Println(string(output))
 				return string(output), err
@@ -149,7 +149,7 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 		s.logger.Printf("Beginning import of file %q", opts.File)
 
 		// if we are skipping create, it has the use statement and no database name
-		if opts.SkipCreate {
+		if opts.CreateDatabase {
 			opts.Database = "emptydatabase"
 		}
 
