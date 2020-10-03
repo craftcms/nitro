@@ -59,6 +59,9 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		if (options.Compressed == false) && (req.GetCompressed()) {
 			options.Compressed = req.GetCompressed()
 		}
+		if options.CompressionType == "" && req.GetCompressionType() != "" {
+			options.CompressionType = req.GetCompressionType()
+		}
 		if (options.CreateDatabase == false) && (req.GetCreateDatabase()) {
 			options.CreateDatabase = req.GetCreateDatabase()
 		}
