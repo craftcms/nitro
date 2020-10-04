@@ -19,7 +19,6 @@ import (
 	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/database"
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/normalize"
 )
@@ -33,13 +32,11 @@ var dbImportCommand = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-		runner := nitro.NewMultipassRunner("multipass")
 		var configFile config.Config
 		if err := viper.Unmarshal(&configFile); err != nil {
 			return err
 		}
-		ip := nitro.IP(machine, runner)
-		c, err := client.NewClient(ip, "50051")
+		c, err := client.NewDefaultClient(machine)
 		if err != nil {
 			return err
 		}
@@ -69,6 +66,12 @@ var dbImportCommand = &cobra.Command{
 			return nil
 		}
 
+		// if the file is compressed, stop here for now
+		if req.Compressed {
+			fmt.Println("Importing compressed backup files is not yet supported")
+			return nil
+		}
+
 		// create a new prompt
 		p := prompt.NewPrompt()
 
@@ -86,6 +89,10 @@ var dbImportCommand = &cobra.Command{
 			if err != nil {
 				fmt.Println("Unable to determine the database engine from the file", filename)
 			}
+		}
+
+		if detected != "" {
+			fmt.Printf("Detected a %q backup file...\n", detected)
 		}
 
 		// get the databases as a list, limiting to the detected engine
@@ -114,15 +121,17 @@ var dbImportCommand = &cobra.Command{
 		showCreatePrompt := true
 		if detected == "mysql" {
 			// check if there is a create database statement
-			hasCreate, err := database.HasCreateStatement(file)
+			willCreate, err := database.HasCreateStatement(file)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-			fmt.Printf("The file %q will create a database during import...\n", filename)
-			if hasCreate {
+
+			if willCreate {
+				fmt.Printf("The file %q will create a database during import...\n", filename)
 				showCreatePrompt = false
 			}
-			req.CreateDatabase = hasCreate
+
+			req.CreateDatabase = willCreate
 		}
 
 		// prompt for the database name to create if needed
