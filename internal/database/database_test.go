@@ -1,7 +1,6 @@
 package database
 
 import (
-	"os"
 	"testing"
 )
 
@@ -36,13 +35,7 @@ func TestDetermineEngine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, err := os.Open(tt.args.file)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer f.Close()
-
-			got, err := DetermineEngine(f)
+			got, err := DetermineEngine(tt.args.file)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DetermineEngine() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -85,13 +78,7 @@ func TestHasCreateStatement(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, err := os.Open(tt.args.file)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer f.Close()
-
-			got, err := HasCreateStatement(f)
+			got, err := HasCreateStatement(tt.args.file)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HasCreateStatement() error = %v, wantErr %v", err, tt.wantErr)
 				return

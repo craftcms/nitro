@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -81,7 +82,7 @@ var dbImportCommand = &cobra.Command{
 		detected := ""
 		// try to determine the database engine
 		if req.Compressed == false {
-			detected, err = database.DetermineEngine(file)
+			detected, err = database.DetermineEngine(file.Name())
 			if err != nil {
 				fmt.Println("Unable to determine the database engine from the file", filename)
 			}
@@ -125,7 +126,7 @@ var dbImportCommand = &cobra.Command{
 		showCreatePrompt := true
 		if detected == "mysql" {
 			// check if there is a create database statement
-			willCreate, err := database.HasCreateStatement(file)
+			willCreate, err := database.HasCreateStatement(file.Name())
 			if err != nil {
 				fmt.Println(err.Error())
 			}
@@ -186,7 +187,7 @@ var dbImportCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(res.Message+".", fmt.Sprintf("Import took %f seconds...", time.Since(start).Seconds()))
+		fmt.Println(res.Message+".", fmt.Sprintf("Import took %f seconds...", math.Round(time.Since(start).Seconds()*100/100)))
 
 		return nil
 	},
