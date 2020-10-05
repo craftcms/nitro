@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/h2non/filetype"
@@ -111,6 +112,14 @@ var dbImportCommand = &cobra.Command{
 			}
 		}
 		req.Container = container
+
+		// set the request engine
+		switch strings.Contains(req.Container, "mysql") {
+		case true:
+			req.Engine = "mysql"
+		default:
+			req.Engine = "postgres"
+		}
 
 		// if the detect engine is mysql
 		showCreatePrompt := true
