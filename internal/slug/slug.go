@@ -14,5 +14,10 @@ func Generate(s string) string {
 		sl = strings.ReplaceAll(sl, " ", "_")
 	}
 
+	// remove dashes
+	if strings.Contains(sl, "-") {
+		sl = strings.ReplaceAll(sl, "-", "_")
+	}
+
 	return sl
 }

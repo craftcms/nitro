@@ -21,6 +21,7 @@ import (
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/normalize"
+	"github.com/craftcms/nitro/internal/slug"
 )
 
 var dbImportCommand = &cobra.Command{
@@ -134,7 +135,7 @@ var dbImportCommand = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			req.Database = db
+			req.Database = slug.Generate(db)
 		}
 
 		// create the stream
