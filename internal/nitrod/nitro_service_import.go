@@ -180,7 +180,7 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 				s.logger.Println(string(output))
 				return string(output), err
 			}
-			s.logger.Printf("Created the database %q\n", opts.Database)
+			s.logger.Printf("Created the MySQL database %q\n", opts.Database)
 		}
 
 		// copy the file into the containers tmp dir
@@ -188,9 +188,9 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 			s.logger.Println()
 			return string(output), err
 		}
-		s.logger.Printf("Copied file %q into container %q\n", opts.File, opts.Container)
+		s.logger.Printf("Copied MySQL backup file %q into container %q\n", opts.File, opts.Container)
 
-		s.logger.Printf("Beginning import of file %q", opts.File)
+		s.logger.Printf("Beginning MySQL import of file %q", opts.File)
 
 		// if we are skipping create, it has the use statement and no database name
 		if opts.CreateDatabase {
@@ -200,27 +200,27 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 		// import the database
 		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < %s", opts.Container, opts.Database, opts.File)})
 		if err != nil {
-			s.logger.Println(string(output))
+			s.logger.Println("Error importing the MySQL database:", string(output))
 			return "", err
 		}
 	default:
 		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, opts.Container, opts.Database)})
 		if err != nil {
-			s.logger.Println(string(output))
+			s.logger.Println("Error creating the PostgreSQL database:", string(output))
 			return "", err
 		}
-		s.logger.Printf("created database %q for engine %q", opts.Database, opts.Container)
+		s.logger.Printf("created PostgreSQL database %q for engine %q", opts.Database, opts.Container)
 
 		output, err = s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, opts.Container, opts.Database, opts.File)})
 		if err != nil {
-			s.logger.Println(string(output))
+			s.logger.Println("Error importing PostgreSQL database:", string(output))
 			return "", err
 		}
 	}
 
-	s.logger.Printf("Imported database %q into %q", opts.Database, opts.Container)
+	s.logger.Printf("Imported %s database %q into %q", opts.Engine, opts.Database, opts.Container)
 
-	return fmt.Sprintf("Imported database %q into %q", opts.Database, opts.Container), nil
+	return fmt.Sprintf("Imported %s database %q into %q", opts.Engine, opts.Database, opts.Container), nil
 }
 
 func (s *NitroService) createFile(dir string, pattern string) (*os.File, error) {
