@@ -29,7 +29,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	options := DatabaseImportOptions{}
 
 	// create a temp file
-	file, err := s.createFile(os.TempDir(), "nitro-db-upload")
+	file, err := s.createFile(os.TempDir(), "nitro-db-upload-")
 	if err != nil {
 		s.logger.Println("Error creating a temp file for the upload:", err.Error())
 		return status.Errorf(codes.Internal, "Unable creating a temp file for the upload")
@@ -89,21 +89,44 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		// create the gzip reader
 		switch options.CompressionType {
 		case "gz":
-			reader, err := gzip.NewReader(file)
+			f, err := os.Open(file.Name())
+			if err != nil {
+				s.logger.Println("error reopening the file for the gzip reader")
+				return status.Errorf(codes.Unknown, "error reopening the file for the gzip reader. %s", err.Error())
+			}
+			reader, err := gzip.NewReader(f)
 			if err != nil {
 				s.logger.Println("error creating the gzip reader", err.Error())
 				return status.Errorf(codes.Unknown, "error reading the compressed file. %s", err.Error())
 			}
 
-			reader.Multistream(true)
+			for {
+				reader.Multistream(false)
+				// copy contents to the new file
+				if _, err := io.Copy(uncompressedFile, reader); err != nil {
+					return err
+				}
 
-			defer reader.Close()
+				err = reader.Reset(f)
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return err
+				}
+			}
+
+			if err := reader.Close(); err != nil {
+				s.logger.Println("error closing the gzip reader, err:", err.Error())
+				return err
+			}
+
+			options.File = uncompressedFile.Name()
 		default:
 			reader, err := zip.OpenReader(file.Name())
 			if err != nil {
 				return err
 			}
-			defer reader.Close()
 
 			for _, z := range reader.File {
 				// only accept sql files
@@ -120,6 +143,11 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 				}
 			}
 
+			if err := reader.Close(); err != nil {
+				s.logger.Println("error closing the zip reader, err:", err.Error())
+				return err
+			}
+
 			options.File = uncompressedFile.Name()
 		}
 	}
@@ -133,6 +161,12 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	if err := stream.SendAndClose(&ServiceResponse{Message: "Successfully imported the database"}); err != nil {
 		return status.Errorf(codes.Internal, "unable to send the response %v", err)
 	}
+
+	// remove the temp file to save space
+	if err := os.Remove(options.File); err != nil {
+		s.logger.Println("error removing temp file:", options.File)
+	}
+	s.logger.Println("removed temp file:", options.File)
 
 	return nil
 }
