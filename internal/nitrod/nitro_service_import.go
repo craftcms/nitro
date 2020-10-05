@@ -89,6 +89,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		// create the gzip reader
 		switch options.CompressionType {
 		case "gz":
+			s.logger.Println("Using gzip to open to file", file.Name())
 			f, err := os.Open(file.Name())
 			if err != nil {
 				s.logger.Println("error reopening the file for the gzip reader")
@@ -123,14 +124,16 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 
 			options.File = uncompressedFile.Name()
 		default:
+			s.logger.Println("Using zip to open to file", file.Name())
 			reader, err := zip.OpenReader(file.Name())
 			if err != nil {
 				return err
 			}
 
 			for _, z := range reader.File {
-				// only accept sql files
-				if strings.Contains(z.Name, ".sql") {
+
+				// only accept sql files, ignoring MACOS specific files
+				if strings.Contains(z.Name, ".sql") && strings.Contains(z.Name, "MACOSX") == false {
 					b, err := z.Open()
 					if err != nil {
 						return err
@@ -183,13 +186,6 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 			s.logger.Printf("Created the MySQL database %q\n", opts.Database)
 		}
 
-		// copy the file into the containers tmp dir
-		if output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker cp %s %s:/tmp", opts.File, opts.Container)}); err != nil {
-			s.logger.Println()
-			return string(output), err
-		}
-		s.logger.Printf("Copied MySQL backup file %q into container %q\n", opts.File, opts.Container)
-
 		s.logger.Printf("Beginning MySQL import of file %q", opts.File)
 
 		// if we are skipping create, it has the use statement and no database name
@@ -198,7 +194,7 @@ func (s *NitroService) importDatabase(opts DatabaseImportOptions) (string, error
 		}
 
 		// import the database
-		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf("docker exec -i %q mysql -unitro -pnitro %s < %s", opts.Container, opts.Database, opts.File)})
+		output, err := s.command.Run("/bin/bash", []string{"-c", fmt.Sprintf(`docker exec -i %q mysql -unitro -pnitro %s < %s`, opts.Container, opts.Database, opts.File)})
 		if err != nil {
 			s.logger.Println("Error importing the MySQL database:", string(output))
 			return "", err
