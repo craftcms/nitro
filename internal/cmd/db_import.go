@@ -66,12 +66,6 @@ var dbImportCommand = &cobra.Command{
 			return nil
 		}
 
-		// if the file is compressed, stop here for now
-		if req.Compressed {
-			fmt.Println("Importing compressed backup files is not yet supported")
-			return nil
-		}
-
 		// create a new prompt
 		p := prompt.NewPrompt()
 

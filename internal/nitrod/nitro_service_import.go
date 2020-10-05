@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,6 +34,7 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 		s.logger.Println("Error creating a temp file for the upload:", err.Error())
 		return status.Errorf(codes.Internal, "Unable creating a temp file for the upload")
 	}
+	defer file.Close()
 
 	options.File = file.Name()
 
@@ -77,17 +79,17 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 	if options.Compressed {
 		s.logger.Println("The file is compressed, extracting now")
 
-		// open the recently saved file
-		f, err := os.Open(file.Name())
+		uncompressedFile, err := s.createFile(os.TempDir(), "nitro-compressed-db-")
 		if err != nil {
-			s.logger.Println("error opening the database import file: ", file.Name())
-			return status.Errorf(codes.Unknown, "error opening the database import file: err: %s", err.Error())
+			s.logger.Println("error creating the compressed db file:", err.Error())
+			return err
 		}
+		defer uncompressedFile.Close()
 
 		// create the gzip reader
 		switch options.CompressionType {
 		case "gz":
-			reader, err := gzip.NewReader(f)
+			reader, err := gzip.NewReader(file)
 			if err != nil {
 				s.logger.Println("error creating the gzip reader", err.Error())
 				return status.Errorf(codes.Unknown, "error reading the compressed file. %s", err.Error())
@@ -97,24 +99,29 @@ func (s *NitroService) ImportDatabase(stream NitroService_ImportDatabaseServer) 
 
 			defer reader.Close()
 		default:
-			reader, err := zip.OpenReader(f.Name())
+			reader, err := zip.OpenReader(file.Name())
 			if err != nil {
 				return err
 			}
-
 			defer reader.Close()
-		}
 
-		compressedFile, err := s.createFile(os.TempDir(), "nitro-compressed-db-")
-		if err != nil {
-			s.logger.Println("error creating the compressed db file:", err.Error())
-			return err
-		}
+			for _, z := range reader.File {
+				// only accept sql files
+				if strings.Contains(z.Name, ".sql") {
+					b, err := z.Open()
+					if err != nil {
+						return err
+					}
 
-		if err := stream.SendAndClose(&ServiceResponse{Message: "Successfully imported the database"}); err != nil {
-			return status.Errorf(codes.Internal, "unable to send the response %v", err)
+					// copy the contents into the uncompressed temp file
+					if _, err := io.Copy(uncompressedFile, b); err != nil {
+						return err
+					}
+				}
+			}
+
+			options.File = uncompressedFile.Name()
 		}
-		options.File = compressedFile.Name()
 	}
 
 	// import the database
