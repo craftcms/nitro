@@ -64,6 +64,7 @@ var dbAddCommand = &cobra.Command{
 
 		// clean the database name
 		database = slug.Generate(database)
+		fmt.Println("Creating database", database)
 
 		// run the scripts
 		if strings.Contains(container, "mysql") {

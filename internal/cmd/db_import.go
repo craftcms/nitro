@@ -136,6 +136,7 @@ var dbImportCommand = &cobra.Command{
 				return err
 			}
 			req.Database = slug.Generate(db)
+			fmt.Println("Will create the database", req.Database)
 		}
 
 		// create the stream
