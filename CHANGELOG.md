@@ -3,16 +3,19 @@
 ### Unreleased
 
 ## Added 
-- Added the `nitro create` command to setup a new Craft installation without PHP or Composer installed locally. ([#101](https://github.com/craftcms/nitro/issues/101))
-- Added the `--silent` flag to `xon`, `xoff`, and all `php iniset <command>`'s to not show output.
-- Added the ability to import `zip` and `gz` files for `db import`. If the backup file is not compressed Nitro will now detect the database backup type and automatically select compatible databases. ([#132](https://github.com/craftcms/nitro/issues/132))
+- Added the `nitro create` command, which will set up a new Craft installation without PHP or Composer installed locally. ([#101](https://github.com/craftcms/nitro/issues/101))
+- Added the `--silent` flag to the `xon`, `xoff`, and `php iniset` commands.
+
+### Changed
+- The `db import` command can now import zip and gzip files.
+- The `db import` command will now detect the database backup type and automatically select the appropriate database engine, if the backup file was uncompressed. ([#132](https://github.com/craftcms/nitro/issues/132))
+- The `db import` and `db add` commands now replaces dashes (`-`) with underscores (`_`) in the specified database name, to workaround a SQL error. ([#212](https://github.com/craftcms/nitro/issues/212))
 
 ## Fixed
-- An issue causing `php iniset memory_limit` to not show as an available command. 
-- An issue where `php iniset` commands were not the setting correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
-- An issue where `php iniget` would not return the correct values.
-- An issue where the hosts file would not get updated on Linux machines. ([#213](https://github.com/craftcms/nitro/issues/213))
-- An issue when entering database names during `db import` would not accept `-` by replacing spaces and dashes with underscores. ([#212](https://github.com/craftcms/nitro/issues/212))  
+- Fixed a bug where `php iniset memory_limit` was listed as an available command. 
+- Fixed a bug where `php iniset` commands weren’t always setting the correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
+- Fixed a bug where `php iniget` commands weren’t always returning the correct values.
+- Fixed a bug where the system’s `hosts` file wasn’t getting updated on Linux machines. ([#213](https://github.com/craftcms/nitro/issues/213))  
 
 ### 1.0.1 - 2020-08-12
 
