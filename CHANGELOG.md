@@ -1,8 +1,8 @@
 # Release Notes for Craft Nitro
 
-### Unreleased
+## Unreleased
 
-## Added 
+### Added 
 - Added the `nitro create` command, which will set up a new Craft installation without PHP or Composer installed locally. ([#101](https://github.com/craftcms/nitro/issues/101))
 - Added the `--silent` flag to the `xon`, `xoff`, and `php iniset` commands.
 
@@ -11,40 +11,40 @@
 - The `db import` command will now detect the database backup type and automatically select the appropriate database engine, if the backup file was uncompressed. ([#132](https://github.com/craftcms/nitro/issues/132))
 - The `db import` and `db add` commands now replaces dashes (`-`) with underscores (`_`) in the specified database name, to workaround a SQL error. ([#212](https://github.com/craftcms/nitro/issues/212))
 
-## Fixed
+### Fixed
 - Fixed a bug where `php iniset memory_limit` was listed as an available command. 
 - Fixed a bug where `php iniset` commands weren’t always setting the correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
 - Fixed a bug where `php iniget` commands weren’t always returning the correct values.
 - Fixed a bug where the system’s `hosts` file wasn’t getting updated on Linux machines. ([#213](https://github.com/craftcms/nitro/issues/213))  
 
-### 1.0.1 - 2020-08-12
+## 1.0.1 - 2020-08-12
 
-## Changed
+### Changed
 - Composer is now installed by default on new machines.
 - The default Nginx site is now a friendly landing page with helpful links.
 
-## Fixed
+### Fixed
 - Fixed an error that occurred when checking for the latest version of Nitro. ([#199](https://github.com/craftcms/nitro/issues/199))
 
-### 1.0.0 - 2020-08-11
+## 1.0.0 - 2020-08-11
 
-## Added
+### Added
 - Added the `support` command to quickly create GitHub issues pre-populated with environment info.
 
-## Changed
+### Changed
 - The `info` command now displays additional info such as IP, PHP version, and links to common tasks.
 
-## Fixed
+### Fixed
 - Fixed a bug confirmation prompts would take just about any input as a “yes”. ([#190](https://github.com/craftcms/nitro/issues/190))
 
-### 1.0.0-RC1.1 - 2020-08-07
+## 1.0.0-RC1.1 - 2020-08-07
 
-## Fixed
+### Fixed
 - Fixed an issue that occurred when creating new machines.
 
-### 1.0.0-RC1 - 2020-08-07
+## 1.0.0-RC1 - 2020-08-07
 
-## Added
+### Added
 - Added the `nginx start`, `nginx stop`, and `nginx restart` commands.
 - Added the `php start`, `php stop`, and `php restart` commands. ([#57](https://github.com/craftcms/nitro/issues/57))
 - Added the `php iniget` command, which can be used to see current php.ini values.
@@ -56,16 +56,16 @@
 ### Changed
 Improved Composer performance when run from inside the virtual machine. ([#186](https://github.com/craftcms/nitro/issues/186))
 
-## Fixed
+### Fixed
 - Fixed a bug where the default PHP version was not getting updated when running the `apply` command. ([#192](https://github.com/craftcms/nitro/issues/192))
 - Fixed command completion when pressing the <kbd>Tab</kbd> key.
 
-### 1.0.0-beta.10 - 2020-06-04
+## 1.0.0-beta.10 - 2020-06-04
 
-## Added
+### Added
 - Added support for a `NITRO_EDIT_HOSTS` environment variable so that when set to `false`, Nitro will never edit the host machine’s `hosts` file.
 
-## Changed
+### Changed
 - The `destroy` command now has a `--skip-hosts` option.
 
 ## 1.0.0-beta.9 - 2020-06-02
