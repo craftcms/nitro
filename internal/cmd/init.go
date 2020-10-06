@@ -251,6 +251,11 @@ var initCommand = &cobra.Command{
 			fmt.Println("Unable to install composer, err: ", err.Error())
 		}
 
+		// enable displaying errors
+		if err := inisetDisplayErrorsCommand.RunE(cmd, append(args, "On")); err != nil {
+			fmt.Println("Unable to enable display_errors, err: ", err.Error())
+		}
+
 		return infoCommand.RunE(cmd, args)
 	},
 }

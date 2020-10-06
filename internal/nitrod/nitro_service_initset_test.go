@@ -27,6 +27,27 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 		wantArgs     []map[string][]string
 	}{
 		{
+			name: "can modify the php ini setting for display_errors",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_DISPLAY_ERRORS, Value: "On"},
+			},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for display_errors to On"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", `/display_errors/c\display_errors = On`, "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
 			name: "can modify the php ini setting for memory_limit",
 			fields: fields{
 				logger: log.New(ioutil.Discard, "testing", 0),
