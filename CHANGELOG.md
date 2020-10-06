@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 1.1.0 - 2020-10-06
 
 ### Added 
 - Added the `nitro create` command, which will set up a new Craft installation without PHP or Composer installed locally. ([#101](https://github.com/craftcms/nitro/issues/101))
