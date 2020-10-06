@@ -7,6 +7,7 @@
 - Added the `--silent` flag to the `xon`, `xoff`, and `php iniset` commands.
 - Added the `--silent` flag to `xon`, `xoff`, and all `php iniset <command>`'s to not show output.
 - Added the ability to import `zip` and `gz` files for `db import`. If the backup file is not compressed Nitro will now detect the database backup type and automatically select compatible databases. ([#132](https://github.com/craftcms/nitro/issues/132))
+- Added the `php iniset display_errors` to enable/disable displaying PHP fatal errors from NGINX. ([#172](https://github.com/craftcms/nitro/issues/172)) 
 
 ### Changed
 - The `db import` command can now import zip and gzip files.
