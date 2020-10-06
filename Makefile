@@ -1,6 +1,6 @@
 .PHONY: install scripts
 
-VERSION ?= 1.0.1
+VERSION ?= 1.1.0
 NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:
@@ -19,6 +19,9 @@ dev: scripts api
 
 test:
 	go test ./...
+
+vet:
+	go vet ./...
 
 releaser:
 	goreleaser --skip-publish --rm-dist --skip-validate
@@ -45,6 +48,7 @@ setup: build-api
 	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl enable nitrod
 proto:
 	protoc internal/nitrod/nitrod.proto --go_out=plugins=grpc:.
-
+journalctl:
+	multipass exec ${NITRO_DEFAULT_MACHINE} -- journalctl -u nitrod -f
 scripts:
 	multipass mount scripts ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/scripts

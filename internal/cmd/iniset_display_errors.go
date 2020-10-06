@@ -7,27 +7,23 @@ import (
 
 	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/config"
-	"github.com/craftcms/nitro/internal/nitro"
 	"github.com/craftcms/nitro/internal/nitrod"
 )
 
-var inisetUploadMaxFilesizeCommand = &cobra.Command{
-	Use:   "upload_max_filesize",
-	Short: "Change upload_max_filesize",
+var inisetDisplayErrorsCommand = &cobra.Command{
+	Use:   "display_errors",
+	Short: "Enable or disable display_errors",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
-		runner := nitro.NewMultipassRunner("multipass")
-		ip := nitro.IP(machine, runner)
-		c, err := client.NewClient(ip, "50051")
+		c, err := client.NewDefaultClient(machine)
 		if err != nil {
 			return err
 		}
-		php := config.GetString("php", flagPhpVersion)
 
 		resp, err := c.PhpIniSettings(cmd.Context(), &nitrod.ChangePhpIniSettingRequest{
-			Version: php,
-			Setting: nitrod.PhpIniSetting_UPLOAD_MAX_FILESIZE,
+			Version: config.GetString("php", flagPhpVersion),
+			Setting: nitrod.PhpIniSetting_DISPLAY_ERRORS,
 			Value:   args[0],
 		})
 		if err != nil {
@@ -43,5 +39,5 @@ var inisetUploadMaxFilesizeCommand = &cobra.Command{
 }
 
 func init() {
-	inisetUploadMaxFilesizeCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
+	inisetDisplayErrorsCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
 }

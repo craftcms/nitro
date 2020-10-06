@@ -1,21 +1,29 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"os/exec"
+	"io"
+	"io/ioutil"
+	"math"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/h2non/filetype"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/internal/client"
 	"github.com/craftcms/nitro/internal/config"
+	"github.com/craftcms/nitro/internal/database"
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/internal/nitro"
+	"github.com/craftcms/nitro/internal/nitrod"
 	"github.com/craftcms/nitro/internal/normalize"
-	"github.com/craftcms/nitro/internal/scripts"
+	"github.com/craftcms/nitro/internal/slug"
 )
 
 var dbImportCommand = &cobra.Command{
@@ -23,10 +31,18 @@ var dbImportCommand = &cobra.Command{
 	Short: "Import database",
 	Args:  cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"sql"}, cobra.ShellCompDirectiveFilterFileExt
+		return []string{"sql", "gz", "zip"}, cobra.ShellCompDirectiveFilterFileExt
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		machine := flagMachineName
+		var configFile config.Config
+		if err := viper.Unmarshal(&configFile); err != nil {
+			return err
+		}
+		c, err := client.NewDefaultClient(machine)
+		if err != nil {
+			return err
+		}
 
 		home, err := homedir.Dir()
 		if err != nil {
@@ -44,96 +60,151 @@ var dbImportCommand = &cobra.Command{
 			return errors.New(fmt.Sprintf("Unable to locate the file %q.", fileAbsPath))
 		}
 
-		// which database engine?
-		var databases []config.Database
-		if err := viper.UnmarshalKey("databases", &databases); err != nil {
-			return err
-		}
-		var dbs []string
-		for _, db := range databases {
-			dbs = append(dbs, db.Name())
+		// create the request
+		req := &nitrod.ImportDatabaseRequest{}
+
+		// check if the file is compressed
+		if err := checkIfCompressed(filename, req); err != nil {
+			fmt.Println("Error checking if the file is compressed, error:", err.Error())
+			return nil
 		}
 
-		if len(dbs) == 0 {
-			return errors.New("there are no databases that we can import the file into")
-		}
-
+		// create a new prompt
 		p := prompt.NewPrompt()
 
-		// if there is only one
-		var containerName string
-		switch len(dbs) {
+		// open the file
+		file, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		detected := ""
+		// try to determine the database engine
+		if req.Compressed == false {
+			detected, err = database.DetermineEngine(file.Name())
+			if err != nil {
+				fmt.Println("Unable to determine the database engine from the file", filename)
+			}
+		}
+
+		if detected != "" {
+			fmt.Printf("Detected a %q backup file...\n", detected)
+		}
+
+		// get the databases as a list, limiting to the detected engine
+		engines := configFile.DatabaseEnginesAsList(detected)
+		if len(engines) == 0 {
+			fmt.Println("Unable to get a list of the database engines")
+			return nil
+		}
+
+		// if there is only on database engine
+		var container string
+		switch len(engines) {
 		case 1:
-			containerName = dbs[0]
+			container = engines[0]
 		default:
-			containerName, _, err = p.Select("Select database engine", dbs, &prompt.SelectOptions{
+			container, _, err = p.Select("Select database engine:", engines, &prompt.SelectOptions{
 				Default: 1,
 			})
 			if err != nil {
 				return err
 			}
 		}
+		req.Container = container
 
-		databaseName, err := p.Ask("Enter the database name to create for the import", &prompt.InputOptions{Validator: nil})
+		// set the request engine
+		switch strings.Contains(req.Container, "mysql") {
+		case true:
+			req.Engine = "mysql"
+		default:
+			req.Engine = "postgres"
+		}
+
+		// if the detect engine is mysql
+		showCreatePrompt := true
+		if detected == "mysql" {
+			// check if there is a create database statement
+			willCreate, err := database.HasCreateStatement(file.Name())
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			if willCreate {
+				fmt.Printf("The file %q will create a database during import...\n", filename)
+				showCreatePrompt = false
+			}
+
+			req.CreateDatabase = willCreate
+		}
+
+		// prompt for the database name to create if needed
+		if showCreatePrompt {
+			db, err := p.Ask("Enter the database name to create for the import:", &prompt.InputOptions{Validator: nil})
+			if err != nil {
+				return err
+			}
+			req.Database = slug.Generate(db)
+			fmt.Println("Will create the database", req.Database)
+		}
+
+		// create the stream
+		stream, err := c.ImportDatabase(cmd.Context())
 		if err != nil {
-			return err
+			fmt.Println("Error creating a connection to the nitro server, error:", err.Error())
+			return nil
 		}
-
-		var actions []nitro.Action
-
-		// syntax is strange, see this issue: https://github.com/canonical/multipass/issues/1165#issuecomment-548763143
-		fileFullPath := "/home/ubuntu/.nitro/databases/imports/" + filename
-		transferAction := nitro.Action{
-			Type:       "transfer",
-			UseSyscall: false,
-			Args:       []string{"transfer", fileAbsPath, machine + ":" + fileFullPath},
-		}
-		actions = append(actions, transferAction)
 
 		fmt.Printf("Uploading %q into %q (large files may take a while)...\n", filename, machine)
 
-		if err := nitro.Run(nitro.NewMultipassRunner("multipass"), actions); err != nil {
-			return err
+		start := time.Now()
+		buffer := make([]byte, 1024*20)
+		reader := bufio.NewReader(file)
+
+		for {
+			n, err := reader.Read(buffer)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return err
+			}
+
+			req.Data = buffer[:n]
+			err = stream.Send(req)
+			if err == io.EOF {
+				return stream.CloseSend()
+			}
+			if err != nil {
+				return err
+			}
 		}
 
-		// run the import scripts
-
-		mp, err := exec.LookPath("multipass")
+		res, err := stream.CloseAndRecv()
 		if err != nil {
+			fmt.Println(err.Error())
 			return err
 		}
 
-		script := scripts.New(mp, machine)
-
-		switch strings.Contains(containerName, "mysql") {
-		case false:
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresCreateDatabase, containerName, databaseName)); err != nil {
-				fmt.Println(output)
-				return err
-			}
-
-			fmt.Println("Created database", databaseName)
-
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerPostgresImportDatabase, containerName, databaseName, fileFullPath)); err != nil {
-				fmt.Println(output)
-				return err
-			}
-		default:
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlCreateDatabaseIfNotExists, containerName, databaseName)); err != nil {
-				fmt.Println(output)
-				return err
-			}
-
-			fmt.Println("Created database", databaseName)
-
-			if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerMysqlImportDatabase, fileFullPath, containerName, databaseName)); err != nil {
-				fmt.Println(output)
-				return err
-			}
-		}
-
-		fmt.Println("Successfully imported the database backup into", containerName)
+		fmt.Println(res.Message+".", fmt.Sprintf("Import took %f seconds...", math.Round(time.Since(start).Seconds()*100/100)))
 
 		return nil
 	},
+}
+
+func checkIfCompressed(file string, req *nitrod.ImportDatabaseRequest) error {
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	kind, _ := filetype.Match(b)
+
+	if filetype.IsArchive(b) {
+		req.Compressed = true
+		req.CompressionType = kind.Extension
+	}
+
+	return nil
 }

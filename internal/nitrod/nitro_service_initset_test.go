@@ -27,6 +27,27 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 		wantArgs     []map[string][]string
 	}{
 		{
+			name: "can modify the php ini setting for display_errors",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &ChangePhpIniSettingRequest{Version: "7.4", Setting: PhpIniSetting_DISPLAY_ERRORS, Value: "On"},
+			},
+			want:         &ServiceResponse{Message: "Successfully changed the ini setting for display_errors to On"},
+			wantErr:      false,
+			wantCommands: []string{"sed", "service"},
+			wantArgs: []map[string][]string{
+				{
+					"sed": {"-i", `/display_errors/c\display_errors = On`, "/etc/php/7.4/fpm/php.ini"},
+				},
+				{
+					"service": {"php7.4-fpm", "restart"},
+				},
+			},
+		},
+		{
 			name: "can modify the php ini setting for memory_limit",
 			fields: fields{
 				logger: log.New(ioutil.Discard, "testing", 0),
@@ -40,7 +61,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|memory_limit|memory_limit = 512M|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/memory_limit/c\memory_limit = 512M`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -61,7 +82,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|max_file_uploads|max_file_uploads = 400|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/max_file_uploads/c\max_file_uploads = 400`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -82,7 +103,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|max_input_time|max_input_time = 4000|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/max_input_time/c\max_input_time = 4000`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -103,7 +124,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|upload_max_filesize|upload_max_filesize = 10M|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/upload_max_filesize/c\upload_max_filesize = 10M`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -124,7 +145,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|upload_max_filesize|upload_max_filesize = 10M|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/upload_max_filesize/c\upload_max_filesize = 10M`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -145,7 +166,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|max_input_vars|max_input_vars = 1000|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/max_input_vars/c\max_input_vars = 1000`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},
@@ -190,7 +211,7 @@ func TestNitrodService_PhpIniSettings(t *testing.T) {
 			wantCommands: []string{"sed", "service"},
 			wantArgs: []map[string][]string{
 				{
-					"sed": {"-i", "s|max_execution_time|max_execution_time = 300|g", "/etc/php/7.4/fpm/php.ini"},
+					"sed": {"-i", `/max_execution_time/c\max_execution_time = 300`, "/etc/php/7.4/fpm/php.ini"},
 				},
 				{
 					"service": {"php7.4-fpm", "restart"},

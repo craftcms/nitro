@@ -48,8 +48,8 @@ func Test_dirExists(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := dirExists(tt.args.dir); got != tt.want {
-				t.Errorf("dirExists() = %v, want %v", got, tt.want)
+			if got := DirExists(tt.args.dir); got != tt.want {
+				t.Errorf("DirExists() = %v, want %v", got, tt.want)
 			}
 		})
 	}

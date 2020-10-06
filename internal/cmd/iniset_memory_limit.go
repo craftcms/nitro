@@ -11,7 +11,7 @@ import (
 	"github.com/craftcms/nitro/internal/nitrod"
 )
 
-var inisetMemoryLimiCommand = &cobra.Command{
+var inisetMemoryLimitCommand = &cobra.Command{
 	Use:   "memory_limit",
 	Short: "Change memory_limit",
 	Args:  cobra.MinimumNArgs(1),
@@ -34,8 +34,14 @@ var inisetMemoryLimiCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(resp.Message)
+		if !flagSilent {
+			fmt.Println(resp.Message)
+		}
 
 		return nil
 	},
+}
+
+func init() {
+	inisetMemoryLimitCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
 }

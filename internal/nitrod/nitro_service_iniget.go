@@ -3,6 +3,7 @@ package nitrod
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,12 +18,23 @@ func (s *NitroService) GetPhpIniSetting(ctx context.Context, req *GetPhpIniSetti
 	}
 
 	// get the setting from the php ini_get function
-	output, err := s.command.Run("php"+req.GetVersion(), []string{"-r", fmt.Sprintf("echo ini_get('%s');", req.GetSetting())})
+	output, err := s.command.Run("bash", []string{"-c", fmt.Sprintf("php-fpm%s -i | grep '%s'", req.GetVersion(), req.GetSetting())})
 	if err != nil {
 		s.logger.Println("error getting ini setting:", err)
 		s.logger.Println("output:", string(output))
 		return nil, status.Errorf(codes.Unknown, string(output))
 	}
 
-	return &ServiceResponse{Message: fmt.Sprintf("The setting %q is currently set to %v", req.GetSetting(), string(output))}, nil
+	// get the output in a normal format
+	var settingValue string
+	sp := strings.Split(string(output), " ")
+	if len(sp) == 5 {
+		settingValue = sp[len(sp)-1]
+	}
+
+	if settingValue == "" {
+		return &ServiceResponse{Message: fmt.Sprintf("Unable to find the PHP setting %q", req.GetSetting())}, nil
+	}
+
+	return &ServiceResponse{Message: fmt.Sprintf("The setting %q is currently set to %v", req.GetSetting(), settingValue)}, nil
 }

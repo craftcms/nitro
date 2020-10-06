@@ -22,4 +22,10 @@ var (
 
 	// flags for apply
 	flagSkipHosts bool
+
+	// flag for not displaying output
+	flagSilent bool
+
+	// flag for overriding which config to use
+	flagConfigFile string
 )

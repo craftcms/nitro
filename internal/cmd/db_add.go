@@ -8,10 +8,10 @@ import (
 
 	"github.com/pixelandtonic/prompt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/internal/scripts"
+	"github.com/craftcms/nitro/internal/slug"
 	"github.com/craftcms/nitro/internal/validate"
 )
 
@@ -24,12 +24,9 @@ var dbAddCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		p := prompt.NewPrompt()
-
 		script := scripts.New(mp, machine)
-
-		var cfg config.Config
-		if err := viper.Unmarshal(&cfg); err != nil {
+		cfg, err := config.Read()
+		if err != nil {
 			return err
 		}
 
@@ -42,6 +39,8 @@ var dbAddCommand = &cobra.Command{
 		for _, db := range cfg.Databases {
 			containers = append(containers, db.Name())
 		}
+
+		p := prompt.NewPrompt()
 
 		// if there is only one
 		var container string
@@ -62,6 +61,10 @@ var dbAddCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// clean the database name
+		database = slug.Generate(database)
+		fmt.Println("Creating database", database)
 
 		// run the scripts
 		if strings.Contains(container, "mysql") {

@@ -14,6 +14,7 @@ import (
 
 func init() {
 	xoffCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
+	xoffCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
 }
 
 var xoffCommand = &cobra.Command{
@@ -37,7 +38,9 @@ var xoffCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(resp.Message)
+		if !flagSilent {
+			fmt.Println(resp.Message)
+		}
 
 		return nil
 	},

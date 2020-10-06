@@ -912,3 +912,70 @@ func TestConfig_AlreadyMounted(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_DatabaseEnginesAsList(t *testing.T) {
+	dbs := []Database{
+		{
+			Engine:  "mysql",
+			Version: "5.7",
+			Port:    "3306",
+		},
+		{
+			Engine:  "mysql",
+			Version: "5.6",
+			Port:    "33061",
+		},
+		{
+			Engine:  "postgres",
+			Version: "12",
+			Port:    "5432",
+		},
+	}
+
+	type fields struct {
+		PHP       string
+		Mounts    []Mount
+		Databases []Database
+		Sites     []Site
+	}
+	type args struct {
+		engine string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{
+			name:   "Can get a list of engines limited by the type of mysql",
+			fields: fields{Databases: dbs},
+			args:   args{engine: "mysql"},
+			want:   []string{"mysql_5.7_3306", "mysql_5.6_33061"},
+		},
+		{
+			name:   "Can get a list of engines limited by the type postgres",
+			fields: fields{Databases: dbs},
+			args:   args{engine: "postgres"},
+			want:   []string{"postgres_12_5432"},
+		},
+		{
+			name:   "All databases are returned when the engine is not provided",
+			fields: fields{Databases: dbs},
+			want:   []string{"mysql_5.7_3306", "mysql_5.6_33061", "postgres_12_5432"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				PHP:       tt.fields.PHP,
+				Mounts:    tt.fields.Mounts,
+				Databases: tt.fields.Databases,
+				Sites:     tt.fields.Sites,
+			}
+			if got := c.DatabaseEnginesAsList(tt.args.engine); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DatabaseEnginesAsList() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

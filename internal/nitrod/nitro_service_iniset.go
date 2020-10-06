@@ -2,6 +2,7 @@ package nitrod
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"google.golang.org/grpc/codes"
@@ -59,6 +60,21 @@ func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIni
 		}
 
 		setting = "memory_limit"
+	case PhpIniSetting_DISPLAY_ERRORS:
+		switch value {
+		case "On":
+			break
+		case "Off":
+			break
+		default:
+			err := errors.New("only the value On or Off is authorized for display_errors")
+
+			s.logger.Println(err.Error())
+
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+
+		setting = "display_errors"
 	default:
 		msg := "changing " + PhpIniSetting_name[int32(request.GetSetting())] + " is not authorized"
 		s.logger.Println(msg)
@@ -66,7 +82,7 @@ func (s *NitroService) PhpIniSettings(ctx context.Context, request *ChangePhpIni
 	}
 
 	// change setting using sed
-	if output, err := s.command.Run("sed", []string{"-i", "s|" + setting + "|" + setting + " = " + value + "|g", "/etc/php/" + version + "/fpm/php.ini"}); err != nil {
+	if output, err := s.command.Run("sed", []string{"-i", "/" + setting + `/c\` + setting + " = " + value, "/etc/php/" + version + "/fpm/php.ini"}); err != nil {
 		s.logger.Println("error changing ini setting, error:", err)
 		s.logger.Println("output:", string(output))
 		return nil, status.Errorf(codes.Unknown, string(output))

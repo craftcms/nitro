@@ -13,6 +13,7 @@ import (
 
 func init() {
 	xonCommand.Flags().StringVar(&flagPhpVersion, "php-version", "", "which PHP version")
+	xonCommand.Flags().BoolVar(&flagSilent, "silent", false, "Run command with no output")
 }
 
 var xonCommand = &cobra.Command{
@@ -33,7 +34,9 @@ var xonCommand = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(resp.Message)
+		if !flagSilent {
+			fmt.Println(resp.Message)
+		}
 
 		return nil
 	},
