@@ -2,22 +2,22 @@
 
 ## 1.1.0 - 2020-10-06
 
-### Added 
+### Added
 - Added the `nitro create` command, which will set up a new Craft installation without PHP or Composer installed locally. ([#101](https://github.com/craftcms/nitro/issues/101))
-- Added the `--silent` flag to the `xon`, `xoff`, and `php iniset` commands. 
+- Added the `--silent` flag to the `xon`, `xoff`, and `php iniset` commands.
 
 ### Changed
 - The `db import` command can now import zip and gzip files.
 - The `db import` command will now detect the database backup type and automatically select the appropriate database engine, if the backup file was uncompressed. ([#132](https://github.com/craftcms/nitro/issues/132))
-- The `db import` and `db add` commands now replaces dashes (`-`) with underscores (`_`) in the specified database name, to workaround a SQL error. ([#212](https://github.com/craftcms/nitro/issues/212))
+- The `db import` and `db add` commands now replaces dashes (`-`) with underscores (`_`) in the specified database name, to work around a SQL error. ([#212](https://github.com/craftcms/nitro/issues/212))
 - The `php iniset` command can now set the `display_errors` config setting. ([#172](https://github.com/craftcms/nitro/issues/172))
 - The `display_errors` config setting is now set to `On` by default.
 
 ### Fixed
-- Fixed a bug where `php iniset memory_limit` was listed as an available command. 
+- Fixed a bug where `php iniset memory_limit` was listed as an available command.
 - Fixed a bug where `php iniset` commands weren’t always setting the correct values. ([#207](https://github.com/craftcms/nitro/issues/207))
 - Fixed a bug where `php iniget` commands weren’t always returning the correct values.
-- Fixed a bug where the system’s `hosts` file wasn’t getting updated on Linux machines. ([#213](https://github.com/craftcms/nitro/issues/213))  
+- Fixed a bug where the system’s `hosts` file wasn’t getting updated on Linux machines. ([#213](https://github.com/craftcms/nitro/issues/213))
 
 ## 1.0.1 - 2020-08-12
 
