@@ -73,19 +73,19 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					"80": {
 						{
-							"127.0.0.1",
+							"0.0.0.0",
 							"80",
 						},
 					},
 					"443": {
 						{
-							"127.0.0.1",
+							"0.0.0.0",
 							"443",
 						},
 					},
 					"5000": {
 						{
-							"127.0.0.1",
+							"0.0.0.0",
 							"5000",
 						},
 					},
@@ -188,9 +188,11 @@ func (cli *Client) checkVolume(ctx context.Context, name string, filter filters.
 
 func (cli *Client) checkPorts(ports []string) error {
 	for _, port := range ports {
-		if _, err := net.Listen("tcp", "127.0.0.1:"+port); err != nil {
+		lis, err := net.Listen("tcp", ":"+port)
+		if err != nil {
 			return fmt.Errorf("nitro uses ports 80, 443, and 5000. It appears the port %q, is already in use", port)
 		}
+		lis.Close()
 	}
 
 	return nil
