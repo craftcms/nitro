@@ -13,3 +13,4 @@ nitro.exe
 /docs
 /cmd/test
 *.sql.zip
+/docker/craft-install

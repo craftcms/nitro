@@ -3,19 +3,28 @@
     admin 0.0.0.0:2019
 }
 
-:80 {
+example.nitro {
+    encode zstd gzip
     respond /hello 200 {
         body "hello"
         close
     }
 
-    rewrite * /index.php?{query}&p={path}
-    php_fastcgi * 172.22.0.3:9000 {
+    rewrite * index.php?{query}&p={path}
+    # TODO change this manually to get the ip address
+    php_fastcgi * 172.22.0.2:9000 {
             root /app/web
             index index.php
 
             env SCRIPT_NAME index.php
             env SCRIPT_FILENAME /app/web/index.php
+    }
+}
+
+:80 :443 {
+    respond * 200 {
+        body "welcome to nitro!"
+        close
     }
 }
 
