@@ -1,0 +1,21 @@
+{
+    local_certs
+    admin 0.0.0.0:2019
+}
+
+:80 {
+    respond /hello 200 {
+        body "hello"
+        close
+    }
+
+    rewrite * /index.php?{query}&p={path}
+    php_fastcgi * 172.22.0.3:9000 {
+            root /app/web
+            index index.php
+
+            env SCRIPT_NAME index.php
+            env SCRIPT_FILENAME /app/web/index.php
+    }
+}
+
