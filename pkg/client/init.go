@@ -101,40 +101,38 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	//	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
 	//}
 
-	// check if there is an existing container for the nitro-proxy
+	// create a filter for the nitro-proxy
 	pf := filters.NewArgs()
 	pf.Add("name", "nitro-proxy")
-	if err := cli.checkContainer(ctx, "nitro-proxy", pf); err != nil {
-		return err
+
+	// check if there is an existing container for the nitro-proxy
+	containerID, err := cli.findOrCreateProxy(ctx, name, pf)
+	if err != nil {
+		return fmt.Errorf("unable to find the proxy container, %w", err)
+	}
+
+	// start the container
+	if err := cli.startContainer(ctx, containerID, "nitro-proxy"); err != nil {
+		return fmt.Errorf("unable to start the nitro-proxy container, %w", err)
 	}
 
 	return nil
 }
 
-func (cli *Client) checkContainer(ctx context.Context, name string, filter filters.Args) error {
+func (cli *Client) findOrCreateProxy(ctx context.Context, name string, filter filters.Args) (string, error) {
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
-		return fmt.Errorf("unable to list the containers\n%w", err)
+		return "", fmt.Errorf("unable to list the containers\n%w", err)
 	}
 
-	// since the filter is fuzzy, do an exact match (e.g. filtering for
-	// `nitro-dev` will also return `nitro-dev-host`
-	var skipContainer bool
-	var containerID string
 	for _, c := range containers {
 		for _, n := range c.Names {
-			if n == name || n == fmt.Sprintf("/%s", name) {
-				skipContainer = true
-				containerID = c.ID
+			if n == "nitro-proxy" || n == "/nitro-proxy" {
+				fmt.Println(" ==> Skipping proxy container creation for nitro-proxy as it already exists")
+
+				return c.ID, nil
 			}
 		}
-	}
-
-	// check if the volume needs to be created, the nitro-proxy container handles traffic routing
-	if skipContainer {
-		fmt.Println(" ==> Skipping proxy container creation for nitro-proxy")
-
-		return cli.startContainer(ctx, containerID, "nitro-proxy")
 	}
 
 	fmt.Println(" ==> Creating proxy container for nitro-proxy")
@@ -146,33 +144,40 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 			PortBindings: map[nat.Port][]nat.PortBinding{
 				"80": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "80",
 					},
 				},
 				"443": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "443",
 					},
 				},
 				"5000": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "5000",
 					},
 				},
 			},
 		},
-		&network.NetworkingConfig{},
+		&network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				name: &network.EndpointSettings{
+					// TODO(jasonmccallister) pass the network ID so we can place the proxy in the right container
+					NetworkID: "TODOGETHEID",
+				},
+			},
+			// EndpointsConfig: ,
+		},
 		"nitro-proxy",
 	)
 	if err != nil {
-		return fmt.Errorf("unable to create the nitro container\n%w", err)
+		return "", fmt.Errorf("unable to create the container\n%w", err)
 	}
 
-	// start the proxy container
-	return cli.startContainer(ctx, resp.ID, "nitro-proxy")
+	return resp.ID, nil
 }
 
 func (cli *Client) startContainer(ctx context.Context, containerID, containerName string) error {
