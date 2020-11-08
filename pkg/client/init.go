@@ -32,17 +32,19 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// since the filter is fuzzy, do an exact match (e.g. filtering for
 	// `nitro-dev` will also return `nitro-dev-host`
 	var skipNetwork bool
+	var networkID string
 	for _, n := range networks {
 		if n.Name == name {
 			skipNetwork = true
+			networkID = n.ID
 		}
 	}
 
 	// create the network needs to be created
 	if skipNetwork {
-		fmt.Println(" ==> Skipping network creation for", name)
+		fmt.Println("  ==> Skipping network creation for", name)
 	} else {
-		fmt.Println(" ==> Creating network for", name)
+		fmt.Println("  ==> Creating network for", name)
 
 		resp, err := cli.docker.NetworkCreate(ctx, name, types.NetworkCreate{
 			Driver:     "bridge",
@@ -55,7 +57,10 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			return fmt.Errorf("unable to create the network, %w", err)
 		}
 
-		fmt.Println(" ==> network created with id", resp.ID)
+		// set the newly created network
+		networkID = resp.ID
+
+		fmt.Println("  ==> Network created for", name)
 	}
 
 	// check if the volume needs to be created
@@ -75,9 +80,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// check if the volume needs to be created
 	if skipVolume {
-		fmt.Println(" ==> Skipping volume creation for", name)
+		fmt.Println("  ==> Skipping volume creation for", name)
 	} else {
-		fmt.Println(" ==> Creating volume for", name)
+		fmt.Println("  ==> Creating volume for", name)
 
 		// create a volume with the same name of the machine
 		resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
@@ -91,7 +96,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			return fmt.Errorf("unable to create the network, %w", err)
 		}
 
-		fmt.Println(" ==> volume created with name", resp.Name)
+		fmt.Println("  ==> volume created with name", resp.Name)
 	}
 
 	// pull the latest image from docker hub for the nitro-proxy
@@ -106,7 +111,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	pf.Add("name", "nitro-proxy")
 
 	// check if there is an existing container for the nitro-proxy
-	containerID, err := cli.findOrCreateProxy(ctx, name, pf)
+	containerID, err := cli.findOrCreateProxy(ctx, name, networkID, pf)
 	if err != nil {
 		return fmt.Errorf("unable to find the proxy container, %w", err)
 	}
@@ -119,7 +124,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	return nil
 }
 
-func (cli *Client) findOrCreateProxy(ctx context.Context, name string, filter filters.Args) (string, error) {
+func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string, filter filters.Args) (string, error) {
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
 		return "", fmt.Errorf("unable to list the containers\n%w", err)
@@ -128,18 +133,21 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name string, filter fi
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == "nitro-proxy" || n == "/nitro-proxy" {
-				fmt.Println(" ==> Skipping proxy container creation for nitro-proxy as it already exists")
+				fmt.Println("  ==> Skipping proxy container creation for nitro-proxy as it already exists")
 
 				return c.ID, nil
 			}
 		}
 	}
 
-	fmt.Println(" ==> Creating proxy container for nitro-proxy")
+	fmt.Println("  ==> Creating proxy container for nitro-proxy")
 
 	resp, err := cli.docker.ContainerCreate(ctx,
-		&container.Config{Image: "testing-caddy:latest"},
+		&container.Config{
+			Image: "testing-caddy:latest",
+		},
 		&container.HostConfig{
+			NetworkMode: "host",
 			// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 			PortBindings: map[nat.Port][]nat.PortBinding{
 				"80": {
@@ -165,8 +173,7 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name string, filter fi
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				name: &network.EndpointSettings{
-					// TODO(jasonmccallister) pass the network ID so we can place the proxy in the right container
-					NetworkID: "TODOGETHEID",
+					NetworkID: networkID,
 				},
 			},
 			// EndpointsConfig: ,
@@ -181,13 +188,13 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name string, filter fi
 }
 
 func (cli *Client) startContainer(ctx context.Context, containerID, containerName string) error {
-	fmt.Println(" ==> Starting container:", containerName)
+	fmt.Println("  ==> Starting container:", containerName)
 
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
 
-	fmt.Println(" ==> Container started successfully")
+	fmt.Println("  ==> Container started successfully")
 
 	return nil
 }
