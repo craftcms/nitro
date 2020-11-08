@@ -134,7 +134,7 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 	if skipContainer {
 		fmt.Println(" ==> Skipping proxy container creation for nitro-proxy")
 
-		return cli.startContainer(ctx, containerID)
+		return cli.startContainer(ctx, containerID, "nitro-proxy")
 	}
 
 	fmt.Println(" ==> Creating proxy container for nitro-proxy")
@@ -172,13 +172,17 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 	}
 
 	// start the proxy container
-	return cli.startContainer(ctx, resp.ID)
+	return cli.startContainer(ctx, resp.ID, "nitro-proxy")
 }
 
-func (cli *Client) startContainer(ctx context.Context, containerID string) error {
+func (cli *Client) startContainer(ctx context.Context, containerID, containerName string) error {
+	fmt.Println(" ==> Starting container:", containerName)
+
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
+
+	fmt.Println(" ==> Container started successfully")
 
 	return nil
 }
