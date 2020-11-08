@@ -4,14 +4,10 @@ import "github.com/docker/docker/client"
 
 // Client represents a Nitro CLI
 type Client struct {
-	docker *client.Client
+	docker client.CommonAPIClient
 }
 
 func NewClient() (*Client, error) {
 	cli, err := client.NewEnvClient()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Client{docker: cli}, nil
+	return &Client{docker: cli}, err
 }
