@@ -31,6 +31,7 @@ type mockDockerClient struct {
 	// network related resources for mocking the calls to the client
 	// for network specific resources
 	networkResources      []types.NetworkResource
+	networkCreateRequest  types.NetworkCreateRequest
 	networkCreateResponse types.NetworkCreateResponse
 
 	// volume related resources
@@ -47,6 +48,12 @@ func (c mockDockerClient) NetworkList(ctx context.Context, options types.Network
 }
 
 func (c mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
+	// save the request on the struct field
+	c.networkCreateRequest = types.NetworkCreateRequest{
+		NetworkCreate: options,
+		Name:          name,
+	}
+
 	return c.networkCreateResponse, c.mockError
 }
 
