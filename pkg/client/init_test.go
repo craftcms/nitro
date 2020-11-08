@@ -14,7 +14,7 @@ func TestInit(t *testing.T) {
 	mock.networkCreateResponse = types.NetworkCreateResponse{ID: "test"}
 	cli := Client{docker: mock}
 
-	// expected
+	// Expected
 	networkReq := types.NetworkCreateRequest{
 		NetworkCreate: types.NetworkCreate{
 			Driver:     "bridge",
@@ -25,6 +25,9 @@ func TestInit(t *testing.T) {
 		},
 		Name: "testing-init",
 	}
+	// TODO(jasonmccallister) set the volume create request
+	// TODO(jasonmccallister) set the container create request
+	// TODO(jasonmccallister) set the container start request
 
 	// Act
 	err := cli.Init(context.TODO(), "testing-init", []string{})
@@ -34,6 +37,7 @@ func TestInit(t *testing.T) {
 		t.Errorf("expected the error to be nil, got %v", err)
 	}
 
+	// make sure the network create matches the expected
 	if !reflect.DeepEqual(mock.networkCreateRequest, networkReq) {
 		t.Errorf(
 			"expected network create requests to match\ngot:\n%v\nwant:\n%v",

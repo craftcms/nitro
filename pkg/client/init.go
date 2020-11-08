@@ -116,7 +116,6 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 func (cli *Client) checkContainer(ctx context.Context, name string, filter filters.Args) error {
 	// skipping for now
 	return nil
-
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
 		return fmt.Errorf("unable to list the containers\n%w", err)

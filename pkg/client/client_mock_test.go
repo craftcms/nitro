@@ -13,9 +13,9 @@ import (
 // inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
 func newMockDockerClient(networks []types.NetworkResource, containers []types.Container, volumes []*types.Volume) *mockDockerClient {
 	return &mockDockerClient{
-		networkResources: networks,
-		containers:       containers,
-		volumes:          volumetypes.VolumesListOKBody{Volumes: volumes},
+		networks:   networks,
+		containers: containers,
+		volumes:    volumetypes.VolumesListOKBody{Volumes: volumes},
 	}
 }
 
@@ -30,7 +30,7 @@ type mockDockerClient struct {
 
 	// network related resources for mocking the calls to the client
 	// for network specific resources
-	networkResources      []types.NetworkResource
+	networks              []types.NetworkResource
 	networkCreateRequest  types.NetworkCreateRequest
 	networkCreateResponse types.NetworkCreateResponse
 
@@ -44,7 +44,7 @@ type mockDockerClient struct {
 }
 
 func (c *mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
-	return c.networkResources, c.mockError
+	return c.networks, c.mockError
 }
 
 func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
