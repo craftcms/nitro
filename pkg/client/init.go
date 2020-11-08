@@ -104,7 +104,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// check if there is an existing container for the nitro-proxy
 	pf := filters.NewArgs()
 	pf.Add("name", "nitro-proxy")
-	if err := cli.checkContainer(ctx, name, pf); err != nil {
+	if err := cli.checkContainer(ctx, "nitro-proxy", pf); err != nil {
 		return err
 	}
 
@@ -130,48 +130,52 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 		}
 	}
 
-	// check if the volume needs to be created, the nitro-proxy container handles 80 and 443 traffic routing
+	// check if the volume needs to be created, the nitro-proxy container handles traffic routing
 	if skipContainer {
 		fmt.Println(" ==> Skipping proxy container creation for nitro-proxy")
-	} else {
-		fmt.Println(" ==> Creating proxy container for nitro-proxy")
 
-		resp, err := cli.docker.ContainerCreate(ctx,
-			&container.Config{Image: "testing-caddy:latest"},
-			&container.HostConfig{
-				// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
-				PortBindings: map[nat.Port][]nat.PortBinding{
-					"80": {
-						{
-							HostIP:   "localhost",
-							HostPort: "80",
-						},
+		return cli.startContainer(ctx, containerID)
+	}
+
+	fmt.Println(" ==> Creating proxy container for nitro-proxy")
+
+	resp, err := cli.docker.ContainerCreate(ctx,
+		&container.Config{Image: "testing-caddy:latest"},
+		&container.HostConfig{
+			// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				"80": {
+					{
+						HostIP:   "localhost",
+						HostPort: "80",
 					},
-					"443": {
-						{
-							HostIP:   "localhost",
-							HostPort: "443",
-						},
+				},
+				"443": {
+					{
+						HostIP:   "localhost",
+						HostPort: "443",
 					},
-					"5000": {
-						{
-							HostIP:   "localhost",
-							HostPort: "5000",
-						},
+				},
+				"5000": {
+					{
+						HostIP:   "localhost",
+						HostPort: "5000",
 					},
 				},
 			},
-			&network.NetworkingConfig{},
-			"nitro-proxy",
-		)
-		if err != nil {
-			return fmt.Errorf("unable to create the nitro container\n%w", err)
-		}
-
-		containerID = resp.ID
+		},
+		&network.NetworkingConfig{},
+		"nitro-proxy",
+	)
+	if err != nil {
+		return fmt.Errorf("unable to create the nitro container\n%w", err)
 	}
 
 	// start the proxy container
+	return cli.startContainer(ctx, resp.ID)
+}
+
+func (cli *Client) startContainer(ctx context.Context, containerID string) error {
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
