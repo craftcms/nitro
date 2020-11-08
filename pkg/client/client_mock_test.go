@@ -43,11 +43,11 @@ type mockDockerClient struct {
 	mockError error
 }
 
-func (c mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
+func (c *mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
 	return c.networkResources, c.mockError
 }
 
-func (c mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
+func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
 	// save the request on the struct field
 	c.networkCreateRequest = types.NetworkCreateRequest{
 		NetworkCreate: options,
@@ -57,10 +57,10 @@ func (c mockDockerClient) NetworkCreate(ctx context.Context, name string, option
 	return c.networkCreateResponse, c.mockError
 }
 
-func (c mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumesListOKBody, error) {
+func (c *mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumesListOKBody, error) {
 	return c.volumes, c.mockError
 }
 
-func (c mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumesCreateBody) (types.Volume, error) {
+func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumesCreateBody) (types.Volume, error) {
 	return c.volumeCreateResponse, c.mockError
 }
