@@ -17,7 +17,7 @@ import (
 // instead of overwriting the containers. Init should only be used once to setup the
 // development environment, which is why we safeguard the resources.
 func (cli *Client) Init(ctx context.Context, name string, args []string) error {
-	fmt.Println("Running pre-checks on the development environment...")
+	fmt.Println("Running pre-checks on", name, "development environment...")
 
 	// create filters for the development environment
 	filter := filters.NewArgs()
@@ -42,9 +42,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// create the network needs to be created
 	if skipNetwork {
-		fmt.Println("  ==> Skipping network creation for", name)
+		fmt.Println("  ==> skipping network creation")
 	} else {
-		fmt.Println("  ==> Creating network for", name)
+		fmt.Println("  ==> creating network")
 
 		resp, err := cli.docker.NetworkCreate(ctx, name, types.NetworkCreate{
 			Driver:     "bridge",
@@ -60,7 +60,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		// set the newly created network
 		networkID = resp.ID
 
-		fmt.Println("  ==> Network created for", name)
+		fmt.Println("  ==> network created for", name)
 	}
 
 	// check if the volume needs to be created
@@ -80,12 +80,12 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// check if the volume needs to be created
 	if skipVolume {
-		fmt.Println("  ==> Skipping volume creation for", name)
+		fmt.Println("  ==> skipping volume creation")
 	} else {
-		fmt.Println("  ==> Creating volume for", name)
+		fmt.Println("  ==> creating volume")
 
 		// create a volume with the same name of the machine
-		resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
+		_, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
 			Driver: "local",
 			Name:   name,
 			Labels: map[string]string{
@@ -96,7 +96,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			return fmt.Errorf("unable to create the network, %w", err)
 		}
 
-		fmt.Println("  ==> volume created with name", resp.Name)
+		fmt.Println("  ==> volume created")
 	}
 
 	// pull the latest image from docker hub for the nitro-proxy
@@ -133,36 +133,41 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == "nitro-proxy" || n == "/nitro-proxy" {
-				fmt.Println("  ==> Skipping proxy container creation for nitro-proxy as it already exists")
+				fmt.Println("  ==> skipping container creation for nitro-proxy")
 
 				return c.ID, nil
 			}
 		}
 	}
 
-	fmt.Println("  ==> Creating proxy container for nitro-proxy")
+	fmt.Println("  ==> creating container for nitro-proxy")
 
 	resp, err := cli.docker.ContainerCreate(ctx,
 		&container.Config{
 			Image: "testing-caddy:latest",
+			ExposedPorts: nat.PortSet{
+				"80/tcp":   struct{}{},
+				"443/tcp":  struct{}{},
+				"5000/tcp": struct{}{},
+			},
 		},
 		&container.HostConfig{
-			NetworkMode: "host",
+			NetworkMode: "default",
 			// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				"80": {
+				"80/tcp": {
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: "80",
 					},
 				},
-				"443": {
+				"443/tcp": {
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: "443",
 					},
 				},
-				"5000": {
+				"5000/tcp": {
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: "5000",
@@ -172,11 +177,10 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 		},
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				name: &network.EndpointSettings{
+				name: {
 					NetworkID: networkID,
 				},
 			},
-			// EndpointsConfig: ,
 		},
 		"nitro-proxy",
 	)
@@ -188,13 +192,13 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 }
 
 func (cli *Client) startContainer(ctx context.Context, containerID, containerName string) error {
-	fmt.Println("  ==> Starting container:", containerName)
+	fmt.Println("  ==> starting container", containerName)
 
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
 
-	fmt.Println("  ==> Container started successfully")
+	fmt.Println("  ==> container started")
 
 	return nil
 }
