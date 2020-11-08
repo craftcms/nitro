@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"net"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -20,13 +19,7 @@ import (
 func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	fmt.Println("Running pre-checks on the development environment...")
 
-	// check if port 80, 443, and 5000 are available
-	//ports := []string{"80", "443", "5000"}
-	//if err := cli.checkPorts(ports); err != nil {
-	//	return err
-	//}
-
-	// create filters
+	// create filters for the development environment
 	filter := filters.NewArgs()
 	filter.Add("name", name)
 
@@ -84,7 +77,6 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	if skipVolume {
 		fmt.Println(" ==> Skipping volume creation for", name)
 	} else {
-
 		fmt.Println(" ==> Creating volume for", name)
 
 		// create a volume with the same name of the machine
@@ -110,7 +102,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	//}
 
 	// check if there is an existing container for the nitro-proxy
-	if err := cli.checkContainer(ctx, name, filter); err != nil {
+	pf := filters.NewArgs()
+	pf.Add("name", "nitro-proxy")
+	if err := cli.checkContainer(ctx, name, pf); err != nil {
 		return err
 	}
 
@@ -128,16 +122,13 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 	var skipContainer bool
 	var containerID string
 	for _, c := range containers {
-		fmt.Println(c.Names)
 		for _, n := range c.Names {
-
 			if n == name || n == fmt.Sprintf("/%s", name) {
 				skipContainer = true
 				containerID = c.ID
 			}
 		}
 	}
-	fmt.Println(containerID)
 
 	// check if the volume needs to be created, the nitro-proxy container handles 80 and 443 traffic routing
 	if skipContainer {
@@ -148,6 +139,7 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 		resp, err := cli.docker.ContainerCreate(ctx,
 			&container.Config{Image: "testing-caddy:latest"},
 			&container.HostConfig{
+				// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					"80": {
 						{
@@ -182,21 +174,6 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 	// start the proxy container
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
-	}
-
-	return nil
-}
-
-func (cli *Client) checkPorts(ports []string) error {
-	for _, port := range ports {
-		lis, err := net.Listen("tcp", ":"+port)
-		if err != nil {
-			return fmt.Errorf("nitro uses ports 80, 443, and 5000. It appears port %q, is already in use", port)
-		}
-
-		if err := lis.Close(); err != nil {
-			return fmt.Errorf("unable to close the listener after checking the ports, %w", err)
-		}
 	}
 
 	return nil
