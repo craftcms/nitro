@@ -8,14 +8,15 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	// Arrange
 	mock := newMockDockerClient(nil)
 	mock.networkCreateResponse = types.NetworkCreateResponse{ID: "test-network"}
+	cli := Client{docker: mock}
 
-	cli := Client{
-		docker: mock,
-	}
-
+	// Act
 	err := cli.Init(context.TODO(), "test", []string{})
+
+	// Assert
 	if err == nil {
 		t.Errorf("expected the error to be nil, got %v", err)
 	}
