@@ -9,18 +9,22 @@ import (
 
 // inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
 
-func newMockDockerClient(networks []types.NetworkResource) *mockDockerClient {
+func newMockDockerClient(networks []types.NetworkResource, containers []types.Container) *mockDockerClient {
 	return &mockDockerClient{
 		networkResources: networks,
+		containers:       containers,
 	}
 }
 
 type mockDockerClient struct {
 	client.CommonAPIClient
 
+	containers []types.Container
+
 	networkResources      []types.NetworkResource
 	networkCreateResponse types.NetworkCreateResponse
-	mockError             error
+
+	mockError error
 }
 
 func (c mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {

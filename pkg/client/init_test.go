@@ -9,8 +9,8 @@ import (
 
 func TestInit(t *testing.T) {
 	// Arrange
-	mock := newMockDockerClient(nil)
-	mock.networkCreateResponse = types.NetworkCreateResponse{ID: "test-network"}
+	mock := newMockDockerClient(nil, nil)
+	mock.networkCreateResponse = types.NetworkCreateResponse{ID: "test"}
 	cli := Client{docker: mock}
 
 	// Act
