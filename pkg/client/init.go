@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
+	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 )
 
@@ -61,53 +62,53 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	}
 
 	// check if the volume needs to be created
-	//volumes, err := cli.docker.VolumeList(ctx, filter)
+	volumes, err := cli.docker.VolumeList(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("unable to list the docker volumes, %w", err)
+	}
+
+	// since the filter is fuzzy, do an exact match (e.g. filtering for
+	// `nitro-dev` will also return `nitro-dev-host`
+	var skipVolume bool
+	for _, volume := range volumes.Volumes {
+		if volume.Name == name {
+			skipVolume = true
+		}
+	}
+
+	// check if the volume needs to be created
+	if skipVolume {
+		fmt.Println(" ==> Skipping volume creation for", name)
+	} else {
+
+		fmt.Println(" ==> Creating volume for", name)
+
+		// create a volume with the same name of the machine
+		resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
+			Driver: "local",
+			Name:   name,
+			Labels: map[string]string{
+				"nitro": name,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("unable to create the network, %w", err)
+		}
+
+		fmt.Println(" ==> volume created with name", resp.Name)
+	}
+
+	// pull the latest image from docker hub for the nitro-proxy
+	// TODO(jasonmccallister) replace with the nitro CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
+	//_, err = cli.docker.ImagePull(ctx, "testing-caddy:latest", types.ImagePullOptions{})
 	//if err != nil {
-	//	return fmt.Errorf("unable to list the docker volumes, %w", err)
+	//	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
 	//}
-	//
-	//// since the filter is fuzzy, do an exact match (e.g. filtering for
-	//// `nitro-dev` will also return `nitro-dev-host`
-	//var skipVolume bool
-	//for _, volume := range volumes.Volumes {
-	//	if volume.Name == name {
-	//		skipVolume = true
-	//	}
-	//}
-	//
-	//// check if the volume needs to be created
-	//if skipVolume {
-	//	fmt.Println(" ==> Skipping volume creation for", name)
-	//} else {
-	//
-	//	fmt.Println(" ==> Creating volume for", name)
-	//
-	//	// create a volume with the same name of the machine
-	//	resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
-	//		Driver: "local",
-	//		Name:   name,
-	//		Labels: map[string]string{
-	//			"nitro": name,
-	//		},
-	//	})
-	//	if err != nil {
-	//		return fmt.Errorf("unable to create the network, %w", err)
-	//	}
-	//
-	//	fmt.Println(" ==> volume created with name", resp.Name)
-	//}
-	//
-	//// pull the latest image from docker hub for the nitro-proxy
-	//// TODO(jasonmccallister) replace with the nitro CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
-	////_, err = cli.docker.ImagePull(ctx, "testing-caddy:latest", types.ImagePullOptions{})
-	////if err != nil {
-	////	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
-	////}
-	//
-	//// check if there is an existing container for the nitro-proxy
-	//if err := cli.checkContainer(ctx, name, filter); err != nil {
-	//	return err
-	//}
+
+	// check if there is an existing container for the nitro-proxy
+	if err := cli.checkContainer(ctx, name, filter); err != nil {
+		return err
+	}
 
 	return nil
 }
