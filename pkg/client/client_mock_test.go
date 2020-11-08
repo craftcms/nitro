@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
@@ -28,8 +29,11 @@ type mockDockerClient struct {
 	// container related resources for mocking calls to the client
 	// the fields ending in *Response are designed to capture the
 	// requests sent to the client API.
+	containerID             string
 	containers              []types.Container
+	containerCreateRequest  types.ContainerCreateConfig
 	containerCreateResponse container.ContainerCreateCreatedBody
+	containerStartRequest   types.ContainerStartOptions
 
 	// network related resources for mocking the calls to the client
 	// for network specific resources
@@ -73,4 +77,31 @@ func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes
 	c.volumeCreateRequest = options
 
 	return c.volumeCreateResponse, c.mockError
+}
+
+func (c *mockDockerClient) ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error) {
+	c.filterArgs = append(c.filterArgs, options.Filters)
+
+	return c.containers, c.mockError
+}
+
+func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, containerName string) (container.ContainerCreateCreatedBody, error) {
+	// save the request on the struct field
+	// TODO(jasonmccallister) this is wrong, need to look at the code to determine the correct
+	// types are set and returned
+	c.containerCreateRequest = types.ContainerCreateConfig{
+		Name:             containerName,
+		Config:           config,
+		HostConfig:       hostConfig,
+		NetworkingConfig: networkingConfig,
+	}
+
+	return c.containerCreateResponse, c.mockError
+}
+
+func (c *mockDockerClient) ContainerStart(ctx context.Context, container string, options types.ContainerStartOptions) error {
+	c.containerID = container
+	c.containerStartRequest = options
+
+	return c.mockError
 }

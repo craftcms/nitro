@@ -6,15 +6,26 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
+	volumetypes "github.com/docker/docker/api/types/volume"
+	"github.com/docker/go-connections/nat"
 )
 
-func TestInit(t *testing.T) {
+func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// Arrange
+	environmentName := "testing-init"
 	mock := newMockDockerClient(nil, nil, nil)
-	mock.networkCreateResponse = types.NetworkCreateResponse{ID: "test"}
+	mock.networkCreateResponse = types.NetworkCreateResponse{
+		ID: "testing-init",
+	}
+	mock.containerCreateResponse = container.ContainerCreateCreatedBody{
+		ID: "testingid",
+	}
 	cli := Client{docker: mock}
 
 	// Expected
+	// set the network create request
 	networkReq := types.NetworkCreateRequest{
 		NetworkCreate: types.NetworkCreate{
 			Driver:     "bridge",
@@ -25,12 +36,48 @@ func TestInit(t *testing.T) {
 		},
 		Name: "testing-init",
 	}
-	// TODO(jasonmccallister) set the volume create request
-	// TODO(jasonmccallister) set the container create request
-	// TODO(jasonmccallister) set the container start request
+	// set the volume create request
+	volumeReq := volumetypes.VolumesCreateBody{
+		Driver: "local",
+		Name:   "testing-init",
+		Labels: map[string]string{
+			"nitro": "testing-init",
+		},
+	}
+	// set the container create request
+	containerCreateReq := types.ContainerCreateConfig{
+		// TODO(jasonmccallister) get this as a param or CLI version
+		Config: &container.Config{Image: "testing-caddy:latest"},
+		HostConfig: &container.HostConfig{
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				"80": {
+					{
+						HostIP:   "localhost",
+						HostPort: "80",
+					},
+				},
+				"443": {
+					{
+						HostIP:   "localhost",
+						HostPort: "443",
+					},
+				},
+				"5000": {
+					{
+						HostIP:   "localhost",
+						HostPort: "5000",
+					},
+				},
+			},
+		},
+		NetworkingConfig: &network.NetworkingConfig{},
+		Name:             "nitro-proxy",
+	}
+	// set the container start request
+	containerStartRequest := types.ContainerStartOptions{}
 
 	// Act
-	err := cli.Init(context.TODO(), "testing-init", []string{})
+	err := cli.Init(context.TODO(), environmentName, []string{})
 
 	// Assert
 	if err != nil {
@@ -40,9 +87,45 @@ func TestInit(t *testing.T) {
 	// make sure the network create matches the expected
 	if !reflect.DeepEqual(mock.networkCreateRequest, networkReq) {
 		t.Errorf(
-			"expected network create requests to match\ngot:\n%v\nwant:\n%v",
+			"expected network create request to match\ngot:\n%v\nwant:\n%v",
 			mock.networkCreateRequest,
 			networkReq,
+		)
+	}
+
+	// make sure the volume create matches the expected
+	if !reflect.DeepEqual(mock.volumeCreateRequest, volumeReq) {
+		t.Errorf(
+			"expected volume create request to match\ngot:\n%v\nwant:\n%v",
+			mock.volumeCreateRequest,
+			volumeReq,
+		)
+	}
+
+	// make sure the container create matches the expected
+	if !reflect.DeepEqual(mock.containerCreateRequest, containerCreateReq) {
+		t.Errorf(
+			"expected container create request to match\ngot:\n%v\nwant:\n%v",
+			mock.containerCreateRequest,
+			containerCreateReq,
+		)
+	}
+
+	// make sure the container start matches the expected
+	if !reflect.DeepEqual(mock.containerStartRequest, containerStartRequest) {
+		t.Errorf(
+			"expected container start request to match\ngot:\n%v\nwant:\n%v",
+			mock.containerStartRequest,
+			containerStartRequest,
+		)
+	}
+
+	// make sure the container ID to start matches the expected
+	if mock.containerID != "testingid" {
+		t.Errorf(
+			"expected container IDs to start to match\ngot:\n%v\nwant:\n%v",
+			mock.containerID,
+			"testingid",
 		)
 	}
 }

@@ -13,6 +13,10 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+// Init is responsible for creating the networks, volumes, and proxy containers for the
+// nitro docker setup. It will check for the existing networks, volumes, and containers
+// instead of overwriting the containers. Init should only be used once to setup the
+// development environment, which is why we safeguard the resources.
 func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	fmt.Println("Running pre-checks on the development environment...")
 
@@ -114,8 +118,6 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 }
 
 func (cli *Client) checkContainer(ctx context.Context, name string, filter filters.Args) error {
-	// skipping for now
-	return nil
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
 		return fmt.Errorf("unable to list the containers\n%w", err)
@@ -135,6 +137,7 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 			}
 		}
 	}
+	fmt.Println(containerID)
 
 	// check if the volume needs to be created, the nitro-proxy container handles 80 and 443 traffic routing
 	if skipContainer {
@@ -142,25 +145,26 @@ func (cli *Client) checkContainer(ctx context.Context, name string, filter filte
 	} else {
 		fmt.Println(" ==> Creating proxy container for nitro-proxy")
 
-		resp, err := cli.docker.ContainerCreate(ctx, &container.Config{Image: "testing-caddy:latest"},
+		resp, err := cli.docker.ContainerCreate(ctx,
+			&container.Config{Image: "testing-caddy:latest"},
 			&container.HostConfig{
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					"80": {
 						{
-							"localhost",
-							"80",
+							HostIP:   "localhost",
+							HostPort: "80",
 						},
 					},
 					"443": {
 						{
-							"localhost",
-							"443",
+							HostIP:   "localhost",
+							HostPort: "443",
 						},
 					},
 					"5000": {
 						{
-							"localhost",
-							"5000",
+							HostIP:   "localhost",
+							HostPort: "5000",
 						},
 					},
 				},
