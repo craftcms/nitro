@@ -22,6 +22,9 @@ func newMockDockerClient(networks []types.NetworkResource, containers []types.Co
 type mockDockerClient struct {
 	client.CommonAPIClient
 
+	// filters are the filters passed to list funcs
+	filterArgs []filters.Args
+
 	// container related resources for mocking calls to the client
 	// the fields ending in *Response are designed to capture the
 	// requests sent to the client API.
@@ -36,6 +39,7 @@ type mockDockerClient struct {
 
 	// volume related resources
 	volumes              volumetypes.VolumesListOKBody
+	volumeCreateRequest  volumetypes.VolumesCreateBody
 	volumeCreateResponse types.Volume
 
 	// mockError allows us to override any func to return a method, we do not
@@ -44,6 +48,8 @@ type mockDockerClient struct {
 }
 
 func (c *mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
+	c.filterArgs = append(c.filterArgs, options.Filters)
+
 	return c.networks, c.mockError
 }
 
@@ -58,9 +64,13 @@ func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, optio
 }
 
 func (c *mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumesListOKBody, error) {
+	c.filterArgs = append(c.filterArgs, filter)
+
 	return c.volumes, c.mockError
 }
 
 func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumesCreateBody) (types.Volume, error) {
+	c.volumeCreateRequest = options
+
 	return c.volumeCreateResponse, c.mockError
 }
