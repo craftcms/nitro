@@ -31,7 +31,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				"nitro": "testing-init",
+				"com.craftcms.nitro.network": "testing-init",
 			},
 		},
 		Name: "testing-init",
@@ -41,37 +41,54 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 		Driver: "local",
 		Name:   "testing-init",
 		Labels: map[string]string{
-			"nitro": "testing-init",
+			"com.craftcms.nitro.volume": "testing-init",
 		},
 	}
 	// set the container create request
 	containerCreateReq := types.ContainerCreateConfig{
 		// TODO(jasonmccallister) get this as a param or CLI version
-		Config: &container.Config{Image: "testing-caddy:latest"},
+		Config: &container.Config{
+			Image: "testing-caddy:latest",
+			ExposedPorts: nat.PortSet{
+				"80/tcp":   struct{}{},
+				"443/tcp":  struct{}{},
+				"5000/tcp": struct{}{},
+			},
+			Labels: map[string]string{
+				"com.craftcms.nitro.proxy": "testing-init",
+			},
+		},
 		HostConfig: &container.HostConfig{
+			NetworkMode: "default",
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				"80": {
+				"80/tcp": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "80",
 					},
 				},
-				"443": {
+				"443/tcp": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "443",
 					},
 				},
-				"5000": {
+				"5000/tcp": {
 					{
-						HostIP:   "localhost",
+						HostIP:   "127.0.0.1",
 						HostPort: "5000",
 					},
 				},
 			},
 		},
-		NetworkingConfig: &network.NetworkingConfig{},
-		Name:             "nitro-proxy",
+		NetworkingConfig: &network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				"testing-init": {
+					NetworkID: "testing-init",
+				},
+			},
+		},
+		Name: "nitro-proxy",
 	}
 	// set the container start request
 	containerStartRequest := types.ContainerStartOptions{}

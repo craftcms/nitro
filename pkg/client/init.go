@@ -50,7 +50,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				"nitro": name,
+				"com.craftcms.nitro.network": name,
 			},
 		})
 		if err != nil {
@@ -89,7 +89,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			Driver: "local",
 			Name:   name,
 			Labels: map[string]string{
-				"nitro": name,
+				"com.craftcms.nitro.volume": name,
 			},
 		})
 		if err != nil {
@@ -149,6 +149,9 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
 				"5000/tcp": struct{}{},
+			},
+			Labels: map[string]string{
+				"com.craftcms.nitro.proxy": name,
 			},
 		},
 		&container.HostConfig{

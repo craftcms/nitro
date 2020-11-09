@@ -12,17 +12,22 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	filter := filters.Args{}
 	filter.ExactMatch("label", name)
 
+	fmt.Println("Starting shutdown for", name)
+
+	// get all the containers using a filter, we only want to stop nitro related containers
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
 
+	// stop each container we found
 	for _, container := range containers {
-		fmt.Println(container.Names)
 		if err := cli.docker.ContainerStop(ctx, container.ID, nil); err != nil {
-			return fmt.Errorf("unable to stop container, %w", err)
+			return fmt.Errorf("unable to stop container %s: %w", container.Names[0], err)
 		}
 	}
 
-	return fmt.Errorf("not implemented")
+	fmt.Println("  ==> stopped all nitro related containers")
+
+	return nil
 }
