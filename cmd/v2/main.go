@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/craftcms/nitro/pkg/client"
+	"github.com/craftcms/nitro/pkg/portavail"
 )
 
 func main() {
@@ -20,6 +21,11 @@ func main() {
 	cli, err := client.NewClient()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if err := portavail.Check("80", "443"); err != nil {
+		fmt.Println(err)
+		// os.Exit(1)
 	}
 
 	if *stop {
