@@ -15,7 +15,7 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	// get all the containers using a filter, we only want to stop nitro related containers
 	// get all of the sites
 	siteFilters := filters.NewArgs()
-	siteFilters.Add("label", "com.craftcms.nitro.site="+name)
+	siteFilters.Add("label", "com.craftcms.nitro.machine="+name)
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: siteFilters})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
@@ -33,8 +33,8 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	// get all the proxy container using a filter
 	proxyFilter := filters.NewArgs()
 	proxyFilter.Add("label", "com.craftcms.nitro.proxy="+name)
-	proxyContainers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: siteFilters})
-	if err != nil || len(proxyContainers) == 0 {
+	proxyContainers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter})
+	if err != nil {
 		return fmt.Errorf("unable to find the proxy container, %w", err)
 	}
 
