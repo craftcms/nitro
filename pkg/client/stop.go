@@ -10,7 +10,7 @@ import (
 
 func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	filter := filters.Args{}
-	filter.ExactMatch("label", name)
+	filter.FuzzyMatch("label", name)
 
 	fmt.Println("Starting shutdown for", name)
 
@@ -20,8 +20,11 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
 
+	fmt.Println("  ==> found", len(containers), " container to stop")
+
 	// stop each container we found
 	for _, container := range containers {
+		fmt.Println("  ==> stopping container", container.Names[0])
 		if err := cli.docker.ContainerStop(ctx, container.ID, nil); err != nil {
 			return fmt.Errorf("unable to stop container %s: %w", container.Names[0], err)
 		}
