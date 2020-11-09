@@ -22,7 +22,10 @@ example.nitro {
 }
 
 :80 :443 {
-    respond * 200 {
+    root * /var/www/html
+    file_server
+
+    respond /docs 200 {
         body "welcome to nitro!"
         close
     }
