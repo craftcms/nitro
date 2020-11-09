@@ -24,7 +24,7 @@ func main() {
 	}
 
 	if err := portavail.Check("80", "443"); err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		// os.Exit(1)
 	}
 
