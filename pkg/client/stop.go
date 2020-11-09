@@ -10,7 +10,7 @@ import (
 )
 
 func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
-	fmt.Println("Starting shutdown for", name)
+	fmt.Println("Shutting down development environment for", name)
 
 	// get all the containers using a filter, we only want to stop nitro related containers
 	// get all of the sites
@@ -23,7 +23,7 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 
 	// stop each site container
 	for _, container := range containers {
-		fmt.Println("  ==> stopping site", strings.TrimLeft(container.Names[0], "/"))
+		fmt.Println("  ==> stopping container for", container.Labels["com.craftcms.nitro.host"])
 
 		if err := cli.docker.ContainerStop(ctx, container.ID, nil); err != nil {
 			return fmt.Errorf("unable to stop container %s: %w", container.Names[0], err)
@@ -37,8 +37,6 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	if err != nil {
 		return fmt.Errorf("unable to find the proxy container, %w", err)
 	}
-
-	fmt.Println("Starting shutdown for the proxy", name)
 
 	// stop each site container
 	for _, container := range proxyContainers {

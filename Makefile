@@ -10,10 +10,15 @@ build-api:
 build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro.exe ./cmd/cli
 
+build-v2:
+	go build -ldflags="-s -w" -o nitro ./cmd/v2
+
 local: build
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
+local-v2: build-v2
+	mv nitro /usr/local/bin/nitro
 
 dev: scripts api
 

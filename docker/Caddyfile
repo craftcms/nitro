@@ -7,7 +7,7 @@ example.nitro {
     rewrite * index.php?{query}&p={path}
 
     # TODO change this manually to get the ip address
-    php_fastcgi * nitro-dev:9000 {
+    php_fastcgi * example.nitro:9000 {
             root /app/web
             index index.php
 
@@ -21,7 +21,7 @@ example.nitro {
     file_server
 
     respond /docs 200 {
-        body "welcome to nitro!"
+        body "Welcome to nitro!"
         close
     }
 }

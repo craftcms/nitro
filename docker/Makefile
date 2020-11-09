@@ -11,7 +11,7 @@ run-sh: build
 craft:
 	composer create-project craftcms/craft craft-install
 craft-run:
-	docker run -d --name nitro-dev --hostname nitro-dev --rm --net=nitro-dev --label com.craftcms.nitro.machine=nitro-dev -v=/Users/jasonmccallister/go/src/github.com/craftcms/nitro/docker/craft-install:/app/ craftcms/php-fpm:7.4-dev
+	docker run -d --name nitro-dev --hostname example.nitro --rm --net=nitro-dev --label com.craftcms.nitro.machine=nitro-dev --label com.craftcms.nitro.host=example.nitro -v=/Users/jasonmccallister/go/src/github.com/craftcms/nitro/docker/craft-install:/app/ craftcms/php-fpm:7.4-dev
 craft-inspect:
 	docker container inspect local-craft
 craft-exec:
