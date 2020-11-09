@@ -1,18 +1,20 @@
 {
     local_certs
-    admin 0.0.0.0:2019
+    admin localhost:2019
 }
 
 example.nitro {
     encode zstd gzip
+
     respond /hello 200 {
         body "hello"
         close
     }
 
     rewrite * index.php?{query}&p={path}
+
     # TODO change this manually to get the ip address
-    php_fastcgi * 172.22.0.2:9000 {
+    php_fastcgi * nitro-dev:9000 {
             root /app/web
             index index.php
 
