@@ -201,7 +201,7 @@ func (cli *Client) startContainer(ctx context.Context, containerID, containerNam
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
 
-	fmt.Println("  ==> container started")
+	fmt.Println("Development environment started")
 
 	return nil
 }
