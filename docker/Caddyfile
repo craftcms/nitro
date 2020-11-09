@@ -4,13 +4,6 @@
 }
 
 example.nitro {
-    encode zstd gzip
-
-    respond /hello 200 {
-        body "hello"
-        close
-    }
-
     rewrite * index.php?{query}&p={path}
 
     # TODO change this manually to get the ip address
