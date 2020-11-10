@@ -1,0 +1,20 @@
+php: 7.4
+blackfire:
+  client: 123456
+  secret: 123456
+databases:
+  - engine: mysql
+    version: "8.0"
+    port: "3306"
+  - engine: mariadb
+    version: "10"
+    port: "33061"
+  - engine: postgres
+    version: "11"
+    port: "5432"
+sites:
+  - hostname: example.nitro
+    aliases:
+      - test.example.nitro
+    webroot: ~/dev/craft-example/web
+    php: 7.2
