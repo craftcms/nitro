@@ -9,7 +9,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 )
 
-// Start is used to start all containers related to a specific environment
+// LS is used to return a list of containers related to a specific environment
 func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 	// get all the containers using a filter, we only want to start containers which
 	// have the label com.craftcms.nitro.environment=name
