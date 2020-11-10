@@ -29,12 +29,12 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	fmt.Println("Stopping down environment for", name)
 
 	// stop each environment container
-	for _, container := range containers {
-		// TODO maket this more dynamic
-		fmt.Println("  ==> stopping container for", container.Labels["com.craftcms.nitro.host"])
+	for _, c := range containers {
+		n := getContainerName(c)
+		fmt.Println("  ==> stopping container for", n)
 
-		if err := cli.docker.ContainerStop(ctx, container.ID, nil); err != nil {
-			return fmt.Errorf("unable to stop container %s: %w", container.Names[0], err)
+		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
+			return fmt.Errorf("unable to stop container %s: %w", n, err)
 		}
 	}
 
