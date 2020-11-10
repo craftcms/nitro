@@ -5,6 +5,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
 	"github.com/craftcms/nitro/pkg/cmd/initcmd"
+	"github.com/craftcms/nitro/pkg/cmd/restart"
 	"github.com/craftcms/nitro/pkg/cmd/start"
 	"github.com/craftcms/nitro/pkg/cmd/stop"
 	"github.com/spf13/cobra"
@@ -34,6 +35,7 @@ func init() {
 		stop.StopCommand,
 		start.StartCommand,
 		destroy.DestroyCommand,
+		restart.RestartCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
