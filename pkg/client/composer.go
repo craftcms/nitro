@@ -15,7 +15,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 	image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
 	// pull the container
-	fmt.Println("Pulling composer image")
+	fmt.Println("Pulling composer image for version", version)
 	_, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {
 		return fmt.Errorf("unable to pull the docker image, %w", err)
@@ -30,7 +30,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		cmd = []string{"composer", "update", "--ignore-platform-reqs", "--prefer-dist"}
 	}
 
-	fmt.Println("  ==> creating temporary container")
+	fmt.Println("  ==> creating temporary container for composer")
 
 	// create the temp container
 	resp, err := cli.docker.ContainerCreate(ctx,
@@ -52,7 +52,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		return fmt.Errorf("unable to create the composer container\n%w", err)
 	}
 
-	fmt.Println("  ==> running composer, please stand by")
+	fmt.Println("  ==> running composer", action, "this may take a moment")
 
 	stream, err := cli.docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
@@ -82,9 +82,10 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 
 	fmt.Println("  ==> removing temporary container")
 
-	// if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
-	// 	return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
-	// }
+	// remove the temp container
+	if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+		return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
+	}
 
 	fmt.Println("Cleanup completed")
 
