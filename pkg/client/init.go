@@ -50,7 +50,8 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				"com.craftcms.nitro.network": name,
+				"com.craftcms.nitro.environment": name,
+				"com.craftcms.nitro.network":     name,
 			},
 		})
 		if err != nil {
@@ -89,7 +90,8 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			Driver: "local",
 			Name:   name,
 			Labels: map[string]string{
-				"com.craftcms.nitro.volume": name,
+				"com.craftcms.nitro.environment": name,
+				"com.craftcms.nitro.volume":      name,
 			},
 		})
 		if err != nil {
