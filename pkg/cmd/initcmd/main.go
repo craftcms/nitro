@@ -3,8 +3,9 @@ package initcmd
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/pkg/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/pkg/client"
 )
 
 // InitCommand is the command for creating new development environments
