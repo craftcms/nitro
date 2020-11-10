@@ -30,9 +30,17 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 	fmt.Println("Listing containers for", name)
 
 	// list each container for for the environment
-	for _, container := range containers {
+	for _, c := range containers {
+		var containerType string
+		if c.Labels["com.craftcms.nitro.host"] != "" {
+			containerType = "web"
+		}
+		if c.Labels["com.craftcms.nitro.proxy"] != "" {
+			containerType = "proxy"
+		}
+
 		fmt.Println(
-			fmt.Sprintf("  ==> container: %q \ttype: web\t \tid: %s", strings.TrimLeft(container.Names[0], "/"), container.ID),
+			fmt.Sprintf("  ==> \t%q \ttype: %s \tmounts: %d \tid: %s", strings.TrimLeft(c.Names[0], "/"), containerType, len(c.Mounts), c.ID),
 		)
 	}
 
