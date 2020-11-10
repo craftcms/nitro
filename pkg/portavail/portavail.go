@@ -15,7 +15,7 @@ func Check(ports ...string) error {
 	for _, port := range ports {
 		lis, err := net.Listen("tcp", "localhost:"+port)
 		if err != nil {
-			return fmt.Errorf("It appears port %q, is already in use", port)
+			return fmt.Errorf("It appears port %s, is already in use", port)
 		}
 
 		if err := lis.Close(); err != nil {

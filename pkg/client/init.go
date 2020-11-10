@@ -151,7 +151,8 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 				"5000/tcp": struct{}{},
 			},
 			Labels: map[string]string{
-				"com.craftcms.nitro.proxy": name,
+				"com.craftcms.nitro.environment": name,
+				"com.craftcms.nitro.proxy":       name,
 			},
 		},
 		&container.HostConfig{
