@@ -47,3 +47,20 @@ func TestRestart(t *testing.T) {
 		)
 	}
 }
+
+func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
+	// Arrange
+	environmentName := "testing-restart"
+	mock := newMockDockerClient(nil, nil, nil)
+	cli := Client{docker: mock}
+
+	// Act
+	if err := cli.Restart(context.Background(), environmentName, []string{}); err != nil {
+		t.Error(err)
+	}
+
+	// Assert
+	if len(mock.containerRestartRequests) != 0 {
+		t.Errorf("expected the number of restart requests to be zero, got %d instead", len(mock.containerRestartRequests))
+	}
+}
