@@ -12,6 +12,8 @@ var RestartCommand = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart an environment",
 	RunE:  restartMain,
+	Example: `  # restart containers for the default environment
+  nitro restart`,
 }
 
 func restartMain(cmd *cobra.Command, args []string) error {

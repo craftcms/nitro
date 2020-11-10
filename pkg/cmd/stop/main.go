@@ -12,6 +12,8 @@ var StopCommand = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop environment",
 	RunE:  stopMain,
+	Example: `  # stop containers for the default environment
+  nitro stop`,
 }
 
 func stopMain(cmd *cobra.Command, args []string) error {

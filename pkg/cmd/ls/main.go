@@ -12,6 +12,8 @@ var LSCommand = &cobra.Command{
 	Use:   "ls",
 	Short: "List environment containers",
 	RunE:  lsMain,
+	Example: `  # list all containers for the environment
+  nitro ls`,
 }
 
 func lsMain(cmd *cobra.Command, args []string) error {

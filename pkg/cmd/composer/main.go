@@ -13,8 +13,13 @@ import (
 // ComposerCommand is the command for creating new development environments
 var ComposerCommand = &cobra.Command{
 	Use:   "composer",
-	Short: "Run composer action",
+	Short: "Run composer actions",
 	RunE:  composerMain,
+	Example: `  # run composer install in a current directory
+  nitro composer
+
+  # updating a composer project outside of the current directory
+  nitro composer ./project-dir --version 2 --update`,
 }
 
 func composerMain(cmd *cobra.Command, args []string) error {

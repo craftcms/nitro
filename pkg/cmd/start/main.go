@@ -12,6 +12,8 @@ var StartCommand = &cobra.Command{
 	Use:   "start",
 	Short: "Start an environment",
 	RunE:  start,
+	Example: `  # start containers for the default environment
+  nitro start`,
 }
 
 func start(cmd *cobra.Command, args []string) error {

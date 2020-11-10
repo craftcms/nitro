@@ -13,6 +13,11 @@ var InitCommand = &cobra.Command{
 	Use:   "init",
 	Short: "Create environment",
 	RunE:  initMain,
+	Example: `  # create a new environment with the default name
+  nitro init
+  
+  # create a new environment overriding the default name
+  nitro init --environment my-new-env`,
 }
 
 func initMain(cmd *cobra.Command, args []string) error {
