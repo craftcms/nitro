@@ -17,7 +17,7 @@ local: build
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
-local-v2: build-v2
+v2-local: build-v2
 	mv nitro /usr/local/bin/nitro
 
 dev: scripts api
