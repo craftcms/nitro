@@ -30,15 +30,7 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 
 	// start each environment container
 	for _, c := range containers {
-		var containerType string
-		if c.Labels["com.craftcms.nitro.host"] != "" {
-			containerType = "site"
-		}
-		if c.Labels["com.craftcms.nitro.proxy"] != "" {
-			containerType = "proxy"
-		}
-
-		fmt.Println("  ==> starting container for", containerType)
+		fmt.Println("  ==> starting container for", getContainerName(c))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
@@ -48,4 +40,16 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 	fmt.Println("Development environment for", name, "started")
 
 	return nil
+}
+
+func getContainerName(c types.Container) string {
+	if c.Labels["com.craftcms.nitro.host"] != "" {
+		return "site"
+	}
+
+	if c.Labels["com.craftcms.nitro.proxy"] != "" {
+		return "proxy"
+	}
+
+	return ""
 }

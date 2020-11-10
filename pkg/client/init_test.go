@@ -48,7 +48,6 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	}
 	// set the container create request
 	containerCreateReq := types.ContainerCreateConfig{
-		// TODO(jasonmccallister) get this as a param or CLI version
 		Config: &container.Config{
 			Image: "testing-caddy:latest",
 			ExposedPorts: nat.PortSet{

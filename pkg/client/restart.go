@@ -33,12 +33,11 @@ func (cli *Client) Restart(ctx context.Context, name string, args []string) erro
 	timeout := time.Duration(5000) * time.Millisecond
 
 	// restart each container for the environment
-	for _, container := range containers {
-		// TODO make this more dynamic
-		fmt.Println("  ==> restarting container for", container.Labels["com.craftcms.nitro.host"])
+	for _, c := range containers {
+		fmt.Println("  ==> restarting container for", getContainerName(c))
 
-		if err := cli.docker.ContainerRestart(ctx, container.ID, &timeout); err != nil {
-			return fmt.Errorf("unable to restart container %s: %w", container.Names[0], err)
+		if err := cli.docker.ContainerRestart(ctx, c.ID, &timeout); err != nil {
+			return fmt.Errorf("unable to restart container %s: %w", c.Names[0], err)
 		}
 	}
 
