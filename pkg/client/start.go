@@ -10,24 +10,38 @@ import (
 
 // Start is used to start all containers related to a specific environment
 func (cli *Client) Start(ctx context.Context, name string, args []string) error {
-	fmt.Println("Starting environment for", name)
-
 	// get all the containers using a filter, we only want to start containers which
 	// have the label com.craftcms.nitro.environment=name
-	siteFilters := filters.NewArgs()
-	siteFilters.Add("label", "com.craftcms.nitro.environment="+name)
-	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: siteFilters})
+	filter := filters.NewArgs()
+	filter.Add("label", "com.craftcms.nitro.environment="+name)
+	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
 
-	// syaty each environment container
-	for _, container := range containers {
-		// TODO maket this more dynamic
-		fmt.Println("  ==> starting container for", container.Labels["com.craftcms.nitro.host"])
+	// if there are no containers, were done
+	if len(containers) == 0 {
+		fmt.Println("There are no containers to start for the", name, "environment")
 
-		if err := cli.docker.ContainerStart(ctx, container.ID, types.ContainerStartOptions{}); err != nil {
-			return fmt.Errorf("unable to start container %s: %w", container.Names[0], err)
+		return nil
+	}
+
+	fmt.Println("Starting environment for", name)
+
+	// start each environment container
+	for _, c := range containers {
+		var containerType string
+		if c.Labels["com.craftcms.nitro.host"] != "" {
+			containerType = "site"
+		}
+		if c.Labels["com.craftcms.nitro.proxy"] != "" {
+			containerType = "proxy"
+		}
+
+		fmt.Println("  ==> starting container for", containerType)
+
+		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
 		}
 	}
 

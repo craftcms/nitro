@@ -11,16 +11,23 @@ import (
 
 // Restart is used to restart all containers related to a specific environment
 func (cli *Client) Restart(ctx context.Context, name string, args []string) error {
-	fmt.Println("Restarting containers for environment", name)
-
 	// get all the containers using a filter, we only want to restart containers which
 	// have the label com.craftcms.nitro.environment=name
-	siteFilters := filters.NewArgs()
-	siteFilters.Add("label", "com.craftcms.nitro.environment="+name)
-	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: siteFilters})
+	filter := filters.NewArgs()
+	filter.Add("label", "com.craftcms.nitro.environment="+name)
+	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
+
+	// if there are no containers, were done
+	if len(containers) == 0 {
+		fmt.Println("There are no container for the", name, "environment")
+
+		return nil
+	}
+
+	fmt.Println("Restarting containers for environment", name)
 
 	// set a timeout, consider making this a flag
 	timeout := time.Duration(5000) * time.Millisecond

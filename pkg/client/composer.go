@@ -14,7 +14,7 @@ import (
 func (cli *Client) Composer(ctx context.Context, dir, version, action string) error {
 	image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
-	// pull container
+	// pull the container
 	fmt.Println("Pulling composer image")
 	_, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {

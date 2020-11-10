@@ -9,5 +9,8 @@ import (
 // is it a destructive action and will prompt a user for verification and perform a database
 // backup before removing the resources.
 func (cli *Client) Destroy(ctx context.Context, name string, args []string) error {
+
+	// if there are no containers, were done
+
 	return fmt.Errorf("not yet implemented")
 }
