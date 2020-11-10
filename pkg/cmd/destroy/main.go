@@ -14,6 +14,11 @@ var DestroyCommand = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy an environment",
 	RunE:  destroy,
+	Example: `  # remove all resources (networks, containers, and volumes) for an environment
+  nitro destroy
+
+  # destroy resources for a specific environment
+  nitro destroy --environment my-testing-environment`,
 }
 
 func destroy(cmd *cobra.Command, args []string) error {
