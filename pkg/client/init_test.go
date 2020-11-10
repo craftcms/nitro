@@ -90,7 +90,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				},
 			},
 		},
-		Name: "testing-init-proxy",
+		Name: "testing-init",
 	}
 	// set the container start request
 	containerStartRequest := types.ContainerStartOptions{}

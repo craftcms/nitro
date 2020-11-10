@@ -108,9 +108,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	//	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
 	//}
 
-	// create a filter for the nitro-proxy
+	// create a filter for the nitro proxy
 	pf := filters.NewArgs()
-	pf.Add("name", "nitro-proxy")
+	pf.Add("label", "com.craftcms.nitro.proxy="+name)
 
 	// check if there is an existing container for the nitro-proxy
 	containerID, err := cli.findOrCreateProxy(ctx, name, networkID, pf)
@@ -119,8 +119,8 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	}
 
 	// start the container
-	if err := cli.startContainer(ctx, containerID, "nitro-proxy"); err != nil {
-		return fmt.Errorf("unable to start the nitro-proxy container, %w", err)
+	if err := cli.startContainer(ctx, containerID, name); err != nil {
+		return fmt.Errorf("unable to start the nitro proxy container, %w", err)
 	}
 
 	return nil
@@ -188,7 +188,7 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 				},
 			},
 		},
-		fmt.Sprintf("%s-proxy", name),
+		name,
 	)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the container\n%w", err)
