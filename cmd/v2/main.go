@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/cmd/composer"
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
 	"github.com/craftcms/nitro/pkg/cmd/initcmd"
 	"github.com/craftcms/nitro/pkg/cmd/ls"
@@ -39,6 +40,7 @@ func init() {
 		destroy.DestroyCommand,
 		restart.RestartCommand,
 		ls.LSCommand,
+		composer.ComposerCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
