@@ -3,12 +3,14 @@ package main
 import (
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
 	"github.com/craftcms/nitro/pkg/cmd/initcmd"
+	"github.com/craftcms/nitro/pkg/cmd/ls"
 	"github.com/craftcms/nitro/pkg/cmd/restart"
 	"github.com/craftcms/nitro/pkg/cmd/start"
 	"github.com/craftcms/nitro/pkg/cmd/stop"
-	"github.com/spf13/cobra"
 )
 
 var rootCommand = &cobra.Command{
@@ -26,8 +28,8 @@ func rootMain(command *cobra.Command, _ []string) error {
 func init() {
 	flags := rootCommand.PersistentFlags()
 
-	// set global flags
-	flags.String("environment", "nitro-dev", "The name of the environment")
+	// set any global flags
+	flags.StringP("environment", "e", "nitro-dev", "The environment")
 
 	// register all of the commands
 	commands := []*cobra.Command{
@@ -36,13 +38,14 @@ func init() {
 		start.StartCommand,
 		destroy.DestroyCommand,
 		restart.RestartCommand,
+		ls.LSCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
 }
 
 func main() {
-	// Execute the root command.
+	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
 		os.Exit(1)
 	}
