@@ -91,7 +91,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				},
 			},
 		},
-		Name: "nitro-proxy",
+		Name: "testing-init-proxy",
 	}
 	// set the container start request
 	containerStartRequest := types.ContainerStartOptions{}

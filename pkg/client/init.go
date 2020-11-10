@@ -134,15 +134,15 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 
 	for _, c := range containers {
 		for _, n := range c.Names {
-			if n == "nitro-proxy" || n == "/nitro-proxy" {
-				fmt.Println("  ==> skipping container creation for nitro-proxy")
+			if n == name || n == "/"+name {
+				fmt.Println("  ==> skipping container creation for the proxy")
 
 				return c.ID, nil
 			}
 		}
 	}
 
-	fmt.Println("  ==> creating container for nitro-proxy")
+	fmt.Println("  ==> creating container for the proxy")
 
 	resp, err := cli.docker.ContainerCreate(ctx,
 		&container.Config{
@@ -188,7 +188,7 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 				},
 			},
 		},
-		"nitro-proxy",
+		fmt.Sprintf("%s-proxy", name),
 	)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the container\n%w", err)

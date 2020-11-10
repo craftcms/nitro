@@ -61,6 +61,7 @@ func composerMain(cmd *cobra.Command, args []string) error {
 func init() {
 	flags := ComposerCommand.Flags()
 
+	// set the flags for this command
 	flags.BoolP("update", "u", false, "Run composer update instead of install")
 	flags.StringP("version", "v", "2", "The composer version to use")
 }
