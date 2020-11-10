@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -29,11 +30,12 @@ type mockDockerClient struct {
 	// container related resources for mocking calls to the client
 	// the fields ending in *Response are designed to capture the
 	// requests sent to the client API.
-	containerID             string
-	containers              []types.Container
-	containerCreateRequest  types.ContainerCreateConfig
-	containerCreateResponse container.ContainerCreateCreatedBody
-	containerStartRequest   types.ContainerStartOptions
+	containerID              string
+	containers               []types.Container
+	containerCreateRequest   types.ContainerCreateConfig
+	containerCreateResponse  container.ContainerCreateCreatedBody
+	containerStartRequest    types.ContainerStartOptions
+	containerRestartRequests []string
 
 	// network related resources for mocking the calls to the client
 	// for network specific resources
@@ -103,5 +105,10 @@ func (c *mockDockerClient) ContainerStart(ctx context.Context, container string,
 	c.containerID = container
 	c.containerStartRequest = options
 
+	return c.mockError
+}
+
+func (c *mockDockerClient) ContainerRestart(ctx context.Context, container string, timeout *time.Duration) error {
+	c.containerRestartRequests = append(c.containerRestartRequests, container)
 	return c.mockError
 }
