@@ -1,4 +1,3 @@
-php: 7.4
 blackfire:
   client: 123456
   secret: 123456
@@ -16,5 +15,12 @@ sites:
   - hostname: example.nitro
     aliases:
       - test.example.nitro
+      - local.exampleproject.com
     webroot: ~/dev/craft-example/web
+    php: 7.2
+  - hostname: plugins.nitro
+    aliases:
+      - plugins.test
+      - local.plugins.craftcms.com
+    webroot: ~/dev/craftnet/web
     php: 7.2
