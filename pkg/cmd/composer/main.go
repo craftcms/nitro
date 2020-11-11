@@ -43,16 +43,35 @@ func composerMain(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// create the new client
-	nitro, err := client.NewClient()
-	if err != nil {
-		return fmt.Errorf("unable to create a client for docker, %w", err)
-	}
-
 	// determine the default action
 	action := "install"
 	if cmd.Flag("update").Value.String() == "true" {
 		action = "update"
+	}
+
+	// get the full file path
+	var composerPath, composerFile string
+	switch action {
+	case "install":
+		composerFile = "composer.json"
+		composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.json")
+	default:
+		composerFile = "composer.json"
+		composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.lock")
+	}
+
+	// make sure the file exists
+	fmt.Println("  ==> checking for", composerFile, "file at:")
+	fmt.Println("  ==>", composerPath)
+	_, err := os.Stat(composerPath)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("unable to located the composer file")
+	}
+
+	// create the new client
+	nitro, err := client.NewClient()
+	if err != nil {
+		return fmt.Errorf("unable to create a client for docker, %w", err)
 	}
 
 	return nitro.Composer(cmd.Context(), path, cmd.Flag("version").Value.String(), action)
