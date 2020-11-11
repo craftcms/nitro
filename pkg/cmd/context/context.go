@@ -8,9 +8,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+// ContextCommand is used to show contextual information
+// based on the nitro environment such as sites, databases,
+// and connection information
 var ContextCommand = &cobra.Command{
 	Use:   "context",
-	Short: "View the environment information",
+	Short: "View environment information",
 	RunE:  contextMain,
 	Example: `  # view all resources for the environment
   nitro context`,
