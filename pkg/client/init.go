@@ -103,10 +103,10 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// pull the latest image from docker hub for the nitro-proxy
 	// TODO(jasonmccallister) replace with the nitro CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
-	//_, err = cli.docker.ImagePull(ctx, "testing-caddy:latest", types.ImagePullOptions{})
-	//if err != nil {
-	//	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
-	//}
+	// _, err = cli.docker.ImagePull(ctx, "nitro-proxy:develop", types.ImagePullOptions{})
+	// if err != nil {
+	// 	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
+	// }
 
 	// create a filter for the nitro proxy
 	pf := filters.NewArgs()
@@ -146,7 +146,8 @@ func (cli *Client) findOrCreateProxy(ctx context.Context, name, networkID string
 
 	resp, err := cli.docker.ContainerCreate(ctx,
 		&container.Config{
-			Image: "testing-caddy:latest",
+			// TODO(jasonmccallister) make this dynamic based on the nitro CLI and image
+			Image: "nitro-proxy:develop",
 			ExposedPorts: nat.PortSet{
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
