@@ -3,8 +3,10 @@ package apply
 import (
 	"fmt"
 
+	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/pkg/client"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var ApplyCommand = &cobra.Command{
@@ -17,6 +19,10 @@ var ApplyCommand = &cobra.Command{
 
 func applyMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
+	cfg := config.Config{}
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return fmt.Errorf("unable to read the config file, %w", err)
+	}
 
 	// create the new client
 	nitro, err := client.NewClient()
@@ -24,5 +30,5 @@ func applyMain(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to create a client for docker, %w", err)
 	}
 
-	return nitro.Apply(cmd.Context(), env)
+	return nitro.Apply(cmd.Context(), env, cfg)
 }

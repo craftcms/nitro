@@ -3,11 +3,34 @@
     admin localhost:2019
 }
 
-example.nitro plugins.nitro {
+example.nitro {
     rewrite * index.php?{query}&p={path}
 
-    # TODO change this manually to get the ip address
     php_fastcgi * example.nitro:9000 {
+            root /app/web
+            index index.php
+
+            env SCRIPT_NAME index.php
+            env SCRIPT_FILENAME /app/web/index.php
+    }
+}
+
+plugins.nitro {
+    rewrite * index.php?{query}&p={path}
+
+    php_fastcgi * plugins.nitro:9000 {
+            root /app/web
+            index index.php
+
+            env SCRIPT_NAME index.php
+            env SCRIPT_FILENAME /app/web/index.php
+    }
+}
+
+extendingcaddy.nitro {
+    rewrite * index.php?{query}&p={path}
+
+    php_fastcgi * extendingcaddy.nitro:9000 {
             root /app/web
             index index.php
 

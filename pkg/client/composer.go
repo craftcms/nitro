@@ -49,7 +49,8 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 				Source: dir,
 				Target: "/app",
 			},
-			}},
+			},
+		},
 		nil,
 		"")
 	if err != nil {
