@@ -9,6 +9,7 @@ import (
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
 	"github.com/craftcms/nitro/pkg/cmd/initcmd"
 	"github.com/craftcms/nitro/pkg/cmd/ls"
+	"github.com/craftcms/nitro/pkg/cmd/npm"
 	"github.com/craftcms/nitro/pkg/cmd/restart"
 	"github.com/craftcms/nitro/pkg/cmd/start"
 	"github.com/craftcms/nitro/pkg/cmd/stop"
@@ -41,6 +42,7 @@ func init() {
 		restart.RestartCommand,
 		ls.LSCommand,
 		composer.ComposerCommand,
+		npm.NPMCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
