@@ -11,12 +11,15 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 )
 
+// Node is used to take a direction and node version to perform actions like
+// npm install or update on a directory. The version flag defaults to the LTS
+// but allows users to pass in any version, that has a tag on docker hub.
 func (cli *Client) Node(ctx context.Context, dir, version, action string) error {
-	image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
+	image := fmt.Sprintf("docker.io/library/%s:%s", "node", version)
 
 	// pull the container
 	fmt.Println("Pulling node image for version", version)
-	_, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{})
+	_, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 	if err != nil {
 		return fmt.Errorf("unable to pull the docker image, %w", err)
 	}
