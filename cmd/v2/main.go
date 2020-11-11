@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/cmd/apply"
 	"github.com/craftcms/nitro/pkg/cmd/complete"
 	"github.com/craftcms/nitro/pkg/cmd/composer"
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
@@ -45,6 +46,7 @@ func init() {
 		composer.ComposerCommand,
 		npm.NPMCommand,
 		complete.CompleteCommand,
+		apply.ApplyCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
