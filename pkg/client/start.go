@@ -14,7 +14,7 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 	// have the label com.craftcms.nitro.environment=name
 	filter := filters.NewArgs()
 	filter.Add("label", "com.craftcms.nitro.environment="+name)
-	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
+	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
