@@ -14,6 +14,13 @@ func TestPHPVersionFlag(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "8.0",
+			args: args{
+				"8.0",
+			},
+			wantErr: false,
+		},
+		{
 			name: "7.4",
 			args: args{
 				"7.4",

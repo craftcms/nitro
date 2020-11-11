@@ -48,9 +48,11 @@ func PHPVersion(v string) error {
 		return nil
 	case "7.2":
 		return nil
+	case "8.0":
+		return nil
 	}
 
-	return errors.New(fmt.Sprintf("the PHP version %q is not valid", v))
+	return fmt.Errorf("the PHP version %q is not valid", v)
 }
 
 func Memory(v string) error {
