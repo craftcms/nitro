@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/docker/docker/api/types"
@@ -20,9 +21,12 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 
 	// pull the container
 	fmt.Println("Pulling composer image for version", version)
-	_, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{})
+	rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 	if err != nil {
 		return fmt.Errorf("unable to pull the docker image, %w", err)
+	}
+	if _, err := ioutil.ReadAll(rdr); err != nil {
+		return fmt.Errorf("unable to read the output from pulling the image, %w", err)
 	}
 
 	// get the version from the flag, default to 1

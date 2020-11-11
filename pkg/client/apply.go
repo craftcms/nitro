@@ -57,9 +57,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		filter.Add("label", "com.craftcms.nitro.site="+site.Hostname)
 
 		// TODO(jasonmccallister) make the php version dynamic based on the site
-		image := fmt.Sprintf("craftcms/php-fpm:%s-dev", "7.4")
+		image := fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", "7.4")
 
-		// cli.docker.ContainerCreate(ctx)
 		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{
 			All:     true,
 			Filters: filter,
@@ -85,6 +84,10 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			absPath, err := filepath.Abs(sourcePath)
 			if err != nil {
 				return fmt.Errorf("unable to get the absolute path to the site, %w", err)
+			}
+
+			if _, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false}); err != nil {
+				return fmt.Errorf("unable to pull the image, %w", err)
 			}
 
 			// create the container
