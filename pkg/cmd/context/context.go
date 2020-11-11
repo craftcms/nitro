@@ -29,6 +29,7 @@ func contextMain(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("The follow sites are configured for", env)
 	for _, site := range cfg.Sites {
+		// TODO(jasonmccallister) get the container information? Is it needed?
 		fmt.Println("  ==> hostname: ", site.Hostname)
 		fmt.Println("  ==> webroot: ", site.Webroot)
 		if len(site.Aliases) > 0 {
