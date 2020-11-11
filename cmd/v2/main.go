@@ -52,9 +52,8 @@ func init() {
 		fmt.Println(fmt.Errorf("error loading the config file, %w", err))
 	}
 
-	flags := rootCommand.PersistentFlags()
-
 	// set any global flags
+	flags := rootCommand.PersistentFlags()
 	flags.StringP("environment", "e", def, "The environment")
 
 	// register all of the commands
