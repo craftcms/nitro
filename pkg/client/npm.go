@@ -8,6 +8,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/pkg/stdcopy"
 )
@@ -18,14 +19,29 @@ import (
 func (cli *Client) Node(ctx context.Context, dir, version, action string) error {
 	image := fmt.Sprintf("docker.io/library/%s:%s", "node", version)
 
-	// pull the container
-	fmt.Println("Pulling node image for version", version)
-	rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+	filters := filters.NewArgs()
+	filters.Add("reference", image)
+
+	// look for the image
+	images, err := cli.docker.ImageList(ctx, types.ImageListOptions{
+		Filters: filters,
+	})
 	if err != nil {
-		return fmt.Errorf("unable to pull the docker image, %w", err)
+		return fmt.Errorf("unable to get a list of images, %w", err)
 	}
-	if _, err := ioutil.ReadAll(rdr); err != nil {
-		return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+
+	// if we don't have the image, pull it
+	if len(images) == 0 {
+		fmt.Println("Pulling node image for version", version)
+
+		rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+		if err != nil {
+			return fmt.Errorf("unable to pull the docker image, %w", err)
+		}
+
+		if _, err := ioutil.ReadAll(rdr); err != nil {
+			return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+		}
 	}
 
 	var cmd []string
