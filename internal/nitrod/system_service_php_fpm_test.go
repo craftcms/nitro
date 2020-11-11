@@ -27,6 +27,20 @@ func TestNitrodServer_PhpFpmService(t *testing.T) {
 		wantArgs    []string
 	}{
 		{
+			name: "can restart php-fpm for version 8.0",
+			fields: fields{
+				logger: log.New(ioutil.Discard, "testing", 0),
+			},
+			args: args{
+				ctx:     context.TODO(),
+				request: &PhpFpmServiceRequest{Version: "8.0", Action: ServiceAction_RESTART},
+			},
+			want:        &ServiceResponse{Message: "Successfully restarted php-fpm 8.0"},
+			wantErr:     false,
+			wantCommand: "service",
+			wantArgs:    []string{"php8.0-fpm", "restart"},
+		},
+		{
 			name: "can restart php-fpm for version 7.4",
 			fields: fields{
 				logger: log.New(ioutil.Discard, "testing", 0),
