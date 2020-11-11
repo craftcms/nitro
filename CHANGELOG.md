@@ -2,9 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- Nitro now creates HTTPS sites by default.
+- You can now set a PHP version per site.
+- `xdebug on` and `xdebug off` apply to only one site.
+- Added the `nitro trust` command to import and trust the certificates used for sites.
+- Added the `nitro composer` with the `--version` flag to install or update projects without composer installed locally.
+- Added the `nitro npm` with the `--version` flag to install or update projects without node/npm installed locally.
+- Added the `nitro ls` command to show all the running containers.
+
 ### Changed
 
 - Multipass is no longer a dependency. Docker is now the only dependency.
+- Nitro will now check for port collisions during `init` and when adding database engines
 
 ## 1.1.0 - 2020-10-06
 
