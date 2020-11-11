@@ -17,6 +17,19 @@ func TestInstallCorePackages(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "can get commands to install PHP 8.0",
+			args: args{
+				name: "somename",
+				php:  "8.0",
+			},
+			want: &Action{
+				Type:       "exec",
+				UseSyscall: false,
+				Args:       []string{"exec", "somename", "--", "sudo", "apt-get", "install", "-y", "php8.0", "php8.0-mbstring", "php8.0-cli", "php8.0-curl", "php8.0-fpm", "php8.0-gd", "php8.0-intl", "php8.0-mysql", "php8.0-pgsql", "php8.0-zip", "php8.0-xml", "php8.0-soap", "php8.0-bcmath", "php8.0-gmp", "php-xdebug", "php-imagick", "blackfire-agent", "blackfire-php"},
+			},
+			wantErr: false,
+		},
+		{
 			name: "can get commands to install PHP 7.4",
 			args: args{
 				name: "somename",

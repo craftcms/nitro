@@ -10,6 +10,7 @@ const (
 	php72Packages = "php7.2 php7.2-mbstring php7.2-cli php7.2-curl php7.2-fpm php7.2-gd php7.2-intl php7.2-json php7.2-mysql php7.2-pgsql php7.2-zip php7.2-xml php7.2-soap php7.2-bcmath php7.2-gmp php-xdebug php-imagick blackfire-agent blackfire-php"
 	php73Packages = "php7.3 php7.3-mbstring php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-intl php7.3-json php7.3-mysql php7.3-pgsql php7.3-zip php7.3-xml php7.3-soap php7.3-bcmath php7.3-gmp php-xdebug php-imagick blackfire-agent blackfire-php"
 	php74Packages = "php7.4 php7.4-mbstring php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-intl php7.4-json php7.4-mysql php7.4-pgsql php7.4-zip php7.4-xml php7.4-soap php7.4-bcmath php7.4-gmp php-xdebug php-imagick blackfire-agent blackfire-php"
+	php80Packages = "php8.0 php8.0-mbstring php8.0-cli php8.0-curl php8.0-fpm php8.0-gd php8.0-intl php8.0-mysql php8.0-pgsql php8.0-zip php8.0-xml php8.0-soap php8.0-bcmath php8.0-gmp php-xdebug php-imagick blackfire-agent blackfire-php"
 )
 
 // InstallPackages is used to install the core PHP packages needed by the
@@ -29,6 +30,8 @@ func InstallPackages(name, php string) (*Action, error) {
 		args = append(args, strings.Split(php72Packages, " ")...)
 	case "7.3":
 		args = append(args, strings.Split(php73Packages, " ")...)
+	case "8.0":
+		args = append(args, strings.Split(php80Packages, " ")...)
 	default:
 		args = append(args, strings.Split(php74Packages, " ")...)
 	}
