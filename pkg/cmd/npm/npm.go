@@ -14,6 +14,9 @@ var NPMCommand = &cobra.Command{
 	Use:   "npm",
 	Short: "Run npm actions",
 	RunE:  npmMain,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveFilterDirs
+	},
 	Example: `  # run node install in a current directory
   nitro npm
 

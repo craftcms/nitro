@@ -15,6 +15,9 @@ var ComposerCommand = &cobra.Command{
 	Use:   "composer",
 	Short: "Run composer actions",
 	RunE:  composerMain,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveFilterDirs
+	},
 	Example: `  # run composer install in a current directory
   nitro composer
 
