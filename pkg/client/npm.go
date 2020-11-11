@@ -71,6 +71,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		return fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	// copy the stream to stdout
 	if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, stream.Reader); err != nil {
 		return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 	}
