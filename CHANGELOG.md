@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 1.1.1 - 2020-11-11
 
 ### Added
 - Added support for PHP 8.0.
