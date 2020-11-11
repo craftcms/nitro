@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package nitrod;
+
+option go_package = "pkg/api";
+
+service Nitro {
+    rpc Ping(PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {}
+
+message PingResponse {
+    string pong = 1;
+}
