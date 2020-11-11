@@ -57,7 +57,6 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 	}
 
 	fmt.Println("  ==> running composer", action, "this may take a moment")
-
 	stream, err := cli.docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdout: true,
@@ -78,20 +77,15 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 	}
 
-	// if _, err := cli.docker.ContainerWait(ctx, resp.ID); err != nil {
-	// 	return fmt.Errorf("error while waiting for the container, %w", err)
-	// }
-
-	fmt.Println("Composer", action, "ran successfully")
-
-	fmt.Println("  ==> removing temporary container")
+	fmt.Println("Composer", action, "ran successfully!")
 
 	// remove the temp container
+	fmt.Println("  ==> removing temporary container")
 	if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 		return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
 	}
 
-	fmt.Println("Cleanup completed")
+	fmt.Println("Cleanup completed!")
 
 	return nil
 }

@@ -50,22 +50,22 @@ func composerMain(cmd *cobra.Command, args []string) error {
 	}
 
 	// get the full file path
-	var composerPath, composerFile string
+	composerFile := "composer.json"
+	var composerPath string
 	switch action {
 	case "install":
-		composerFile = "composer.json"
 		composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.json")
 	default:
-		composerFile = "composer.json"
+		composerFile = "composer.lock"
 		composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.lock")
 	}
 
 	// make sure the file exists
-	fmt.Println("  ==> checking for", composerFile, "file at:")
+	fmt.Println("Checking for", composerFile, "file in:")
 	fmt.Println("  ==>", composerPath)
 	_, err := os.Stat(composerPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("unable to located the composer file")
+		return fmt.Errorf("unable to locate a composer file at %s", path)
 	}
 
 	// create the new client
