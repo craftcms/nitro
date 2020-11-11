@@ -33,10 +33,29 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
+	home, _ := homedir.Dir()
+
+	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
+	viper.SetConfigType("yaml")
+
+	// set the default machine name
+	def := "nitro-dev"
+	if os.Getenv("NITRO_DEFAULT_MACHINE") != "" {
+		def = os.Getenv("NITRO_DEFAULT_MACHINE")
+	}
+
+	// set the config file
+	viper.SetConfigName(def)
+
+	// read the config
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println(fmt.Errorf("error loading the config file, %w", err))
+	}
+
 	flags := rootCommand.PersistentFlags()
 
 	// set any global flags
-	flags.StringP("environment", "e", "nitro-dev", "The environment")
+	flags.StringP("environment", "e", def, "The environment")
 
 	// register all of the commands
 	commands := []*cobra.Command{
@@ -56,32 +75,8 @@ func init() {
 }
 
 func main() {
-	// load the config
-	loadConfig()
-
 	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
 		os.Exit(1)
-	}
-}
-
-func loadConfig() {
-	home, _ := homedir.Dir()
-
-	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
-	viper.SetConfigType("yaml")
-
-	// set the default machine name
-	def := "nitro-dev"
-	if os.Getenv("NITRO_DEFAULT_MACHINE") != "" {
-		def = os.Getenv("NITRO_DEFAULT_MACHINE")
-	}
-
-	// set the config file
-	viper.SetConfigName(def)
-
-	// read the config
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(fmt.Errorf("error loading the config file, %w", err))
 	}
 }
