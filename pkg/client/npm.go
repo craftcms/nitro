@@ -1,9 +1,9 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/docker/docker/api/types"
@@ -39,7 +39,8 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 			return fmt.Errorf("unable to pull the docker image, %w", err)
 		}
 
-		if _, err := ioutil.ReadAll(rdr); err != nil {
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
 			return fmt.Errorf("unable to read the output from pulling the image, %w", err)
 		}
 	}
