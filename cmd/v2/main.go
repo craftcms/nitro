@@ -13,6 +13,7 @@ import (
 	"github.com/craftcms/nitro/pkg/cmd/composer"
 	"github.com/craftcms/nitro/pkg/cmd/context"
 	"github.com/craftcms/nitro/pkg/cmd/destroy"
+	"github.com/craftcms/nitro/pkg/cmd/exec"
 	"github.com/craftcms/nitro/pkg/cmd/initcmd"
 	"github.com/craftcms/nitro/pkg/cmd/ls"
 	"github.com/craftcms/nitro/pkg/cmd/npm"
@@ -70,6 +71,7 @@ func init() {
 		complete.CompleteCommand,
 		apply.ApplyCommand,
 		context.ContextCommand,
+		exec.ExecCommand,
 	}
 
 	rootCommand.AddCommand(commands...)

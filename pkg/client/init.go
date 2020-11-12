@@ -7,7 +7,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
@@ -74,11 +73,11 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// since the filter is fuzzy, do an exact match (e.g. filtering for
 	// `nitro-dev` will also return `nitro-dev-host`
 	var skipVolume bool
-	var volumeName string
+	var volume types.Volume
 	for _, volume := range volumes.Volumes {
 		if volume.Name == name {
 			skipVolume = true
-			volumeName = volume.Name
+			volume = volume
 		}
 	}
 
@@ -101,7 +100,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			return fmt.Errorf("unable to create the network, %w", err)
 		}
 
-		volumeName = resp.Name
+		volume = resp
 
 		fmt.Println("  ==> volume created")
 	}
@@ -154,13 +153,15 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			},
 			&container.HostConfig{
 				NetworkMode: "default",
-				Mounts: []mount.Mount{
-					{
-						Type:   "bind",
-						Source: volumeName,
-						Target: "/data",
-					},
-				},
+				// TODO(jasonmccallister) learn how to mount a volume into a container
+				VolumesFrom: []string{"nitro-dev"},
+				// Mounts: []mount.Mount{
+				// 	{
+				// 		Type:   "bind",
+				// 		Source: volume.Mountpoint,
+				// 		Target: "/data",
+				// 	},
+				// },
 				// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					"80/tcp": {
