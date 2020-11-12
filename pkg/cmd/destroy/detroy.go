@@ -24,7 +24,7 @@ var DestroyCommand = &cobra.Command{
 func destroy(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
 
-	fmt.Println("Are you sure? This will remove all containers, volumes, and networks.")
+	fmt.Print("Are you sure? this will remove all containers, volumes, and networks (Y/n) ")
 
 	// prompt the user for confirmation
 	var response string
@@ -42,7 +42,8 @@ func destroy(cmd *cobra.Command, args []string) error {
 	}
 
 	if !confirm {
-		fmt.Println("Skipping destroy, all resources related to", env, "will remain")
+		fmt.Println("Skipping destroy action")
+		fmt.Println("  ==> all resources related to", env, "will remain")
 
 		return nil
 	}
