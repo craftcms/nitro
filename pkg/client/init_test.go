@@ -7,6 +7,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
@@ -56,12 +57,22 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				"5000/tcp": struct{}{},
 			},
 			Labels: map[string]string{
+				"com.craftcms.nitro.type":        "proxy",
 				"com.craftcms.nitro.environment": "testing-init",
 				"com.craftcms.nitro.proxy":       "testing-init",
 			},
 		},
 		HostConfig: &container.HostConfig{
 			NetworkMode: "default",
+			Mounts: []mount.Mount{
+				{
+					Type: "bind",
+					// TODO(jasonmccallister) fix the mock to return, or filter, volumes
+					// when asking for volumes
+					Source: "",
+					Target: "/data",
+				},
+			},
 			PortBindings: map[nat.Port][]nat.PortBinding{
 				"80/tcp": {
 					{
