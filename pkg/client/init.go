@@ -119,7 +119,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// check if there is an existing container for the nitro-proxy
 	var containerID string
-	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
+	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: pf, All: true})
 	if err != nil {
 		return fmt.Errorf("unable to list the containers\n%w", err)
 	}
