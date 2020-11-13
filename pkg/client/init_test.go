@@ -134,11 +134,35 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 
 	// make sure the container create matches the expected
 	if !reflect.DeepEqual(mock.containerCreateRequest, containerCreateReq) {
-		t.Errorf(
-			"expected container create request to match\ngot:\n%v\nwant:\n%v",
-			mock.containerCreateRequest,
-			containerCreateReq,
-		)
+		// t.Errorf(
+		// 	"expected container create request to match\ngot:\n%v\nwant:\n%v",
+		// 	mock.containerCreateRequest,
+		// 	containerCreateReq,
+		// )
+
+		if !reflect.DeepEqual(mock.containerCreateRequest.Config, containerCreateReq.Config) {
+			t.Errorf(
+				"expected container create request config to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequest.Config,
+				containerCreateReq.Config,
+			)
+		}
+
+		if !reflect.DeepEqual(mock.containerCreateRequest.HostConfig, containerCreateReq.HostConfig) {
+			t.Errorf(
+				"expected container create request host config to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequest.HostConfig,
+				containerCreateReq.HostConfig,
+			)
+		}
+
+		if !reflect.DeepEqual(mock.containerCreateRequest.NetworkingConfig, containerCreateReq.NetworkingConfig) {
+			t.Errorf(
+				"expected container create request networking to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequest.NetworkingConfig,
+				containerCreateReq.NetworkingConfig,
+			)
+		}
 	}
 
 	// make sure the container start matches the expected

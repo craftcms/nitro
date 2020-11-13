@@ -18,7 +18,7 @@ import (
 // instead of overwriting the containers. Init should only be used once to setup the
 // development environment, which is why we safeguard the resources.
 func (cli *Client) Init(ctx context.Context, name string, args []string) error {
-	fmt.Println("Running pre-checks on", name, "development environment...")
+	cli.out.Info("Running pre-checks on", name, "development environment...")
 
 	// create filters for the development environment
 	filter := filters.NewArgs()
@@ -43,9 +43,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// create the network needs to be created
 	if skipNetwork {
-		fmt.Println("  ==> skipping network")
+		cli.out.Info("  ==> skipping network")
 	} else {
-		fmt.Println("  ==> creating network")
+		cli.out.Info("  ==> creating network")
 
 		resp, err := cli.docker.NetworkCreate(ctx, name, types.NetworkCreate{
 			Driver:     "bridge",
@@ -62,7 +62,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		// set the newly created network
 		networkID = resp.ID
 
-		fmt.Println("  ==> network created for", name)
+		cli.out.Info("  ==> network created for", name)
 	}
 
 	// check if the volume needs to be created
@@ -84,9 +84,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// check if the volume needs to be created
 	if skipVolume {
-		fmt.Println("  ==> skipping volume")
+		cli.out.Info("  ==> skipping volume")
 	} else {
-		fmt.Println("  ==> creating volume")
+		cli.out.Info("  ==> creating volume")
 
 		// create a volume with the same name of the machine
 		resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
@@ -103,7 +103,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 		volume = &resp
 
-		fmt.Println("  ==> volume created for", name)
+		cli.out.Info("  ==> volume created for", name)
 	}
 
 	// pull the latest image from docker hub for the nitro-proxy
@@ -136,7 +136,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// if we do not have a container id, it needs to be create
 	if containerID == "" {
-		fmt.Println("  ==> creating container for the proxy")
+		cli.out.Info("  ==> creating container for the proxy")
 		resp, err := cli.docker.ContainerCreate(ctx,
 			&container.Config{
 				// TODO(jasonmccallister) make this dynamic based on the nitro CLI and image
@@ -200,15 +200,13 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	}
 
 	// start the container for the proxy
-	fmt.Println("  ==> starting proxy container")
+	cli.out.Info("  ==> starting proxy container")
 
 	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
 
-	// TODO(jasonmccallister) start all container related to the environment
-
-	fmt.Println("Development environment for", name, "started")
+	cli.out.Info("Development environment for", name, "started")
 
 	return nil
 }

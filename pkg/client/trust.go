@@ -3,6 +3,9 @@ package client
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"runtime"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -28,12 +31,39 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 
 	// get the contents of the certificate from the container
+	cli.out.Info("Retreiving CA from nitro proxy")
 	content, err := cli.Exec(ctx, containers[0].ID, []string{"less", "/data/caddy/pki/authorities/local/root.crt"})
 	if err != nil {
 		return fmt.Errorf("unable to retreive the certificate from the proxy, %w", err)
 	}
 
-	fmt.Print(string(content))
+	// remove special characters from the output
+	var stop int
+	for i, s := range content {
+		if s != 0 && s != 1 {
+			stop = i + 1
+			break
+		}
+	}
+
+	// create a temp file
+	f, err := ioutil.TempFile(os.TempDir(), "nitro-cert")
+	if err != nil {
+		return fmt.Errorf("unable to create a temporary file, %w", err)
+	}
+
+	// write the certificate to the temporary file
+	if _, err := f.Write(content[stop+1:]); err != nil {
+		return fmt.Errorf("unable to write the certificate to the temporary file, %w", err)
+	}
+	defer f.Close()
+
+	cli.out.Info("  ==> saved certificate to", f.Name())
+
+	if runtime.GOOS == "darwin" {
+		cli.out.Info("To install the certificate, run the following command:")
+		cli.out.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+	}
 
 	return nil
 }

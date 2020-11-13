@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -21,24 +22,24 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		fmt.Println("There are no container running for the", name, "environment")
+		cli.out.Error("There are no containers running for the", name, "environment")
 
 		return nil
 	}
 
-	fmt.Println("Stopping down environment for", name)
+	cli.out.Info("Stopping down environment for", name)
 
 	// stop each environment container
 	for _, c := range containers {
-		n := getContainerName(c)
-		fmt.Println("  ==> stopping container for", n)
+		n := strings.TrimLeft(c.Names[0], "/")
+		cli.out.Info("  ==> stopping container for", n)
 
 		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
 			return fmt.Errorf("unable to stop container %s: %w", n, err)
 		}
 	}
 
-	fmt.Println("Development environment for", name, "shutdown")
+	cli.out.Info("Development environment for", name, "shutdown")
 
 	return nil
 }

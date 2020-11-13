@@ -55,7 +55,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		cmd = []string{"composer", "update", "--ignore-platform-reqs", "--prefer-dist"}
 	}
 
-	fmt.Println("  ==> creating temporary container for composer")
+	cli.out.Info("  ==> creating temporary container for composer")
 
 	// create the temp container
 	resp, err := cli.docker.ContainerCreate(ctx,
@@ -66,7 +66,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{{
-				Type:   "bind",
+				Type:   mount.TypeBind,
 				Source: dir,
 				Target: "/app",
 			},
@@ -78,7 +78,7 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		return fmt.Errorf("unable to create the composer container\n%w", err)
 	}
 
-	fmt.Println("  ==> running composer", action, "this may take a moment")
+	cli.out.Info("  ==> running composer", action, "this may take a moment")
 	stream, err := cli.docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdout: true,
@@ -99,15 +99,15 @@ func (cli *Client) Composer(ctx context.Context, dir, version, action string) er
 		return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 	}
 
-	fmt.Println("Composer", action, "ran successfully!")
+	cli.out.Info("Composer", action, "ran successfully!")
 
 	// remove the temp container
-	fmt.Println("  ==> removing temporary container")
+	cli.out.Info("  ==> removing temporary container")
 	if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 		return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
 	}
 
-	fmt.Println("Cleanup completed!")
+	cli.out.Info("Cleanup completed!")
 
 	return nil
 }

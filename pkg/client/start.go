@@ -22,40 +22,28 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		fmt.Println("There are no containers to start for the", name, "environment")
+		cli.out.Error("There are no containers to start for the", name, "environment")
 
 		return nil
 	}
 
-	fmt.Println("Starting environment for", name)
+	cli.out.Info("Starting environment for", name)
 
 	// start each environment container
 	for _, c := range containers {
 		if c.State == "running" {
-			fmt.Println("  ==> container", strings.TrimLeft(c.Names[0], "/"), "is running")
+			cli.out.Info("  ==> container", strings.TrimLeft(c.Names[0], "/"), "is running")
 			continue
 		}
 
-		fmt.Println("  ==> starting container", strings.TrimLeft(c.Names[0], "/"))
+		cli.out.Info("  ==> starting container", strings.TrimLeft(c.Names[0], "/"))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
 		}
 	}
 
-	fmt.Println("Development environment for", name, "started")
+	cli.out.Info("Development environment for", name, "started")
 
 	return nil
-}
-
-func getContainerName(c types.Container) string {
-	if c.Labels["com.craftcms.nitro.host"] != "" {
-		return "site"
-	}
-
-	if c.Labels["com.craftcms.nitro.proxy"] != "" {
-		return "proxy"
-	}
-
-	return ""
 }
