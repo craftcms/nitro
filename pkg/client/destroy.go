@@ -29,9 +29,9 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 	// make sure there are containers
 	if len(containers) == 0 {
 		fmt.Println("  ==> no containers found for environment", env)
+	} else {
+		fmt.Println("  ==> found", len(containers), "containers for environment", env)
 	}
-
-	fmt.Println("  ==> found", len(containers), "containers for environment", env)
 
 	// get all related volumes
 	fmt.Println("Checking for volumes")
@@ -43,6 +43,8 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 	// make sure there are volumes
 	if len(volumes.Volumes) == 0 {
 		fmt.Println("  ==> no volumes found for the environment")
+	} else {
+		fmt.Println("  ==> found", len(volumes.Volumes), "volumes for environment", env)
 	}
 
 	// get all related networks
