@@ -14,9 +14,7 @@ require (
 	github.com/jasonmccallister/hosts v0.0.0-20200601172247-0748f05d919e
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
-	github.com/moby/moby v1.13.1
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pixelandtonic/prompt v1.1.8
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
