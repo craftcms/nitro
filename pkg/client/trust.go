@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -24,24 +23,27 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 		return fmt.Errorf("unable to get the list of containers, %w", err)
 	}
 
-	// make sure there are at least some containers
+	// make sure there is at least one container
 	if len(containers) == 0 {
 		return fmt.Errorf("unable to find the container for the proxy")
 	}
 
-	proxy := containers[0]
-	stream, err := cli.Exec(ctx, proxy.ID, []string{"cat", "/data/caddy/pki/authorities/local/root.crt"})
+	// get the contents of the certificate from the container
+	stream, err := cli.Exec(ctx, containers[0].ID, []string{"less", "/data/caddy/pki/authorities/local/root.crt"})
 	if err != nil {
-		return fmt.Errorf("unableto exec the trust command, %w", err)
+		return fmt.Errorf("unable to retreive the certificate from the proxy, %w", err)
 	}
 	defer stream.Close()
 
-	cert, err := ioutil.ReadAll(stream.Reader)
-	if err != nil {
-		return fmt.Errorf("unable to read output from exec, %w", err)
+	// read the stream content
+	bytes, err := ioutil.ReadAll(stream.Reader)
+	if err != nil || len(bytes) == 0 {
+		return fmt.Errorf("unable to read the content from the proxy container, %w", err)
 	}
 
-	fmt.Println(strings.TrimSpace(string(cert)))
+	content := string(bytes)
+
+	fmt.Print(content)
 
 	return nil
 }
