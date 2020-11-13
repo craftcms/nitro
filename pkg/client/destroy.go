@@ -29,7 +29,6 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 	// make sure there are containers
 	if len(containers) == 0 {
 		fmt.Println("  ==> no containers found for environment", env)
-		return nil
 	}
 
 	fmt.Println("  ==> found", len(containers), "containers for environment", env)
@@ -57,6 +56,8 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 		fmt.Println("  ==> no networks found for the environment")
 	}
 
+	timeout := time.Duration(5000) * time.Millisecond
+
 	// stop all of the container
 	fmt.Println("Removing containers")
 	for _, c := range containers {
@@ -67,20 +68,26 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 			fmt.Println(" ==> removing databases is not yet supported")
 			break
 
-			// TODO(jasonmccallister) implemente backups
+			// TODO(jasonmccallister) implement backups
 			fmt.Println("Backing up database")
 			time.Sleep(time.Second * 2)
 			fmt.Println("  ==> database backup for container", strings.TrimLeft(c.Names[0], "/"), "completed")
 		}
 
-		// TODO(jasonmccallister) actually stop the container
+		// stop the container
 		fmt.Println("  ==> stopping container", name)
-		time.Sleep(time.Millisecond * 200)
+		if err := cli.docker.ContainerStop(ctx, c.ID, &timeout); err != nil {
+			return fmt.Errorf("unable to stop the container, %w", err)
+		}
+
 		fmt.Println("  ==> container", name, "stopped")
 
-		// TODO(jasonmccallister) actually stop the container
+		// remove the container
 		fmt.Println("  ==> removing container", name)
-		time.Sleep(time.Millisecond * 150)
+		if err := cli.docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+			return fmt.Errorf("unable to remove the container, %w", err)
+		}
+
 		fmt.Println("  ==> container", name, "removed")
 	}
 
@@ -89,8 +96,10 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 	for _, v := range volumes.Volumes {
 		fmt.Println("  ==> removing volume", v.Name)
 
+		// remove the volume
 		if err := cli.docker.VolumeRemove(ctx, v.Name, true); err != nil {
-			fmt.Println("  ==> unable to remove volume", v.Name, "you may need to manually remove the volume")
+			fmt.Println("  ==> unable to remove volume"+v.Name+",", "you may need to manually remove the volume")
+			break
 		}
 
 		fmt.Println("  ==> volume", v.Name, "removed")
@@ -108,5 +117,7 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 		fmt.Println("  ==> network", n.Name, "removed")
 	}
 
-	return fmt.Errorf("not actually implemented")
+	fmt.Println("Development environment for", env, "removed")
+
+	return nil
 }
