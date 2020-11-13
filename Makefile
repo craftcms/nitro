@@ -34,28 +34,7 @@ releaser:
 win-home:
 	mkdir "${HOME}"/Nitro
 
-api: build-api
-	multipass transfer nitrod ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/nitrod
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl stop nitrod
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo cp /home/ubuntu/nitrod /usr/sbin/
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo chmod u+x /usr/sbin/nitrod
-	multipass transfer nitrod.service ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/nitrod.service
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo cp /home/ubuntu/nitrod.service /etc/systemd/system/
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl daemon-reload
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl start nitrod
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl enable nitrod
-setup: build-api
-	multipass transfer nitrod ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/nitrod
-	multipass transfer nitrod.service ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/nitrod.service
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo cp /home/ubuntu/nitrod.service /etc/systemd/system/
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl daemon-reload
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl start nitrod
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- sudo systemctl enable nitrod
 proto:
 	protoc internal/nitrod/nitrod.proto --go_out=plugins=grpc:.
 v2-proto:
 	protoc pkg/protob/nitro.proto --go_out=plugins=grpc:.
-journalctl:
-	multipass exec ${NITRO_DEFAULT_MACHINE} -- journalctl -u nitrod -f
-scripts:
-	multipass mount scripts ${NITRO_DEFAULT_MACHINE}:/home/ubuntu/scripts
