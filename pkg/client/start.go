@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -30,7 +31,12 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 
 	// start each environment container
 	for _, c := range containers {
-		fmt.Println("  ==> starting container for", getContainerName(c))
+		if c.State == "running" {
+			fmt.Println("  ==> container", strings.TrimLeft(c.Names[0], "/"), "is running")
+			continue
+		}
+
+		fmt.Println("  ==> starting container", strings.TrimLeft(c.Names[0], "/"))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
