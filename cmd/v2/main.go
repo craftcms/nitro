@@ -20,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/pkg/cmd/restart"
 	"github.com/craftcms/nitro/pkg/cmd/start"
 	"github.com/craftcms/nitro/pkg/cmd/stop"
+	"github.com/craftcms/nitro/pkg/cmd/trust"
 )
 
 var rootCommand = &cobra.Command{
@@ -72,6 +73,7 @@ func init() {
 		apply.ApplyCommand,
 		context.ContextCommand,
 		exec.ExecCommand,
+		trust.TrustCommand,
 	}
 
 	rootCommand.AddCommand(commands...)
