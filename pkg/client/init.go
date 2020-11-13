@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
@@ -73,11 +74,11 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// since the filter is fuzzy, do an exact match (e.g. filtering for
 	// `nitro-dev` will also return `nitro-dev-host`
 	var skipVolume bool
-	var volume types.Volume
-	for _, volume := range volumes.Volumes {
-		if volume.Name == name {
+	var volume *types.Volume
+	for _, v := range volumes.Volumes {
+		if v.Name == name {
 			skipVolume = true
-			volume = volume
+			volume = v
 		}
 	}
 
@@ -100,13 +101,13 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			return fmt.Errorf("unable to create the network, %w", err)
 		}
 
-		volume = resp
+		volume = &resp
 
-		fmt.Println("  ==> volume created")
+		fmt.Println("  ==> volume created for", name)
 	}
 
 	// pull the latest image from docker hub for the nitro-proxy
-	// TODO(jasonmccallister) replace with the nitro CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
+	// TODO(jasonmccallister) replace with the nitr o CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
 	// _, err = cli.docker.ImagePull(ctx, "nitro-proxy:develop", types.ImagePullOptions{})
 	// if err != nil {
 	// 	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
@@ -153,15 +154,13 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			},
 			&container.HostConfig{
 				NetworkMode: "default",
-				// TODO(jasonmccallister) learn how to mount a volume into a container
-				VolumesFrom: []string{"nitro-dev"},
-				// Mounts: []mount.Mount{
-				// 	{
-				// 		Type:   "bind",
-				// 		Source: volume.Mountpoint,
-				// 		Target: "/data",
-				// 	},
-				// },
+				Mounts: []mount.Mount{
+					{
+						Type:   mount.TypeVolume,
+						Source: volume.Name,
+						Target: "/data",
+					},
+				},
 				// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					"80/tcp": {
