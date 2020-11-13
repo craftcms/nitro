@@ -3,14 +3,14 @@ package client
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/docker/docker/api/types"
 )
 
 // Exec is used to execute a command in a container and retreive the response. If there is an issue creating
 // the exec for the container it will return an error. The func caller is responsible for closing the reader.
-func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) (types.HijackedResponse, error) {
-	emptyResp := types.HijackedResponse{}
+func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) ([]byte, error) {
 	exec, err := cli.docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
 		AttachStderr: true,
 		AttachStdin:  true,
@@ -18,7 +18,7 @@ func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) (
 		Cmd:          cmd,
 	})
 	if err != nil {
-		return emptyResp, fmt.Errorf("unable to create an execution for container, %w", err)
+		return nil, fmt.Errorf("unable to create an execution for container, %w", err)
 	}
 
 	stream, err := cli.docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
@@ -28,8 +28,15 @@ func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) (
 		Cmd:          cmd,
 	})
 	if err != nil {
-		return emptyResp, fmt.Errorf("unable to attach to container, %w", err)
+		return nil, fmt.Errorf("unable to attach to container, %w", err)
+	}
+	defer stream.Close()
+
+	// read the stream content
+	bytes, err := ioutil.ReadAll(stream.Reader)
+	if err != nil || len(bytes) == 0 {
+		return nil, fmt.Errorf("unable to read the content from the proxy container, %w", err)
 	}
 
-	return stream, nil
+	return bytes, nil
 }
