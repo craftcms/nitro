@@ -4,6 +4,9 @@ import (
 	"github.com/fatih/color"
 )
 
+// Outputer is used to style terminal output in the CLI tool. It is also used to
+// help keep indentation easier by allowing nesting error and info output using
+// SubError and SubInfo.
 type Outputer interface {
 	Error(a ...interface{})
 	Info(a ...interface{})
@@ -35,7 +38,7 @@ func (o output) SubError(a ...interface{}) {
 func New() Outputer {
 	out := output{}
 
-	out.printErr = color.New(color.FgRed).PrintlnFunc()
+	out.printErr = color.New(color.FgRed, color.Bold).PrintlnFunc()
 	out.printInfo = color.New(color.FgCyan, color.Bold).PrintlnFunc()
 
 	return out
