@@ -1,0 +1,15 @@
+./github
+./goreleaser.yml
+*.env
+./buddy.yml
+./build.bat
+./dist
+./docker
+./docs
+./CHANGELOG.md
+./gon.hcl
+./install.sh
+./LICENSE.md
+./Makefile
+./README.md
+./resources

@@ -1,4 +1,4 @@
-.PHONY: install scripts
+.PHONY: install scripts docker
 
 VERSION ?= 1.1.0
 NITRO_DEFAULT_MACHINE ?= nitro-dev
@@ -12,6 +12,9 @@ build-win:
 
 build-v2:
 	go build -ldflags="-s -w" -o nitro ./cmd/v2
+
+docker:
+	docker build -t craftcms/nitro-proxy:develop .
 
 local: build
 	mv nitro /usr/local/bin/nitro
