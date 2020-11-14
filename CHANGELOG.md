@@ -11,10 +11,11 @@
 - Added the `nitro composer` with the `--version` flag to install or update projects without composer installed locally.
 - Added the `nitro npm` with the `--version` flag to install or update projects without node/npm installed locally.
 - Added the `nitro ls` command to show all the running containers.
+- Added the `nitro prep` command to help setup a project to deploy to a Docker based environment by adding a `Dockerfile` based on the sites PHP version, a `.dockerignore`, and multi-stage builds for handling dependency installs in Docker.
 
 ### Changed
 
-- Multipass is no longer a dependency. Docker is now the only dependency.
+- Multipass is no longer a dependency. Docker is now the only dependency and setting up a development environment is faster.
 - Nitro will now check for port collisions during `init` and when adding database engines.
 - Terminal output now has colors to identify info and error output.
 - The `nitro create` command now accepts custom GitHub repositiories and installs composer and node dependencies automatically using `nitro composer` and `nitro npm`.
