@@ -42,8 +42,12 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 		n := strings.TrimLeft(c.Names[0], "/")
 
 		cli.out.Info("  ==> type:", containerType, "\thostname:", n)
-		cli.out.Info("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress)
+		cli.out.Info("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
+		if c.Mounts[0].Source != "" {
+			cli.out.Info("      mount:", c.Mounts[0].Source)
+		}
 		cli.out.Info("      uptime:", c.Status)
+		cli.out.Info("      ---")
 	}
 
 	return nil
