@@ -125,7 +125,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 			containerID = resp.ID
 
-			cli.out.Info(fmt.Sprintf("  ==> created container for %s", containerID, site.Hostname))
+			cli.out.Info(fmt.Sprintf("  ==> created container for %s", site.Hostname))
 		default:
 			return fmt.Errorf("container already exists")
 		}
