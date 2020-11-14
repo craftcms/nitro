@@ -14,21 +14,23 @@ func TestRestart(t *testing.T) {
 	mock := newMockDockerClient(nil, nil, nil)
 	mock.containers = []types.Container{
 		{
-			ID: "testing-restart",
+			ID:    "testing-restart",
+			Names: []string{"/testing-restart"},
 			Labels: map[string]string{
 				"com.craftcms.nitro.environment": "testing-restart",
 				"com.craftcms.nitro.proxy":       "testing-restart",
 			},
 		},
 		{
-			ID: "testing-restart-hostname",
+			ID:    "testing-restart-hostname",
+			Names: []string{"/testing-restart-hostname"},
 			Labels: map[string]string{
 				"com.craftcms.nitro.environment": "testing-restart",
 				"com.craftcms.nitro.proxy":       "testing-restart",
 			},
 		},
 	}
-	cli := Client{docker: mock}
+	cli := Client{docker: mock, out: mockOutput{}}
 
 	// Expected
 	ids := []string{"testing-restart", "testing-restart-hostname"}
@@ -52,7 +54,7 @@ func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
 	// Arrange
 	environmentName := "testing-restart"
 	mock := newMockDockerClient(nil, nil, nil)
-	cli := Client{docker: mock}
+	cli := Client{docker: mock, out: mockOutput{}}
 
 	// Act
 	if err := cli.Restart(context.Background(), environmentName, []string{}); err != nil {
