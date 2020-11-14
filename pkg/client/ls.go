@@ -22,7 +22,7 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.out.Error("There are no container running for the", name, "environment")
+		cli.out.Error("There are no containers running for the", name, "environment")
 
 		return nil
 	}
@@ -39,9 +39,11 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 			containerType = "proxy"
 		}
 
-		cli.out.Info(
-			fmt.Sprintf("  ==> \t%q \ttype: %s \tmounts: %d \tid: %s", strings.TrimLeft(c.Names[0], "/"), containerType, len(c.Mounts), c.ID),
-		)
+		n := strings.TrimLeft(c.Names[0], "/")
+
+		cli.out.Info("  ==> type:", containerType, "\thostname:", n)
+		cli.out.Info("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress)
+		cli.out.Info("      uptime:", c.Status)
 	}
 
 	return nil
