@@ -15,7 +15,9 @@
 ### Changed
 
 - Multipass is no longer a dependency. Docker is now the only dependency.
-- Nitro will now check for port collisions during `init` and when adding database engines
+- Nitro will now check for port collisions during `init` and when adding database engines.
+- Terminal output now has colors to identify info and error output.
+- The `nitro create` command now accepts custom GitHub repositiories and installs composer and node dependencies automatically using `nitro composer` and `nitro npm`.
 
 ## 1.1.0 - 2020-10-06
 
