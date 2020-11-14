@@ -36,7 +36,7 @@ func New() Outputer {
 	out := output{}
 
 	out.printErr = color.New(color.FgRed).PrintlnFunc()
-	out.printInfo = color.New(color.FgHiBlue, color.Bold).PrintlnFunc()
+	out.printInfo = color.New(color.FgCyan, color.Bold).PrintlnFunc()
 
 	return out
 }

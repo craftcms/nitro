@@ -37,7 +37,7 @@ func (cli *Client) Restart(ctx context.Context, name string, args []string) erro
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
 
-		cli.out.Info("  ==> restarting container for", n)
+		cli.out.Info("  ==> restarting", n)
 
 		if err := cli.docker.ContainerRestart(ctx, c.ID, &timeout); err != nil {
 			return fmt.Errorf("unable to restart container %s: %w", n, err)
