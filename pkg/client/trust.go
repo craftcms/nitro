@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 )
@@ -46,6 +47,8 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 		}
 	}
 
+	// TODO(jasonmccallister) move this to the cmd pkg
+
 	// create a temp file
 	f, err := ioutil.TempFile(os.TempDir(), "nitro-cert")
 	if err != nil {
@@ -60,10 +63,31 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 
 	cli.out.Info("  ==> saved certificate to", f.Name())
 
-	if runtime.GOOS == "darwin" {
-		cli.out.Info("To install the certificate, run the following command:")
-		cli.out.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+	cli.out.Info("  ==> attempting to add certificate, you will be prompted for a password")
+	if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
+		cli.out.Error("Unable to automatically add the certificate\n")
+
+		cli.out.Error("To install the certificate, run the following command:")
+
+		// show os specific commands
+		if runtime.GOOS == "darwin" {
+			cli.out.Error(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+		}
+
+		return nil
 	}
+
+	// we added it correctly
+	cli.out.Info("  ==> certificate added successfully")
+
+	// clean up
+	cli.out.Info("  ==> removing temporary file", f.Name())
+
+	if err := os.Remove(f.Name()); err != nil {
+		cli.out.Error(" ==> unable to remove the temporary file, it will be automatically removed on the next reboot")
+	}
+
+	cli.out.Info("Certificate has been added to the trust, you may need to restart your browser")
 
 	return nil
 }
