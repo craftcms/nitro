@@ -22,28 +22,28 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.out.Error("There are no containers to start for the", name, "environment")
+		fmt.Println("There are no containers to start for the", name, "environment")
 
 		return nil
 	}
 
-	cli.out.Info("Starting environment for", name)
+	fmt.Println("Starting environment for", name)
 
 	// start each environment container
 	for _, c := range containers {
 		if c.State == "running" {
-			cli.out.Info("  ==> container", strings.TrimLeft(c.Names[0], "/"), "is running")
+			fmt.Println("  ==> container", strings.TrimLeft(c.Names[0], "/"), "is running")
 			continue
 		}
 
-		cli.out.Info("  ==> starting container", strings.TrimLeft(c.Names[0], "/"))
+		fmt.Println("  ==> starting container", strings.TrimLeft(c.Names[0], "/"))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
 		}
 	}
 
-	cli.out.Info("Development environment for", name, "started")
+	fmt.Println("Development environment for", name, "started")
 
 	return nil
 }

@@ -32,7 +32,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 
 	// if we don't have the image, pull it
 	if len(images) == 0 {
-		cli.out.Info("Pulling node image for version", version)
+		fmt.Println("Pulling node image for version", version)
 
 		rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 		if err != nil {
@@ -53,7 +53,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		cmd = []string{"npm", "update"}
 	}
 
-	cli.out.Info("  ==> creating temporary container for node")
+	fmt.Println("  ==> creating temporary container for node")
 
 	// create the temp container
 	resp, err := cli.docker.ContainerCreate(ctx,
@@ -75,7 +75,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		return fmt.Errorf("unable to create container\n%w", err)
 	}
 
-	cli.out.Info("  ==> running node", action, "this may take a moment")
+	fmt.Println("  ==> running node", action, "this may take a moment")
 	stream, err := cli.docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdout: true,
@@ -97,15 +97,15 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 	}
 
-	cli.out.Info("Node", action, "ran successfully!")
+	fmt.Println("Node", action, "ran successfully!")
 
 	// remove the temp container
-	cli.out.Info("  ==> removing temporary container")
+	fmt.Println("  ==> removing temporary container")
 	if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 		return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
 	}
 
-	cli.out.Info("Cleanup completed!")
+	fmt.Println("Cleanup completed!")
 
 	return nil
 }

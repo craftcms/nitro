@@ -22,24 +22,24 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.out.Error("There are no containers running for the", name, "environment")
+		fmt.Println("There are no containers running for the", name, "environment")
 
 		return nil
 	}
 
-	cli.out.Info("Stopping down environment for", name)
+	fmt.Println("Stopping down environment for", name)
 
 	// stop each environment container
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
-		cli.out.Info("  ==> stopping container for", n)
+		fmt.Println("  ==> stopping container for", n)
 
 		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
 			return fmt.Errorf("unable to stop container %s: %w", n, err)
 		}
 	}
 
-	cli.out.Info("Development environment for", name, "shutdown")
+	fmt.Println("Development environment for", name, "shutdown")
 
 	return nil
 }

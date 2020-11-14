@@ -39,7 +39,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	mock.containerCreateResponse = container.ContainerCreateCreatedBody{
 		ID: "testingid",
 	}
-	cli := Client{docker: mock, out: mockOutput{}}
+	cli := Client{docker: mock}
 
 	// Expected
 	// set the network create request

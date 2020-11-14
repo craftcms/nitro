@@ -22,12 +22,12 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.out.Error("There are no containers running for the", name, "environment")
+		fmt.Println("There are no containers running for the", name, "environment")
 
 		return nil
 	}
 
-	cli.out.Info("Listing containers for", name)
+	fmt.Println("Listing containers for", name)
 
 	// list each container for for the environment
 	for _, c := range containers {
@@ -41,13 +41,13 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 		n := strings.TrimLeft(c.Names[0], "/")
 
-		cli.out.Info("  ==> type:", containerType, "\thostname:", n)
-		cli.out.Info("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
+		fmt.Println("  ==> type:", containerType, "\thostname:", n)
+		fmt.Println("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
 		if c.Mounts[0].Source != "" {
-			cli.out.Info("      mount:", c.Mounts[0].Source)
+			fmt.Println("      mount:", c.Mounts[0].Source)
 		}
-		cli.out.Info("      uptime:", c.Status)
-		cli.out.Info("      ---")
+		fmt.Println("      uptime:", c.Status)
+		fmt.Println("      ---")
 	}
 
 	return nil

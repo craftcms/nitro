@@ -18,7 +18,7 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 	filter.Add("label", "com.craftcms.nitro.environment="+env)
 
 	// get all related containers
-	cli.out.Info("Checking for containers")
+	fmt.Println("Checking for containers")
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{
 		All: true,
 	})
@@ -28,98 +28,98 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 
 	// make sure there are containers
 	if len(containers) == 0 {
-		cli.out.Error("  ==> no containers found for environment", env)
+		fmt.Println("  ==> no containers found for environment", env)
 	} else {
-		cli.out.Info("  ==> found", len(containers), "containers for environment", env)
+		fmt.Println("  ==> found", len(containers), "containers for environment", env)
 	}
 
 	// get all related volumes
-	cli.out.Info("Checking for volumes")
+	fmt.Println("Checking for volumes")
 	volumes, err := cli.docker.VolumeList(ctx, filter)
 	if err != nil {
-		cli.out.Error(" ==> error listing volumes for the environment")
+		fmt.Println(" ==> error listing volumes for the environment")
 	}
 
 	// make sure there are volumes
 	if len(volumes.Volumes) == 0 {
-		cli.out.Error("  ==> no volumes found for the environment")
+		fmt.Println("  ==> no volumes found for the environment")
 	} else {
-		cli.out.Info("  ==> found", len(volumes.Volumes), "volumes for environment", env)
+		fmt.Println("  ==> found", len(volumes.Volumes), "volumes for environment", env)
 	}
 
 	// get all related networks
 	networks, err := cli.docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
 	if err != nil {
-		cli.out.Error(" ==> error listing networks for the environment")
+		fmt.Println(" ==> error listing networks for the environment")
 	}
 
 	// make sure there are networks
 	if len(networks) == 0 {
-		cli.out.Error("  ==> no networks found for the environment")
+		fmt.Println("  ==> no networks found for the environment")
 	}
 
 	timeout := time.Duration(5000) * time.Millisecond
 
 	// stop all of the container
-	cli.out.Info("Removing containers")
+	fmt.Println("Removing containers")
 	for _, c := range containers {
 		name := strings.TrimLeft(c.Names[0], "/")
 
 		// only perform a backup if the container is for databases
 		if c.Labels["com.craftcms.nitro.database"] != "" {
-			cli.out.Error(" ==> removing databases is not yet supported")
+			fmt.Println(" ==> removing databases is not yet supported")
 			break
 
 			// TODO(jasonmccallister) implement backups
-			cli.out.Info("Backing up database")
+			fmt.Println("Backing up database")
 			time.Sleep(time.Second * 2)
-			cli.out.Info("  ==> database backup for container", strings.TrimLeft(c.Names[0], "/"), "completed")
+			fmt.Println("  ==> database backup for container", strings.TrimLeft(c.Names[0], "/"), "completed")
 		}
 
 		// stop the container
-		cli.out.Info("  ==> stopping container", name)
+		fmt.Println("  ==> stopping container", name)
 		if err := cli.docker.ContainerStop(ctx, c.ID, &timeout); err != nil {
 			return fmt.Errorf("unable to stop the container, %w", err)
 		}
 
-		cli.out.Info("  ==> container", name, "stopped")
+		fmt.Println("  ==> container", name, "stopped")
 
 		// remove the container
-		cli.out.Info("  ==> removing container", name)
+		fmt.Println("  ==> removing container", name)
 		if err := cli.docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 			return fmt.Errorf("unable to remove the container, %w", err)
 		}
 
-		cli.out.Info("  ==> container", name, "removed")
+		fmt.Println("  ==> container", name, "removed")
 	}
 
 	// get all the volumes
-	cli.out.Info("Removing volumes")
+	fmt.Println("Removing volumes")
 	for _, v := range volumes.Volumes {
-		cli.out.Info("  ==> removing volume", v.Name)
+		fmt.Println("  ==> removing volume", v.Name)
 
 		// remove the volume
 		if err := cli.docker.VolumeRemove(ctx, v.Name, true); err != nil {
-			cli.out.Error("  ==> unable to remove volume"+v.Name+",", "you may need to manually remove the volume")
+			fmt.Println("  ==> unable to remove volume"+v.Name+",", "you may need to manually remove the volume")
 			break
 		}
 
-		cli.out.Info("  ==> volume", v.Name, "removed")
+		fmt.Println("  ==> volume", v.Name, "removed")
 	}
 
 	// get all the networks
-	cli.out.Info("Removing network")
+	fmt.Println("Removing network")
 	for _, n := range networks {
-		cli.out.Info("  ==> removing network", n.Name)
+		fmt.Println("  ==> removing network", n.Name)
 
 		if err := cli.docker.NetworkRemove(ctx, n.ID); err != nil {
-			cli.out.Error("  ==> unable to remove network", n.Name, "you may need to manually remove the network")
+			fmt.Println("  ==> unable to remove network", n.Name, "you may need to manually remove the network")
 		}
 
-		cli.out.Info("  ==> network", n.Name, "removed")
+		fmt.Println("  ==> network", n.Name, "removed")
 	}
 
-	cli.out.Info("Development environment for", env, "removed")
+	fmt.Println("Development environment for", env, "removed")
 
 	return nil
 }
