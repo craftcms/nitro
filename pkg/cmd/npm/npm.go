@@ -83,6 +83,6 @@ func init() {
 	flags := NPMCommand.Flags()
 
 	// set the flags for this command
-	flags.BoolP("update", "u", false, "Run node update instead of install")
-	flags.StringP("version", "v", "14", "The node version to use")
+	flags.BoolP("update", "u", false, "run node update instead of install")
+	flags.StringP("version", "v", "14", "which node version to use")
 }

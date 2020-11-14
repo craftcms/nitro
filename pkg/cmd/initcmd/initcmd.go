@@ -23,11 +23,16 @@ var InitCommand = &cobra.Command{
 func initMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
 
+	// TODO(jasonmccallister) check for the env.yaml file in the home directory
+	// TODO(jasonmccallister) ask for the default PHP version
+
 	// create the new client
 	nitro, err := client.NewClient()
 	if err != nil {
 		return fmt.Errorf("unable to create a client for docker, %w", err)
 	}
+
+	// TODO (jasonmccallister) call the apply command
 
 	return nitro.Init(cmd.Context(), env, args)
 }

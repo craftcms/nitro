@@ -84,6 +84,6 @@ func init() {
 	flags := ComposerCommand.Flags()
 
 	// set the flags for this command
-	flags.BoolP("update", "u", false, "Run composer update instead of install")
-	flags.StringP("version", "v", "2", "The composer version to use")
+	flags.BoolP("update", "u", false, "run composer update instead of install")
+	flags.StringP("version", "v", "2", "which composer version to use")
 }
