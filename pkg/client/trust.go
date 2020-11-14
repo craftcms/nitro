@@ -69,8 +69,9 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 
 		cli.out.Error("To install the certificate, run the following command:")
 
-		// show os specific commands
-		if runtime.GOOS == "darwin" {
+		// TODO show os specific commands
+		switch runtime.GOOS {
+		default:
 			cli.out.Error(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
 		}
 
@@ -78,16 +79,16 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 
 	// we added it correctly
-	cli.out.Info("  ==> certificate added successfully")
+	cli.out.Info("  ==> certificate added")
 
 	// clean up
 	cli.out.Info("  ==> removing temporary file", f.Name())
 
 	if err := os.Remove(f.Name()); err != nil {
-		cli.out.Error(" ==> unable to remove the temporary file, it will be automatically removed on the next reboot")
+		cli.out.Error(" ==> unable to remove temporary file, it will be automatically removed on reboot")
 	}
 
-	cli.out.Info("Certificate has been added to the trust, you may need to restart your browser")
+	cli.out.Info("Certificate sucessfully added, you may need to restart your browser")
 
 	return nil
 }
