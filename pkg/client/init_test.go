@@ -13,6 +13,22 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+type mockOutput struct {
+}
+
+func (m mockOutput) Error(a ...interface{}) {
+
+}
+
+func (m mockOutput) Info(a ...interface{}) {
+}
+
+func (m mockOutput) SubError(a ...interface{}) {
+}
+
+func (m mockOutput) SubInfo(a ...interface{}) {
+}
+
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// Arrange
 	environmentName := "testing-init"
@@ -23,7 +39,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	mock.containerCreateResponse = container.ContainerCreateCreatedBody{
 		ID: "testingid",
 	}
-	cli := Client{docker: mock}
+	cli := Client{docker: mock, out: mockOutput{}}
 
 	// Expected
 	// set the network create request
@@ -66,9 +82,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			NetworkMode: "default",
 			Mounts: []mount.Mount{
 				{
-					Type: "bind",
+					Type: mount.TypeVolume,
 					// TODO(jasonmccallister) fix the mock to return, or filter, volumes
-					// when asking for volumes
 					Source: "",
 					Target: "/data",
 				},
