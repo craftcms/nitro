@@ -32,15 +32,15 @@ type mockDockerClient struct {
 	// requests sent to the client API.
 	containerID              string
 	containers               []types.Container
-	containerCreateRequest   types.ContainerCreateConfig
+	containerCreateRequests  []types.ContainerCreateConfig
 	containerCreateResponse  container.ContainerCreateCreatedBody
-	containerStartRequest    types.ContainerStartOptions
+	containerStartRequests   []types.ContainerStartOptions
 	containerRestartRequests []string
 
 	// network related resources for mocking the calls to the client
 	// for network specific resources
 	networks              []types.NetworkResource
-	networkCreateRequest  types.NetworkCreateRequest
+	networkCreateRequests []types.NetworkCreateRequest
 	networkCreateResponse types.NetworkCreateResponse
 
 	// volume related resources
@@ -61,10 +61,10 @@ func (c *mockDockerClient) NetworkList(ctx context.Context, options types.Networ
 
 func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
 	// save the request on the struct field
-	c.networkCreateRequest = types.NetworkCreateRequest{
+	c.networkCreateRequests = append(c.networkCreateRequests, types.NetworkCreateRequest{
 		NetworkCreate: options,
 		Name:          name,
-	}
+	})
 
 	return c.networkCreateResponse, c.mockError
 }
@@ -91,19 +91,19 @@ func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *containe
 	// save the request on the struct field
 	// TODO(jasonmccallister) this is wrong, need to look at the code to determine the correct
 	// types are set and returned
-	c.containerCreateRequest = types.ContainerCreateConfig{
+	c.containerCreateRequests = append(c.containerCreateRequests, types.ContainerCreateConfig{
 		Name:             containerName,
 		Config:           config,
 		HostConfig:       hostConfig,
 		NetworkingConfig: networkingConfig,
-	}
+	})
 
 	return c.containerCreateResponse, c.mockError
 }
 
 func (c *mockDockerClient) ContainerStart(ctx context.Context, container string, options types.ContainerStartOptions) error {
 	c.containerID = container
-	c.containerStartRequest = options
+	c.containerStartRequests = append(c.containerStartRequests, options)
 
 	return c.mockError
 }

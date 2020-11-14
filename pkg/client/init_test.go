@@ -130,10 +130,10 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	}
 
 	// make sure the network create matches the expected
-	if !reflect.DeepEqual(mock.networkCreateRequest, networkReq) {
+	if !reflect.DeepEqual(mock.networkCreateRequests[0], networkReq) {
 		t.Errorf(
 			"expected network create request to match\ngot:\n%v\nwant:\n%v",
-			mock.networkCreateRequest,
+			mock.networkCreateRequests[0],
 			networkReq,
 		)
 	}
@@ -148,43 +148,43 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	}
 
 	// make sure the container create matches the expected
-	if !reflect.DeepEqual(mock.containerCreateRequest, containerCreateReq) {
+	if !reflect.DeepEqual(mock.containerCreateRequests[0], containerCreateReq) {
 		// t.Errorf(
 		// 	"expected container create request to match\ngot:\n%v\nwant:\n%v",
 		// 	mock.containerCreateRequest,
 		// 	containerCreateReq,
 		// )
 
-		if !reflect.DeepEqual(mock.containerCreateRequest.Config, containerCreateReq.Config) {
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].Config, containerCreateReq.Config) {
 			t.Errorf(
 				"expected container create request config to match\ngot:\n%v\n\nwant:\n%v",
-				mock.containerCreateRequest.Config,
+				mock.containerCreateRequests[0].Config,
 				containerCreateReq.Config,
 			)
 		}
 
-		if !reflect.DeepEqual(mock.containerCreateRequest.HostConfig, containerCreateReq.HostConfig) {
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].HostConfig, containerCreateReq.HostConfig) {
 			t.Errorf(
 				"expected container create request host config to match\ngot:\n%v\n\nwant:\n%v",
-				mock.containerCreateRequest.HostConfig,
+				mock.containerCreateRequests[0].HostConfig,
 				containerCreateReq.HostConfig,
 			)
 		}
 
-		if !reflect.DeepEqual(mock.containerCreateRequest.NetworkingConfig, containerCreateReq.NetworkingConfig) {
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].NetworkingConfig, containerCreateReq.NetworkingConfig) {
 			t.Errorf(
 				"expected container create request networking to match\ngot:\n%v\n\nwant:\n%v",
-				mock.containerCreateRequest.NetworkingConfig,
+				mock.containerCreateRequests[0].NetworkingConfig,
 				containerCreateReq.NetworkingConfig,
 			)
 		}
 	}
 
 	// make sure the container start matches the expected
-	if !reflect.DeepEqual(mock.containerStartRequest, containerStartRequest) {
+	if !reflect.DeepEqual(mock.containerStartRequests[0], containerStartRequest) {
 		t.Errorf(
 			"expected container start request to match\ngot:\n%v\nwant:\n%v",
-			mock.containerStartRequest,
+			mock.containerStartRequests[0],
 			containerStartRequest,
 		)
 	}
