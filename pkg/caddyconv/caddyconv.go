@@ -2,51 +2,27 @@ package caddyconv
 
 import "github.com/craftcms/nitro/internal/config"
 
-type CaddyConfig struct {
-	Admin CaddyAdmin `json:"admin"`
-	Apps  struct {
-		HTTP struct {
-			Servers map[string]CaddyServer `json:"servers"`
-		} `json:"http"`
-		TLS struct {
-			Automation struct {
-				Policies []struct {
-					Issuer struct {
-						Module string `json:"module"`
-					} `json:"issuer"`
-				} `json:"policies"`
-			} `json:"automation"`
-		} `json:"tls"`
-	} `json:"apps"`
-}
-
-type CaddyServer struct {
-	Listen []string `json:"listen"`
-	Routes []struct {
-		Match []struct {
-			Host []string `json:"host"`
-		} `json:"match,omitempty"`
-		Handle []struct {
-			Handler string `json:"handler"`
-			Routes  []struct {
-				Handle []struct {
-					Handler   string `json:"handler"`
-					Upstreams []struct {
-						Dial string `json:"dial"`
-					} `json:"upstreams"`
-				} `json:"handle"`
-			} `json:"routes"`
-		} `json:"handle"`
-		Terminal bool `json:"terminal"`
-	} `json:"routes"`
-}
-
-type CaddyAdmin struct {
-	Listen string `json:"listen"`
-}
-
+// ToCaddy takes a nitro config struct and converts it to a representation of
+// a caddy configuration to send to the Caddy API.
 func ToCaddy(config *config.Config) (*CaddyConfig, error) {
-	caddy := &CaddyConfig{Admin: CaddyAdmin{Listen: "localhost:2019"}}
+	// map all of the sites to a server configuration
+	servers := map[string]CaddyServer{}
+	for _, site := range config.Sites {
+		servers[site.Hostname] = CaddyServer{
+			// TODO(jasonmccallister) make this grab the sites aliases
+			Listen: []string{":443"},
+			// Routes:
+		}
+	}
+
+	// set the defaults
+	caddy := &CaddyConfig{
+		Admin: CaddyAdmin{
+			Listen: "localhost:2019",
+		},
+	}
+	// set the tls configuration
+	// tls := CaddyAppsTLS{}
 	// generate
 
 	return caddy, nil
