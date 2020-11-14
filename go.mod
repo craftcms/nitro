@@ -27,7 +27,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/txn2/txeh v1.3.0
-	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
+	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102
 	golang.org/x/sys v0.0.0-20201107080550-4d91cf3a1aaf // indirect
 	google.golang.org/genproto v0.0.0-20200722002428-88e341933a54 // indirect
 	google.golang.org/grpc v1.30.0
