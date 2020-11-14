@@ -50,6 +50,33 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		return fmt.Errorf("unable to get the users home directory, %w", err)
 	}
 
+	for _, db := range cfg.Databases {
+		// add filters to check for the container
+		filter.Add("label", "com.craftcms.nitro.database-engine="+db.Engine)
+		filter.Add("label", "com.craftcms.nitro.database-version="+db.Version)
+
+		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{
+			All:     true,
+			Filters: filter,
+		})
+		if err != nil {
+			return fmt.Errorf("error getting a list of containers")
+		}
+
+		// if there are no containers, create a volume, container, and start the container
+		if len(containers) == 0 {
+			// vol, err := cli.docker.VolumeCreate(ctx, volume.VolumesCreateBody{})
+			// if err != nil {
+
+			// }
+
+		}
+
+		// remove the filter
+		filter.Del("label", "com.craftcms.nitro.database-engine="+db.Engine)
+		filter.Del("label", "com.craftcms.nitro.database-version="+db.Version)
+	}
+
 	// TODO(jasonmccallister) get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 	cli.out.Info("Checking for existing sites")
 	for _, site := range cfg.Sites {
