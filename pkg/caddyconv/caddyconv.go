@@ -3,12 +3,10 @@ package caddyconv
 import "github.com/craftcms/nitro/internal/config"
 
 type CaddyConfig struct {
-	Admin struct {
-		Listen string `json:"listen"`
-	} `json:"admin"`
-	Apps struct {
+	Admin CaddyAdmin `json:"admin"`
+	Apps  struct {
 		HTTP struct {
-			Servers map[string][]CaddyServer `json:"servers"`
+			Servers map[string]CaddyServer `json:"servers"`
 		} `json:"http"`
 		TLS struct {
 			Automation struct {
@@ -31,25 +29,25 @@ type CaddyServer struct {
 		Handle []struct {
 			Handler string `json:"handler"`
 			Routes  []struct {
-				Group  string `json:"group,omitempty"`
 				Handle []struct {
-					Handler string `json:"handler"`
-					URI     string `json:"uri"`
+					Handler   string `json:"handler"`
+					Upstreams []struct {
+						Dial string `json:"dial"`
+					} `json:"upstreams"`
 				} `json:"handle"`
-				Match []struct {
-					File struct {
-						TryFiles []string `json:"try_files"`
-					} `json:"file"`
-					Not []struct {
-						Path []string `json:"path"`
-					} `json:"not"`
-				} `json:"match,omitempty"`
 			} `json:"routes"`
 		} `json:"handle"`
 		Terminal bool `json:"terminal"`
 	} `json:"routes"`
 }
 
-func ToJSON(config config.Config) {
+type CaddyAdmin struct {
+	Listen string `json:"listen"`
+}
 
+func ToCaddy(config *config.Config) (*CaddyConfig, error) {
+	caddy := &CaddyConfig{Admin: CaddyAdmin{Listen: "localhost:2019"}}
+	// generate
+
+	return caddy, nil
 }
