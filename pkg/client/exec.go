@@ -11,6 +11,7 @@ import (
 // Exec is used to execute a command in a container and retreive the response. If there is an issue creating
 // the exec for the container it will return an error. The func caller is responsible for closing the reader.
 func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) ([]byte, error) {
+	// create an exec for the container
 	exec, err := cli.docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
 		AttachStderr: true,
 		AttachStdin:  true,
@@ -21,6 +22,7 @@ func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) (
 		return nil, fmt.Errorf("unable to create an execution for container, %w", err)
 	}
 
+	// attach to the container
 	stream, err := cli.docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
 		AttachStdout: true,
 		AttachStderr: true,
@@ -35,7 +37,7 @@ func (cli *Client) Exec(ctx context.Context, containerID string, cmd []string) (
 	// read the stream content
 	bytes, err := ioutil.ReadAll(stream.Reader)
 	if err != nil || len(bytes) == 0 {
-		return nil, fmt.Errorf("unable to read the content from the proxy container, %w", err)
+		return nil, fmt.Errorf("unable to read the content from container, %w", err)
 	}
 
 	return bytes, nil
