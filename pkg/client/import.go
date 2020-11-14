@@ -8,6 +8,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Import is used to copy a local file into a container at a given path. It automatically enables
+// overwriting directories with files. This is used for the `db import` commands.
 func (cli *Client) Import(ctx context.Context, containerID string, path string, rdr io.Reader) error {
 	cli.out.Info("Copying file to container")
 
