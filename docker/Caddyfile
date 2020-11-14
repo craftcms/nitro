@@ -3,40 +3,16 @@
     admin localhost:2019
 }
 
-example.nitro {
-    rewrite * index.php?{query}&p={path}
-
-    php_fastcgi * example.nitro:9000 {
-            root /app/web
-            index index.php
-
-            env SCRIPT_NAME index.php
-            env SCRIPT_FILENAME /app/web/index.php
-    }
+example.nitro demo.nitro {
+    reverse_proxy * example.nitro:8080
 }
 
 plugins.nitro {
-    rewrite * index.php?{query}&p={path}
-
-    php_fastcgi * plugins.nitro:9000 {
-            root /app/web
-            index index.php
-
-            env SCRIPT_NAME index.php
-            env SCRIPT_FILENAME /app/web/index.php
-    }
+    reverse_proxy * plugins.nitro:8080
 }
 
 extendingcaddy.nitro {
-    rewrite * index.php?{query}&p={path}
-
-    php_fastcgi * extendingcaddy.nitro:9000 {
-            root /app/web
-            index index.php
-
-            env SCRIPT_NAME index.php
-            env SCRIPT_FILENAME /app/web/index.php
-    }
+    reverse_proxy * extendingcaddy.nitro:8080
 }
 
 :80 :443 {
