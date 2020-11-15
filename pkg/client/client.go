@@ -3,14 +3,63 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/client"
+	"github.com/fatih/color"
 )
 
 // Client represents a Nitro CLI
 type Client struct {
 	docker client.CommonAPIClient
-	//out    output.Outputer
+
+	// color output
+	infoOut *color.Color
+	errOut  *color.Color
+}
+
+func (cli Client) Error(s ...string) {
+	msg := strings.Join(s, " ")
+
+	switch cli.errOut {
+	case nil:
+		fmt.Printf("%s\n", msg)
+	default:
+		cli.errOut.Printf("%s\n", msg)
+	}
+}
+
+func (cli Client) SubError(s ...string) {
+	msg := strings.Join(s, " ")
+
+	switch cli.errOut {
+	case nil:
+		fmt.Printf("  ==> %s\n", msg)
+	default:
+		cli.errOut.Printf("  ==> %s\n", msg)
+	}
+}
+
+func (cli Client) Info(s ...string) {
+	msg := strings.Join(s, " ")
+
+	switch cli.infoOut {
+	case nil:
+		fmt.Printf("%s\n", msg)
+	default:
+		cli.infoOut.Printf("%s\n", msg)
+	}
+}
+
+func (cli Client) SubInfo(s ...string) {
+	msg := strings.Join(s, " ")
+
+	switch cli.infoOut {
+	case nil:
+		fmt.Printf("  ==> %s\n", msg)
+	default:
+		cli.infoOut.Printf("  ==> %s\n", msg)
+	}
 }
 
 // NewClient creates a default docker client using the current environment.
@@ -26,8 +75,9 @@ func NewClient() (*Client, error) {
 	}
 
 	cli := &Client{
-		docker: docker,
-		//out:    output.New(),
+		docker:  docker,
+		infoOut: color.New(color.FgCyan),
+		errOut:  color.New(color.FgRed),
 	}
 
 	return cli, nil

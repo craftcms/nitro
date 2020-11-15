@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/output"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 )
@@ -23,28 +22,28 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		output.Error("There are no containers to start for the", name, "environment")
+		cli.Error("There are no containers to start for the", name, "environment")
 
 		return nil
 	}
 
-	output.Info("Starting environment for", name)
+	cli.Info("Starting environment for", name)
 
 	// start each environment container
 	for _, c := range containers {
 		if c.State == "running" {
-			output.SubInfo("container", strings.TrimLeft(c.Names[0], "/"), "is running")
+			cli.SubInfo("container", strings.TrimLeft(c.Names[0], "/"), "is running")
 			continue
 		}
 
-		output.SubInfo("starting container", strings.TrimLeft(c.Names[0], "/"))
+		cli.SubInfo("starting container", strings.TrimLeft(c.Names[0], "/"))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
 		}
 	}
 
-	output.Info("Development environment for", name, "started")
+	cli.Info("Development environment for", name, "started")
 
 	return nil
 }

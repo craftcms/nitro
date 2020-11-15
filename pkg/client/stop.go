@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/output"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 )
@@ -23,28 +22,28 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		output.Error("No containers are running in the", name, "environment")
+		cli.Error("No containers are running in the", name, "environment")
 
 		return nil
 	}
 
-	output.Info("Stopping down environment for", name)
+	cli.Info("Stopping down environment for", name)
 
 	// stop each environment container
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
-		output.SubInfo("stopping container for", n)
+		cli.SubInfo("stopping container for", n)
 
 		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
 			errWrap := fmt.Errorf("unable to stop container %s: %w", n, err)
 
-			output.SubError(errWrap.Error())
+			cli.SubError(errWrap.Error())
 
 			return errWrap
 		}
 	}
 
-	output.Info("Development environment for", name, "shutdown")
+	cli.Info("Development environment for", name, "shutdown")
 
 	return nil
 }

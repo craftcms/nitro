@@ -32,7 +32,7 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 
 	// get the contents of the certificate from the container
-	fmt.Println("Retreiving CA from nitro proxy")
+	cli.Info("Retreiving CA from nitro proxy")
 	content, err := cli.Exec(ctx, containers[0].ID, []string{"less", "/data/caddy/pki/authorities/local/root.crt"})
 	if err != nil {
 		return fmt.Errorf("unable to retreive the certificate from the proxy, %w", err)
@@ -61,34 +61,33 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 	defer f.Close()
 
-	fmt.Println("  ==> saved certificate to", f.Name())
+	cli.SubInfo("saved certificate to", f.Name())
 
-	fmt.Println("  ==> attempting to add certificate, you will be prompted for a password")
+	cli.SubInfo("attempting to add certificate, you will be prompted for a password")
 	if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
-		fmt.Println("Unable to automatically add the certificate\n")
-
-		fmt.Println("To install the certificate, run the following command:")
+		cli.SubError("Unable to automatically add the certificate\n")
+		cli.SubError("To install the certificate, run the following command:")
 
 		// TODO show os specific commands
 		switch runtime.GOOS {
 		default:
-			fmt.Println(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+			cli.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
 		}
 
 		return nil
 	}
 
 	// we added it correctly
-	fmt.Println("  ==> certificate added")
+	cli.SubInfo("certificate added")
 
 	// clean up
-	fmt.Println("  ==> removing temporary file", f.Name())
+	cli.SubInfo("removing temporary file", f.Name())
 
 	if err := os.Remove(f.Name()); err != nil {
-		fmt.Println(" ==> unable to remove temporary file, it will be automatically removed on reboot")
+		cli.SubError("unable to remove temporary file, it will be automatically removed on reboot")
 	}
 
-	fmt.Println("Certificate sucessfully added, you may need to restart your browser")
+	cli.Info("Certificate sucessfully added, you may need to restart your browser")
 
 	return nil
 }

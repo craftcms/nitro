@@ -42,7 +42,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		return fmt.Errorf("unable to find the network for %s", env)
 	}
 
-	fmt.Println("  ==> using network", networkID)
+	cli.SubInfo("using network", networkID)
 
 	// get the users home dir
 	home, err := homedir.Dir()
@@ -78,7 +78,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 	}
 
 	// TODO(jasonmccallister) get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-	fmt.Println("Checking for existing sites")
+	cli.Info("Checking for existing sites")
 	for _, site := range cfg.Sites {
 		// add the site filter
 		filter.Add("label", "com.craftcms.nitro.site="+site.Hostname)
@@ -152,7 +152,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 			containerID = resp.ID
 
-			fmt.Println(fmt.Sprintf("  ==> created container for %s", site.Hostname))
+			cli.SubInfo(fmt.Sprintf("created container for %s", site.Hostname))
 		default:
 			return fmt.Errorf("container already exists")
 		}
