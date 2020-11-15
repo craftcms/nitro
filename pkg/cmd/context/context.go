@@ -20,25 +20,29 @@ var ContextCommand = &cobra.Command{
 }
 
 func contextMain(cmd *cobra.Command, args []string) error {
-	env := cmd.Flag("environment").Value
 	cfg := config.Config{}
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return fmt.Errorf("unable to read the config file, %w", err)
+		return fmt.Errorf("unable to read config file, %w", err)
 	}
 
-	fmt.Println("Using configuration file")
+	fmt.Println("Configuration")
 	fmt.Println("  ==>", viper.ConfigFileUsed())
-	fmt.Println("")
 
-	fmt.Println("The follow sites are configured for", env)
+	fmt.Println("Databases")
+	for _, db := range cfg.Databases {
+		fmt.Println("  ==> engine:", db.Engine, "\tversion:", db.Version, "\tport:", db.Port)
+		fmt.Println("      username:", "nitro", "\tpassword:", "nitro")
+	}
+
+	fmt.Println("Sites")
 	for _, site := range cfg.Sites {
 		// TODO(jasonmccallister) get the container information? Is it needed?
 		fmt.Println("  ==> hostname: ", site.Hostname)
-		fmt.Println("  ==> webroot: ", site.Webroot)
 		if len(site.Aliases) > 0 {
-			fmt.Println("  ==> aliases: ", site.Aliases)
+			fmt.Println("      aliases: ", site.Aliases)
 		}
-		fmt.Println("")
+		fmt.Println("      php:", "7.4", "\twebroot:", site.Webroot)
+
 	}
 
 	return nil
