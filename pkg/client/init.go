@@ -124,12 +124,18 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		return fmt.Errorf("unable to list the containers\n%w", err)
 	}
 
+	var proxyRunning bool
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == name || n == "/"+name {
 				fmt.Println("  ==> skipping proxy")
 
 				containerID = c.ID
+
+				// check if it is running
+				if c.State == "running" {
+					proxyRunning = true
+				}
 			}
 		}
 	}
@@ -199,11 +205,13 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		containerID = resp.ID
 	}
 
-	// start the container for the proxy
-	fmt.Println("  ==> starting proxy container")
+	// start the container for the proxy if its not running
+	if !proxyRunning {
+		fmt.Println("  ==> starting proxy container")
 
-	if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-		return fmt.Errorf("unable to start the nitro container, %w", err)
+		if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+			return fmt.Errorf("unable to start the nitro container, %w", err)
+		}
 	}
 
 	fmt.Println("Development environment for", name, "started")
