@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/output"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/fatih/color"
 )
 
 // LS is used to return a list of containers related to a specific environment
@@ -22,13 +24,15 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		fmt.Println("There are no containers running for the", name, "environment")
+		output.Error("There are no containers running for the", name, "environment")
 
 		return nil
 	}
 
-	fmt.Println("Listing containers for", name)
+	output.Info("Listing containers for", name)
 
+	// set the colors manually because of the format
+	color.Set(color.FgGreen)
 	// list each container for for the environment
 	for _, c := range containers {
 		var containerType string
@@ -49,6 +53,8 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 		fmt.Println("      uptime:", c.Status)
 		fmt.Println("      ---")
 	}
+
+	color.Unset()
 
 	return nil
 }
