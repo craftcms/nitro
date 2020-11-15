@@ -15,7 +15,7 @@ import (
 // backup before removing the resources.
 func (cli *Client) Destroy(ctx context.Context, env string, args []string) error {
 	filter := filters.NewArgs()
-	filter.Add("label", "com.craftcms.nitro.environment="+env)
+	filter.Add("label", EnvironmentLabel+"="+env)
 
 	// get all related containers
 	cli.Info("Checking for containers")

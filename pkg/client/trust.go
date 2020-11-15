@@ -17,7 +17,7 @@ import (
 func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	// find the nitro proxy for the environment
 	filter := filters.NewArgs()
-	filter.Add("label", "com.craftcms.nitro.environment="+env)
+	filter.Add("label", EnvironmentLabel+"="+env)
 	filter.Add("label", "com.craftcms.nitro.proxy="+env)
 
 	// find the container, should only be one

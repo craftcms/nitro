@@ -17,16 +17,16 @@ func TestRestart(t *testing.T) {
 			ID:    "testing-restart",
 			Names: []string{"/testing-restart"},
 			Labels: map[string]string{
-				"com.craftcms.nitro.environment": "testing-restart",
-				"com.craftcms.nitro.proxy":       "testing-restart",
+				EnvironmentLabel:           "testing-restart",
+				"com.craftcms.nitro.proxy": "testing-restart",
 			},
 		},
 		{
 			ID:    "testing-restart-hostname",
 			Names: []string{"/testing-restart-hostname"},
 			Labels: map[string]string{
-				"com.craftcms.nitro.environment": "testing-restart",
-				"com.craftcms.nitro.proxy":       "testing-restart",
+				EnvironmentLabel:           "testing-restart",
+				"com.craftcms.nitro.proxy": "testing-restart",
 			},
 		},
 	}

@@ -22,7 +22,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 	// create a filter for the network
 	filter := filters.NewArgs()
-	filter.Add("label", "com.craftcms.nitro.environment="+env)
+	filter.Add("label", EnvironmentLabel+"="+env)
 
 	fmt.Println(fmt.Sprintf("Looking for the %s network", env))
 
@@ -123,8 +123,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				&container.Config{
 					Image: image,
 					Labels: map[string]string{
-						"com.craftcms.nitro.environment": env,
-						"com.craftcms.nitro.host":        site.Hostname,
+						EnvironmentLabel:          env,
+						"com.craftcms.nitro.host": site.Hostname,
 					},
 				},
 				&container.HostConfig{

@@ -14,7 +14,7 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 	// get all the containers using a filter, we only want to stop containers which
 	// have the label com.craftcms.nitro.machine=name
 	filter := filters.NewArgs()
-	filter.Add("label", "com.craftcms.nitro.environment="+name)
+	filter.Add("label", EnvironmentLabel+"="+name)
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of the containers, %w", err)
