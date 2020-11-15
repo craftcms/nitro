@@ -78,6 +78,7 @@ func init() {
 		db.DBCommand,
 	}
 
+	// add the commands
 	rootCommand.AddCommand(commands...)
 }
 
