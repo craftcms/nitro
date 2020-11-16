@@ -112,3 +112,9 @@ func (c *mockDockerClient) ContainerRestart(ctx context.Context, container strin
 	c.containerRestartRequests = append(c.containerRestartRequests, container)
 	return c.mockError
 }
+
+func (c *mockDockerClient) ContainerStop(ctx context.Context, containerID string, timeout *time.Duration) error {
+	c.containerID = containerID
+
+	return c.mockError
+}

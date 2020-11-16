@@ -13,22 +13,6 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-type mockOutput struct {
-}
-
-func (m mockOutput) Error(a ...interface{}) {
-
-}
-
-func (m mockOutput) Info(a ...interface{}) {
-}
-
-func (m mockOutput) SubError(a ...interface{}) {
-}
-
-func (m mockOutput) SubInfo(a ...interface{}) {
-}
-
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// Arrange
 	environmentName := "testing-init"

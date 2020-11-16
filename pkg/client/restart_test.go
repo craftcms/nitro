@@ -30,7 +30,7 @@ func TestRestart(t *testing.T) {
 			},
 		},
 	}
-	cli := Client{docker: mock, out: mockOutput{}}
+	cli := Client{docker: mock}
 
 	// Expected
 	ids := []string{"testing-restart", "testing-restart-hostname"}
@@ -54,7 +54,7 @@ func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
 	// Arrange
 	environmentName := "testing-restart"
 	mock := newMockDockerClient(nil, nil, nil)
-	cli := Client{docker: mock, out: mockOutput{}}
+	cli := Client{docker: mock}
 
 	// Act
 	if err := cli.Restart(context.Background(), environmentName, []string{}); err != nil {
