@@ -55,10 +55,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		filter.Add("label", "com.craftcms.nitro.database-engine="+db.Engine)
 		filter.Add("label", "com.craftcms.nitro.database-version="+db.Version)
 
-		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{
-			All:     true,
-			Filters: filter,
-		})
+		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
 			return fmt.Errorf("error getting a list of containers")
 		}
@@ -70,6 +67,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 			// }
 
+			// TODO jasonmccallister create the container and start it
 		}
 
 		// remove the filter
@@ -86,10 +84,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		// TODO(jasonmccallister) make the php version dynamic based on the site
 		image := fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", "7.4")
 
-		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{
-			All:     true,
-			Filters: filter,
-		})
+		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
 			return fmt.Errorf("error getting a list of containers")
 		}

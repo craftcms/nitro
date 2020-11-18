@@ -42,9 +42,10 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	}
 
 	// create the network needs to be created
-	if skipNetwork {
+	switch skipNetwork {
+	case true:
 		fmt.Println("  ==> skipping network")
-	} else {
+	default:
 		fmt.Println("  ==> creating network")
 
 		resp, err := cli.docker.NetworkCreate(ctx, name, types.NetworkCreate{
@@ -68,7 +69,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// check if the volume needs to be created
 	volumes, err := cli.docker.VolumeList(ctx, filter)
 	if err != nil {
-		return fmt.Errorf("unable to list the docker volumes, %w", err)
+		return fmt.Errorf("unable to list volumes, %w", err)
 	}
 
 	// since the filter is fuzzy, do an exact match (e.g. filtering for
@@ -83,9 +84,10 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	}
 
 	// check if the volume needs to be created
-	if skipVolume {
+	switch skipVolume {
+	case true:
 		fmt.Println("  ==> skipping volume")
-	} else {
+	default:
 		fmt.Println("  ==> creating volume")
 
 		// create a volume with the same name of the machine
@@ -98,7 +100,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("unable to create the network, %w", err)
+			return fmt.Errorf("unable to create the volume, %w", err)
 		}
 
 		volume = &resp
