@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/craftcms/nitro/pkg/client"
 	"github.com/craftcms/nitro/pkg/cmd/apply"
 	"github.com/craftcms/nitro/pkg/cmd/complete"
 	"github.com/craftcms/nitro/pkg/cmd/composer"
@@ -26,11 +28,12 @@ import (
 )
 
 var rootCommand = &cobra.Command{
-	Use:          "nitro",
-	Short:        "Local Craft CMS dev made easy",
-	Long:         `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
-	RunE:         rootMain,
-	SilenceUsage: true,
+	Use:           "nitro",
+	Short:         "Local Craft CMS dev made easy",
+	Long:          `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
+	RunE:          rootMain,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func rootMain(command *cobra.Command, _ []string) error {
@@ -87,6 +90,11 @@ func init() {
 func main() {
 	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
+		if errors.Is(err, client.ErrDockerPing) {
+			fmt.Println("it appears docker is not currently running")
+			os.Exit(1)
+		}
+
 		os.Exit(1)
 	}
 }

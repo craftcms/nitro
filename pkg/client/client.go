@@ -9,6 +9,9 @@ import (
 	"github.com/fatih/color"
 )
 
+// ErrDockerPing is the error when we are aunable to reach to docker client
+var ErrDockerPing = fmt.Errorf("docker does not appear to be running")
+
 // Client represents a Nitro CLI
 type Client struct {
 	docker client.CommonAPIClient
@@ -71,7 +74,7 @@ func NewClient() (*Client, error) {
 
 	// check if we can talk to the docker api
 	if _, err := docker.Ping(context.TODO()); err != nil {
-		return nil, fmt.Errorf("docker does not appear to be running")
+		return nil, ErrDockerPing
 	}
 
 	cli := &Client{
