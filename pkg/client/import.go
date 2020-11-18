@@ -17,7 +17,7 @@ func (cli *Client) Import(ctx context.Context, containerID string, path string, 
 		return fmt.Errorf("unable to copy to the container, %w", err)
 	}
 
-	cli.Info("  ==> copy completed")
+	cli.SubInfo("copy completed")
 
 	return nil
 }
