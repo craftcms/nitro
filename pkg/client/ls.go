@@ -43,13 +43,16 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 		n := strings.TrimLeft(c.Names[0], "/")
 
 		fmt.Println("  ==> type:", containerType, "\thostname:", n)
-		fmt.Println("      aliases:", "\t\texamplealias.demo,", "anotheralias.test")
+		if containerType == "web" {
+			fmt.Println("      aliases:", "\t\texamplealias.demo,", "anotheralias.test")
+		}
 		fmt.Println("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
 		if c.Mounts[0].Source != "" {
 			fmt.Println("      mount:", c.Mounts[0].Source)
 		}
 		fmt.Println("      uptime:", c.Status)
-		fmt.Println("      ---")
+		fmt.Println("")
+		// fmt.Println("      ---")
 	}
 
 	return nil
