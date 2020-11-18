@@ -78,9 +78,9 @@ func NewClient() (*Client, error) {
 	}
 
 	cli := &Client{
-		docker:  docker,
-		infoOut: color.New(color.FgCyan),
-		errOut:  color.New(color.FgRed),
+		docker: docker,
+		//infoOut: color.New(color.FgCyan),
+		//errOut:  color.New(color.FgRed),
 	}
 
 	return cli, nil
