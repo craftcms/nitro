@@ -7,7 +7,6 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/fatih/color"
 )
 
 // LS is used to return a list of containers related to a specific environment
@@ -30,8 +29,6 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 	cli.Info(fmt.Sprintf("Listing containers for %s...", name))
 
-	// set the colors manually because of the format
-	color.Set(color.FgGreen)
 	// list each container for for the environment
 	for _, c := range containers {
 		containerType := "web"
@@ -50,8 +47,6 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 		fmt.Println("      uptime:", c.Status)
 		fmt.Println("      ---")
 	}
-
-	color.Unset()
 
 	return nil
 }
