@@ -36,6 +36,10 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 			containerType = "proxy"
 		}
 
+		if c.Labels[DatabaseEngineLabel] != "" {
+			containerType = "database"
+		}
+
 		n := strings.TrimLeft(c.Names[0], "/")
 
 		fmt.Println("  ==> type:", containerType, "\thostname:", n)
