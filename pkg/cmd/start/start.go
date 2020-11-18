@@ -9,9 +9,10 @@ import (
 
 // StartCommand is the command for creating new development environments
 var StartCommand = &cobra.Command{
-	Use:   "start",
-	Short: "Start an environment",
-	RunE:  start,
+	Use:     "start",
+	Aliases: []string{"up"},
+	Short:   "Start an environment",
+	RunE:    start,
 	Example: `  # start containers for the default environment
   nitro start`,
 }
