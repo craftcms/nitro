@@ -13,7 +13,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 )
 
-// Composer aenables users without composer installed on the host machine to
+// Composer enables users without composer installed on the host machine to
 // install or update composer using a docker container and specifying the version
 // of composer to use. The default action is composer install, passing the flag
 // --update switches that behavior to run composer update instead.
