@@ -9,15 +9,14 @@ import (
 
 // StartCommand is the command for creating new development environments
 var StartCommand = &cobra.Command{
-	Use:     "start",
-	Aliases: []string{"up"},
-	Short:   "Start an environment",
-	RunE:    start,
+	Use:   "start",
+	Short: "Start an environment",
+	RunE:  startMain,
 	Example: `  # start containers for the default environment
   nitro start`,
 }
 
-func start(cmd *cobra.Command, args []string) error {
+func startMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
 
 	// create the new client

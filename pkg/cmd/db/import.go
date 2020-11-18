@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/craftcms/nitro/pkg/client"
 	"github.com/spf13/cobra"
@@ -14,7 +15,7 @@ var ImportCommand = &cobra.Command{
 	Short: "Import a database",
 	Args:  cobra.MinimumNArgs(1),
 	RunE:  importMain,
-	Example: `  # list all containers for the environment
+	Example: `  # import a sql file into a database
   nitro db import filename.sql
 
   # use a relative path
@@ -31,7 +32,9 @@ func importMain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	f, err := os.Open("README.md")
+	path := filepath.Clean(args[0])
+
+	f, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("error opening the file, %w", err)
 	}

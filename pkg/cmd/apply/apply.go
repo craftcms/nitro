@@ -19,6 +19,7 @@ var ApplyCommand = &cobra.Command{
 
 func applyMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
+
 	cfg := config.Config{}
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return fmt.Errorf("unable to read the config file, %w", err)
@@ -27,7 +28,7 @@ func applyMain(cmd *cobra.Command, args []string) error {
 	// create the new client
 	nitro, err := client.NewClient()
 	if err != nil {
-		return fmt.Errorf("unable to create a client for docker, %w", err)
+		return err
 	}
 
 	return nitro.Apply(cmd.Context(), env, cfg)
