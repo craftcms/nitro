@@ -12,16 +12,23 @@ import (
 var ImportCommand = &cobra.Command{
 	Use:   "import",
 	Short: "Import a database",
+	Args:  cobra.MinimumNArgs(1),
 	RunE:  importMain,
 	Example: `  # list all containers for the environment
-  nitro db import filename.sql`,
+  nitro db import filename.sql
+
+  # use a relative path
+  nitro db import ~/Desktop/backup.sql
+
+  # use an absolute path
+  nitro db import /Users/oli/Desktop/backup.sql`,
 }
 
 func importMain(cmd *cobra.Command, args []string) error {
 	// create the new client
 	nitro, err := client.NewClient()
 	if err != nil {
-		return fmt.Errorf("unable to create a client for docker, %w", err)
+		return err
 	}
 
 	f, err := os.Open("README.md")
