@@ -9,7 +9,7 @@ import (
 
 var ExecCommand = &cobra.Command{
 	Use:   "exec",
-	Short: "Access a shell in a container",
+	Short: "Access container environment",
 	RunE:  execCommand,
 	Args:  cobra.MinimumNArgs(1),
 	Example: `  # get access to a container

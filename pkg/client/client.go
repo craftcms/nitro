@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// ErrDockerPing is the error when we are aunable to reach to docker client
+// ErrDockerPing is the error when we are unable to reach to docker client
 var ErrDockerPing = fmt.Errorf("docker does not appear to be running")
 
 // Client represents a Nitro CLI

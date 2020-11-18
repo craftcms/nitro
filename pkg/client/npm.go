@@ -23,9 +23,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 	filters.Add("reference", image)
 
 	// look for the image
-	images, err := cli.docker.ImageList(ctx, types.ImageListOptions{
-		Filters: filters,
-	})
+	images, err := cli.docker.ImageList(ctx, types.ImageListOptions{Filters: filters})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of images, %w", err)
 	}

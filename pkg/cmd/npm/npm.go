@@ -12,7 +12,7 @@ import (
 
 var NPMCommand = &cobra.Command{
 	Use:   "npm",
-	Short: "Run npm actions",
+	Short: "Run npm install or update",
 	RunE:  npmMain,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveFilterDirs

@@ -28,12 +28,11 @@ import (
 )
 
 var rootCommand = &cobra.Command{
-	Use:           "nitro",
-	Short:         "Local Craft CMS dev made easy",
-	Long:          `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
-	RunE:          rootMain,
-	SilenceUsage:  true,
-	SilenceErrors: true,
+	Use:          "nitro",
+	Short:        "Local Craft CMS dev made easy",
+	Long:         `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
+	RunE:         rootMain,
+	SilenceUsage: true,
 }
 
 func rootMain(command *cobra.Command, _ []string) error {

@@ -13,7 +13,7 @@ import (
 // ComposerCommand is the command for creating new development environments
 var ComposerCommand = &cobra.Command{
 	Use:   "composer",
-	Short: "Run composer actions",
+	Short: "Run composer install or update",
 	RunE:  composerMain,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveFilterDirs

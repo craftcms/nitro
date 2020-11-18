@@ -10,7 +10,7 @@ import (
 // UpdateCommand is the command for creating new development environments
 var UpdateCommand = &cobra.Command{
 	Use:   "update",
-	Short: "Update images",
+	Short: "Update Docker images",
 	RunE:  updateMain,
 	Example: `  # update docker images
   nitro update`,
