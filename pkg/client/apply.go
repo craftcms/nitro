@@ -199,7 +199,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		filter.Add("label", HostLabel+"="+site.Hostname)
 
 		// TODO(jasonmccallister) make the php version dynamic based on the site
-		image := fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", "7.4")
+		image := fmt.Sprintf("docker.io/craftcms/nginx:%s", "7.4")
 
 		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
@@ -237,8 +237,15 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			// pull the image
-			if _, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false}); err != nil {
+			cli.Info("Pulling image")
+			rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+			if err != nil {
 				return fmt.Errorf("unable to pull the image, %w", err)
+			}
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.ReadFrom(rdr); err != nil {
+				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 			}
 
 			// create the container
