@@ -3,16 +3,8 @@
     admin localhost:2019
 }
 
-example.nitro demo.nitro {
+example.nitro example.test {
     reverse_proxy * example.nitro:8080
-}
-
-plugins.nitro {
-    reverse_proxy * plugins.nitro:8080
-}
-
-extendingcaddy.nitro {
-    reverse_proxy * extendingcaddy.nitro:8080
 }
 
 :80 :443 {
