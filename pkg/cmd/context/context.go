@@ -27,13 +27,14 @@ func contextMain(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Configuration")
 	fmt.Println("  ==>", viper.ConfigFileUsed())
+	fmt.Println("")
 
 	fmt.Println("Databases")
 	for _, db := range cfg.Databases {
 		fmt.Println("  ==> engine:", db.Engine, "\tversion:", db.Version, "\tport:", db.Port)
 		fmt.Println("      username:", "nitro", "\tpassword:", "nitro")
 	}
-
+	fmt.Println("")
 	fmt.Println("Sites")
 	for _, site := range cfg.Sites {
 		// TODO(jasonmccallister) get the container information? Is it needed?

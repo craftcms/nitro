@@ -34,6 +34,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 	if err != nil {
 		return fmt.Errorf("unable to list docker networks\n%w", err)
 	}
+
 	for _, n := range networks {
 		if n.Name == env {
 			networkID = n.ID
@@ -42,7 +43,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 	// if the network is not found
 	if networkID == "" {
-		return fmt.Errorf("unable to find network for %s", env)
+		return ErrNoNetwork
 	}
 
 	cli.SubInfo("using network", networkID)

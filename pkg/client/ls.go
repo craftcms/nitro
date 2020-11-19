@@ -22,7 +22,7 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.Error("There are no containers running for the", name, "environment")
+		cli.Error(ErrNoContainers.Error())
 
 		return nil
 	}
@@ -44,6 +44,7 @@ func (cli *Client) LS(ctx context.Context, name string, args []string) error {
 
 		fmt.Println("  ==> type:", containerType, "\thostname:", n)
 		if containerType == "web" {
+			// TODO(jasonmccallister) grab the aliases, should be set on a label
 			fmt.Println("      aliases:", "\t\texamplealias.demo,", "anotheralias.test")
 		}
 		fmt.Println("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
