@@ -1,0 +1,25 @@
+exts:
+  - grpc
+  - soap
+blackfire:
+  key: my-key
+  secret: my-secret
+databases:
+  - engine: mysql
+    version: "8.0"
+    port: 3306
+  - engine: postgres
+    version: "13"
+    port: 5432
+sites:
+  - hostname: example.nitro
+    aliases:
+      - example.test
+      - example.local
+    php: "7.4"
+    path: ~/dev/craft-dev
+  - hostname: plugins.nitro
+    aliases:
+      - plugins.test
+      - plugins.local
+    php: "7.4"
