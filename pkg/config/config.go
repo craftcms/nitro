@@ -41,10 +41,10 @@ func (d *Database) GetHostname() (string, error) {
 	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
 }
 
-func Load() error {
+func Load() (string, error) {
 	home, err := homedir.Dir()
 	if err != nil {
-		return fmt.Errorf("unable to get the home directory, %w", err)
+		return "", fmt.Errorf("unable to get the home directory, %w", err)
 	}
 
 	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
@@ -60,7 +60,7 @@ func Load() error {
 	viper.SetConfigName(def)
 
 	// read the config
-	return viper.ReadInConfig()
+	return def, viper.ReadInConfig()
 }
 
 func Umarshal() (*Config, error) {

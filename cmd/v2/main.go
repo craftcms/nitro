@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/craftcms/nitro/pkg/cmd/apply"
 	"github.com/craftcms/nitro/pkg/cmd/complete"
@@ -23,6 +21,7 @@ import (
 	"github.com/craftcms/nitro/pkg/cmd/stop"
 	"github.com/craftcms/nitro/pkg/cmd/trust"
 	"github.com/craftcms/nitro/pkg/cmd/update"
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 var rootCommand = &cobra.Command{
@@ -38,23 +37,8 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
-	home, _ := homedir.Dir()
-
-	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
-	viper.SetConfigType("yaml")
-
-	// set the default machine name
-	def := "nitro-dev"
-	if os.Getenv("NITRO_DEFAULT_MACHINE") != "" {
-		def = os.Getenv("NITRO_DEFAULT_MACHINE")
-	}
-
-	// set the config file
-	viper.SetConfigName(def)
-
-	// read the config
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(fmt.Errorf("error loading the config file, %w", err))
+	if err := config.Load(); err != nil {
+		log.Fatal(err)
 	}
 
 	// set any global flags
