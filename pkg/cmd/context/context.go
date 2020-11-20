@@ -2,8 +2,9 @@ package context
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/craftcms/nitro/internal/config"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,11 +35,11 @@ func contextMain(cmd *cobra.Command, args []string) error {
 	for _, site := range cfg.Sites {
 		fmt.Println("    hostname:\t", site.Hostname)
 		if len(site.Aliases) > 0 {
-			fmt.Println("    aliases:\t", site.Aliases)
+			fmt.Println("    aliases:\t", strings.Join(site.Aliases, ", "))
 		}
-		fmt.Println("    php:\t", "7.4")
-		fmt.Println("    webroot:\t", site.Webroot)
-		fmt.Println("    local:\t", "~/dev/plugins-test.nitro")
+		fmt.Println("    php:\t", site.PHP)
+		fmt.Println("    webroot:\t", site.Dir)
+		fmt.Println("    path:\t", site.Path)
 		fmt.Println("")
 	}
 

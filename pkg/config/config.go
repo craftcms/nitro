@@ -25,6 +25,7 @@ type Site struct {
 	Aliases  []string `yaml:"aliases,omitempty"`
 	Path     string   `yaml:"path,omitempty"`
 	PHP      string   `yaml:"php,omitempty"`
+	Dir      string   `yaml:"dir,omitempty"`
 }
 
 type Database struct {

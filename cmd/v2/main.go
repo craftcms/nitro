@@ -37,13 +37,14 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
-	if err := config.Load(); err != nil {
+	env, err := config.Load()
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	// set any global flags
 	flags := rootCommand.PersistentFlags()
-	flags.StringP("environment", "e", def, "The environment")
+	flags.StringP("environment", "e", env, "The environment")
 
 	// register all of the commands
 	commands := []*cobra.Command{
