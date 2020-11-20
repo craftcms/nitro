@@ -1,12 +1,9 @@
 package apply
 
 import (
-	"fmt"
-
-	"github.com/craftcms/nitro/internal/config"
 	"github.com/craftcms/nitro/pkg/client"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var ApplyCommand = &cobra.Command{
@@ -20,9 +17,9 @@ var ApplyCommand = &cobra.Command{
 func applyMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
 
-	cfg := config.Config{}
-	if err := viper.Unmarshal(&cfg); err != nil {
-		return fmt.Errorf("unable to read the config file, %w", err)
+	cfg, err := config.Umarshal()
+	if err != nil {
+		return err
 	}
 
 	// create the new client

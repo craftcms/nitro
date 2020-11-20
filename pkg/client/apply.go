@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/craftcms/nitro/internal/config"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -19,7 +19,7 @@ import (
 )
 
 // Apply is used to create a
-func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) error {
+func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) error {
 	// get the network for the environment
 	var networkID string
 
@@ -61,9 +61,16 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		filter.Add("label", DatabaseEngineLabel+"="+db.Engine)
 		filter.Add("label", DatabaseVersionLabel+"="+db.Version)
 
+		// get the containers for databases
 		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
 			return fmt.Errorf("error getting a list of containers")
+		}
+
+		// set the hostname
+		hostname, err := db.GetHostname()
+		if err != nil {
+			return err
 		}
 
 		// if there are no containers, create a volume, container, and start the container
@@ -71,7 +78,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		var startContainer bool
 		switch len(containers) {
 		case 1:
-			cli.InfoSuccess(db.Name(), "ready")
+			cli.InfoSuccess(hostname, "ready")
 
 			// set the container id
 			containerID = containers[0].ID
@@ -81,7 +88,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				startContainer = true
 			}
 		default:
-			cli.InfoPending("creating volume", db.Name())
+			cli.InfoPending("creating volume", hostname)
 
 			// create the labels
 			labels := map[string]string{
@@ -93,7 +100,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			// create the volume
 			volResp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
 				Driver: "local",
-				Name:   db.Name(),
+				Name:   hostname,
 				Labels: labels,
 			})
 			if err != nil {
@@ -135,7 +142,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			// create the container
-			cli.InfoPending("creating container", db.Name())
+			cli.InfoPending("creating container", hostname)
 
 			conResp, err := cli.docker.ContainerCreate(
 				ctx,
@@ -171,7 +178,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 						},
 					},
 				},
-				db.Name(),
+				hostname,
 			)
 			if err != nil {
 				return fmt.Errorf("unable to create the container, %w", err)
@@ -186,7 +193,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 		// start the container if needed
 		if startContainer {
-			cli.InfoPending("starting container", db.Name())
+			cli.InfoPending("starting container", hostname)
 
 			if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
@@ -240,10 +247,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				sourcePath = strings.Replace(sourcePath, "~", home, 1)
 			}
 
-			absPath, err := filepath.Abs(sourcePath)
-			if err != nil {
-				return fmt.Errorf("unable to get the absolute path to the site, %w", err)
-			}
+			path := filepath.Clean(sourcePath)
 
 			// pull the image
 			cli.InfoPending("pulling image", image)
@@ -276,7 +280,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 					Mounts: []mount.Mount{{
 						Type: mount.TypeBind,
 						// TODO (jasonmccallister) get the source from the site
-						Source: absPath,
+						Source: path,
 						//Source: site.Webroot,
 						Target: "/app",
 					},
