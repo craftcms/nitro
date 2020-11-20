@@ -1,6 +1,12 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Extensions []string   `yaml:"exts,omitempty"`
@@ -33,4 +39,26 @@ func (d *Database) GetHostname() (string, error) {
 	}
 
 	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
+}
+
+func Load() error {
+	home, err := homedir.Dir()
+	if err != nil {
+		return fmt.Errorf("unable to get the home directory, %w", err)
+	}
+
+	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
+	viper.SetConfigType("yaml")
+
+	// set the default environment name
+	def := "nitro-dev"
+	if os.Getenv("NITRO_DEFAULT_ENVIRONMENT") != "" {
+		def = os.Getenv("NITRO_DEFAULT_ENVIRONMENT")
+	}
+
+	// set the config file
+	viper.SetConfigName(def)
+
+	// read the config
+	return viper.ReadInConfig()
 }

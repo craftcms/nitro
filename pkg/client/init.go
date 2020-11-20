@@ -18,7 +18,7 @@ import (
 // instead of overwriting the containers. Init should only be used once to setup the
 // development environment, which is why we safeguard the resources.
 func (cli *Client) Init(ctx context.Context, name string, args []string) error {
-	fmt.Println("Running pre-checks on", name, "development environment...")
+	cli.Info(fmt.Sprintf("Checking %s...", name))
 
 	// create filters for the development environment
 	filter := filters.NewArgs()
@@ -44,16 +44,16 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// create the network needs to be created
 	switch skipNetwork {
 	case true:
-		fmt.Println("  ==> skipping network")
+		cli.InfoSuccess("network ready")
 	default:
-		fmt.Println("  ==> creating network")
+		cli.InfoPending("creating network")
 
 		resp, err := cli.docker.NetworkCreate(ctx, name, types.NetworkCreate{
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				EnvironmentLabel:             name,
-				"com.craftcms.nitro.network": name,
+				EnvironmentLabel: name,
+				NetworkLabel:     name,
 			},
 		})
 		if err != nil {
@@ -63,7 +63,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		// set the newly created network
 		networkID = resp.ID
 
-		fmt.Println("  ==> network created for", name)
+		cli.InfoDone()
 	}
 
 	// check if the volume needs to be created
@@ -86,9 +86,9 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	// check if the volume needs to be created
 	switch skipVolume {
 	case true:
-		fmt.Println("  ==> skipping volume")
+		cli.InfoSuccess("volume ready")
 	default:
-		fmt.Println("  ==> creating volume")
+		cli.InfoPending("creating volume")
 
 		// create a volume with the same name of the machine
 		resp, err := cli.docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
@@ -105,7 +105,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 		volume = &resp
 
-		fmt.Println("  ==> volume created for", name)
+		cli.InfoDone()
 	}
 
 	// pull the latest image from docker hub for the nitro-proxy
@@ -130,7 +130,7 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == name || n == "/"+name {
-				fmt.Println("  ==> skipping proxy")
+				cli.InfoSuccess("proxy ready")
 
 				containerID = c.ID
 
@@ -144,7 +144,8 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 
 	// if we do not have a container id, it needs to be create
 	if containerID == "" {
-		fmt.Println("  ==> creating container for the proxy")
+		cli.InfoPending("creating proxy")
+
 		resp, err := cli.docker.ContainerCreate(ctx,
 			&container.Config{
 				// TODO(jasonmccallister) make this dynamic based on the nitro CLI and image
@@ -205,18 +206,18 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 		}
 
 		containerID = resp.ID
+
+		cli.InfoDone()
 	}
 
 	// start the container for the proxy if its not running
 	if !proxyRunning {
-		fmt.Println("  ==> starting proxy container")
-
 		if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start the nitro container, %w", err)
 		}
 	}
 
-	fmt.Println("Development environment for", name, "started")
+	cli.Info(name, "is ready! 🚀")
 
 	return nil
 }

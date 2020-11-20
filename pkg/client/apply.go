@@ -27,7 +27,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 	filter := filters.NewArgs()
 	filter.Add("label", EnvironmentLabel+"="+env)
 
-	fmt.Println(fmt.Sprintf("Looking for %s network", env))
+	cli.Info(fmt.Sprintf("Checking %s Network...", env))
 
 	// find networks
 	networks, err := cli.docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
@@ -46,7 +46,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		return ErrNoNetwork
 	}
 
-	cli.SubInfo("using network", networkID)
+	cli.InfoSuccess("using", networkID)
 
 	// get the users home dir
 	home, err := homedir.Dir()
@@ -54,7 +54,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		return fmt.Errorf("unable to get the users home directory, %w", err)
 	}
 
-	cli.Info("Checking for databases")
+	cli.Info("Checking Databases...")
+
 	for _, db := range cfg.Databases {
 		// add filters to check for the container
 		filter.Add("label", DatabaseEngineLabel+"="+db.Engine)
@@ -70,7 +71,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		var startContainer bool
 		switch len(containers) {
 		case 1:
-			cli.SubInfo("using existing container for", db.Name())
+			cli.InfoSuccess(db.Name(), "ready")
 
 			// set the container id
 			containerID = containers[0].ID
@@ -80,7 +81,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				startContainer = true
 			}
 		default:
-			cli.SubInfo("creating volume for", db.Name())
+			cli.InfoPending("creating volume", db.Name())
 
 			// create the labels
 			labels := map[string]string{
@@ -99,6 +100,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				return fmt.Errorf("unable to create the volume, %w", err)
 			}
 
+			cli.InfoDone()
+
 			// determine the image name
 			image := fmt.Sprintf("docker.io/library/%s:%s", db.Engine, db.Version)
 
@@ -112,11 +115,14 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			// pull the image
-			cli.SubInfo("pulling image", image)
+			cli.InfoPending("pulling image", image)
+
 			rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 			if err != nil {
 				return fmt.Errorf("unable to pull image %s, %w", image, err)
 			}
+
+			cli.InfoDone()
 
 			buf := &bytes.Buffer{}
 			if _, err := buf.ReadFrom(rdr); err != nil {
@@ -129,7 +135,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			// create the container
-			cli.SubInfo("creating container for", db.Name())
+			cli.InfoPending("creating container", db.Name())
+
 			conResp, err := cli.docker.ContainerCreate(
 				ctx,
 				&container.Config{
@@ -170,20 +177,22 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 				return fmt.Errorf("unable to create the container, %w", err)
 			}
 
+			// set the container id to start
 			containerID = conResp.ID
 			startContainer = true
-			// set the container id to start
+
+			cli.InfoDone()
 		}
 
 		// start the container if needed
 		if startContainer {
-			cli.Info("starting container for", db.Name())
+			cli.InfoPending("starting container", db.Name())
 
 			if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
-			cli.SubInfo("container for", db.Name(), "started")
+			cli.InfoDone()
 		}
 
 		// remove the filter
@@ -192,7 +201,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 	}
 
 	// TODO(jasonmccallister) get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-	cli.Info("Checking for existing sites")
+	cli.Info("Checking Sites...")
 
 	for _, site := range cfg.Sites {
 		// add the site filter
@@ -210,7 +219,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 		var startContainer bool
 		switch len(containers) {
 		case 1:
-			cli.SubInfo("using existing container for", site.Hostname)
+			cli.InfoSuccess(site.Hostname, "ready")
 
 			// get the container id
 			containerID = containers[0].ID
@@ -237,7 +246,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			// pull the image
-			cli.Info("Pulling image")
+			cli.InfoPending("pulling image", image)
+
 			rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 			if err != nil {
 				return fmt.Errorf("unable to pull the image, %w", err)
@@ -247,6 +257,10 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			if _, err := buf.ReadFrom(rdr); err != nil {
 				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 			}
+
+			cli.InfoDone()
+
+			cli.InfoPending("creating container", site.Hostname)
 
 			// create the container
 			resp, err := cli.docker.ContainerCreate(
@@ -282,15 +296,20 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 			}
 
 			containerID = resp.ID
+			startContainer = true
 
-			cli.SubInfo("created container for", site.Hostname)
+			cli.InfoDone()
 		}
 
 		// start the container if needed
 		if startContainer {
+			cli.InfoPending("starting container for", site.Hostname)
+
 			if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
+
+			cli.InfoDone()
 		}
 
 		// remove the site filter
@@ -299,7 +318,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg config.Config) err
 
 	// TODO(jasonmccallister) convert the sites into a Caddy json config and send to the API
 
-	cli.Info("All containers are running")
+	cli.Info("Everything for", env, "is up and running 😃")
 
 	return nil
 }

@@ -25,25 +25,30 @@ func contextMain(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to read config file, %w", err)
 	}
 
-	fmt.Println("Configuration")
-	fmt.Println("  ==>", viper.ConfigFileUsed())
+	fmt.Println("Craft Nitro", "2.0.0")
+	fmt.Println("")
+	fmt.Println("Configuration:\t", viper.ConfigFileUsed())
 	fmt.Println("")
 
-	fmt.Println("Databases")
-	for _, db := range cfg.Databases {
-		fmt.Println("  ==> engine:", db.Engine, "\tversion:", db.Version, "\tport:", db.Port)
-		fmt.Println("      username:", "nitro", "\tpassword:", "nitro")
-	}
-	fmt.Println("")
-	fmt.Println("Sites")
+	fmt.Println(`Sites:`)
 	for _, site := range cfg.Sites {
-		// TODO(jasonmccallister) get the container information? Is it needed?
-		fmt.Println("  ==> hostname: ", site.Hostname)
+		fmt.Println("    hostname:\t", site.Hostname)
 		if len(site.Aliases) > 0 {
-			fmt.Println("      aliases: ", site.Aliases)
+			fmt.Println("    aliases:\t", site.Aliases)
 		}
-		fmt.Println("      php:", "7.4", "\twebroot:", site.Webroot)
+		fmt.Println("    php:\t", "7.4")
+		fmt.Println("    webroot:\t", site.Webroot)
+		fmt.Println("    local:\t", "~/dev/plugins-test.nitro")
+		fmt.Println("")
+	}
 
+	fmt.Println(`Databases:`)
+	for _, db := range cfg.Databases {
+		fmt.Println("    engine:\t", db.Engine, db.Version)
+		fmt.Println("    username:\t", "nitro")
+		fmt.Println("    password:\t", "nitro")
+		fmt.Println("    port:\t", db.Port)
+		fmt.Println("")
 	}
 
 	return nil

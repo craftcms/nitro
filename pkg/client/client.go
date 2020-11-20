@@ -59,10 +59,22 @@ func (cli Client) SubInfo(s ...string) {
 
 	switch cli.infoOut {
 	case nil:
-		fmt.Printf("  ==> %s\n", msg)
+		fmt.Printf("  \u2713 %s\n", msg)
 	default:
 		cli.infoOut.Printf("  ==> %s\n", msg)
 	}
+}
+
+func (cli Client) InfoSuccess(s ...string) {
+	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
+}
+
+func (cli Client) InfoPending(s ...string) {
+	fmt.Printf("  … %s ", strings.Join(s, " "))
+}
+
+func (cli Client) InfoDone() {
+	fmt.Print("\u2713\n")
 }
 
 // NewClient creates a default docker client using the current environment.

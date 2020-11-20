@@ -13,4 +13,7 @@ const (
 
 	// HostLabel is used to identify a web application by the hostname of the site (e.g demo.nitro)
 	HostLabel = "com.craftcms.nitro.host"
+
+	// NetworkLabel is used to label a network for an environment
+	NetworkLabel = "com.craftcms.nitro.network"
 )

@@ -13,7 +13,7 @@ var InitCommand = &cobra.Command{
 	RunE:  initMain,
 	Example: `  # create a new environment with the default name
   nitro init
-  
+
   # create a new environment overriding the default name
   nitro init --environment my-new-env`,
 }

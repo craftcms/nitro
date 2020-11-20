@@ -32,7 +32,8 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 
 	// get the contents of the certificate from the container
-	cli.Info("Retreiving CA from nitro proxy")
+	cli.Info(fmt.Sprintf("Trusting CA certificate for %s...", env))
+
 	content, err := cli.Exec(ctx, containers[0].ID, []string{"less", "/data/caddy/pki/authorities/local/root.crt"})
 	if err != nil {
 		return fmt.Errorf("unable to retreive the certificate from the proxy, %w", err)
@@ -61,9 +62,8 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	}
 	defer f.Close()
 
-	cli.SubInfo("saved certificate to", f.Name())
+	cli.InfoPending("trusting certificate (you will be prompted for a password):\n")
 
-	cli.SubInfo("attempting to add certificate, you will be prompted for a password")
 	if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
 		cli.SubError("Unable to automatically add the certificate\n")
 		cli.SubError("To install the certificate, run the following command:")
@@ -77,17 +77,14 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 		return nil
 	}
 
-	// we added it correctly
-	cli.SubInfo("certificate added")
-
 	// clean up
-	cli.SubInfo("removing temporary file", f.Name())
+	cli.InfoPending("cleaning up")
 
 	if err := os.Remove(f.Name()); err != nil {
 		cli.SubError("unable to remove temporary file, it will be automatically removed on reboot")
 	}
 
-	cli.Info("Certificate sucessfully added, you may need to restart your browser")
+	cli.InfoDone()
 
 	return nil
 }
