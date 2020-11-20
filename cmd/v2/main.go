@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/craftcms/nitro/pkg/client"
 	"github.com/craftcms/nitro/pkg/cmd/apply"
 	"github.com/craftcms/nitro/pkg/cmd/complete"
 	"github.com/craftcms/nitro/pkg/cmd/composer"
@@ -89,11 +87,6 @@ func init() {
 func main() {
 	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
-		if errors.Is(err, client.ErrDockerPing) {
-			fmt.Println("it appears docker is not currently running")
-			os.Exit(1)
-		}
-
 		os.Exit(1)
 	}
 }

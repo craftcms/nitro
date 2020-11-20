@@ -44,7 +44,7 @@ func initMain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if len(cfg.Sites) > 0 || len(cfg.Databases) > 0 && cmd.Flag("skip-apply").Value.String() != "true" {
+	if (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) && cmd.Flag("skip-apply").Value.String() != "true" {
 		return nitro.Apply(cmd.Context(), env, cfg)
 	}
 
@@ -55,5 +55,4 @@ func init() {
 	flags := InitCommand.Flags()
 
 	flags.BoolP("skip-apply", "s", false, "skip applying changes")
-
 }
