@@ -33,10 +33,9 @@ func TestDatabase_GetHostname(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := &Database{
-				Engine:    tt.fields.Engine,
-				Version:   tt.fields.Version,
-				Port:      tt.fields.Port,
-				Ephemeral: tt.fields.Ephemeral,
+				Engine:  tt.fields.Engine,
+				Version: tt.fields.Version,
+				Port:    tt.fields.Port,
 			}
 			got, err := d.GetHostname()
 			if (err != nil) != tt.wantErr {
