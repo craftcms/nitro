@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -15,7 +14,6 @@ import (
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
-	"github.com/mitchellh/go-homedir"
 )
 
 // Apply is used to create a
@@ -47,12 +45,6 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 	}
 
 	cli.InfoSuccess("using", networkID)
-
-	// get the users home dir
-	home, err := homedir.Dir()
-	if err != nil {
-		return fmt.Errorf("unable to get the users home directory, %w", err)
-	}
 
 	cli.Info("Checking Databases...")
 
@@ -122,7 +114,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 			}
 
 			// pull the image
-			cli.InfoPending("pulling image", image)
+			cli.InfoPending("pulling", image)
 
 			rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 			if err != nil {
@@ -142,7 +134,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 			}
 
 			// create the container
-			cli.InfoPending("creating container", hostname)
+			cli.InfoPending("creating", hostname)
 
 			conResp, err := cli.docker.ContainerCreate(
 				ctx,
@@ -193,7 +185,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 
 		// start the container if needed
 		if startContainer {
-			cli.InfoPending("starting container", hostname)
+			cli.InfoPending("starting", hostname)
 
 			if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
@@ -207,15 +199,12 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 		filter.Del("label", DatabaseVersionLabel+"="+db.Version)
 	}
 
-	// TODO(jasonmccallister) get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
+	// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 	cli.Info("Checking Sites...")
 
 	for _, site := range cfg.Sites {
 		// add the site filter
 		filter.Add("label", HostLabel+"="+site.Hostname)
-
-		// TODO(jasonmccallister) make the php version dynamic based on the site
-		image := fmt.Sprintf("docker.io/craftcms/nginx:%s", "7.4")
 
 		containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
@@ -226,31 +215,104 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 		var startContainer bool
 		switch len(containers) {
 		case 1:
+			c := containers[0]
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+
+			// make sure the images match, if they don't stop, remove, and create the container
+			// with the new image
+			if c.Image != image {
+				cli.InfoPending(site.Hostname, "out of sync, applying")
+
+				path, err := site.GetAbsPath()
+				if err != nil {
+					return err
+				}
+
+				// stop container
+				if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
+					return err
+				}
+
+				// remove container
+				if err := cli.docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					return err
+				}
+
+				// pull the image
+				// pull the image
+				cli.InfoPending("pulling", image)
+
+				rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+				if err != nil {
+					return fmt.Errorf("unable to pull image, %w", err)
+				}
+
+				buf := &bytes.Buffer{}
+				if _, err := buf.ReadFrom(rdr); err != nil {
+					return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+				}
+
+				cli.InfoDone()
+
+				// create new container, will have a new container id
+				// create the container
+				resp, err := cli.docker.ContainerCreate(
+					ctx,
+					&container.Config{
+						Image: image,
+						Labels: map[string]string{
+							EnvironmentLabel: env,
+							HostLabel:        site.Hostname,
+						},
+					},
+					&container.HostConfig{
+						Mounts: []mount.Mount{{
+							Type:   mount.TypeBind,
+							Source: path,
+							Target: "/app",
+						},
+						},
+					},
+					&network.NetworkingConfig{
+						EndpointsConfig: map[string]*network.EndpointSettings{
+							env: {
+								NetworkID: networkID,
+							},
+						},
+					},
+					site.Hostname,
+				)
+				if err != nil {
+					return fmt.Errorf("unable to create the container, %w", err)
+				}
+
+				containerID = resp.ID
+				startContainer = true
+
+				cli.InfoDone()
+
+				break
+			}
+
 			cli.InfoSuccess(site.Hostname, "ready")
 
 			// get the container id
-			containerID = containers[0].ID
+			containerID = c.ID
 
 			// check if the container is running
 			if containers[0].State != "running" {
 				startContainer = true
 			}
 		default:
-			// TODO(jasonmccallister) make this dynamic
-			sourcePath := "~/dev/plugins-dev"
-			if site.Hostname == "extendingcaddy.nitro" {
-				sourcePath = "~/dev/extendingcaddy"
-			}
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
 
-			// TODO get the complete file path
-			if strings.Contains(sourcePath, "~") {
-				sourcePath = strings.Replace(sourcePath, "~", home, 1)
+			path, err := site.GetAbsPath()
+			if err != nil {
+				return err
 			}
-
-			path := filepath.Clean(sourcePath)
 
 			// pull the image
-			cli.InfoPending("pulling image", image)
+			cli.InfoPending("pulling", image)
 
 			rdr, err := cli.docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 			if err != nil {
@@ -264,7 +326,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 
 			cli.InfoDone()
 
-			cli.InfoPending("creating container", site.Hostname)
+			cli.InfoPending("creating", site.Hostname)
 
 			// create the container
 			resp, err := cli.docker.ContainerCreate(
@@ -278,10 +340,8 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 				},
 				&container.HostConfig{
 					Mounts: []mount.Mount{{
-						Type: mount.TypeBind,
-						// TODO (jasonmccallister) get the source from the site
+						Type:   mount.TypeBind,
 						Source: path,
-						//Source: site.Webroot,
 						Target: "/app",
 					},
 					},
@@ -307,7 +367,7 @@ func (cli *Client) Apply(ctx context.Context, env string, cfg *config.Config) er
 
 		// start the container if needed
 		if startContainer {
-			cli.InfoPending("starting container for", site.Hostname)
+			cli.InfoPending("starting", site.Hostname)
 
 			if err := cli.docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
