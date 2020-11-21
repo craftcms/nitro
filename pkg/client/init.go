@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -146,14 +147,65 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 	if containerID == "" {
 		cli.InfoPending("creating proxy")
 
+		// set ports
+		var httpPort, httpsPort, apiPort nat.Port
+
+		// check for a custom HTTP port
+		switch os.Getenv("NITRO_HTTP_PORT") {
+		case "":
+			httpPort, err = nat.NewPort("tcp", "80")
+			if err != nil {
+				return fmt.Errorf("unable to set the HTTP port, %w", err)
+			}
+		default:
+			if os.Getenv("NITRO_HTTP_PORT") != "" {
+				httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
+				if err != nil {
+					return fmt.Errorf("unable to set the HTTP port, %w", err)
+				}
+			}
+		}
+
+		// check for a custom HTTPS port
+		switch os.Getenv("NITRO_HTTPS_PORT") {
+		case "":
+			httpsPort, err = nat.NewPort("tcp", "443")
+			if err != nil {
+				return fmt.Errorf("unable to set the HTTPS port, %w", err)
+			}
+		default:
+			if os.Getenv("NITRO_HTTPS_PORT") != "" {
+				httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
+				if err != nil {
+					return fmt.Errorf("unable to set the HTTPS port, %w", err)
+				}
+			}
+		}
+
+		// check for a custom API port
+		switch os.Getenv("NITRO_API_PORT") {
+		case "":
+			apiPort, err = nat.NewPort("tcp", "5000")
+			if err != nil {
+				return fmt.Errorf("unable to set the API port, %w", err)
+			}
+		default:
+			if os.Getenv("NITRO_API_PORT") != "" {
+				httpPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
+				if err != nil {
+					return fmt.Errorf("unable to set the API port, %w", err)
+				}
+			}
+		}
+
+		// create a container
 		resp, err := cli.docker.ContainerCreate(ctx,
 			&container.Config{
-				// TODO(jasonmccallister) make this dynamic based on the nitro CLI and image
 				Image: "nitro-proxy:develop",
 				ExposedPorts: nat.PortSet{
-					"80/tcp":   struct{}{},
-					"443/tcp":  struct{}{},
-					"5000/tcp": struct{}{},
+					httpPort:  struct{}{},
+					httpsPort: struct{}{},
+					apiPort:   struct{}{},
 				},
 				Labels: map[string]string{
 					"com.craftcms.nitro.type":  "proxy",
@@ -170,21 +222,20 @@ func (cli *Client) Init(ctx context.Context, name string, args []string) error {
 						Target: "/data",
 					},
 				},
-				// TODO(jasonmccallister) make the ports for HTTP, HTTPS, and the gRPC API dynamic
 				PortBindings: map[nat.Port][]nat.PortBinding{
-					"80/tcp": {
+					httpPort: {
 						{
 							HostIP:   "127.0.0.1",
 							HostPort: "80",
 						},
 					},
-					"443/tcp": {
+					httpsPort: {
 						{
 							HostIP:   "127.0.0.1",
 							HostPort: "443",
 						},
 					},
-					"5000/tcp": {
+					apiPort: {
 						{
 							HostIP:   "127.0.0.1",
 							HostPort: "5000",
