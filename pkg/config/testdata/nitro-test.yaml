@@ -18,8 +18,11 @@ sites:
       - example.local
     php: "7.4"
     path: ~/dev/craft-dev
-  - hostname: plugins.nitro
+  - hostname: plugin-dev.nitro
     aliases:
-      - plugins.test
-      - plugins.local
+      - plugin-dev.test
+      - plugin-dev.local
     php: "7.4"
+    path: ~/dev/plugin-dev
+    mounts:
+      - ~/dev/plugins/commerce:/app/commerce
