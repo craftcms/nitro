@@ -27,12 +27,13 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 		return nil
 	}
 
-	cli.Info("Stopping down environment for", name)
+	cli.Info("Stopping", name)
 
 	// stop each environment container
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
-		cli.SubInfo("stopping container for", n)
+
+		cli.InfoPending("stopping", n)
 
 		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
 			errWrap := fmt.Errorf("unable to stop container %s: %w", n, err)
@@ -41,9 +42,11 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 
 			return errWrap
 		}
+
+		cli.InfoDone()
 	}
 
-	cli.Info("Development environment for", name, "shutdown")
+	cli.Info(name, "shutdown 😴")
 
 	return nil
 }

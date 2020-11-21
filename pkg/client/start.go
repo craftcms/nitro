@@ -27,23 +27,23 @@ func (cli *Client) Start(ctx context.Context, name string, args []string) error 
 		return nil
 	}
 
-	cli.Info("Starting environment for", name)
-
 	// start each environment container
 	for _, c := range containers {
 		if c.State == "running" {
-			cli.SubInfo("container", strings.TrimLeft(c.Names[0], "/"), "is running")
+			cli.InfoSuccess(strings.TrimLeft(c.Names[0], "/"), "ready")
 			continue
 		}
 
-		cli.SubInfo("starting container", strings.TrimLeft(c.Names[0], "/"))
+		cli.InfoPending("starting", strings.TrimLeft(c.Names[0], "/"))
 
 		if err := cli.docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start container %s: %w", c.Names[0], err)
 		}
+
+		cli.InfoDone()
 	}
 
-	cli.Info("Development environment for", name, "started")
+	cli.Info(name, "started 👍")
 
 	return nil
 }
