@@ -6,10 +6,26 @@ option go_package = "pkg/protob";
 
 service Nitro {
     rpc Ping(PingRequest) returns (PingResponse) {}
+    rpc Apply(ApplyRequest) returns (ApplyResponse) {}
 }
 
 message PingRequest {}
 
 message PingResponse {
     string pong = 1;
+}
+
+message ApplyRequest {
+    map<string, Site> sites = 1;
+}
+
+message ApplyResponse {
+    bool error = 1;
+    string message = 2;
+}
+
+message Site {
+    string hostname = 1;
+    string aliases = 2;
+    int32 port = 3;
 }

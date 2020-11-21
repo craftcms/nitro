@@ -114,6 +114,171 @@ func (x *PingResponse) GetPong() string {
 	return ""
 }
 
+type ApplyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Sites map[string]*Site `protobuf:"bytes,1,rep,name=sites,proto3" json:"sites,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *ApplyRequest) Reset() {
+	*x = ApplyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkg_protob_nitro_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyRequest) ProtoMessage() {}
+
+func (x *ApplyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_protob_nitro_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyRequest.ProtoReflect.Descriptor instead.
+func (*ApplyRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_protob_nitro_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ApplyRequest) GetSites() map[string]*Site {
+	if x != nil {
+		return x.Sites
+	}
+	return nil
+}
+
+type ApplyResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error   bool   `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *ApplyResponse) Reset() {
+	*x = ApplyResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkg_protob_nitro_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyResponse) ProtoMessage() {}
+
+func (x *ApplyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_protob_nitro_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyResponse.ProtoReflect.Descriptor instead.
+func (*ApplyResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_protob_nitro_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ApplyResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
+func (x *ApplyResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type Site struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Hostname string `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Aliases  string `protobuf:"bytes,2,opt,name=aliases,proto3" json:"aliases,omitempty"`
+	Port     int32  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+}
+
+func (x *Site) Reset() {
+	*x = Site{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkg_protob_nitro_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Site) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Site) ProtoMessage() {}
+
+func (x *Site) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_protob_nitro_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Site.ProtoReflect.Descriptor instead.
+func (*Site) Descriptor() ([]byte, []int) {
+	return file_pkg_protob_nitro_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Site) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+func (x *Site) GetAliases() string {
+	if x != nil {
+		return x.Aliases
+	}
+	return ""
+}
+
+func (x *Site) GetPort() int32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
 var File_pkg_protob_nitro_proto protoreflect.FileDescriptor
 
 var file_pkg_protob_nitro_proto_rawDesc = []byte{
@@ -122,12 +287,34 @@ var file_pkg_protob_nitro_proto_rawDesc = []byte{
 	0x22, 0x0d, 0x0a, 0x0b, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
 	0x22, 0x0a, 0x0c, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
 	0x12, 0x0a, 0x04, 0x70, 0x6f, 0x6e, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70,
-	0x6f, 0x6e, 0x67, 0x32, 0x3c, 0x0a, 0x05, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x12, 0x33, 0x0a, 0x04,
-	0x50, 0x69, 0x6e, 0x67, 0x12, 0x13, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x50, 0x69,
-	0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6e, 0x69, 0x74, 0x72,
-	0x6f, 0x64, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x67, 0x22, 0x8d, 0x01, 0x0a, 0x0c, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x35, 0x0a, 0x05, 0x73, 0x69, 0x74, 0x65, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x41, 0x70, 0x70,
+	0x6c, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x69, 0x74, 0x65, 0x73, 0x45,
+	0x6e, 0x74, 0x72, 0x79, 0x52, 0x05, 0x73, 0x69, 0x74, 0x65, 0x73, 0x1a, 0x46, 0x0a, 0x0a, 0x53,
+	0x69, 0x74, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x22, 0x0a, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x6e, 0x69, 0x74,
+	0x72, 0x6f, 0x64, 0x2e, 0x53, 0x69, 0x74, 0x65, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a,
+	0x02, 0x38, 0x01, 0x22, 0x3f, 0x0a, 0x0d, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x08, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x22, 0x50, 0x0a, 0x04, 0x53, 0x69, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08,
+	0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x6c, 0x69, 0x61,
+	0x73, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x6c, 0x69, 0x61, 0x73,
+	0x65, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x32, 0x74, 0x0a, 0x05, 0x4e, 0x69, 0x74, 0x72, 0x6f, 0x12,
+	0x33, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x13, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64,
+	0x2e, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6e,
+	0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x05, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x12, 0x14, 0x2e,
+	0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x6e, 0x69, 0x74, 0x72, 0x6f, 0x64, 0x2e, 0x41, 0x70, 0x70,
+	0x6c, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0c, 0x5a, 0x0a,
+	0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -142,19 +329,27 @@ func file_pkg_protob_nitro_proto_rawDescGZIP() []byte {
 	return file_pkg_protob_nitro_proto_rawDescData
 }
 
-var file_pkg_protob_nitro_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pkg_protob_nitro_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_pkg_protob_nitro_proto_goTypes = []interface{}{
-	(*PingRequest)(nil),  // 0: nitrod.PingRequest
-	(*PingResponse)(nil), // 1: nitrod.PingResponse
+	(*PingRequest)(nil),   // 0: nitrod.PingRequest
+	(*PingResponse)(nil),  // 1: nitrod.PingResponse
+	(*ApplyRequest)(nil),  // 2: nitrod.ApplyRequest
+	(*ApplyResponse)(nil), // 3: nitrod.ApplyResponse
+	(*Site)(nil),          // 4: nitrod.Site
+	nil,                   // 5: nitrod.ApplyRequest.SitesEntry
 }
 var file_pkg_protob_nitro_proto_depIdxs = []int32{
-	0, // 0: nitrod.Nitro.Ping:input_type -> nitrod.PingRequest
-	1, // 1: nitrod.Nitro.Ping:output_type -> nitrod.PingResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	5, // 0: nitrod.ApplyRequest.sites:type_name -> nitrod.ApplyRequest.SitesEntry
+	4, // 1: nitrod.ApplyRequest.SitesEntry.value:type_name -> nitrod.Site
+	0, // 2: nitrod.Nitro.Ping:input_type -> nitrod.PingRequest
+	2, // 3: nitrod.Nitro.Apply:input_type -> nitrod.ApplyRequest
+	1, // 4: nitrod.Nitro.Ping:output_type -> nitrod.PingResponse
+	3, // 5: nitrod.Nitro.Apply:output_type -> nitrod.ApplyResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_pkg_protob_nitro_proto_init() }
@@ -187,6 +382,42 @@ func file_pkg_protob_nitro_proto_init() {
 				return nil
 			}
 		}
+		file_pkg_protob_nitro_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ApplyRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkg_protob_nitro_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ApplyResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkg_protob_nitro_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Site); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -194,7 +425,7 @@ func file_pkg_protob_nitro_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkg_protob_nitro_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -221,6 +452,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NitroClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
+	Apply(ctx context.Context, in *ApplyRequest, opts ...grpc.CallOption) (*ApplyResponse, error)
 }
 
 type nitroClient struct {
@@ -240,9 +472,19 @@ func (c *nitroClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *nitroClient) Apply(ctx context.Context, in *ApplyRequest, opts ...grpc.CallOption) (*ApplyResponse, error) {
+	out := new(ApplyResponse)
+	err := c.cc.Invoke(ctx, "/nitrod.Nitro/Apply", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NitroServer is the server API for Nitro service.
 type NitroServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
+	Apply(context.Context, *ApplyRequest) (*ApplyResponse, error)
 }
 
 // UnimplementedNitroServer can be embedded to have forward compatible implementations.
@@ -251,6 +493,9 @@ type UnimplementedNitroServer struct {
 
 func (*UnimplementedNitroServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (*UnimplementedNitroServer) Apply(context.Context, *ApplyRequest) (*ApplyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Apply not implemented")
 }
 
 func RegisterNitroServer(s *grpc.Server, srv NitroServer) {
@@ -275,6 +520,24 @@ func _Nitro_Ping_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Nitro_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NitroServer).Apply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nitrod.Nitro/Apply",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NitroServer).Apply(ctx, req.(*ApplyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Nitro_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "nitrod.Nitro",
 	HandlerType: (*NitroServer)(nil),
@@ -282,6 +545,10 @@ var _Nitro_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Ping",
 			Handler:    _Nitro_Ping_Handler,
+		},
+		{
+			MethodName: "Apply",
+			Handler:    _Nitro_Apply_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
