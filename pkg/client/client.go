@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/docker/docker/client"
-	"github.com/fatih/color"
 )
 
 // ErrDockerPing is the error when we are unable to reach to docker client
@@ -15,55 +14,19 @@ var ErrDockerPing = fmt.Errorf("docker does not appear to be running")
 // Client represents a Nitro CLI
 type Client struct {
 	docker client.CommonAPIClient
-
-	// color output
-	infoOut *color.Color
-	errOut  *color.Color
 }
 
 func (cli Client) Error(s ...string) {
-	msg := strings.Join(s, " ")
-
-	switch cli.errOut {
-	case nil:
-		fmt.Printf("%s\n", msg)
-	default:
-		cli.errOut.Printf("%s\n", msg)
-	}
-}
-
-func (cli Client) SubError(s ...string) {
-	msg := strings.Join(s, " ")
-
-	switch cli.errOut {
-	case nil:
-		fmt.Printf("  ==> %s\n", msg)
-	default:
-		cli.errOut.Printf("  ==> %s\n", msg)
-	}
+	fmt.Printf("%s\n", strings.Join(s, " "))
 }
 
 func (cli Client) Info(s ...string) {
-	msg := strings.Join(s, " ")
-
-	switch cli.infoOut {
-	case nil:
-		fmt.Printf("%s\n", msg)
-	default:
-		cli.infoOut.Printf("%s\n", msg)
-	}
+	fmt.Printf("%s\n", strings.Join(s, " "))
 }
 
-func (cli Client) SubInfo(s ...string) {
-	msg := strings.Join(s, " ")
-
-	switch cli.infoOut {
-	case nil:
-		fmt.Printf("  \u2713 %s\n", msg)
-	default:
-		cli.infoOut.Printf("  ==> %s\n", msg)
-	}
-}
+// func (cli Client) SubInfo(s ...string) {
+// 	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
+// }
 
 func (cli Client) InfoSuccess(s ...string) {
 	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
