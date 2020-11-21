@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -26,6 +28,21 @@ type Site struct {
 	Path     string   `yaml:"path,omitempty"`
 	PHP      string   `yaml:"php,omitempty"`
 	Dir      string   `yaml:"dir,omitempty"`
+}
+
+func (s *Site) GetAbsPath() (string, error) {
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", fmt.Errorf("unable to get the users home directory, %w", err)
+	}
+
+	p := s.Path
+
+	if strings.Contains(p, "~") {
+		p = strings.Replace(p, "~", home, -1)
+	}
+
+	return filepath.Abs(p)
 }
 
 type Database struct {
