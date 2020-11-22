@@ -27,20 +27,15 @@ func (cli *Client) Stop(ctx context.Context, name string, args []string) error {
 		return nil
 	}
 
-	cli.Info("Stopping", name)
-
 	// stop each environment container
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
 
 		cli.InfoPending("stopping", n)
 
+		// stop the container
 		if err := cli.docker.ContainerStop(ctx, c.ID, nil); err != nil {
-			errWrap := fmt.Errorf("unable to stop container %s: %w", n, err)
-
-			cli.SubError(errWrap.Error())
-
-			return errWrap
+			return fmt.Errorf("unable to stop container %s: %w", n, err)
 		}
 
 		cli.InfoDone()

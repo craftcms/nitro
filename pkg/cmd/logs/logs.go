@@ -1,4 +1,4 @@
-package ls
+package logs
 
 import (
 	"fmt"
@@ -7,16 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// LSCommand is the command for creating new development environments
-var LSCommand = &cobra.Command{
-	Use:   "ls",
-	Short: "List environment containers",
-	RunE:  lsMain,
-	Example: `  # list all containers for the environment
-  nitro ls`,
+// LogsCommand is used to retrieve logs from a container
+var LogsCommand = &cobra.Command{
+	Use:   "logs",
+	Short: "View logs",
+	RunE:  logsMain,
+	Example: `  # list logs for a container
+  nitro logs`,
 }
 
-func lsMain(cmd *cobra.Command, args []string) error {
+func logsMain(cmd *cobra.Command, args []string) error {
 	env := cmd.Flag("environment").Value.String()
 
 	// create the new client

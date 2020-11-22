@@ -65,8 +65,8 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	cli.InfoPending("trusting certificate (you will be prompted for a password):\n")
 
 	if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
-		cli.SubError("Unable to automatically add the certificate\n")
-		cli.SubError("To install the certificate, run the following command:")
+		cli.Info("Unable to automatically add the certificate\n")
+		cli.Info("To install the certificate, run the following command:")
 
 		// TODO show os specific commands
 		switch runtime.GOOS {
@@ -81,7 +81,7 @@ func (cli *Client) Trust(ctx context.Context, env string, args []string) error {
 	cli.InfoPending("cleaning up")
 
 	if err := os.Remove(f.Name()); err != nil {
-		cli.SubError("unable to remove temporary file, it will be automatically removed on reboot")
+		cli.Info("unable to remove temporary file, it will be automatically removed on reboot")
 	}
 
 	cli.InfoDone()

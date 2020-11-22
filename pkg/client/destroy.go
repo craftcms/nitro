@@ -27,29 +27,29 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 
 	// make sure there are containers
 	if len(containers) == 0 {
-		cli.SubError("no containers found for environment", env)
+		cli.Info("no containers found for", env)
 	}
 
 	// get all related volumes
 	volumes, err := cli.docker.VolumeList(ctx, filter)
 	if err != nil {
-		cli.SubError("error listing volumes for the environment")
+		return err
 	}
 
 	// make sure there are volumes
 	if len(volumes.Volumes) == 0 {
-		cli.SubError("no volumes found for the environment")
+		cli.Info("no volumes found for", env)
 	}
 
 	// get all related networks
 	networks, err := cli.docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
 	if err != nil {
-		cli.SubError("error listing networks for the environment")
+		return err
 	}
 
 	// make sure there are networks
 	if len(networks) == 0 {
-		cli.SubError("no networks found for the environment")
+		cli.Info("no networks found for", env)
 	}
 
 	// stop all of the container
@@ -63,17 +63,18 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 
 			// only perform a backup if the container is for databases
 			if c.Labels["com.craftcms.nitro.todo"] != "" {
-				cli.SubError("removing databases is not yet supported")
+				cli.Info("removing databases is not yet supported")
 				break
 
-				// TODO(jasonmccallister) implement backups
+				// TODO(jasonmccallister) implement backups of the databases
 				fmt.Println("Backing up database")
 				time.Sleep(time.Second * 2)
-				cli.SubInfo("database backup for container", strings.TrimLeft(c.Names[0], "/"), "completed")
 			}
 
 			// stop the container
 			cli.InfoPending("removing", name)
+
+			// stop the container
 			if err := cli.docker.ContainerStop(ctx, c.ID, &timeout); err != nil {
 				return fmt.Errorf("unable to stop the container, %w", err)
 			}
@@ -96,7 +97,7 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 
 			// remove the volume
 			if err := cli.docker.VolumeRemove(ctx, v.Name, true); err != nil {
-				cli.SubError("unable to remove volume"+v.Name+",", "you may need to manually remove the volume")
+				cli.Info("unable to remove volume", v.Name)
 				break
 			}
 
@@ -112,7 +113,7 @@ func (cli *Client) Destroy(ctx context.Context, env string, args []string) error
 			cli.InfoPending("removing", n.Name)
 
 			if err := cli.docker.NetworkRemove(ctx, n.ID); err != nil {
-				cli.SubInfo("unable to remove network", n.Name, "you may need to manually remove the network")
+				cli.Info("unable to remove network", n.Name, "you may need to manually remove network")
 			}
 
 			cli.InfoDone()

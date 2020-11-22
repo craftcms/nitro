@@ -28,7 +28,7 @@ func (cli *Client) Restart(ctx context.Context, name string, args []string) erro
 		return nil
 	}
 
-	fmt.Println("Restarting containers for environment", name)
+	fmt.Println("Restarting", name+"...")
 
 	// set a timeout, consider making this a flag
 	timeout := time.Duration(5000) * time.Millisecond
@@ -37,14 +37,17 @@ func (cli *Client) Restart(ctx context.Context, name string, args []string) erro
 	for _, c := range containers {
 		n := strings.TrimLeft(c.Names[0], "/")
 
-		fmt.Println("  ==> restarting", n)
+		cli.InfoPending("restarting", n)
 
+		// restart the container
 		if err := cli.docker.ContainerRestart(ctx, c.ID, &timeout); err != nil {
 			return fmt.Errorf("unable to restart container %s: %w", n, err)
 		}
+
+		cli.InfoDone()
 	}
 
-	fmt.Println("Development environment for", name, "restarted")
+	fmt.Println(name, "restarted 🎉")
 
 	return nil
 }

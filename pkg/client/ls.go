@@ -10,51 +10,27 @@ import (
 )
 
 // LS is used to return a list of containers related to a specific environment
-func (cli *Client) LS(ctx context.Context, name string, args []string) error {
+func (cli *Client) LS(ctx context.Context, name string, args []string) (map[string]string, error) {
+	opts := make(map[string]string)
+
 	// get all the containers using a filter, we only want to start containers which
 	// have the label com.craftcms.nitro.environment=name
 	filter := filters.NewArgs()
 	filter.Add("label", EnvironmentLabel+"="+name)
 	containers, err := cli.docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 	if err != nil {
-		return fmt.Errorf("unable to get a list of the containers, %w", err)
+		return opts, fmt.Errorf("unable to get a list of the containers, %w", err)
 	}
 
 	// if there are no containers, were done
 	if len(containers) == 0 {
-		cli.Error(ErrNoContainers.Error())
-
-		return nil
+		return opts, ErrNoContainers
 	}
 
-	cli.Info(fmt.Sprintf("Listing containers for %s...", name))
-
-	// list each container for for the environment
+	// get each of the containers
 	for _, c := range containers {
-		containerType := "web"
-		if c.Labels["com.craftcms.nitro.proxy"] != "" {
-			containerType = "proxy"
-		}
-
-		if c.Labels[DatabaseEngineLabel] != "" {
-			containerType = "database"
-		}
-
-		n := strings.TrimLeft(c.Names[0], "/")
-
-		fmt.Println("  ==> type:", containerType, "\thostname:", n)
-		if containerType == "web" {
-			// TODO(jasonmccallister) grab the aliases, should be set on a label
-			fmt.Println("      aliases:", "\t\texamplealias.demo,", "anotheralias.test")
-		}
-		fmt.Println("      ip:", c.NetworkSettings.Networks["nitro-dev"].IPAddress, "\timage:", c.Image)
-		if c.Mounts[0].Source != "" {
-			fmt.Println("      mount:", c.Mounts[0].Source)
-		}
-		fmt.Println("      uptime:", c.Status)
-		fmt.Println("")
-		// fmt.Println("      ---")
+		opts[strings.TrimLeft(c.Names[0], "/")] = c.ID
 	}
 
-	return nil
+	return opts, nil
 }

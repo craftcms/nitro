@@ -51,7 +51,7 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		cmd = []string{"npm", "update"}
 	}
 
-	cli.SubInfo("creating temporary container for node")
+	cli.InfoPending("preparing npm")
 
 	// create the temp container
 	resp, err := cli.docker.ContainerCreate(ctx,
@@ -73,7 +73,11 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		return fmt.Errorf("unable to create container\n%w", err)
 	}
 
-	cli.SubInfo("running node", action, "this may take a moment")
+	cli.InfoDone()
+
+	cli.Info("Running npm", action)
+
+	// attach to the container
 	stream, err := cli.docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdout: true,
@@ -95,15 +99,17 @@ func (cli *Client) Node(ctx context.Context, dir, version, action string) error 
 		return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 	}
 
-	cli.Info("Node", action, "ran successfully!")
-
 	// remove the temp container
-	cli.SubInfo("removing temporary container")
+	cli.InfoPending("cleaning up")
+
+	// remove the container
 	if err := cli.docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 		return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
 	}
 
-	cli.Info("Cleanup completed!")
+	cli.InfoDone()
+
+	cli.Info("Node", action, "complete 🤘")
 
 	return nil
 }

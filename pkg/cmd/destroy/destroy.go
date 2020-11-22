@@ -12,7 +12,7 @@ import (
 // DestroyCommand is the command for creating new development environments
 var DestroyCommand = &cobra.Command{
 	Use:   "destroy",
-	Short: "Destroy an environment",
+	Short: "Destroy environment",
 	RunE:  destroy,
 	Example: `  # remove all resources (networks, containers, and volumes) for an environment
   nitro destroy

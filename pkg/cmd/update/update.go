@@ -25,13 +25,13 @@ func updateMain(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to create a client for docker, %w", err)
 	}
 
-	images := []string{"docker.io/craftcms/php-fpm:7.4-dev", "docker.io/craftcms/php-fpm:7.3-dev"}
+	images := []string{"docker.io/craftcms/nginx:7.4", "docker.io/craftcms/nginx:7.3"}
 
 	if err := nitro.Update(cmd.Context(), images); err != nil {
 		return err
 	}
 
-	if cmd.Flag("restart").Value.String() == "true" {
+	if cmd.Flag("skip-restart").Value.String() == "false" {
 		return nitro.Restart(cmd.Context(), env, args)
 	}
 
@@ -41,5 +41,5 @@ func updateMain(cmd *cobra.Command, args []string) error {
 func init() {
 	flags := UpdateCommand.Flags()
 
-	flags.BoolP("restart", "r", true, "restart containers after update")
+	flags.BoolP("skip-restart", "r", false, "restart after update")
 }
