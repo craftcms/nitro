@@ -12,6 +12,8 @@
 - Added the `nitro npm` with the `--version` flag to install or update projects without node/npm installed locally.
 - Added the `nitro ls` command to show all the running containers.
 - Added the `nitro prep` command to help setup a project to deploy to a Docker based environment by adding a `Dockerfile` based on the sites PHP version, a `.dockerignore`, and multi-stage builds for handling dependency installs in Docker.
+- You can now set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO
+_API_PORT`.
 
 ### Changed
 
@@ -19,6 +21,7 @@
 - Nitro will now check for port collisions during `init` and when adding database engines.
 - Terminal output now has colors to identify info and error output.
 - The `nitro create` command now accepts custom GitHub repositiories and installs composer and node dependencies automatically using `nitro composer` and `nitro npm`.
+- Machine name is now the environment name, the `NITRO_DEFAULT_MACHINE` has been renamed to `NITRO_DEFAULT_ENVIRONMENT`.
 
 ## 1.1.0 - 2020-10-06
 
