@@ -7,22 +7,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/update"
-	"github.com/craftcms/nitro/pkg/cmd/apply"
-	"github.com/craftcms/nitro/pkg/cmd/complete"
-	"github.com/craftcms/nitro/pkg/cmd/composer"
-	"github.com/craftcms/nitro/pkg/cmd/context"
-	"github.com/craftcms/nitro/pkg/cmd/db"
-	"github.com/craftcms/nitro/pkg/cmd/destroy"
-	"github.com/craftcms/nitro/pkg/cmd/exec"
-	"github.com/craftcms/nitro/pkg/cmd/initcmd"
-	"github.com/craftcms/nitro/pkg/cmd/ls"
-	"github.com/craftcms/nitro/pkg/cmd/npm"
-	"github.com/craftcms/nitro/pkg/cmd/restart"
-	"github.com/craftcms/nitro/pkg/cmd/start"
-	"github.com/craftcms/nitro/pkg/cmd/stop"
-	"github.com/craftcms/nitro/pkg/cmd/trust"
+
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/terminal"
 )
@@ -60,21 +48,20 @@ func init() {
 
 	// register all of the commands
 	commands := []*cobra.Command{
-		initcmd.InitCommand,
 		initialize.New(client, term),
-		stop.StopCommand,
-		start.StartCommand,
-		destroy.DestroyCommand,
-		restart.RestartCommand,
-		ls.LSCommand,
-		composer.ComposerCommand,
-		npm.NPMCommand,
-		complete.CompleteCommand,
-		apply.ApplyCommand,
-		context.ContextCommand,
-		exec.ExecCommand,
-		trust.TrustCommand,
-		db.DBCommand,
+		//stop.StopCommand,
+		//start.StartCommand,
+		// destroy.DestroyCommand,
+		// restart.RestartCommand,
+		// ls.LSCommand,
+		// composer.ComposerCommand,
+		// npm.NPMCommand,
+		//complete.CompleteCommand,
+		apply.New(client, term),
+		//context.ContextCommand,
+		//exec.ExecCommand,
+		//trust.TrustCommand,
+		//db.DBCommand,
 		update.New(),
 	}
 
