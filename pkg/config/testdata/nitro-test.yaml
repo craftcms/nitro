@@ -4,6 +4,14 @@ exts:
 blackfire:
   key: my-key
   secret: my-secret
+php:
+  display_errors: On
+  max_execution_time: 5000
+  max_input_vars: 10000
+  max_input_time: 5000
+  max_file_upload: 200M
+  memory_limit: 1024M
+  upload_max_filesize: 500M
 databases:
   - engine: mysql
     version: "8.0"

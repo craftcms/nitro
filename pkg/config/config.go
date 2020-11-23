@@ -13,6 +13,7 @@ import (
 type Config struct {
 	Extensions []string   `yaml:"exts,omitempty"`
 	Blackfire  Blackfire  `yaml:"blackfire,omitempty"`
+	PHP        PHP        `yaml:"php,omitempty"`
 	Sites      []Site     `yaml:"sites,omitempty"`
 	Databases  []Database `yaml:"databases,omitempty"`
 }
@@ -20,6 +21,16 @@ type Config struct {
 type Blackfire struct {
 	ClientID     string `yaml:"client_id,omitempty"`
 	ClientSecret string `yaml:"client_secret,omitempty"`
+}
+
+type PHP struct {
+	DisplayErrors     string `yaml:"display_errors,omitempty"`
+	MaxExecutionTime  int    `yaml:"max_execution_time,omitempty"`
+	MaxInputVars      int    `yaml:"max_input_vars,omitempty"`
+	MaxInputTime      int    `yaml:"max_input_time,omitempty"`
+	MaxFileUpload     string `yaml:"max_file_upload,omitempty"`
+	MemoryLimit       string `yaml:"memory_limit,omitempty"`
+	UploadMaxFileSize string `yaml:"upload_max_file_size,omitempty"`
 }
 
 type Site struct {
