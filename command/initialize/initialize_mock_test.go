@@ -2,6 +2,8 @@ package initialize
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -11,6 +13,28 @@ import (
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
+
+type spyOutputer struct {
+	infos     []string
+	succesess []string
+	dones     []string
+}
+
+func (spy spyOutputer) Info(s ...string) {
+	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
+}
+
+func (spy spyOutputer) Success(s ...string) {
+	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
+}
+
+func (spy spyOutputer) Pending(s ...string) {
+	fmt.Printf("  … %s ", strings.Join(s, " "))
+}
+
+func (spy spyOutputer) Done() {
+	fmt.Print("\u2713\n")
+}
 
 // inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
 func newMockDockerClient(networks []types.NetworkResource, containers []types.Container, volumes []*types.Volume) *mockDockerClient {

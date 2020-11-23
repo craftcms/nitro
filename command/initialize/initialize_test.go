@@ -1,10 +1,8 @@
 package initialize
 
 import (
-	"fmt"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/craftcms/nitro/labels"
@@ -179,26 +177,4 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			"testingid",
 		)
 	}
-}
-
-type spyOutputer struct {
-	infos     []string
-	succesess []string
-	dones     []string
-}
-
-func (spy spyOutputer) Info(s ...string) {
-	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
-}
-
-func (spy spyOutputer) Success(s ...string) {
-	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
-}
-
-func (spy spyOutputer) Pending(s ...string) {
-	fmt.Printf("  … %s ", strings.Join(s, " "))
-}
-
-func (spy spyOutputer) Done() {
-	fmt.Print("\u2713\n")
 }
