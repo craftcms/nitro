@@ -23,12 +23,18 @@ import (
 	"github.com/craftcms/nitro/terminal"
 )
 
+// Version is used to set the version of nitro we are using
+// and is also used to sync the docker image for the proxy
+// container to use to verify the gRPC API is in sync.
+var Version = "dev"
+
 var rootCommand = &cobra.Command{
 	Use:          "nitro",
 	Short:        "Local Craft CMS dev made easy",
 	Long:         `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
 	RunE:         rootMain,
 	SilenceUsage: true,
+	Version:      Version,
 }
 
 func rootMain(command *cobra.Command, _ []string) error {
