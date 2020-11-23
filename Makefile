@@ -1,6 +1,6 @@
 .PHONY: install scripts docker
 
-VERSION ?= 1.1.0
+VERSION ?= 2.0.0-alpha
 NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:
@@ -11,7 +11,7 @@ build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro.exe ./cmd/cli
 
 build-v2:
-	go build -ldflags="-s -w" -o nitro ./cmd/v2
+	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/v2
 
 docker:
 	docker build -t craftcms/nitro-proxy:develop .
