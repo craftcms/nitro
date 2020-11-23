@@ -16,11 +16,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 const exampleText = `  # run composer install in a current directory
   nitro composer
 
@@ -177,7 +172,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Info("Composer", action, "completed 🤘")
 
-			return ErrExample
+			return nil
 		},
 	}
 
