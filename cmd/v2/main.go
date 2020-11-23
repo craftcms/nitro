@@ -4,8 +4,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/initialize"
+	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/pkg/cmd/apply"
 	"github.com/craftcms/nitro/pkg/cmd/complete"
 	"github.com/craftcms/nitro/pkg/cmd/composer"
@@ -20,8 +23,8 @@ import (
 	"github.com/craftcms/nitro/pkg/cmd/start"
 	"github.com/craftcms/nitro/pkg/cmd/stop"
 	"github.com/craftcms/nitro/pkg/cmd/trust"
-	"github.com/craftcms/nitro/pkg/cmd/update"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/terminal"
 )
 
 var rootCommand = &cobra.Command{
@@ -46,9 +49,19 @@ func init() {
 	flags := rootCommand.PersistentFlags()
 	flags.StringP("environment", "e", env, "The environment")
 
+	// create the docker client
+	client, err := client.NewEnvClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// create the "terminal" for capturing output
+	term := terminal.New()
+
 	// register all of the commands
 	commands := []*cobra.Command{
 		initcmd.InitCommand,
+		initialize.New(client, term),
 		stop.StopCommand,
 		start.StartCommand,
 		destroy.DestroyCommand,
@@ -62,7 +75,7 @@ func init() {
 		exec.ExecCommand,
 		trust.TrustCommand,
 		db.DBCommand,
-		update.UpdateCommand,
+		update.New(),
 	}
 
 	// add the commands
