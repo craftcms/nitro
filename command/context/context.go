@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -21,9 +20,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "View environment information",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg := config.Config{}
-			if err := viper.Unmarshal(&cfg); err != nil {
-				return fmt.Errorf("unable to read config file, %w", err)
+			cfg, err := config.Umarshal()
+			if err != nil {
+				return err
 			}
 
 			output.Info("Craft Nitro", "2.0.0")
