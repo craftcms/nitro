@@ -170,7 +170,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
-			output.Info("Composer", action, "completed 🤘")
+			output.Info("composer", action, "completed 🤘")
 
 			return nil
 		},
