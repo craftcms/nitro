@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -34,6 +35,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			env := cmd.Flag("environment").Value.String()
+			_, cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
 
 			output.Info(fmt.Sprintf("Checking %s...", env))
 
@@ -281,6 +286,15 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			if !proxyRunning {
 				if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 					return fmt.Errorf("unable to start the nitro container, %w", err)
+				}
+			}
+
+			// check if we need to run the
+			if (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) && cmd.Flag("skip-apply").Value.String() != "true" {
+				for _, c := range cmd.Commands() {
+					if c.Use == "apply" {
+						return c.RunE(cmd, args)
+					}
 				}
 			}
 
