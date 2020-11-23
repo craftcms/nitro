@@ -12,6 +12,7 @@ import (
 	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/destroy"
 	"github.com/craftcms/nitro/command/initialize"
+	"github.com/craftcms/nitro/command/node"
 	"github.com/craftcms/nitro/command/restart"
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
@@ -62,12 +63,14 @@ func init() {
 		update.New(client, term),
 		destroy.New(client, term),
 		composer.New(client, term),
+		node.New(client, term),
 		// npm.NPMCommand,
 		//complete.CompleteCommand,
 		apply.New(client, term),
 		context.New(client, term),
 		trust.New(client, term),
 		//db.DBCommand,
+		//php.New(client, term),
 	}
 
 	// add the commands
