@@ -27,7 +27,7 @@ func initMain(cmd *cobra.Command, args []string) error {
 	// TODO(jasonmccallister) check for the env.yaml file in the home directory
 	// TODO(jasonmccallister) ask for the default PHP version
 
-	cfg, err := config.Umarshal()
+	_, err := config.Umarshal()
 	if err != nil {
 		return fmt.Errorf("unable to read config, %w", err)
 	}
@@ -42,11 +42,6 @@ func initMain(cmd *cobra.Command, args []string) error {
 
 	if err := nitro.Init(cmd.Context(), env, args); err != nil {
 		return err
-	}
-
-	// call the apply command
-	if (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) && cmd.Flag("skip-apply").Value.String() != "true" {
-		return nitro.Apply(cmd.Context(), env, cfg)
 	}
 
 	return nil
