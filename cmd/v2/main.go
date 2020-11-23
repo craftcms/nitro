@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply"
+	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/restart"
 	"github.com/craftcms/nitro/command/start"
@@ -55,6 +56,7 @@ func init() {
 		start.New(client, term),
 		stop.New(client, term),
 		restart.New(client, term),
+		composer.New(client, term),
 		// destroy.DestroyCommand,
 		// restart.RestartCommand,
 		// ls.LSCommand,

@@ -93,13 +93,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				var startContainer bool
 				switch len(containers) {
 				case 1:
-					output.Success(hostname, "ready")
-
 					// set the container id
 					containerID = containers[0].ID
 
 					// check if the container is running
 					if containers[0].State != "running" {
+						output.Success(hostname, "ready")
 						startContainer = true
 					}
 				default:
@@ -221,6 +220,191 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
 				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 			}
+
+			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
+			output.Info("Checking Sites...")
+
+			for _, site := range cfg.Sites {
+				// add the site filter
+				filter.Add("label", labels.Host+"="+site.Hostname)
+
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+				if err != nil {
+					return fmt.Errorf("error getting a list of containers")
+				}
+
+				var containerID string
+				var startContainer bool
+				switch len(containers) {
+				case 1:
+					c := containers[0]
+					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+
+					// make sure the images match, if they don't stop, remove, and create the container
+					// with the new image
+					if c.Image != image {
+						output.Pending(site.Hostname, "out of sync, applying")
+
+						path, err := site.GetAbsPath()
+						if err != nil {
+							return err
+						}
+
+						// stop container
+						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+							return err
+						}
+
+						// remove container
+						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+							return err
+						}
+
+						// pull the image
+						// pull the image
+						output.Pending("pulling", image)
+
+						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+						if err != nil {
+							return fmt.Errorf("unable to pull image, %w", err)
+						}
+
+						buf := &bytes.Buffer{}
+						if _, err := buf.ReadFrom(rdr); err != nil {
+							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+						}
+
+						output.Done()
+
+						// create new container, will have a new container id
+						// create the container
+						resp, err := docker.ContainerCreate(
+							ctx,
+							&container.Config{
+								Image: image,
+								Labels: map[string]string{
+									labels.Environment: env,
+									labels.Host:        site.Hostname,
+								},
+							},
+							&container.HostConfig{
+								Mounts: []mount.Mount{{
+									Type:   mount.TypeBind,
+									Source: path,
+									Target: "/app",
+								},
+								},
+							},
+							&network.NetworkingConfig{
+								EndpointsConfig: map[string]*network.EndpointSettings{
+									env: {
+										NetworkID: networkID,
+									},
+								},
+							},
+							site.Hostname,
+						)
+						if err != nil {
+							return fmt.Errorf("unable to create the container, %w", err)
+						}
+
+						containerID = resp.ID
+						startContainer = true
+
+						output.Done()
+
+						break
+					}
+
+					output.Success(site.Hostname, "ready")
+
+					// get the container id
+					containerID = c.ID
+
+					// check if the container is running
+					if containers[0].State != "running" {
+						startContainer = true
+					}
+				default:
+					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+
+					path, err := site.GetAbsPath()
+					if err != nil {
+						return err
+					}
+
+					// pull the image
+					output.Pending("pulling", image)
+
+					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+					if err != nil {
+						return fmt.Errorf("unable to pull the image, %w", err)
+					}
+
+					buf := &bytes.Buffer{}
+					if _, err := buf.ReadFrom(rdr); err != nil {
+						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+					}
+
+					output.Done()
+
+					output.Pending("creating", site.Hostname)
+
+					// create the container
+					resp, err := docker.ContainerCreate(
+						ctx,
+						&container.Config{
+							Image: image,
+							Labels: map[string]string{
+								labels.Environment: env,
+								labels.Host:        site.Hostname,
+							},
+						},
+						&container.HostConfig{
+							Mounts: []mount.Mount{{
+								Type:   mount.TypeBind,
+								Source: path,
+								Target: "/app",
+							},
+							},
+						},
+						&network.NetworkingConfig{
+							EndpointsConfig: map[string]*network.EndpointSettings{
+								env: {
+									NetworkID: networkID,
+								},
+							},
+						},
+						site.Hostname,
+					)
+					if err != nil {
+						return fmt.Errorf("unable to create the container, %w", err)
+					}
+
+					containerID = resp.ID
+					startContainer = true
+
+					output.Done()
+				}
+
+				// start the container if needed
+				if startContainer {
+					output.Pending("starting", site.Hostname)
+
+					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the container, %w", err)
+					}
+
+					output.Done()
+				}
+
+				// remove the site filter
+				filter.Del("label", labels.Host+"="+site.Hostname)
+			}
+
+			// TODO(jasonmccallister) convert the sites into a Caddy json config and send to the API
+
+			output.Info("Everything for", env, "is up and running 😃")
 
 			return nil
 		},
