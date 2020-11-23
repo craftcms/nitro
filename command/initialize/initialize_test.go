@@ -1,120 +1,204 @@
 package initialize
 
 import (
-	"context"
-	"time"
+	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"testing"
 
+	"github.com/craftcms/nitro/labels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
-	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 )
 
-// inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
-func newMockDockerClient(networks []types.NetworkResource, containers []types.Container, volumes []*types.Volume) *mockDockerClient {
-	return &mockDockerClient{
-		networks:   networks,
-		containers: containers,
-		volumes:    volumetypes.VolumesListOKBody{Volumes: volumes},
+func TestInitFromFreshCreatesNewResources(t *testing.T) {
+	// Arrange
+	environmentName := "testing-init"
+	mock := newMockDockerClient(nil, nil, nil)
+	mock.networkCreateResponse = types.NetworkCreateResponse{
+		ID: "testing-init",
+	}
+	mock.containerCreateResponse = container.ContainerCreateCreatedBody{
+		ID: "testingid",
+	}
+
+	// Expected
+	// set the network create request
+	networkReq := types.NetworkCreateRequest{
+		NetworkCreate: types.NetworkCreate{
+			Driver:     "bridge",
+			Attachable: true,
+			Labels: map[string]string{
+				labels.Environment:           "testing-init",
+				"com.craftcms.nitro.network": "testing-init",
+			},
+		},
+		Name: "testing-init",
+	}
+	// set the volume create request
+	volumeReq := volumetypes.VolumesCreateBody{
+		Driver: "local",
+		Name:   "testing-init",
+		Labels: map[string]string{
+			labels.Environment: "testing-init",
+			labels.Volume:      "testing-init",
+		},
+	}
+	// set the container create request
+	containerCreateReq := types.ContainerCreateConfig{
+		Config: &container.Config{
+			Image: "nitro-proxy:develop",
+			ExposedPorts: nat.PortSet{
+				"80/tcp":   struct{}{},
+				"443/tcp":  struct{}{},
+				"5000/tcp": struct{}{},
+			},
+			Labels: map[string]string{
+				"com.craftcms.nitro.type":  "proxy",
+				labels.Environment:         "testing-init",
+				"com.craftcms.nitro.proxy": "testing-init",
+			},
+		},
+		HostConfig: &container.HostConfig{
+			NetworkMode: "default",
+			Mounts: []mount.Mount{
+				{
+					Type: mount.TypeVolume,
+					// TODO(jasonmccallister) fix the mock to return, or filter, volumes
+					Source: "",
+					Target: "/data",
+				},
+			},
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				"80/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "80",
+					},
+				},
+				"443/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "443",
+					},
+				},
+				"5000/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "5000",
+					},
+				},
+			},
+		},
+		NetworkingConfig: &network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				"testing-init": {
+					NetworkID: "testing-init",
+				},
+			},
+		},
+		Name: "testing-init",
+	}
+	// set the container start request
+	containerStartRequest := types.ContainerStartOptions{}
+
+	// Act
+	cmd := New(mock, spyOutputer{})
+	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	err := cmd.RunE(cmd, os.Args)
+
+	// Assert
+	if err != nil {
+		t.Errorf("expected the error to be nil, got %v", err)
+	}
+
+	// make sure the network create matches the expected
+	if !reflect.DeepEqual(mock.networkCreateRequests[0], networkReq) {
+		t.Errorf(
+			"expected network create request to match\ngot:\n%v\nwant:\n%v",
+			mock.networkCreateRequests[0],
+			networkReq,
+		)
+	}
+
+	// make sure the volume create matches the expected
+	if !reflect.DeepEqual(mock.volumeCreateRequest, volumeReq) {
+		t.Errorf(
+			"expected volume create request to match\ngot:\n%v\nwant:\n%v",
+			mock.volumeCreateRequest,
+			volumeReq,
+		)
+	}
+
+	// make sure the container create matches the expected
+	if !reflect.DeepEqual(mock.containerCreateRequests[0], containerCreateReq) {
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].Config, containerCreateReq.Config) {
+			t.Errorf(
+				"expected container create request config to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequests[0].Config,
+				containerCreateReq.Config,
+			)
+		}
+
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].HostConfig, containerCreateReq.HostConfig) {
+			t.Errorf(
+				"expected container create request host config to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequests[0].HostConfig,
+				containerCreateReq.HostConfig,
+			)
+		}
+
+		if !reflect.DeepEqual(mock.containerCreateRequests[0].NetworkingConfig, containerCreateReq.NetworkingConfig) {
+			t.Errorf(
+				"expected container create request networking to match\ngot:\n%v\n\nwant:\n%v",
+				mock.containerCreateRequests[0].NetworkingConfig,
+				containerCreateReq.NetworkingConfig,
+			)
+		}
+	}
+
+	// make sure the container start matches the expected
+	if !reflect.DeepEqual(mock.containerStartRequests[0], containerStartRequest) {
+		t.Errorf(
+			"expected container start request to match\ngot:\n%v\nwant:\n%v",
+			mock.containerStartRequests[0],
+			containerStartRequest,
+		)
+	}
+
+	// make sure the container ID to start matches the expected
+	if mock.containerID != "testingid" {
+		t.Errorf(
+			"expected container IDs to start to match\ngot:\n%v\nwant:\n%v",
+			mock.containerID,
+			"testingid",
+		)
 	}
 }
 
-type mockDockerClient struct {
-	client.CommonAPIClient
-
-	// filters are the filters passed to list funcs
-	filterArgs []filters.Args
-
-	// container related resources for mocking calls to the client
-	// the fields ending in *Response are designed to capture the
-	// requests sent to the client API.
-	containerID              string
-	containers               []types.Container
-	containerCreateRequests  []types.ContainerCreateConfig
-	containerCreateResponse  container.ContainerCreateCreatedBody
-	containerStartRequests   []types.ContainerStartOptions
-	containerRestartRequests []string
-
-	// network related resources for mocking the calls to the client
-	// for network specific resources
-	networks              []types.NetworkResource
-	networkCreateRequests []types.NetworkCreateRequest
-	networkCreateResponse types.NetworkCreateResponse
-
-	// volume related resources
-	volumes              volumetypes.VolumesListOKBody
-	volumeCreateRequest  volumetypes.VolumesCreateBody
-	volumeCreateResponse types.Volume
-
-	// mockError allows us to override any func to return a method, we do not
-	// set the error by default.
-	mockError error
+type spyOutputer struct {
+	infos     []string
+	succesess []string
+	dones     []string
 }
 
-func (c *mockDockerClient) NetworkList(ctx context.Context, options types.NetworkListOptions) ([]types.NetworkResource, error) {
-	c.filterArgs = append(c.filterArgs, options.Filters)
-
-	return c.networks, c.mockError
+func (spy spyOutputer) Info(s ...string) {
+	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
 }
 
-func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, options types.NetworkCreate) (types.NetworkCreateResponse, error) {
-	// save the request on the struct field
-	c.networkCreateRequests = append(c.networkCreateRequests, types.NetworkCreateRequest{
-		NetworkCreate: options,
-		Name:          name,
-	})
-
-	return c.networkCreateResponse, c.mockError
+func (spy spyOutputer) Success(s ...string) {
+	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
 }
 
-func (c *mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumesListOKBody, error) {
-	c.filterArgs = append(c.filterArgs, filter)
-
-	return c.volumes, c.mockError
+func (spy spyOutputer) Pending(s ...string) {
+	fmt.Printf("  … %s ", strings.Join(s, " "))
 }
 
-func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumesCreateBody) (types.Volume, error) {
-	c.volumeCreateRequest = options
-
-	return c.volumeCreateResponse, c.mockError
-}
-
-func (c *mockDockerClient) ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error) {
-	c.filterArgs = append(c.filterArgs, options.Filters)
-
-	return c.containers, c.mockError
-}
-
-func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, containerName string) (container.ContainerCreateCreatedBody, error) {
-	// save the request on the struct field
-	// TODO(jasonmccallister) this is wrong, need to look at the code to determine the correct
-	// types are set and returned
-	c.containerCreateRequests = append(c.containerCreateRequests, types.ContainerCreateConfig{
-		Name:             containerName,
-		Config:           config,
-		HostConfig:       hostConfig,
-		NetworkingConfig: networkingConfig,
-	})
-
-	return c.containerCreateResponse, c.mockError
-}
-
-func (c *mockDockerClient) ContainerStart(ctx context.Context, container string, options types.ContainerStartOptions) error {
-	c.containerID = container
-	c.containerStartRequests = append(c.containerStartRequests, options)
-
-	return c.mockError
-}
-
-func (c *mockDockerClient) ContainerRestart(ctx context.Context, container string, timeout *time.Duration) error {
-	c.containerRestartRequests = append(c.containerRestartRequests, container)
-	return c.mockError
-}
-
-func (c *mockDockerClient) ContainerStop(ctx context.Context, containerID string, timeout *time.Duration) error {
-	c.containerID = containerID
-
-	return c.mockError
+func (spy spyOutputer) Done() {
+	fmt.Print("\u2713\n")
 }
