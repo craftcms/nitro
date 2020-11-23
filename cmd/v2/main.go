@@ -83,6 +83,8 @@ func init() {
 }
 
 func main() {
+	// cobra.OnInitialize()
+
 	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
 		os.Exit(1)
