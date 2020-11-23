@@ -1,6 +1,7 @@
 package context
 
 import (
+	"io/ioutil"
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -11,7 +12,10 @@ import (
 )
 
 const exampleText = `  # view all resources for the environment
-  nitro context`
+  nitro context
+
+  # show only the config file
+  nitro context --pretty=false`
 
 // New is used for scaffolding new commands
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -20,15 +24,26 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "View environment information",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := config.Umarshal()
+			_, cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
 
-			output.Info("Craft Nitro", "2.0.0")
+			output.Info("Craft Nitro", cmd.Parent().Version)
 			output.Info("")
 			output.Info("Configuration:\t", viper.ConfigFileUsed())
 			output.Info("")
+
+			if cmd.Flag("pretty").Value.String() == "false" {
+				bytes, err := ioutil.ReadFile(viper.ConfigFileUsed())
+				if err != nil {
+					return err
+				}
+
+				output.Info(string(bytes))
+
+				return nil
+			}
 
 			output.Info(`Sites:`)
 			for _, site := range cfg.Sites {
@@ -54,6 +69,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolP("pretty", "p", true, "show the pretty version")
 
 	return cmd
 }
