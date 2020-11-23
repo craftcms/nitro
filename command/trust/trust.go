@@ -110,7 +110,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
-			output.Pending("installing certificate (you will be prompted for a password)")
+			output.Info("Installing certificate (you might be prompted for your password)")
 
 			if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
 				output.Info("Unable to automatically add the certificate\n")
