@@ -37,7 +37,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
-			cfg, err := config.Umarshal()
+			_, cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
@@ -98,9 +98,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 					// check if the container is running
 					if containers[0].State != "running" {
-						output.Success(hostname, "ready")
 						startContainer = true
+					} else {
+						output.Success(hostname, "ready")
 					}
+
+					// TODO(jasonmccallister) check is the mounts expects match whats there
 				default:
 					output.Pending("creating volume", hostname)
 
@@ -135,9 +138,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
 					}
 
-					// pull the image
 					output.Pending("pulling", image)
 
+					// pull the image
 					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 					if err != nil {
 						return fmt.Errorf("unable to pull image %s, %w", image, err)
@@ -150,6 +153,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 					}
 
+					// set the port for the database
 					port, err := nat.NewPort("tcp", db.Port)
 					if err != nil {
 						return fmt.Errorf("unable to create the port, %w", err)
@@ -224,6 +228,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 			output.Info("Checking Sites...")
 
+			// get the envs for the sites
+			envs := cfg.AsEnvs()
+			for _, e := range envs {
+				output.Info(e)
+			}
+
 			for _, site := range cfg.Sites {
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
@@ -261,7 +271,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						}
 
 						// pull the image
-						// pull the image
 						output.Pending("pulling", image)
 
 						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
@@ -286,13 +295,15 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 									labels.Environment: env,
 									labels.Host:        site.Hostname,
 								},
+								Env: envs,
 							},
 							&container.HostConfig{
-								Mounts: []mount.Mount{{
-									Type:   mount.TypeBind,
-									Source: path,
-									Target: "/app",
-								},
+								Mounts: []mount.Mount{
+									{
+										Type:   mount.TypeBind,
+										Source: path,
+										Target: "/app",
+									},
 								},
 							},
 							&network.NetworkingConfig{
@@ -359,6 +370,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 								labels.Environment: env,
 								labels.Host:        site.Hostname,
 							},
+							Env: envs,
 						},
 						&container.HostConfig{
 							Mounts: []mount.Mount{{

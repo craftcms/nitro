@@ -36,7 +36,7 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
-	env, err := config.Load()
+	env, _, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,7 +64,6 @@ func init() {
 		destroy.New(client, term),
 		composer.New(client, term),
 		node.New(client, term),
-		// npm.NPMCommand,
 		//complete.CompleteCommand,
 		apply.New(client, term),
 		context.New(client, term),

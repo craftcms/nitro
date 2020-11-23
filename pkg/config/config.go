@@ -18,9 +18,83 @@ type Config struct {
 	Databases  []Database `yaml:"databases,omitempty"`
 }
 
+// AsEnvs takes a configuration and turns specific options
+// such as PHP settings into env vars that can be set on the
+// containers environment
+func (c Config) AsEnvs() []string {
+	var envs []string
+
+	if c.PHP.DisplayErrors == "" {
+		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
+	} else {
+		// TODO(jasonmccallister) add validation
+		envs = append(envs, "PHP_DISPLAY_ERRORS="+c.PHP.DisplayErrors)
+	}
+
+	if c.PHP.MemoryLimit == "" {
+		envs = append(envs, "PHP_MEMORY_LIMIT=2048M")
+	} else {
+		// TODO(jasonmccallister) add validation
+		envs = append(envs, "PHP_MEMORY_LIMIT="+c.PHP.MemoryLimit)
+	}
+
+	if c.PHP.MaxExecutionTime == 0 {
+		envs = append(envs, "PHP_MAX_EXECUTION_TIME=5000")
+	} else {
+		// TODO(jasonmccallister) add validation
+		envs = append(envs, fmt.Sprintf("PHP_MAX_EXECUTION_TIME=%d", c.PHP.MaxExecutionTime))
+	}
+
+	if c.PHP.UploadMaxFileSize == "" {
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE=512M")
+	} else {
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+c.PHP.UploadMaxFileSize)
+	}
+
+	if c.PHP.MaxInputVars == 0 {
+		envs = append(envs, "PHP_MAX_INPUT_VARS=512M")
+	} else {
+		envs = append(envs, fmt.Sprintf("PHP_MAX_INPUT_VARS=%d", c.PHP.MaxInputVars))
+	}
+
+	if c.PHP.PostMaxSize == "" {
+		envs = append(envs, "PHP_POST_MAX_SIZE=512M")
+	} else {
+		envs = append(envs, fmt.Sprintf("PHP_POST_MAX_SIZE=%s", c.PHP.PostMaxSize))
+	}
+
+	// set the blackfire envs if available
+	if c.Blackfire.ServerID != "" {
+		envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
+	}
+	if c.Blackfire.ServerToken != "" {
+		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
+	}
+	if c.Blackfire.ClientID != "" {
+		envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
+	}
+	if c.Blackfire.ClientToken != "" {
+		envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
+	}
+
+	// TODO(jasonmccallister) add opcache settings
+	// "PHP_OPCACHE_ENABLE=1",
+	// "PHP_OPCACHE_REVALIDATE_FREQ=0",
+	// "PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
+	// "PHP_OPCACHE_MAX_ACCELERATED_FILES=10000",
+	// "PHP_OPCACHE_MEMORY_CONSUMPTION=128",
+	// "PHP_OPCACHE_MAX_WASTED_PERCENTAGE=10",
+	// "PHP_OPCACHE_INTERNED_STRINGS_BUFFER=16",
+	// "PHP_OPCACHE_FAST_SHUTDOWN=1"
+
+	return envs
+}
+
 type Blackfire struct {
-	ClientID     string `yaml:"client_id,omitempty"`
-	ClientSecret string `yaml:"client_secret,omitempty"`
+	ServerID    string `yaml:"server_id,omitempty"`
+	ServerToken string `yaml:"server_token,omitempty"`
+	ClientID    string `yaml:"client_id,omitempty"`
+	ClientToken string `yaml:"client_token,omitempty"`
 }
 
 type PHP struct {
@@ -30,6 +104,7 @@ type PHP struct {
 	MaxInputTime      int    `yaml:"max_input_time,omitempty"`
 	MaxFileUpload     string `yaml:"max_file_upload,omitempty"`
 	MemoryLimit       string `yaml:"memory_limit,omitempty"`
+	PostMaxSize       string `yaml:"post_max_size,omitempty"`
 	UploadMaxFileSize string `yaml:"upload_max_file_size,omitempty"`
 }
 
@@ -48,7 +123,6 @@ func (s *Site) GetAbsPath() (string, error) {
 	}
 
 	p := s.Path
-
 	if strings.Contains(p, "~") {
 		p = strings.Replace(p, "~", home, -1)
 	}
@@ -70,10 +144,10 @@ func (d *Database) GetHostname() (string, error) {
 	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
 }
 
-func Load() (string, error) {
+func Load() (string, *Config, error) {
 	home, err := homedir.Dir()
 	if err != nil {
-		return "", fmt.Errorf("unable to get the home directory, %w", err)
+		return "", nil, fmt.Errorf("unable to get the home directory, %w", err)
 	}
 
 	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
@@ -88,8 +162,17 @@ func Load() (string, error) {
 	// set the config file
 	viper.SetConfigName(def)
 
+	if err := viper.ReadInConfig(); err != nil {
+		return "", nil, err
+	}
+
+	cfg, err := Umarshal()
+	if err != nil {
+		return "nil", nil, err
+	}
+
 	// read the config
-	return def, viper.ReadInConfig()
+	return def, cfg, nil
 }
 
 func Umarshal() (*Config, error) {
