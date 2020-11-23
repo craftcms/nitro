@@ -17,7 +17,7 @@ const exampleText = `  # example command
   nitro example`
 
 // New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "example",
 		Short:   "Example command",

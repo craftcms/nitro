@@ -17,8 +17,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const exampleText = `  # create a new environment with the default environment
+  nitro init
+
+  # create a new environment overriding the default name
+  nitro init --environment my-new-env
+
+  # you can override the environment by setting the variable "NITRO_DEFAULT_ENVIRONMENT"`
+
 // New takes a docker client and returns the init command for creating a new environment
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "init",
 		Short:   "Create new environment",
@@ -27,7 +35,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			ctx := cmd.Context()
 			env := cmd.Flag("environment").Value.String()
 
-			terminal.Info(fmt.Sprintf("Checking %s...", env))
+			output.Info(fmt.Sprintf("Checking %s...", env))
 
 			// create filters for the development environment
 			filter := filters.NewArgs()
@@ -53,9 +61,9 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			// create the network needs to be created
 			switch skipNetwork {
 			case true:
-				terminal.Success("network ready")
+				output.Success("network ready")
 			default:
-				terminal.Pending("creating network")
+				output.Pending("creating network")
 
 				resp, err := docker.NetworkCreate(ctx, env, types.NetworkCreate{
 					Driver:     "bridge",
@@ -72,7 +80,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 				// set the newly created network
 				networkID = resp.ID
 
-				terminal.Done()
+				output.Done()
 			}
 
 			// check if the volume needs to be created
@@ -95,9 +103,9 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			// check if the volume needs to be created
 			switch skipVolume {
 			case true:
-				terminal.Success("volume ready")
+				output.Success("volume ready")
 			default:
-				terminal.Pending("creating volume")
+				output.Pending("creating volume")
 
 				// create a volume with the same name of the machine
 				resp, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
@@ -114,7 +122,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 
 				volume = &resp
 
-				terminal.Done()
+				output.Done()
 			}
 
 			// pull the latest image from docker hub for the nitro-proxy
@@ -139,7 +147,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			for _, c := range containers {
 				for _, n := range c.Names {
 					if n == env || n == "/"+env {
-						terminal.Success("proxy ready")
+						output.Success("proxy ready")
 
 						containerID = c.ID
 
@@ -153,7 +161,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 
 			// if we do not have a container id, it needs to be create
 			if containerID == "" {
-				terminal.Pending("creating proxy")
+				output.Pending("creating proxy")
 
 				// set ports
 				var httpPort, httpsPort, apiPort nat.Port
@@ -266,7 +274,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 
 				containerID = resp.ID
 
-				terminal.Done()
+				output.Done()
 			}
 
 			// start the container for the proxy if its not running
@@ -276,7 +284,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 				}
 			}
 
-			terminal.Info(env, "is ready! 🚀")
+			output.Info(env, "is ready! 🚀")
 
 			return nil
 		},
@@ -287,11 +295,3 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 
 	return cmd
 }
-
-const exampleText = `  # create a new environment with the default environment
-  nitro init
-
-  # create a new environment overriding the default name
-  nitro init --environment my-new-env
-
-  # you can override the environment by setting the variable "NITRO_DEFAULT_ENVIRONMENT"`

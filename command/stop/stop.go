@@ -21,7 +21,7 @@ const exampleText = `  # stop containers for the default environment
   nitro stop`
 
 // New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "stop",
 		Short:   "Stop environment",
@@ -50,17 +50,17 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			for _, c := range containers {
 				n := strings.TrimLeft(c.Names[0], "/")
 
-				terminal.Pending("stopping", n)
+				output.Pending("stopping", n)
 
 				// stop the container
 				if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
 					return fmt.Errorf("unable to stop container %s: %w", n, err)
 				}
 
-				terminal.Done()
+				output.Done()
 			}
 
-			terminal.Info(env, "shutdown 😴")
+			output.Info(env, "shutdown 😴")
 
 			return nil
 		},

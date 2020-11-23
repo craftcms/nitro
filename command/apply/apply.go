@@ -28,7 +28,7 @@ const exampleText = `  # apply changes from a config to the environment
   nitro apply`
 
 // New takes a docker client and the terminal output to run the apply actions
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
 		Short:   "Apply changes to an environment",
@@ -46,7 +46,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 
-			terminal.Info(fmt.Sprintf("Checking %s Network...", env))
+			output.Info(fmt.Sprintf("Checking %s Network...", env))
 
 			// find networks
 			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
@@ -67,10 +67,10 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 				return ErrNoNetwork
 			}
 
-			terminal.Success("using", networkID)
+			output.Success("using", networkID)
 
 			// check the databases
-			terminal.Info("Checking Databases...")
+			output.Info("Checking Databases...")
 			for _, db := range cfg.Databases {
 				// add filters to check for the container
 				filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
@@ -93,7 +93,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 				var startContainer bool
 				switch len(containers) {
 				case 1:
-					terminal.Success(hostname, "ready")
+					output.Success(hostname, "ready")
 
 					// set the container id
 					containerID = containers[0].ID
@@ -103,7 +103,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 						startContainer = true
 					}
 				default:
-					terminal.Pending("creating volume", hostname)
+					output.Pending("creating volume", hostname)
 
 					// create the labels
 					lbls := map[string]string{
@@ -122,7 +122,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 						return fmt.Errorf("unable to create the volume, %w", err)
 					}
 
-					terminal.Done()
+					output.Done()
 
 					// determine the image name
 					image := fmt.Sprintf("docker.io/library/%s:%s", db.Engine, db.Version)
@@ -137,14 +137,14 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 					}
 
 					// pull the image
-					terminal.Pending("pulling", image)
+					output.Pending("pulling", image)
 
 					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 					if err != nil {
 						return fmt.Errorf("unable to pull image %s, %w", image, err)
 					}
 
-					terminal.Done()
+					output.Done()
 
 					buf := &bytes.Buffer{}
 					if _, err := buf.ReadFrom(rdr); err != nil {
@@ -157,7 +157,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 					}
 
 					// create the container
-					terminal.Pending("creating", hostname)
+					output.Pending("creating", hostname)
 
 					conResp, err := docker.ContainerCreate(
 						ctx,
@@ -203,18 +203,18 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 					containerID = conResp.ID
 					startContainer = true
 
-					terminal.Done()
+					output.Done()
 				}
 
 				// start the container if needed
 				if startContainer {
-					terminal.Pending("starting", hostname)
+					output.Pending("starting", hostname)
 
 					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 						return fmt.Errorf("unable to start the container, %w", err)
 					}
 
-					terminal.Done()
+					output.Done()
 				}
 
 				// remove the filters

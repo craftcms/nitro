@@ -22,7 +22,7 @@ const exampleText = `  # restart containers for the default environment
   nitro restart`
 
 // New returns the command to restart all of an environments containers
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "restart",
 		Short:   "Restart an environment",
@@ -47,7 +47,7 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 				return ErrNoContainers
 			}
 
-			terminal.Info("Restarting", env+"...")
+			output.Info("Restarting", env+"...")
 
 			// set a timeout, consider making this a flag
 			timeout := time.Duration(5000) * time.Millisecond
@@ -56,14 +56,14 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 			for _, c := range containers {
 				n := strings.TrimLeft(c.Names[0], "/")
 
-				terminal.Pending("restarting", n)
+				output.Pending("restarting", n)
 
 				// restart the container
 				if err := docker.ContainerRestart(ctx, c.ID, &timeout); err != nil {
 					return fmt.Errorf("unable to restart container %s: %w", n, err)
 				}
 
-				terminal.Done()
+				output.Done()
 			}
 
 			fmt.Println(env, "restarted 🎉")

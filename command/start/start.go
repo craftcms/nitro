@@ -21,7 +21,7 @@ const exampleText = `  # start containers for the default environment
   nitro start`
 
 // New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Command {
+func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
 		Short:   "Start environment",
@@ -52,21 +52,21 @@ func New(docker client.CommonAPIClient, terminal terminal.Terminal) *cobra.Comma
 
 				// if the container is already running
 				if c.State == "running" {
-					terminal.Success(n, "ready")
+					output.Success(n, "ready")
 					continue
 				}
 
-				terminal.Pending("starting", n)
+				output.Pending("starting", n)
 
 				// start the container
 				if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 					return fmt.Errorf("unable to start container %s: %w", n, err)
 				}
 
-				terminal.Done()
+				output.Done()
 			}
 
-			terminal.Info(env, "started 👍")
+			output.Info(env, "started 👍")
 
 			return nil
 		},
