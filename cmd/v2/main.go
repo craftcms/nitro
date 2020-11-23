@@ -9,10 +9,12 @@ import (
 
 	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/composer"
+	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/restart"
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
+	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -56,19 +58,15 @@ func init() {
 		start.New(client, term),
 		stop.New(client, term),
 		restart.New(client, term),
-		composer.New(client, term),
+		update.New(),
 		// destroy.DestroyCommand,
-		// restart.RestartCommand,
-		// ls.LSCommand,
-		// composer.ComposerCommand,
+		composer.New(client, term),
 		// npm.NPMCommand,
 		//complete.CompleteCommand,
 		apply.New(client, term),
-		//context.ContextCommand,
-		//exec.ExecCommand,
-		//trust.TrustCommand,
+		context.New(client, term),
+		trust.New(client, term),
 		//db.DBCommand,
-		update.New(),
 	}
 
 	// add the commands
