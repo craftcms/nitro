@@ -69,7 +69,6 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	if mock.containerID != expectedContainerID {
 		t.Errorf("expected the container IDs to match got %s, want %s", mock.containerID, expectedContainerID)
 	}
-
 	if !reflect.DeepEqual(output.succesess, expectedOutputSuccess) {
 		t.Errorf("expected the infos to match, got \n%v\nwant:\n%v", output.succesess, expectedOutputSuccess)
 	}

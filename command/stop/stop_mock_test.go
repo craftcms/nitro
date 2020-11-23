@@ -20,20 +20,20 @@ type spyOutputer struct {
 	dones     []string
 }
 
-func (spy spyOutputer) Info(s ...string) {
+func (spy *spyOutputer) Info(s ...string) {
 	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
 }
 
-func (spy spyOutputer) Success(s ...string) {
-	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
+func (spy *spyOutputer) Success(s ...string) {
+	spy.succesess = append(spy.succesess, fmt.Sprintf("  \u2713 %s\n", strings.Join(s, " ")))
 }
 
-func (spy spyOutputer) Pending(s ...string) {
-	fmt.Printf("  … %s ", strings.Join(s, " "))
+func (spy *spyOutputer) Pending(s ...string) {
+	spy.succesess = append(spy.succesess, fmt.Sprintf("  … %s ", strings.Join(s, " ")))
 }
 
-func (spy spyOutputer) Done() {
-	fmt.Print("\u2713\n")
+func (spy *spyOutputer) Done() {
+	spy.dones = append(spy.dones, fmt.Sprintf("\u2713\n"))
 }
 
 // inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
