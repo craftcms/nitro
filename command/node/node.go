@@ -9,9 +9,10 @@ import (
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/moby/moby/client"
 	"github.com/spf13/cobra"
 )
 
@@ -66,45 +67,50 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// get the full file path
-			nodeFile := "package.json"
 			var nodePath string
 			switch action {
 			case "install":
 				nodePath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "package.json")
 			default:
-				nodeFile = "package-lock.json"
 				nodePath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "package-lock.json")
 			}
 
+			output.Pending("checking ", nodePath)
+
 			// make sure the file exists
-			fmt.Println("Checking for", nodeFile, "file in:")
-			fmt.Println("  ==>", nodePath)
 			_, err := os.Stat(nodePath)
 			if os.IsNotExist(err) {
 				return fmt.Errorf("unable to locate a node file at %s", path)
 			}
 
+			output.Done()
+
 			image := fmt.Sprintf("docker.io/library/%s:%s", "node", version)
 
+			filter := filters.NewArgs()
+			filter.Add("reference", image)
+
 			// look for the image
-			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filters})
+			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
 
 			// if we don't have the image, pull it
 			if len(images) == 0 {
-				output.Info("Pulling node image for version", version)
+				output.Pending("pulling")
 
 				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 				if err != nil {
-					return fmt.Errorf("unable to pull the docker image, %w", err)
+					return fmt.Errorf("unable to pull docker image, %w", err)
 				}
 
 				buf := &bytes.Buffer{}
 				if _, err := buf.ReadFrom(rdr); err != nil {
 					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
 				}
+
+				output.Done()
 			}
 
 			var commands []string
@@ -115,7 +121,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				commands = []string{"npm", "update"}
 			}
 
-			output.Pending("preparing npm")
+			output.Pending("preparing")
 
 			// create the temp container
 			resp, err := docker.ContainerCreate(ctx,
@@ -175,7 +181,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
-			output.Info("Node", action, "complete 🤘")
+			output.Info("npm", action, "complete 🤘")
 
 			return nil
 		},
