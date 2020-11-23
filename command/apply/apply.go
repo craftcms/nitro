@@ -230,9 +230,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// get the envs for the sites
 			envs := cfg.AsEnvs()
-			for _, e := range envs {
-				output.Info(e)
-			}
 
 			for _, site := range cfg.Sites {
 				// add the site filter

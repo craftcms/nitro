@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply"
+	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/destroy"
@@ -70,7 +71,7 @@ func init() {
 		destroy.New(client, term),
 		composer.New(client, term),
 		node.New(client, term),
-		//complete.CompleteCommand,
+		completion.New(),
 		apply.New(client, term),
 		context.New(client, term),
 		trust.New(client, term),

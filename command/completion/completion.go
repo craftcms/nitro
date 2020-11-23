@@ -1,10 +1,8 @@
-package example
+package completion
 
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/terminal"
-	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 )
 
@@ -13,22 +11,43 @@ var (
 	ErrExample = fmt.Errorf("not implemented")
 )
 
-const exampleText = `  # example command
-  nitro example`
+const exampleText = `To load completions:
+
+Bash:
+
+$ source <(nitro completion bash)
+
+# To load completions for each session, execute once:
+Linux:
+  $ nitro completion bash > /etc/bash_completion.d/nitro
+MacOS:
+  $ nitro completion bash > /usr/local/etc/bash_completion.d/nitro
+
+Zsh:
+
+# If shell completion is not already enabled in your environment you will need
+# to enable it.  You can execute the following once:
+
+$ echo "autoload -U compinit; compinit" >> ~/.zshrc
+
+# To load completions for each session, execute once:
+$ nitro completion zsh > "${fpath[1]}/_nitro"
+
+# You will need to start a new shell for this setup to take effect.
+`
 
 // New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func New() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "example",
-		Short:   "Example command",
+		Use:     "completion",
+		Short:   "Enable shell completion",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ErrExample
+			return cmd.Help()
 		},
 	}
 
-	// set flags for the command
-	cmd.Flags().StringP("example", "e", "example", "an example flag")
+	cmd.AddCommand(bashCompletionCommand, zshCompletionCommand)
 
 	return cmd
 }
