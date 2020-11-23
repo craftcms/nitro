@@ -134,6 +134,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
+			output.Info(env, "certificates are now trusted 🔒")
+
 			return nil
 		},
 	}
