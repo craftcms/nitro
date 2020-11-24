@@ -23,6 +23,9 @@ const (
 	// Proxy is the label used to idenitfy the proxy container
 	Proxy = "com.craftcms.nitro.proxy"
 
+	// ProxyVersion is used to label a proxy container with a specific version
+	ProxyVersion = "com.craftcms.nitro.proxy-version"
+
 	// Type is used to idenity the type of container
 	// TODO(jasonmccallister) I'm not sure if we need this, so we should look at
 	// removing this

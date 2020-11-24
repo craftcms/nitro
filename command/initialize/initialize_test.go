@@ -32,8 +32,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				labels.Environment:           "testing-init",
-				"com.craftcms.nitro.network": "testing-init",
+				labels.Environment: "testing-init",
+				labels.Network:     "testing-init",
 			},
 		},
 		Name: "testing-init",
@@ -57,9 +57,10 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				"5000/tcp": struct{}{},
 			},
 			Labels: map[string]string{
-				"com.craftcms.nitro.type":  "proxy",
-				labels.Environment:         "testing-init",
-				"com.craftcms.nitro.proxy": "testing-init",
+				labels.Type:         "proxy",
+				labels.Environment:  "testing-init",
+				labels.Proxy:        "testing-init",
+				labels.ProxyVersion: "dev",
 			},
 		},
 		HostConfig: &container.HostConfig{

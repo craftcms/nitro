@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/terminal"
@@ -229,9 +230,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 							apiPort:   struct{}{},
 						},
 						Labels: map[string]string{
-							labels.Type:        "proxy",
-							labels.Environment: env,
-							labels.Proxy:       env,
+							labels.Type:         "proxy",
+							labels.Environment:  env,
+							labels.Proxy:        env,
+							labels.ProxyVersion: version.Version,
 						},
 					},
 					&container.HostConfig{
