@@ -32,7 +32,6 @@ func (c *Config) AsEnvs() []string {
 	if c.PHP.DisplayErrors == "" {
 		envs = append(envs, envMap["display_errors"]+"=on")
 	} else {
-
 		envs = append(envs, envMap["display_errors"]+"="+c.PHP.DisplayErrors)
 	}
 
@@ -129,12 +128,21 @@ func (s *Site) GetAbsPath() (string, error) {
 		return "", fmt.Errorf("unable to get home directory, %w", err)
 	}
 
-	p := s.Path
+	return s.cleanPath(home, s.Path)
+}
+
+func (s *Site) cleanPath(home, path string) (string, error) {
+	p := path
 	if strings.Contains(p, "~") {
 		p = strings.Replace(p, "~", home, -1)
 	}
 
-	return filepath.Abs(p)
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Clean(abs), nil
 }
 
 // Database is the struct used to represent a database engine
