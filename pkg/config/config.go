@@ -10,6 +10,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+var envMap = map[string]string{
+	"display_errors": "PHP_DISPLAY_ERRORS",
+	"memory_limit":   "PHP_MEMORY_LIMIT",
+}
+
+// Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	PHP       PHP        `yaml:"php,omitempty"`
@@ -24,17 +30,17 @@ func (c *Config) AsEnvs() []string {
 	var envs []string
 
 	if c.PHP.DisplayErrors == "" {
-		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
+		envs = append(envs, envMap["display_errors"]+"=on")
 	} else {
-		// TODO(jasonmccallister) add validation
-		envs = append(envs, "PHP_DISPLAY_ERRORS="+c.PHP.DisplayErrors)
+
+		envs = append(envs, envMap["display_errors"]+"="+c.PHP.DisplayErrors)
 	}
 
 	if c.PHP.MemoryLimit == "" {
-		envs = append(envs, "PHP_MEMORY_LIMIT=2048M")
+		envs = append(envs, envMap["memory_limit"]+"=512MB")
 	} else {
 		// TODO(jasonmccallister) add validation
-		envs = append(envs, "PHP_MEMORY_LIMIT="+c.PHP.MemoryLimit)
+		envs = append(envs, envMap["memory_limit"]+"="+c.PHP.MemoryLimit)
 	}
 
 	if c.PHP.MaxExecutionTime == 0 {
@@ -69,12 +75,6 @@ func (c *Config) AsEnvs() []string {
 	if c.Blackfire.ServerToken != "" {
 		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
 	}
-	if c.Blackfire.ClientID != "" {
-		envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
-	}
-	if c.Blackfire.ClientToken != "" {
-		envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
-	}
 
 	// TODO(jasonmccallister) add opcache settings
 	// "PHP_OPCACHE_ENABLE=1",
@@ -89,13 +89,14 @@ func (c *Config) AsEnvs() []string {
 	return envs
 }
 
+// Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
 	ServerID    string `mapstructure:"server_id,omitempty"`
 	ServerToken string `mapstructure:"server_token,omitempty"`
-	ClientID    string `mapstructure:"client_id,omitempty"`
-	ClientToken string `mapstructure:"client_token,omitempty"`
 }
 
+// PHP is nested in a configuration and allows setting environment variables
+// for sites to override in the local development environment.
 type PHP struct {
 	DisplayErrors     string `mapstructure:"display_errors,omitempty"`
 	MaxExecutionTime  int    `mapstructure:"max_execution_time,omitempty"`
@@ -107,18 +108,25 @@ type PHP struct {
 	UploadMaxFileSize string `mapstructure:"upload_max_file_size,omitempty"`
 }
 
+// Site represents a web application. It has a hostname, aliases (which
+// are alternate domains), the local path to the site, additional mounts
+// to add to the container, and the directory the index.php is located.
 type Site struct {
 	Hostname string   `yaml:"hostname,omitempty"`
 	Aliases  []string `yaml:"aliases,omitempty"`
 	Path     string   `yaml:"path,omitempty"`
+	Mounts   []string `yaml:"mounts,omitempty"`
 	PHP      string   `yaml:"php,omitempty"`
 	Dir      string   `yaml:"dir,omitempty"`
 }
 
+// GetAbsPath gets the directory for a site.Path,
+// It is used to create the mount for a sites
+// container.
 func (s *Site) GetAbsPath() (string, error) {
 	home, err := homedir.Dir()
 	if err != nil {
-		return "", fmt.Errorf("unable to get the users home directory, %w", err)
+		return "", fmt.Errorf("unable to get home directory, %w", err)
 	}
 
 	p := s.Path
@@ -129,12 +137,21 @@ func (s *Site) GetAbsPath() (string, error) {
 	return filepath.Abs(p)
 }
 
+// Database is the struct used to represent a database engine
+// that is a combination of a engine (e.g. mariadb, mysql, or
+// postgresl), the version number, and the port. The engine
+// and version are directly related to the official docker
+// images on the docker hub.
 type Database struct {
 	Engine  string `yaml:"engine,omitempty"`
 	Version string `yaml:"version,omitempty"`
 	Port    string `yaml:"port,omitempty"`
 }
 
+// GetHostname returns a friendly and predictable name for a database
+// container. It is used for accessing a database by hostname. For
+// example, mysql-8.0-3306 would be the hostname to use in the .env
+// for DB_HOST.
 func (d *Database) GetHostname() (string, error) {
 	if d.Engine == "" || d.Version == "" || d.Port == "" {
 		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
@@ -143,6 +160,9 @@ func (d *Database) GetHostname() (string, error) {
 	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
 }
 
+// Load is used to return the environment name, unmarshalled config, and
+// returns an error when trying to get the users home directory or
+// while marshalling the config.
 func Load() (string, *Config, error) {
 	home, err := homedir.Dir()
 	if err != nil {
