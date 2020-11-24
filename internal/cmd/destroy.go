@@ -132,7 +132,7 @@ var destroyCommand = &cobra.Command{
 						}
 
 						fullVmBackupPath = "/home/ubuntu/.nitro/databases/mysql/backups/" + backupFileName
-						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupAllMysqlDatabases, container, fullVmBackupPath)); err != nil {
+						if output, err := script.Run(false, fmt.Sprintf(scripts.FmtDockerBackupIndividualMysqlDatabase, container, fullVmBackupPath)); err != nil {
 							fmt.Println(output)
 							fmt.Println(err)
 							fmt.Println(backupErrorMessage)
