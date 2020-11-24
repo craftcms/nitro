@@ -26,9 +26,11 @@ import (
 )
 
 var rootCommand = &cobra.Command{
-	Use:          "nitro",
-	Short:        "Local Craft CMS dev made easy",
-	Long:         `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.`,
+	Use:   "nitro",
+	Short: "Local Craft CMS dev made easy",
+	Long: `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.
+
+Version: ` + version.Version,
 	RunE:         rootMain,
 	SilenceUsage: true,
 	Version:      version.Version,
