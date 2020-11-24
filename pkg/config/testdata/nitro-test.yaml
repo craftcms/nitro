@@ -1,6 +1,3 @@
-exts:
-  - grpc
-  - soap
 blackfire:
   key: my-key
   secret: my-secret

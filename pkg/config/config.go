@@ -11,17 +11,16 @@ import (
 )
 
 type Config struct {
-	Extensions []string   `yaml:"exts,omitempty"`
-	Blackfire  Blackfire  `yaml:"blackfire,omitempty"`
-	PHP        PHP        `yaml:"php,omitempty"`
-	Sites      []Site     `yaml:"sites,omitempty"`
-	Databases  []Database `yaml:"databases,omitempty"`
+	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
+	PHP       PHP        `yaml:"php,omitempty"`
+	Sites     []Site     `yaml:"sites,omitempty"`
+	Databases []Database `yaml:"databases,omitempty"`
 }
 
 // AsEnvs takes a configuration and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
-func (c Config) AsEnvs() []string {
+func (c *Config) AsEnvs() []string {
 	var envs []string
 
 	if c.PHP.DisplayErrors == "" {
@@ -91,21 +90,21 @@ func (c Config) AsEnvs() []string {
 }
 
 type Blackfire struct {
-	ServerID    string `yaml:"server_id,omitempty"`
-	ServerToken string `yaml:"server_token,omitempty"`
-	ClientID    string `yaml:"client_id,omitempty"`
-	ClientToken string `yaml:"client_token,omitempty"`
+	ServerID    string `mapstructure:"server_id,omitempty"`
+	ServerToken string `mapstructure:"server_token,omitempty"`
+	ClientID    string `mapstructure:"client_id,omitempty"`
+	ClientToken string `mapstructure:"client_token,omitempty"`
 }
 
 type PHP struct {
-	DisplayErrors     string `yaml:"display_errors,omitempty"`
-	MaxExecutionTime  int    `yaml:"max_execution_time,omitempty"`
-	MaxInputVars      int    `yaml:"max_input_vars,omitempty"`
-	MaxInputTime      int    `yaml:"max_input_time,omitempty"`
-	MaxFileUpload     string `yaml:"max_file_upload,omitempty"`
-	MemoryLimit       string `yaml:"memory_limit,omitempty"`
-	PostMaxSize       string `yaml:"post_max_size,omitempty"`
-	UploadMaxFileSize string `yaml:"upload_max_file_size,omitempty"`
+	DisplayErrors     string `mapstructure:"display_errors,omitempty"`
+	MaxExecutionTime  int    `mapstructure:"max_execution_time,omitempty"`
+	MaxInputVars      int    `mapstructure:"max_input_vars,omitempty"`
+	MaxInputTime      int    `mapstructure:"max_input_time,omitempty"`
+	MaxFileUpload     string `mapstructure:"max_file_upload,omitempty"`
+	MemoryLimit       string `mapstructure:"memory_limit,omitempty"`
+	PostMaxSize       string `mapstructure:"post_max_size,omitempty"`
+	UploadMaxFileSize string `mapstructure:"upload_max_file_size,omitempty"`
 }
 
 type Site struct {
@@ -166,9 +165,9 @@ func Load() (string, *Config, error) {
 		return "", nil, err
 	}
 
-	cfg, err := Umarshal()
-	if err != nil {
-		return "nil", nil, err
+	cfg := &Config{}
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return "", nil, err
 	}
 
 	// read the config
@@ -177,7 +176,6 @@ func Load() (string, *Config, error) {
 
 func Umarshal() (*Config, error) {
 	c := Config{}
-
 	if err := viper.Unmarshal(&c); err != nil {
 		return nil, err
 	}
