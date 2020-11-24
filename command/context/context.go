@@ -15,7 +15,7 @@ const exampleText = `  # view all resources for the environment
   nitro context
 
   # show only the config file
-  nitro context --pretty=false`
+  nitro context --not-pretty`
 
 // New is used for scaffolding new commands
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -34,7 +34,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("Configuration:\t", viper.ConfigFileUsed())
 			output.Info("")
 
-			if cmd.Flag("pretty").Value.String() == "false" {
+			if cmd.Flag("not-pretty").Value.String() == "true" {
 				bytes, err := ioutil.ReadFile(viper.ConfigFileUsed())
 				if err != nil {
 					return err
@@ -54,6 +54,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Info("    php:\t", site.PHP)
 				output.Info("    webroot:\t", site.Dir)
 				output.Info("    path:\t", site.Path)
+				if len(site.Mounts) > 0 {
+					output.Info("    mounts:\t", strings.Join(site.Mounts, ", "))
+				}
 				output.Info("")
 			}
 
@@ -70,7 +73,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		},
 	}
 
-	cmd.Flags().BoolP("pretty", "p", true, "show the pretty version")
+	cmd.Flags().BoolP("not-pretty", "p", false, "show the not pretty version")
 
 	return cmd
 }
