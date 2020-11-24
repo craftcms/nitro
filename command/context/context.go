@@ -34,7 +34,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("Configuration:\t", viper.ConfigFileUsed())
 			output.Info("")
 
-			if cmd.Flag("not-pretty").Value.String() == "true" {
+			if cmd.Flag("yaml").Value.String() == "true" {
 				bytes, err := ioutil.ReadFile(viper.ConfigFileUsed())
 				if err != nil {
 					return err
@@ -73,7 +73,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		},
 	}
 
-	cmd.Flags().BoolP("not-pretty", "p", false, "show the not pretty version")
+	cmd.Flags().BoolP("yaml", "p", false, "show the config file")
 
 	return cmd
 }
