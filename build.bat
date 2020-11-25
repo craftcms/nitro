@@ -1,3 +1,3 @@
 @ECHO OFF
 ECHO building nitro.exe
-go build -o nitro.exe ./cmd/cli
+go build -o nitro.exe ./cmd/v2

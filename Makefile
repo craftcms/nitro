@@ -4,11 +4,11 @@ VERSION ?= 2.0.0-alpha
 NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:
-	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro ./cmd/cli
+	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/v2
 build-api:
-	GOOS=linux go build -ldflags="-s -w" -o nitrod ./cmd/nitrod
+	GOOS=linux go build -ldflags="-s -w" -o api ./cmd/api
 build-win:
-	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/internal/cmd.Version=${VERSION}'" -o nitro.exe ./cmd/cli
+	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/v2
 
 docker:
 	docker build -t craftcms/nitro-proxy:develop .

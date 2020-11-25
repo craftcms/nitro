@@ -9,7 +9,7 @@ nitro.exe
 /*.sql
 /*.sql.gz
 *.env*
-/nitrod
+/api
 /docs
 /cmd/test
 *.sql.zip
