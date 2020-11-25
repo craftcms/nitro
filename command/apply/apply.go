@@ -103,7 +103,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						output.Success(hostname, "ready")
 					}
 
-					// TODO(jasonmccallister) check is the mounts expects match whats there
+					// TODO(jasonmccallister) check is the site.Mounts to match whats there versus expected
 				default:
 					output.Pending("creating volume", hostname)
 
