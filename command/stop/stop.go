@@ -20,7 +20,8 @@ var (
 const exampleText = `  # stop containers for the default environment
   nitro stop`
 
-// New is used for scaffolding new commands
+// New is used to stop all running containers for an environment. The process
+// of stopping to reduce usage and "finish" your work effort at the end of your session.
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "stop",
