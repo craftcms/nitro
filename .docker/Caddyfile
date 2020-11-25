@@ -3,10 +3,6 @@
     admin localhost:2019
 }
 
-example.nitro example.test {
-    reverse_proxy * example.nitro:8080
-}
-
 :80 :443 {
     root * /var/www/html
     file_server

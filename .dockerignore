@@ -1,4 +1,6 @@
 ./github
+./idea
+/.vscode
 ./goreleaser.yml
 *.env
 ./buddy.yml
@@ -11,3 +13,4 @@
 ./Makefile
 ./README.md
 ./resources
+./nitro
