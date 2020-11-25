@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
@@ -132,12 +133,33 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			// pull the latest image from docker hub for the nitro-proxy
-			// TODO(jasonmccallister) replace with the nitr o CLI version and non-local image (e.g. craftcms/nitro-proxy:version)
-			// _, err = cli.docker.ImagePull(ctx, "nitro-proxy:develop", types.ImagePullOptions{})
-			// if err != nil {
-			// 	return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
-			// }
+			imageFilter := filters.NewArgs()
+			imageFilter.Add("reference", "craftcms/nitro-proxy:"+cmd.Version)
+
+			// check for the proxy image
+			images, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
+				Filters: imageFilter,
+			})
+			if err != nil {
+				return fmt.Errorf("unable to get a list of images, %w", err)
+			}
+
+			// TODO(jasonmccallister) remove this logic check once published to add a method for developing locally
+			if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "true" {
+				output.Pending("pulling image")
+
+				rdr, err := docker.ImagePull(ctx, "craftcms/nitro-proxy:"+cmd.Version, types.ImagePullOptions{All: false})
+				if err != nil {
+					return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
+				}
+
+				buf := &bytes.Buffer{}
+				if _, err := buf.ReadFrom(rdr); err != nil {
+					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+				}
+
+				output.Done()
+			}
 
 			// create a filter for the nitro proxy
 			pf := filters.NewArgs()
