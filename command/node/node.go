@@ -67,20 +67,18 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// get the full file path
-			var nodePath string
-			switch action {
-			case "install":
-				nodePath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "package.json")
-			default:
+			nodePath := fmt.Sprintf("%s%c%s", path, os.PathSeparator, "package.json")
+			if action == "update" {
 				nodePath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "package-lock.json")
 			}
 
-			output.Pending("checking ", nodePath)
+			output.Pending("checking", nodePath)
 
 			// make sure the file exists
 			_, err := os.Stat(nodePath)
 			if os.IsNotExist(err) {
-				return fmt.Errorf("unable to locate a node file at %s", path)
+				fmt.Println("")
+				return fmt.Errorf("unable to locate a node file at %s", nodePath)
 			}
 
 			output.Done()
