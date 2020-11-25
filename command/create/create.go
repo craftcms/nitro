@@ -132,12 +132,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("new project created 🤓")
 
 			// TODO(jasonmccallister) run the composer install command
-			for _, c := range cmd.Commands() {
-				if c.Use == "composer" {
-					// add the directory
-					return c.RunE(c, []string{dir})
-				}
-			}
+			// composerCommand := composer.New(docker, output)
+			// composerCommand.Flags().Set("version", "1")
+			// composerCommand.RunE(, []string{dir})
 
 			// TODO(jasonmccallister) edit the .env
 			// TODO(jasonmccallister) ask if we should run apply now
