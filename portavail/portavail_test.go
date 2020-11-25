@@ -23,10 +23,6 @@ func TestCheck(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "returns error when no ports are provided",
-			wantErr: true,
-		},
-		{
 			name:    "used ports return an error",
 			args:    args{port: usedPort},
 			wantErr: true,
