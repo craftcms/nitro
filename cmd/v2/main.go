@@ -22,7 +22,7 @@ import (
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/version"
 
-	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/terminal"
 )
 

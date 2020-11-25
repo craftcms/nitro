@@ -4,11 +4,12 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/terminal"
 )
 
 const exampleText = `  # view all resources for the environment

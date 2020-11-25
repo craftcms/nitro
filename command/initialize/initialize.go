@@ -4,10 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/craftcms/nitro/command/version"
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -17,6 +13,11 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/terminal"
 )
 
 const exampleText = `  # create a new environment with the default environment

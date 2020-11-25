@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/craftcms/nitro/config"
 )
 
 // ContextCommand is used to show contextual information
