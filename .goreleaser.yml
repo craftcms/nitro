@@ -7,7 +7,7 @@ before:
 builds:
   - binary: nitro
     id: nitro
-    main: ./cmd/v2/main.go
+    main: ./cmd/cli/main.go
     goos:
       - linux
       - windows
