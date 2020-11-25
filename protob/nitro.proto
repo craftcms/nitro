@@ -7,12 +7,19 @@ option go_package = "/protob";
 service Nitro {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Apply(ApplyRequest) returns (ApplyResponse) {}
+    rpc Version(VersionRequest) returns (VersionResponse) {}
 }
 
 message PingRequest {}
 
 message PingResponse {
     string pong = 1;
+}
+
+message VersionRequest {}
+
+message VersionResponse {
+    string version = 1;
 }
 
 message ApplyRequest {

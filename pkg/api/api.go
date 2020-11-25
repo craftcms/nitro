@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 
+	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/protob"
 )
 
@@ -26,4 +27,9 @@ func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.Pi
 // uses port 9000.
 func (a *API) Apply(context.Context, *protob.ApplyRequest) (*protob.ApplyResponse, error) {
 	return &protob.ApplyResponse{}, nil
+}
+
+// Version is used to check the container image version with the CLI version
+func (a *API) Version(context.Context, *protob.VersionRequest) (*protob.VersionResponse, error) {
+	return &protob.VersionResponse{Version: version.Version}, nil
 }
