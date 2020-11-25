@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package nitrod;
 
-option go_package = "pkg/protob";
+option go_package = "/protob";
 
 service Nitro {
     rpc Ping(PingRequest) returns (PingResponse) {}
