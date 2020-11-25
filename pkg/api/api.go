@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/craftcms/nitro/pkg/protob"
+	"github.com/craftcms/nitro/protob"
 )
 
 // NewAPI returns an API struct that implements the gRPC API used in the proxy container.
