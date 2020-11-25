@@ -138,12 +138,3 @@ func Load() (string, *Config, error) {
 	// read the config
 	return def, cfg, nil
 }
-
-func Umarshal() (*Config, error) {
-	c := Config{}
-	if err := viper.Unmarshal(&c); err != nil {
-		return nil, err
-	}
-
-	return &c, nil
-}
