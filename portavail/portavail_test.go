@@ -15,7 +15,7 @@ func TestCheck(t *testing.T) {
 	usedPort := strconv.Itoa(p)
 
 	type args struct {
-		ports []string
+		port string
 	}
 	tests := []struct {
 		name    string
@@ -28,13 +28,13 @@ func TestCheck(t *testing.T) {
 		},
 		{
 			name:    "used ports return an error",
-			args:    args{ports: []string{usedPort}},
+			args:    args{port: usedPort},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Check(tt.args.ports...); (err != nil) != tt.wantErr {
+			if err := Check(tt.args.port); (err != nil) != tt.wantErr {
 				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

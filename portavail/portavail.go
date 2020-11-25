@@ -7,21 +7,11 @@ import (
 
 // Check takes ports and will check for use against the localhost:port. If any port provided
 // is in use, it will return an error.
-func Check(ports ...string) error {
-	if len(ports) == 0 {
-		return fmt.Errorf("expected a list of ports to check, nothing was provided")
+func Check(port string) error {
+	lis, err := net.Listen("tcp", "localhost:"+port)
+	if err != nil {
+		return fmt.Errorf("It appears port %s, is already in use", port)
 	}
 
-	for _, port := range ports {
-		lis, err := net.Listen("tcp", "localhost:"+port)
-		if err != nil {
-			return fmt.Errorf("It appears port %s, is already in use", port)
-		}
-
-		if err := lis.Close(); err != nil {
-			return fmt.Errorf("unable to close the listener after checking the ports, %w", err)
-		}
-	}
-
-	return nil
+	return lis.Close()
 }
