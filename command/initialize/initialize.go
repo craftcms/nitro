@@ -134,7 +134,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// build the proxy image ref
-			proxyImage := fmt.Sprintf("craftcms/nitro-proxy:%s", cmd.Version)
+			proxyImage := fmt.Sprintf("craftcms/nitro-proxy:%s", version.Version)
 
 			imageFilter := filters.NewArgs()
 			imageFilter.Add("reference", proxyImage)
@@ -165,12 +165,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// create a filter for the nitro proxy
-			pf := filters.NewArgs()
-			pf.Add("label", labels.Proxy+"="+env)
+			proxyFilter := filters.NewArgs()
+			proxyFilter.Add("label", labels.Proxy+"="+env)
 
 			// check if there is an existing container for the nitro-proxy
 			var containerID string
-			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: pf, All: true})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter, All: true})
 			if err != nil {
 				return fmt.Errorf("unable to list the containers\n%w", err)
 			}
@@ -292,6 +292,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 									HostPort: "5000",
 								},
 							},
+							// TODO(jasonmccallister) remove the port
 							"2019/tcp": {
 								{
 									HostIP:   "127.0.0.1",
@@ -310,7 +311,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					env,
 				)
 				if err != nil {
-					return fmt.Errorf("unable to create the container\n%w", err)
+					return fmt.Errorf("unable to create the container from image %s\n%w", proxyImage, err)
 				}
 
 				containerID = resp.ID
