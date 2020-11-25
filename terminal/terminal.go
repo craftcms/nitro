@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// Outputer is an interface that captures the output to a terminal.
+// It is used to make our output consistent in the command line.
 type Outputer interface {
 	Info(s ...string)
 	Success(s ...string)
@@ -14,6 +16,7 @@ type Outputer interface {
 
 type terminal struct{}
 
+// New returns an Outputer interface
 func New() Outputer {
 	return terminal{}
 }
