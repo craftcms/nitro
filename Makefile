@@ -11,7 +11,7 @@ build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/cli
 
 docker:
-	docker build -t craftcms/nitro-proxy:develop .
+	docker build -t craftcms/nitro-proxy:${VERSION} .
 
 local: build
 	mv nitro /usr/local/bin/nitro
