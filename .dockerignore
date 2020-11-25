@@ -7,8 +7,6 @@
 ./docker
 ./docs
 ./CHANGELOG.md
-./gon.hcl
-./install.sh
 ./LICENSE.md
 ./Makefile
 ./README.md

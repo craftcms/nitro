@@ -4,13 +4,9 @@ composer.lock
 /.idea
 /demo-site
 /coverage.txt
-/production-site
 nitro.exe
 /*.sql
 /*.sql.gz
 *.env*
 /api
-/docs
-/cmd/test
 *.sql.zip
-/docker/craft-install
