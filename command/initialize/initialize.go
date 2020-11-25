@@ -133,8 +133,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
+			// build the proxy image
+			proxyImage := fmt.Sprintf("craftcms/nitro-proxy:%s", cmd.Version)
+
 			imageFilter := filters.NewArgs()
-			imageFilter.Add("reference", "craftcms/nitro-proxy:"+cmd.Version)
+			imageFilter.Add("reference", proxyImage)
 
 			// check for the proxy image
 			images, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
@@ -148,7 +151,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "true" {
 				output.Pending("pulling image")
 
-				rdr, err := docker.ImagePull(ctx, "craftcms/nitro-proxy:"+cmd.Version, types.ImagePullOptions{All: false})
+				rdr, err := docker.ImagePull(ctx, proxyImage, types.ImagePullOptions{All: false})
 				if err != nil {
 					return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
 				}
@@ -246,11 +249,13 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				// create a container
 				resp, err := docker.ContainerCreate(ctx,
 					&container.Config{
-						Image: "nitro-proxy:develop",
+						Image: "craftcms/nitro-proxy:2.0.0-alpha",
 						ExposedPorts: nat.PortSet{
 							httpPort:  struct{}{},
 							httpsPort: struct{}{},
 							apiPort:   struct{}{},
+							// TODO(jasonmccallister) remove after testing
+							"2019/tcp": struct{}{},
 						},
 						Labels: map[string]string{
 							labels.Type:         "proxy",
@@ -285,6 +290,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 								{
 									HostIP:   "127.0.0.1",
 									HostPort: "5000",
+								},
+							},
+							"2019/tcp": {
+								{
+									HostIP:   "127.0.0.1",
+									HostPort: "2019",
 								},
 							},
 						},
