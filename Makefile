@@ -1,7 +1,6 @@
 .PHONY: docker
 
 VERSION ?= 2.0.0-alpha
-NITRO_DEFAULT_MACHINE ?= nitro-dev
 
 build:
 	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/cli
