@@ -11,6 +11,7 @@ import (
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/context"
+	"github.com/craftcms/nitro/command/create"
 	"github.com/craftcms/nitro/command/destroy"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/node"
@@ -62,6 +63,7 @@ func init() {
 	// register all of the commands
 	commands := []*cobra.Command{
 		initialize.New(client, term),
+		create.New(client, term),
 		start.New(client, term),
 		stop.New(client, term),
 		restart.New(client, term),
