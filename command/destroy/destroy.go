@@ -30,7 +30,9 @@ const exampleText = `  # remove all resources (networks, containers, and volumes
   # destroy resources for a specific environment
   nitro destroy --environment my-testing-environment`
 
-// New is used to restart all containers related to a specific environment
+// New is used to destroy all resources for an environment. It will prompt for
+// user verification and defaults to no. Part of the destroy process is to
+// perform a backup for all databases in each container database.
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "destroy",
