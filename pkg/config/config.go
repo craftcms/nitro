@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -105,67 +103,6 @@ type PHP struct {
 	MemoryLimit       string `mapstructure:"memory_limit,omitempty"`
 	PostMaxSize       string `mapstructure:"post_max_size,omitempty"`
 	UploadMaxFileSize string `mapstructure:"upload_max_file_size,omitempty"`
-}
-
-// Site represents a web application. It has a hostname, aliases (which
-// are alternate domains), the local path to the site, additional mounts
-// to add to the container, and the directory the index.php is located.
-type Site struct {
-	Hostname string   `yaml:"hostname,omitempty"`
-	Aliases  []string `yaml:"aliases,omitempty"`
-	Path     string   `yaml:"path,omitempty"`
-	Mounts   []string `yaml:"mounts,omitempty"`
-	PHP      string   `yaml:"php,omitempty"`
-	Dir      string   `yaml:"dir,omitempty"`
-}
-
-// GetAbsPath gets the directory for a site.Path,
-// It is used to create the mount for a sites
-// container.
-func (s *Site) GetAbsPath() (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", fmt.Errorf("unable to get home directory, %w", err)
-	}
-
-	return s.cleanPath(home, s.Path)
-}
-
-func (s *Site) cleanPath(home, path string) (string, error) {
-	p := path
-	if strings.Contains(p, "~") {
-		p = strings.Replace(p, "~", home, -1)
-	}
-
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Clean(abs), nil
-}
-
-// Database is the struct used to represent a database engine
-// that is a combination of a engine (e.g. mariadb, mysql, or
-// postgresl), the version number, and the port. The engine
-// and version are directly related to the official docker
-// images on the docker hub.
-type Database struct {
-	Engine  string `yaml:"engine,omitempty"`
-	Version string `yaml:"version,omitempty"`
-	Port    string `yaml:"port,omitempty"`
-}
-
-// GetHostname returns a friendly and predictable name for a database
-// container. It is used for accessing a database by hostname. For
-// example, mysql-8.0-3306 would be the hostname to use in the .env
-// for DB_HOST.
-func (d *Database) GetHostname() (string, error) {
-	if d.Engine == "" || d.Version == "" || d.Port == "" {
-		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
-	}
-
-	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
 }
 
 // Load is used to return the environment name, unmarshalled config, and
