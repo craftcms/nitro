@@ -133,7 +133,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			// build the proxy image
+			// build the proxy image ref
 			proxyImage := fmt.Sprintf("craftcms/nitro-proxy:%s", cmd.Version)
 
 			imageFilter := filters.NewArgs()
@@ -249,7 +249,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				// create a container
 				resp, err := docker.ContainerCreate(ctx,
 					&container.Config{
-						Image: "craftcms/nitro-proxy:2.0.0-alpha",
+						Image: proxyImage,
 						ExposedPorts: nat.PortSet{
 							httpPort:  struct{}{},
 							httpsPort: struct{}{},
