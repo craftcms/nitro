@@ -33,4 +33,7 @@ VOLUME /data
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
-EXPOSE 443 80 5000 2019
+EXPOSE 443
+EXPOSE 80
+EXPOSE 5000
+EXPOSE 2019
