@@ -21,6 +21,7 @@ import (
 	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/version"
+	nitro "github.com/craftcms/nitro/pkg/client"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/terminal"
@@ -57,6 +58,12 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// create the nitrod gRPC API
+	n, err := nitro.NewClient("127.0.0.1", "5000")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// create the "terminal" for capturing output
 	term := terminal.New()
 
@@ -75,8 +82,7 @@ func init() {
 		apply.New(client, term),
 		context.New(client, term),
 		trust.New(client, term),
-		//db.DBCommand,
-		//php.New(client, term),
+		version.New(n, term),
 	}
 
 	// add the commands
