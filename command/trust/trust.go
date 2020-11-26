@@ -111,18 +111,25 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Done()
 
 			output.Info("Installing certificate (you might be prompted for your password)")
+			switch runtime.GOOS {
+			case "linux":
+				// TODO(jasonmccallister) run multiple commands to set permissions
+				if err := sudo.Run("cp", "cp", "/usr/local/share/ca-certificates/", f.Name()); err != nil {
+					output.Info("Unable to automatically add certificate\n")
+					output.Info("To install the certificate, run the following command:")
+					output.Info(fmt.Sprintf("  sudo cp %s /usr/local/share/ca-certificates/", f.Name()))
+					output.Info("  sudo sudo update-ca-certificates")
 
-			if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
-				output.Info("Unable to automatically add the certificate\n")
-				output.Info("To install the certificate, run the following command:")
-
-				// TODO show os specific commands
-				switch runtime.GOOS {
-				default:
-					output.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+					return nil
 				}
-
-				return nil
+			// linux
+			default:
+				if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
+					output.Info("Unable to automatically add certificate\n")
+					output.Info("To install the certificate, run the following command:")
+					output.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+					return nil
+				}
 			}
 
 			// clean up
