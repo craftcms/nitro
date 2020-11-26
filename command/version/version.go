@@ -28,8 +28,16 @@ func New(nitro protob.NitroClient, output terminal.Outputer) *cobra.Command {
 				return fmt.Errorf("unable to get the version from the gRPC API")
 			}
 
-			output.Info("CLI Version:\t", Version)
-			output.Info("gRPC Version:\t", resp.GetVersion())
+			output.Info("cli:", Version)
+			output.Info("gRPC:", resp.GetVersion())
+
+			if Version != resp.GetVersion() {
+				output.Info("")
+				output.Info("The CLI and gRPC versions do not match")
+				output.Info("You might need to run `nitro update`")
+			} else {
+				output.Success("everything looks great 🙂")
+			}
 
 			return nil
 		},
