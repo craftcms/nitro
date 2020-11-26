@@ -1,29 +1,15 @@
 package caddyconv
 
-import "github.com/craftcms/nitro/internal/config"
+import "github.com/craftcms/nitro/config"
 
 // ToCaddy takes a nitro config struct and converts it to a representation of
 // a caddy configuration to send to the Caddy API.
-func ToCaddy(config *config.Config) (*CaddyConfig, error) {
+func ToCaddy(sites []config.Site) (*CaddyUpdateRequest, error) {
 	// map all of the sites to a server configuration
-	servers := map[string]CaddyServer{}
-	for _, site := range config.Sites {
-		servers[site.Hostname] = CaddyServer{
-			// TODO(jasonmccallister) make this grab the sites aliases
-			Listen: []string{":443"},
-			// Routes:
-		}
-	}
+	req := &CaddyUpdateRequest{}
 
-	// set the defaults
-	caddy := &CaddyConfig{
-		Admin: CaddyAdmin{
-			Listen: "localhost:2019",
-		},
-	}
-	// set the tls configuration
-	// tls := CaddyAppsTLS{}
-	// generate
+	// set the defaults for displaying the static page
+	req.Srv1.Listen = []string{":80"}
 
-	return caddy, nil
+	return req, nil
 }
