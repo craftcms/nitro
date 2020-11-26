@@ -14,6 +14,7 @@
 - Added the `nitro prep` command to help setup a project to deploy to a Docker based environment by adding a `Dockerfile` based on the sites PHP version, a `.dockerignore`, and multi-stage builds for handling dependency installs in Docker.
 - You can now set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO
 _API_PORT`.
+- Added the `version` command to display the cli and gRPC API versions
 
 ### Changed
 
