@@ -32,13 +32,40 @@ func (s *Site) GetAbsPath() (string, error) {
 	return s.cleanPath(home, s.Path)
 }
 
+// GetAbsMountPaths gets the directory for a site.Mounts,
+// It is used to create the additional mounts for a sites
+// container.
+func (s *Site) GetAbsMountPaths() (map[string]string, error) {
+	mnts := make(map[string]string)
+	home, err := homedir.Dir()
+	if err != nil {
+		return mnts, fmt.Errorf("unable to get home directory, %w", err)
+	}
+
+	for _, m := range s.Mounts {
+		// split the
+		sp := strings.Split(m, ":")
+		src := sp[0]
+		dest := sp[1]
+
+		p, err := s.cleanPath(home, src)
+		if err != nil {
+			return mnts, err
+		}
+
+		mnts[p] = dest
+	}
+
+	return mnts, nil
+}
+
 func (s *Site) cleanPath(home, path string) (string, error) {
 	p := path
 	if strings.Contains(p, "~") {
 		p = strings.Replace(p, "~", home, -1)
 	}
 
-	abs, err := filepath.Abs(path)
+	abs, err := filepath.Abs(p)
 	if err != nil {
 		return "", err
 	}
