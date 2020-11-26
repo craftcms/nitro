@@ -3,9 +3,11 @@ FROM caddy:2.2.1-alpine AS caddy
 
 # build the api
 FROM golang:1.15-alpine AS builder
+ARG NITRO_VERSION=dev
+ENV NITRO_VERSION=${NITRO_VERSION}
 WORKDIR /go/src/github.com/craftcms/nitro
 COPY . .
-RUN GOOS=linux go build -ldflags="-s -w" -o nitrod ./cmd/api
+RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${NITRO_VERSION}'" -o nitrod ./cmd/api
 
 # build the final image
 FROM alpine:3.12
