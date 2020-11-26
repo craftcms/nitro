@@ -23,12 +23,16 @@ type CaddyUpdateRequest struct {
 	} `json:"srv0"`
 	Srv1 struct {
 		Listen []string `json:"listen"`
-		Routes []struct {
-			Handle []struct {
-				Handler string   `json:"handler"`
-				Root    string   `json:"root,omitempty"`
-				Hide    []string `json:"hide,omitempty"`
-			} `json:"handle"`
-		} `json:"routes"`
+		Routes []Route `json:"routes"`
 	} `json:"srv1"`
+}
+
+type Route struct {
+	Handle []Handler `json:"handle"`
+}
+
+type Handler struct {
+	Handler string   `json:"handler"`
+	Root    string   `json:"root,omitempty"`
+	Hide    []string `json:"hide,omitempty"`
 }
