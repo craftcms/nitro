@@ -10,6 +10,10 @@ RUN GOOS=linux go build -ldflags="-s -w" -o nitrod ./cmd/api
 # build the final image
 FROM alpine:3.12
 
+# See https://caddyserver.com/docs/conventions#file-locations for details
+ENV XDG_CONFIG_HOME /config
+ENV XDG_DATA_HOME /data
+
 LABEL org.opencontainers.image.version=v2.2.1
 LABEL org.opencontainers.image.title="Craft Nitro"
 LABEL org.opencontainers.image.description="Nitro is a command-line tool focused on making local Craft CMS development quick and easy"
@@ -21,6 +25,8 @@ LABEL org.opencontainers.image.source="https://github.com/craftcms/nitro"
 RUN apk --no-cache add ca-certificates nss-tools supervisor
 RUN mkdir --parents /var/www/html
 RUN mkdir --parents /etc/caddy/
+RUN mkdir --parents /config
+RUN mkdir --parents /data
 
 COPY .docker/Caddyfile /etc/caddy/Caddyfile
 COPY .docker/index.html /var/www/html/
