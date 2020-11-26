@@ -113,7 +113,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("Installing certificate (you might be prompted for your password)")
 			switch runtime.GOOS {
 			case "linux":
+				// https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
 				// TODO(jasonmccallister) run multiple commands to set permissions
+				// TODO(jasonmccallister) os.Chmod(/usr/local/share/ca-certificates/+f.Name(), 644)
 				if err := sudo.Run("cp", "cp", "/usr/local/share/ca-certificates/", f.Name()); err != nil {
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
