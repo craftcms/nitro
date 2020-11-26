@@ -1,0 +1,116 @@
+{
+    "servers": {
+        "srv0": {
+            "listen": [
+                ":80"
+            ],
+            "routes": [
+                {
+                    "handle": [
+                        {
+                            "handler": "vars",
+                            "root": "/var/www/html"
+                        },
+                        {
+                            "handler": "file_server",
+                            "hide": [
+                                "/etc/caddy/Caddyfile"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "srv1": {
+            "listen": [
+                ":443"
+            ],
+            "routes": [
+                {
+                    "handle": [
+                        {
+                            "handler": "subroute",
+                            "routes": [
+                                {
+                                    "handle": [
+                                        {
+                                            "handler": "reverse_proxy",
+                                            "upstreams": [
+                                                {
+                                                    "dial": "something.nitro:8080"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "match": [
+                        {
+                            "host": [
+                                "something.nitro",
+                                "something.test"
+                            ]
+                        }
+                    ],
+                    "terminal": true
+                },
+                {
+                    "handle": [
+                        {
+                            "handler": "subroute",
+                            "routes": [
+                                {
+                                    "handle": [
+                                        {
+                                            "handler": "reverse_proxy",
+                                            "upstreams": [
+                                                {
+                                                    "dial": "example.nitro:8080"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "match": [
+                        {
+                            "host": [
+                                "example.nitro",
+                                "example.test"
+                            ]
+                        }
+                    ],
+                    "terminal": true
+                },
+                {
+                    "handle": [
+                        {
+                            "handler": "subroute",
+                            "routes": [
+                                {
+                                    "handle": [
+                                        {
+                                            "handler": "vars",
+                                            "root": "/var/www/html"
+                                        },
+                                        {
+                                            "handler": "file_server",
+                                            "hide": [
+                                                "/etc/caddy/Caddyfile"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "terminal": true
+                }
+            ]
+        }
+    }
+}
