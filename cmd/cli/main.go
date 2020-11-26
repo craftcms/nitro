@@ -20,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/command/stop"
 	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
+	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
 	nitro "github.com/craftcms/nitro/pkg/client"
 
@@ -83,6 +84,7 @@ func init() {
 		context.New(client, term),
 		trust.New(client, term),
 		version.New(n, term),
+		validate.New(client, term),
 	}
 
 	// add the commands
