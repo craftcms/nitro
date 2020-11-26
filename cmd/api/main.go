@@ -32,7 +32,7 @@ func main() {
 
 	protob.RegisterNitroServer(s, api.NewAPI())
 
-	fmt.Println("running api on port", *port)
+	fmt.Println("gRPC API listening on port", *port)
 
 	// server the grpc service
 	if err := s.Serve(lis); err != nil {
