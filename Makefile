@@ -17,7 +17,11 @@ local: build
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 
-dev: api
+dev: rm docker init
+rm:
+	docker container rm -f nitro-v2
+init:
+	nitro init
 
 test:
 	go test ./...
