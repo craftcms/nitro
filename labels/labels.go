@@ -7,6 +7,9 @@ const (
 	// DatabaseVersion is the version of the datbase the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
 
+	// DatabaseCompatability is the compatability of the database (e.g. mariadb and mysql are compatible)
+	DatabaseCompatability = "com.craftcms.nitro.database-compatability"
+
 	// Environment is the constant used for the label used for docker images to determine
 	// the environment (e.g. nitro-dev) for the container
 	Environment = "com.craftcms.nitro.environment"

@@ -76,6 +76,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				// add filters to check for the container
 				filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 				filter.Add("label", labels.DatabaseVersion+"="+db.Version)
+				filter.Add("label", labels.Type+"=database")
 
 				// get the containers for databases
 				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -113,6 +114,20 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						labels.Environment:     env,
 						labels.DatabaseEngine:  db.Engine,
 						labels.DatabaseVersion: db.Version,
+						labels.Type:            "database",
+					}
+
+					// if the database is mysql or mariadb, mark them as
+					// mysql compatible (used for importing backups)
+					if db.Engine == "mariadb" || db.Engine == "mysql" {
+						lbls[labels.DatabaseCompatability] = "mysql"
+					}
+
+					// if the database is postgres, mark it as compatible
+					// with postgres. This is not needed but a place holder
+					// if cockroachdb is ever supported by craft.
+					if db.Engine == "postgres" {
+						lbls[labels.DatabaseCompatability] = "postgres"
 					}
 
 					// create the volume
@@ -206,23 +221,19 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					// set the container id to start
 					containerID = conResp.ID
 					startContainer = true
-
-					output.Done()
 				}
 
 				// start the container if needed
 				if startContainer {
-					output.Pending("starting", hostname)
-
 					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 						return fmt.Errorf("unable to start the container, %w", err)
 					}
-
-					output.Done()
 				}
 
+				output.Done()
+
 				// remove the filters
-				filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
+				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 			}
 
@@ -414,7 +425,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// TODO(jasonmccallister) convert the sites into a Caddy json config and send to the API
 
-			output.Info("Everything for", env, "is up and running 😃")
+			output.Info(env, "is up and running 😃")
 
 			return nil
 		},
