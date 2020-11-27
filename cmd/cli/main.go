@@ -12,6 +12,7 @@ import (
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/create"
+	"github.com/craftcms/nitro/command/database"
 	"github.com/craftcms/nitro/command/destroy"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/node"
@@ -85,6 +86,7 @@ func init() {
 		trust.New(client, term),
 		version.New(n, term),
 		validate.New(client, term),
+		database.New(client, term),
 	}
 
 	// add the commands
