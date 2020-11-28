@@ -78,16 +78,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 				filter.Add("label", labels.Type+"=database")
 
-				// add filter for mysql compatability
-				if db.Engine == "mysql" || db.Engine == "mariadb" {
-					filter.Add("label", labels.DatabaseCompatability+"=mysql")
-				}
-
-				// add filter for postgres compatability
-				if db.Engine == "postgres" {
-					filter.Add("label", labels.DatabaseCompatability+"=postgres")
-				}
-
 				// get the containers for databases
 				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 				if err != nil {
@@ -248,7 +238,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				}
 
 				// remove the filters
-				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
+				filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
 				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 				filter.Del("label", labels.Type+"=database")
 			}
