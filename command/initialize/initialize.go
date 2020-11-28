@@ -17,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/version"
-	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
 )
@@ -39,10 +38,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			env := cmd.Flag("environment").Value.String()
-			_, cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
+			// _, cfg, err := config.Load()
+			// if err != nil {
+			// 	return err
+			// }
 
 			output.Info(fmt.Sprintf("Checking %s...", env))
 
@@ -328,13 +327,13 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// convert the apply flag to a boolean
-			apply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
+			skipApply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
 			if err != nil {
 				// don't do anything
 			}
 
 			// check if we need to run the
-			if apply && (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) {
+			if skipApply != false {
 				for _, c := range cmd.Parent().Commands() {
 					if c.Use == "apply" {
 						return c.RunE(cmd, args)
@@ -349,7 +348,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	// set flags for the command
-	cmd.Flags().BoolP("skip-apply", "s", true, "skip applying changes")
+	cmd.Flags().BoolP("skip-apply", "s", false, "skip applying changes")
 
 	return cmd
 }
