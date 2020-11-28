@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
 	"github.com/docker/docker/client"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply"
@@ -23,9 +25,10 @@ import (
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
-	nitro "github.com/craftcms/nitro/pkg/client"
-
 	"github.com/craftcms/nitro/config"
+	nitro "github.com/craftcms/nitro/pkg/client"
+	"github.com/craftcms/nitro/setup"
+
 	"github.com/craftcms/nitro/terminal"
 )
 
@@ -45,14 +48,33 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
-	env, _, err := config.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// set any global flags
 	flags := rootCommand.PersistentFlags()
+
+	// set a default environment if there is a variable
+	// set the default environment name
+	env := "nitro-dev"
+	if os.Getenv("NITRO_DEFAULT_ENVIRONMENT") != "" {
+		env = os.Getenv("NITRO_DEFAULT_ENVIRONMENT")
+	}
+
 	flags.StringP("environment", "e", env, "The environment")
+
+	// check for or create the config
+	if _, err := config.Load(env); err != nil {
+		if errors.Is(err, config.ErrNoConfigFile) {
+			// get the home directory
+			home, err := homedir.Dir()
+			if err != nil {
+				log.Fatal("unable to get the home directory, %w", err)
+			}
+
+			// setup the config file
+			if err := setup.FirstTime(home, env); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
 
 	// create the docker client
 	client, err := client.NewEnvClient()
@@ -61,7 +83,7 @@ func init() {
 	}
 
 	// create the nitrod gRPC API
-	n, err := nitro.NewClient("127.0.0.1", "5000")
+	nitrod, err := nitro.NewClient("127.0.0.1", "5000")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +106,7 @@ func init() {
 		apply.New(client, term),
 		context.New(client, term),
 		trust.New(client, term),
-		version.New(client, n, term),
+		version.New(client, nitrod, term),
 		validate.New(client, term),
 		database.New(client, term),
 	}
@@ -94,8 +116,6 @@ func init() {
 }
 
 func main() {
-	// cobra.OnInitialize()
-
 	// execute the root command
 	if err := rootCommand.Execute(); err != nil {
 		os.Exit(1)
