@@ -10,3 +10,4 @@ nitro.exe
 *.env*
 /api
 *.sql.zip
+*.dump
