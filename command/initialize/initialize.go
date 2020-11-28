@@ -38,10 +38,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			env := cmd.Flag("environment").Value.String()
-			// _, cfg, err := config.Load()
-			// if err != nil {
-			// 	return err
-			// }
 
 			output.Info(fmt.Sprintf("Checking %s...", env))
 

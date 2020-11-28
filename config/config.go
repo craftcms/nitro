@@ -6,6 +6,12 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
+)
+
+var (
+	// ErrNoConfigFile is returned when a configuration file cannot be found
+	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
 )
 
 var envMap = map[string]string{
@@ -108,33 +114,54 @@ type PHP struct {
 // Load is used to return the environment name, unmarshalled config, and
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
-func Load() (string, *Config, error) {
+func Load(env string) (*Config, error) {
 	home, err := homedir.Dir()
 	if err != nil {
-		return "", nil, fmt.Errorf("unable to get the home directory, %w", err)
+		return nil, fmt.Errorf("unable to get the home directory, %w", err)
 	}
 
 	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
 	viper.SetConfigType("yaml")
 
-	// set the default environment name
-	def := "nitro-dev"
-	if os.Getenv("NITRO_DEFAULT_ENVIRONMENT") != "" {
-		def = os.Getenv("NITRO_DEFAULT_ENVIRONMENT")
+	// set the config file
+	if env == "" {
+		env = "nitro-dev"
 	}
 
-	// set the config file
-	viper.SetConfigName(def)
+	viper.SetConfigName(env)
 
 	if err := viper.ReadInConfig(); err != nil {
-		return "", nil, err
+		return nil, ErrNoConfigFile
+	}
+
+	if viper.ConfigFileUsed() == "" {
+		return nil, ErrNoConfigFile
 	}
 
 	cfg := &Config{}
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return "", nil, err
+		return nil, err
 	}
 
-	// read the config
-	return def, cfg, nil
+	// return the config
+	return cfg, nil
+}
+
+func (c *Config) Save(file string) error {
+	// open the file
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return nil
 }

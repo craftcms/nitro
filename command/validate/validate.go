@@ -26,7 +26,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "Validate the config",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, cfg, err := config.Load()
+			env := cmd.Flag("environment").Value.String()
+			cfg, err := config.Load(env)
 			if err != nil {
 				return err
 			}

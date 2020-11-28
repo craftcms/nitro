@@ -38,7 +38,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
-			_, cfg, err := config.Load()
+			cfg, err := config.Load(env)
 			if err != nil {
 				return err
 			}
