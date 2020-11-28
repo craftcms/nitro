@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/archive"
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +36,9 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 		Example: importExampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
+
+			output.Info("Preparing import...")
+
 			// TODO(jasonmccallister) get the abs clean path for the file
 			file, err := os.Open(args[0])
 			if err != nil {
@@ -42,18 +46,18 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 			defer file.Close()
 
-			// TODO(jasonmccallister) check if the file is an archive
 			b, err := ioutil.ReadFile(file.Name())
 			if err != nil {
 				return err
 			}
 
+			// check if the file is an archive
 			compressed := false
 			if filetype.IsArchive(b) {
 				compressed = true
 			}
 
-			// TODO(jasonmccallister) dectect the type of backup if not compressed
+			// dectect the type of backup if not compressed
 			detected := ""
 			if compressed == false {
 				detected, err = database.DetermineEngine(file.Name())
@@ -83,11 +87,29 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return err
 			}
 
+			// TODO(jasonmccallister) prompt the user for the container to import
+			var containerID string
 			for _, c := range containers {
+				containerID = c.ID
 				output.Info(c.Names[0])
 			}
 
+			// TODO(jasonmccallister) if the file is not compressed, compress it to send to the api
+			switch compressed {
+			case false:
+				rdr, err := archive.Generate(file.Name())
+				if err != nil {
+					return err
+				}
+
+				// https://stackoverflow.com/questions/47641799/unable-to-understand-docker-cp-command
+				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}); err != nil {
+					return err
+				}
+			}
+
 			// TODO(jasonmccallister) copy the file, in tar format, to the container in the tmp directory
+
 			// TODO(jasonmccallister) determine if the backup is to mysql or postgres and run the import file command
 			return nil
 		},
