@@ -1,6 +1,8 @@
 package database
 
 import (
+	"archive/tar"
+	"bytes"
 	"io/ioutil"
 	"os"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/archive"
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 )
@@ -70,11 +71,12 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				output.Success("detected", detected, "backup")
 			}
 
-			// TODO(jasonmccallister) get a list of all the databases
+			// add filters to show only the envrionment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 			filter.Add("label", labels.Type+"=database")
 
+			// if we detected the engine type, add the compatability label to the filter
 			switch detected {
 			case "mysql":
 				filter.Add("label", labels.DatabaseCompatability+"=mysql")
@@ -82,6 +84,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				filter.Add("label", labels.DatabaseCompatability+"=postgres")
 			}
 
+			// get a list of all the databases
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
 			if err != nil {
 				return err
@@ -97,13 +100,41 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			// TODO(jasonmccallister) if the file is not compressed, compress it to send to the api
 			switch compressed {
 			case false:
-				rdr, err := archive.Generate(file.Name())
-				if err != nil {
+				var buf bytes.Buffer
+				tw := tar.NewWriter(&buf)
+
+				var files = []struct {
+					Name, Body string
+				}{
+					{"readme.txt", "This archive contains some text files."},
+					{"gopher.txt", "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
+					{"todo.txt", "Get animal handling license."},
+				}
+
+				for _, file := range files {
+					hdr := &tar.Header{
+						Name: file.Name,
+						Mode: 0600,
+						Size: int64(len(file.Body)),
+					}
+
+					if err := tw.WriteHeader(hdr); err != nil {
+						return err
+					}
+
+					if _, err := tw.Write([]byte(file.Body)); err != nil {
+						return err
+					}
+				}
+
+				if err := tw.Close(); err != nil {
 					return err
 				}
 
+				tr := tar.NewReader(&buf)
+
 				// https://stackoverflow.com/questions/47641799/unable-to-understand-docker-cp-command
-				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}); err != nil {
+				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}); err != nil {
 					return err
 				}
 			}

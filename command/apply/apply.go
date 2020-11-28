@@ -78,6 +78,16 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 				filter.Add("label", labels.Type+"=database")
 
+				// add filter for mysql compatability
+				if db.Engine == "mysql" || db.Engine == "mariadb" {
+					filter.Add("label", labels.DatabaseCompatability+"=mysql")
+				}
+
+				// add filter for postgres compatability
+				if db.Engine == "postgres" {
+					filter.Add("label", labels.DatabaseCompatability+"=postgres")
+				}
+
 				// get the containers for databases
 				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 				if err != nil {
@@ -221,20 +231,26 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					// set the container id to start
 					containerID = conResp.ID
 					startContainer = true
+
+					output.Done()
 				}
 
 				// start the container if needed
 				if startContainer {
+					output.Pending("starting", hostname)
+
+					// start the container
 					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 						return fmt.Errorf("unable to start the container, %w", err)
 					}
-				}
 
-				output.Done()
+					output.Done()
+				}
 
 				// remove the filters
 				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
+				filter.Del("label", labels.Type+"=database")
 			}
 
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)

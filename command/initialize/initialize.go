@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -326,9 +327,15 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				}
 			}
 
+			// convert the apply flag to a boolean
+			apply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
+			if err != nil {
+				// don't do anything
+			}
+
 			// check if we need to run the
-			if (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) && cmd.Flag("skip-apply").Value.String() != "true" {
-				for _, c := range cmd.Commands() {
+			if apply && (len(cfg.Sites) > 0 || len(cfg.Databases) > 0) {
+				for _, c := range cmd.Parent().Commands() {
 					if c.Use == "apply" {
 						return c.RunE(cmd, args)
 					}

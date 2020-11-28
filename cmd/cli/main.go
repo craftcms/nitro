@@ -84,7 +84,7 @@ func init() {
 		apply.New(client, term),
 		context.New(client, term),
 		trust.New(client, term),
-		version.New(n, term),
+		version.New(client, n, term),
 		validate.New(client, term),
 		database.New(client, term),
 	}

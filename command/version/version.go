@@ -5,6 +5,7 @@ import (
 
 	"github.com/craftcms/nitro/protob"
 	"github.com/craftcms/nitro/terminal"
+	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 )
 
@@ -17,26 +18,33 @@ const exampleText = `  # show the cli and api version
   nitro version`
 
 // New is used to show the cli and gRPC API client version
-func New(nitro protob.NitroClient, output terminal.Outputer) *cobra.Command {
+func New(client client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "version",
 		Short:   "Show version info",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resp, err := nitro.Version(cmd.Context(), &protob.VersionRequest{})
+			resp, err := nitrod.Version(cmd.Context(), &protob.VersionRequest{})
 			if err != nil {
-				return fmt.Errorf("unable to get the version from the gRPC API")
+				return fmt.Errorf("unable to get version from the gRPC API")
 			}
 
-			output.Info("cli:", Version)
-			output.Info("gRPC:", resp.GetVersion())
+			servVersion, err := client.ServerVersion(cmd.Context())
+			if err != nil {
+				return fmt.Errorf("unable to get docker server version, %w", err)
+			}
+
+			output.Info("Nitro CLI: \t", Version)
+			output.Info("Nitro gRPC: \t", resp.GetVersion())
+			output.Info("Docker API: \t", servVersion.APIVersion, "("+servVersion.MinAPIVersion+" min)")
+			output.Info("Docker CLI: \t", client.ClientVersion())
 
 			if Version != resp.GetVersion() {
 				output.Info("")
-				output.Info("The CLI and gRPC versions do not match")
+				output.Info("The Nitro CLI and gRPC versions do not match")
 				output.Info("You might need to run `nitro update`")
 			} else {
-				output.Success("everything looks great 🙂")
+				output.Info("Everything looks great 🙂")
 			}
 
 			return nil
