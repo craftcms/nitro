@@ -26,7 +26,10 @@ const exampleText = `  # create command
   nitro create
 
   # bring your own git repo
-  nitro create https://github.com/craftcms/demo`
+  nitro create https://github.com/craftcms/demo
+
+  # you can also provide shorthand urls for github
+  nitro create craftcms/demo`
 
 var download = "https://github.com/craftcms/craft/archive/HEAD.zip"
 
@@ -49,7 +52,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			} else {
 				parsed, err := url.Parse(download)
 				if err != nil {
-					return fmt.Errorf("")
+					return fmt.Errorf("Unable to parse the provided URL %q", args[0])
 				}
 				u = *parsed
 			}
@@ -131,10 +134,17 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Info("new project created 🤓")
 
-			// TODO(jasonmccallister) run the composer install command
-			// composerCommand := composer.New(docker, output)
-			// composerCommand.Flags().Set("version", "1")
-			// composerCommand.RunE(, []string{dir})
+			// run the composer install command
+			for _, c := range cmd.Parent().Commands() {
+				if c.Use == "composer" {
+					// run composer install using the new directory
+					// we pass the command itself instead of the parent
+					// command
+					if err := c.RunE(c, []string{dir}); err != nil {
+						return err
+					}
+				}
+			}
 
 			// TODO(jasonmccallister) edit the .env
 			// TODO(jasonmccallister) ask if we should run apply now

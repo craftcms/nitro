@@ -2,6 +2,7 @@ package composer
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,6 +34,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			version := cmd.Flag("version").Value.String()
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
 
 			// get the path from args or current directory
 			var path string
@@ -85,7 +90,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			filters.Add("reference", image)
 
 			// look for the image
-			images, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
+			images, err := docker.ImageList(ctx, types.ImageListOptions{
 				Filters: filters,
 			})
 			if err != nil {
@@ -96,7 +101,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			if len(images) == 0 {
 				output.Pending("pulling image")
 
-				rdr, err := docker.ImagePull(cmd.Context(), image, types.ImagePullOptions{All: false})
+				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 				if err != nil {
 					return fmt.Errorf("unable to pull the docker image, %w", err)
 				}
@@ -118,7 +123,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// create the temp container
-			resp, err := docker.ContainerCreate(cmd.Context(),
+			resp, err := docker.ContainerCreate(ctx,
 				&container.Config{
 					Image: image,
 					Cmd:   commands,
@@ -140,7 +145,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// attach to the container
-			stream, err := docker.ContainerAttach(cmd.Context(), resp.ID, types.ContainerAttachOptions{
+			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 				Stream: true,
 				Stdout: true,
 				Stderr: true,
@@ -152,7 +157,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			defer stream.Close()
 
 			// run the container
-			if err := docker.ContainerStart(cmd.Context(), resp.ID, types.ContainerStartOptions{}); err != nil {
+			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
@@ -164,7 +169,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Pending("cleaning up")
 
 			// remove the container
-			if err := docker.ContainerRemove(cmd.Context(), resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
 				return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
 			}
 
