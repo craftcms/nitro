@@ -49,7 +49,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 
-			output.Info(fmt.Sprintf("Checking %s Network...", env))
+			output.Info("Checking Network...")
 
 			// find networks
 			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
@@ -62,6 +62,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			for _, n := range networks {
 				if n.Name == env {
 					networkID = n.ID
+					output.Success("network ready")
 				}
 			}
 
@@ -69,8 +70,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			if networkID == "" {
 				return ErrNoNetwork
 			}
-
-			output.Success("using", networkID)
 
 			// check the databases
 			if err := checkDatabases(ctx, docker, output, filter, env, networkID, cfg); err != nil {
