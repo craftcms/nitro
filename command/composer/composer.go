@@ -2,7 +2,6 @@ package composer
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,7 +35,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			version := cmd.Flag("version").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
-				ctx = context.Background()
+				// when we call commands from other commands (e.g. create)
+				// the context could be nil, so we set it to the parent
+				// context just in case.
+				ctx = cmd.Parent().Context()
 			}
 
 			// get the path from args or current directory
