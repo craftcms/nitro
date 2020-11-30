@@ -1,12 +1,15 @@
 package api
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/pkg/caddyconv"
 	"github.com/craftcms/nitro/protob"
 )
 
@@ -152,8 +155,44 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 	// TODO(jasonmccallister) create the struct to represent the servers to send
 	// to the caddy api.
 
+	update := caddyconv.CaddyUpdateRequest{}
+
+	routes := []caddyconv.ServerRoute{}
+	for _, site := range request.GetSites() {
+		hosts := []string{site.GetHostname()}
+		hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
+
+		routes = append(routes, caddyconv.ServerRoute{
+			Handle: []caddyconv.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddyconv.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), site.GetPort()),
+						},
+					},
+				},
+			},
+			Match: []caddyconv.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+	}
+
+	update.Srv0 = caddyconv.Server{
+		Listen: []string{":443"},
+		Routes: routes,
+	}
+
+	content, err := json.Marshal(&update)
+	if err != nil {
+		return nil, err
+	}
+
 	// send the update
-	res, err := http.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", strings.NewReader(update))
+	res, err := http.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
 		resp.Message = "error updating the Caddy API"
 		resp.Error = true
