@@ -43,8 +43,6 @@ func New(client client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				output.Info("")
 				output.Info("The Nitro CLI and gRPC versions do not match")
 				output.Info("You might need to run `nitro update`")
-			} else {
-				output.Info("Everything looks great 🙂")
 			}
 
 			return nil
