@@ -11,8 +11,9 @@ type Server struct {
 }
 
 type ServerRoute struct {
-	Handle []RouteHandle `json:"handle"`
-	Match  []Match       `json:"match,omitempty"`
+	Handle   []RouteHandle `json:"handle"`
+	Match    []Match       `json:"match,omitempty"`
+	Terminal bool          `json:"terminal"`
 }
 
 type RouteHandle struct {

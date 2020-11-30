@@ -147,9 +147,6 @@ func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.Pi
 // port for the service. The NGINX container type uses port 8080 and the PHP-FPM container type
 // uses port 9000.
 func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
-	for k, v := range request.GetSites() {
-		fmt.Println(k, v)
-	}
 	resp := &protob.ApplyResponse{}
 
 	// TODO(jasonmccallister) create the struct to represent the servers to send
@@ -159,6 +156,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 
 	routes := []caddyconv.ServerRoute{}
 	for _, site := range request.GetSites() {
+		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
 		hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
 
@@ -178,12 +176,33 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 					Host: hosts,
 				},
 			},
+			Terminal: true,
 		})
 	}
 
 	update.Srv0 = caddyconv.Server{
 		Listen: []string{":443"},
 		Routes: routes,
+	}
+
+	update.Srv1 = caddyconv.Server{
+		Listen: []string{":80"},
+		Routes: []caddyconv.ServerRoute{
+			{
+				Handle: []caddyconv.RouteHandle{
+					{
+						Handler: "vars",
+						Root:    "/var/www/html",
+					},
+					{
+						Handler: "file_server",
+						Root:    "/var/www/html",
+						Hide:    []string{"/etc/caddy/Caddyfile"},
+					},
+				},
+				Terminal: true,
+			},
+		},
 	}
 
 	content, err := json.Marshal(&update)
