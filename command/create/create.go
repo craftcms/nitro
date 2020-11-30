@@ -30,7 +30,7 @@ const exampleText = `  # create command
   nitro create https://github.com/craftcms/demo
 
   # you can also provide shorthand urls for github
-  nitro create craftcms/demo`
+  nitro create craftcms/demo my-project`
 
 var download = "https://github.com/craftcms/craft/archive/HEAD.zip"
 
@@ -76,6 +76,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return err
 			}
 			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				return fmt.Errorf("\nUnable to download %s.\nStatus: %d", download.String(), resp.StatusCode)
+			}
 
 			// create a temp file
 			file, err := ioutil.TempFile(os.TempDir(), "nitro-create-download-")
@@ -146,7 +150,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					// run composer install using the new directory
 					// we pass the command itself instead of the parent
 					// command
-					if err := c.RunE(c, []string{dir}); err != nil {
+					if err := c.RunE(c, []string{dir, "--version=" + cmd.Flag("composer-version").Value.String()}); err != nil {
 						return err
 					}
 				}
@@ -160,6 +164,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	// TODO(jasonmccallister) add flags for the composer and node versions
+	cmd.Flags().StringP("composer-version", "c", "2", "version of composer to use")
+	cmd.Flags().StringP("node-version", "n", "14", "version of node to use")
 
 	return cmd
 }
