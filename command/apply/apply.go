@@ -2,6 +2,7 @@ package apply
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"strings"
 
@@ -72,176 +73,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Success("using", networkID)
 
 			// check the databases
-			output.Info("Checking Databases...")
-			for _, db := range cfg.Databases {
-				// add filters to check for the container
-				filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
-				filter.Add("label", labels.DatabaseVersion+"="+db.Version)
-				filter.Add("label", labels.Type+"=database")
-
-				// get the containers for databases
-				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-				if err != nil {
-					return fmt.Errorf("error getting a list of containers")
-				}
-
-				// set the hostname
-				hostname, err := db.GetHostname()
-				if err != nil {
-					return err
-				}
-
-				// if there are no containers, create a volume, container, and start the container
-				var containerID string
-				var startContainer bool
-				switch len(containers) {
-				case 1:
-					// set the container id
-					containerID = containers[0].ID
-
-					// check if the container is running
-					if containers[0].State != "running" {
-						startContainer = true
-					} else {
-						output.Success(hostname, "ready")
-					}
-
-					// TODO(jasonmccallister) check is the site.Mounts to match whats there versus expected
-				default:
-					output.Pending("creating volume", hostname)
-
-					// create the labels
-					lbls := map[string]string{
-						labels.Environment:     env,
-						labels.DatabaseEngine:  db.Engine,
-						labels.DatabaseVersion: db.Version,
-						labels.Type:            "database",
-					}
-
-					// if the database is mysql or mariadb, mark them as
-					// mysql compatible (used for importing backups)
-					if db.Engine == "mariadb" || db.Engine == "mysql" {
-						lbls[labels.DatabaseCompatability] = "mysql"
-					}
-
-					// if the database is postgres, mark it as compatible
-					// with postgres. This is not needed but a place holder
-					// if cockroachdb is ever supported by craft.
-					if db.Engine == "postgres" {
-						lbls[labels.DatabaseCompatability] = "postgres"
-					}
-
-					// create the volume
-					volResp, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
-						Driver: "local",
-						Name:   hostname,
-						Labels: lbls,
-					})
-					if err != nil {
-						return fmt.Errorf("unable to create the volume, %w", err)
-					}
-
-					output.Done()
-
-					// determine the image name
-					image := fmt.Sprintf("docker.io/library/%s:%s", db.Engine, db.Version)
-
-					target := "/var/lib/mysql"
-					var envs []string
-					if strings.Contains(image, "postgres") {
-						target = "/var/lib/postgresql/data"
-						envs = []string{"POSTGRES_USER=nitro", "POSTGRES_DB=nitro", "POSTGRES_PASSWORD=nitro"}
-					} else {
-						envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
-					}
-
-					output.Pending("pulling", image)
-
-					// pull the image
-					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-					if err != nil {
-						return fmt.Errorf("unable to pull image %s, %w", image, err)
-					}
-
-					output.Done()
-
-					buf := &bytes.Buffer{}
-					if _, err := buf.ReadFrom(rdr); err != nil {
-						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-					}
-
-					// set the port for the database
-					port, err := nat.NewPort("tcp", db.Port)
-					if err != nil {
-						return fmt.Errorf("unable to create the port, %w", err)
-					}
-
-					// create the container
-					output.Pending("creating", hostname)
-
-					conResp, err := docker.ContainerCreate(
-						ctx,
-						&container.Config{
-							Image:  image,
-							Labels: lbls,
-							ExposedPorts: nat.PortSet{
-								port: struct{}{},
-							},
-							Env: envs,
-						},
-						&container.HostConfig{
-							Mounts: []mount.Mount{
-								{
-									Type:   mount.TypeVolume,
-									Source: volResp.Name,
-									Target: target,
-								},
-							},
-							PortBindings: map[nat.Port][]nat.PortBinding{
-								port: {
-									{
-										HostIP:   "127.0.0.1",
-										HostPort: db.Port,
-									},
-								},
-							},
-						},
-						&network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
-									NetworkID: networkID,
-								},
-							},
-						},
-						hostname,
-					)
-					if err != nil {
-						return fmt.Errorf("unable to create the container, %w", err)
-					}
-
-					// set the container id to start
-					containerID = conResp.ID
-					startContainer = true
-
-					output.Done()
-				}
-
-				// start the container if needed
-				if startContainer {
-					output.Pending("starting", hostname)
-
-					// start the container
-					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-						return fmt.Errorf("unable to start the container, %w", err)
-					}
-
-					output.Done()
-				}
-
-				// remove the filters
-				filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
-				filter.Del("label", labels.DatabaseVersion+"="+db.Version)
-				filter.Del("label", labels.Type+"=database")
+			if err := checkDatabases(ctx, docker, output, filter, env, networkID, cfg); err != nil {
+				return err
 			}
 
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
@@ -457,18 +290,13 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 					containerID = resp.ID
 					startContainer = true
-
-					output.Done()
 				}
 
 				// start the container if needed
 				if startContainer {
-					output.Pending("starting", site.Hostname)
-
 					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 						return fmt.Errorf("unable to start the container, %w", err)
 					}
-
 					output.Done()
 				}
 
@@ -485,4 +313,185 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	return cmd
+}
+
+func checkDatabases(
+	ctx context.Context,
+	docker client.CommonAPIClient,
+	output terminal.Outputer,
+	filter filters.Args,
+	env, networkID string,
+	cfg *config.Config,
+) error {
+	output.Info("Checking Databases...")
+
+	for _, db := range cfg.Databases {
+		// add filters to check for the container
+		filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
+		filter.Add("label", labels.DatabaseVersion+"="+db.Version)
+		filter.Add("label", labels.Type+"=database")
+
+		// get the containers for databases
+		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+		if err != nil {
+			return fmt.Errorf("error getting a list of containers")
+		}
+
+		// set the hostname
+		hostname, err := db.GetHostname()
+		if err != nil {
+			return err
+		}
+
+		// if there are no containers, create a volume, container, and start the container
+		var containerID string
+		var startContainer bool
+		switch len(containers) {
+		case 1:
+			// set the container id
+			containerID = containers[0].ID
+
+			// check if the container is running
+			if containers[0].State != "running" {
+				startContainer = true
+				output.Pending("starting", hostname)
+			} else {
+				output.Success(hostname, "ready")
+			}
+		default:
+			output.Pending("creating volume", hostname)
+
+			// create the labels
+			lbls := map[string]string{
+				labels.Environment:     env,
+				labels.DatabaseEngine:  db.Engine,
+				labels.DatabaseVersion: db.Version,
+				labels.Type:            "database",
+			}
+
+			// if the database is mysql or mariadb, mark them as
+			// mysql compatible (used for importing backups)
+			if db.Engine == "mariadb" || db.Engine == "mysql" {
+				lbls[labels.DatabaseCompatability] = "mysql"
+			}
+
+			// if the database is postgres, mark it as compatible
+			// with postgres. This is not needed but a place holder
+			// if cockroachdb is ever supported by craft.
+			if db.Engine == "postgres" {
+				lbls[labels.DatabaseCompatability] = "postgres"
+			}
+
+			// create the volume
+			volResp, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
+				Driver: "local",
+				Name:   hostname,
+				Labels: lbls,
+			})
+			if err != nil {
+				return fmt.Errorf("unable to create the volume, %w", err)
+			}
+
+			output.Done()
+
+			// determine the image name
+			image := fmt.Sprintf("docker.io/library/%s:%s", db.Engine, db.Version)
+
+			target := "/var/lib/mysql"
+			var envs []string
+			if strings.Contains(image, "postgres") {
+				target = "/var/lib/postgresql/data"
+				envs = []string{"POSTGRES_USER=nitro", "POSTGRES_DB=nitro", "POSTGRES_PASSWORD=nitro"}
+			} else {
+				envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
+			}
+
+			output.Pending("pulling", image)
+
+			// pull the image
+			rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+			if err != nil {
+				return fmt.Errorf("unable to pull image %s, %w", image, err)
+			}
+
+			output.Done()
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.ReadFrom(rdr); err != nil {
+				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+			}
+
+			// set the port for the database
+			port, err := nat.NewPort("tcp", db.Port)
+			if err != nil {
+				return fmt.Errorf("unable to create the port, %w", err)
+			}
+
+			// create the container
+			output.Pending("creating", hostname)
+
+			conResp, err := docker.ContainerCreate(
+				ctx,
+				&container.Config{
+					Image:  image,
+					Labels: lbls,
+					ExposedPorts: nat.PortSet{
+						port: struct{}{},
+					},
+					Env: envs,
+				},
+				&container.HostConfig{
+					Mounts: []mount.Mount{
+						{
+							Type:   mount.TypeVolume,
+							Source: volResp.Name,
+							Target: target,
+						},
+					},
+					PortBindings: map[nat.Port][]nat.PortBinding{
+						port: {
+							{
+								HostIP:   "127.0.0.1",
+								HostPort: db.Port,
+							},
+						},
+					},
+				},
+				&network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						env: {
+							NetworkID: networkID,
+						},
+					},
+				},
+				hostname,
+			)
+			if err != nil {
+				return fmt.Errorf("unable to create the container, %w", err)
+			}
+
+			// set the container id to start
+			containerID = conResp.ID
+			startContainer = true
+
+			output.Done()
+		}
+
+		// start the container if needed
+		if startContainer {
+			// start the container
+			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			output.Done()
+		}
+
+		// remove the filters
+		filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
+		filter.Del("label", labels.DatabaseVersion+"="+db.Version)
+		filter.Del("label", labels.Type+"=database")
+	}
+
+	return nil
 }
