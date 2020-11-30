@@ -24,22 +24,22 @@ func New(client client.CommonAPIClient, nitrod protob.NitroClient, output termin
 		Short:   "Show version info",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resp, err := nitrod.Version(cmd.Context(), &protob.VersionRequest{})
+			nitro, err := nitrod.Version(cmd.Context(), &protob.VersionRequest{})
 			if err != nil {
 				return fmt.Errorf("unable to get version from the gRPC API")
 			}
 
-			servVersion, err := client.ServerVersion(cmd.Context())
+			ver, err := client.ServerVersion(cmd.Context())
 			if err != nil {
 				return fmt.Errorf("unable to get docker server version, %w", err)
 			}
 
 			output.Info("Nitro CLI: \t", Version)
-			output.Info("Nitro gRPC: \t", resp.GetVersion())
-			output.Info("Docker API: \t", servVersion.APIVersion, "("+servVersion.MinAPIVersion+" min)")
+			output.Info("Nitro gRPC: \t", nitro.GetVersion())
+			output.Info("Docker API: \t", ver.APIVersion, "("+ver.MinAPIVersion+" min)")
 			output.Info("Docker CLI: \t", client.ClientVersion())
 
-			if Version != resp.GetVersion() {
+			if Version != nitro.GetVersion() {
 				output.Info("")
 				output.Info("The Nitro CLI and gRPC versions do not match")
 				output.Info("You might need to run `nitro update`")
