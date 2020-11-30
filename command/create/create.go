@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/craftcms/nitro/command/create/internal/urlgen"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -40,30 +41,37 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Use:     "create",
 		Short:   "Create project",
 		Example: exampleText,
+		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default
-			var u url.URL
-			if len(args) > 0 {
-				parsed, err := url.Parse(args[0])
+			var download *url.URL
+			var dir string
+
+			switch len(args) {
+			case 2:
+				// the directory and url are specified
+				u, err := urlgen.Generate(args[0])
 				if err != nil {
-					return fmt.Errorf("")
+					return err
 				}
-				u = *parsed
-			} else {
-				parsed, err := url.Parse(download)
+
+				download = u
+				dir = cleanDirectory(args[1])
+			default:
+				// only the directory was provided, download craft to that repo
+				u, err := urlgen.Generate("")
 				if err != nil {
-					return fmt.Errorf("Unable to parse the provided URL %q", args[0])
+					return err
 				}
-				u = *parsed
+
+				download = u
+				dir = cleanDirectory(args[0])
 			}
 
-			// dir := "docker/"
-
-			// https://github.com/craftcms/craft/archive/HEAD.zip
 			output.Pending("setting up project")
 
 			// download the zip
-			resp, err := http.Get(u.String())
+			resp, err := http.Get(download.String())
 			if err != nil {
 				return err
 			}
@@ -90,8 +98,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 			defer r.Close()
 
-			// TODO(jasonmccallister) make this dynamic
-			dir := "docker"
 			// TODO(jasonmccallister) ask for the version of PHP
 
 			for _, f := range r.File {
@@ -132,7 +138,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
-			output.Info("new project created 🤓")
+			output.Info("project created 🤓")
 
 			// run the composer install command
 			for _, c := range cmd.Parent().Commands() {
@@ -153,5 +159,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		},
 	}
 
+	// TODO(jasonmccallister) add flags for the composer and node versions
+
 	return cmd
+}
+
+func cleanDirectory(s string) string {
+	return strings.TrimSpace(strings.Replace(s, " ", "-", -1))
 }
