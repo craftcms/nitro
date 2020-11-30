@@ -103,7 +103,7 @@ func init() {
 		composer.New(client, term),
 		node.New(client, term),
 		completion.New(),
-		apply.New(client, term),
+		apply.New(client, nitrod, term),
 		context.New(client, term),
 		trust.New(client, term),
 		version.New(client, nitrod, term),

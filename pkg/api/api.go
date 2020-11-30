@@ -149,24 +149,21 @@ func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.Pi
 func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
 	resp := &protob.ApplyResponse{}
 
-	// TODO(jasonmccallister) create the struct to represent the servers to send
-	// to the caddy api.
-
 	update := caddyconv.CaddyUpdateRequest{}
-
 	routes := []caddyconv.ServerRoute{}
-	for _, site := range request.GetSites() {
+	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
 		hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
 
+		// create the route for each of the sites
 		routes = append(routes, caddyconv.ServerRoute{
 			Handle: []caddyconv.RouteHandle{
 				{
 					Handler: "reverse_proxy",
 					Upstreams: []caddyconv.Upstream{
 						{
-							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), site.GetPort()),
+							Dial: fmt.Sprintf("%s:%d", k, site.GetPort()),
 						},
 					},
 				},
@@ -180,11 +177,13 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 		})
 	}
 
+	// add the routes to the first server
 	update.Srv0 = caddyconv.Server{
 		Listen: []string{":443"},
 		Routes: routes,
 	}
 
+	// set the default welcome server
 	update.Srv1 = caddyconv.Server{
 		Listen: []string{":80"},
 		Routes: []caddyconv.ServerRoute{
@@ -227,7 +226,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 		return resp, nil
 	}
 
-	resp.Message = "success"
+	resp.Message = fmt.Sprintf("successfully applied changes, sites: %d", len(request.GetSites()))
 	resp.Error = false
 
 	return resp, nil

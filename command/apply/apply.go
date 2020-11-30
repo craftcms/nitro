@@ -19,6 +19,7 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/protob"
 	"github.com/craftcms/nitro/terminal"
 )
 
@@ -31,7 +32,7 @@ const exampleText = `  # apply changes from a config to the environment
   nitro apply`
 
 // New takes a docker client and the terminal output to run the apply actions
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
 		Short:   "Apply changes to an environment",
@@ -81,7 +82,32 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return err
 			}
 
-			// TODO(jasonmccallister) convert the sites into a Caddy json config and send to the API
+			// convert the sites into the gRPC API Apply request
+			sites := make(map[string]*protob.Site)
+			for _, s := range cfg.Sites {
+				hosts := []string{s.Hostname}
+
+				// if there are aliases lets append then
+				if len(s.Aliases) > 0 {
+					hosts = append(hosts, s.Aliases...)
+				}
+
+				// create the site
+				sites[s.Hostname] = &protob.Site{
+					Hostname: s.Hostname,
+					Aliases:  strings.Join(hosts, ","),
+					Port:     8080,
+				}
+			}
+
+			updateReq := &protob.ApplyRequest{
+				Sites: sites,
+			}
+
+			// send the changes
+			if _, err = nitrod.Apply(ctx, updateReq); err != nil {
+				return err
+			}
 
 			output.Info(env, "is up and running 😃")
 
