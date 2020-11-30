@@ -78,230 +78,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-			output.Info("Checking Sites...")
-
-			// get the envs for the sites
-			envs := cfg.AsEnvs()
-
-			for _, site := range cfg.Sites {
-				// add the site filter
-				filter.Add("label", labels.Host+"="+site.Hostname)
-
-				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-				if err != nil {
-					return fmt.Errorf("error getting a list of containers")
-				}
-
-				var containerID string
-				var startContainer bool
-				switch len(containers) {
-				case 1:
-					// there is a running container
-					c := containers[0]
-					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
-					path, err := site.GetAbsPath()
-					if err != nil {
-						return err
-					}
-
-					expected, err := site.GetAbsMountPaths()
-					if err != nil {
-						return err
-					}
-					// hard code the path to the first site mount
-					expected[path] = "/app"
-
-					// make sure the images and mounts match, if they don't stop, remove, and create the container
-					// with the new image
-					if c.Image != image || match.Mounts(c.Mounts, expected) == false {
-						output.Pending(site.Hostname, "out of sync")
-
-						path, err := site.GetAbsPath()
-						if err != nil {
-							return err
-						}
-
-						// stop container
-						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-							return err
-						}
-
-						// remove container
-						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-							return err
-						}
-
-						output.Done()
-
-						// pull the image
-						output.Pending("pulling", image)
-
-						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-						if err != nil {
-							return fmt.Errorf("unable to pull image, %w", err)
-						}
-
-						buf := &bytes.Buffer{}
-						if _, err := buf.ReadFrom(rdr); err != nil {
-							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-						}
-
-						output.Done()
-
-						// add the path mount
-						mounts := []mount.Mount{}
-						mounts = append(mounts, mount.Mount{
-							Type:   mount.TypeBind,
-							Source: path,
-							Target: "/app",
-						})
-
-						// get additional site mounts
-						siteMounts, err := site.GetAbsMountPaths()
-						if err != nil {
-							return err
-						}
-
-						for k, v := range siteMounts {
-							mounts = append(mounts, mount.Mount{
-								Type:   mount.TypeBind,
-								Source: k,
-								Target: v,
-							})
-						}
-
-						// create new container, will have a new container id
-						// create the container
-						resp, err := docker.ContainerCreate(
-							ctx,
-							&container.Config{
-								Image: image,
-								Labels: map[string]string{
-									labels.Environment: env,
-									labels.Host:        site.Hostname,
-								},
-								Env: envs,
-							},
-							&container.HostConfig{
-								Mounts: mounts,
-							},
-							&network.NetworkingConfig{
-								EndpointsConfig: map[string]*network.EndpointSettings{
-									env: {
-										NetworkID: networkID,
-									},
-								},
-							},
-							site.Hostname,
-						)
-						if err != nil {
-							return fmt.Errorf("unable to create the container, %w", err)
-						}
-
-						containerID = resp.ID
-						startContainer = true
-
-						break
-					}
-
-					output.Success(site.Hostname, "ready")
-
-					// get the container id
-					containerID = c.ID
-
-					// check if the container is running
-					if containers[0].State != "running" {
-						startContainer = true
-					}
-				default:
-					// create a brand new container since there is not an existing one
-					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
-
-					path, err := site.GetAbsPath()
-					if err != nil {
-						return err
-					}
-
-					// pull the image
-					output.Pending("pulling", image)
-
-					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-					if err != nil {
-						return fmt.Errorf("unable to pull the image, %w", err)
-					}
-
-					buf := &bytes.Buffer{}
-					if _, err := buf.ReadFrom(rdr); err != nil {
-						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-					}
-
-					output.Done()
-
-					output.Pending("creating", site.Hostname)
-
-					// add the path mount
-					mounts := []mount.Mount{}
-					mounts = append(mounts, mount.Mount{
-						Type:   mount.TypeBind,
-						Source: path,
-						Target: "/app",
-					})
-
-					// get additional site mounts
-					siteMounts, err := site.GetAbsMountPaths()
-					if err != nil {
-						return err
-					}
-
-					for k, v := range siteMounts {
-						mounts = append(mounts, mount.Mount{
-							Type:   mount.TypeBind,
-							Source: k,
-							Target: v,
-						})
-					}
-
-					// create the container
-					resp, err := docker.ContainerCreate(
-						ctx,
-						&container.Config{
-							Image: image,
-							Labels: map[string]string{
-								labels.Environment: env,
-								labels.Host:        site.Hostname,
-							},
-							Env: envs,
-						},
-						&container.HostConfig{
-							Mounts: mounts,
-						},
-						&network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
-									NetworkID: networkID,
-								},
-							},
-						},
-						site.Hostname,
-					)
-					if err != nil {
-						return fmt.Errorf("unable to create the container, %w", err)
-					}
-
-					containerID = resp.ID
-					startContainer = true
-				}
-
-				// start the container if needed
-				if startContainer {
-					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-						return fmt.Errorf("unable to start the container, %w", err)
-					}
-					output.Done()
-				}
-
-				// remove the site filter
-				filter.Del("label", labels.Host+"="+site.Hostname)
+			if err := checkSites(ctx, docker, output, filter, env, networkID, cfg); err != nil {
+				return err
 			}
 
 			// TODO(jasonmccallister) convert the sites into a Caddy json config and send to the API
@@ -491,6 +269,244 @@ func checkDatabases(
 		filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
 		filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 		filter.Del("label", labels.Type+"=database")
+	}
+
+	return nil
+}
+
+func checkSites(
+	ctx context.Context,
+	docker client.CommonAPIClient,
+	output terminal.Outputer,
+	filter filters.Args,
+	env, networkID string,
+	cfg *config.Config,
+) error {
+	output.Info("Checking Sites...")
+
+	// get the envs for the sites
+	envs := cfg.AsEnvs()
+	for _, site := range cfg.Sites {
+		// add the site filter
+		filter.Add("label", labels.Host+"="+site.Hostname)
+
+		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+		if err != nil {
+			return fmt.Errorf("error getting a list of containers")
+		}
+
+		var containerID string
+		var startContainer bool
+		switch len(containers) {
+		case 1:
+			// there is a running container
+			c := containers[0]
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+			path, err := site.GetAbsPath()
+			if err != nil {
+				return err
+			}
+
+			expected, err := site.GetAbsMountPaths()
+			if err != nil {
+				return err
+			}
+			// hard code the path to the first site mount
+			expected[path] = "/app"
+
+			// make sure the images and mounts match, if they don't stop, remove, and create the container
+			// with the new image
+			if c.Image != image || match.Mounts(c.Mounts, expected) == false {
+				output.Pending(site.Hostname, "out of sync")
+
+				path, err := site.GetAbsPath()
+				if err != nil {
+					return err
+				}
+
+				// stop container
+				if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+					return err
+				}
+
+				// remove container
+				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					return err
+				}
+
+				output.Done()
+
+				// pull the image
+				output.Pending("pulling", image)
+
+				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+				if err != nil {
+					return fmt.Errorf("unable to pull image, %w", err)
+				}
+
+				buf := &bytes.Buffer{}
+				if _, err := buf.ReadFrom(rdr); err != nil {
+					return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+				}
+
+				output.Done()
+
+				// add the path mount
+				mounts := []mount.Mount{}
+				mounts = append(mounts, mount.Mount{
+					Type:   mount.TypeBind,
+					Source: path,
+					Target: "/app",
+				})
+
+				// get additional site mounts
+				siteMounts, err := site.GetAbsMountPaths()
+				if err != nil {
+					return err
+				}
+
+				for k, v := range siteMounts {
+					mounts = append(mounts, mount.Mount{
+						Type:   mount.TypeBind,
+						Source: k,
+						Target: v,
+					})
+				}
+
+				// create new container, will have a new container id
+				// create the container
+				resp, err := docker.ContainerCreate(
+					ctx,
+					&container.Config{
+						Image: image,
+						Labels: map[string]string{
+							labels.Environment: env,
+							labels.Host:        site.Hostname,
+						},
+						Env: envs,
+					},
+					&container.HostConfig{
+						Mounts: mounts,
+					},
+					&network.NetworkingConfig{
+						EndpointsConfig: map[string]*network.EndpointSettings{
+							env: {
+								NetworkID: networkID,
+							},
+						},
+					},
+					site.Hostname,
+				)
+				if err != nil {
+					return fmt.Errorf("unable to create the container, %w", err)
+				}
+
+				containerID = resp.ID
+				startContainer = true
+
+				break
+			}
+
+			// get the container id
+			containerID = c.ID
+
+			// check if the container is running
+			if containers[0].State != "running" {
+				startContainer = true
+				output.Pending("starting", site.Hostname)
+			} else {
+				output.Success(site.Hostname, "ready")
+			}
+		default:
+			// create a brand new container since there is not an existing one
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+
+			path, err := site.GetAbsPath()
+			if err != nil {
+				return err
+			}
+
+			// pull the image
+			output.Pending("pulling", image)
+
+			rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+			if err != nil {
+				return fmt.Errorf("unable to pull the image, %w", err)
+			}
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.ReadFrom(rdr); err != nil {
+				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+			}
+
+			output.Done()
+
+			output.Pending("creating", site.Hostname)
+
+			// add the path mount
+			mounts := []mount.Mount{}
+			mounts = append(mounts, mount.Mount{
+				Type:   mount.TypeBind,
+				Source: path,
+				Target: "/app",
+			})
+
+			// get additional site mounts
+			siteMounts, err := site.GetAbsMountPaths()
+			if err != nil {
+				return err
+			}
+
+			for k, v := range siteMounts {
+				mounts = append(mounts, mount.Mount{
+					Type:   mount.TypeBind,
+					Source: k,
+					Target: v,
+				})
+			}
+
+			// create the container
+			resp, err := docker.ContainerCreate(
+				ctx,
+				&container.Config{
+					Image: image,
+					Labels: map[string]string{
+						labels.Environment: env,
+						labels.Host:        site.Hostname,
+					},
+					Env: envs,
+				},
+				&container.HostConfig{
+					Mounts: mounts,
+				},
+				&network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						env: {
+							NetworkID: networkID,
+						},
+					},
+				},
+				site.Hostname,
+			)
+			if err != nil {
+				return fmt.Errorf("unable to create the container, %w", err)
+			}
+
+			containerID = resp.ID
+			startContainer = true
+		}
+
+		// start the container if needed
+		if startContainer {
+			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			output.Done()
+		}
+
+		// remove the site filter
+		filter.Del("label", labels.Host+"="+site.Hostname)
 	}
 
 	return nil
