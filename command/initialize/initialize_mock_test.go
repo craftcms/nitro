@@ -142,3 +142,14 @@ func (c *mockDockerClient) ContainerStop(ctx context.Context, containerID string
 
 	return c.mockError
 }
+
+func (c *mockDockerClient) ImageList(ctx context.Context, options types.ImageListOptions) ([]types.ImageSummary, error) {
+	// TODO(jasonmccallister) remove this hacked method
+	summary := []types.ImageSummary{
+		{
+			Containers: 1,
+		},
+	}
+
+	return summary, nil
+}

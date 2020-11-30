@@ -144,7 +144,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// TODO(jasonmccallister) remove this logic check once published to add a method for developing locally
-			if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "true" {
+			if len(images) == 0 {
 				output.Pending("pulling image")
 
 				rdr, err := docker.ImagePull(ctx, proxyImage, types.ImagePullOptions{All: false})
@@ -250,8 +250,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 							httpPort:  struct{}{},
 							httpsPort: struct{}{},
 							apiPort:   struct{}{},
-							// TODO(jasonmccallister) remove after testing
-							"2019/tcp": struct{}{},
 						},
 						Labels: map[string]string{
 							labels.Type:         "proxy",
@@ -286,13 +284,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 								{
 									HostIP:   "127.0.0.1",
 									HostPort: "5000",
-								},
-							},
-							// TODO(jasonmccallister) remove the port
-							"2019/tcp": {
-								{
-									HostIP:   "127.0.0.1",
-									HostPort: "2019",
 								},
 							},
 						},
@@ -330,9 +321,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// check if we need to run the
 			if skipApply != true {
-				for _, c := range cmd.Parent().Commands() {
-					if c.Use == "apply" {
-						return c.RunE(cmd, args)
+				cmds := cmd.Parent().Commands()
+				if len(cmds) > 0 {
+					for _, c := range cmds {
+						if c.Use == "apply" {
+							return c.RunE(cmd, args)
+						}
 					}
 				}
 			}
