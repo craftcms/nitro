@@ -15,6 +15,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
@@ -262,13 +263,25 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				var startContainer bool
 				switch len(containers) {
 				case 1:
+					// there is a running container
 					c := containers[0]
 					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+					path, err := site.GetAbsPath()
+					if err != nil {
+						return err
+					}
 
-					// make sure the images match, if they don't stop, remove, and create the container
+					expected, err := site.GetAbsMountPaths()
+					if err != nil {
+						return err
+					}
+					// hard code the path to the first site mount
+					expected[path] = "/app"
+
+					// make sure the images and mounts match, if they don't stop, remove, and create the container
 					// with the new image
-					if c.Image != image {
-						output.Pending(site.Hostname, "out of sync, applying")
+					if c.Image != image || match.Mounts(c.Mounts, expected) == false {
+						output.Pending(site.Hostname, "out of sync")
 
 						path, err := site.GetAbsPath()
 						if err != nil {
@@ -285,6 +298,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 							return err
 						}
 
+						output.Done()
+
 						// pull the image
 						output.Pending("pulling", image)
 
@@ -300,6 +315,28 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 						output.Done()
 
+						// add the path mount
+						mounts := []mount.Mount{}
+						mounts = append(mounts, mount.Mount{
+							Type:   mount.TypeBind,
+							Source: path,
+							Target: "/app",
+						})
+
+						// get additional site mounts
+						siteMounts, err := site.GetAbsMountPaths()
+						if err != nil {
+							return err
+						}
+
+						for k, v := range siteMounts {
+							mounts = append(mounts, mount.Mount{
+								Type:   mount.TypeBind,
+								Source: k,
+								Target: v,
+							})
+						}
+
 						// create new container, will have a new container id
 						// create the container
 						resp, err := docker.ContainerCreate(
@@ -313,13 +350,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 								Env: envs,
 							},
 							&container.HostConfig{
-								Mounts: []mount.Mount{
-									{
-										Type:   mount.TypeBind,
-										Source: path,
-										Target: "/app",
-									},
-								},
+								Mounts: mounts,
 							},
 							&network.NetworkingConfig{
 								EndpointsConfig: map[string]*network.EndpointSettings{
@@ -337,8 +368,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						containerID = resp.ID
 						startContainer = true
 
-						output.Done()
-
 						break
 					}
 
@@ -352,6 +381,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						startContainer = true
 					}
 				default:
+					// create a brand new container since there is not an existing one
 					image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
 
 					path, err := site.GetAbsPath()
@@ -376,6 +406,28 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 					output.Pending("creating", site.Hostname)
 
+					// add the path mount
+					mounts := []mount.Mount{}
+					mounts = append(mounts, mount.Mount{
+						Type:   mount.TypeBind,
+						Source: path,
+						Target: "/app",
+					})
+
+					// get additional site mounts
+					siteMounts, err := site.GetAbsMountPaths()
+					if err != nil {
+						return err
+					}
+
+					for k, v := range siteMounts {
+						mounts = append(mounts, mount.Mount{
+							Type:   mount.TypeBind,
+							Source: k,
+							Target: v,
+						})
+					}
+
 					// create the container
 					resp, err := docker.ContainerCreate(
 						ctx,
@@ -388,12 +440,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 							Env: envs,
 						},
 						&container.HostConfig{
-							Mounts: []mount.Mount{{
-								Type:   mount.TypeBind,
-								Source: path,
-								Target: "/app",
-							},
-							},
+							Mounts: mounts,
 						},
 						&network.NetworkingConfig{
 							EndpointsConfig: map[string]*network.EndpointSettings{
