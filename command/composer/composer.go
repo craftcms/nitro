@@ -16,6 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// ErrNoComposerFile is returned when there is no composer.json file in a directory
+	ErrNoComposerFile = fmt.Errorf("No composer.json or composer.lock was found")
+)
+
 const exampleText = `  # run composer install in a current directory
   nitro composer
 
@@ -81,7 +86,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Pending("checking", composerPath)
 			_, err := os.Stat(composerPath)
 			if os.IsNotExist(err) {
-				return fmt.Errorf("unable to locate a composer file at %s", path)
+				return ErrNoComposerFile
 			}
 			output.Done()
 
