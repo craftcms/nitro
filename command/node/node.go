@@ -16,11 +16,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 const exampleText = `  # run node install in a current directory
   nitro npm
 
