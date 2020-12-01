@@ -71,6 +71,13 @@ func (c *Config) AsEnvs() []string {
 		envs = append(envs, fmt.Sprintf("PHP_POST_MAX_SIZE=%s", c.PHP.PostMaxSize))
 	}
 
+	// handle opcache settings
+	if c.PHP.OpcacheEnable == true {
+		envs = append(envs, "PHP_OPCACHE_ENABLE=1")
+	} else {
+		envs = append(envs, "PHP_OPCACHE_ENABLE=0")
+	}
+
 	// set the blackfire envs if available
 	if c.Blackfire.ServerID != "" {
 		envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
@@ -107,6 +114,7 @@ type PHP struct {
 	MaxInputTime      int    `mapstructure:"max_input_time,omitempty"`
 	MaxFileUpload     string `mapstructure:"max_file_upload,omitempty"`
 	MemoryLimit       string `mapstructure:"memory_limit,omitempty"`
+	OpcacheEnable     bool   `mapstructure:"opcache_enable,omitempty"`
 	PostMaxSize       string `mapstructure:"post_max_size,omitempty"`
 	UploadMaxFileSize string `mapstructure:"upload_max_file_size,omitempty"`
 }
