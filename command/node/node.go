@@ -16,11 +16,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const exampleText = `  # run node install in a current directory
+const exampleText = `  # run npm install in a current directory
   nitro npm
 
+  # run npm install in current directory
+  nitro npm --install
+
   # updating a node project outside of the current directory
-  nitro npm ./project-dir --version 14 --update`
+  nitro npm ./project-dir --version 10 --update`
 
 // New is used for scaffolding new commands
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
