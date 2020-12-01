@@ -72,6 +72,41 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				return ErrNoNetwork
 			}
 
+			output.Info("Checking Proxy...")
+
+			proxyFilter := filters.NewArgs()
+			proxyFilter.Add("label", labels.Proxy+"="+env)
+
+			// check if there is an existing container for the nitro-proxy
+			var proxyContainerID string
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter, All: true})
+			if err != nil {
+				return fmt.Errorf("unable to list the containers\n%w", err)
+			}
+
+			var proxyRunning bool
+			for _, c := range containers {
+				for _, n := range c.Names {
+					if n == env || n == "/"+env {
+						proxyContainerID = c.ID
+
+						// check if it is running
+						if c.State == "running" {
+							output.Success("proxy ready")
+							proxyRunning = true
+						}
+					}
+				}
+			}
+
+			if !proxyRunning {
+				output.Pending("starting proxy")
+				if err := docker.ContainerStart(ctx, proxyContainerID, types.ContainerStartOptions{}); err != nil {
+					return fmt.Errorf("unable to start the nitro container, %w", err)
+				}
+				output.Done()
+			}
+
 			// check the databases
 			if err := checkDatabases(ctx, docker, output, filter, env, networkID, cfg); err != nil {
 				return err
@@ -100,6 +135,21 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				}
 			}
 
+			ping := &protob.PingRequest{}
+			output.Pending("waiting for api")
+
+			waiting := true
+			for waiting {
+				_, err := nitrod.Ping(ctx, ping)
+				if err == nil {
+					waiting = false
+				}
+			}
+
+			output.Done()
+
+			output.Info("Configuring Proxy...")
+
 			updateReq := &protob.ApplyRequest{
 				Sites: sites,
 			}
@@ -108,6 +158,8 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			if _, err = nitrod.Apply(ctx, updateReq); err != nil {
 				return err
 			}
+
+			output.Success("proxy ready")
 
 			output.Info(env, "is up and running 😃")
 
