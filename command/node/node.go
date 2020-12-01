@@ -16,6 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// ErrNoPackageFile is returned when there is no package.json or package-lock.json file in a directory
+	ErrNoPackageFile = fmt.Errorf("No package.json or package-lock.json was found")
+)
+
 const exampleText = `  # run npm install in a current directory
   nitro npm
 
@@ -82,7 +87,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			_, err := os.Stat(nodePath)
 			if os.IsNotExist(err) {
 				fmt.Println("")
-				return fmt.Errorf("unable to locate a node file at %s", nodePath)
+				return ErrNoPackageFile
 			}
 
 			output.Done()
