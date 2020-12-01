@@ -22,12 +22,11 @@ var (
 	ErrExample = fmt.Errorf("some example error")
 )
 
-const exampleText = `  # create command
-  # create a new default craft project
-  nitro create
+const exampleText = `  # create a new default craft project (similar to "composer create-project craftcms/craft my-project")
+  nitro create my-project
 
   # bring your own git repo
-  nitro create https://github.com/craftcms/demo
+  nitro create https://github.com/craftcms/demo my-project
 
   # you can also provide shorthand urls for github
   nitro create craftcms/demo my-project`
