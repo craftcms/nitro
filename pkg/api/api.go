@@ -13,129 +13,18 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-const update = `{
-  "srv0": {
-    "listen": [
-      ":443"
-    ],
-    "routes": [
-      {
-        "handle": [
-          {
-            "handler": "subroute",
-            "routes": [
-              {
-                "handle": [
-                  {
-                    "handler": "reverse_proxy",
-                    "upstreams": [
-                      {
-                        "dial": "updated.nitro:8080"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "match": [
-          {
-            "host": [
-              "updated.nitro",
-              "updated.test"
-            ]
-          }
-        ],
-        "terminal": true
-      },
-      {
-        "handle": [
-          {
-            "handler": "subroute",
-            "routes": [
-              {
-                "handle": [
-                  {
-                    "handler": "reverse_proxy",
-                    "upstreams": [
-                      {
-                        "dial": "exampleupdated.nitro:8080"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "match": [
-          {
-            "host": [
-              "exampleupdated.nitro",
-              "exampleupdated.test"
-            ]
-          }
-        ],
-        "terminal": true
-      },
-      {
-        "handle": [
-          {
-            "handler": "subroute",
-            "routes": [
-              {
-                "handle": [
-                  {
-                    "handler": "vars",
-                    "root": "/var/www/html"
-                  },
-                  {
-                    "handler": "file_server",
-                    "hide": [
-                      "/etc/caddy/Caddyfile"
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "terminal": true
-      }
-    ]
-  },
-  "srv1": {
-    "listen": [
-      ":80"
-    ],
-    "routes": [
-      {
-        "handle": [
-          {
-            "handler": "vars",
-            "root": "/var/www/html"
-          },
-          {
-            "handler": "file_server",
-            "hide": [
-              "/etc/caddy/Caddyfile"
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}`
-
 // NewAPI returns an API struct that implements the gRPC API used in the proxy container.
 // The gRPC API is used to handle making changes to the Caddy Server via its local API.
 func NewAPI() *API {
-	return &API{}
+	return &API{
+		Client: http.DefaultClient,
+	}
 }
 
 // API implements the protob.NitroServer interface
-type API struct{}
+type API struct {
+	Client *http.Client
+}
 
 // Ping returns a simple response "pong" from the gRPC API to verify connectivity.
 func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.PingResponse, error) {
@@ -149,7 +38,11 @@ func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.Pi
 func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
 	resp := &protob.ApplyResponse{}
 
-	update := caddyconv.CaddyUpdateRequest{}
+	// if there is no client, use the default
+	if a.Client == nil {
+		a.Client = http.DefaultClient
+	}
+
 	routes := []caddyconv.ServerRoute{}
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
@@ -177,9 +70,11 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 		})
 	}
 
+	update := caddyconv.CaddyUpdateRequest{}
+
 	// add the routes to the first server
 	update.Srv0 = caddyconv.Server{
-		Listen: []string{":443"},
+		Listen: []string{":443", ":80"},
 		Routes: routes,
 	}
 
@@ -210,7 +105,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 	}
 
 	// send the update
-	res, err := http.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
+	res, err := a.Client.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
 		resp.Message = "error updating the Caddy API"
 		resp.Error = true
