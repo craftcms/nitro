@@ -124,7 +124,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 					return nil
 				}
-			// linux
+			// macos
 			default:
 				if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
 					output.Info("Unable to automatically add certificate\n")
