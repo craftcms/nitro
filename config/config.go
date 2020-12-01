@@ -107,23 +107,23 @@ func (c *Config) AsEnvs() []string {
 
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
-	ServerID    string `mapstructure:"server_id,omitempty"`
-	ServerToken string `mapstructure:"server_token,omitempty"`
+	ServerID    string `mapstructure:"server_id,omitempty" yaml:"server_id,omitempty"`
+	ServerToken string `mapstructure:"server_token,omitempty" yaml:"server_token,omitempty"`
 }
 
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         string `mapstructure:"display_errors,omitempty"`
-	MaxExecutionTime      int    `mapstructure:"max_execution_time,omitempty"`
-	MaxInputVars          int    `mapstructure:"max_input_vars,omitempty"`
-	MaxInputTime          int    `mapstructure:"max_input_time,omitempty"`
-	MaxFileUpload         string `mapstructure:"max_file_upload,omitempty"`
-	MemoryLimit           string `mapstructure:"memory_limit,omitempty"`
-	OpcacheEnable         bool   `mapstructure:"opcache_enable,omitempty"`
-	OpcacheRevalidateFreq int    `mapstructure:"opcache_revalidate_freq,omitempty"`
-	PostMaxSize           string `mapstructure:"post_max_size,omitempty"`
-	UploadMaxFileSize     string `mapstructure:"upload_max_file_size,omitempty"`
+	DisplayErrors         string `mapstructure:"display_errors,omitempty" yaml:"display_errors,omitempty"`
+	MaxExecutionTime      int    `mapstructure:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
+	MaxInputVars          int    `mapstructure:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
+	MaxInputTime          int    `mapstructure:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
+	MaxFileUpload         string `mapstructure:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
+	MemoryLimit           string `mapstructure:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
+	OpcacheEnable         bool   `mapstructure:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
+	OpcacheRevalidateFreq int    `mapstructure:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
+	PostMaxSize           string `mapstructure:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
+	UploadMaxFileSize     string `mapstructure:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
 }
 
 // Load is used to return the environment name, unmarshalled config, and

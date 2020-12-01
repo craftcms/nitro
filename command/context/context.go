@@ -1,12 +1,12 @@
 package context
 
 import (
-	"io/ioutil"
 	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/terminal"
@@ -16,7 +16,7 @@ const exampleText = `  # view all resources for the environment
   nitro context
 
   # show only the config file
-  nitro context --not-pretty`
+  nitro context --yaml`
 
 // New is used for scaffolding new commands
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -37,12 +37,26 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("")
 
 			if cmd.Flag("yaml").Value.String() == "true" {
-				bytes, err := ioutil.ReadFile(viper.ConfigFileUsed())
+				cfg := config.Config{}
+				// marshal into the struct version so we can remove the blackfire credentials
+				if err := viper.Unmarshal(&cfg); err != nil {
+					return err
+				}
+
+				// redact blackfire credentials
+				if cfg.Blackfire.ServerID != "" {
+					cfg.Blackfire.ServerID = "****************"
+				}
+				if cfg.Blackfire.ServerToken != "" {
+					cfg.Blackfire.ServerToken = "********************************"
+				}
+
+				out, err := yaml.Marshal(&cfg)
 				if err != nil {
 					return err
 				}
 
-				output.Info(string(bytes))
+				output.Info(string(out))
 
 				return nil
 			}
