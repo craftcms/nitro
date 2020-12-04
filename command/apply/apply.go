@@ -84,12 +84,13 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			proxyFilter.Add("label", labels.Proxy+"="+env)
 
 			// check if there is an existing container for the nitro-proxy
-			var proxyContainerID string
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter, All: true})
 			if err != nil {
 				return fmt.Errorf("unable to list the containers\n%w", err)
 			}
 
+			// get the container id and determine if the container needs to start
+			var proxyContainerID string
 			var proxyRunning bool
 			for _, c := range containers {
 				for _, n := range c.Names {
@@ -105,11 +106,14 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				}
 			}
 
+			// if its not running start it
 			if !proxyRunning {
 				output.Pending("starting proxy")
+
 				if err := docker.ContainerStart(ctx, proxyContainerID, types.ContainerStartOptions{}); err != nil {
 					return fmt.Errorf("unable to start the nitro container, %w", err)
 				}
+
 				output.Done()
 			}
 
