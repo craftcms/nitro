@@ -14,9 +14,16 @@ var (
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
 )
 
-var envMap = map[string]string{
-	"display_errors": "PHP_DISPLAY_ERRORS",
-	"memory_limit":   "PHP_MEMORY_LIMIT",
+// Envs is used to map a config to a known environment variable that is used
+// on the container instances.
+var Envs = map[string]string{
+	// PHP specific settings
+	"display_errors":      "PHP_DISPLAY_ERRORS",
+	"memory_limit":        "PHP_MEMORY_LIMIT",
+	"max_execution_time":  "PHP_MAX_EXECUTION_TIME",
+	"upload_max_filesize": "PHP_UPLOAD_MAX_FILESIZE",
+	"max_input_vars":      "PHP_MAX_INPUT_VARS",
+	"post_max_size":       "PHP_POST_MAX_SIZE",
 }
 
 // Config represents the nitro-dev.yaml users add for local development.
@@ -34,41 +41,40 @@ func (c *Config) AsEnvs() []string {
 	var envs []string
 
 	if c.PHP.DisplayErrors == "" {
-		envs = append(envs, envMap["display_errors"]+"=on")
+		envs = append(envs, Envs["display_errors"]+"=on")
 	} else {
-		envs = append(envs, envMap["display_errors"]+"="+c.PHP.DisplayErrors)
+		envs = append(envs, Envs["display_errors"]+"="+c.PHP.DisplayErrors)
 	}
 
 	if c.PHP.MemoryLimit == "" {
-		envs = append(envs, envMap["memory_limit"]+"=512MB")
+		fmt.Println("HERE:", Envs["memory_limit"])
+		envs = append(envs, Envs["memory_limit"]+"=512MB")
 	} else {
-		// TODO(jasonmccallister) add validation
-		envs = append(envs, envMap["memory_limit"]+"="+c.PHP.MemoryLimit)
+		envs = append(envs, Envs["memory_limit"]+"="+c.PHP.MemoryLimit)
 	}
 
 	if c.PHP.MaxExecutionTime == 0 {
-		envs = append(envs, "PHP_MAX_EXECUTION_TIME=5000")
+		envs = append(envs, Envs["max_execution_time"]+"=5000")
 	} else {
-		// TODO(jasonmccallister) add validation
-		envs = append(envs, fmt.Sprintf("PHP_MAX_EXECUTION_TIME=%d", c.PHP.MaxExecutionTime))
+		envs = append(envs, fmt.Sprintf("%s=%d", Envs["max_execution_time"], c.PHP.MaxExecutionTime))
 	}
 
 	if c.PHP.UploadMaxFileSize == "" {
-		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE=512M")
+		envs = append(envs, Envs["upload_max_filesize"]+"=512M")
 	} else {
-		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+c.PHP.UploadMaxFileSize)
+		envs = append(envs, Envs["upload_max_filesize"]+"="+c.PHP.UploadMaxFileSize)
 	}
 
 	if c.PHP.MaxInputVars == 0 {
-		envs = append(envs, "PHP_MAX_INPUT_VARS=512M")
+		envs = append(envs, Envs["max_input_vars"]+"=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("PHP_MAX_INPUT_VARS=%d", c.PHP.MaxInputVars))
+		envs = append(envs, fmt.Sprintf("%s=%d", Envs["max_input_vars"], c.PHP.MaxInputVars))
 	}
 
 	if c.PHP.PostMaxSize == "" {
-		envs = append(envs, "PHP_POST_MAX_SIZE=512M")
+		envs = append(envs, Envs["max_post_size"]+"=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("PHP_POST_MAX_SIZE=%s", c.PHP.PostMaxSize))
+		envs = append(envs, fmt.Sprintf("%s=%s", Envs["max_post_size"], c.PHP.PostMaxSize))
 	}
 
 	// handle opcache settings
