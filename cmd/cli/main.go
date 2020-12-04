@@ -16,6 +16,7 @@ import (
 	"github.com/craftcms/nitro/command/create"
 	"github.com/craftcms/nitro/command/database"
 	"github.com/craftcms/nitro/command/destroy"
+	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/node"
 	"github.com/craftcms/nitro/command/restart"
@@ -109,6 +110,7 @@ func init() {
 		version.New(client, nitrod, term),
 		validate.New(client, term),
 		database.New(client, term),
+		hosts.New("todo", term),
 	}
 
 	// add the commands
