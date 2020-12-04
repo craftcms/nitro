@@ -381,8 +381,7 @@ func checkSites(
 		case 1:
 			// there is a running container
 			c := containers[0]
-			// TODO(jasonmccallister) add docker.io prefix
-			image := fmt.Sprintf("craftcms/nginx:%s", site.PHP)
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
 			path, err := site.GetAbsPath()
 			if err != nil {
 				return err
@@ -500,8 +499,7 @@ func checkSites(
 			}
 		default:
 			// create a brand new container since there is not an existing one
-			// TODO(jasonmccallister) add docker.io prefix
-			image := fmt.Sprintf("craftcms/nginx:%s", site.PHP)
+			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
 
 			path, err := site.GetAbsPath()
 			if err != nil {
