@@ -293,7 +293,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			for _, s := range cfg.Sites {
 				hosts := []string{s.Hostname}
 
-				// if there are aliases lets append then
+				// if there are aliases lets append them to the hosts
 				if len(s.Aliases) > 0 {
 					hosts = append(hosts, s.Aliases...)
 				}
@@ -333,8 +333,8 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 		},
 	}
 
-	// TODO(jasonmccallister) add flag to skip pulling images
-	// cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
+	// add flag to skip pulling images
+	cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
 
 	return cmd
 }
@@ -577,7 +577,3 @@ func checkSites(
 
 	return nil
 }
-
-// TODO(jasonmccallister) add create container func
-// TODO(jasonmccallister) add start container
-// TODO(jasonmccallister) add remove container, which also stops it
