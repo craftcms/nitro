@@ -26,6 +26,12 @@ import (
 var (
 	// ErrNoNetwork is used when we cannot find the network
 	ErrNoNetwork = fmt.Errorf("Unable to find the network")
+
+	// NginxImage is the image used for sites, with the PHP version
+	NginxImage = "docker.io/craftcms/nginx:%s"
+
+	// DatabaseImage is used for determining the engine and version
+	DatabaseImage = "docker.io/library/%s:%s"
 )
 
 const exampleText = `  # apply changes from a config
@@ -181,7 +187,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					output.Done()
 
 					// determine the image name
-					image := fmt.Sprintf("docker.io/library/%s:%s", db.Engine, db.Version)
+					image := fmt.Sprintf(DatabaseImage, db.Engine, db.Version)
 
 					target := "/var/lib/mysql"
 					var envs []string
@@ -361,7 +367,7 @@ func checkSites(
 		case 1:
 			// there is a running container
 			c := containers[0]
-			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+			image := fmt.Sprintf(NginxImage, site.PHP)
 			path, err := site.GetAbsPath()
 			if err != nil {
 				return err
@@ -479,7 +485,7 @@ func checkSites(
 			}
 		default:
 			// create a brand new container since there is not an existing one
-			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+			image := fmt.Sprintf(NginxImage, site.PHP)
 
 			path, err := site.GetAbsPath()
 			if err != nil {
