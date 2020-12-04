@@ -28,7 +28,7 @@ var (
 	ErrNoNetwork = fmt.Errorf("Unable to find the network")
 )
 
-const exampleText = `  # apply changes from a config to the environment
+const exampleText = `  # apply changes from a config
   nitro apply`
 
 // New takes a docker client and the terminal output to run the apply actions
@@ -167,6 +167,9 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 		},
 	}
 
+	// TODO(jasonmccallister) add flag to skip pulling images
+	// cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
+
 	return cmd
 }
 
@@ -261,6 +264,7 @@ func checkDatabases(
 				envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
 			}
 
+			// TODO(jasonmccallister) check for skip apply
 			output.Pending("pulling", image)
 
 			// pull the image
@@ -328,8 +332,6 @@ func checkDatabases(
 			// set the container id to start
 			containerID = conResp.ID
 			startContainer = true
-
-			output.Done()
 		}
 
 		// start the container if needed
@@ -367,6 +369,7 @@ func checkSites(
 		// add the site filter
 		filter.Add("label", labels.Host+"="+site.Hostname)
 
+		// look for a container for the site
 		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
 			return fmt.Errorf("error getting a list of containers")
@@ -378,7 +381,8 @@ func checkSites(
 		case 1:
 			// there is a running container
 			c := containers[0]
-			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+			// TODO(jasonmccallister) add docker.io prefix
+			image := fmt.Sprintf("craftcms/nginx:%s", site.PHP)
 			path, err := site.GetAbsPath()
 			if err != nil {
 				return err
@@ -496,7 +500,8 @@ func checkSites(
 			}
 		default:
 			// create a brand new container since there is not an existing one
-			image := fmt.Sprintf("docker.io/craftcms/nginx:%s", site.PHP)
+			// TODO(jasonmccallister) add docker.io prefix
+			image := fmt.Sprintf("craftcms/nginx:%s", site.PHP)
 
 			path, err := site.GetAbsPath()
 			if err != nil {
@@ -588,3 +593,7 @@ func checkSites(
 
 	return nil
 }
+
+// TODO(jasonmccallister) add create container func
+// TODO(jasonmccallister) add start container
+// TODO(jasonmccallister) add remove container, which also stops it
