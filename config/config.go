@@ -16,6 +16,7 @@ var (
 
 // Envs is used to map a config to a known environment variable that is used
 // on the container instances.
+// TODO(jasonmccallister) not used
 var Envs = map[string]string{
 	// PHP specific settings
 	"display_errors":      "PHP_DISPLAY_ERRORS",
@@ -41,40 +42,39 @@ func (c *Config) AsEnvs() []string {
 	var envs []string
 
 	if c.PHP.DisplayErrors == "" {
-		envs = append(envs, Envs["display_errors"]+"=on")
+		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
 	} else {
-		envs = append(envs, Envs["display_errors"]+"="+c.PHP.DisplayErrors)
+		envs = append(envs, "PHP_DISPLAY_ERRORS="+c.PHP.DisplayErrors)
 	}
 
 	if c.PHP.MemoryLimit == "" {
-		fmt.Println("HERE:", Envs["memory_limit"])
-		envs = append(envs, Envs["memory_limit"]+"=512MB")
+		envs = append(envs, "PHP_MEMORY_LIMIT=512MB")
 	} else {
-		envs = append(envs, Envs["memory_limit"]+"="+c.PHP.MemoryLimit)
+		envs = append(envs, "PHP_MEMORY_LIMIT="+c.PHP.MemoryLimit)
 	}
 
 	if c.PHP.MaxExecutionTime == 0 {
-		envs = append(envs, Envs["max_execution_time"]+"=5000")
+		envs = append(envs, "PHP_MAX_EXECUTION_TIME=5000")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%d", Envs["max_execution_time"], c.PHP.MaxExecutionTime))
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_EXECUTION_TIME", c.PHP.MaxExecutionTime))
 	}
 
 	if c.PHP.UploadMaxFileSize == "" {
-		envs = append(envs, Envs["upload_max_filesize"]+"=512M")
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE=512M")
 	} else {
-		envs = append(envs, Envs["upload_max_filesize"]+"="+c.PHP.UploadMaxFileSize)
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+c.PHP.UploadMaxFileSize)
 	}
 
 	if c.PHP.MaxInputVars == 0 {
-		envs = append(envs, Envs["max_input_vars"]+"=512M")
+		envs = append(envs, "PHP_MAX_INPUT_VARS=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%d", Envs["max_input_vars"], c.PHP.MaxInputVars))
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", c.PHP.MaxInputVars))
 	}
 
 	if c.PHP.PostMaxSize == "" {
-		envs = append(envs, Envs["max_post_size"]+"=512M")
+		envs = append(envs, "PHP_POST_MAX_SIZE=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%s", Envs["max_post_size"], c.PHP.PostMaxSize))
+		envs = append(envs, fmt.Sprintf("%s=%s", "PHP_POST_MAX_SIZE", c.PHP.PostMaxSize))
 	}
 
 	// handle opcache settings
