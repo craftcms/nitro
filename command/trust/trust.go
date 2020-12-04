@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/craftcms/nitro/labels"
@@ -103,14 +104,24 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Info("Installing certificate (you might be prompted for your password)")
 			switch runtime.GOOS {
 			case "linux":
-				// https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
-				// TODO(jasonmccallister) run multiple commands to set permissions
-				// TODO(jasonmccallister) os.Chmod(/usr/local/share/ca-certificates/+f.Name(), 644)
+				// using the reference from: https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
+				// TODO(jasonmccallister) run multiple commands to set permissions, os.Chmod(/usr/local/share/ca-certificates/+f.Name(), 644)
 				if err := sudo.Run("cp", "cp", "/usr/local/share/ca-certificates/", f.Name()); err != nil {
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
 					output.Info(fmt.Sprintf("  sudo cp %s /usr/local/share/ca-certificates/", f.Name()))
 					output.Info("  sudo update-ca-certificates")
+
+					return nil
+				}
+			// windows
+			case "windows":
+				// automate the certificate installation from this article: https://superuser.com/a/1506481/215387
+				// we cannot assume PowerShell is enabled, so we use certutil.exe
+				if err := exec.Command("certutil.exe", "-addstore", "root", f.Name()).Run(); err != nil {
+					output.Info("Unable to automatically add certificate\n")
+					output.Info("To install the certificate, run the following command:")
+					output.Info(fmt.Sprintf("  certutil.exe -addstore root %s", f.Name()))
 
 					return nil
 				}
