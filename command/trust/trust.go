@@ -1,7 +1,10 @@
 package trust
 
 import (
+	"archive/tar"
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -56,44 +59,31 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// get the contents of the certificate from the container
 			output.Pending(fmt.Sprintf("getting certificate for %s...", env))
 
-			commands := []string{"less", "/data/caddy/pki/authorities/local/root.crt"}
+			// TODO(jasonmccallister) testing copy from container
 
-			// create an exec for the container
-			exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
-				AttachStderr: true,
-				AttachStdin:  true,
-				AttachStdout: true,
-				Cmd:          commands,
-			})
+			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
 			if err != nil {
-				return fmt.Errorf("unable to create an execution for container, %w", err)
+				return fmt.Errorf("unable to get the certificate from the container, %w", err)
+			}
+			// make sure it is a file not a directory
+			if stat.Mode.IsRegular() == false {
+				return fmt.Errorf("expected a file, not a directory")
 			}
 
-			// attach to the container
-			stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				AttachStdin:  true,
-				Cmd:          commands,
-			})
-			if err != nil {
-				return fmt.Errorf("unable to attach to container, %w", err)
-			}
-			defer stream.Close()
-
-			// read the stream content
-			bytes, err := ioutil.ReadAll(stream.Reader)
-			if err != nil || len(bytes) == 0 {
-				return fmt.Errorf("unable to read the content from container, %w", err)
-			}
-
-			// remove special characters from the output
-			var stop int
-			for i, s := range bytes {
-				if s != 0 && s != 1 {
-					stop = i + 1
+			// the file is in a tar format
+			buf := new(bytes.Buffer)
+			tr := tar.NewReader(rdr)
+			for {
+				_, err := tr.Next()
+				// if end of tar archive
+				if err == io.EOF {
 					break
 				}
+				if err != nil {
+					return err
+				}
+
+				buf.ReadFrom(tr)
 			}
 
 			// create a temp file
@@ -103,7 +93,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// write the certificate to the temporary file
-			if _, err := f.Write(bytes[stop+1:]); err != nil {
+			if _, err := f.Write(buf.Bytes()); err != nil {
 				return fmt.Errorf("unable to write the certificate to the temporary file, %w", err)
 			}
 			defer f.Close()
@@ -120,7 +110,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
 					output.Info(fmt.Sprintf("  sudo cp %s /usr/local/share/ca-certificates/", f.Name()))
-					output.Info("  sudo sudo update-ca-certificates")
+					output.Info("  sudo update-ca-certificates")
 
 					return nil
 				}
