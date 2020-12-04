@@ -37,7 +37,7 @@ const exampleText = `  # apply changes from a config
   nitro apply`
 
 // New takes a docker client and the terminal output to run the apply actions
-func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
+func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
 		Short:   "Apply changes to an environment",
@@ -46,7 +46,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
-			cfg, err := config.Load(env)
+			cfg, err := config.Load(home, env)
 			if err != nil {
 				return err
 			}
@@ -311,13 +311,13 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				switch len(containers) {
 				case 1:
 					// get the main site path (e.g. ~/dev/craft-dev)
-					path, err := site.GetAbsPath()
+					path, err := site.GetAbsPath(home)
 					if err != nil {
 						return err
 					}
 
 					// get any additional mounts for the site (e.g. mounts:)
-					expected, err := site.GetAbsMountPaths()
+					expected, err := site.GetAbsMountPaths(home)
 					if err != nil {
 						return err
 					}
@@ -334,7 +334,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					if c.Image != image || match.Mounts(c.Mounts, expected) == false {
 						output.Pending(site.Hostname, "out of sync")
 
-						path, err := site.GetAbsPath()
+						path, err := site.GetAbsPath(home)
 						if err != nil {
 							return err
 						}
@@ -379,7 +379,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 						})
 
 						// get additional site mounts
-						siteMounts, err := site.GetAbsMountPaths()
+						siteMounts, err := site.GetAbsMountPaths(home)
 						if err != nil {
 							return err
 						}
@@ -458,7 +458,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					}
 
 					// get the sites main path
-					path, err := site.GetAbsPath()
+					path, err := site.GetAbsPath(home)
 					if err != nil {
 						return err
 					}
@@ -474,7 +474,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					})
 
 					// get additional site mounts
-					siteMounts, err := site.GetAbsMountPaths()
+					siteMounts, err := site.GetAbsMountPaths(home)
 					if err != nil {
 						return err
 					}

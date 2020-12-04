@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -135,12 +134,7 @@ type PHP struct {
 // Load is used to return the environment name, unmarshalled config, and
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
-func Load(env string) (*Config, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return nil, fmt.Errorf("unable to get the home directory, %w", err)
-	}
-
+func Load(home, env string) (*Config, error) {
 	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
 	viper.SetConfigType("yaml")
 

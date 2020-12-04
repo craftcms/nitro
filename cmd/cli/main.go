@@ -61,8 +61,14 @@ func init() {
 
 	flags.StringP("environment", "e", env, "The environment")
 
+	// get the users home directory
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// check for or create the config
-	if _, err := config.Load(env); err != nil {
+	if _, err := config.Load(home, env); err != nil {
 		if errors.Is(err, config.ErrNoConfigFile) {
 			// get the home directory
 			home, err := homedir.Dir()
@@ -104,13 +110,13 @@ func init() {
 		composer.New(client, term),
 		node.New(client, term),
 		completion.New(),
-		apply.New(client, nitrod, term),
-		context.New(client, term),
+		apply.New(home, client, nitrod, term),
+		context.New(home, client, term),
 		trust.New(client, term),
 		version.New(client, nitrod, term),
-		validate.New(client, term),
+		validate.New(home, client, term),
 		database.New(client, term),
-		hosts.New("todo", term),
+		hosts.New(home, term),
 	}
 
 	// add the commands

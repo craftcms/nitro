@@ -20,14 +20,14 @@ const exampleText = `  # validate a config file
   nitro validate`
 
 // New
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "validate",
 		Short:   "Validate the config",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
-			cfg, err := config.Load(env)
+			cfg, err := config.Load(home, env)
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 				for _, s := range sites {
 					// check the site path
-					p, err := s.GetAbsPath()
+					p, err := s.GetAbsPath(home)
 					if err != nil {
 						siteErrs = append(siteErrs, err)
 					}
@@ -68,7 +68,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					}
 
 					// check if the mounts exist
-					mnts, err := s.GetAbsMountPaths()
+					mnts, err := s.GetAbsMountPaths(home)
 					if err != nil {
 						siteErrs = append(siteErrs, err)
 					}

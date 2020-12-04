@@ -1,11 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 // Site represents a web application. It has a hostname, aliases (which
@@ -23,24 +20,15 @@ type Site struct {
 // GetAbsPath gets the directory for a site.Path,
 // It is used to create the mount for a sites
 // container.
-func (s *Site) GetAbsPath() (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", fmt.Errorf("unable to get home directory, %w", err)
-	}
-
+func (s *Site) GetAbsPath(home string) (string, error) {
 	return s.cleanPath(home, s.Path)
 }
 
 // GetAbsMountPaths gets the directory for a site.Mounts,
 // It is used to create the additional mounts for a sites
 // container.
-func (s *Site) GetAbsMountPaths() (map[string]string, error) {
+func (s *Site) GetAbsMountPaths(home string) (map[string]string, error) {
 	mnts := make(map[string]string)
-	home, err := homedir.Dir()
-	if err != nil {
-		return mnts, fmt.Errorf("unable to get home directory, %w", err)
-	}
 
 	for _, m := range s.Mounts {
 		// split the
