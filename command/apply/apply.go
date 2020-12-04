@@ -141,7 +141,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				var containerID string
 				var startContainer bool
 				switch len(containers) {
-				// there database container exists
+				// the database container exists
 				case 1:
 					// set the container id
 					containerID = containers[0].ID
@@ -153,8 +153,8 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					} else {
 						output.Success(hostname, "ready")
 					}
-					// database container does not exist, so create the volume and start it
 				default:
+					// database container does not exist, so create the volume and start it
 					output.Pending("creating volume", hostname)
 
 					// create the database labels
@@ -193,6 +193,7 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					// determine the image name
 					image := fmt.Sprintf(DatabaseImage, db.Engine, db.Version)
 
+					// set mounts and environment based on the database type
 					target := "/var/lib/mysql"
 					var envs []string
 					if strings.Contains(image, "postgres") {
@@ -203,19 +204,22 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 					}
 
 					// TODO(jasonmccallister) check for skip apply
-					output.Pending("pulling", image)
+					if cmd.Flag("skip-apply").Value.String() == "false" {
+						output.Pending("pulling", image)
 
-					// pull the image
-					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-					if err != nil {
-						return fmt.Errorf("unable to pull image %s, %w", image, err)
-					}
+						// pull the image
+						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+						if err != nil {
+							return fmt.Errorf("unable to pull image %s, %w", image, err)
+						}
 
-					output.Done()
+						// read the output to pull the image
+						buf := &bytes.Buffer{}
+						if _, err := buf.ReadFrom(rdr); err != nil {
+							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+						}
 
-					buf := &bytes.Buffer{}
-					if _, err := buf.ReadFrom(rdr); err != nil {
-						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+						output.Done()
 					}
 
 					// set the port for the database
