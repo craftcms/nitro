@@ -2,7 +2,6 @@ package apply
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 
@@ -203,8 +202,8 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 						envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
 					}
 
-					// TODO(jasonmccallister) check for skip apply
-					if cmd.Flag("skip-apply").Value.String() == "false" {
+					// check for if we should skip pulling an image
+					if cmd.Flag("skip-pull").Value.String() == "false" {
 						output.Pending("pulling", image)
 
 						// pull the image
@@ -292,8 +291,244 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			}
 
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-			if err := checkSites(ctx, docker, output, filter, env, networkID, cfg); err != nil {
-				return err
+			output.Info("Checking Sites...")
+
+			// get the envs for the sites
+			envs := cfg.AsEnvs()
+
+			for _, site := range cfg.Sites {
+				// add the site filter
+				filter.Add("label", labels.Host+"="+site.Hostname)
+
+				// look for a container for the site
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+				if err != nil {
+					return fmt.Errorf("error getting a list of containers")
+				}
+
+				var containerID string
+				var startContainer bool
+				switch len(containers) {
+				case 1:
+					// get the main site path (e.g. ~/dev/craft-dev)
+					path, err := site.GetAbsPath()
+					if err != nil {
+						return err
+					}
+
+					// get any additional mounts for the site (e.g. mounts:)
+					expected, err := site.GetAbsMountPaths()
+					if err != nil {
+						return err
+					}
+
+					// hard code the path to the first site mount (which is the path)
+					expected[path] = "/app"
+
+					// there is a running container
+					c := containers[0]
+					image := fmt.Sprintf(NginxImage, site.PHP)
+
+					// make sure the images and mounts match, if they don't stop, remove, and create the container
+					// with the new image
+					if c.Image != image || match.Mounts(c.Mounts, expected) == false {
+						output.Pending(site.Hostname, "out of sync")
+
+						path, err := site.GetAbsPath()
+						if err != nil {
+							return err
+						}
+
+						// stop container
+						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+							return err
+						}
+
+						// remove container
+						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+							return err
+						}
+
+						output.Done()
+
+						// pull the image
+						if cmd.Flag("skip-pull").Value.String() == "false" {
+							output.Pending("pulling", image)
+
+							// pull the image
+							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+							if err != nil {
+								return fmt.Errorf("unable to pull image, %w", err)
+							}
+
+							// read to pull the image
+							buf := &bytes.Buffer{}
+							if _, err := buf.ReadFrom(rdr); err != nil {
+								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+							}
+
+							output.Done()
+						}
+
+						// add the path mount
+						mounts := []mount.Mount{}
+						mounts = append(mounts, mount.Mount{
+							Type:   mount.TypeBind,
+							Source: path,
+							Target: "/app",
+						})
+
+						// get additional site mounts
+						siteMounts, err := site.GetAbsMountPaths()
+						if err != nil {
+							return err
+						}
+
+						// create mounts for the site
+						for k, v := range siteMounts {
+							mounts = append(mounts, mount.Mount{
+								Type:   mount.TypeBind,
+								Source: k,
+								Target: v,
+							})
+						}
+
+						// create new container, will have a new container id
+						resp, err := docker.ContainerCreate(
+							ctx,
+							&container.Config{
+								Image: image,
+								Labels: map[string]string{
+									labels.Environment: env,
+									labels.Host:        site.Hostname,
+								},
+								Env: envs,
+							},
+							&container.HostConfig{
+								Mounts: mounts,
+							},
+							&network.NetworkingConfig{
+								EndpointsConfig: map[string]*network.EndpointSettings{
+									env: {
+										NetworkID: networkID,
+									},
+								},
+							},
+							site.Hostname,
+						)
+						if err != nil {
+							return fmt.Errorf("unable to create the container, %w", err)
+						}
+
+						containerID = resp.ID
+						startContainer = true
+
+						break
+					}
+
+					// get the container id
+					containerID = c.ID
+
+					// check if the container is running
+					if c.State != "running" {
+						startContainer = true
+						output.Pending("starting", site.Hostname)
+					} else {
+						output.Success(site.Hostname, "ready")
+					}
+				default:
+					// create a brand new container since there is not an existing one
+					image := fmt.Sprintf(NginxImage, site.PHP)
+
+					// should we skip pulling the image
+					if cmd.Flag("skip-pull").Value.String() == "false" {
+						output.Pending("pulling", image)
+
+						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+						if err != nil {
+							return fmt.Errorf("unable to pull the image, %w", err)
+						}
+
+						buf := &bytes.Buffer{}
+						if _, err := buf.ReadFrom(rdr); err != nil {
+							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+						}
+
+						output.Done()
+					}
+
+					// get the sites main path
+					path, err := site.GetAbsPath()
+					if err != nil {
+						return err
+					}
+
+					output.Pending("creating", site.Hostname)
+
+					// add the path mount
+					mounts := []mount.Mount{}
+					mounts = append(mounts, mount.Mount{
+						Type:   mount.TypeBind,
+						Source: path,
+						Target: "/app",
+					})
+
+					// get additional site mounts
+					siteMounts, err := site.GetAbsMountPaths()
+					if err != nil {
+						return err
+					}
+
+					for k, v := range siteMounts {
+						mounts = append(mounts, mount.Mount{
+							Type:   mount.TypeBind,
+							Source: k,
+							Target: v,
+						})
+					}
+
+					// create the container
+					resp, err := docker.ContainerCreate(
+						ctx,
+						&container.Config{
+							Image: image,
+							Labels: map[string]string{
+								labels.Environment: env,
+								labels.Host:        site.Hostname,
+							},
+							Env: envs,
+						},
+						&container.HostConfig{
+							Mounts: mounts,
+						},
+						&network.NetworkingConfig{
+							EndpointsConfig: map[string]*network.EndpointSettings{
+								env: {
+									NetworkID: networkID,
+								},
+							},
+						},
+						site.Hostname,
+					)
+					if err != nil {
+						return fmt.Errorf("unable to create the container, %w", err)
+					}
+
+					containerID = resp.ID
+					startContainer = true
+				}
+
+				// start the container if needed
+				if startContainer {
+					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the container, %w", err)
+					}
+
+					output.Done()
+				}
+
+				// remove the site filter
+				filter.Del("label", labels.Host+"="+site.Hostname)
 			}
 
 			// convert the sites into the gRPC API Apply request
@@ -345,243 +580,4 @@ func New(docker client.CommonAPIClient, nitrod protob.NitroClient, output termin
 	cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
 
 	return cmd
-}
-
-func checkSites(
-	ctx context.Context,
-	docker client.CommonAPIClient,
-	output terminal.Outputer,
-	filter filters.Args,
-	env, networkID string,
-	cfg *config.Config,
-) error {
-	output.Info("Checking Sites...")
-
-	// get the envs for the sites
-	envs := cfg.AsEnvs()
-	for _, site := range cfg.Sites {
-		// add the site filter
-		filter.Add("label", labels.Host+"="+site.Hostname)
-
-		// look for a container for the site
-		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-		if err != nil {
-			return fmt.Errorf("error getting a list of containers")
-		}
-
-		var containerID string
-		var startContainer bool
-		switch len(containers) {
-		case 1:
-			// there is a running container
-			c := containers[0]
-			image := fmt.Sprintf(NginxImage, site.PHP)
-			path, err := site.GetAbsPath()
-			if err != nil {
-				return err
-			}
-
-			expected, err := site.GetAbsMountPaths()
-			if err != nil {
-				return err
-			}
-			// hard code the path to the first site mount
-			expected[path] = "/app"
-
-			// make sure the images and mounts match, if they don't stop, remove, and create the container
-			// with the new image
-			if c.Image != image || match.Mounts(c.Mounts, expected) == false {
-				output.Pending(site.Hostname, "out of sync")
-
-				path, err := site.GetAbsPath()
-				if err != nil {
-					return err
-				}
-
-				// stop container
-				if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-					return err
-				}
-
-				// remove container
-				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-					return err
-				}
-
-				output.Done()
-
-				// pull the image
-				output.Pending("pulling", image)
-
-				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-				if err != nil {
-					return fmt.Errorf("unable to pull image, %w", err)
-				}
-
-				buf := &bytes.Buffer{}
-				if _, err := buf.ReadFrom(rdr); err != nil {
-					return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-				}
-
-				output.Done()
-
-				// add the path mount
-				mounts := []mount.Mount{}
-				mounts = append(mounts, mount.Mount{
-					Type:   mount.TypeBind,
-					Source: path,
-					Target: "/app",
-				})
-
-				// get additional site mounts
-				siteMounts, err := site.GetAbsMountPaths()
-				if err != nil {
-					return err
-				}
-
-				for k, v := range siteMounts {
-					mounts = append(mounts, mount.Mount{
-						Type:   mount.TypeBind,
-						Source: k,
-						Target: v,
-					})
-				}
-
-				// create new container, will have a new container id
-				// create the container
-				resp, err := docker.ContainerCreate(
-					ctx,
-					&container.Config{
-						Image: image,
-						Labels: map[string]string{
-							labels.Environment: env,
-							labels.Host:        site.Hostname,
-						},
-						Env: envs,
-					},
-					&container.HostConfig{
-						Mounts: mounts,
-					},
-					&network.NetworkingConfig{
-						EndpointsConfig: map[string]*network.EndpointSettings{
-							env: {
-								NetworkID: networkID,
-							},
-						},
-					},
-					site.Hostname,
-				)
-				if err != nil {
-					return fmt.Errorf("unable to create the container, %w", err)
-				}
-
-				containerID = resp.ID
-				startContainer = true
-
-				break
-			}
-
-			// get the container id
-			containerID = c.ID
-
-			// check if the container is running
-			if containers[0].State != "running" {
-				startContainer = true
-				output.Pending("starting", site.Hostname)
-			} else {
-				output.Success(site.Hostname, "ready")
-			}
-		default:
-			// create a brand new container since there is not an existing one
-			image := fmt.Sprintf(NginxImage, site.PHP)
-
-			path, err := site.GetAbsPath()
-			if err != nil {
-				return err
-			}
-
-			// pull the image
-			output.Pending("pulling", image)
-
-			rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-			if err != nil {
-				return fmt.Errorf("unable to pull the image, %w", err)
-			}
-
-			buf := &bytes.Buffer{}
-			if _, err := buf.ReadFrom(rdr); err != nil {
-				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-			}
-
-			output.Done()
-
-			output.Pending("creating", site.Hostname)
-
-			// add the path mount
-			mounts := []mount.Mount{}
-			mounts = append(mounts, mount.Mount{
-				Type:   mount.TypeBind,
-				Source: path,
-				Target: "/app",
-			})
-
-			// get additional site mounts
-			siteMounts, err := site.GetAbsMountPaths()
-			if err != nil {
-				return err
-			}
-
-			for k, v := range siteMounts {
-				mounts = append(mounts, mount.Mount{
-					Type:   mount.TypeBind,
-					Source: k,
-					Target: v,
-				})
-			}
-
-			// create the container
-			resp, err := docker.ContainerCreate(
-				ctx,
-				&container.Config{
-					Image: image,
-					Labels: map[string]string{
-						labels.Environment: env,
-						labels.Host:        site.Hostname,
-					},
-					Env: envs,
-				},
-				&container.HostConfig{
-					Mounts: mounts,
-				},
-				&network.NetworkingConfig{
-					EndpointsConfig: map[string]*network.EndpointSettings{
-						env: {
-							NetworkID: networkID,
-						},
-					},
-				},
-				site.Hostname,
-			)
-			if err != nil {
-				return fmt.Errorf("unable to create the container, %w", err)
-			}
-
-			containerID = resp.ID
-			startContainer = true
-		}
-
-		// start the container if needed
-		if startContainer {
-			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			output.Done()
-		}
-
-		// remove the site filter
-		filter.Del("label", labels.Host+"="+site.Hostname)
-	}
-
-	return nil
 }
