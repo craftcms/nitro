@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/craftcms/nitro/internal/datetime"
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
@@ -50,7 +51,8 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// create a backup with the current timestamp
-			backup := fmt.Sprintf("nitro-backup-%d.sql", time.Now().Unix())
+			// TODO(jasonmccallister) replace with the database to backup from the prompt
+			backup := fmt.Sprintf("nitro-%s.sql", datetime.Parse(time.Now()))
 
 			// create the backup command based on the compatability type
 			var backupCmd []string
@@ -129,7 +131,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved 💾\n =>", filepath.Join(backupDir, backup))
+			output.Info("Backup saved", filepath.Join(backupDir, backup), "💾")
 
 			return nil
 		},
