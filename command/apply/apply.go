@@ -27,7 +27,7 @@ var (
 	ErrNoNetwork = fmt.Errorf("Unable to find the network")
 
 	// NginxImage is the image used for sites, with the PHP version
-	NginxImage = "docker.io/craftcms/nginx:%s"
+	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 
 	// DatabaseImage is used for determining the engine and version
 	DatabaseImage = "docker.io/library/%s:%s"
