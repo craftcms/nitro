@@ -1,10 +1,13 @@
 package database
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,11 +47,42 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// TODO(jasonmccallister) prompt the user for the container to import
 			var containerID, containerCompatability, containerName string
-			for _, c := range containers {
-				containerID = c.ID
-				containerCompatability = c.Labels[labels.DatabaseCompatability]
-				containerName = strings.TrimLeft(c.Names[0], "/")
+			for k, c := range containers {
+				output.Info(fmt.Sprintf("  %d. %s", k+1, strings.TrimLeft(c.Names[0], "/")))
 			}
+
+			// ask for the engine
+			fmt.Print("Select database engine: ")
+			fmt.Scan("")
+			reader := bufio.NewReader(os.Stdin)
+			char, err := reader.ReadString('\n')
+			if err != nil {
+				return err
+			}
+
+			// remove the new line from string
+			char = strings.TrimSpace(char)
+
+			// convert the selection to an integer
+			selection, err := strconv.Atoi(char)
+			if err != nil {
+				return err
+			}
+
+			// make sure its there
+			if len(containers) < selection {
+				return err
+			}
+
+			// take away one from the selection
+			selection = selection - 1
+
+			// set the selected container
+			containerName = containers[selection].Names[0]
+			containerID = containers[selection].ID
+			containerCompatability = containers[selection].Labels[labels.DatabaseCompatability]
+
+			output.Info("Preparing backup...")
 
 			// create a backup with the current timestamp
 			// TODO(jasonmccallister) replace with the database to backup from the prompt
@@ -57,9 +91,10 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			// create the backup command based on the compatability type
 			var backupCmd []string
 			switch containerCompatability {
-			// TODO(jasonmccallister) add mysql backup
 			case "postgres":
 				backupCmd = []string{"pg_dump", "-Unitro", "-f", "/tmp/" + backup}
+			default:
+				backupCmd = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", "nitro", "--result-file=" + "/tmp/" + backup}
 			}
 
 			output.Pending("creating backup", backup)
@@ -94,17 +129,13 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// wait for the container exec to complete
 			waiting := true
-			for {
-				if waiting {
-					resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-					if err != nil {
-						return err
-					}
-
-					waiting = resp.Running
-				} else {
-					break
+			for waiting {
+				resp, err := docker.ContainerExecInspect(ctx, exec.ID)
+				if err != nil {
+					return err
 				}
+
+				waiting = resp.Running
 			}
 
 			// copy the backup file from the container
