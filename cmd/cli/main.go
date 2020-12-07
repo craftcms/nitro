@@ -115,7 +115,7 @@ func init() {
 		trust.New(client, term),
 		version.New(client, nitrod, term),
 		validate.New(home, client, term),
-		database.New(client, term),
+		database.New(home, client, term),
 		hosts.New(home, term),
 	}
 

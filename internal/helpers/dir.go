@@ -22,7 +22,7 @@ func DirExists(dir string) bool {
 		return false
 	}
 
-	if i.IsDir() {
+	if i != nil && i.IsDir() {
 		return true
 	}
 
