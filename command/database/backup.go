@@ -49,54 +49,100 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// TODO(jasonmccallister) prompt the user for the container to import
 			var containerID, containerCompatability, containerName string
-			for k, c := range containers {
-				output.Info(fmt.Sprintf("  %d. %s", k+1, strings.TrimLeft(c.Names[0], "/")))
+
+			var containerList []string
+			for _, c := range containers {
+				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
-			// ask for the engine
-			fmt.Print("Select database engine: ")
-			fmt.Scan("")
-			reader := bufio.NewReader(os.Stdin)
-			char, err := reader.ReadString('\n')
+			// prompt the user for which database to backup
+			containerSelection, err := promptForOption(os.Stdin, containerList, "Which database engine? ", output)
 			if err != nil {
 				return err
 			}
-
-			// remove the new line from string
-			char = strings.TrimSpace(char)
-
-			// convert the selection to an integer
-			selection, err := strconv.Atoi(char)
-			if err != nil {
-				return err
-			}
-
-			// make sure its there
-			if len(containers) < selection {
-				return err
-			}
-
-			// take away one from the selection
-			selection = selection - 1
 
 			// set the selected container
-			containerName = containers[selection].Names[0]
-			containerID = containers[selection].ID
-			containerCompatability = containers[selection].Labels[labels.DatabaseCompatability]
+			containerName = containers[containerSelection].Names[0]
+			containerID = containers[containerSelection].ID
+			containerCompatability = containers[containerSelection].Labels[labels.DatabaseCompatability]
+
+			// TODO(jasonmccallister) get a list of the databases
+			var dbs []string
+			switch strings.Contains(containerName, "mysql") {
+			case true:
+				return fmt.Errorf("getting all mysql databases is not implemented")
+			default:
+				// get a list of the postgres databases
+				commands := []string{"psql", "--username=nitro", "--command", `SELECT datname FROM pg_database WHERE datistemplate = false;`}
+
+				// create the command and pass to exec
+				exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+					AttachStdout: true,
+					AttachStderr: true,
+					Tty:          false,
+					Cmd:          commands,
+				})
+				if err != nil {
+					return err
+				}
+
+				// attach to the container
+				stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
+					AttachStdout: true,
+					AttachStderr: true,
+					Tty:          false,
+					Cmd:          commands,
+				})
+				if err != nil {
+					return err
+				}
+				defer stream.Close()
+
+				// start the exec
+				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+					return fmt.Errorf("unable to start the container, %w", err)
+				}
+
+				// get the output
+				buf := new(bytes.Buffer)
+				if _, err := io.Copy(buf, stream.Reader); err != nil {
+					return err
+				}
+
+				// TODO(jasonmccallister) remove this to a helper?
+				// split the lines
+				sp := strings.Split(buf.String(), "\n")
+				for i, d := range sp {
+					// remoe the first, second, last, rows, and empty lines
+					if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") || d == "" {
+						continue
+					}
+
+					dbs = append(dbs, strings.TrimSpace(d))
+				}
+			}
+
+			// prompt the user for the specific database to backup
+			dbSelection, err := promptForOption(os.Stdin, dbs, "Which database should we backup? ", output)
+			if err != nil {
+				return err
+			}
+
+			// select the database
+			db := dbs[dbSelection]
 
 			output.Info("Preparing backup...")
 
 			// create a backup with the current timestamp
-			// TODO(jasonmccallister) replace with the database to backup from the prompt
-			backup := fmt.Sprintf("nitro-%s.sql", datetime.Parse(time.Now()))
+			backup := fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now()))
 
 			// create the backup command based on the compatability type
 			var backupCmd []string
 			switch containerCompatability {
 			case "postgres":
-				backupCmd = []string{"pg_dump", "-Unitro", "-f", "/tmp/" + backup}
+				backupCmd = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backup}
 			default:
-				backupCmd = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", "nitro", "--result-file=" + "/tmp/" + backup}
+				backupCmd = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backup}
 			}
 
 			output.Pending("creating backup", backup)
@@ -184,4 +230,37 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 	}
 
 	return cmd
+}
+
+func promptForOption(reader io.Reader, options []string, prompt string, output terminal.Outputer) (int, error) {
+	for k, v := range options {
+		output.Info(fmt.Sprintf("  %d. %s", k+1, v))
+	}
+
+	fmt.Print(prompt)
+	fmt.Scan("")
+	rdr := bufio.NewReader(reader)
+	char, err := rdr.ReadString('\n')
+	if err != nil {
+		return 0, err
+	}
+
+	// remove the new line from string
+	char = strings.TrimSpace(char)
+
+	// convert the selection to an integer
+	selection, err := strconv.Atoi(char)
+	if err != nil {
+		return 0, err
+	}
+
+	// make sure its there
+	if len(options) < selection {
+		return 0, err
+	}
+
+	// take away one from the selection
+	selection = selection - 1
+
+	return selection, nil
 }
