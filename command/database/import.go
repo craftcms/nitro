@@ -16,6 +16,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/h2non/filetype"
+	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/spf13/cobra"
 )
 
@@ -102,6 +103,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			// if the file is not compressed, compress it to send to the api
 			switch compressed {
 			case false:
+				// create a new archive
 				rdr, err := newTarArchiveFromFile(file)
 				if err != nil {
 					return err
@@ -113,7 +115,79 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				}
 			}
 
-			// TODO(jasonmccallister) determine if the backup is to mysql or postgres and run the import file command
+			// TODO(jasonmccallister) create the database
+
+			// determine if the backup is to mysql or postgres and run the import file command
+			var createCmd, importCmd []string
+			switch detected {
+			case "postgres":
+				// TODO(jasonmccallister) make the database name dynamic
+				createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", `-c CREATE DATABASE testing2;`}
+				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", "testing", "--file", "/tmp/" + file.Name()}
+			default:
+				return fmt.Errorf("mysql imports have not been implemented")
+			}
+
+			// create the exec
+			createExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				Tty:          false,
+				Cmd:          createCmd,
+			})
+
+			// attach to the container
+			createResp, err := docker.ContainerExecAttach(cmd.Context(), createExec.ID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				Tty:          false,
+				Cmd:          importCmd,
+			})
+			if err != nil {
+				return err
+			}
+
+			// start the exec
+			if err := docker.ContainerExecStart(cmd.Context(), createExec.ID, types.ExecStartCheck{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			// show the output to stdout and stderr
+			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, createResp.Reader); err != nil {
+				return fmt.Errorf("unable to copy the output of the container logs, %w", err)
+			}
+
+			// create the exec
+			importExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				Tty:          false,
+				Cmd:          importCmd,
+			})
+
+			// attach to the container
+			docker.ContainerExecAttach(cmd.Context(), importExec.ID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				Tty:          false,
+				Cmd:          importCmd,
+			})
+
+			// start the exec
+			if err := docker.ContainerExecStart(cmd.Context(), importExec.ID, types.ExecStartCheck{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			// wait for the container exec to complete
+			waiting := true
+			for waiting {
+				resp, err := docker.ContainerExecInspect(cmd.Context(), importExec.ID)
+				if err != nil {
+					return err
+				}
+
+				waiting = resp.Running
+			}
 
 			output.Info("Import successful")
 
