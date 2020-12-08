@@ -3,6 +3,7 @@ package initialize
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -22,6 +23,10 @@ type spyOutputer struct {
 
 func (spy spyOutputer) Info(s ...string) {
 	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
+}
+
+func (spy spyOutputer) Select(r io.Reader, msg string, opts []string) (int, error) {
+	return 0, nil
 }
 
 func (spy spyOutputer) Success(s ...string) {
