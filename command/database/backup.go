@@ -66,11 +66,57 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			containerID = containers[containerSelection].ID
 			containerCompatability = containers[containerSelection].Labels[labels.DatabaseCompatability]
 
-			// TODO(jasonmccallister) get a list of the databases
+			// get a list of the databases
 			var dbs []string
 			switch strings.Contains(containerName, "mysql") {
 			case true:
-				return fmt.Errorf("getting all mysql databases is not implemented")
+				// TODO(jasonmccallister) get a list of the mysql databases
+				commands := []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
+
+				// create the command and pass to exec
+				exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+					AttachStdout: true,
+					AttachStderr: true,
+					Tty:          false,
+					Cmd:          commands,
+				})
+				if err != nil {
+					return err
+				}
+
+				// attach to the container
+				stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
+					AttachStdout: true,
+					AttachStderr: true,
+					Tty:          false,
+					Cmd:          commands,
+				})
+				if err != nil {
+					return err
+				}
+				defer stream.Close()
+
+				// start the exec
+				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+					return fmt.Errorf("unable to start the container, %w", err)
+				}
+
+				// get the output
+				buf := new(bytes.Buffer)
+				if _, err := io.Copy(buf, stream.Reader); err != nil {
+					return err
+				}
+
+				// TODO(jasonmccallister) remove this to a helper?
+				// get all the databases
+				for _, db := range strings.Split(buf.String(), "\n") {
+					// ignore the system defaults
+					if db == "Database" || strings.Contains(db, `"Database`) || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") || db == "mysql" || db == "" {
+						continue
+					}
+
+					dbs = append(dbs, db)
+				}
 			default:
 				// get a list of the postgres databases
 				commands := []string{"psql", "--username=nitro", "--command", `SELECT datname FROM pg_database WHERE datistemplate = false;`}
@@ -113,7 +159,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				// split the lines
 				sp := strings.Split(buf.String(), "\n")
 				for i, d := range sp {
-					// remoe the first, second, last, rows, and empty lines
+					// remove the first, second, last, rows, and empty lines
 					if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") || d == "" {
 						continue
 					}
@@ -123,13 +169,20 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// prompt the user for the specific database to backup
-			dbSelection, err := promptForOption(os.Stdin, dbs, "Which database should we backup? ", output)
-			if err != nil {
-				return err
-			}
+			var db string
+			switch len(dbs) {
+			case 1:
+				output.Info("There is only one database to backup...")
 
-			// select the database
-			db := dbs[dbSelection]
+				db = dbs[0]
+			default:
+				dbSelection, err := promptForOption(os.Stdin, dbs, "Which database should we backup? ", output)
+				if err != nil {
+					return err
+				}
+
+				db = dbs[dbSelection]
+			}
 
 			output.Info("Preparing backup...")
 
