@@ -1,9 +1,11 @@
 package database
 
 import (
+	"archive/tar"
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -145,9 +147,22 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 			defer rdr.Close()
 
-			// read the content of the file
+			// read the content of the file, the file is in a tar format
 			buf := new(bytes.Buffer)
-			buf.ReadFrom(rdr)
+			tr := tar.NewReader(rdr)
+
+			for {
+				_, err := tr.Next()
+				// if end of tar archive
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return err
+				}
+
+				buf.ReadFrom(tr)
+			}
 
 			// make the backup directory if it does not exist
 			backupDir := filepath.Join(home, ".nitro", "backups", env, containerName)
@@ -162,7 +177,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved", filepath.Join(backupDir, backup), "💾")
+			output.Info("Backup saved in", filepath.Join(backupDir), "💾")
 
 			return nil
 		},

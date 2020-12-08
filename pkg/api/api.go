@@ -43,6 +43,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 		a.Client = http.DefaultClient
 	}
 
+	// convert each of the sites into a route
 	routes := []caddyconv.ServerRoute{}
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
@@ -107,7 +108,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 	// send the update
 	res, err := a.Client.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
-		resp.Message = "error updating the Caddy API"
+		resp.Message = "error updating Caddy API"
 		resp.Error = true
 
 		return resp, err
@@ -121,6 +122,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 		return resp, nil
 	}
 
+	// set the message and error to false
 	resp.Message = fmt.Sprintf("successfully applied changes, sites: %d", len(request.GetSites()))
 	resp.Error = false
 
