@@ -67,7 +67,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 			}
 
 			// run the sudo command
-			if err := sudo.Run(nitro, "nitro", "hosts", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+			if err := sudo.Run(nitro, "nitro", "hosts", "add", "--hosts="+strings.Join(hostnames, ",")); err != nil {
 				return err
 			}
 
