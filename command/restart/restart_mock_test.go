@@ -3,6 +3,7 @@ package restart
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -34,6 +35,14 @@ func (spy spyOutputer) Pending(s ...string) {
 
 func (spy spyOutputer) Done() {
 	fmt.Print("\u2713\n")
+}
+
+func (spy spyOutputer) Select(r io.Reader, msg string, opts []string) (int, error) {
+	return 0, nil
+}
+
+func (spy spyOutputer) Warning() {
+
 }
 
 // inspired by the following from the Docker docker package: https://github.com/moby/moby/blob/master/client/network_create_test.go
