@@ -1,11 +1,8 @@
 name: Release
 on:
   push:
-    branches: [ v2 ]
     tags:
       - '*'
-  pull_request:
-    branches: [ v2 ]
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
