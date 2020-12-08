@@ -2,7 +2,10 @@ package database
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -94,57 +97,70 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			var containerID string
 			for _, c := range containers {
 				containerID = c.ID
-				output.Info(c.Names[0])
 			}
 
-			// TODO(jasonmccallister) if the file is not compressed, compress it to send to the api
+			// if the file is not compressed, compress it to send to the api
 			switch compressed {
 			case false:
-				var buf bytes.Buffer
-				tw := tar.NewWriter(&buf)
-
-				var files = []struct {
-					Name, Body string
-				}{
-					{"readme.txt", "This archive contains some text files."},
-					{"gopher.txt", "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
-					{"todo.txt", "Get animal handling license."},
-				}
-
-				for _, file := range files {
-					hdr := &tar.Header{
-						Name: file.Name,
-						Mode: 0600,
-						Size: int64(len(file.Body)),
-					}
-
-					if err := tw.WriteHeader(hdr); err != nil {
-						return err
-					}
-
-					if _, err := tw.Write([]byte(file.Body)); err != nil {
-						return err
-					}
-				}
-
-				if err := tw.Close(); err != nil {
+				rdr, err := newTarArchiveFromFile(file)
+				if err != nil {
 					return err
 				}
 
-				tr := tar.NewReader(&buf)
-
-				// https://stackoverflow.com/questions/47641799/unable-to-understand-docker-cp-command
-				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: true}); err != nil {
+				// copy the file into the container
+				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
 					return err
 				}
 			}
 
-			// TODO(jasonmccallister) copy the file, in tar format, to the container in the tmp directory
-
 			// TODO(jasonmccallister) determine if the backup is to mysql or postgres and run the import file command
+
+			output.Info("Import successful")
+
 			return nil
 		},
 	}
 
 	return cmd
+}
+
+func newTarArchiveFromFile(file *os.File) (io.Reader, error) {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+
+	info, err := os.Stat(file.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	header, err := tar.FileInfoHeader(info, file.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	// header.Name = strings.TrimPrefix(strings.Replace(file, path, "", -1), string(filepath.Separator))
+	err = tw.WriteHeader(header)
+	if err != nil {
+		return nil, err
+	}
+
+	if info.IsDir() {
+		return nil, fmt.Errorf("is directory")
+	}
+
+	_, err = io.Copy(tw, file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = file.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tw.Close(); err != nil {
+		return nil, err
+	}
+
+	return bufio.NewReader(&buf), nil
 }
