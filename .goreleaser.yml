@@ -38,5 +38,5 @@ changelog:
       - '^test:'
 release:
   github:
-    owner: craftcms
-    name: nitro
+    owner: jasonmccallister
+    name: nitro-internal
