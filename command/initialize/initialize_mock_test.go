@@ -29,6 +29,10 @@ func (spy spyOutputer) Select(r io.Reader, msg string, opts []string) (int, erro
 	return 0, nil
 }
 
+func (spy spyOutputer) Warning() {
+
+}
+
 func (spy spyOutputer) Success(s ...string) {
 	fmt.Printf("  \u2713 %s\n", strings.Join(s, " "))
 }

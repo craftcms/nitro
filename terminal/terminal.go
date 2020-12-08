@@ -15,6 +15,7 @@ type Outputer interface {
 	Success(s ...string)
 	Pending(s ...string)
 	Select(r io.Reader, msg string, opts []string) (int, error)
+	Warning()
 	Done()
 }
 
@@ -39,6 +40,10 @@ func (t terminal) Pending(s ...string) {
 
 func (t terminal) Done() {
 	fmt.Print("\u2713\n")
+}
+
+func (t terminal) Warning() {
+	fmt.Print("\u2717\n")
 }
 
 func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {

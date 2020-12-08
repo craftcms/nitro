@@ -86,8 +86,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				}
 
 				if len(siteErrs) > 0 {
-					// TODO(jasonmccallister) add a output.Warning()
-					output.Info("\u2717")
+					output.Warning()
 				} else {
 					output.Done()
 				}

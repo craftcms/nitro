@@ -106,8 +106,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 
 			// try to save the hosts file
 			if err := hostedit.Save(); err != nil {
-				// TODO(jasonmccallister) make this use output.Warning()
-				output.Info("\u2717")
+				output.Warning()
 				return err
 			}
 
