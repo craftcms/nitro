@@ -68,7 +68,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// get a list of the databases
 			var dbs []string
-			switch strings.Contains(containerName, "mysql") {
+			switch strings.Contains(containerName, "mysql") || strings.Contains(containerName, "mariadb") {
 			case true:
 				// TODO(jasonmccallister) get a list of the mysql databases
 				commands := []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
@@ -85,7 +85,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				}
 
 				// attach to the container
-				stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
+				resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
 					AttachStdout: true,
 					AttachStderr: true,
 					Tty:          false,
@@ -94,7 +94,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				if err != nil {
 					return err
 				}
-				defer stream.Close()
+				defer resp.Close()
 
 				// start the exec
 				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
@@ -103,7 +103,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 				// get the output
 				buf := new(bytes.Buffer)
-				if _, err := io.Copy(buf, stream.Reader); err != nil {
+				if _, err := io.Copy(buf, resp.Reader); err != nil {
 					return err
 				}
 
@@ -133,7 +133,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				}
 
 				// attach to the container
-				stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
+				resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
 					AttachStdout: true,
 					AttachStderr: true,
 					Tty:          false,
@@ -142,7 +142,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				if err != nil {
 					return err
 				}
-				defer stream.Close()
+				defer resp.Close()
 
 				// start the exec
 				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
@@ -151,7 +151,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 				// get the output
 				buf := new(bytes.Buffer)
-				if _, err := io.Copy(buf, stream.Reader); err != nil {
+				if _, err := io.Copy(buf, resp.Reader); err != nil {
 					return err
 				}
 
@@ -175,6 +175,8 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				output.Info("There is only one database to backup...")
 
 				db = dbs[0]
+			case 0:
+				return fmt.Errorf("no databases found")
 			default:
 				dbSelection, err := promptForOption(os.Stdin, dbs, "Which database should we backup? ", output)
 				if err != nil {
