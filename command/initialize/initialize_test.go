@@ -50,7 +50,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// set the container create request
 	containerCreateReq := types.ContainerCreateConfig{
 		Config: &container.Config{
-			Image: "nitro-proxy:develop",
+			Image: "craftcms/nitro-proxy:develop",
 			ExposedPorts: nat.PortSet{
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
@@ -60,7 +60,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				labels.Type:         "proxy",
 				labels.Environment:  "testing-init",
 				labels.Proxy:        "testing-init",
-				labels.ProxyVersion: "dev",
+				labels.ProxyVersion: "develop",
 			},
 		},
 		HostConfig: &container.HostConfig{
