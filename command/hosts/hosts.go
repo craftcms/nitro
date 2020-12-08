@@ -2,10 +2,12 @@ package hosts
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/spf13/cobra"
 	"github.com/txn2/txeh"
@@ -54,6 +56,19 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 				for _, h := range strings.Split(hosts, ",") {
 					hostnames = append(hostnames, h)
 				}
+			}
+
+			// check if we are the root user
+
+			// get the executable
+			nitro, err := os.Executable()
+			if err != nil {
+				return err
+			}
+
+			// run the sudo command
+			if err := sudo.Run(nitro, "nitro", "hosts", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+				return err
 			}
 
 			// create the host editor, should be a dependency to the function
