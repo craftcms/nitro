@@ -2,14 +2,12 @@ package database
 
 import (
 	"archive/tar"
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -56,15 +54,15 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// prompt the user for which database to backup
-			containerSelection, err := promptForOption(os.Stdin, containerList, "Which database engine? ", output)
+			selected, err := output.Select(os.Stdin, "Which database engine? ", containerList)
 			if err != nil {
 				return err
 			}
 
 			// set the selected container
-			containerName = containers[containerSelection].Names[0]
-			containerID = containers[containerSelection].ID
-			containerCompatability = containers[containerSelection].Labels[labels.DatabaseCompatability]
+			containerName = containers[selected].Names[0]
+			containerID = containers[selected].ID
+			containerCompatability = containers[selected].Labels[labels.DatabaseCompatability]
 
 			// get a list of the databases
 			var dbs []string
@@ -178,12 +176,12 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			case 0:
 				return fmt.Errorf("no databases found")
 			default:
-				dbSelection, err := promptForOption(os.Stdin, dbs, "Which database should we backup? ", output)
+				selected, err := output.Select(os.Stdin, "Which database should we backup? ", dbs)
 				if err != nil {
 					return err
 				}
 
-				db = dbs[dbSelection]
+				db = dbs[selected]
 			}
 
 			output.Info("Preparing backup...")
@@ -285,37 +283,4 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 	}
 
 	return cmd
-}
-
-func promptForOption(reader io.Reader, options []string, prompt string, output terminal.Outputer) (int, error) {
-	for k, v := range options {
-		output.Info(fmt.Sprintf("  %d. %s", k+1, v))
-	}
-
-	fmt.Print(prompt)
-	fmt.Scan("")
-	rdr := bufio.NewReader(reader)
-	char, err := rdr.ReadString('\n')
-	if err != nil {
-		return 0, err
-	}
-
-	// remove the new line from string
-	char = strings.TrimSpace(char)
-
-	// convert the selection to an integer
-	selection, err := strconv.Atoi(char)
-	if err != nil {
-		return 0, err
-	}
-
-	// make sure its there
-	if len(options) < selection {
-		return 0, err
-	}
-
-	// take away one from the selection
-	selection = selection - 1
-
-	return selection, nil
 }
