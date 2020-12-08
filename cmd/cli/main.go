@@ -101,6 +101,7 @@ func init() {
 	// register all of the commands
 	commands := []*cobra.Command{
 		initialize.New(client, term),
+		hosts.New(home, term),
 		create.New(client, term),
 		start.New(client, term),
 		stop.New(client, term),
