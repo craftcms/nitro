@@ -113,8 +113,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					name := strings.TrimLeft(c.Names[0], "/")
 
 					// only perform a backup if the container is for databases
-					if c.Labels["com.craftcms.nitro.todo"] != "" {
-						output.Info("removing databases is not yet supported")
+					if c.Labels[labels.DatabaseEngine] != "" {
+						output.Info("backing up databases is not yet supported")
 						break
 
 						// TODO(jasonmccallister) implement backups of the databases
