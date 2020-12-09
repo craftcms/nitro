@@ -3,6 +3,8 @@ package apply
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -18,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/protob"
 	"github.com/craftcms/nitro/terminal"
 )
@@ -569,6 +572,30 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			}
 
 			output.Success("proxy ready")
+
+			// get all possible hostnames
+			var hostnames []string
+			for _, s := range cfg.Sites {
+				hostnames = append(hostnames, s.Hostname)
+				hostnames = append(hostnames, s.Aliases...)
+			}
+
+			// get the executable
+			nitro, err := os.Executable()
+			if err != nil {
+				return err
+			}
+
+			// run the hosts command
+			switch runtime.GOOS {
+			case "darwin":
+				output.Info("Modifying hosts file (you might be prompted for your password)")
+
+				// run the sudo command
+				if err := sudo.Run(nitro, "nitro", "hosts", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+					return err
+				}
+			}
 
 			output.Info(env, "is up and running 😃")
 

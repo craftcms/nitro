@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/spf13/cobra"
 	"github.com/txn2/txeh"
@@ -27,7 +25,6 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 		Short:   "Modify your hosts file",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			hosts := cmd.Flag("hosts").Value.String()
 			preview, err := strconv.ParseBool(cmd.Flag("preview").Value.String())
 			if err != nil {
@@ -36,39 +33,13 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 			}
 
 			var hostnames []string
-			switch hosts {
-			case "[]": // if there are no hosts as flags, use the config file
-				cfg, err := config.Load(home, env)
-				if err != nil {
-					return err
-				}
 
-				// get all of the hostnames for the sites
-				for _, s := range cfg.Sites {
-					hostnames = append(hostnames, s.Hostname)
-					hostnames = append(hostnames, s.Aliases...)
-				}
-			default:
-				// remove [ and ] from the string
-				hosts = strings.Replace(hosts, "[", "", 1)
-				hosts = strings.Replace(hosts, "]", "", 1)
+			// remove [ and ] from the string
+			hosts = strings.Replace(hosts, "[", "", 1)
+			hosts = strings.Replace(hosts, "]", "", 1)
 
-				for _, h := range strings.Split(hosts, ",") {
-					hostnames = append(hostnames, h)
-				}
-			}
-
-			// check if we are the root user
-
-			// get the executable
-			nitro, err := os.Executable()
-			if err != nil {
-				return err
-			}
-
-			// run the sudo command
-			if err := sudo.Run(nitro, "nitro", "hosts", "add", "--hosts="+strings.Join(hostnames, ",")); err != nil {
-				return err
+			for _, h := range strings.Split(hosts, ",") {
+				hostnames = append(hostnames, h)
 			}
 
 			// create the host editor, should be a dependency to the function
@@ -102,6 +73,12 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 				return nil
 			}
 
+			// check if we are the root user
+			uid := os.Geteuid()
+			if (uid != 0) && (uid != -1) {
+				return fmt.Errorf("you do not appear to be running this command as root, so we cannot modify your hosts file")
+			}
+
 			output.Pending("modifying hosts file")
 
 			// try to save the hosts file
@@ -118,6 +95,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 
 	// set flags for the command
 	cmd.Flags().StringSliceP("hosts", "z", nil, "list of hostnames to set")
+	cmd.MarkFlagRequired("hosts")
 	cmd.Flags().BoolP("remove", "r", false, "remove hosts from file")
 	cmd.Flags().BoolP("preview", "p", false, "preview the hosts file change")
 
