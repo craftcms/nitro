@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/craftcms/nitro/internal/database"
 	"github.com/craftcms/nitro/labels"
@@ -49,8 +50,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				show = false
 			}
 
-			output.Info("Preparing import...")
-
 			// TODO(jasonmccallister) get the abs clean path for the file
 			file, err := os.Open(args[0])
 			if err != nil {
@@ -69,17 +68,21 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				compressed = true
 			}
 
+			output.Info("Preparing import...")
+
 			// dectect the type of backup if not compressed
 			detected := ""
 			if compressed == false {
+				output.Pending("detecting backup type")
+
 				detected, err = database.DetermineEngine(file.Name())
 				if err != nil {
 					return err
 				}
-			}
 
-			if detected != "" {
-				output.Success("detected", detected, "backup")
+				output.Done()
+
+				output.Info("Detected", detected, "backup")
 			}
 
 			// add filters to show only the envrionment and database containers
@@ -101,11 +104,46 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return err
 			}
 
-			// TODO(jasonmccallister) prompt the user for the container to import
-			var containerID string
+			// get all of the containers as a list
+			var engineOpts []string
 			for _, c := range containers {
-				containerID = c.ID
+				engineOpts = append(engineOpts, strings.TrimLeft(c.Names[0], "/"))
 			}
+
+			// prompt the user for the engine to import the backup into
+			var containerID string
+			selected, err := output.Select(os.Stdin, "Select a database engine: ", engineOpts)
+
+			// set the container id
+			containerID = containers[selected].ID
+			if containerID == "" {
+				return fmt.Errorf("unable to get the container")
+			}
+
+			// ask the user for the database to create
+			msg := "Enter the database name: "
+
+			fmt.Print(msg)
+			var db string
+			wait := true
+			for wait {
+				rdr := bufio.NewReader(os.Stdin)
+				input, err := rdr.ReadString('\n')
+				if err != nil {
+					return err
+				}
+
+				if strings.ContainsAny(input, " -") == false {
+					db = input
+					wait = false
+					break
+				}
+
+				fmt.Println("  no spaces or hypens allowed 🙄...")
+				fmt.Print(msg)
+			}
+
+			output.Pending("uploading backup")
 
 			// if the file is not compressed, compress it to send to the api
 			switch compressed {
@@ -120,10 +158,11 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
 					return err
 				}
+			default:
+				return fmt.Errorf("importing compressed databases is not yet supported")
 			}
 
-			// TODO(jasonmccallister) prompt for the database to create
-			db := "testing"
+			output.Done()
 
 			// determine if the backup is to mysql or postgres and run the import file command
 			var createCmd, importCmd []string
@@ -135,6 +174,8 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return fmt.Errorf("mysql imports have not been implemented")
 			}
 
+			output.Pending("importing database to", db)
+
 			// create the database
 			if _, err := exec(cmd.Context(), docker, containerID, createCmd, show); err != nil {
 				return fmt.Errorf("unable to create the database, %w", err)
@@ -145,7 +186,9 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return fmt.Errorf("unable to import the database, %w", err)
 			}
 
-			output.Info("Import successful")
+			output.Done()
+
+			output.Info("Import successful 💪")
 
 			return nil
 		},
