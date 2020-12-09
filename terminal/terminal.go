@@ -68,12 +68,11 @@ func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 		// remove the new line from string
 		char = strings.TrimSpace(char)
 
-		// convert the selection to an integer
+		// convert the selection to an integer and make sure its a valid option
 		s, err := strconv.Atoi(char)
-		// make sure its a valid option
 		if err != nil || len(opts) < s {
 			wait = true
-			fmt.Println("Please choose a valid option 🙄...")
+			fmt.Println("  Please choose a valid option 🙄...")
 
 			for k, v := range opts {
 				fmt.Println(fmt.Sprintf("  %d. %s", k+1, v))
