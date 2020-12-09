@@ -21,7 +21,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating...")
 
-			images := []string{"docker.io/craftcms/nginx:7.4", "docker.io/craftcms/nginx:7.3"}
+			images := []string{"docker.io/craftcms/nginx:7.4-dev", "docker.io/craftcms/nginx:7.3-dev", "docker.io/craftcms/nginx:7.2-dev"}
 
 			for _, image := range images {
 				output.Pending("updating", image)
