@@ -50,6 +50,8 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
+			output.Info("Getting ready to backup...")
+
 			// prompt the user for which database to backup
 			selected, err := output.Select(os.Stdin, "Which database engine? ", containerList)
 			if err != nil {
