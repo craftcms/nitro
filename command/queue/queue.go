@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -12,7 +11,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/moby/moby/pkg/stdcopy"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 )
 
@@ -88,7 +87,6 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 					}
 					defer resp.Close()
 
-					var outBuf, errBuf bytes.Buffer
 					outputDone := make(chan error)
 
 					go func() {
