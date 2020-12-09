@@ -54,7 +54,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				return err
 			}
 
-			// create a filter for the network
+			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 
