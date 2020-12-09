@@ -1,8 +1,7 @@
 package setup
 
 import (
-	"fmt"
-	"os"
+	"path/filepath"
 
 	"github.com/craftcms/nitro/config"
 )
@@ -29,11 +28,8 @@ func FirstTime(home, env string) error {
 		Port:    "5432",
 	})
 
-	// generate the complete filepath
-	filepath := fmt.Sprintf("%s%c%s%c%s", home, os.PathSeparator, ".nitro", os.PathSeparator, env+".yaml")
-
 	// save the file
-	if err := c.Save(filepath); err != nil {
+	if err := c.Save(filepath.Join(home, ".nitro", env+".yaml")); err != nil {
 		return err
 	}
 
