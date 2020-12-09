@@ -143,7 +143,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
 
-			// TODO(jasonmccallister) remove this logic check once published to add a method for developing locally
+			// remove this logic check once published to add a method for developing locally
 			if len(images) == 0 {
 				output.Pending("pulling image")
 
