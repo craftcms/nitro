@@ -6,10 +6,12 @@ import (
 	"os/exec"
 )
 
+// Run takes an executable and a list of arguments and will run the
+// command as the sudo user
 func Run(e string, args ...string) error {
 	p, err := exec.LookPath(e)
 	if err != nil {
-		return fmt.Errorf("unable to find the executable %q, %w", e, err)
+		return fmt.Errorf("unable to find executable %q, %w", e, err)
 	}
 
 	b := []string{p}
