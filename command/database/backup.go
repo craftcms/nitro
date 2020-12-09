@@ -45,9 +45,6 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
-			// TODO(jasonmccallister) prompt the user for the container to import
-			var containerID, containerCompatability, containerName string
-
 			var containerList []string
 			for _, c := range containers {
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
@@ -60,15 +57,15 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// set the selected container
-			containerName = containers[selected].Names[0]
-			containerID = containers[selected].ID
-			containerCompatability = containers[selected].Labels[labels.DatabaseCompatability]
+			containerName := containers[selected].Names[0]
+			containerID := containers[selected].ID
+			containerCompatability := containers[selected].Labels[labels.DatabaseCompatability]
 
 			// get a list of the databases
 			var dbs []string
 			switch strings.Contains(containerName, "mysql") || strings.Contains(containerName, "mariadb") {
 			case true:
-				// TODO(jasonmccallister) get a list of the mysql databases
+				// get a list of the mysql databases
 				commands := []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
 
 				// create the command and pass to exec
