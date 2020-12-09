@@ -20,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/node"
 	"github.com/craftcms/nitro/command/restart"
+	"github.com/craftcms/nitro/command/ssh"
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
 	"github.com/craftcms/nitro/command/trust"
@@ -105,6 +106,7 @@ func init() {
 		create.New(client, term),
 		start.New(client, term),
 		stop.New(client, term),
+		ssh.New(home, client, term),
 		restart.New(client, term),
 		update.New(client, term),
 		destroy.New(client, term),
