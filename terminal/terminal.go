@@ -47,13 +47,14 @@ func (t terminal) Warning() {
 }
 
 func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
+	// show the message
+	fmt.Println(msg)
 	// show all the options
 	for k, v := range opts {
 		fmt.Println(fmt.Sprintf("  %d. %s", k+1, v))
 	}
 
-	// show the message
-	fmt.Print(msg)
+	fmt.Print("Enter your selection: ")
 
 	// create for loop until the input is valid
 	var selection int
@@ -72,7 +73,7 @@ func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 		s, err := strconv.Atoi(char)
 		if err != nil || len(opts) < s {
 			wait = true
-			fmt.Println("  Please choose a valid option 🙄...")
+			fmt.Println("Please choose a valid option 🙄...")
 
 			for k, v := range opts {
 				fmt.Println(fmt.Sprintf("  %d. %s", k+1, v))
