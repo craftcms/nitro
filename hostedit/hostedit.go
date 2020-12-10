@@ -42,6 +42,10 @@ func Update(file, addr string, hosts ...string) (string, error) {
 	switch index {
 	// if there is not a comment section, we need to create one
 	case 0:
+		if lines[len(lines)-1] != "" {
+			// add a blank line
+			lines = append(lines, "")
+		}
 		lines = append(lines, StartText)
 		lines = append(lines, fmt.Sprintf("%s\t%s", addr, strings.Join(hosts, " ")))
 		lines = append(lines, EndText+"\n")
