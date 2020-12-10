@@ -65,6 +65,8 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			// set the version of php
 			site.PHP = versions[selected]
 
+			output.Success("setting PHP version", site.PHP)
+
 			fmt.Println(site)
 
 			// prompt for the webroot
