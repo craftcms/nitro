@@ -50,10 +50,56 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				dir = filepath.Clean(wd)
 			}
 
+			// get the hostname from the directory
+			sp := strings.Split(dir, string(os.PathSeparator))
+			site.Hostname = sp[len(sp)-1]
+
+			// append the test domain if there are no periods
+			if strings.Contains(site.Hostname, ".") == false {
+				// set the default tld
+				tld := "test"
+				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+					tld = os.Getenv("NITRO_DEFAULT_TLD")
+				}
+
+				site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
+			}
+
+			output.Success("using hostname", site.Hostname)
+
 			// set the sites directory but make the path relative
 			site.Path = strings.Replace(dir, home, "~", 1)
 
-			output.Success("added site at", site.Path)
+			output.Success("adding site", site.Path)
+
+			// get the web directory
+			var root string
+			if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+				// don't go into subdirectories and ignore files
+				if path != dir || info.IsDir() == false {
+					return nil
+				}
+
+				// if the directory is considered a web root
+				if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
+					root = info.Name()
+
+					return nil
+				}
+
+				return nil
+			}); err != nil {
+				return err
+			}
+
+			if root == "" {
+				root = "web"
+			}
+
+			// set the webroot
+			site.Dir = root
+
+			output.Success("using webroot", site.Dir)
 
 			// prompt for the php version
 			versions := []string{"7.4", "7.3", "7.2", "7.1"}
@@ -69,8 +115,9 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			fmt.Println(site)
 
-			// prompt for the webroot
-			// prompt to enable xdebug for the site
+			// verify the site does not exist
+
+			// add the site to the config
 			return nil
 		},
 	}
