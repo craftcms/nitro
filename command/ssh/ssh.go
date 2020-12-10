@@ -112,52 +112,52 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 }
 
 func connect(ctx context.Context, docker client.ContainerAPIClient, containerID string) error {
-	// create an exec
-	exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+	execConfig := types.ExecConfig{
 		AttachStdin:  true,
 		AttachStderr: true,
 		AttachStdout: true,
-		Cmd:          []string{"sh"},
-		// Tty:          true,
-	})
+		Detach:       false,
+		//DetachKeys:   "ctrl+p,ctrl+c",
+		Cmd:        []string{"sh"},
+		Privileged: false,
+		User:       "www-data",
+		// Tty:        true,
+	}
+
+	// create an exec
+	exec, err := docker.ContainerExecCreate(ctx, containerID, execConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating the exec, %w", err)
 	}
 
 	// attach to the exec
-	stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-		AttachStdin:  true,
-		AttachStderr: true,
-		AttachStdout: true,
-		Cmd:          []string{"sh"},
-		// Tty:          true,
-	})
+	stream, err := docker.ContainerExecAttach(ctx, exec.ID, execConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("error attaching to exec, %w", err)
 	}
 	defer stream.Close()
 
 	outputDone := make(chan error)
 	go func() {
-		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, stream.Reader)
+		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, os.Stdin)
 		outputDone <- err
 	}()
 
 	select {
 	case err := <-outputDone:
 		if err != nil {
-			return err
+			return fmt.Errorf("output done error, %w", err)
 		}
 		break
 
 	case <-ctx.Done():
-		return ctx.Err()
+		return fmt.Errorf("contet done error, %w", ctx.Err())
 	}
 
 	// get the exit code
 	exit, err := docker.ContainerExecInspect(ctx, exec.ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("inspect exec error, %w", err)
 	}
 
 	fmt.Println(exit)
