@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/add"
 	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
@@ -104,6 +105,7 @@ func init() {
 		initialize.New(client, term),
 		hosts.New(home, term),
 		create.New(client, term),
+		add.New(home, client, term),
 		start.New(client, term),
 		stop.New(client, term),
 		queue.New(home, client, term),
