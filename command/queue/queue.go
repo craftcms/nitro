@@ -54,6 +54,8 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
+					output.Info("Listening for queue jobs...")
+
 					filter.Add("label", labels.Host+"="+s.Hostname)
 
 					// find all of the containers, there should only be one though
@@ -67,7 +69,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 						// AttachStdin:  true,
 						AttachStderr: true,
 						AttachStdout: true,
-						Cmd:          []string{"./craft", "queue/listen"},
+						Cmd:          []string{"./craft", "queue/listen", "--verbose"},
 						// Tty:          true,
 					})
 					if err != nil {
@@ -79,7 +81,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 						// AttachStdin:  true,
 						AttachStderr: true,
 						AttachStdout: true,
-						Cmd:          []string{"./craft", "queue/listen"},
+						Cmd:          []string{"./craft", "queue/listen", "--verbose"},
 						// Tty:          true,
 					})
 					if err != nil {
