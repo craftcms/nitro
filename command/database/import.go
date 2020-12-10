@@ -134,7 +134,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				}
 
 				if strings.ContainsAny(input, " -") == false {
-					db = input
+					db = strings.TrimSpace(db)
 					wait = false
 					break
 				}
