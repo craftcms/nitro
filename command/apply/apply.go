@@ -587,10 +587,17 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 			// run the hosts command
 			switch runtime.GOOS {
-			case "darwin":
+			case "windows":
+				return fmt.Errorf("setting hosts file is not yet supported on windows")
+			default:
 				output.Info("Modifying hosts file (you might be prompted for your password)")
 
-				// run the sudo command
+				// remove all hosts first
+				if err := sudo.Run(nitro, "nitro", "hosts", "--remove", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+					return err
+				}
+
+				// add the hosts
 				if err := sudo.Run(nitro, "nitro", "hosts", "--hosts="+strings.Join(hostnames, ",")); err != nil {
 					return err
 				}

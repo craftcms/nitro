@@ -55,7 +55,8 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 					output.Info("Removing sites from hosts file...")
 				}
 
-				return fmt.Errorf("remove is not yet implemented")
+				// remove the hosts from the file
+				hostedit.RemoveHosts(hostnames)
 			default:
 				if !preview {
 					output.Info("Adding sites to hosts file...")
