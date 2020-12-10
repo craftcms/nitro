@@ -313,28 +313,13 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				var startContainer bool
 				switch len(containers) {
 				case 1:
-					// get the main site path (e.g. ~/dev/craft-dev)
-					path, err := site.GetAbsPath(home)
-					if err != nil {
-						return err
-					}
-
-					// get any additional mounts for the site (e.g. mounts:)
-					expected, err := site.GetAbsMountPaths(home)
-					if err != nil {
-						return err
-					}
-
-					// hard code the path to the first site mount (which is the path)
-					expected[path] = "/app"
-
 					// there is a running container
 					c := containers[0]
 					image := fmt.Sprintf(NginxImage, site.PHP)
 
 					// make sure the images and mounts match, if they don't stop, remove, and create the container
 					// with the new image
-					if c.Image != image || match.Mounts(c.Mounts, expected) == false {
+					if match.Site(home, site, cfg.PHP, c) == false {
 						output.Pending(site.Hostname, "out of sync")
 
 						path, err := site.GetAbsPath(home)
@@ -394,6 +379,13 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 								Source: k,
 								Target: v,
 							})
+						}
+
+						// check if xdebug is enabled
+						if site.Xdebug {
+							envs = append(envs, "XDEBUG_MODE=develop,debug")
+						} else {
+							envs = append(envs, "XDEBUG_MODE=off")
 						}
 
 						// create new container, will have a new container id
@@ -488,6 +480,13 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							Source: k,
 							Target: v,
 						})
+					}
+
+					// check if xdebug is enabled
+					if site.Xdebug {
+						envs = append(envs, "XDEBUG_MODE=develop,debug")
+					} else {
+						envs = append(envs, "XDEBUG_MODE=off")
 					}
 
 					// create the container
