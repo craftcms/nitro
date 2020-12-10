@@ -117,11 +117,9 @@ func connect(ctx context.Context, docker client.ContainerAPIClient, containerID 
 		AttachStderr: true,
 		AttachStdout: true,
 		Detach:       false,
-		//DetachKeys:   "ctrl+p,ctrl+c",
-		Cmd:        []string{"sh"},
-		Privileged: false,
-		User:       "www-data",
-		// Tty:        true,
+		Cmd:          []string{"sh"},
+		Privileged:   false,
+		User:         "www-data",
 	}
 
 	// create an exec
