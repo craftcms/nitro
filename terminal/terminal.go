@@ -15,8 +15,28 @@ type Outputer interface {
 	Success(s ...string)
 	Pending(s ...string)
 	Select(r io.Reader, msg string, opts []string) (int, error)
+	// Input(r io.Reader, validate Validator, msg string) (string, error)
 	Warning()
 	Done()
+}
+
+// Validator is used to pass information into a terminal prompt for
+// validating inputs that are strings
+type Validator interface {
+	// Validate takes an input, illegal chars, and the error message and returns an error
+	Validate(input, chars, msg string) error
+}
+
+// ValidateString is used to validate terminal input as a string
+type ValidateString struct{}
+
+// Validate takes the input and checks if the string contains any chars
+func (t *ValidateString) Validate(input, chars, msg string) error {
+	if strings.ContainsAny(input, chars) {
+		return fmt.Errorf(msg)
+	}
+
+	return nil
 }
 
 type terminal struct{}
@@ -45,6 +65,28 @@ func (t terminal) Done() {
 func (t terminal) Warning() {
 	fmt.Print("\u2717\n")
 }
+
+// func (t terminal) Input(r io.Reader, validate Validator, msg string) (string, error) {
+// 	// show the message
+// 	fmt.Print(msg)
+
+// 	var input string
+// 	w := true
+// 	for w {
+// 		rdr := bufio.NewReader(r)
+// 		char, err := rdr.ReadString('\n')
+// 		if err != nil {
+// 			return "", err
+// 		}
+
+// 		// remove the new line from string
+// 		char = strings.TrimSpace(char)
+
+// 		err := validate.Validate(input)
+// 	}
+
+// 	return input, nil
+// }
 
 func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 	// show the message
