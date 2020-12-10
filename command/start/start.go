@@ -46,6 +46,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return ErrNoContainers
 			}
 
+			output.Info(fmt.Sprintf("Starting %s...", env))
+
 			// start each environment container
 			for _, c := range containers {
 				n := strings.TrimLeft(c.Names[0], "/")
