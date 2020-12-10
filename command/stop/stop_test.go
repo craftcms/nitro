@@ -20,7 +20,7 @@ func TestStopSuccess(t *testing.T) {
 	expectedContainerID := "testing-stop"
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
-	expectedOutput := []string{"testing-stop shutdown 😴\n"}
+	expectedOutput := []string{"Stopping testing-stop...\n", "testing-stop shutdown 😴\n"}
 
 	// Act
 	cmd := New(mock, output)
