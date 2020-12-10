@@ -18,7 +18,7 @@ import (
 	"github.com/craftcms/nitro/command/destroy"
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/initialize"
-	"github.com/craftcms/nitro/command/node"
+	"github.com/craftcms/nitro/command/npm"
 	"github.com/craftcms/nitro/command/queue"
 	"github.com/craftcms/nitro/command/restart"
 	"github.com/craftcms/nitro/command/start"
@@ -111,7 +111,7 @@ func init() {
 		update.New(client, term),
 		destroy.New(client, term),
 		composer.New(client, term),
-		node.New(client, term),
+		npm.New(client, term),
 		completion.New(),
 		apply.New(home, client, nitrod, term),
 		context.New(home, client, term),
