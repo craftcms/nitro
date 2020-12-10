@@ -90,8 +90,6 @@ func (c *Config) AsEnvs() []string {
 	}
 
 	// TODO(jasonmccallister) add opcache settings
-	// "PHP_OPCACHE_ENABLE=1",
-	// "PHP_OPCACHE_REVALIDATE_FREQ=0",
 	// "PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
 	// "PHP_OPCACHE_MAX_ACCELERATED_FILES=10000",
 	// "PHP_OPCACHE_MEMORY_CONSUMPTION=128",

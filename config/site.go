@@ -15,6 +15,7 @@ type Site struct {
 	Mounts   []string `yaml:"mounts,omitempty"`
 	PHP      string   `yaml:"php,omitempty"`
 	Dir      string   `yaml:"dir,omitempty"`
+	Xdebug   bool     `yaml:"xdebug,omitempty"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
