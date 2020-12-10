@@ -1,6 +1,7 @@
 package add
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -65,7 +66,28 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
 			}
 
-			output.Success("using hostname", site.Hostname)
+			// prompt for the hostname
+			fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
+			w := true
+			for w {
+				rdr := bufio.NewReader(os.Stdin)
+				char, _ := rdr.ReadString('\n')
+
+				// remove the carriage return
+				char = strings.TrimRight(char, "\n")
+
+				// does it have spaces?
+				if strings.ContainsAny(char, " ") {
+					w = true
+					fmt.Println("Please enter a hostname without spaces 🙄...")
+					fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
+				} else {
+					site.Hostname = char
+					w = false
+				}
+			}
+
+			output.Success("setting hostname to", site.Hostname)
 
 			// set the sites directory but make the path relative
 			site.Path = strings.Replace(dir, home, "~", 1)
