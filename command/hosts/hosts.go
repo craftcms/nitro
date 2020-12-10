@@ -25,7 +25,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 		Short:   "Modify your hosts file",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			hosts := cmd.Flag("hosts").Value.String()
+			hosts := cmd.Flag("hostnames").Value.String()
 			preview, err := strconv.ParseBool(cmd.Flag("preview").Value.String())
 			if err != nil {
 				// if there is an error set preview to false
@@ -62,6 +62,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 					output.Info("Adding sites to hosts file...")
 				}
 
+				// add the hosts
 				hostedit.AddHosts("127.0.0.1", hostnames)
 			}
 
@@ -95,8 +96,8 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 	}
 
 	// set flags for the command
-	cmd.Flags().StringSliceP("hosts", "z", nil, "list of hostnames to set")
-	cmd.MarkFlagRequired("hosts")
+	cmd.Flags().StringSliceP("hostnames", "z", nil, "list of hostnames to set")
+	cmd.MarkFlagRequired("hostnames")
 	cmd.Flags().BoolP("remove", "r", false, "remove hosts from file")
 	cmd.Flags().BoolP("preview", "p", false, "preview the hosts file change")
 

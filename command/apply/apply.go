@@ -593,12 +593,12 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				output.Info("Modifying hosts file (you might be prompted for your password)")
 
 				// remove all hosts first
-				if err := sudo.Run(nitro, "nitro", "hosts", "--remove", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+				if err := sudo.Run(nitro, "nitro", "hosts", "--remove", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
 					return err
 				}
 
 				// add the hosts
-				if err := sudo.Run(nitro, "nitro", "hosts", "--hosts="+strings.Join(hostnames, ",")); err != nil {
+				if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
 					return err
 				}
 			}
