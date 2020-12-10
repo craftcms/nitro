@@ -2,13 +2,15 @@ package hosts
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 
+	"github.com/craftcms/nitro/hostedit"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/spf13/cobra"
-	"github.com/txn2/txeh"
 )
 
 const exampleText = `  # modify hosts file to match sites and aliases
@@ -42,35 +44,38 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 				hostnames = append(hostnames, h)
 			}
 
-			// create the host editor, should be a dependency to the function
-			hostedit, err := txeh.NewHostsDefault()
-			if err != nil {
-				return err
+			// set the file based on the OS
+			defaultFile := "/etc/hosts"
+			if runtime.GOOS == "windows" {
+				defaultFile = `C:\Windows\System32\Drivers\etc\hosts`
 			}
 
 			// is this a remove or add
+			var updatedContent string
 			switch cmd.Flag("remove").Value.String() {
 			case "true":
 				if !preview {
 					output.Info("Removing sites from hosts file...")
 				}
-
-				// remove the hosts from the file
-				hostedit.RemoveHosts(hostnames)
+				return fmt.Errorf("remove is not yet implemented")
 			default:
 				if !preview {
 					output.Info("Adding sites to hosts file...")
 				}
 
 				// add the hosts
-				hostedit.AddHosts("127.0.0.1", hostnames)
+				updated, err := hostedit.Update(defaultFile, "127.0.0.1", hostnames...)
+				if err != nil {
+					return err
+				}
+				updatedContent = updated
 			}
 
 			// if we are previewing, show the hosts file without saving
 			if preview {
-				output.Info("Previewing changes to hostfile...\n")
+				output.Info("Previewing changes to hosts file...\n")
 
-				output.Info(hostedit.RenderHostsFile())
+				output.Info(updatedContent)
 
 				return nil
 			}
@@ -83,9 +88,8 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 
 			output.Pending("modifying hosts file")
 
-			// try to save the hosts file
-			if err := hostedit.Save(); err != nil {
-				output.Warning()
+			// save the file
+			if err := ioutil.WriteFile(defaultFile, []byte(updatedContent), 0644); err != nil {
 				return err
 			}
 
