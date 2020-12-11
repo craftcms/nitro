@@ -8,7 +8,7 @@ nitro.exe
 /*.sql
 /*.sql.gz
 *.env*
-/api
+/nitrod
 *.sql.zip
 *.dump
 profile.out
