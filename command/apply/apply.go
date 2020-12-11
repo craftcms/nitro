@@ -315,16 +315,15 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					return fmt.Errorf("error getting a list of containers")
 				}
 
-				var containerID string
-				var startContainer bool
 				switch len(containers) {
 				case 1:
 					// there is a running container
 					c := containers[0]
 					image := fmt.Sprintf(NginxImage, site.PHP)
 
-					// make sure the images and mounts match, if they don't stop, remove, and create the container
-					// with the new image
+					// TODO(jasonmccallister) get the containers environment variables
+
+					// make sure the images and mounts match, if they don't stop, remove, and recreate the container
 					if match.Site(home, site, cfg.PHP, c) == false {
 						output.Pending(site.Hostname, "out of sync")
 
@@ -421,21 +420,17 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							return fmt.Errorf("unable to create the container, %w", err)
 						}
 
-						containerID = resp.ID
-						startContainer = true
+						output.Pending("starting", site.Hostname)
+
+						// start the container
+						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+							output.Warning()
+							return fmt.Errorf("unable to start the container, %w", err)
+						}
+
+						output.Done()
 
 						break
-					}
-
-					// get the container id
-					containerID = c.ID
-
-					// check if the container is running
-					if c.State != "running" {
-						startContainer = true
-						output.Pending("starting", site.Hostname)
-					} else {
-						output.Success(site.Hostname, "ready")
 					}
 				default:
 					// create a brand new container since there is not an existing one
@@ -522,13 +517,11 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						return fmt.Errorf("unable to create the container, %w", err)
 					}
 
-					containerID = resp.ID
-					startContainer = true
-				}
+					output.Pending("starting", site.Hostname)
 
-				// start the container if needed
-				if startContainer {
-					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+					// start the container
+					if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+						output.Warning()
 						return fmt.Errorf("unable to start the container, %w", err)
 					}
 
