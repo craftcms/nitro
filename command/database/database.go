@@ -26,7 +26,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 		},
 	}
 
-	cmd.AddCommand(importCommand(docker, output), backupCommand(home, docker, output))
+	cmd.AddCommand(importCommand(docker, output), backupCommand(home, docker, output), addCommand(docker, output))
 
 	return cmd
 }
