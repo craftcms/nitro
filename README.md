@@ -2,6 +2,6 @@
 
 <h1 align="center">Craft Nitro</h1>
 
-Nitro is a speedy local development environment that’s tuned for [Craft CMS](https://craftcms.com/), powered by [Multipass](https://multipass.run/).
+Nitro is a speedy local development environment that’s tuned for [Craft CMS](https://craftcms.com/), powered by [Docker](https://www.docker.com/).
 
 Learn more at [craftcms.com/docs/nitro](https://craftcms.com/docs/nitro/).
