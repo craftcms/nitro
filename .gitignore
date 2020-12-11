@@ -11,3 +11,4 @@ nitro.exe
 /api
 *.sql.zip
 *.dump
+profile.out

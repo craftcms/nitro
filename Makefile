@@ -25,7 +25,9 @@ init:
 
 test:
 	go test ./...
-
+coverage:
+	go test ./... -coverprofile profile.out
+	go tool cover -html=profile.out
 vet:
 	go vet ./...
 
