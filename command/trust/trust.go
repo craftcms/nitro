@@ -60,15 +60,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// get the contents of the certificate from the container
 			output.Pending(fmt.Sprintf("getting certificate for %s...", env))
 
-			// TODO(jasonmccallister) testing copy from container
-
+			// copy the file from the container
 			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
-			if err != nil {
+			if err != nil || stat.Mode.IsRegular() == false { // make sure it is a file not a directory
 				return fmt.Errorf("unable to get the certificate from the container, %w", err)
-			}
-			// make sure it is a file not a directory
-			if stat.Mode.IsRegular() == false {
-				return fmt.Errorf("expected a file, not a directory")
 			}
 
 			// the file is in a tar format
@@ -105,15 +100,24 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			switch runtime.GOOS {
 			case "linux":
 				// using the reference from: https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
-				// TODO(jasonmccallister) run multiple commands to set permissions, os.Chmod(/usr/local/share/ca-certificates/+f.Name(), 644)
-				if err := sudo.Run("cp", "cp", "/usr/local/share/ca-certificates/", f.Name()); err != nil {
+				if err := sudo.Run("mv", "mv", f.Name(), fmt.Sprintf("/usr/local/share/ca-certificates/%s.crt", env)); err != nil {
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
-					output.Info(fmt.Sprintf("  sudo cp %s /usr/local/share/ca-certificates/", f.Name()))
+					output.Info(fmt.Sprintf("  sudo mv %s /usr/local/share/ca-certificates/%s.crt", f.Name(), env))
 					output.Info("  sudo update-ca-certificates")
 
 					return nil
 				}
+
+				// update the ca certs
+				if err := sudo.Run("update-ca-certificates", "update-ca-certificates"); err != nil {
+					output.Info("Unable to automatically add certificate\n")
+					output.Info("To install the certificate, run the following command:")
+					output.Info("  sudo update-ca-certificates")
+
+					return nil
+				}
+				// TODO(jasonmccallister) trust the certificate for firefox and edge on linux (https://javorszky.co.uk/2019/11/06/get-firefox-to-trust-your-self-signed-certificates/)
 			// windows
 			case "windows":
 				// automate the certificate installation from this article: https://superuser.com/a/1506481/215387
@@ -127,10 +131,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				}
 			// macos
 			default:
+				// add the certificate to the keychain
 				if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
 					output.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
+
 					return nil
 				}
 			}
@@ -138,11 +144,14 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// clean up
 			output.Pending("cleaning up")
 
+			// remove the temp file
 			if err := os.Remove(f.Name()); err != nil {
-				output.Info("unable to remove temporary file, it will be automatically removed on reboot")
-			}
+				output.Warning()
 
-			output.Done()
+				output.Info("unable to remove temporary file, it will be automatically removed on reboot")
+			} else {
+				output.Done()
+			}
 
 			output.Info(env, "certificates are now trusted 🔒")
 
