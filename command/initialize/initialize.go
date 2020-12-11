@@ -321,9 +321,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// check if we need to run the
 			if skipApply != true && cmd.Parent() != nil {
-				for _, c := range cmd.Parent().Commands() {
-					if c.Use == "apply" {
-						return c.RunE(cmd, args)
+				cmds := cmd.Parent().Commands()
+				if len(cmds) > 0 {
+					for _, c := range cmds {
+						if c.Use == "apply" {
+							return c.RunE(cmd, args)
+						}
 					}
 				}
 			}

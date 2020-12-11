@@ -2,6 +2,7 @@ package apply
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -48,6 +49,9 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
 
 			cfg, err := config.Load(home, env)
 			if err != nil {
