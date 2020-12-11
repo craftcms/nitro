@@ -1,8 +1,10 @@
 package ssh
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -112,51 +114,51 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 }
 
 func connect(ctx context.Context, docker client.ContainerAPIClient, containerID string) error {
-	execConfig := types.ExecConfig{
-		AttachStdin:  true,
-		AttachStderr: true,
-		AttachStdout: true,
-		Tty:          true,
-		Detach:       false,
-		Cmd:          []string{"sh"},
-		// Privileged:   false,
-		// User:         "www-data",
-	}
+	inout := make(chan []byte)
+	errCh := make(chan error)
 
-	// create an exec
-	exec, err := docker.ContainerExecCreate(ctx, containerID, execConfig)
+	// attach to the container
+	waiter, err := docker.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
+		Stream: true,
+		Stdin:  true,
+		Stdout: true,
+		Stderr: true,
+	})
 	if err != nil {
-		return fmt.Errorf("error creating the exec, %w", err)
+		return fmt.Errorf("error attaching to the container, %w", err)
 	}
 
-	// attach to the exec
-	stream, err := docker.ContainerExecAttach(ctx, exec.ID, execConfig)
-	if err != nil {
-		return fmt.Errorf("error attaching to exec, %w", err)
-	}
-	defer stream.Close()
-
-	// get the exit code
-	if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{Tty: execConfig.Tty}); err != nil {
-		return fmt.Errorf("inspect exec error, %w", err)
+	if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+		errCh <- err
 	}
 
-	outputDone := make(chan error)
 	go func() {
-		fmt.Println("started")
-		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, os.Stdin)
-		outputDone <- err
+		scanner := bufio.NewScanner(os.Stdin)
+
+		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, scanner)
+		errCh <- err
+		for scanner.Scan() {
+			fmt.Println("scanner")
+			inout <- []byte(scanner.Text())
+		}
 	}()
 
-	select {
-	case err := <-outputDone:
-		if err != nil {
-			return err
-		}
-		break
+	// Write to docker container
+	go func(w io.WriteCloser) {
+		for {
+			data, ok := <-inout
+			if !ok {
+				fmt.Println("!ok")
+				w.Close()
+				return
+			}
 
-	case <-ctx.Done():
-		return ctx.Err()
+			w.Write(append(data, '\n'))
+		}
+	}(waiter.Conn)
+
+	if _, err := docker.ContainerWait(ctx, containerID); err != nil {
+		errCh <- err
 	}
 
 	return nil
