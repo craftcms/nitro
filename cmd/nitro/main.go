@@ -92,8 +92,14 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// get the port for the nitrod API
+	apiPort := "5000"
+	if os.Getenv("NITRO_API_PORT") != "" {
+		apiPort = os.Getenv("NITRO_API_PORT")
+	}
+
 	// create the nitrod gRPC API
-	nitrod, err := nitro.NewClient("127.0.0.1", "5000")
+	nitrod, err := nitro.NewClient("127.0.0.1", apiPort)
 	if err != nil {
 		log.Fatal(err)
 	}
