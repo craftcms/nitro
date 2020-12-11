@@ -116,10 +116,11 @@ func connect(ctx context.Context, docker client.ContainerAPIClient, containerID 
 		AttachStdin:  true,
 		AttachStderr: true,
 		AttachStdout: true,
+		Tty:          true,
 		Detach:       false,
 		Cmd:          []string{"sh"},
-		Privileged:   false,
-		User:         "www-data",
+		// Privileged:   false,
+		// User:         "www-data",
 	}
 
 	// create an exec
@@ -135,8 +136,14 @@ func connect(ctx context.Context, docker client.ContainerAPIClient, containerID 
 	}
 	defer stream.Close()
 
+	// get the exit code
+	if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{Tty: execConfig.Tty}); err != nil {
+		return fmt.Errorf("inspect exec error, %w", err)
+	}
+
 	outputDone := make(chan error)
 	go func() {
+		fmt.Println("started")
 		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, os.Stdin)
 		outputDone <- err
 	}()
@@ -144,21 +151,13 @@ func connect(ctx context.Context, docker client.ContainerAPIClient, containerID 
 	select {
 	case err := <-outputDone:
 		if err != nil {
-			return fmt.Errorf("output done error, %w", err)
+			return err
 		}
 		break
 
 	case <-ctx.Done():
-		return fmt.Errorf("contet done error, %w", ctx.Err())
+		return ctx.Err()
 	}
-
-	// get the exit code
-	exit, err := docker.ContainerExecInspect(ctx, exec.ID)
-	if err != nil {
-		return fmt.Errorf("inspect exec error, %w", err)
-	}
-
-	fmt.Println(exit)
 
 	return nil
 }
