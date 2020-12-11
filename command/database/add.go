@@ -31,7 +31,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				show = false
 			}
 
-			// add filters to show only the envrionment and database containers
+			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 			filter.Add("label", labels.Type+"=database")
@@ -78,7 +78,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					break
 				}
 
-				fmt.Println("  no spaces or hypens allowed 🙄...")
+				fmt.Println("  no spaces or hyphens allowed 🙄...")
 				fmt.Print(msg)
 			}
 
@@ -88,7 +88,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			var cmds []string
 			switch databaseEngine {
 			case "mysql":
-				cmds = []string{"mysql", "-unitro", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+				cmds = []string{"mysql", "-unitro", "-pnitro", fmt.Sprintf(`-e "CREATE DATABASE IF NOT EXISTS %s;"`, db)}
 			default:
 				cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
 			}
