@@ -7,7 +7,7 @@ ARG NITRO_VERSION=dev
 ENV NITRO_VERSION=${NITRO_VERSION}
 WORKDIR /go/src/github.com/craftcms/nitro
 COPY . .
-RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${NITRO_VERSION}'" -o nitrod ./cmd/api
+RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
 FROM alpine:3.12
