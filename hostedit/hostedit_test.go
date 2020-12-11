@@ -116,15 +116,6 @@ func TestIsUpdated(t *testing.T) {
 			},
 			want: false,
 		},
-		{
-			name: "missing files returns true",
-			args: args{
-				file:  "testdata/missing.txt",
-				addr:  "127.0.0.1",
-				hosts: []string{"one", "two", "three", "four"},
-			},
-			want: true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
