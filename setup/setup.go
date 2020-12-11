@@ -1,8 +1,6 @@
 package setup
 
 import (
-	"path/filepath"
-
 	"github.com/craftcms/nitro/config"
 )
 
@@ -29,7 +27,7 @@ func FirstTime(home, env string) error {
 	})
 
 	// save the file
-	if err := c.Save(filepath.Join(home, ".nitro", env+".yaml")); err != nil {
+	if err := c.Save(); err != nil {
 		return err
 	}
 
