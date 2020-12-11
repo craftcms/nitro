@@ -13,5 +13,14 @@ func Check(port string) error {
 		return fmt.Errorf("It appears port %s, is already in use", port)
 	}
 
-	return lis.Close()
+	// check the close error
+	if err := lis.Close(); err != nil {
+		w := fmt.Errorf("unable to close the listener, %w", err)
+
+		fmt.Println(w.Error())
+
+		return w
+	}
+
+	return nil
 }
