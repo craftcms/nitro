@@ -2,7 +2,6 @@ package apply
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -50,7 +49,10 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
-				ctx = context.Background()
+				// when we call commands from other commands (e.g. init)
+				// the context could be nil, so we set it to the parent
+				// context just in case.
+				ctx = cmd.Parent().Context()
 			}
 
 			cfg, err := config.Load(home, env)

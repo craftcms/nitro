@@ -40,6 +40,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
+			if ctx == nil {
+				// when we call commands from other commands (e.g. create)
+				// the context could be nil, so we set it to the parent
+				// context just in case.
+				ctx = cmd.Parent().Context()
+			}
 
 			// find the nitro proxy for the environment
 			filter := filters.NewArgs()
