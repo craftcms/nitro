@@ -114,7 +114,7 @@ func init() {
 		restart.New(client, term),
 		update.New(client, term),
 		destroy.New(client, term),
-		composer.New(client, term),
+		composer.NewCommand(client, term),
 		npm.New(client, term),
 		completion.New(),
 		apply.New(home, client, nitrod, term),

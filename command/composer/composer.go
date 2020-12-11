@@ -27,8 +27,10 @@ const exampleText = `  # run composer install in a current directory
   # updating a composer project outside of the current directory
   nitro composer ./project-dir --version 2 --update`
 
-// New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommand returns a new command that runs composer install or update for a directory.
+// This command allows users to skip installing composer on the host machine and will run
+// all the commands in a disposable docker container.
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "composer",
 		Short:   "Run composer install or update",
