@@ -31,6 +31,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 		Short:   "Add a new site",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			env := cmd.Flag("environment").Value.String()
 			output.Info("Adding site...")
 
 			// get the environment
@@ -58,7 +59,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			// append the test domain if there are no periods
 			if strings.Contains(site.Hostname, ".") == false {
 				// set the default tld
-				tld := "test"
+				tld := "nitro"
 				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
 					tld = os.Getenv("NITRO_DEFAULT_TLD")
 				}
@@ -79,12 +80,21 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				// does it have spaces?
 				if strings.ContainsAny(char, " ") {
 					w = true
+
 					fmt.Println("Please enter a hostname without spaces 🙄...")
 					fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
-				} else {
-					site.Hostname = char
-					w = false
+
+					continue
 				}
+
+				// if its empty, we are setting the default
+				if char == "" {
+					break
+				}
+
+				// set the input as the hostname
+				site.Hostname = char
+				w = false
 			}
 
 			output.Success("setting hostname to", site.Hostname)
@@ -114,6 +124,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				return err
 			}
 
+			// if the root is still empty, we fall back to the default
 			if root == "" {
 				root = "web"
 			}
@@ -135,11 +146,32 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			output.Success("setting PHP version", site.PHP)
 
-			fmt.Println(site)
-
-			// verify the site does not exist
+			// load the config
+			cfg, err := config.Load(home, env)
+			if err != nil {
+				return err
+			}
 
 			// add the site to the config
+			if err := cfg.AddSite(site); err != nil {
+				return err
+			}
+
+			output.Pending("saving file")
+
+			// save the config file
+			if err := cfg.Save(); err != nil {
+				output.Warning()
+
+				return err
+			}
+
+			output.Done()
+
+			output.Info("Site added 🌍")
+
+			// TODO(jasonmccallister) run the apply command
+
 			return nil
 		},
 	}
