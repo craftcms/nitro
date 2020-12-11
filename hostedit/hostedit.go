@@ -52,3 +52,23 @@ func Update(file, addr string, hosts ...string) (string, error) {
 
 	return strings.Join(lines, "\n"), nil
 }
+
+// IsUpdated is used to check if an update will make any changes
+// to the hosts file and return true if there is nothing to change
+func IsUpdated(file, addr string, hosts ...string) (bool, error) {
+	// open the original file
+	orig, err := ioutil.ReadFile(file)
+	if err != nil {
+		// we could not open the file so just assume its good
+		return false, err
+	}
+
+	// perform the update
+	updated, err := Update(file, addr, hosts...)
+	if err != nil {
+		return false, err
+	}
+
+	// compare the two to see if they are updated
+	return string(orig) == updated, nil
+}
