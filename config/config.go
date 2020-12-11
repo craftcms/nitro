@@ -32,6 +32,8 @@ type Config struct {
 	PHP       PHP        `yaml:"php,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
+
+	file string
 }
 
 // AsEnvs takes a configuration and turns specific options
@@ -156,22 +158,58 @@ func Load(home, env string) (*Config, error) {
 		return nil, err
 	}
 
+	// set the file being used on the config
+	cfg.file = viper.ConfigFileUsed()
+
 	// return the config
 	return cfg, nil
 }
 
-func (c *Config) Save(file string) error {
+// AddSite takes a site and adds it to the config
+func (c *Config) AddSite(s Site) error {
+	// if there are no aliases
+	if len(s.Aliases) == 0 {
+		s.Aliases = nil
+	}
+
+	// check existing sites
+	for _, e := range c.Sites {
+		// does the hostname match
+		if e.Hostname == s.Hostname {
+			return fmt.Errorf("hostname already exists")
+		}
+
+		// does the path match
+		if e.Path == s.PHP {
+			return fmt.Errorf("site path already exists")
+		}
+	}
+
+	// add the site to the list
+	c.Sites = append(c.Sites, s)
+
+	return nil
+}
+
+// Save takes a file path and marshals the config into a file.
+func (c *Config) Save() error {
+	if c.file == "" {
+		c.file = viper.ConfigFileUsed()
+	}
+
 	// open the file
-	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
+	f, err := os.OpenFile(c.file, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
 
+	// marshal into yaml
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
 
+	// save the file
 	if _, err := f.Write(data); err != nil {
 		return err
 	}
