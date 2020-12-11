@@ -33,6 +33,8 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 		Use:     "ssh",
 		Short:   "SSH into a container",
 		Example: exampleText,
+		// TODO(jasonmccallister) remove this once the functionality is complete
+		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 

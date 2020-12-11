@@ -115,11 +115,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
 						output.Info("backing up databases is not yet supported")
-						break
 
 						// TODO(jasonmccallister) implement backups of the databases
-						fmt.Println("Backing up database")
-						time.Sleep(time.Second * 2)
+						// fmt.Println("Backing up database")
+						// time.Sleep(time.Second * 2)
 					}
 
 					// stop the container
