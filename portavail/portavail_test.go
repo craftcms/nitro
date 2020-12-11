@@ -9,7 +9,8 @@ import (
 func TestCheck(t *testing.T) {
 	lis, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
-		t.Fatal(err)
+		t.Logf("error creating listener, %s", err.Error())
+		t.Fail()
 	}
 	p := lis.Addr().(*net.TCPAddr).Port
 	usedPort := strconv.Itoa(p)
