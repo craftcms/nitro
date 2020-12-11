@@ -168,9 +168,40 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			output.Done()
 
-			output.Info("Site added 🌍")
+			output.Info(fmt.Sprintf("Site added to %s 🌍", env))
 
-			// TODO(jasonmccallister) run the apply command
+			// ask if the apply command should run
+			var response string
+			var confirm bool
+			fmt.Print("Apply changes now [Y/n]? ")
+			if _, err := fmt.Scanln(&response); err != nil {
+				return fmt.Errorf("unable to provide a prompt, %w", err)
+			}
+
+			// get the response
+			resp := strings.TrimSpace(response)
+			for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
+				if resp == answer {
+					confirm = true
+				}
+			}
+
+			// we are skipping the apply step
+			if confirm == false {
+				return nil
+			}
+
+			// check if there is no parent command
+			if cmd.Parent() == nil {
+				return nil
+			}
+
+			// get the apply command and run it
+			for _, c := range cmd.Parent().Commands() {
+				if c.Use == "apply" {
+					return c.RunE(cmd, args)
+				}
+			}
 
 			return nil
 		},
