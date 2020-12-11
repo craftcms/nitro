@@ -30,8 +30,8 @@ var Envs = map[string]string{
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	PHP       PHP        `yaml:"php,omitempty"`
-	Sites     []Site     `yaml:"sites,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
+	Sites     []Site     `yaml:"sites,omitempty"`
 
 	file string
 }
@@ -49,7 +49,7 @@ func (c *Config) AsEnvs() []string {
 	}
 
 	if c.PHP.MemoryLimit == "" {
-		envs = append(envs, "PHP_MEMORY_LIMIT=512MB")
+		envs = append(envs, "PHP_MEMORY_LIMIT=512M")
 	} else {
 		envs = append(envs, "PHP_MEMORY_LIMIT="+c.PHP.MemoryLimit)
 	}
