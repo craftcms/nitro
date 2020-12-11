@@ -135,7 +135,7 @@ func connect(ctx context.Context, docker client.ContainerAPIClient, containerID 
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 
-		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, scanner)
+		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, waiter.Reader)
 		errCh <- err
 		for scanner.Scan() {
 			fmt.Println("scanner")
