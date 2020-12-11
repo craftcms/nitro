@@ -48,7 +48,9 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
-		hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
+		if site.GetAliases() != "" {
+			hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
+		}
 
 		// create the route for each of the sites
 		routes = append(routes, caddyconv.ServerRoute{
@@ -75,7 +77,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 
 	// add the routes to the first server
 	update.Srv0 = caddyconv.Server{
-		Listen: []string{":443", ":80"},
+		Listen: []string{":443"},
 		Routes: routes,
 	}
 
