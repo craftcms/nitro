@@ -321,10 +321,14 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					c := containers[0]
 					image := fmt.Sprintf(NginxImage, site.PHP)
 
-					// TODO(jasonmccallister) get the containers environment variables
+					// get the containers environment variables
+					container, err := docker.ContainerInspect(ctx, c.ID)
+					if err != nil {
+						return err
+					}
 
 					// make sure the images and mounts match, if they don't stop, remove, and recreate the container
-					if match.Site(home, site, cfg.PHP, c) == false {
+					if match.Site(home, site, cfg.PHP, container) == false {
 						output.Pending(site.Hostname, "out of sync")
 
 						path, err := site.GetAbsPath(home)
