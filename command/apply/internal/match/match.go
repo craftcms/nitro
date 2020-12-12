@@ -2,6 +2,7 @@ package match
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/docker/docker/api/types"
@@ -29,11 +30,20 @@ func Mounts(existing []types.MountPoint, expected map[string]string) bool {
 // match whats expected.
 func Site(home string, site config.Site, php config.PHP, container types.ContainerJSON) bool {
 	// check if the image does not match
-	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.PHP) != container.Image {
+	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.PHP) != container.Config.Image {
 		return false
 	}
 
-	// check the environment variables
+	// TODO(jasonmccallister) check the environment variables
+	for _, e := range container.Config.Env {
+		sp := strings.Split(e, "=")
+
+		// show only the environment variables we know about/support
+		if _, ok := config.Envs[sp[0]]; ok {
+			// TODO(jasonmccallister) check if the value matches the config option
+			fmt.Println(sp[0])
+		}
+	}
 
 	// check the mounts
 
