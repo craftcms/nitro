@@ -34,7 +34,7 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 		return false
 	}
 
-	// TODO(jasonmccallister) check the environment variables
+	// check the environment variables
 	for _, e := range container.Config.Env {
 		sp := strings.Split(e, "=")
 
