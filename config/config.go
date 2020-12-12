@@ -18,12 +18,12 @@ var (
 // TODO(jasonmccallister) not used
 var Envs = map[string]string{
 	// PHP specific settings
-	"display_errors":      "PHP_DISPLAY_ERRORS",
-	"memory_limit":        "PHP_MEMORY_LIMIT",
-	"max_execution_time":  "PHP_MAX_EXECUTION_TIME",
-	"upload_max_filesize": "PHP_UPLOAD_MAX_FILESIZE",
-	"max_input_vars":      "PHP_MAX_INPUT_VARS",
-	"post_max_size":       "PHP_POST_MAX_SIZE",
+	"PHP_DISPLAY_ERRORS":      "display_errors",
+	"PHP_MEMORY_LIMIT":        "memory_limit",
+	"PHP_MAX_EXECUTION_TIME":  "max_execution_time",
+	"PHP_UPLOAD_MAX_FILESIZE": "upload_max_filesize",
+	"PHP_MAX_INPUT_VARS":      "max_input_vars",
+	"PHP_POST_MAX_SIZE":       "post_max_size",
 }
 
 // Config represents the nitro-dev.yaml users add for local development.
