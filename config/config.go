@@ -36,6 +36,12 @@ type Config struct {
 	file string
 }
 
+// SetFile is used the set a file for the config and
+// is only really used when first time setup is used.
+func (c *Config) SetFile(file string) {
+	c.file = file
+}
+
 // AsEnvs takes a configuration and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment

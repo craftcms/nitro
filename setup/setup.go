@@ -1,6 +1,8 @@
 package setup
 
 import (
+	"path/filepath"
+
 	"github.com/craftcms/nitro/config"
 )
 
@@ -11,6 +13,9 @@ import (
 func FirstTime(home, env string) error {
 	// TODO(jasonmccallister) consider prompts for which type(s) of database?
 	c := config.Config{}
+
+	// TODO(jasonmccallister) set the file
+	c.SetFile(filepath.Join(home, ".nitro", env, ".yaml"))
 
 	// add a default mysql database
 	c.Databases = append(c.Databases, config.Database{

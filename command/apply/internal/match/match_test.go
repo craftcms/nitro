@@ -5,6 +5,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 )
 
@@ -70,7 +71,7 @@ func TestSite(t *testing.T) {
 		home      string
 		site      config.Site
 		php       config.PHP
-		container types.Container
+		container types.ContainerJSON
 	}
 	tests := []struct {
 		name string
@@ -85,8 +86,10 @@ func TestSite(t *testing.T) {
 					Path: "testdata/new-site",
 					PHP:  "7.4",
 				},
-				container: types.Container{
-					Image: "docker.io/craftcms/nginx:7.4-dev",
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+					},
 				},
 			},
 			want: false,
@@ -97,8 +100,10 @@ func TestSite(t *testing.T) {
 				site: config.Site{
 					PHP: "7.4",
 				},
-				container: types.Container{
-					Image: "docker.io/craftcms/nginx:7.3-dev",
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.3-dev",
+					},
 				},
 			},
 			want: false,
