@@ -33,7 +33,20 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 		// show only the environment variables we know about/support
 		if _, ok := config.Envs[sp[0]]; ok {
 			// TODO(jasonmccallister) check if the value matches the config option
-			fmt.Println(sp[0])
+			e := sp[0]
+			v := sp[1]
+
+			// check the value of each environment variable
+			switch e {
+			case "PHP_DISPLAY_ERRORS":
+				if php.DisplayErrors == "" && v != "on" {
+					return false
+				}
+			case "PHP_MAX_EXECUTION_TIME":
+				if php.MaxExecutionTime != 0 && v != "5000" {
+					return false
+				}
+			}
 		}
 	}
 
