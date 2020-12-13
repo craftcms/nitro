@@ -16,6 +16,8 @@ local: build
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
+local-linux: build
+	mv nitro ${HOME}/bin/nitro
 
 dev: rm docker init
 rm:
