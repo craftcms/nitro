@@ -39,8 +39,11 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 			// check the value of each environment variable
 			switch e {
 			case "PHP_DISPLAY_ERRORS":
-				if php.DisplayErrors == "" && v != "on" {
-					return false
+				// if there is a custom value
+				if php.DisplayErrors != "" {
+					if php.DisplayErrors != v {
+						return false
+					}
 				}
 			case "PHP_MAX_EXECUTION_TIME":
 				if php.MaxExecutionTime != 0 && v != "5000" {
