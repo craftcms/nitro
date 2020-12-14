@@ -272,6 +272,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						},
 					}
 
+					// create the container for the database
 					containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname)
 					if err != nil {
 						output.Warning()
@@ -388,10 +389,34 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							envs = append(envs, "XDEBUG_MODE=off")
 						}
 
+						// add the site itself to the extra hosts
+						extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
+						for _, s := range site.Aliases {
+							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+						}
+
 						// create the container config
-						containerConfig := &container.Config{Image: image, Labels: map[string]string{labels.Environment: env, labels.Host: site.Hostname}, Env: envs}
-						hostConfig := &container.HostConfig{Mounts: mounts}
-						networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
+						containerConfig := &container.Config{
+							Image: image,
+							Labels: map[string]string{
+								labels.Environment: env,
+								labels.Host:        site.Hostname,
+							},
+							Env: envs,
+						}
+						hostConfig := &container.HostConfig{
+							Mounts:     mounts,
+							ExtraHosts: extraHosts,
+						}
+						networkConfig := &network.NetworkingConfig{
+							EndpointsConfig: map[string]*network.EndpointSettings{
+								env: {
+									NetworkID: networkID,
+								},
+							},
+						}
+
+						output.Pending("creating", site.Hostname)
 
 						// create the container
 						containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname)
@@ -416,6 +441,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					if cmd.Flag("skip-pull").Value.String() == "false" {
 						output.Pending("pulling", image)
 
+						// pull the image
 						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 						if err != nil {
 							return fmt.Errorf("unable to pull the image, %w", err)
@@ -466,11 +492,25 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						envs = append(envs, "XDEBUG_MODE=off")
 					}
 
-					output.Pending("creating", site.Hostname)
+					// add the site itself to the extra hosts
+					extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
+					for _, s := range site.Aliases {
+						extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+					}
 
 					// create the container config
-					containerConfig := &container.Config{Image: image, Labels: map[string]string{labels.Environment: env, labels.Host: site.Hostname}, Env: envs}
-					hostConfig := &container.HostConfig{Mounts: mounts}
+					containerConfig := &container.Config{
+						Image: image,
+						Labels: map[string]string{
+							labels.Environment: env,
+							labels.Host:        site.Hostname,
+						},
+						Env: envs,
+					}
+					hostConfig := &container.HostConfig{
+						Mounts:     mounts,
+						ExtraHosts: extraHosts,
+					}
 					networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
 
 					// create the container
@@ -509,21 +549,21 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 			}
 
-			// ping the nitrod API until its ready...
 			output.Pending("waiting for api")
-			ping := &protob.PingRequest{}
-			waiting := true
-			for waiting {
-				_, err := nitrod.Ping(ctx, ping)
+
+			// ping the nitrod API until its ready...
+			for {
+				_, err := nitrod.Ping(ctx, &protob.PingRequest{})
 				if err == nil {
-					waiting = false
+					break
 				}
 			}
 
 			output.Done()
 
-			// configure the proxy with the sites
 			output.Info("Configuring Proxy...")
+
+			// configure the proxy with the sites
 			if _, err = nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
 				return err
 			}
@@ -542,7 +582,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				_, ok := knownContainers[c.ID]
 
 				// its not a known container, we can remove it
-				if !ok && c.Labels[labels.Type] != "proxy" {
+				if ok && c.Labels[labels.Type] != "proxy" {
 					// check if the type is a database
 					if c.Labels[labels.Type] == "database" {
 						output.Info("backing up databases on apply is not yet supported")
@@ -551,7 +591,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					}
 
 					// remove the container
-					fmt.Println(c.Names[0])
+					fmt.Println("\t\t", c.Names[0])
 					// if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 					// 	return fmt.Errorf("unable to remove container, %w", err)
 					// }
