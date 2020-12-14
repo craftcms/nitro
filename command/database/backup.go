@@ -1,19 +1,15 @@
 package database
 
 import (
-	"archive/tar"
-	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/craftcms/nitro/internal/datetime"
-	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -45,6 +41,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
+			// generate a list of engines for the prompt
 			var containerList []string
 			for _, c := range containers {
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
@@ -52,230 +49,47 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Info("Getting ready to backup...")
 
-			// prompt the user for which database to backup
-			selected, err := output.Select(os.Stdin, "Which database engine? ", containerList)
+			// get the container id, name, and database from the user
+			containerID, containerName, compatability, db, err := backup.Prompt(ctx, os.Stdin, docker, output, containers, containerList)
 			if err != nil {
 				return err
-			}
-
-			// set the selected container
-			containerName := containers[selected].Names[0]
-			containerID := containers[selected].ID
-			containerCompatability := containers[selected].Labels[labels.DatabaseCompatability]
-
-			// get a list of the databases
-			var dbs []string
-			switch strings.Contains(containerName, "mysql") || strings.Contains(containerName, "mariadb") {
-			case true:
-				// get a list of the mysql databases
-				commands := []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
-
-				// create the command and pass to exec
-				exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
-					AttachStdout: true,
-					AttachStderr: true,
-					Tty:          false,
-					Cmd:          commands,
-				})
-				if err != nil {
-					return err
-				}
-
-				// attach to the container
-				resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-					AttachStdout: true,
-					AttachStderr: true,
-					Tty:          false,
-					Cmd:          commands,
-				})
-				if err != nil {
-					return err
-				}
-				defer resp.Close()
-
-				// start the exec
-				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-					return fmt.Errorf("unable to start the container, %w", err)
-				}
-
-				// get the output
-				buf := new(bytes.Buffer)
-				if _, err := io.Copy(buf, resp.Reader); err != nil {
-					return err
-				}
-
-				// TODO(jasonmccallister) remove this to a helper?
-				// get all the databases
-				for _, db := range strings.Split(buf.String(), "\n") {
-					// ignore the system defaults
-					if db == "Database" || strings.Contains(db, `"Database`) || db == "information_schema" || db == "performance_schema" || db == "sys" || strings.Contains(db, "password on the command line") || db == "mysql" || db == "" {
-						continue
-					}
-
-					dbs = append(dbs, db)
-				}
-			default:
-				// get a list of the postgres databases
-				commands := []string{"psql", "--username=nitro", "--command", `SELECT datname FROM pg_database WHERE datistemplate = false;`}
-
-				// create the command and pass to exec
-				exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
-					AttachStdout: true,
-					AttachStderr: true,
-					Tty:          false,
-					Cmd:          commands,
-				})
-				if err != nil {
-					return err
-				}
-
-				// attach to the container
-				resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-					AttachStdout: true,
-					AttachStderr: true,
-					Tty:          false,
-					Cmd:          commands,
-				})
-				if err != nil {
-					return err
-				}
-				defer resp.Close()
-
-				// start the exec
-				if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-					return fmt.Errorf("unable to start the container, %w", err)
-				}
-
-				// get the output
-				buf := new(bytes.Buffer)
-				if _, err := io.Copy(buf, resp.Reader); err != nil {
-					return err
-				}
-
-				// TODO(jasonmccallister) remove this to a helper?
-				// split the lines
-				sp := strings.Split(buf.String(), "\n")
-				for i, d := range sp {
-					// remove the first, second, last, rows, and empty lines
-					if i == 0 || i == 1 || i == len(sp) || strings.Contains(d, "rows)") || d == "" {
-						continue
-					}
-
-					dbs = append(dbs, strings.TrimSpace(d))
-				}
-			}
-
-			// prompt the user for the specific database to backup
-			var db string
-			switch len(dbs) {
-			case 1:
-				output.Info("There is only one database to backup...")
-
-				db = dbs[0]
-			case 0:
-				return fmt.Errorf("no databases found")
-			default:
-				selected, err := output.Select(os.Stdin, "Which database should we backup? ", dbs)
-				if err != nil {
-					return err
-				}
-
-				db = dbs[selected]
 			}
 
 			output.Info("Preparing backup...")
 
-			// create a backup with the current timestamp
-			backup := fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now()))
+			// create the options for the backup
+			backupOpts := &backup.Options{
+				BackupName:    fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now())),
+				ContainerID:   containerID,
+				ContainerName: containerName,
+				Database:      db,
+				Home:          home,
+			}
 
 			// create the backup command based on the compatability type
-			var backupCmd []string
-			switch containerCompatability {
+			var commands []string
+			switch compatability {
 			case "postgres":
-				backupCmd = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backup}
+				commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backupOpts.BackupName}
 			default:
-				backupCmd = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backup}
+				commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backupOpts.BackupName}
 			}
 
-			output.Pending("creating backup", backup)
+			// set the backup commands
+			backupOpts.Commands = commands
 
-			// create the command and pass to exec
-			exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				Tty:          false,
-				Cmd:          backupCmd,
-			})
-			if err != nil {
-				return err
-			}
+			output.Pending("creating backup")
 
-			// attach to the container
-			stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				Tty:          false,
-				Cmd:          backupCmd,
-			})
-			if err != nil {
-				return err
-			}
-			defer stream.Close()
+			// perform the backup
+			if err := backup.Perform(ctx, docker, backupOpts); err != nil {
+				output.Warning()
 
-			// start the exec
-			if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// wait for the container exec to complete
-			waiting := true
-			for waiting {
-				resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-				if err != nil {
-					return err
-				}
-
-				waiting = resp.Running
-			}
-
-			// copy the backup file from the container
-			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/tmp/"+backup)
-			if err != nil || stat.Mode.IsRegular() == false {
-				return err
-			}
-			defer rdr.Close()
-
-			// read the content of the file, the file is in a tar format
-			buf := new(bytes.Buffer)
-			tr := tar.NewReader(rdr)
-
-			for {
-				_, err := tr.Next()
-				// if end of tar archive
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					return err
-				}
-
-				buf.ReadFrom(tr)
-			}
-
-			// make the backup directory if it does not exist
-			backupDir := filepath.Join(home, ".nitro", "backups", env, containerName)
-			if err := helpers.MkdirIfNotExists(backupDir); err != nil {
-				return err
-			}
-
-			// write the file to the backups dir
-			if err := ioutil.WriteFile(filepath.Join(backupDir, backup), buf.Bytes(), 0644); err != nil {
-				return err
+				return fmt.Errorf("unable to backup the database, %w", err)
 			}
 
 			output.Done()
 
-			output.Info("Backup saved in", filepath.Join(backupDir), "💾")
+			output.Info("Backup saved in", filepath.Join(backupOpts.Home, ".nitro", backupOpts.ContainerName, backupOpts.BackupName), "💾")
 
 			return nil
 		},
