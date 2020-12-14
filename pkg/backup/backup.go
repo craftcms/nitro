@@ -50,45 +50,8 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 
 	// TODO(jasonmccallister) abstract to databases
 
-	// get a list of the databases from the container
-	var commands []string
-	if strings.Contains(name, "mysql") || strings.Contains(name, "mariadb") {
-		// get a list of the mysql databases
-		commands = []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
-	} else {
-		commands = []string{"psql", "--username=nitro", "--command", `SELECT datname FROM pg_database WHERE datistemplate = false;`}
-	}
-
-	// create the command and pass to exec
-	exec, err := docker.ContainerExecCreate(ctx, id, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          commands,
-	})
-	if err != nil {
-		return "", "", "", "", err
-	}
-
-	// attach to the container
-	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          commands,
-	})
-	if err != nil {
-		return "", "", "", "", err
-	}
-	defer resp.Close()
-
-	// start the exec
-	if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-		return "", "", "", "", fmt.Errorf("unable to start the container, %w", err)
-	}
-
 	// get all of the databases based on the engine
-	databases, err := Databases(resp.Reader, compatability)
+	databases, err := Databases(ctx, docker, id, compatability)
 	if err != nil {
 		return "", "", "", "", err
 	}
@@ -116,10 +79,47 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	return id, name, compatability, db, nil
 }
 
-func Databases(reader io.Reader, compatability string) ([]string, error) {
+func Databases(ctx context.Context, docker client.ContainerAPIClient, containerID, compatability string) ([]string, error) {
+	// get a list of the databases from the container
+	var commands []string
+	if compatability == "mysql" {
+		// get a list of the mysql databases
+		commands = []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
+	} else {
+		commands = []string{"psql", "--username=nitro", "--command", `SELECT datname FROM pg_database WHERE datistemplate = false;`}
+	}
+
+	// create the command and pass to exec
+	exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          false,
+		Cmd:          commands,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// attach to the container
+	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          false,
+		Cmd:          commands,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Close()
+
+	// start the exec
+	if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+		return nil, fmt.Errorf("unable to start the container, %w", err)
+	}
+
 	// get the output
 	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, reader); err != nil {
+	if _, err := io.Copy(buf, resp.Reader); err != nil {
 		return nil, err
 	}
 

@@ -542,7 +542,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				_, ok := knownContainers[c.ID]
 
 				// its not a known container, we can remove it
-				if ok && c.Labels[labels.Type] != "proxy" {
+				if !ok && c.Labels[labels.Type] != "proxy" {
 					// check if the type is a database
 					if c.Labels[labels.Type] == "database" {
 						output.Info("backing up databases on apply is not yet supported")

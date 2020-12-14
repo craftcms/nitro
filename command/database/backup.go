@@ -67,16 +67,12 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// create the backup command based on the compatability type
-			var commands []string
 			switch compatability {
 			case "postgres":
-				commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backupOpts.BackupName}
+				backupOpts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backupOpts.BackupName}
 			default:
-				commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backupOpts.BackupName}
+				backupOpts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backupOpts.BackupName}
 			}
-
-			// set the backup commands
-			backupOpts.Commands = commands
 
 			output.Pending("creating backup")
 
