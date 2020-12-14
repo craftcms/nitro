@@ -29,8 +29,8 @@ const exampleText = `  # create a new environment with the default environment
 
   # you can override the environment by setting the variable "NITRO_DEFAULT_ENVIRONMENT"`
 
-// New takes a docker client and returns the init command for creating a new environment
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommnad takes a docker client and returns the init command for creating a new environment
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "init",
 		Short:   "Create new environment",

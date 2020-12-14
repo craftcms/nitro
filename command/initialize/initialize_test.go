@@ -107,7 +107,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	containerStartRequest := types.ContainerStartOptions{}
 
 	// Act
-	cmd := New(mock, spyOutputer{})
+	cmd := NewCommand(mock, spyOutputer{})
 	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
