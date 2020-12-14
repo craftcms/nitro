@@ -199,7 +199,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			// get the apply command and run it
 			for _, c := range cmd.Parent().Commands() {
 				if c.Use == "apply" {
-					return c.RunE(cmd, args)
+					return c.RunE(c, args)
 				}
 			}
 
