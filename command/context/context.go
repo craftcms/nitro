@@ -63,26 +63,26 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			output.Info(`Sites:`)
 			for _, site := range cfg.Sites {
-				output.Info("    hostname:\t", site.Hostname)
+				output.Info("  hostname:\t", site.Hostname)
 				if len(site.Aliases) > 0 {
-					output.Info("    aliases:\t", strings.Join(site.Aliases, ", "))
+					output.Info("  aliases:\t", strings.Join(site.Aliases, ", "))
 				}
-				output.Info("    php:\t", site.PHP)
-				output.Info("    webroot:\t", site.Dir)
-				output.Info("    path:\t", site.Path)
+				output.Info("  php:\t", site.PHP)
+				output.Info("  webroot:\t", site.Dir)
+				output.Info("  path:\t", site.Path)
 				if len(site.Mounts) > 0 {
-					output.Info("    mounts:\t", strings.Join(site.Mounts, ", "))
+					output.Info("  mounts:\t", strings.Join(site.Mounts, ", "))
 				}
-				output.Info("")
+				output.Info("  ---")
 			}
 
 			output.Info(`Databases:`)
 			for _, db := range cfg.Databases {
-				output.Info("    engine:\t", db.Engine, db.Version)
-				output.Info("    username:\t", "nitro")
-				output.Info("    password:\t", "nitro")
-				output.Info("    port:\t", db.Port)
-				output.Info("")
+				hostname, _ := db.GetHostname()
+				output.Info("  engine:\t", db.Engine, db.Version, "\thostname:", hostname)
+				output.Info("  username:\t", "nitro", "\tpassword:", "nitro")
+				output.Info("  port:\t", db.Port)
+				output.Info("  ---")
 			}
 
 			return nil
