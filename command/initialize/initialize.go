@@ -320,33 +320,22 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// check if we need to run the
-			var applyCmd, trustCmd *cobra.Command
 			if skipApply != true && cmd.Parent() != nil {
-				// TODO(jasonmccallister) make this better
+				// TODO(jasonmccallister) make this better :)
 				for _, c := range cmd.Parent().Commands() {
 					// set the apply command
 					if c.Use == "apply" {
-						applyCmd = c
+						if err := c.RunE(c, args); err != nil {
+							return err
+						}
 					}
 
 					// set the trust command
 					if c.Use == "trust" {
-						trustCmd = c
+						if err := c.RunE(c, args); err != nil {
+							return err
+						}
 					}
-				}
-			}
-
-			// run the apply command
-			if applyCmd != nil && skipApply != true {
-				if err := applyCmd.RunE(cmd, args); err != nil {
-					output.Info("Error running apply command", err.Error())
-				}
-			}
-
-			// run the trust command
-			if trustCmd != nil && skipApply != true {
-				if err := trustCmd.RunE(cmd, args); err != nil {
-					output.Info("Error running trust command", err.Error())
 				}
 			}
 
