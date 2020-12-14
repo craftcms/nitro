@@ -74,7 +74,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				backupOpts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backupOpts.BackupName}
 			}
 
-			output.Pending("creating backup")
+			output.Pending("creating backup", backupOpts.BackupName)
 
 			// perform the backup
 			if err := backup.Perform(ctx, docker, backupOpts); err != nil {
@@ -85,7 +85,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved in", filepath.Join(backupOpts.Home, ".nitro", backupOpts.ContainerName, backupOpts.BackupName), "💾")
+			output.Info("Backup saved in", filepath.Join(backupOpts.Home, ".nitro", backupOpts.ContainerName), "💾")
 
 			return nil
 		},
