@@ -547,13 +547,14 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					if c.Labels[labels.Type] == "database" {
 						output.Info("backing up databases on apply is not yet supported")
 						// TODO(jasonmccallister) add the backup functionality for the database type and all the databases
-						continue
+						break
 					}
 
 					// remove the container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: true}); err != nil {
-						return fmt.Errorf("unable to remove container, %w", err)
-					}
+					fmt.Println(c.Names[0])
+					// if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
+					// 	return fmt.Errorf("unable to remove container, %w", err)
+					// }
 				}
 			}
 
