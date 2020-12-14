@@ -48,10 +48,10 @@ func (c *Config) SetFile(file string) {
 func (c *Config) AsEnvs() []string {
 	var envs []string
 
-	if c.PHP.DisplayErrors == "" {
+	if c.PHP.DisplayErrors {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
 	} else {
-		envs = append(envs, "PHP_DISPLAY_ERRORS="+c.PHP.DisplayErrors)
+		envs = append(envs, "PHP_DISPLAY_ERRORS=off")
 	}
 
 	if c.PHP.MemoryLimit == "" {
@@ -125,7 +125,7 @@ type Blackfire struct {
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         string `mapstructure:"display_errors,omitempty" yaml:"display_errors,omitempty"`
+	DisplayErrors         bool   `mapstructure:"display_errors,omitempty" yaml:"display_errors,omitempty"`
 	MaxExecutionTime      int    `mapstructure:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
 	MaxInputVars          int    `mapstructure:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
 	MaxInputTime          int    `mapstructure:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
