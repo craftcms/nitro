@@ -2,6 +2,7 @@ package match
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -40,8 +41,13 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 			switch e {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
-				if php.DisplayErrors != "" {
-					if php.DisplayErrors != v {
+				if php.DisplayErrors {
+					b, err := strconv.ParseBool(v)
+					if err != nil {
+						return false
+					}
+
+					if php.DisplayErrors != b {
 						return false
 					}
 				}
