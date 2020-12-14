@@ -2,6 +2,7 @@ package apply
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -91,6 +92,9 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			proxyFilter := filters.NewArgs()
 			proxyFilter.Add("label", labels.Proxy+"="+env)
 
+			// set a list of known container ids
+			knownContainers := make(map[string]string)
+
 			// check if there is an existing container for the nitro-proxy
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter, All: true})
 			if err != nil {
@@ -98,31 +102,28 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			}
 
 			// get the container id and determine if the container needs to start
-			var proxyContainerID string
-			var proxyRunning bool
 			for _, c := range containers {
 				for _, n := range c.Names {
 					if n == env || n == "/"+env {
-						proxyContainerID = c.ID
+						proxyContainerID := c.ID
+
+						// add the container id to the list of known containers
+						knownContainers[proxyContainerID] = n
 
 						// check if it is running
-						if c.State == "running" {
+						if c.State != "running" {
+							output.Pending("starting proxy")
+
+							if err := docker.ContainerStart(ctx, proxyContainerID, types.ContainerStartOptions{}); err != nil {
+								return fmt.Errorf("unable to start the nitro container, %w", err)
+							}
+
+							output.Done()
+						} else {
 							output.Success("proxy ready")
-							proxyRunning = true
 						}
 					}
 				}
-			}
-
-			// if its not running start it
-			if !proxyRunning {
-				output.Pending("starting proxy")
-
-				if err := docker.ContainerStart(ctx, proxyContainerID, types.ContainerStartOptions{}); err != nil {
-					return fmt.Errorf("unable to start the nitro container, %w", err)
-				}
-
-				output.Done()
 			}
 
 			// check the databases
@@ -146,18 +147,20 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 
 				// if there is not a container for the database, create a volume, container, and start the container
-				var containerID string
-				var startContainer bool
 				switch len(containers) {
 				// the database container exists
 				case 1:
-					// set the container id
-					containerID = containers[0].ID
-
 					// check if the container is running
 					if containers[0].State != "running" {
-						startContainer = true
 						output.Pending("starting", hostname)
+
+						// start the container
+						if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
+							output.Warning()
+							return err
+						}
+
+						output.Done()
 					} else {
 						output.Success(hostname, "ready")
 					}
@@ -187,11 +190,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					}
 
 					// create the volume
-					volResp, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
-						Driver: "local",
-						Name:   hostname,
-						Labels: lbls,
-					})
+					volume, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{Driver: "local", Name: hostname, Labels: lbls})
 					if err != nil {
 						return fmt.Errorf("unable to create the volume, %w", err)
 					}
@@ -218,77 +217,69 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						// pull the image
 						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 						if err != nil {
+							output.Warning()
 							return fmt.Errorf("unable to pull image %s, %w", image, err)
 						}
 
 						// read the output to pull the image
 						buf := &bytes.Buffer{}
 						if _, err := buf.ReadFrom(rdr); err != nil {
+							output.Warning()
 							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 						}
 
 						output.Done()
 					}
 
+					output.Pending("creating", hostname)
+
 					// set the port for the database
 					port, err := nat.NewPort("tcp", db.Port)
 					if err != nil {
+						output.Warning()
 						return fmt.Errorf("unable to create the port, %w", err)
 					}
-
-					output.Pending("creating", hostname)
-
-					// tell docker to create the database container
-					resp, err := docker.ContainerCreate(
-						ctx,
-						&container.Config{
-							Image:  image,
-							Labels: lbls,
-							ExposedPorts: nat.PortSet{
-								port: struct{}{},
-							},
-							Env: envs,
+					containerConfig := &container.Config{
+						Image:  image,
+						Labels: lbls,
+						ExposedPorts: nat.PortSet{
+							port: struct{}{},
 						},
-						&container.HostConfig{
-							Mounts: []mount.Mount{
+						Env: envs,
+					}
+					hostConfig := &container.HostConfig{
+						Mounts: []mount.Mount{
+							{
+								Type:   mount.TypeVolume,
+								Source: volume.Name,
+								Target: target,
+							},
+						},
+						PortBindings: map[nat.Port][]nat.PortBinding{
+							port: {
 								{
-									Type:   mount.TypeVolume,
-									Source: volResp.Name,
-									Target: target,
-								},
-							},
-							PortBindings: map[nat.Port][]nat.PortBinding{
-								port: {
-									{
-										HostIP:   "127.0.0.1",
-										HostPort: db.Port,
-									},
+									HostIP:   "127.0.0.1",
+									HostPort: db.Port,
 								},
 							},
 						},
-						&network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
-									NetworkID: networkID,
-								},
+					}
+					networkConfig := &network.NetworkingConfig{
+						EndpointsConfig: map[string]*network.EndpointSettings{
+							env: {
+								NetworkID: networkID,
 							},
 						},
-						hostname,
-					)
+					}
+
+					containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname)
 					if err != nil {
-						return fmt.Errorf("unable to create the container, %w", err)
+						output.Warning()
+						return err
 					}
 
-					// set the database container id to start
-					containerID = resp.ID
-					startContainer = true
-				}
-
-				// start the database container if needed
-				if startContainer {
-					if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-						return fmt.Errorf("unable to start the container, %w", err)
-					}
+					// add the container id to the list of known containers
+					knownContainers[containerID] = hostname
 
 					output.Done()
 				}
@@ -397,40 +388,21 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							envs = append(envs, "XDEBUG_MODE=off")
 						}
 
-						// create new container, will have a new container id
-						resp, err := docker.ContainerCreate(
-							ctx,
-							&container.Config{
-								Image: image,
-								Labels: map[string]string{
-									labels.Environment: env,
-									labels.Host:        site.Hostname,
-								},
-								Env: envs,
-							},
-							&container.HostConfig{
-								Mounts: mounts,
-							},
-							&network.NetworkingConfig{
-								EndpointsConfig: map[string]*network.EndpointSettings{
-									env: {
-										NetworkID: networkID,
-									},
-								},
-							},
-							site.Hostname,
-						)
+						// create the container config
+						containerConfig := &container.Config{Image: image, Labels: map[string]string{labels.Environment: env, labels.Host: site.Hostname}, Env: envs}
+						hostConfig := &container.HostConfig{Mounts: mounts}
+						networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
+
+						// create the container
+						containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname)
 						if err != nil {
-							return fmt.Errorf("unable to create the container, %w", err)
-						}
-
-						output.Pending("starting", site.Hostname)
-
-						// start the container
-						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 							output.Warning()
-							return fmt.Errorf("unable to start the container, %w", err)
+
+							return fmt.Errorf("unable to create the site, %w", err)
 						}
+
+						// add the container id to the list of known containers
+						knownContainers[containerID] = site.Hostname
 
 						output.Done()
 
@@ -494,40 +466,23 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						envs = append(envs, "XDEBUG_MODE=off")
 					}
 
+					output.Pending("creating", site.Hostname)
+
+					// create the container config
+					containerConfig := &container.Config{Image: image, Labels: map[string]string{labels.Environment: env, labels.Host: site.Hostname}, Env: envs}
+					hostConfig := &container.HostConfig{Mounts: mounts}
+					networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
+
 					// create the container
-					resp, err := docker.ContainerCreate(
-						ctx,
-						&container.Config{
-							Image: image,
-							Labels: map[string]string{
-								labels.Environment: env,
-								labels.Host:        site.Hostname,
-							},
-							Env: envs,
-						},
-						&container.HostConfig{
-							Mounts: mounts,
-						},
-						&network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
-									NetworkID: networkID,
-								},
-							},
-						},
-						site.Hostname,
-					)
+					containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname)
 					if err != nil {
-						return fmt.Errorf("unable to create the container, %w", err)
-					}
-
-					output.Pending("starting", site.Hostname)
-
-					// start the container
-					if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 						output.Warning()
-						return fmt.Errorf("unable to start the container, %w", err)
+
+						return fmt.Errorf("unable to create the site, %w", err)
 					}
+
+					// add the container id to the list of known containers
+					knownContainers[containerID] = site.Hostname
 
 					output.Done()
 				}
@@ -575,6 +530,28 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 			output.Success("proxy ready")
 
+			// remove unused containers
+			allContainers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
+			if err != nil {
+				output.Warning()
+				return err
+			}
+
+			// check if the container id does not exist
+			for _, c := range allContainers {
+				_, ok := knownContainers[c.ID]
+
+				// its not a known container, we can remove it
+				if ok && c.Labels[labels.Type] != "proxy" {
+					// TODO(jasonmccallister) check if the type is a database
+					if c.Labels[labels.Type] == "database" {
+						fmt.Println("this is a database container and we need to backup all tables")
+					}
+
+					fmt.Println(c.Names[0])
+				}
+			}
+
 			// get all possible hostnames
 			var hostnames []string
 			for _, s := range cfg.Sites {
@@ -585,7 +562,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			// get the executable
 			nitro, err := os.Executable()
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to locate the nitro path, %w", err)
 			}
 
 			// run the hosts command
@@ -611,4 +588,19 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 	cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
 
 	return cmd
+}
+
+func create(ctx context.Context, docker client.ContainerAPIClient, config *container.Config, host *container.HostConfig, network *network.NetworkingConfig, name string) (string, error) {
+	// create the container
+	resp, err := docker.ContainerCreate(ctx, config, host, network, name)
+	if err != nil {
+		return "", fmt.Errorf("unable to create the container, %w", err)
+	}
+
+	// start the container
+	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return "", fmt.Errorf("unable to start the container, %w", err)
+	}
+
+	return resp.ID, nil
 }
