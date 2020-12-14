@@ -30,7 +30,5 @@ const (
 	ProxyVersion = "com.craftcms.nitro.proxy-version"
 
 	// Type is used to idenity the type of container
-	// TODO(jasonmccallister) I'm not sure if we need this, so we should look at
-	// removing this
 	Type = "com.craftcms.nitro.type"
 )
