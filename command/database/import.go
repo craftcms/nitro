@@ -194,7 +194,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 		},
 	}
 
-	cmd.Flags().BoolP("show-output", "s", false, "show debug from import")
+	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
 }

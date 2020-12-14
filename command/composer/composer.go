@@ -191,8 +191,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	}
 
 	// set flags for the command
-	cmd.Flags().BoolP("update", "u", false, "run composer update instead of install")
-	cmd.Flags().StringP("version", "v", "2", "which composer version to use")
+	cmd.Flags().Bool("update", false, "run composer update instead of install")
+	cmd.Flags().String("version", "2", "which composer version to use")
 
 	return cmd
 }

@@ -558,6 +558,12 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 			}
 
+			// update the hosts files
+			if os.Getenv("NITRO_EDIT_HOSTS") == "false" || cmd.Flag("skip-hosts").Value.String() == "true" {
+				// skip updating the hosts file
+				return nil
+			}
+
 			// get all possible hostnames
 			var hostnames []string
 			for _, s := range cfg.Sites {
@@ -591,7 +597,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 	}
 
 	// add flag to skip pulling images
-	cmd.Flags().BoolP("skip-pull", "s", false, "skip pulling images")
+	cmd.Flags().Bool("skip-pull", false, "skip pulling images")
+	cmd.Flags().Bool("skip-hosts", false, "skip modifying the hosts file")
 
 	return cmd
 }

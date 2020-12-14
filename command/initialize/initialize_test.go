@@ -108,7 +108,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 
 	// Act
 	cmd := NewCommand(mock, spyOutputer{})
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert

@@ -100,10 +100,10 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 	}
 
 	// set flags for the command
-	cmd.Flags().StringSliceP("hostnames", "z", nil, "list of hostnames to set")
+	cmd.Flags().StringSlice("hostnames", nil, "list of hostnames to set")
 	cmd.MarkFlagRequired("hostnames")
-	cmd.Flags().BoolP("remove", "r", false, "remove hosts from file")
-	cmd.Flags().BoolP("preview", "p", false, "preview the hosts file change")
+	cmd.Flags().Bool("remove", false, "remove hosts from file")
+	cmd.Flags().Bool("preview", false, "preview the hosts file change")
 
 	return cmd
 }

@@ -106,7 +106,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		},
 	}
 
-	cmd.Flags().BoolP("show-output", "s", false, "show debug from import")
+	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
 }

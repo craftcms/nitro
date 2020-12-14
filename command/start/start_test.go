@@ -24,7 +24,7 @@ func TestStartSuccess(t *testing.T) {
 
 	// Act
 	cmd := New(mock, output)
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert
@@ -58,7 +58,7 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 
 	// Act
 	cmd := New(mock, output)
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert
@@ -81,7 +81,7 @@ func TestStartErrorsWhenThereAreNoContainers(t *testing.T) {
 
 	// Act
 	cmd := New(mock, &spyOutputer{})
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert

@@ -357,7 +357,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	}
 
 	// set flags for the command
-	cmd.Flags().BoolP("skip-apply", "s", false, "skip applying changes")
+	cmd.Flags().Bool("skip-apply", false, "skip applying changes")
 
 	return cmd
 }

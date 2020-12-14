@@ -28,7 +28,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	// set flags for the command
-	cmd.Flags().StringP("example", "e", "example", "an example flag")
+	cmd.Flags().String("example", "example", "an example flag")
 
 	return cmd
 }

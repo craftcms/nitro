@@ -89,7 +89,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 		},
 	}
 
-	cmd.Flags().BoolP("yaml", "p", false, "show the config file")
+	cmd.Flags().Bool("yaml", false, "show the config file")
 
 	return cmd
 }

@@ -37,7 +37,7 @@ func TestRestart(t *testing.T) {
 
 	// Act
 	cmd := New(mock, spyOutputer{})
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 	if err != nil {
 		t.Error(err)
@@ -60,7 +60,7 @@ func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
 
 	// Act
 	cmd := New(mock, spyOutputer{})
-	cmd.Flags().StringP("environment", "e", environmentName, "test flag")
+	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	if err == nil {

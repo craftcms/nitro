@@ -163,8 +163,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	// TODO(jasonmccallister) add flags for the composer and node versions
-	cmd.Flags().StringP("composer-version", "c", "2", "version of composer to use")
-	cmd.Flags().StringP("node-version", "n", "14", "version of node to use")
+	cmd.Flags().String("composer-version", "2", "version of composer to use")
+	cmd.Flags().String("node-version", "14", "version of node to use")
 
 	return cmd
 }

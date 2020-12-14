@@ -195,8 +195,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 	}
 
 	// set flags for the command
-	cmd.Flags().BoolP("update", "u", false, "run node update instead of install")
-	cmd.Flags().StringP("version", "v", "14", "which node version to use")
+	cmd.Flags().Bool("update", false, "run node update instead of install")
+	cmd.Flags().String("version", "14", "which node version to use")
 
 	return cmd
 }
