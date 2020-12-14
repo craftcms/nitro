@@ -48,6 +48,8 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	id := containers[selected].ID
 	compatability := containers[selected].Labels[labels.DatabaseCompatability]
 
+	// TODO(jasonmccallister) abstract to databases
+
 	// get a list of the databases from the container
 	var commands []string
 	if strings.Contains(name, "mysql") || strings.Contains(name, "mariadb") {
@@ -85,14 +87,43 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 		return "", "", "", "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
-	// get the output
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, resp.Reader); err != nil {
+	// get all of the databases based on the engine
+	databases, err := Databases(resp.Reader, compatability)
+	if err != nil {
 		return "", "", "", "", err
 	}
 
-	// get all of the databases based on the engine
-	var dbs []string
+	// TODO(jasonmccallister) abstract to databases
+
+	// prompt the user for the specific database to backup
+	var db string
+	switch len(databases) {
+	case 1:
+		output.Info("There is only one database to backup...")
+
+		db = databases[0]
+	case 0:
+		return "", "", "", "", fmt.Errorf("no databases found")
+	default:
+		selected, err := output.Select(os.Stdin, "Which database should we backup? ", databases)
+		if err != nil {
+			return "", "", "", "", err
+		}
+
+		db = databases[selected]
+	}
+
+	return id, name, compatability, db, nil
+}
+
+func Databases(reader io.Reader, compatability string) ([]string, error) {
+	// get the output
+	buf := new(bytes.Buffer)
+	if _, err := io.Copy(buf, reader); err != nil {
+		return nil, err
+	}
+
+	var databases []string
 	switch compatability {
 	case "mysql":
 		// get all the databases from the mysql engine
@@ -102,7 +133,7 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 				continue
 			}
 
-			dbs = append(dbs, strings.TrimSpace(d))
+			databases = append(databases, strings.TrimSpace(d))
 		}
 	default:
 		// get all the databases from the postgres engine
@@ -113,29 +144,11 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 				continue
 			}
 
-			dbs = append(dbs, strings.TrimSpace(d))
+			databases = append(databases, strings.TrimSpace(d))
 		}
 	}
 
-	// prompt the user for the specific database to backup
-	var db string
-	switch len(dbs) {
-	case 1:
-		output.Info("There is only one database to backup...")
-
-		db = dbs[0]
-	case 0:
-		return "", "", "", "", fmt.Errorf("no databases found")
-	default:
-		selected, err := output.Select(os.Stdin, "Which database should we backup? ", dbs)
-		if err != nil {
-			return "", "", "", "", err
-		}
-
-		db = dbs[selected]
-	}
-
-	return id, name, compatability, db, nil
+	return databases, nil
 }
 
 // Perform is used to perform a backup for a database container, it does not prompt the user as it assumed the Prompt func above
