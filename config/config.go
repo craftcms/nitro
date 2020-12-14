@@ -15,7 +15,6 @@ var (
 
 // Envs is used to map a config to a known environment variable that is used
 // on the container instances.
-// TODO(jasonmccallister) not used
 var Envs = map[string]string{
 	// PHP specific settings
 	"PHP_DISPLAY_ERRORS":      "display_errors",
@@ -30,6 +29,7 @@ var Envs = map[string]string{
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	PHP       PHP        `yaml:"php,omitempty"`
+	Services  Services   `yaml:"services,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 
@@ -135,6 +135,16 @@ type PHP struct {
 	OpcacheRevalidateFreq int    `mapstructure:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
 	PostMaxSize           string `mapstructure:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
 	UploadMaxFileSize     string `mapstructure:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
+}
+
+// Services define common tools for development that should run as containers. We don't expose the volumes, ports, and
+// networking options for these types of services. We plan to support "custom" container options to make local users
+// development even better.
+type Services struct {
+	Blackfire bool `yaml:"blackfire,omitempty"`
+	DynamoDB  bool `yaml:"dynamodb,omitempty"`
+	Mailhog   bool `yaml:"mailhog,omitempty"`
+	Minio     bool `yaml:"minio,omitempty"`
 }
 
 // Load is used to return the environment name, unmarshalled config, and
