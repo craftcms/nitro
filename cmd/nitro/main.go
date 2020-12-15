@@ -11,6 +11,7 @@ import (
 
 	"github.com/craftcms/nitro/command/add"
 	"github.com/craftcms/nitro/command/apply"
+	"github.com/craftcms/nitro/command/clean"
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/context"
@@ -124,6 +125,7 @@ func init() {
 		npm.New(client, term),
 		completion.New(),
 		apply.New(home, client, nitrod, term),
+		clean.NewCommand(home, client, term),
 		context.New(home, client, term),
 		trust.New(client, term),
 		version.New(client, nitrod, term),
