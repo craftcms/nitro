@@ -92,9 +92,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			proxyFilter := filters.NewArgs()
 			proxyFilter.Add("label", labels.Proxy+"="+env)
 
-			// set a list of known container ids
-			knownContainers := make(map[string]string)
-
 			// check if there is an existing container for the nitro-proxy
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: proxyFilter, All: true})
 			if err != nil {
@@ -106,9 +103,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				for _, n := range c.Names {
 					if n == env || n == "/"+env {
 						proxyContainerID := c.ID
-
-						// add the container id to the list of known containers
-						knownContainers[proxyContainerID] = n
 
 						// check if it is running
 						if c.State != "running" {
@@ -273,14 +267,11 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					}
 
 					// create the container for the database
-					containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname)
+					_, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname)
 					if err != nil {
 						output.Warning()
 						return err
 					}
-
-					// add the container id to the list of known containers
-					knownContainers[containerID] = hostname
 
 					output.Done()
 				}
@@ -419,15 +410,11 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						output.Pending("creating", site.Hostname)
 
 						// create the container
-						containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname)
-						if err != nil {
+						if _, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname); err != nil {
 							output.Warning()
 
 							return fmt.Errorf("unable to create the site, %w", err)
 						}
-
-						// add the container id to the list of known containers
-						knownContainers[containerID] = site.Hostname
 
 						output.Done()
 
@@ -514,15 +501,11 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
 
 					// create the container
-					containerID, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname)
-					if err != nil {
+					if _, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname); err != nil {
 						output.Warning()
 
 						return fmt.Errorf("unable to create the site, %w", err)
 					}
-
-					// add the container id to the list of known containers
-					knownContainers[containerID] = site.Hostname
 
 					output.Done()
 				}
@@ -569,34 +552,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			}
 
 			output.Success("proxy ready")
-
-			// remove unused containers
-			allContainers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
-			if err != nil {
-				output.Warning()
-				return err
-			}
-
-			// check if the container id does not exist
-			for _, c := range allContainers {
-				_, ok := knownContainers[c.ID]
-
-				// its not a known container, we can remove it
-				if ok && c.Labels[labels.Type] != "proxy" {
-					// check if the type is a database
-					if c.Labels[labels.Type] == "database" {
-						output.Info("backing up databases on apply is not yet supported")
-						// TODO(jasonmccallister) add the backup functionality for the database type and all the databases
-						break
-					}
-
-					// remove the container
-					fmt.Println("\t\t", c.Names[0])
-					// if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
-					// 	return fmt.Errorf("unable to remove container, %w", err)
-					// }
-				}
-			}
 
 			// update the hosts files
 			if os.Getenv("NITRO_EDIT_HOSTS") == "false" || cmd.Flag("skip-hosts").Value.String() == "true" {
