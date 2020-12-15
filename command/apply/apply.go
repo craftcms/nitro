@@ -267,8 +267,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					}
 
 					// create the container for the database
-					_, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname)
-					if err != nil {
+					if _, err := create(ctx, docker, containerConfig, hostConfig, networkConfig, hostname); err != nil {
 						output.Warning()
 						return err
 					}
