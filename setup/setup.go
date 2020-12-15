@@ -15,7 +15,7 @@ func FirstTime(home, env string) error {
 	c := config.Config{}
 
 	// TODO(jasonmccallister) set the file
-	c.SetFile(filepath.Join(home, ".nitro", env, ".yaml"))
+	c.SetFile(filepath.Join(home, ".nitro", env+".yaml"))
 
 	// add a default mysql database
 	c.Databases = append(c.Databases, config.Database{
