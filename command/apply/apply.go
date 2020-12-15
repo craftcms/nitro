@@ -297,7 +297,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 
 				// if there is no container, create it
-				if len(containers) == 0 {
+				switch len(containers) {
+				case 0:
 					output.Pending("creating mailhog service")
 
 					// pull the mailhog image
@@ -364,6 +365,22 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					}
 
 					output.Done()
+				default:
+					// check if the container is running
+					if containers[0].State != "running" {
+						// start the container
+						output.Pending("starting mailhog")
+
+						// start the container
+						if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
+							output.Warning()
+							break
+						}
+
+						output.Done()
+					} else {
+						output.Success("mailhog ready")
+					}
 				}
 
 				// remove the label
