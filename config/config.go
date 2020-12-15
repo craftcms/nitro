@@ -152,9 +152,8 @@ type Services struct {
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
 func Load(home, env string) (*Config, error) {
-	path := filepath.Join(home, ".nitro")
 	v := viper.New()
-	v.AddConfigPath(path)
+	v.AddConfigPath(home)
 	v.SetConfigType("yaml")
 
 	// set the config file
@@ -163,7 +162,7 @@ func Load(home, env string) (*Config, error) {
 	}
 
 	// set the config file
-	v.SetConfigFile(filepath.Join(path, env+".yaml"))
+	v.SetConfigFile(filepath.Join(home, ".nitro", env+".yaml"))
 
 	// read the config
 	if err := v.ReadInConfig(); err != nil {

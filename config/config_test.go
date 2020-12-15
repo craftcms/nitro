@@ -59,7 +59,7 @@ func TestLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	testdir := filepath.Join(wd, "testdata", ".nitro")
+	testdir := filepath.Join(wd, "testdata")
 
 	type args struct {
 		home string
@@ -74,11 +74,11 @@ func TestLoad(t *testing.T) {
 		{
 			name: "can load a config file",
 			args: args{
-				home: "testdata",
+				home: testdir,
 				env:  "nitro-test",
 			},
 			want: &Config{
-				file: filepath.Join(testdir, "nitro-test"+".yaml"),
+				file: filepath.Join(testdir, ".nitro", "nitro-test"+".yaml"),
 				Blackfire: Blackfire{
 					ServerID:    "my-id",
 					ServerToken: "my-token",
@@ -108,7 +108,32 @@ func TestLoad(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Load() = %v, want %v", got, tt.want)
+				// check php
+				if !reflect.DeepEqual(got.PHP, tt.want.PHP) {
+					t.Errorf("Load() = %v,\nwant\n%v", got.PHP, tt.want.PHP)
+				}
+
+				// check blackfire
+				if !reflect.DeepEqual(got.Blackfire, tt.want.Blackfire) {
+					t.Errorf("Load() = %v,\nwant\n%v", got.Blackfire, tt.want.Blackfire)
+				}
+
+				// check databases
+				if !reflect.DeepEqual(got.Databases, tt.want.Databases) {
+					t.Errorf("Load() = %v,\nwant\n%v", got.Databases, tt.want.Databases)
+				}
+
+				// check services
+				if !reflect.DeepEqual(got.Services, tt.want.Services) {
+					t.Errorf("Load() = %v,\nwant\n%v", got.Services, tt.want.Services)
+				}
+
+				// check sites
+				if !reflect.DeepEqual(got.Sites, tt.want.Sites) {
+					t.Errorf("Load() = %v,\nwant\n%v", got.Sites, tt.want.Sites)
+				}
+
+				t.Errorf("Load() = \ngot\n%v,\nwant\n%v", got, tt.want)
 			}
 		})
 	}

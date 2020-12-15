@@ -2,7 +2,7 @@ blackfire:
   key: my-key
   secret: my-secret
 php:
-  display_errors: on
+  display_errors: true
   max_execution_time: 5000
   max_input_vars: 10000
   max_input_time: 5000
