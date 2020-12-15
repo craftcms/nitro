@@ -155,6 +155,14 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 // is used to determine the engine (container) and the specific database to backup. Perform accepts the backup commands and is
 // agnositic to the database engine for the requested backup.
 func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Options) error {
+	if opts == nil {
+		return fmt.Errorf("options must be provided for the backup")
+	}
+
+	if opts.BackupName == "" || opts.Commands == nil || opts.ContainerID == "" || opts.ContainerName == "" || opts.Database == "" || opts.Environment == "" || opts.Home == "" {
+		return fmt.Errorf("invalid options provided for backup")
+	}
+
 	// create the backup in the container
 	exec, err := docker.ContainerExecCreate(ctx, opts.ContainerID, types.ExecConfig{
 		AttachStdout: true,
