@@ -3,9 +3,12 @@ package clean
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/internal/datetime"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -21,6 +24,8 @@ var (
 const exampleText = `  # remove unused containers
   nitro clean`
 
+// NewCommand returns the command that is used to clean containers that do not exist in a specified
+// environment. It will also perform the backup for database containers.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "clean",
@@ -95,9 +100,51 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// remove each of the containers
 			for name, c := range remove {
-				output.Pending("removing", name)
+				// if this is a database container we need to back it up
+				if c.Labels[labels.DatabaseEngine] != "" {
+					output.Pending("backup up container", name)
 
-				// TODO(jasonmccallister) if this is a database container
+					// get all of the databases
+					databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
+					if err != nil {
+						output.Warning()
+						output.Info("Unable to get the databases from", name, err.Error())
+
+						break
+					}
+
+					// backup each database
+					for _, d := range databases {
+						// create the database specific backup options
+						opts := &backup.Options{
+							BackupName:    fmt.Sprintf("%s-%s.sql", d, datetime.Parse(time.Now())),
+							ContainerID:   c.ID,
+							ContainerName: name,
+							Database:      d,
+							Home:          home,
+						}
+
+						// create the backup command based on the compatability type
+						switch c.Labels[labels.DatabaseCompatability] {
+						case "postgres":
+							opts.Commands = []string{"pg_dump", "--username=nitro", d, "-f", "/tmp/" + opts.BackupName}
+						default:
+							opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", d, "--result-file=" + "/tmp/" + opts.BackupName}
+						}
+
+						// backup the container
+						if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
+							output.Warning()
+							output.Info("Unable to backup database", d, err.Error())
+
+							break
+						}
+					}
+
+					output.Done()
+				}
+
+				output.Pending("removing", name)
 
 				// stop the container
 				if err := docker.ContainerStop(cmd.Context(), c.ID, nil); err != nil {
