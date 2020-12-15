@@ -121,7 +121,7 @@ func init() {
 		ssh.New(home, client, term),
 		restart.New(client, term),
 		update.New(client, term),
-		destroy.New(client, term),
+		destroy.NewCommand(home, client, term),
 		composer.NewCommand(client, term),
 		npm.New(client, term),
 		completion.New(),
