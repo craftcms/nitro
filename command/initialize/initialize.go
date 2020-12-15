@@ -132,32 +132,35 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// build the proxy image ref
 			proxyImage := fmt.Sprintf("craftcms/nitro-proxy:%s", version.Version)
 
-			imageFilter := filters.NewArgs()
-			imageFilter.Add("reference", proxyImage)
+			// TODO(jasonmccallister) remove this after development
+			if os.Getenv("NITRO_DEVELOPMENT") != "true" {
+				imageFilter := filters.NewArgs()
+				imageFilter.Add("reference", proxyImage)
 
-			// check for the proxy image
-			images, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
-				Filters: imageFilter,
-			})
-			if err != nil {
-				return fmt.Errorf("unable to get a list of images, %w", err)
-			}
-
-			// remove this logic check once published to add a method for developing locally
-			if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "" {
-				output.Pending("pulling image")
-
-				rdr, err := docker.ImagePull(ctx, proxyImage, types.ImagePullOptions{All: false})
+				// check for the proxy image
+				images, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
+					Filters: imageFilter,
+				})
 				if err != nil {
-					return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
+					return fmt.Errorf("unable to get a list of images, %w", err)
 				}
 
-				buf := &bytes.Buffer{}
-				if _, err := buf.ReadFrom(rdr); err != nil {
-					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
-				}
+				// if there are no local images, pull it
+				if len(images) == 0 {
+					output.Pending("pulling image")
 
-				output.Done()
+					rdr, err := docker.ImagePull(ctx, proxyImage, types.ImagePullOptions{All: false})
+					if err != nil {
+						return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
+					}
+
+					buf := &bytes.Buffer{}
+					if _, err := buf.ReadFrom(rdr); err != nil {
+						return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+					}
+
+					output.Done()
+				}
 			}
 
 			// create a filter for the nitro proxy
