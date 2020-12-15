@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 
@@ -31,9 +30,7 @@ import (
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/command/xon"
-	"github.com/craftcms/nitro/config"
 	nitro "github.com/craftcms/nitro/pkg/client"
-	"github.com/craftcms/nitro/setup"
 
 	"github.com/craftcms/nitro/terminal"
 )
@@ -70,22 +67,6 @@ func init() {
 	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	// check for or create the config
-	if _, err := config.Load(home, env); err != nil {
-		if errors.Is(err, config.ErrNoConfigFile) {
-			// get the home directory
-			home, err := homedir.Dir()
-			if err != nil {
-				log.Fatal("unable to get the home directory, %w", err)
-			}
-
-			// setup the config file
-			if err := setup.FirstTime(home, env); err != nil {
-				log.Fatal(err)
-			}
-		}
 	}
 
 	// create the docker client
