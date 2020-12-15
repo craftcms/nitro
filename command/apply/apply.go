@@ -286,72 +286,116 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			// check if the mailhog service should be created
 			switch cfg.Services.Mailhog {
 			case true:
-				output.Pending("creating mailhog service")
+				// add the filter for mailhog
+				filter.Add("label", labels.Type+"=mailhog")
 
-				// pull the mailhog image
-				rdr, err := docker.ImagePull(ctx, "docker.io/mailhog/mailhog", types.ImagePullOptions{})
+				// get a list of containers
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 				if err != nil {
 					return err
 				}
 
-				buf := &bytes.Buffer{}
-				if _, err := buf.ReadFrom(rdr); err != nil {
-					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
-				}
+				// if there is no container, create it
+				if len(containers) == 0 {
+					output.Pending("creating mailhog service")
 
-				// configure the service
-				smtpPort, err := nat.NewPort("tcp/udp", "1025")
-				if err != nil {
-					output.Warning()
-					return fmt.Errorf("unable to create the port, %w", err)
-				}
-				httpPort, err := nat.NewPort("tcp", "8025")
-				if err != nil {
-					output.Warning()
-					return fmt.Errorf("unable to create the port, %w", err)
-				}
-				containerConfig := &container.Config{
-					Image: "docker.io/mailhog/mailhog",
-					Labels: map[string]string{
-						labels.Environment: env,
-						labels.Type:        "mailhog",
-					},
-					ExposedPorts: nat.PortSet{
-						smtpPort: struct{}{},
-						httpPort: struct{}{},
-					},
-				}
-				hostconfig := &container.HostConfig{
-					PortBindings: map[nat.Port][]nat.PortBinding{
-						smtpPort: {
-							{
-								HostIP:   "127.0.0.1",
-								HostPort: "1025",
+					// pull the mailhog image
+					rdr, err := docker.ImagePull(ctx, "docker.io/mailhog/mailhog", types.ImagePullOptions{})
+					if err != nil {
+						return err
+					}
+
+					buf := &bytes.Buffer{}
+					if _, err := buf.ReadFrom(rdr); err != nil {
+						return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+					}
+
+					// configure the service
+					smtpPort, err := nat.NewPort("tcp/udp", "1025")
+					if err != nil {
+						output.Warning()
+						return fmt.Errorf("unable to create the port, %w", err)
+					}
+					httpPort, err := nat.NewPort("tcp", "8025")
+					if err != nil {
+						output.Warning()
+						return fmt.Errorf("unable to create the port, %w", err)
+					}
+					containerConfig := &container.Config{
+						Image: "docker.io/mailhog/mailhog",
+						Labels: map[string]string{
+							labels.Environment: env,
+							labels.Type:        "mailhog",
+						},
+						ExposedPorts: nat.PortSet{
+							smtpPort: struct{}{},
+							httpPort: struct{}{},
+						},
+					}
+					hostconfig := &container.HostConfig{
+						PortBindings: map[nat.Port][]nat.PortBinding{
+							smtpPort: {
+								{
+									HostIP:   "127.0.0.1",
+									HostPort: "1025",
+								},
+							},
+							httpPort: {
+								{
+									HostIP:   "127.0.0.1",
+									HostPort: "8025",
+								},
 							},
 						},
-						httpPort: {
-							{
-								HostIP:   "127.0.0.1",
-								HostPort: "8025",
+					}
+					networkConfig := &network.NetworkingConfig{
+						EndpointsConfig: map[string]*network.EndpointSettings{
+							env: {
+								NetworkID: networkID,
 							},
 						},
-					},
-				}
-				networkConfig := &network.NetworkingConfig{
-					EndpointsConfig: map[string]*network.EndpointSettings{
-						env: {
-							NetworkID: networkID,
-						},
-					},
+					}
+
+					// create the container
+					if _, err := create(ctx, docker, containerConfig, hostconfig, networkConfig, "mailhog"); err != nil {
+						output.Warning()
+						return err
+					}
+
+					output.Done()
 				}
 
-				// create the container
-				if _, err := create(ctx, docker, containerConfig, hostconfig, networkConfig, "mailhog"); err != nil {
-					output.Warning()
+				// remove the label
+				filter.Del("label", labels.Type+"=mailhog")
+			default:
+				// add the filter for mailhog
+				filter.Add("label", labels.Type+"=mailhog")
+
+				// check if there is an existing container for mailhog
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+				if err != nil {
 					return err
 				}
 
-				output.Done()
+				// if we have a container, we need to remove it
+				if len(containers) > 0 {
+					output.Pending("removing mailhog")
+
+					// stop the container
+					if err := docker.ContainerStop(ctx, containers[0].ID, nil); err != nil {
+						output.Warning()
+						output.Info(err.Error())
+					}
+
+					// remove the container
+					if err := docker.ContainerRemove(ctx, containers[0].ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
+						output.Warning()
+						output.Info(err.Error())
+					}
+
+					// remove the label
+					filter.Del("label", labels.Type+"=mailhog")
+				}
 			}
 
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
