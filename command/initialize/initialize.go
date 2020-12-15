@@ -144,7 +144,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// remove this logic check once published to add a method for developing locally
-			if len(images) == 0 {
+			if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "" {
 				output.Pending("pulling image")
 
 				rdr, err := docker.ImagePull(ctx, proxyImage, types.ImagePullOptions{All: false})
