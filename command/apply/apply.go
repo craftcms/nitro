@@ -56,6 +56,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				ctx = cmd.Parent().Context()
 			}
 
+			// load the config
 			cfg, err := config.Load(home, env)
 			if err != nil {
 				return err
