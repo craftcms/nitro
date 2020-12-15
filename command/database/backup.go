@@ -55,6 +55,10 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
+			output.Info("ID:", containerID)
+			output.Info("Name:", containerName)
+			output.Info("Compatability:", compatability)
+
 			output.Info("Preparing backup...")
 
 			// create the options for the backup
@@ -63,6 +67,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				ContainerID:   containerID,
 				ContainerName: containerName,
 				Database:      db,
+				Environment:   env,
 				Home:          home,
 			}
 

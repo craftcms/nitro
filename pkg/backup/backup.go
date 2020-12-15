@@ -48,15 +48,11 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	id := containers[selected].ID
 	compatability := containers[selected].Labels[labels.DatabaseCompatability]
 
-	// TODO(jasonmccallister) abstract to databases
-
 	// get all of the databases based on the engine
 	databases, err := Databases(ctx, docker, id, compatability)
 	if err != nil {
 		return "", "", "", "", err
 	}
-
-	// TODO(jasonmccallister) abstract to databases
 
 	// prompt the user for the specific database to backup
 	var db string
@@ -159,8 +155,27 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 		return fmt.Errorf("options must be provided for the backup")
 	}
 
-	if opts.BackupName == "" || opts.Commands == nil || opts.ContainerID == "" || opts.ContainerName == "" || opts.Database == "" || opts.Environment == "" || opts.Home == "" {
-		return fmt.Errorf("invalid options provided for backup")
+	// check the options
+	if opts.BackupName == "" {
+		return fmt.Errorf("invalid backup name")
+	}
+	if opts.Commands == nil {
+		return fmt.Errorf("invalid commands")
+	}
+	if opts.ContainerID == "" {
+		return fmt.Errorf("invalid container id")
+	}
+	if opts.ContainerName == "" {
+		return fmt.Errorf("invalid container name")
+	}
+	if opts.Database == "" {
+		return fmt.Errorf("invalid database")
+	}
+	if opts.Environment == "" {
+		return fmt.Errorf("invalid environment")
+	}
+	if opts.Home == "" {
+		return fmt.Errorf("invalid home path")
 	}
 
 	// create the backup in the container
@@ -227,7 +242,7 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 	}
 
 	// make the backup directory if it does not exist
-	dir := filepath.Join(opts.Home, ".nitro", "backups", opts.Environment, opts.ContainerID)
+	dir := filepath.Join(opts.Home, ".nitro", "backups", opts.Environment, opts.ContainerName)
 	if err := helpers.MkdirIfNotExists(dir); err != nil {
 		return err
 	}

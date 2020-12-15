@@ -2,6 +2,7 @@ package clean
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,11 +15,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-)
-
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
 )
 
 const exampleText = `  # remove unused containers
@@ -102,12 +98,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for name, c := range remove {
 				// if this is a database container we need to back it up
 				if c.Labels[labels.DatabaseEngine] != "" {
-					output.Pending("backup up container", name)
-
 					// get all of the databases
 					databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
 					if err != nil {
-						output.Warning()
 						output.Info("Unable to get the databases from", name, err.Error())
 
 						break
@@ -121,6 +114,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							ContainerID:   c.ID,
 							ContainerName: name,
 							Database:      d,
+							Environment:   env,
 							Home:          home,
 						}
 
@@ -132,6 +126,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", d, "--result-file=" + "/tmp/" + opts.BackupName}
 						}
 
+						output.Pending("creating backup", opts.BackupName)
+
 						// backup the container
 						if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
 							output.Warning()
@@ -139,9 +135,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 							break
 						}
-					}
 
-					output.Done()
+						output.Done()
+
+						output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", opts.ContainerName), "💾")
+					}
 				}
 
 				output.Pending("removing", name)
@@ -150,14 +148,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				if err := docker.ContainerStop(cmd.Context(), c.ID, nil); err != nil {
 					output.Warning()
 					output.Info(err.Error())
-					continue
+					break
+				}
+
+				if c.Labels[labels.DatabaseEngine] != "" {
+					break
 				}
 
 				// remove the container
 				if err := docker.ContainerRemove(cmd.Context(), c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 					output.Warning()
 					output.Info(err.Error())
-					continue
+					break
 				}
 
 				output.Done()
