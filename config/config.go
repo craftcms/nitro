@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -151,7 +152,7 @@ type Services struct {
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
 func Load(home, env string) (*Config, error) {
-	viper.AddConfigPath(fmt.Sprintf("%s%c%s", home, os.PathSeparator, ".nitro"))
+	viper.AddConfigPath(filepath.Join(home, ".nitro"))
 	viper.SetConfigType("yaml")
 
 	// set the config file
