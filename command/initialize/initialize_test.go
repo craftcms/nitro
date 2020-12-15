@@ -55,6 +55,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
 				"5000/tcp": struct{}{},
+				"9003/tcp": struct{}{},
 			},
 			Labels: map[string]string{
 				labels.Type:         "proxy",
@@ -90,6 +91,12 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: "5000",
+					},
+				},
+				"9003/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "9003",
 					},
 				},
 			},

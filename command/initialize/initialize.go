@@ -192,7 +192,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Pending("creating proxy")
 
 				// set ports
-				var httpPort, httpsPort, apiPort nat.Port
+				var httpPort, httpsPort, apiPort, xdebugPort nat.Port
 
 				// check for a custom HTTP port
 				switch os.Getenv("NITRO_HTTP_PORT") {
@@ -235,9 +235,25 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					}
 				default:
 					if os.Getenv("NITRO_API_PORT") != "" {
-						httpPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
+						apiPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
 						if err != nil {
 							return fmt.Errorf("unable to set the API port, %w", err)
+						}
+					}
+				}
+
+				// check for a custom xdebug port
+				switch os.Getenv("NITRO_XDEBUG_PORT") {
+				case "":
+					xdebugPort, err = nat.NewPort("tcp", "9003")
+					if err != nil {
+						return fmt.Errorf("unable to set the API port, %w", err)
+					}
+				default:
+					if os.Getenv("NITRO_XDEBUG_PORT") != "" {
+						xdebugPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_XDEBUG_PORT"))
+						if err != nil {
+							return fmt.Errorf("unable to set the xdebug port, %w", err)
 						}
 					}
 				}
@@ -247,9 +263,10 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					&container.Config{
 						Image: proxyImage,
 						ExposedPorts: nat.PortSet{
-							httpPort:  struct{}{},
-							httpsPort: struct{}{},
-							apiPort:   struct{}{},
+							httpPort:   struct{}{},
+							httpsPort:  struct{}{},
+							apiPort:    struct{}{},
+							xdebugPort: struct{}{},
 						},
 						Labels: map[string]string{
 							labels.Type:         "proxy",
@@ -284,6 +301,12 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 								{
 									HostIP:   "127.0.0.1",
 									HostPort: "5000",
+								},
+							},
+							xdebugPort: {
+								{
+									HostIP:   "127.0.0.1",
+									HostPort: "9003",
 								},
 							},
 						},
