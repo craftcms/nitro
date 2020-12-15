@@ -30,6 +30,7 @@ import (
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/command/xon"
 	"github.com/craftcms/nitro/config"
 	nitro "github.com/craftcms/nitro/pkg/client"
 	"github.com/craftcms/nitro/setup"
@@ -132,6 +133,7 @@ func init() {
 		validate.New(home, client, term),
 		database.New(home, client, term),
 		hosts.New(home, term),
+		xon.NewCommand(home, client, term),
 	}
 
 	// add the commands
