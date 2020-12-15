@@ -281,6 +281,79 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				filter.Del("label", labels.Type+"=database")
 			}
 
+			output.Info("Checking Services...")
+
+			// check if the mailhog service should be created
+			switch cfg.Services.Mailhog {
+			case true:
+				output.Pending("creating mailhog service")
+
+				// pull the mailhog image
+				rdr, err := docker.ImagePull(ctx, "docker.io/mailhog/mailhog", types.ImagePullOptions{})
+				if err != nil {
+					return err
+				}
+
+				buf := &bytes.Buffer{}
+				if _, err := buf.ReadFrom(rdr); err != nil {
+					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+				}
+
+				// configure the service
+				smtpPort, err := nat.NewPort("tcp/udp", "1025")
+				if err != nil {
+					output.Warning()
+					return fmt.Errorf("unable to create the port, %w", err)
+				}
+				httpPort, err := nat.NewPort("tcp", "8025")
+				if err != nil {
+					output.Warning()
+					return fmt.Errorf("unable to create the port, %w", err)
+				}
+				containerConfig := &container.Config{
+					Image: "docker.io/mailhog/mailhog",
+					Labels: map[string]string{
+						labels.Environment: env,
+						labels.Type:        "mailhog",
+					},
+					ExposedPorts: nat.PortSet{
+						smtpPort: struct{}{},
+						httpPort: struct{}{},
+					},
+				}
+				hostconfig := &container.HostConfig{
+					PortBindings: map[nat.Port][]nat.PortBinding{
+						smtpPort: {
+							{
+								HostIP:   "127.0.0.1",
+								HostPort: "1025",
+							},
+						},
+						httpPort: {
+							{
+								HostIP:   "127.0.0.1",
+								HostPort: "8025",
+							},
+						},
+					},
+				}
+				networkConfig := &network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						env: {
+							NetworkID: networkID,
+						},
+					},
+				}
+
+				// create the container
+				if _, err := create(ctx, docker, containerConfig, hostconfig, networkConfig, "mailhog"); err != nil {
+					output.Warning()
+					return err
+				}
+
+				output.Done()
+			}
+
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 			output.Info("Checking Sites...")
 
