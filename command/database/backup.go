@@ -58,7 +58,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			output.Info("Preparing backup...")
 
 			// create the options for the backup
-			backupOpts := &backup.Options{
+			opts := &backup.Options{
 				BackupName:    fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now())),
 				ContainerID:   containerID,
 				ContainerName: containerName,
@@ -69,15 +69,15 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			// create the backup command based on the compatability type
 			switch compatability {
 			case "postgres":
-				backupOpts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + backupOpts.BackupName}
+				opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 			default:
-				backupOpts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + backupOpts.BackupName}
+				opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + opts.BackupName}
 			}
 
-			output.Pending("creating backup", backupOpts.BackupName)
+			output.Pending("creating backup", opts.BackupName)
 
 			// perform the backup
-			if err := backup.Perform(ctx, docker, backupOpts); err != nil {
+			if err := backup.Perform(ctx, docker, opts); err != nil {
 				output.Warning()
 
 				return fmt.Errorf("unable to backup the database, %w", err)
@@ -85,7 +85,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved in", filepath.Join(backupOpts.Home, ".nitro", backupOpts.ContainerName), "💾")
+			output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", opts.ContainerName), "💾")
 
 			return nil
 		},
