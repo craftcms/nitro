@@ -107,13 +107,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 
 					// backup each database
-					for _, d := range databases {
+					for _, db := range databases {
 						// create the database specific backup options
 						opts := &backup.Options{
-							BackupName:    fmt.Sprintf("%s-%s.sql", d, datetime.Parse(time.Now())),
+							BackupName:    fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now())),
 							ContainerID:   c.ID,
 							ContainerName: name,
-							Database:      d,
+							Database:      db,
 							Environment:   env,
 							Home:          home,
 						}
@@ -121,9 +121,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						// create the backup command based on the compatability type
 						switch c.Labels[labels.DatabaseCompatability] {
 						case "postgres":
-							opts.Commands = []string{"pg_dump", "--username=nitro", d, "-f", "/tmp/" + opts.BackupName}
+							opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 						default:
-							opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", d, "--result-file=" + "/tmp/" + opts.BackupName}
+							opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + opts.BackupName}
 						}
 
 						output.Pending("creating backup", opts.BackupName)
@@ -131,15 +131,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						// backup the container
 						if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
 							output.Warning()
-							output.Info("Unable to backup database", d, err.Error())
+							output.Info("Unable to backup database", db, err.Error())
 
 							break
 						}
 
 						output.Done()
-
-						output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", opts.ContainerName), "💾")
 					}
+
+					// show where all backups are saved for this container
+					output.Info("Backups saved in", filepath.Join(home, ".nitro", name), "💾")
 				}
 
 				output.Pending("removing", name)
@@ -151,15 +152,38 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					break
 				}
 
-				if c.Labels[labels.DatabaseEngine] != "" {
-					break
-				}
-
 				// remove the container
 				if err := docker.ContainerRemove(cmd.Context(), c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 					output.Warning()
 					output.Info(err.Error())
 					break
+				}
+
+				// remove the containers volume if its a database
+				if c.Labels[labels.DatabaseEngine] != "" {
+					// append the database labels to the filter
+					filter.Add("label", labels.DatabaseEngine+"="+c.Labels[labels.DatabaseEngine])
+					filter.Add("label", labels.DatabaseVersion+"="+c.Labels[labels.DatabaseVersion])
+					filter.Add("label", labels.Type+"=database")
+
+					// get the volume for the database
+					resp, err := docker.VolumeList(cmd.Context(), filter)
+					if err != nil {
+						return err
+					}
+
+					// no volumes found
+					if len(resp.Volumes) > 0 {
+						// remove the found volume
+						if err := docker.VolumeRemove(cmd.Context(), resp.Volumes[0].Name, false); err != nil {
+							return err
+						}
+					}
+
+					// remove the database labels from the filter
+					filter.Del("label", labels.DatabaseEngine+"="+c.Labels[labels.DatabaseEngine])
+					filter.Del("label", labels.DatabaseVersion+"="+c.Labels[labels.DatabaseVersion])
+					filter.Del("label", labels.Type+"=database")
 				}
 
 				output.Done()
