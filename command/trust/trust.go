@@ -1,5 +1,3 @@
-// +build !linux, darwin, !windows
-
 package trust
 
 import (
