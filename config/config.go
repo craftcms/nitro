@@ -75,13 +75,10 @@ func Load(home, env string) (*Config, error) {
 
 	// read the config
 	if err := v.ReadInConfig(); err != nil {
-		fmt.Println("reading config")
-		fmt.Println(err)
 		return nil, ErrNoConfigFile
 	}
 
 	if v.ConfigFileUsed() == "" {
-		fmt.Println("config file used")
 		return nil, ErrNoConfigFile
 	}
 
