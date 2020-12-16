@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
+	nitro "github.com/craftcms/nitro/client"
 	"github.com/craftcms/nitro/command/add"
 	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/clean"
@@ -33,7 +34,6 @@ import (
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/command/xon"
-	nitro "github.com/craftcms/nitro/pkg/client"
 
 	"github.com/craftcms/nitro/terminal"
 )
