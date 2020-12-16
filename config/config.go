@@ -2,31 +2,36 @@ package config
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
+
+	// ErrNoEnvironmentSet is returned whan an environment is not provided
+	ErrNoEnvironmentSet = fmt.Errorf("missing the environment name")
 )
 
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
-	Blackfire Blackfire  `mapstructure:"blackfire,omitempty" yaml:"blackfire,omitempty"`
-	PHP       PHP        `mapstructure:"php,omitempty" yaml:"php,omitempty"`
+	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
+	PHP       PHP        `yaml:"php,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
-	Services  Services   `mapstructure:"services,omitempty" yaml:"services,omitempty"`
+	Services  Services   `yaml:"services,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 
-	file string
+	File string `yaml:"-"`
 }
 
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
-	ServerID    string `mapstructure:"server_id,omitempty" yaml:"server_id,omitempty"`
-	ServerToken string `mapstructure:"server_token,omitempty" yaml:"server_token,omitempty"`
+	ServerID    string `yaml:"server_id,omitempty"`
+	ServerToken string `yaml:"server_token,omitempty"`
 }
 
 // PHP is nested in a configuration and allows setting environment variables
@@ -59,43 +64,34 @@ type Services struct {
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
 func Load(home, env string) (*Config, error) {
-	v := viper.New()
-	v.AddConfigPath(home)
-	v.SetConfigName(env + ".yaml")
-
-	// set the config file
 	if env == "" {
-		env = "nitro-dev"
+		return nil, ErrNoEnvironmentSet
 	}
 
 	// set the config file
-	v.SetConfigFile(filepath.Join(home, ".nitro", env+".yaml"))
-
-	// read the config
-	if err := v.ReadInConfig(); err != nil {
+	file := filepath.Join(home, ".nitro", env+".yaml")
+	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return nil, ErrNoConfigFile
 	}
 
-	if v.ConfigFileUsed() == "" {
-		return nil, ErrNoConfigFile
+	// create the config
+	c := &Config{
+		File: file,
 	}
 
-	cfg := &Config{}
-	if err := v.Unmarshal(&cfg); err != nil {
+	// read the file
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
 		return nil, err
 	}
 
-	// set the file being used on the config
-	cfg.file = v.ConfigFileUsed()
+	// unmarshal
+	if err := yaml.Unmarshal(data, &c); err != nil {
+		return nil, err
+	}
 
 	// return the config
-	return cfg, nil
-}
-
-// SetFile is used the set a file for the config and
-// is only really used when first time setup is used.
-func (c *Config) SetFile(file string) {
-	c.file = file
+	return c, nil
 }
 
 // AddSite takes a site and adds it to the config
@@ -126,18 +122,25 @@ func (c *Config) AddSite(s Site) error {
 
 // Save takes a file path and marshals the config into a file.
 func (c *Config) Save() error {
-	viper.SetConfigFile(c.file)
+	// make sure the file exists
+	if _, err := os.Stat(c.File); os.IsNotExist(err) {
+		return ErrNoConfigFile
+	}
 
-	if err := viper.ReadInConfig(); err != nil {
+	// unmarshal
+	data, err := yaml.Marshal(&c)
+	if err != nil {
 		return err
 	}
 
-	cfg := Config{}
-	viper.Unmarshal(&cfg)
+	// open the file
+	f, err := os.OpenFile(c.File, os.O_SYNC|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println(cfg)
-
-	if err := viper.WriteConfigAs("testing.yaml"); err != nil {
+	// write the content
+	if _, err := f.Write(data); err != nil {
 		return err
 	}
 

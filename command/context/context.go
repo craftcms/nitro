@@ -1,12 +1,12 @@
 package context
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/terminal"
@@ -32,34 +32,15 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				return err
 			}
 
+			// if they are asking for yaml, show only the yaml
+			if cmd.Flag("yaml").Value.String() == "true" {
+				return yaml(cfg)
+			}
+
 			output.Info("Craft Nitro", cmd.Parent().Version)
 			output.Info("")
 			output.Info("Configuration:\t", viper.ConfigFileUsed())
 			output.Info("")
-
-			if cmd.Flag("yaml").Value.String() == "true" {
-				// marshal into the struct version so we can remove the blackfire credentials
-				if err := viper.Unmarshal(&cfg); err != nil {
-					return err
-				}
-
-				// redact blackfire credentials
-				if cfg.Blackfire.ServerID != "" {
-					cfg.Blackfire.ServerID = "****************"
-				}
-				if cfg.Blackfire.ServerToken != "" {
-					cfg.Blackfire.ServerToken = "********************************"
-				}
-
-				out, err := yaml.Marshal(&cfg)
-				if err != nil {
-					return err
-				}
-
-				output.Info(string(out))
-
-				return nil
-			}
 
 			output.Info(`Sites:`)
 			for _, site := range cfg.Sites {
@@ -89,4 +70,22 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 	cmd.Flags().Bool("yaml", false, "show the config file")
 
 	return cmd
+}
+
+func yaml(cfg *config.Config) error {
+	// marshal into the struct version so we can remove the blackfire credentials
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return err
+	}
+
+	// redact blackfire credentials
+	if cfg.Blackfire.ServerID != "" {
+		cfg.Blackfire.ServerID = "****************"
+	}
+	if cfg.Blackfire.ServerToken != "" {
+		cfg.Blackfire.ServerToken = "********************************"
+	}
+
+	fmt.Println(cfg)
+	return nil
 }
