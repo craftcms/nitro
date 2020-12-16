@@ -14,12 +14,14 @@ upx:
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
 
-local: build upx
+local: build
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 local-linux: build
 	mv nitro ${HOME}/bin/nitro
+local-prod: build upx
+	mv nitro /usr/local/bin/nitro
 
 dev: rm docker init
 rm:
