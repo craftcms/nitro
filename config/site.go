@@ -9,12 +9,12 @@ import (
 // are alternate domains), the local path to the site, additional mounts
 // to add to the container, and the directory the index.php is located.
 type Site struct {
-	Hostname string   `yaml:"hostname"`
-	Aliases  []string `yaml:"aliases,omitempty"`
-	Path     string   `yaml:"path"`
-	PHP      string   `yaml:"php"`
-	Dir      string   `yaml:"dir"`
-	Xdebug   bool     `yaml:"xdebug"`
+	Hostname string   `mapstructure:"hostname" yaml:"hostname"`
+	Aliases  []string `mapstructure:"aliases,omitempty" yaml:"aliases,omitempty"`
+	Path     string   `mapstructure:"path" yaml:"path"`
+	PHP      string   `mapstructure:"php" yaml:"php"`
+	Dir      string   `mapstructure:"dir" yaml:"dir"`
+	Xdebug   bool     `mapstructure:"xdebug" yaml:"xdebug"`
 }
 
 // GetAbsPath gets the directory for a site.Path,

@@ -2,11 +2,9 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -16,10 +14,10 @@ var (
 
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
-	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
-	PHP       PHP        `yaml:"php,omitempty"`
+	Blackfire Blackfire  `mapstructure:"blackfire,omitempty" yaml:"blackfire,omitempty"`
+	PHP       PHP        `mapstructure:"php,omitempty" yaml:"php,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
-	Services  Services   `yaml:"services,omitempty"`
+	Services  Services   `mapstructure:"services,omitempty" yaml:"services,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 
 	file string
@@ -63,7 +61,7 @@ type Services struct {
 func Load(home, env string) (*Config, error) {
 	v := viper.New()
 	v.AddConfigPath(home)
-	v.SetConfigType("yaml")
+	v.SetConfigName(env + ".yaml")
 
 	// set the config file
 	if env == "" {
@@ -128,29 +126,18 @@ func (c *Config) AddSite(s Site) error {
 
 // Save takes a file path and marshals the config into a file.
 func (c *Config) Save() error {
-	if c.file == "" {
-		c.file = viper.ConfigFileUsed()
-	}
-
 	viper.SetConfigFile(c.file)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
 
-	// marshal into yaml
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
+	cfg := Config{}
+	viper.Unmarshal(&cfg)
 
-	f, err := os.OpenFile(c.file, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		return err
-	}
+	fmt.Println(cfg)
 
-	// save the file
-	if _, err := f.Write(data); err != nil {
+	if err := viper.WriteConfigAs("testing.yaml"); err != nil {
 		return err
 	}
 

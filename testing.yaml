@@ -1,0 +1,31 @@
+databases:
+- engine: mysql
+  port: "3306"
+  version: "8.0"
+- engine: postgres
+  port: "5432"
+  version: "12"
+services:
+  blackfire: true
+  dynamodb: true
+  mailhog: true
+  minio: true
+  redis: true
+sites:
+- aliases:
+  - plugins.craftcms.test
+  - api.craftcms.test
+  - composer.craftcms.test
+  dir: web
+  hostname: id.craftcms.test
+  path: ~/dev/craftnet
+  php: "7.4"
+  xdebug: true
+- dir: web
+  hostname: extendingcaddy.nitro
+  path: ~/dev/extendingcaddy
+  php: "7.4"
+- dir: web
+  hostname: plugins-dev.nitro
+  path: ~/dev/plugins-dev
+  php: "7.4"
