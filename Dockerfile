@@ -3,14 +3,13 @@ FROM caddy:2.2.1-alpine AS caddy
 
 # build the api
 FROM golang:1.15-alpine AS builder
-ARG NITRO_VERSION=dev
+ARG NITRO_VERSION
 ENV NITRO_VERSION=${NITRO_VERSION}
 WORKDIR /go/src/github.com/craftcms/nitro
 COPY . .
 RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
-ARG VERSION=2.0.0-alpha
 FROM alpine:3.12
 
 # See https://caddyserver.com/docs/conventions#file-locations for details
@@ -18,7 +17,6 @@ ENV XDG_CONFIG_HOME /config
 ENV XDG_DATA_HOME /data
 
 # label the container
-LABEL org.opencontainers.image.version=${VERSION}
 LABEL org.opencontainers.image.title="Craft Nitro"
 LABEL org.opencontainers.image.description="Nitro is a command-line tool focused on making local Craft CMS development quick and easy"
 LABEL org.opencontainers.image.url=https://getnitro.sh
