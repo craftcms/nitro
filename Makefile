@@ -26,9 +26,9 @@ init:
 	nitro init
 
 test:
-	go test ./...
+	go test -v ./...
 coverage:
-	go test ./... -coverprofile profile.out
+	go test -v ./... -coverprofile profile.out
 	go tool cover -html=profile.out
 vet:
 	go vet ./...
