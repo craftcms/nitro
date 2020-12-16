@@ -101,7 +101,7 @@ func init() {
 		add.NewCommand(home, client, term),
 		enable.NewCommand(home, client, term),
 		disable.NewCommand(home, client, term),
-		start.New(client, term),
+		start.NewCommand(client, term),
 		stop.New(client, term),
 		queue.NewCommand(home, client, term),
 		logs.NewCommand(home, client, term),

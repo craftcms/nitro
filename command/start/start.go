@@ -20,8 +20,7 @@ var (
 const exampleText = `  # start containers for the default environment
   nitro start`
 
-// New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
 		Short:   "Start environment",

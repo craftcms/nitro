@@ -23,7 +23,7 @@ func TestStartSuccess(t *testing.T) {
 	expectedOutput := []string{"Starting testing-start...\n", "testing-start started 👍\n"}
 
 	// Act
-	cmd := New(mock, output)
+	cmd := NewCommand(mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
@@ -57,7 +57,7 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	expectedOutputSuccess := []string{"  ✓ testing-start ready\n"}
 
 	// Act
-	cmd := New(mock, output)
+	cmd := NewCommand(mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
@@ -80,7 +80,7 @@ func TestStartErrorsWhenThereAreNoContainers(t *testing.T) {
 	mock := newMockDockerClient(nil, nil, nil)
 
 	// Act
-	cmd := New(mock, &spyOutputer{})
+	cmd := NewCommand(mock, &spyOutputer{})
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
