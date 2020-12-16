@@ -2,11 +2,8 @@ package validate
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/craftcms/nitro/internal/config"
 )
 
 func DatabaseEngine(v string) error {
@@ -65,26 +62,6 @@ func DatabaseEngineAndVersion(e, v string) error {
 	}
 
 	return errors.New("unsupported version of " + e + ": " + v)
-}
-
-func DatabaseConfig(databases []config.Database) error {
-	ports := map[string]string{}
-	versions := map[string]string{}
-
-	for _, database := range databases {
-		if ports[database.Port] != "" {
-			return errors.New(fmt.Sprintf("Duplicate port %s assigned to %s version %s", database.Port, database.Engine, database.Version))
-		}
-
-		if versions[database.Engine] == database.Version {
-			return errors.New(fmt.Sprintf("Duplicate engine %s and version %s", database.Engine, database.Version))
-		}
-
-		ports[database.Port] = database.Port
-		versions[database.Engine] = database.Version
-	}
-
-	return nil
 }
 
 // DatabaseName is used to validate a give database name to ensure its valid
