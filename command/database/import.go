@@ -12,15 +12,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/internal/database"
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/database"
+	"github.com/craftcms/nitro/terminal"
 )
 
 var importExampleText = `  # import a sql file into a database
