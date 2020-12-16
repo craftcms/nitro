@@ -6,10 +6,7 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 )
@@ -37,89 +34,36 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// create a filter for the enviroment
-			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
-
-			// check if we are a known site
+			// check each of the sites for a match
+			var currentSite string
 			var sites []string
 			for _, site := range cfg.Sites {
 				// get the path
 				path, _ := site.GetAbsPath(home)
 
+				// see if the sites path matches the current directory
+				if strings.Contains(wd, path) {
+					currentSite = site.Hostname
+					break
+				}
+
 				// add the site as an option
 				sites = append(sites, site.Hostname)
-
-				// are we in a current project/site?
-				if strings.Contains(wd, path) {
-					filter.Add("label", labels.Host+"="+site.Hostname)
-				}
 			}
 
-			// find all of the containers, there should only be one if we are in a known directory
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
-			if err != nil {
-				return err
-			}
-
-			switch len(containers) {
-			case 1:
-				// get the containers details
-				details, err := docker.ContainerInspect(cmd.Context(), containers[0].ID)
+			if currentSite == "" {
+				// show all of the sites to the user
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
 				if err != nil {
 					return err
 				}
 
-				// find the environment variable for xdebug
-				for _, e := range details.Config.Env {
-					env := strings.Split(e, "=")
-
-					fmt.Println(env[0])
-				}
-			default:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site to enable xdebug:", sites)
-				if err != nil {
-					return err
-				}
-
-				filter.Add("label", labels.Host+"="+sites[selected])
-
-				// get the containers details
-				details, err := docker.ContainerInspect(cmd.Context(), containers[0].ID)
-				if err != nil {
-					return err
-				}
-
-				// find the environment variable for xdebug
-				for _, e := range details.Config.Env {
-					env := strings.Split(e, "=")
-
-					fmt.Println(env[0])
-				}
+				currentSite = sites[selected]
 			}
 
-			// otherwise show the list of sites
-
-			// get the "selected" site and get the container from the list
-
-			// get the containers details docker.ContainerJSON
-
-			// get the envs
-
-			// find the xdebug environment variable
-
-			// stop the container
-
-			// remove the container
-
-			// create the new container
-
-			return nil
+			return fmt.Errorf("use config.EnableXdebug(site) and call apply")
 		},
 	}
-
-	// set flags for the command
-	cmd.Flags().String("example", "example", "an example flag")
 
 	return cmd
 }
