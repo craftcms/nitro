@@ -1,6 +1,6 @@
 package caddy
 
-type CaddyUpdateRequest struct {
+type UpdateRequest struct {
 	Srv0 Server `json:"srv0,omitempty"`
 	Srv1 Server `json:"srv1,omitempty"`
 }
