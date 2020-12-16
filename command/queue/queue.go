@@ -15,17 +15,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 // https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/integration/internal/container/exec.go#L38
 
 const exampleText = `  # example command
   nitro queue`
 
-func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommand returns the command to run queue listen inside of a sites container. It will check if the
+// current working directory is a known site and autoselect or prompt a user for a list of sites.
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "queue",
 		Short:   "Run a queue worker",
