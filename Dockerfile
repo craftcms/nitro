@@ -1,7 +1,7 @@
 # grab the caddy binary
 FROM caddy:2.2.1-alpine AS caddy
 
-# build the api
+# build the nitrod
 FROM golang:1.15-alpine AS builder
 ARG NITRO_VERSION
 ENV NITRO_VERSION=${NITRO_VERSION}
