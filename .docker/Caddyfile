@@ -3,7 +3,7 @@
     admin 0.0.0.0:2019
 }
 
-:80 :443 {
+:80 {
     root * /var/www/html
     file_server
 }
