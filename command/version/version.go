@@ -14,7 +14,7 @@ import (
 // container to use to verify the gRPC API is in sync.
 var Version = "develop"
 
-  nitro version`
+var exampleText = `nitro version`
 
 // New is used to show the cli and gRPC API client version
 func New(client client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
