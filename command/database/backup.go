@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/backup"
+	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/terminal"
 )
 
