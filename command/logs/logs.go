@@ -56,6 +56,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var currentSite string
 			var sites []string
 			for _, site := range cfg.Sites {
+				// get the path
 				path, _ := site.GetAbsPath(home)
 
 				// see if the sites path matches the current directory
@@ -83,7 +84,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				filter.Add("label", labels.Host+"="+currentSite)
 			}
 
-			// find all of the containers, there should only be one though
+			// find all of the containers, there should only be one if we are in a known directory
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
 			if err != nil {
 				return err
