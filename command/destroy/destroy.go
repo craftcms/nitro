@@ -117,8 +117,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
-						output.Info("backing up databases is not yet supported")
-
 						// get all of the databases
 						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
 						if err != nil {
