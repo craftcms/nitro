@@ -11,11 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+
 	"github.com/craftcms/nitro/internal/helpers"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 )
 
 // Options are used to pass options to a database backup func.
