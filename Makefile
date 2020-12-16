@@ -8,11 +8,13 @@ build-api:
 	GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitrod ./cmd/nitrod
 build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+upx:
+	upx --brute nitro
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
 
-local: build
+local: build upx
 	mv nitro /usr/local/bin/nitro
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
