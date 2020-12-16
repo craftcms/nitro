@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -135,9 +134,9 @@ func (c *Config) Save() error {
 		c.file = viper.ConfigFileUsed()
 	}
 
-	// open the file
-	f, err := os.OpenFile(c.file, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
+	viper.SetConfigFile(c.file)
+
+	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
 
@@ -147,10 +146,17 @@ func (c *Config) Save() error {
 		return err
 	}
 
+	fmt.Println(string(data))
+
+	// f, err := os.OpenFile(c.file, os.O_RDWR|os.O_CREATE, 0755)
+	// if err != nil {
+	// 	return err
+	// }
+
 	// save the file
-	if _, err := f.Write(data); err != nil {
-		return err
-	}
+	// if _, err := f.Write(data); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

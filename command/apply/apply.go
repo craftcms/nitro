@@ -492,21 +492,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							Target: "/app",
 						})
 
-						// get additional site mounts
-						siteMounts, err := site.GetAbsMountPaths(home)
-						if err != nil {
-							return err
-						}
-
-						// create mounts for the site
-						for k, v := range siteMounts {
-							mounts = append(mounts, mount.Mount{
-								Type:   mount.TypeBind,
-								Source: k,
-								Target: v,
-							})
-						}
-
 						// check if xdebug is enabled
 						if site.Xdebug {
 							envs = append(envs, "XDEBUG_MODE=develop,debug")
@@ -591,20 +576,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						Source: path,
 						Target: "/app",
 					})
-
-					// get additional site mounts
-					siteMounts, err := site.GetAbsMountPaths(home)
-					if err != nil {
-						return err
-					}
-
-					for k, v := range siteMounts {
-						mounts = append(mounts, mount.Mount{
-							Type:   mount.TypeBind,
-							Source: k,
-							Target: v,
-						})
-					}
 
 					// check if xdebug is enabled
 					if site.Xdebug {

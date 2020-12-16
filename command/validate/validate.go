@@ -67,18 +67,6 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 						siteErrs = append(siteErrs, fmt.Errorf("unable to locate site path %s", p))
 					}
 
-					// check if the mounts exist
-					mnts, err := s.GetAbsMountPaths(home)
-					if err != nil {
-						siteErrs = append(siteErrs, err)
-					}
-
-					for k, _ := range mnts {
-						if _, err := os.Stat(k); os.IsNotExist(err) {
-							siteErrs = append(siteErrs, fmt.Errorf("Mount source is missing for %s %q", s.Hostname, k))
-						}
-					}
-
 					// validate the php version
 					if err := validator.PHPVersion(s.PHP); err != nil {
 						siteErrs = append(siteErrs, fmt.Errorf("the php version for %s is not valid", s.Hostname))

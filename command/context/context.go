@@ -70,9 +70,6 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				output.Info("  php:\t", site.PHP)
 				output.Info("  webroot:\t", site.Dir)
 				output.Info("  path:\t", site.Path)
-				if len(site.Mounts) > 0 {
-					output.Info("  mounts:\t", strings.Join(site.Mounts, ", "))
-				}
 				output.Info("  ---")
 			}
 
