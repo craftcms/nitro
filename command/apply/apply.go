@@ -666,9 +666,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 			}
 
-			output.Pending("waiting for nitrod")
+			output.Pending("waiting for api")
 
-			// ping the nitrod API until its ready...
 			for {
 				_, err := nitrod.Ping(ctx, &protob.PingRequest{})
 				if err == nil {

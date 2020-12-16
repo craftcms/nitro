@@ -146,7 +146,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 
 			output.Pending("uploading backup")
 
-			// if the file is not compressed, compress it to send to the nitrod
 			switch compressed {
 			case false:
 				// create a new archive

@@ -9,13 +9,13 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/craftcms/nitro/nitrod"
+	"github.com/craftcms/nitro/api"
 	"github.com/craftcms/nitro/protob"
 )
 
 func main() {
 	log.SetOutput(os.Stdout)
-	log.SetPrefix("nitrod")
+	log.SetPrefix("api")
 
 	// assign the port as a flag with a default
 	port := flag.String("port", "5000", "which port API should listen on")
@@ -30,12 +30,12 @@ func main() {
 	// create the grpc server
 	s := grpc.NewServer()
 
-	protob.RegisterNitroServer(s, nitrod.NewAPI())
+	protob.RegisterNitroServer(s, api.NewAPI())
 
 	fmt.Println("gRPC API listening on port", *port)
 
 	// server the grpc service
 	if err := s.Serve(lis); err != nil {
-		log.Fatal("error when running the nitrod", err)
+		log.Fatal("error when running the api", err)
 	}
 }

@@ -14,7 +14,6 @@ import (
 // container to use to verify the gRPC API is in sync.
 var Version = "develop"
 
-const exampleText = `  # show the cli and nitrod version
   nitro version`
 
 // New is used to show the cli and gRPC API client version
