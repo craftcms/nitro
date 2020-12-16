@@ -1,15 +1,32 @@
 package caddyconv
 
-import "github.com/craftcms/nitro/config"
+type CaddyUpdateRequest struct {
+	Srv0 Server `json:"srv0,omitempty"`
+	Srv1 Server `json:"srv1,omitempty"`
+}
 
-// ToCaddy takes a nitro config struct and converts it to a representation of
-// a caddy configuration to send to the Caddy API.
-func ToCaddy(sites []config.Site) (*CaddyUpdateRequest, error) {
-	// map all of the sites to a server configuration
-	req := &CaddyUpdateRequest{}
+type Server struct {
+	Listen []string      `json:"listen"`
+	Routes []ServerRoute `json:"routes"`
+}
 
-	// set the defaults for displaying the static page
-	req.Srv1.Listen = []string{":80"}
+type ServerRoute struct {
+	Handle   []RouteHandle `json:"handle"`
+	Match    []Match       `json:"match,omitempty"`
+	Terminal bool          `json:"terminal"`
+}
 
-	return req, nil
+type RouteHandle struct {
+	Handler   string     `json:"handler"`
+	Root      string     `json:"root,omitempty"`
+	Upstreams []Upstream `json:"upstreams,omitempty"`
+	Hide      []string   `json:"hide,omitempty"`
+}
+
+type Match struct {
+	Host []string `json:"host"`
+}
+
+type Upstream struct {
+	Dial string `json:"dial,omitempty"`
 }
