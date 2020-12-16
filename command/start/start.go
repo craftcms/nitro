@@ -50,6 +50,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// start each environment container
 			for _, c := range containers {
+				// don't start composer or npm containers
+				if c.Labels[labels.Type] == "composer" || c.Labels[labels.Type] == "npm" {
+					break
+				}
+
 				n := strings.TrimLeft(c.Names[0], "/")
 
 				// if the container is already running
