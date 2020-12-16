@@ -19,8 +19,8 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/database"
 	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/pkg/database"
 	"github.com/craftcms/nitro/terminal"
 )
 
