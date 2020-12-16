@@ -1,4 +1,4 @@
-package caddyconv
+package caddy
 
 type CaddyUpdateRequest struct {
 	Srv0 Server `json:"srv0,omitempty"`
