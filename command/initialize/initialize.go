@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -17,7 +18,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/setup"
 	"github.com/craftcms/nitro/terminal"
 )
 
@@ -30,7 +33,7 @@ const exampleText = `  # create a new environment with the default environment
   # you can override the environment by setting the variable "NITRO_DEFAULT_ENVIRONMENT"`
 
 // NewCommand takes a docker client and returns the init command for creating a new environment
-func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "init",
 		Short:   "Create new environment",
@@ -38,6 +41,14 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			env := cmd.Flag("environment").Value.String()
+
+			// check if there is a config file
+			_, err := config.Load(home, env)
+			if errors.Is(err, config.ErrNoConfigFile) {
+				if err := setup.FirstTime(home, env, output); err != nil {
+					return err
+				}
+			}
 
 			output.Info(fmt.Sprintf("Checking %s...", env))
 

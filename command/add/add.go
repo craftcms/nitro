@@ -24,18 +24,14 @@ const exampleText = `  # add the current project as a site
   # add a directory as the site
   nitro add my-project`
 
-// New is used for scaffolding new commands
-func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
-		Short:   "Add a new site",
+		Short:   "Add a site",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			output.Info("Adding site...")
-
-			// get the environment
-			site := config.Site{}
 
 			// get the current working directory
 			wd, err := os.Getwd()
@@ -51,6 +47,8 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			default:
 				dir = filepath.Clean(wd)
 			}
+
+			site := config.Site{}
 
 			// get the hostname from the directory
 			sp := strings.Split(dir, string(os.PathSeparator))
@@ -172,7 +170,6 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			// ask if the apply command should run
 			var response string
-			var confirm bool
 			fmt.Print("Apply changes now [Y/n]? ")
 			if _, err := fmt.Scanln(&response); err != nil {
 				return fmt.Errorf("unable to provide a prompt, %w", err)
@@ -180,6 +177,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 			// get the response
 			resp := strings.TrimSpace(response)
+			var confirm bool
 			for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
 				if resp == answer {
 					confirm = true
