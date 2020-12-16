@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -39,6 +41,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			return nil, cobra.ShellCompDirectiveFilterDirs
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			env := cmd.Flag("environment").Value.String()
 			version := cmd.Flag("version").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -79,29 +82,32 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			var composerPath string
 			switch action {
 			case "install":
-				composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.json")
+				composerPath = filepath.Join(path, "composer.json")
 			default:
-				composerPath = fmt.Sprintf("%s%c%s", path, os.PathSeparator, "composer.lock")
+				composerPath = filepath.Join(path, "composer.lock")
 			}
 
-			// make sure the file exists
+			// set the container name to keep the ephemeral
+			name := containerName(path, version, action)
+
 			output.Pending("checking", composerPath)
+
+			// make sure the file exists
 			_, err := os.Stat(composerPath)
 			if os.IsNotExist(err) {
 				return ErrNoComposerFile
 			}
+
 			output.Done()
 
 			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
 			// filter for the image ref
-			filters := filters.NewArgs()
-			filters.Add("reference", image)
+			imageFilter := filters.NewArgs()
+			imageFilter.Add("reference", image)
 
 			// look for the image
-			images, err := docker.ImageList(ctx, types.ImageListOptions{
-				Filters: filters,
-			})
+			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
@@ -131,30 +137,56 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				commands = []string{"composer", "update", "--ignore-platform-reqs", "--prefer-dist"}
 			}
 
-			// create the temp container
-			resp, err := docker.ContainerCreate(ctx,
-				&container.Config{
-					Image: image,
-					Cmd:   commands,
-					Tty:   false,
-				},
-				&container.HostConfig{
-					Mounts: []mount.Mount{
-						{
-							Type:   mount.TypeBind,
-							Source: path,
-							Target: "/app",
+			// set filters for the container name and environment
+			containerFilter := filters.NewArgs()
+			containerFilter.Add("label", labels.Environment+"="+env)
+			containerFilter.Add("name", name)
+
+			// check if there is an existing container
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: containerFilter})
+			if err != nil {
+				return err
+			}
+
+			// check the length of the container
+			var containerID string
+			switch len(containers) {
+			case 1:
+				containerID = containers[0].ID
+			default:
+				// create the container
+				resp, err := docker.ContainerCreate(ctx,
+					&container.Config{
+						Image: image,
+						Cmd:   commands,
+						Tty:   false,
+						Labels: map[string]string{
+							labels.Environment: env,
+							labels.Type:        "composer",
+							// TODO abstract this?
+							"com.craftcms.nitro.path": path,
 						},
 					},
-				},
-				nil,
-				"")
-			if err != nil {
-				return fmt.Errorf("unable to create the composer container\n%w", err)
+					&container.HostConfig{
+						Mounts: []mount.Mount{
+							{
+								Type:   mount.TypeBind,
+								Source: path,
+								Target: "/app",
+							},
+						},
+					},
+					nil,
+					name)
+				if err != nil {
+					return fmt.Errorf("unable to create the composer container\n%w", err)
+				}
+
+				containerID = resp.ID
 			}
 
 			// attach to the container
-			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
+			stream, err := docker.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
 				Stream: true,
 				Stdout: true,
 				Stderr: true,
@@ -166,7 +198,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			defer stream.Close()
 
 			// run the container
-			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
@@ -174,15 +206,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, stream.Reader); err != nil {
 				return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 			}
-
-			output.Pending("cleaning up")
-
-			// remove the container
-			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
-				return fmt.Errorf("unable to remove the temporary container %q, %w", resp.ID, err)
-			}
-
-			output.Done()
 
 			output.Info("composer", action, "completed 🤘")
 
@@ -195,4 +218,18 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	cmd.Flags().String("version", "2", "which composer version to use")
 
 	return cmd
+}
+
+func containerName(path, version, action string) string {
+	// combine the path and version
+	n := fmt.Sprintf("%s_%s_%s_%s", path, "composer", version, action)
+
+	// make it lower case
+	n = strings.ToLower(n)
+
+	// replace path separators with underscores
+	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
+
+	// remove the first underscore
+	return strings.TrimLeft(n, "_")
 }
