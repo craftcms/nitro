@@ -2,8 +2,6 @@ package validate
 
 import (
 	"testing"
-
-	"github.com/craftcms/nitro/internal/config"
 )
 
 func TestDatabaseEngine(t *testing.T) {
@@ -180,89 +178,6 @@ func TestDatabaseVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := DatabaseEngineAndVersion(tt.args.e, tt.args.v); (err != nil) != tt.wantErr {
 				t.Errorf("DatabaseEngineAndVersion() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestDatabaseConfig(t *testing.T) {
-	type args struct {
-		databases []config.Database
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "non duplicate ports does not return an error",
-			args: args{
-				databases: []config.Database{
-					{
-						Engine:  "mysql",
-						Version: "8",
-						Port:    "3306",
-					},
-					{
-						Engine:  "mysql",
-						Version: "5.7",
-						Port:    "33061",
-					},
-					{
-						Engine:  "postgres",
-						Version: "11",
-						Port:    "5432",
-					},
-					{
-						Engine:  "postgres",
-						Version: "12",
-						Port:    "54321",
-					},
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "duplicate ports return error",
-			args: args{
-				databases: []config.Database{
-					{
-						Engine:  "mysql",
-						Version: "5.7",
-						Port:    "3306",
-					},
-					{
-						Engine:  "mysql",
-						Version: "8",
-						Port:    "3306",
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "duplicate engines and version returns an error",
-			args: args{
-				databases: []config.Database{
-					{
-						Engine:  "mysql",
-						Version: "5.7",
-						Port:    "3306",
-					},
-					{
-						Engine:  "mysql",
-						Version: "5.7",
-						Port:    "33061",
-					},
-				},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := DatabaseConfig(tt.args.databases); (err != nil) != tt.wantErr {
-				t.Errorf("DatabaseConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
