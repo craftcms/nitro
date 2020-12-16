@@ -4,13 +4,14 @@ import (
 	"path/filepath"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/terminal"
 )
 
 // FirstTime is used when there is no configuration file found in a users
 // home/.nitro directory. We do not prompt for input such as memory, cpu,
 // disk space in version 2 as that is defined and managed at the docker
 // level. If anything fails, we return an error.
-func FirstTime(home, env string) error {
+func FirstTime(home, env string, output terminal.Outputer) error {
 	// TODO(jasonmccallister) consider prompts for which type(s) of database?
 	c := config.Config{}
 
