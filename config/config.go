@@ -30,8 +30,8 @@ var Envs = map[string]string{
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	PHP       PHP        `yaml:"php,omitempty"`
-	Services  Services   `yaml:"services,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
+	Services  Services   `yaml:"services,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 
 	file string
@@ -146,6 +146,7 @@ type Services struct {
 	DynamoDB  bool `yaml:"dynamodb,omitempty"`
 	Mailhog   bool `yaml:"mailhog,omitempty"`
 	Minio     bool `yaml:"minio,omitempty"`
+	Redis     bool `yaml:"redis,omitempty"`
 }
 
 // Load is used to return the environment name, unmarshalled config, and
