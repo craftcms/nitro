@@ -26,6 +26,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
+			// load the config file
 			cfg, err := config.Load(home, env)
 			if err != nil {
 				return err
@@ -37,7 +38,6 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			output.Info("")
 
 			if cmd.Flag("yaml").Value.String() == "true" {
-				cfg := config.Config{}
 				// marshal into the struct version so we can remove the blackfire credentials
 				if err := viper.Unmarshal(&cfg); err != nil {
 					return err
