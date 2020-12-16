@@ -10,13 +10,15 @@ COPY . .
 RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
+ARG VERSION=2.0.0-alpha
 FROM alpine:3.12
 
 # See https://caddyserver.com/docs/conventions#file-locations for details
 ENV XDG_CONFIG_HOME /config
 ENV XDG_DATA_HOME /data
 
-LABEL org.opencontainers.image.version=v2.2.1
+# label the container
+LABEL org.opencontainers.image.version=${VERSION}
 LABEL org.opencontainers.image.title="Craft Nitro"
 LABEL org.opencontainers.image.description="Nitro is a command-line tool focused on making local Craft CMS development quick and easy"
 LABEL org.opencontainers.image.url=https://getnitro.sh
@@ -41,7 +43,4 @@ VOLUME /data
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
-EXPOSE 443
-EXPOSE 80
-EXPOSE 5000
-EXPOSE 2019
+EXPOSE 443 80 5000 9003
