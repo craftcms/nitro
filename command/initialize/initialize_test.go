@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -24,6 +25,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	mock.containerCreateResponse = container.ContainerCreateCreatedBody{
 		ID: "testingid",
 	}
+	home, _ := os.Getwd()
+	home = filepath.Join(home, "testdata")
 
 	// Expected
 	// set the network create request
@@ -114,7 +117,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	containerStartRequest := types.ContainerStartOptions{}
 
 	// Act
-	cmd := NewCommand(mock, spyOutputer{})
+	cmd := NewCommand(home, mock, spyOutputer{})
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
