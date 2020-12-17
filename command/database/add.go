@@ -92,7 +92,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// execute the command
-			if _, err := exec(cmd.Context(), docker, containerID, cmds, show); err != nil {
+			if _, err := execCreate(cmd.Context(), docker, containerID, cmds, show); err != nil {
 				return err
 			}
 

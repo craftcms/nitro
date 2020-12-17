@@ -1,12 +1,8 @@
 package database
 
 import (
-	"archive/tar"
 	"bufio"
-	"bytes"
-	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -15,7 +11,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 
@@ -177,12 +172,12 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			output.Pending("importing database to", db)
 
 			// create the database
-			if _, err := exec(cmd.Context(), docker, containerID, createCmd, show); err != nil {
+			if _, err := execCreate(cmd.Context(), docker, containerID, createCmd, show); err != nil {
 				return fmt.Errorf("unable to create the database, %w", err)
 			}
 
 			// import the database
-			if _, err := exec(cmd.Context(), docker, containerID, importCmd, show); err != nil {
+			if _, err := execCreate(cmd.Context(), docker, containerID, importCmd, show); err != nil {
 				return fmt.Errorf("unable to import the database, %w", err)
 			}
 
@@ -197,93 +192,4 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
-}
-
-func exec(ctx context.Context, docker client.ContainerAPIClient, containerID string, cmds []string, show bool) (bool, error) {
-	// create the exec
-	e, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          cmds,
-	})
-	if err != nil {
-		return false, err
-	}
-
-	// attach to the container
-	resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          cmds,
-	})
-	defer resp.Close()
-
-	// should we dispaly output?
-	if show {
-		// show the output to stdout and stderr
-		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, resp.Reader); err != nil {
-			return false, fmt.Errorf("unable to copy the output of container, %w", err)
-		}
-	}
-
-	// start the exec
-	if err := docker.ContainerExecStart(ctx, e.ID, types.ExecStartCheck{}); err != nil {
-		return false, fmt.Errorf("unable to start the container, %w", err)
-	}
-
-	// wait for the container exec to complete
-	waiting := true
-	for waiting {
-		resp, err := docker.ContainerExecInspect(ctx, e.ID)
-		if err != nil {
-			return false, err
-		}
-
-		waiting = resp.Running
-	}
-
-	return true, nil
-}
-
-func newTarArchiveFromFile(file *os.File) (io.Reader, error) {
-	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-
-	info, err := os.Stat(file.Name())
-	if err != nil {
-		return nil, err
-	}
-
-	header, err := tar.FileInfoHeader(info, file.Name())
-	if err != nil {
-		return nil, err
-	}
-
-	// header.Name = strings.TrimPrefix(strings.Replace(file, path, "", -1), string(filepath.Separator))
-	err = tw.WriteHeader(header)
-	if err != nil {
-		return nil, err
-	}
-
-	if info.IsDir() {
-		return nil, fmt.Errorf("is directory")
-	}
-
-	_, err = io.Copy(tw, file)
-	if err != nil {
-		return nil, err
-	}
-
-	err = file.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := tw.Close(); err != nil {
-		return nil, err
-	}
-
-	return bufio.NewReader(&buf), nil
 }

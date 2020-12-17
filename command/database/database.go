@@ -15,8 +15,8 @@ const exampleText = `  # import a database from a backup
   # add a new database
   nitro db add`
 
-// New returns the db commands for importing, backing up, and adding databases
-func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommand returns the db commands for importing, backing up, and adding databases
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "db",
 		Short:   "Manage databases",
