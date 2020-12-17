@@ -120,6 +120,20 @@ func (c *Config) AddSite(s Site) error {
 	return nil
 }
 
+func (c *Config) EnableXdebug(site string) error {
+	// find the site by the hostname
+	for _, s := range c.Sites {
+		if s.Hostname == site {
+			// enable xdebug
+			s.Xdebug = true
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown site, %s", site)
+}
+
 // Save takes a file path and marshals the config into a file.
 func (c *Config) Save() error {
 	// make sure the file exists
