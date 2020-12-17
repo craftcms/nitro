@@ -241,6 +241,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 			}
 
+			// TODO(jasonmccallister) add the other services here
+
 			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 			output.Info("Checking Sites...")
 
@@ -271,56 +273,46 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 				}
 
 				// if there are no containers we need to create one
-				if len(containers) == 0 {
-					output.Pending("creating", site.Hostname)
-
+				switch len(containers) == 0 {
+				case true:
 					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
-						output.Warning()
-						break
+						return err
 					}
-
-					output.Done()
 
 					// remove the site filter
 					filter.Del("label", labels.Host+"="+site.Hostname)
+				default:
+					// there is a running container
+					c := containers[0]
 
-					break
-				}
-
-				// there is a running container
-				c := containers[0]
-
-				// get the containers details that include environment variables
-				details, err := docker.ContainerInspect(ctx, c.ID)
-				if err != nil {
-					return err
-				}
-
-				// make sure container is in sync
-				if match.Site(home, site, cfg.PHP, details) == false {
-					output.Pending(site.Hostname, "out of sync")
-
-					// stop container
-					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+					// get the containers details that include environment variables
+					details, err := docker.ContainerInspect(ctx, c.ID)
+					if err != nil {
 						return err
 					}
 
-					// remove container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-						return err
+					// make sure container is in sync
+					if match.Site(home, site, cfg.PHP, details) == false {
+						// stop container
+						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+							return err
+						}
+
+						// remove container
+						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+							return err
+						}
+
+						// create the site container
+						if err := createSiteContainer(ctx, docker, output, opts); err != nil {
+							output.Warning()
+							return err
+						}
 					}
 
-					// create the site container
-					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
-						output.Warning()
-						break
-					}
-
-					output.Done()
+					// remove the site filter
+					filter.Del("label", labels.Host+"="+site.Hostname)
 				}
-
-				// remove the site filter
-				filter.Del("label", labels.Host+"="+site.Hostname)
 
 				output.Done()
 			}
@@ -654,7 +646,7 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	case false:
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
 	default:
-		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s idekey=%s`, opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress, "nitro"))
+		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s idekey=%s start_with_request=yes`, opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress, "nitro"))
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
 	}
 
