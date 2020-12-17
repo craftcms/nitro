@@ -293,6 +293,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 					// make sure container is in sync
 					if match.Site(home, site, cfg.PHP, details) == false {
+						fmt.Print("- updating... ")
 						// stop container
 						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
 							return err
