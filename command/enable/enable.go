@@ -68,8 +68,17 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			// TODO(jasonmccallister) call the apply command
-			return fmt.Errorf("saved the config, but not calling apply yet")
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					if err := c.RunE(c, args); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
 		},
 	}
 
