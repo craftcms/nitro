@@ -244,6 +244,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			envs := cfg.AsEnvs()
 
 			for _, site := range cfg.Sites {
+				output.Pending("checking", site.Hostname)
+
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
 
@@ -253,194 +255,60 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					return fmt.Errorf("error getting a list of containers")
 				}
 
-				switch len(containers) {
-				case 1:
-					// there is a running container
-					c := containers[0]
-					image := fmt.Sprintf(NginxImage, site.PHP)
+				// create the site options
+				opts := &SiteOptions{
+					Site:            site,
+					Home:            home,
+					Environment:     env,
+					EnvironmentVars: envs,
+					SkipPulls:       skipPulls,
+					Network:         envNetwork,
+				}
 
-					// get the containers details that include environment variables
-					details, err := docker.ContainerInspect(ctx, c.ID)
-					if err != nil {
-						return err
-					}
-
-					// make sure the images and mounts match, if they don't stop, remove, and recreate the container
-					if match.Site(home, site, cfg.PHP, details) == false {
-						output.Pending(site.Hostname, "out of sync")
-
-						path, err := site.GetAbsPath(home)
-						if err != nil {
-							return err
-						}
-
-						// stop container
-						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-							return err
-						}
-
-						// remove container
-						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-							return err
-						}
-
-						output.Done()
-
-						// pull the image
-						if cmd.Flag("skip-pull").Value.String() == "false" {
-							output.Pending("pulling", image)
-
-							// pull the image
-							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-							if err != nil {
-								return fmt.Errorf("unable to pull image, %w", err)
-							}
-
-							// read to pull the image
-							buf := &bytes.Buffer{}
-							if _, err := buf.ReadFrom(rdr); err != nil {
-								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-							}
-
-							output.Done()
-						}
-
-						// check if xdebug is enabled
-						if site.Xdebug {
-							// XDEBUG_CONFIG="client_host=192.168.42.34 log=/tmp/xdebug.log"
-							// set the config for xdebug client: https://xdebug.org/docs/all_settings#client_host
-							envs = append(envs, "XDEBUG_MODE=develop,debug")
-						} else {
-							envs = append(envs, "XDEBUG_MODE=off")
-						}
-
-						// add the site itself to the extra hosts
-						extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
-						for _, s := range site.Aliases {
-							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-						}
-
-						// create the container config
-						containerConfig := &container.Config{
-							Image: image,
-							Labels: map[string]string{
-								labels.Environment: env,
-								labels.Host:        site.Hostname,
-							},
-							Env: envs,
-						}
-
-						hostConfig := &container.HostConfig{
-							Mounts: []mount.Mount{
-								{
-									Type:   mount.TypeBind,
-									Source: path,
-									Target: "/app",
-								},
-							},
-							ExtraHosts: extraHosts,
-						}
-
-						networkConfig := &network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
-									NetworkID: envNetwork.ID,
-								},
-							},
-						}
-
-						output.Pending("creating", site.Hostname)
-
-						// create the container
-						if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname); err != nil {
-							output.Warning()
-
-							return fmt.Errorf("unable to create the site, %w", err)
-						}
-
-						output.Done()
-
-						break
-					}
-				default:
-					// create a brand new container since there is not an existing one
-					image := fmt.Sprintf(NginxImage, site.PHP)
-
-					// should we skip pulling the image
-					if skipPulls == false {
-						output.Pending("pulling", image)
-
-						// pull the image
-						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-						if err != nil {
-							return fmt.Errorf("unable to pull the image, %w", err)
-						}
-
-						buf := &bytes.Buffer{}
-						if _, err := buf.ReadFrom(rdr); err != nil {
-							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-						}
-
-						output.Done()
-					}
-
-					// get the sites main path
-					path, err := site.GetAbsPath(home)
-					if err != nil {
-						return err
-					}
-
+				// if there are no containers we need to create one
+				if len(containers) == 0 {
 					output.Pending("creating", site.Hostname)
 
-					// add the path mount
-					mounts := []mount.Mount{}
-					mounts = append(mounts, mount.Mount{
-						Type:   mount.TypeBind,
-						Source: path,
-						Target: "/app",
-					})
-
-					// check if xdebug is enabled
-					if site.Xdebug {
-						envs = append(envs, "XDEBUG_MODE=develop,debug")
-					} else {
-						envs = append(envs, "XDEBUG_MODE=off")
-					}
-
-					// add the site itself to the extra hosts
-					extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
-					for _, s := range site.Aliases {
-						extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-					}
-
-					// create the container config
-					containerConfig := &container.Config{
-						Image: image,
-						Labels: map[string]string{
-							labels.Environment: env,
-							labels.Host:        site.Hostname,
-						},
-						Env: envs,
-					}
-
-					hostConfig := &container.HostConfig{
-						Mounts:     mounts,
-						ExtraHosts: extraHosts,
-					}
-
-					networkConfig := &network.NetworkingConfig{
-						EndpointsConfig: map[string]*network.EndpointSettings{
-							env: {
-								NetworkID: envNetwork.ID,
-							},
-						},
-					}
-
-					// create the container
-					if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname); err != nil {
+					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
 						output.Warning()
+						break
+					}
 
-						return fmt.Errorf("unable to create the site, %w", err)
+					output.Done()
+
+					// remove the site filter
+					filter.Del("label", labels.Host+"="+site.Hostname)
+
+					break
+				}
+
+				// there is a running container
+				c := containers[0]
+
+				// get the containers details that include environment variables
+				details, err := docker.ContainerInspect(ctx, c.ID)
+				if err != nil {
+					return err
+				}
+
+				// make sure container is in sync
+				if match.Site(home, site, cfg.PHP, details) == false {
+					output.Pending(site.Hostname, "out of sync")
+
+					// stop container
+					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+						return err
+					}
+
+					// remove container
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+						return err
+					}
+
+					// create the site container
+					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
+						output.Warning()
+						break
 					}
 
 					output.Done()
@@ -448,45 +316,20 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 				// remove the site filter
 				filter.Del("label", labels.Host+"="+site.Hostname)
+
+				output.Done()
 			}
 
-			// convert the sites into the gRPC API Apply request
-			sites := make(map[string]*protob.Site)
-			for _, s := range cfg.Sites {
-				hosts := []string{s.Hostname}
+			output.Info("Checking Proxy...")
 
-				// if there are aliases lets append them to the hosts
-				if len(s.Aliases) > 0 {
-					hosts = append(hosts, s.Aliases...)
-				}
+			output.Pending("updating proxy")
 
-				// create the site
-				sites[s.Hostname] = &protob.Site{
-					Hostname: s.Hostname,
-					Aliases:  strings.Join(hosts, ","),
-					Port:     8080,
-				}
-			}
-
-			output.Pending("waiting for api")
-
-			for {
-				_, err := nitrod.Ping(ctx, &protob.PingRequest{})
-				if err == nil {
-					break
-				}
-			}
-
-			output.Done()
-
-			output.Info("Configuring Proxy...")
-
-			// configure the proxy with the sites
-			if _, err = nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
+			if err := updateProxy(ctx, docker, nitrod, *cfg); err != nil {
+				output.Warning()
 				return err
 			}
 
-			output.Success("proxy ready")
+			output.Done()
 
 			// update the hosts files
 			if os.Getenv("NITRO_EDIT_HOSTS") == "false" || cmd.Flag("skip-hosts").Value.String() == "true" {
@@ -753,5 +596,128 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 	filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Del("label", labels.Type+"=database")
+	return nil
+}
+
+type SiteOptions struct {
+	Site            config.Site
+	Home            string
+	Environment     string
+	EnvironmentVars []string
+	SkipPulls       bool
+	Network         *types.NetworkResource
+}
+
+func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, opts *SiteOptions) error {
+	image := fmt.Sprintf(NginxImage, opts.Site.PHP)
+
+	// should we skip pulling the image
+	if !opts.SkipPulls == false {
+		output.Pending("pulling", image)
+
+		// pull the image
+		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+		if err != nil {
+			return fmt.Errorf("unable to pull the image, %w", err)
+		}
+
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
+			return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		}
+
+		output.Done()
+	}
+
+	// add the site itself to the extra hosts
+	extraHosts := []string{fmt.Sprintf("%s:%s", opts.Site.Hostname, "127.0.0.1")}
+	for _, s := range opts.Site.Aliases {
+		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+	}
+
+	path, err := opts.Site.GetAbsPath(opts.Home)
+	if err != nil {
+		return err
+	}
+
+	// check if xdebug is enabled
+	// set the config for xdebug client: https://xdebug.org/docs/all_settings#client_host
+	if opts.Site.Xdebug {
+		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf("XDEBUG_CONFIG=client_host=%s", opts.Network.IPAM.Config[0].Gateway))
+		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
+	} else {
+		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
+	}
+
+	// create the container config
+	containerConfig := &container.Config{
+		Image: image,
+		Labels: map[string]string{
+			labels.Environment: opts.Environment,
+			labels.Host:        opts.Site.Hostname,
+		},
+		Env: opts.EnvironmentVars,
+	}
+
+	hostConfig := &container.HostConfig{
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: path,
+				Target: "/app",
+			},
+		},
+		ExtraHosts: extraHosts,
+	}
+
+	networkConfig := &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			opts.Environment: {
+				NetworkID: opts.Network.ID,
+			},
+		},
+	}
+
+	// create the container
+	if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, opts.Site.Hostname); err != nil {
+		return fmt.Errorf("unable to create the site, %w", err)
+	}
+
+	return nil
+}
+
+func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
+	// convert the sites into the gRPC API Apply request
+	sites := make(map[string]*protob.Site)
+
+	for _, s := range cfg.Sites {
+		hosts := []string{s.Hostname}
+
+		// if there are aliases lets append them to the hosts
+		if len(s.Aliases) > 0 {
+			hosts = append(hosts, s.Aliases...)
+		}
+
+		// create the site
+		sites[s.Hostname] = &protob.Site{
+			Hostname: s.Hostname,
+			Aliases:  strings.Join(hosts, ","),
+			Port:     8080,
+		}
+	}
+
+	// wait for the api to be ready
+	for {
+		_, err := nitrod.Ping(ctx, &protob.PingRequest{})
+		if err == nil {
+			break
+		}
+	}
+
+	// configure the proxy with the sites
+	if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
+		return err
+	}
+
 	return nil
 }
