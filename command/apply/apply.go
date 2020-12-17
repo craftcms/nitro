@@ -78,7 +78,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			output.Info("Checking Network...")
 
 			// check the network
-			networkID, err := checkNetwork(ctx, docker, env, filter)
+			envNetwork, err := checkNetwork(ctx, docker, env, filter)
 			if err != nil {
 				return err
 			}
@@ -98,7 +98,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 			// check the databases
 			for _, db := range cfg.Databases {
-				if err := checkDatabase(ctx, docker, output, filter, db, networkID, env, skipPulls); err != nil {
+				if err := checkDatabase(ctx, docker, output, filter, db, envNetwork.ID, env, skipPulls); err != nil {
 					return err
 				}
 			}
@@ -174,7 +174,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					networkConfig := &network.NetworkingConfig{
 						EndpointsConfig: map[string]*network.EndpointSettings{
 							env: {
-								NetworkID: networkID,
+								NetworkID: envNetwork.ID,
 							},
 						},
 					}
@@ -305,14 +305,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							output.Done()
 						}
 
-						// add the path mount
-						mounts := []mount.Mount{}
-						mounts = append(mounts, mount.Mount{
-							Type:   mount.TypeBind,
-							Source: path,
-							Target: "/app",
-						})
-
 						// check if xdebug is enabled
 						if site.Xdebug {
 							envs = append(envs, "XDEBUG_MODE=develop,debug")
@@ -335,14 +327,22 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 							},
 							Env: envs,
 						}
+
 						hostConfig := &container.HostConfig{
-							Mounts:     mounts,
+							Mounts: []mount.Mount{
+								{
+									Type:   mount.TypeBind,
+									Source: path,
+									Target: "/app",
+								},
+							},
 							ExtraHosts: extraHosts,
 						}
+
 						networkConfig := &network.NetworkingConfig{
 							EndpointsConfig: map[string]*network.EndpointSettings{
 								env: {
-									NetworkID: networkID,
+									NetworkID: envNetwork.ID,
 								},
 							},
 						}
@@ -360,7 +360,6 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 						break
 					}
-
 				default:
 					// create a brand new container since there is not an existing one
 					image := fmt.Sprintf(NginxImage, site.PHP)
@@ -421,11 +420,19 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 						},
 						Env: envs,
 					}
+
 					hostConfig := &container.HostConfig{
 						Mounts:     mounts,
 						ExtraHosts: extraHosts,
 					}
-					networkConfig := &network.NetworkingConfig{EndpointsConfig: map[string]*network.EndpointSettings{env: {NetworkID: networkID}}}
+
+					networkConfig := &network.NetworkingConfig{
+						EndpointsConfig: map[string]*network.EndpointSettings{
+							env: {
+								NetworkID: envNetwork.ID,
+							},
+						},
+					}
 
 					// create the container
 					if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, site.Hostname); err != nil {
@@ -539,27 +546,22 @@ func createContainer(ctx context.Context, docker client.ContainerAPIClient, conf
 	return resp.ID, nil
 }
 
-func checkNetwork(ctx context.Context, docker client.NetworkAPIClient, env string, filter filters.Args) (string, error) {
+func checkNetwork(ctx context.Context, docker client.NetworkAPIClient, env string, filter filters.Args) (*types.NetworkResource, error) {
 	// find networks
 	networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
 	if err != nil {
-		return "", fmt.Errorf("unable to list docker networks\n%w", err)
+		return nil, fmt.Errorf("unable to list docker networks\n%w", err)
 	}
 
 	// get the network for the environment
-	var id string
-	for _, n := range networks {
-		if n.Name == env {
-			id = n.ID
+	for _, network := range networks {
+		if network.Name == env {
+			return &network, nil
 		}
 	}
 
-	// if the network is not found
-	if id == "" {
-		return "", ErrNoNetwork
-	}
-
-	return id, nil
+	// the network is not found
+	return nil, ErrNoNetwork
 }
 
 func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env string) error {
