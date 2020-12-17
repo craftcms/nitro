@@ -15,6 +15,7 @@
 - You can now set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO
 _API_PORT`.
 - Added the `version` command to display the cli and gRPC API versions
+- Added the `nitro craft` command to run console commands in the sites container.
 
 ### Changed
 
