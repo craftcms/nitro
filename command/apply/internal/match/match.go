@@ -3,7 +3,6 @@ package match
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -18,38 +17,6 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 		return false
 	}
 
-	// check the environment variables
-	for _, e := range container.Config.Env {
-		sp := strings.Split(e, "=")
-
-		// show only the environment variables we know about/support
-		if _, ok := config.Envs[sp[0]]; ok {
-			// TODO(jasonmccallister) check if the value matches the config option
-			e := sp[0]
-			v := sp[1]
-
-			// check the value of each environment variable
-			switch e {
-			case "PHP_DISPLAY_ERRORS":
-				// if there is a custom value
-				if php.DisplayErrors {
-					b, err := strconv.ParseBool(v)
-					if err != nil {
-						return false
-					}
-
-					if php.DisplayErrors != b {
-						return false
-					}
-				}
-			case "PHP_MAX_EXECUTION_TIME":
-				if php.MaxExecutionTime != 0 && v != "5000" {
-					return false
-				}
-			}
-		}
-	}
-
 	// get the main site path (e.g. ~/dev/craft-dev)
 	path, err := site.GetAbsPath(home)
 	if err != nil {
@@ -59,6 +26,33 @@ func Site(home string, site config.Site, php config.PHP, container types.Contain
 	// check if the path exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
+	}
+
+	// check the environment variables
+	for _, e := range container.Config.Env {
+		sp := strings.Split(e, "=")
+
+		// show only the environment variables we know about/support
+		if _, ok := config.Envs[sp[0]]; ok {
+			env := sp[0]
+			val := sp[1]
+
+			// check the value of each environment variable
+			switch env {
+			case "PHP_DISPLAY_ERRORS":
+				// if there is a custom value
+				if php.DisplayErrors {
+					if val != "on" {
+						fmt.Println("display errors is not on")
+						return false
+					}
+				}
+			case "PHP_MAX_EXECUTION_TIME":
+				if php.MaxExecutionTime != 0 && val != "5000" {
+					return false
+				}
+			}
+		}
 	}
 
 	return true
