@@ -120,6 +120,8 @@ func (c *Config) AddSite(s Site) error {
 	return nil
 }
 
+// DisableXdebug takes a sites hostname and sets the xdebug option
+// to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
@@ -134,6 +136,8 @@ func (c *Config) DisableXdebug(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
+// EnableXdebug takes a sites hostname and sets the xdebug option
+// to true. If the site cannot be found, it returns an error.
 func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
