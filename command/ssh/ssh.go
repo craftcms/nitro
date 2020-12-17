@@ -101,12 +101,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// find the docker executable
 			cli, err := exec.LookPath("docker")
 			if err != nil {
-				fmt.Println(fmt.Sprintf(`nitro ssh is not working as expected...
-
-You can use the following command to get a shell in the container:
-
-  $ docker exec -it %s sh
-			`, strings.TrimLeft(containers[0].Names[0], "/")))
 				return err
 			}
 
