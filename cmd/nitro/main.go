@@ -33,6 +33,7 @@ import (
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
 
 	"github.com/craftcms/nitro/terminal"
@@ -121,6 +122,7 @@ func init() {
 		database.New(home, client, term),
 		hosts.New(home, term),
 		xon.NewCommand(home, client, term),
+		xoff.NewCommand(home, client, term),
 	}
 
 	// add the commands

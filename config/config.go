@@ -120,6 +120,20 @@ func (c *Config) AddSite(s Site) error {
 	return nil
 }
 
+func (c *Config) DisableXdebug(site string) error {
+	// find the site by the hostname
+	for i, s := range c.Sites {
+		if s.Hostname == site {
+			// replace the site
+			s.Xdebug = false
+			c.Sites = append(c.Sites[:i], s)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown site, %s", site)
+}
+
 func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
