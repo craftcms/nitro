@@ -307,7 +307,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 						// check if xdebug is enabled
 						if site.Xdebug {
-
+							// XDEBUG_CONFIG="client_host=192.168.42.34 log=/tmp/xdebug.log"
 							// set the config for xdebug client: https://xdebug.org/docs/all_settings#client_host
 							envs = append(envs, "XDEBUG_MODE=develop,debug")
 						} else {
