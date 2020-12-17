@@ -106,7 +106,7 @@ func init() {
 		stop.New(client, term),
 		queue.NewCommand(home, client, term),
 		logs.NewCommand(home, client, term),
-		ssh.New(home, client, term),
+		ssh.NewCommand(home, client, term),
 		restart.New(client, term),
 		update.New(client, term),
 		destroy.NewCommand(home, client, term),

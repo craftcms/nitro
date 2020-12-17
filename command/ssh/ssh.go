@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -28,13 +29,13 @@ var (
 const exampleText = `  # ssh into a container - assuming its the current working directory
   nitro ssh`
 
-func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommand returns the ssh command to get a shell in a container. The command is context aware and if
+// it is not in a known project directory, it will provide a list of known sites to the user.
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "ssh",
 		Short:   "SSH into a container",
 		Example: exampleText,
-		// TODO(jasonmccallister) remove this once the functionality is complete
-		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 
@@ -55,33 +56,24 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the sites
-			var containerID string
+			var currentSite string
 			var sites []string
 			for _, s := range cfg.Sites {
-				// add the site to the list in case we cannot find the directory
-				sites = append(sites, s.Hostname)
-
 				p, _ := s.GetAbsPath(home)
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					filter.Add("label", labels.Host+"="+s.Hostname)
-
-					// find the containers but limited to the site label
-					containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
-					if err != nil {
-						return err
-					}
-
-					// set the first container
-					if len(containers) > 0 {
-						containerID = containers[0].ID
-					}
+					currentSite = s.Hostname
+					break
 				}
+
+				// add the site to the list in case we cannot find the directory
+				sites = append(sites, s.Hostname)
 			}
 
-			// if we did not find a container, get a list of sites and prompt
-			if containerID == "" {
+			// check the current site
+			switch currentSite == "" {
+			case true:
 				// prompt for the site to ssh into
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
 				if err != nil {
@@ -90,21 +82,40 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 
 				// add the label to get the site
 				filter.Add("label", labels.Host+"="+sites[selected])
-
-				// find the containers but limited to the site label
-				containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
-				if err != nil {
-					return err
-				}
-
-				// set the first container
-				if len(containers) > 0 {
-					containerID = containers[0].ID
-				}
+			default:
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+currentSite)
 			}
 
-			// connect to the container
-			if err := connect(cmd.Context(), docker, containerID); err != nil {
+			// find the containers but limited to the site label
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
+			if err != nil {
+				return err
+			}
+
+			// are there any containers??
+			if len(containers) == 0 {
+				return fmt.Errorf("unable to find an matching site")
+			}
+
+			// find the docker executable
+			cli, err := exec.LookPath("docker")
+			if err != nil {
+				fmt.Println(fmt.Sprintf(`nitro ssh is not working as expected...
+
+You can use the following command to get a shell in the container:
+
+  $ docker exec -it %s sh
+			`, strings.TrimLeft(containers[0].Names[0], "/")))
+				return err
+			}
+
+			c := exec.Command(cli, "exec", "-it", containers[0].ID, "sh")
+			c.Stdin = cmd.InOrStdin()
+			c.Stderr = cmd.ErrOrStderr()
+			c.Stdout = cmd.OutOrStdout()
+
+			if err := c.Run(); err != nil {
 				return err
 			}
 
