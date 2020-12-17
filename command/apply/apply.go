@@ -366,7 +366,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					image := fmt.Sprintf(NginxImage, site.PHP)
 
 					// should we skip pulling the image
-					if cmd.Flag("skip-pull").Value.String() == "false" {
+					if skipPulls == false {
 						output.Pending("pulling", image)
 
 						// pull the image
