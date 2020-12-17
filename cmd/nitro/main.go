@@ -15,6 +15,7 @@ import (
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/context"
+	"github.com/craftcms/nitro/command/craft"
 	"github.com/craftcms/nitro/command/create"
 	"github.com/craftcms/nitro/command/database"
 	"github.com/craftcms/nitro/command/destroy"
@@ -104,6 +105,7 @@ func init() {
 		disable.NewCommand(home, client, term),
 		start.NewCommand(client, term),
 		stop.New(client, term),
+		craft.NewCommand(home, client, term),
 		queue.NewCommand(home, client, term),
 		logs.NewCommand(home, client, term),
 		ssh.NewCommand(home, client, term),
