@@ -66,26 +66,10 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
 
-			output.Info("Checking Network...")
-
-			// find networks
-			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
+			// check the network
+			networkID, err := checkNetwork(ctx, docker, output, env, filter)
 			if err != nil {
-				return fmt.Errorf("unable to list docker networks\n%w", err)
-			}
-
-			// get the network for the environment
-			var networkID string
-			for _, n := range networks {
-				if n.Name == env {
-					networkID = n.ID
-					output.Success("network ready")
-				}
-			}
-
-			// if the network is not found
-			if networkID == "" {
-				return ErrNoNetwork
+				return err
 			}
 
 			output.Info("Checking Proxy...")
@@ -715,4 +699,30 @@ func create(ctx context.Context, docker client.ContainerAPIClient, config *conta
 	}
 
 	return resp.ID, nil
+}
+
+func checkNetwork(ctx context.Context, docker client.NetworkAPIClient, output terminal.Outputer, env string, filter filters.Args) (string, error) {
+	output.Info("Checking Network...")
+
+	// find networks
+	networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
+	if err != nil {
+		return "", fmt.Errorf("unable to list docker networks\n%w", err)
+	}
+
+	// get the network for the environment
+	var id string
+	for _, n := range networks {
+		if n.Name == env {
+			id = n.ID
+			output.Success("network ready")
+		}
+	}
+
+	// if the network is not found
+	if id == "" {
+		return "", ErrNoNetwork
+	}
+
+	return id, nil
 }
