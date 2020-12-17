@@ -120,6 +120,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			msg := "Enter the database name: "
 
 			fmt.Print(msg)
+
 			var db string
 			for {
 				rdr := bufio.NewReader(os.Stdin)
