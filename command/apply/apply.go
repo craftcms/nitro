@@ -599,6 +599,7 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 	return nil
 }
 
+// SiteOptions are used to create site containers
 type SiteOptions struct {
 	Site            config.Site
 	Home            string
@@ -635,6 +636,7 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
 	}
 
+	// get the sites path
 	path, err := opts.Site.GetAbsPath(opts.Home)
 	if err != nil {
 		return err
@@ -679,8 +681,14 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	}
 
 	// create the container
-	if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, opts.Site.Hostname); err != nil {
-		return fmt.Errorf("unable to create the site, %w", err)
+	resp, err := docker.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, opts.Site.Hostname)
+	if err != nil {
+		return fmt.Errorf("unable to create the container, %w", err)
+	}
+
+	// start the container
+	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return fmt.Errorf("unable to start the container, %w", err)
 	}
 
 	return nil
