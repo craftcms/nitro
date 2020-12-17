@@ -12,3 +12,4 @@ nitro.exe
 *.sql.zip
 *.dump
 profile.out
+/nitro.upx
