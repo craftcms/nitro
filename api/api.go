@@ -13,21 +13,21 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-// NewAPI returns an API struct that implements the gRPC API used in the proxy container.
+// NewService returns an API struct that implements the gRPC API used in the proxy container.
 // The gRPC API is used to handle making changes to the Caddy Server via its local API.
-func NewAPI() *API {
-	return &API{
-		Client: http.DefaultClient,
+func NewService() *Service {
+	return &Service{
+		HTTP: http.DefaultClient,
 	}
 }
 
-// API implements the protob.NitroServer interface
-type API struct {
-	Client *http.Client
+// Service implements the protob.NitroServer interface
+type Service struct {
+	HTTP *http.Client
 }
 
 // Ping returns a simple response "pong" from the gRPC API to verify connectivity.
-func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.PingResponse, error) {
+func (svc *Service) Ping(ctx context.Context, request *protob.PingRequest) (*protob.PingResponse, error) {
 	return &protob.PingResponse{Pong: "pong"}, nil
 }
 
@@ -35,12 +35,12 @@ func (a *API) Ping(ctx context.Context, request *protob.PingRequest) (*protob.Pi
 // in protob.ApplyRequest represents the hostname, aliases (in a comma delimited list), and the
 // port for the service. The NGINX container type uses port 8080 and the PHP-FPM container type
 // uses port 9000.
-func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
+func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
 	resp := &protob.ApplyResponse{}
 
 	// if there is no client, use the default
-	if a.Client == nil {
-		a.Client = http.DefaultClient
+	if svc.HTTP == nil {
+		svc.HTTP = http.DefaultClient
 	}
 
 	// convert each of the sites into a route
@@ -108,7 +108,7 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 	}
 
 	// send the update
-	res, err := a.Client.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
+	res, err := svc.HTTP.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
 		resp.Message = "error updating Caddy API"
 		resp.Error = true
@@ -132,6 +132,6 @@ func (a *API) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.
 }
 
 // Version is used to check the container image version with the CLI version
-func (a *API) Version(context.Context, *protob.VersionRequest) (*protob.VersionResponse, error) {
+func (svc *Service) Version(context.Context, *protob.VersionRequest) (*protob.VersionResponse, error) {
 	return &protob.VersionResponse{Version: version.Version}, nil
 }
