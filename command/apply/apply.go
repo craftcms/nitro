@@ -684,6 +684,8 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 		return fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	// TODO(jasonmccallister) check for a custom root and copt the template to the container
+
 	return nil
 }
 
