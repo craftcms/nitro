@@ -121,8 +121,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 
 			fmt.Print(msg)
 			var db string
-			wait := true
-			for wait {
+			for {
 				rdr := bufio.NewReader(os.Stdin)
 				input, err := rdr.ReadString('\n')
 				if err != nil {
@@ -130,8 +129,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				}
 
 				if strings.ContainsAny(input, " -") == false {
-					db = strings.TrimSpace(db)
-					wait = false
+					db = strings.TrimSpace(input)
 					break
 				}
 
