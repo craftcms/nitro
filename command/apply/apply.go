@@ -98,7 +98,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 			// check the databases
 			for _, db := range cfg.Databases {
-				if err := checkDatabase(ctx, docker, output, filter, db, env, networkID, skipPulls); err != nil {
+				if err := checkDatabase(ctx, docker, output, filter, db, networkID, env, skipPulls); err != nil {
 					return err
 				}
 			}
@@ -591,7 +591,7 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 	return nil
 }
 
-func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, env, networkID string, skipPull bool) error {
+func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, networkID, env string, skipPull bool) error {
 	// add filters to check for the container
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
