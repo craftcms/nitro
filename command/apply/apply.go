@@ -31,6 +31,9 @@ var (
 	// ErrNoNetwork is used when we cannot find the network
 	ErrNoNetwork = fmt.Errorf("Unable to find the network")
 
+	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
+	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
+
 	// NginxImage is the image used for sites, with the PHP version
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 
@@ -88,7 +91,8 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 			output.Info("Checking Proxy...")
 
 			// check the proxy
-			if err := checkProxy(ctx, docker, env); err != nil {
+			proxy, err := checkProxy(ctx, docker, env)
+			if err != nil {
 				return err
 			}
 
@@ -263,6 +267,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 					EnvironmentVars: envs,
 					SkipPulls:       skipPulls,
 					Network:         envNetwork,
+					Proxy:           &proxy,
 				}
 
 				// if there are no containers we need to create one
@@ -409,7 +414,7 @@ func checkNetwork(ctx context.Context, docker client.NetworkAPIClient, env strin
 	return nil, ErrNoNetwork
 }
 
-func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env string) error {
+func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env string) (types.Container, error) {
 	f := filters.NewArgs()
 	f.Add("label", labels.Proxy+"="+env)
 	// TODO(jasonmccallister) add the type filter as well?
@@ -417,7 +422,7 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 	// check if there is an existing container for the nitro-proxy
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: f, All: true})
 	if err != nil {
-		return fmt.Errorf("unable to list the containers\n%w", err)
+		return types.Container{}, fmt.Errorf("unable to list the containers\n%w", err)
 	}
 
 	// get the container id and determine if the container needs to start
@@ -427,16 +432,17 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 				// check if it is running
 				if c.State != "running" {
 					if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-						return fmt.Errorf("unable to start the nitro container, %w", err)
+						return types.Container{}, fmt.Errorf("unable to start the nitro container, %w", err)
 					}
-
-					return nil
 				}
+
+				// return the container
+				return c, nil
 			}
 		}
 	}
 
-	return nil
+	return types.Container{}, ErrNoProxyContainer
 }
 
 func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, networkID, env string, skipPull bool) error {
@@ -607,6 +613,7 @@ type SiteOptions struct {
 	EnvironmentVars []string
 	SkipPulls       bool
 	Network         *types.NetworkResource
+	Proxy           *types.Container
 }
 
 func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, opts *SiteOptions) error {
@@ -647,7 +654,7 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	case false:
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
 	default:
-		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf("XDEBUG_CONFIG=client_host=%s", opts.Network.IPAM.Config[0].Gateway))
+		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf("XDEBUG_CONFIG=client_host=%s", opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress))
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
 	}
 
