@@ -98,6 +98,21 @@ func TestLoad(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "no env returns error",
+			args: args{
+				home: testdir,
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing file returns an error",
+			args: args{
+				home: testdir,
+				env:  "not-here",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
