@@ -19,11 +19,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 // https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/integration/internal/container/exec.go#L38
 
 const exampleText = `  # ssh into a container - assuming its the current working directory
@@ -56,14 +51,14 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the sites
-			var currentSite string
+			var site string
 			var sites []string
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					currentSite = s.Hostname
+					site = s.Hostname
 					break
 				}
 
@@ -72,7 +67,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check the current site
-			switch currentSite == "" {
+			switch site == "" {
 			case true:
 				// prompt for the site to ssh into
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
@@ -84,7 +79,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				filter.Add("label", labels.Host+"="+sites[selected])
 			default:
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+currentSite)
+				filter.Add("label", labels.Host+"="+site)
 			}
 
 			// find the containers but limited to the site label
