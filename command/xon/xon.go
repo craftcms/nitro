@@ -1,7 +1,6 @@
 package xon
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -74,7 +73,17 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			return fmt.Errorf("use config.EnableXdebug(site) and call apply")
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					if err := c.RunE(c, args); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
 		},
 	}
 
