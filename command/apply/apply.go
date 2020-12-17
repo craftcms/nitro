@@ -613,7 +613,7 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	image := fmt.Sprintf(NginxImage, opts.Site.PHP)
 
 	// should we skip pulling the image
-	if !opts.SkipPulls == false {
+	if opts.SkipPulls {
 		output.Pending("pulling", image)
 
 		// pull the image
@@ -630,38 +630,36 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 		output.Done()
 	}
 
-	// add the site itself to the extra hosts
-	extraHosts := []string{fmt.Sprintf("%s:%s", opts.Site.Hostname, "127.0.0.1")}
-	for _, s := range opts.Site.Aliases {
-		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-	}
-
 	// get the sites path
 	path, err := opts.Site.GetAbsPath(opts.Home)
 	if err != nil {
 		return err
 	}
 
-	// check if xdebug is enabled
-	// set the config for xdebug client: https://xdebug.org/docs/all_settings#client_host
-	if opts.Site.Xdebug {
-		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf("XDEBUG_CONFIG=client_host=%s", opts.Network.IPAM.Config[0].Gateway))
-		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
-	} else {
-		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
+	// add the site itself to the extra hosts
+	extraHosts := []string{fmt.Sprintf("%s:%s", opts.Site.Hostname, "127.0.0.1")}
+	for _, s := range opts.Site.Aliases {
+		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
 	}
 
-	// create the container config
-	containerConfig := &container.Config{
+	// check if xdebug is enabled
+	switch opts.Site.Xdebug {
+	case false:
+		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
+	default:
+		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf("XDEBUG_CONFIG=client_host=%s", opts.Network.IPAM.Config[0].Gateway))
+		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
+	}
+
+	// create the container
+	resp, err := docker.ContainerCreate(ctx, &container.Config{
 		Image: image,
 		Labels: map[string]string{
 			labels.Environment: opts.Environment,
 			labels.Host:        opts.Site.Hostname,
 		},
 		Env: opts.EnvironmentVars,
-	}
-
-	hostConfig := &container.HostConfig{
+	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
@@ -670,18 +668,13 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 			},
 		},
 		ExtraHosts: extraHosts,
-	}
-
-	networkConfig := &network.NetworkingConfig{
+	}, &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			opts.Environment: {
 				NetworkID: opts.Network.ID,
 			},
 		},
-	}
-
-	// create the container
-	resp, err := docker.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, opts.Site.Hostname)
+	}, opts.Site.Hostname)
 	if err != nil {
 		return fmt.Errorf("unable to create the container, %w", err)
 	}
