@@ -64,8 +64,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			fmt.Print(msg)
 			var db string
-			wait := true
-			for wait {
+			for {
 				rdr := bufio.NewReader(os.Stdin)
 				input, err := rdr.ReadString('\n')
 				if err != nil {
@@ -73,8 +72,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				}
 
 				if strings.ContainsAny(input, " -") == false {
-					db = strings.TrimSpace(db)
-					wait = false
+					db = strings.TrimSpace(input)
 					break
 				}
 
