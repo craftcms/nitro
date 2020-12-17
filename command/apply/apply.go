@@ -360,6 +360,7 @@ func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, 
 
 						break
 					}
+
 				default:
 					// create a brand new container since there is not an existing one
 					image := fmt.Sprintf(NginxImage, site.PHP)
