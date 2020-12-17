@@ -122,11 +122,11 @@ func (c *Config) AddSite(s Site) error {
 
 func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
-	for _, s := range c.Sites {
+	for i, s := range c.Sites {
 		if s.Hostname == site {
-			// enable xdebug
+			// replace the site
 			s.Xdebug = true
-
+			c.Sites = append(c.Sites[:i], s)
 			return nil
 		}
 	}
