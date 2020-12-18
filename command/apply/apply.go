@@ -44,8 +44,7 @@ var (
 const exampleText = `  # apply changes from a config
   nitro apply`
 
-// New takes a docker client and the terminal output to run the apply actions
-func New(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
 		Short:   "Apply changes to an environment",
