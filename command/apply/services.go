@@ -15,7 +15,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, enabled bool, networkID, env string) error {
+func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, enabled bool, networkID, env string) (string, error) {
 	// add the filter for mailhog
 	filter.Add("label", labels.Type+"=mailhog")
 	defer filter.Add("label", labels.Type+"=mailhog")
@@ -25,7 +25,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 		// get a list of containers
 		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if len(containers) == 0 {
@@ -38,25 +38,25 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			// pull the mailhog image
 			rdr, err := docker.ImagePull(ctx, "docker.io/mailhog/mailhog", types.ImagePullOptions{})
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			buf := &bytes.Buffer{}
 			if _, err := buf.ReadFrom(rdr); err != nil {
-				return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+				return "", fmt.Errorf("unable to read the output from pulling the image, %w", err)
 			}
 
 			// configure the service
 			smtpPort, err := nat.NewPort("tcp/udp", "1025")
 			if err != nil {
 				output.Warning()
-				return fmt.Errorf("unable to create the port, %w", err)
+				return "", fmt.Errorf("unable to create the port, %w", err)
 			}
 			httpPort, err := nat.NewPort("tcp", "8025")
 
 			if err != nil {
 				output.Warning()
-				return fmt.Errorf("unable to create the port, %w", err)
+				return "", fmt.Errorf("unable to create the port, %w", err)
 			}
 
 			containerConfig := &container.Config{
@@ -99,7 +99,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			// create the container
 			if _, err := createContainer(ctx, docker, containerConfig, hostconfig, networkConfig, "mailhog"); err != nil {
 				output.Warning()
-				return err
+				return "", err
 			}
 
 			output.Done()
@@ -125,12 +125,12 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 		// check if there is an existing container for mailhog
 		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		// if there are no containers, we can stop here
 		if len(containers) == 0 {
-			return nil
+			return "", nil
 		}
 
 		// if we have a container, we need to remove it
@@ -152,5 +152,5 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 		}
 	}
 
-	return nil
+	return "", nil
 }
