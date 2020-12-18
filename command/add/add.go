@@ -18,6 +18,9 @@ var (
 	ErrExample = fmt.Errorf("some example error")
 )
 
+// TODO - prompt user for the database engine and new database
+// TODO - edit the env file for the user
+
 const exampleText = `  # add the current project as a site
   nitro add
 
@@ -67,8 +70,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// prompt for the hostname
 			fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
-			w := true
-			for w {
+			for {
 				rdr := bufio.NewReader(os.Stdin)
 				char, _ := rdr.ReadString('\n')
 
@@ -77,8 +79,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// does it have spaces?
 				if strings.ContainsAny(char, " ") {
-					w = true
-
 					fmt.Println("Please enter a hostname without spaces 🙄...")
 					fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
 
@@ -92,7 +92,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// set the input as the hostname
 				site.Hostname = char
-				w = false
 			}
 
 			output.Success("setting hostname to", site.Hostname)
@@ -129,6 +128,33 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// set the webroot
 			site.Dir = root
+
+			// prompt for the webroot
+			fmt.Print(fmt.Sprintf("Enter the webroot for the site [%s]: ", site.Dir))
+			for {
+				rdr := bufio.NewReader(os.Stdin)
+				input, _ := rdr.ReadString('\n')
+
+				// remove the carriage return
+				input = strings.TrimRight(input, "\n")
+
+				// does it have spaces?
+				if strings.ContainsAny(input, " ") {
+					fmt.Println("Please enter a webroot without spaces 🙄...")
+					fmt.Print(fmt.Sprintf("Enter the webroot for the site [%s]: ", site.Dir))
+
+					continue
+				}
+
+				// if its empty, we are setting the default
+				if input == "" {
+					break
+				}
+
+				// set the input as the hostname
+				site.Path = input
+				break
+			}
 
 			output.Success("using webroot", site.Dir)
 
