@@ -647,7 +647,10 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	case false:
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
 	default:
-		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s idekey=%s start_with_request=yes`, opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress, "nitro"))
+		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
+		// opts.Network.IPAM.Config[0].Gateway
+		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress))
+		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_SESSION=nitro")
 		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
 	}
 
