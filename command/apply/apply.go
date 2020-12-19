@@ -274,6 +274,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// if there are no containers we need to create one
 				switch len(containers) == 0 {
 				case true:
+					// create the container
 					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
 						return err
 					}
@@ -711,10 +712,16 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		}
 	}
 
+	if len(sites) == 0 {
+		return fmt.Errorf("no sites exist")
+	}
+
 	// wait for the api to be ready
-	for {
+	wait := true
+	for wait {
 		_, err := nitrod.Ping(ctx, &protob.PingRequest{})
 		if err == nil {
+			wait = false
 			break
 		}
 	}

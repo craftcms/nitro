@@ -98,7 +98,7 @@ func init() {
 	// register all of the commands
 	commands := []*cobra.Command{
 		add.NewCommand(home, client, term),
-		apply.New(home, client, nitrod, term),
+		apply.NewCommand(home, client, nitrod, term),
 		clean.NewCommand(home, client, term),
 		completion.New(),
 		composer.NewCommand(client, term),
