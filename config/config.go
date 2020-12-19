@@ -156,7 +156,10 @@ func (c *Config) EnableXdebug(site string) error {
 func (c *Config) Save() error {
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
-		return ErrNoConfigFile
+		// otherwise create it
+		if _, err := os.Create(c.File); err != nil {
+			return err
+		}
 	}
 
 	// unmarshal
