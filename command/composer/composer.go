@@ -2,6 +2,7 @@ package composer
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,7 +49,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				// when we call commands from other commands (e.g. create)
 				// the context could be nil, so we set it to the parent
 				// context just in case.
-				ctx = cmd.Parent().Context()
+				ctx = context.Background()
 			}
 
 			// get the path from args or current directory
@@ -143,7 +144,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			containerFilter.Add("name", name)
 
 			// check if there is an existing container
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: containerFilter})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: containerFilter})
 			if err != nil {
 				return err
 			}
