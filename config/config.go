@@ -181,3 +181,7 @@ func (c *Config) Save() error {
 
 	return nil
 }
+
+func (c *Config) GetFile() string {
+	return c.File
+}
