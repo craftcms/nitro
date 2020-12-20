@@ -19,6 +19,8 @@ func FirstTime(home, env string, output terminal.Outputer) error {
 		File: filepath.Join(home, ".nitro", env+".yaml"),
 	}
 
+	output.Info("Setting up Nitro...")
+
 	mysql, err := confirm("Would you like to use MySQL", true)
 	if err != nil {
 		return err
@@ -91,20 +93,19 @@ func confirm(msg string, fallback bool) (bool, error) {
 	}
 
 	// check for empty newline and use the default
-	if err.Error() == "unexpected newline" {
+	if err != nil && err.Error() == "unexpected newline" {
 		return fallback, nil
 	}
 
 	// read the confirmation from the input
-	var confirm bool
 	resp := strings.TrimSpace(input)
 	for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
 		if resp == answer {
-			confirm = true
+			fallback = true
 		}
 	}
 
-	return confirm, nil
+	return fallback, nil
 }
 
 func setupPostgres() (bool, error) {

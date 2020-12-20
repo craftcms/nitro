@@ -342,22 +342,24 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				hostnames = append(hostnames, s.Aliases...)
 			}
 
-			// get the executable
-			nitro, err := os.Executable()
-			if err != nil {
-				return fmt.Errorf("unable to locate the nitro path, %w", err)
-			}
+			if len(hostnames) > 0 {
+				// get the executable
+				nitro, err := os.Executable()
+				if err != nil {
+					return fmt.Errorf("unable to locate the nitro path, %w", err)
+				}
 
-			// run the hosts command
-			switch runtime.GOOS {
-			case "windows":
-				return fmt.Errorf("setting hosts file is not yet supported on windows")
-			default:
-				output.Info("Modifying hosts file (you might be prompted for your password)")
+				// run the hosts command
+				switch runtime.GOOS {
+				case "windows":
+					return fmt.Errorf("setting hosts file is not yet supported on windows")
+				default:
+					output.Info("Modifying hosts file (you might be prompted for your password)")
 
-				// add the hosts
-				if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
-					return err
+					// add the hosts
+					if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
+						return err
+					}
 				}
 			}
 
@@ -712,23 +714,21 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		}
 	}
 
-	if len(sites) == 0 {
-		return fmt.Errorf("no sites exist")
-	}
-
-	// wait for the api to be ready
-	wait := true
-	for wait {
-		_, err := nitrod.Ping(ctx, &protob.PingRequest{})
-		if err == nil {
-			wait = false
-			break
+	if len(sites) > 0 {
+		// wait for the api to be ready
+		wait := true
+		for wait {
+			_, err := nitrod.Ping(ctx, &protob.PingRequest{})
+			if err == nil {
+				wait = false
+				break
+			}
 		}
-	}
 
-	// configure the proxy with the sites
-	if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
-		return err
+		// configure the proxy with the sites
+		if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
+			return err
+		}
 	}
 
 	return nil
