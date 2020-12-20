@@ -186,6 +186,7 @@ func (c *Config) Save() error {
 	return nil
 }
 
+// GetFile returns the file location for the config
 func (c *Config) GetFile() string {
 	return c.File
 }
