@@ -47,7 +47,6 @@ func FirstTime(home, env string, output terminal.Outputer) error {
 		// check if the port is available
 		var port string
 		for {
-
 			if err := portavail.Check(strconv.Itoa(mysqlDefaultPort)); err != nil {
 				mysqlDefaultPort = mysqlDefaultPort + 1
 				continue
@@ -64,8 +63,6 @@ func FirstTime(home, env string, output terminal.Outputer) error {
 			Version: version,
 			Port:    port,
 		})
-
-		output.Done()
 	}
 
 	postgres, err := confirm("Would you like to use PostgreSQL", true)
@@ -74,19 +71,37 @@ func FirstTime(home, env string, output terminal.Outputer) error {
 	}
 
 	if postgres {
-		output.Pending("adding postgres 12 on port 5432")
+		// prompt for the version
+		opts := []string{"13", "12", "11", "10", "9"}
+		selected, err := output.Select(os.Stderr, "Select the version of PostgreSQL ", opts)
+		if err != nil {
+			return err
+		}
+
+		version := opts[selected]
+
+		// check if the port is available
+		var port string
+		for {
+			if err := portavail.Check(strconv.Itoa(postgresDefaultPort)); err != nil {
+				postgresDefaultPort = postgresDefaultPort + 1
+				continue
+			}
+
+			port = strconv.Itoa(postgresDefaultPort)
+
+			break
+		}
 
 		// add a default postgres database
 		c.Databases = append(c.Databases, config.Database{
 			Engine:  "postgres",
-			Version: "12",
-			Port:    "5432",
+			Version: version,
+			Port:    port,
 		})
-
-		output.Done()
 	}
 
-	redis, err := confirm("Would you like to setup Redis", true)
+	redis, err := confirm("Would you like to use Redis", true)
 	if err != nil {
 		return err
 	}
