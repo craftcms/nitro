@@ -2,6 +2,7 @@ package destroy
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/backup"
+	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
@@ -45,12 +47,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
+			cfg, err := config.Load(home, env)
+			if err != nil {
+				return err
+			}
 
 			fmt.Print("Are you sure (this will remove all containers, volumes, and networks) [Y/n] ")
 
 			// prompt the user for confirmation
 			var response string
-			_, err := fmt.Scanln(&response)
+			_, err = fmt.Scanln(&response)
 			if err != nil {
 				return fmt.Errorf("unable to provide a prompt, %w", err)
 			}
@@ -212,11 +218,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			if cmd.Flag("clean").Value.String() == "true" {
+				if err := os.Remove(cfg.GetFile()); err != nil {
+					output.Info("Unable to remove configuration file")
+				}
+			}
+
 			output.Info(env, "destroyed ✨")
 
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool("clean", false, "remove configuration file")
 
 	return cmd
 }
