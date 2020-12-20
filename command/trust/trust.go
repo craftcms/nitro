@@ -67,9 +67,22 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// get the contents of the certificate from the container
 			output.Pending(fmt.Sprintf("getting certificate for %s...", env))
 
+			// verify the file exists in the container
+			for {
+				stat, err := docker.ContainerStatPath(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
+				if err != nil {
+					continue
+				}
+
+				if stat.Name != "" {
+					break
+				}
+			}
+
 			// copy the file from the container
 			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
-			if err != nil || stat.Mode.IsRegular() == false { // make sure it is a file not a directory
+			if err != nil || stat.Mode.IsRegular() == false {
+				output.Warning()
 				return fmt.Errorf("unable to get the certificate from the container, %w", err)
 			}
 
