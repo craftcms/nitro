@@ -2,11 +2,20 @@ package setup
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/portavail"
 	"github.com/craftcms/nitro/terminal"
+)
+
+var (
+	mysqlDefaultPort    = 3306
+	postgresDefaultPort = 5432
+	redisDefaultPort    = 6379
 )
 
 // FirstTime is used when there is no configuration file found in a users
@@ -14,7 +23,6 @@ import (
 // disk space in version 2 as that is defined and managed at the docker
 // level. If anything fails, we return an error.
 func FirstTime(home, env string, output terminal.Outputer) error {
-	// TODO(jasonmccallister) consider prompts for which type(s) of database?
 	c := config.Config{
 		File: filepath.Join(home, ".nitro", env+".yaml"),
 	}
@@ -27,13 +35,34 @@ func FirstTime(home, env string, output terminal.Outputer) error {
 	}
 
 	if mysql {
-		output.Pending("adding mysql 8.0 on port 3306")
+		// prompt for the version
+		opts := []string{"8.0", "5.7", "5.6"}
+		selected, err := output.Select(os.Stderr, "Select the version of MySQL ", opts)
+		if err != nil {
+			return err
+		}
+
+		version := opts[selected]
+
+		// check if the port is available
+		var port string
+		for {
+
+			if err := portavail.Check(strconv.Itoa(mysqlDefaultPort)); err != nil {
+				mysqlDefaultPort = mysqlDefaultPort + 1
+				continue
+			}
+
+			port = strconv.Itoa(mysqlDefaultPort)
+
+			break
+		}
 
 		// add a default mysql database
 		c.Databases = append(c.Databases, config.Database{
 			Engine:  "mysql",
-			Version: "8.0",
-			Port:    "3306",
+			Version: version,
+			Port:    port,
 		})
 
 		output.Done()
