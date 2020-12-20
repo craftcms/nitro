@@ -157,9 +157,13 @@ func (c *Config) Save() error {
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
 		// otherwise create it
-		if _, err := os.Create(c.File); err != nil {
+		f, err := os.Create(c.File)
+		if err != nil {
 			return err
 		}
+		defer f.Close()
+
+		f.Chown(os.Geteuid(), os.Getuid())
 	}
 
 	// unmarshal
