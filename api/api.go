@@ -77,7 +77,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 
 	// add the routes to the first server
 	update.Srv0 = caddy.Server{
-		Listen: []string{":443", ":9003"},
+		Listen: []string{":443", ":80", ":9003"},
 		Routes: routes,
 	}
 
