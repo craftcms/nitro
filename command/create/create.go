@@ -17,11 +17,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 const exampleText = `  # create a new default craft project (similar to "composer create-project craftcms/craft my-project")
   nitro create my-project
 
@@ -142,6 +137,14 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			output.Done()
 
 			output.Info("project created 🤓")
+
+			// TODO(jasonmccallister) prompt the user for the version of php, webroot, hostname
+			// prompt for the php version
+			// versions := []string{"7.4", "7.3", "7.2", "7.1"}
+			// selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
+			// if err != nil {
+			// 	return err
+			// }
 
 			// run the composer install command
 			for _, c := range cmd.Parent().Commands() {
