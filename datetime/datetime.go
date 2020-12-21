@@ -11,14 +11,14 @@ func Parse(t time.Time) string {
 	year, month, day := t.Date()
 	hour, min, sec := t.Clock()
 
-	y := strconv.Itoa(year)
-	m := prepend(strconv.Itoa(int(month)))
+	yr := strconv.Itoa(year)
+	mon := prepend(strconv.Itoa(int(month)))
 	d := prepend(strconv.Itoa(day))
-	h := prepend(strconv.Itoa(hour))
+	hr := prepend(strconv.Itoa(hour))
 	mi := prepend(strconv.Itoa(min))
 	s := prepend(strconv.Itoa(sec))
 
-	return y[len(y)-2:] + m + d + "_" + h + mi + s
+	return yr[len(yr)-2:] + mon + d + "_" + hr + mi + s
 }
 
 func prepend(s string) string {
