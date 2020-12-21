@@ -84,22 +84,20 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	// set the default welcome server
 	update.Srv1 = caddy.Server{
 		Listen: []string{":80"},
-		Routes: []caddy.ServerRoute{
-			{
-				Handle: []caddy.RouteHandle{
-					{
-						Handler: "vars",
-						Root:    "/var/www/html",
-					},
-					{
-						Handler: "file_server",
-						Root:    "/var/www/html",
-						Hide:    []string{"/etc/caddy/Caddyfile"},
-					},
+		Routes: append(routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "vars",
+					Root:    "/var/www/html",
 				},
-				Terminal: true,
+				{
+					Handler: "file_server",
+					Root:    "/var/www/html",
+					Hide:    []string{"/etc/caddy/Caddyfile"},
+				},
 			},
-		},
+			Terminal: true,
+		}),
 	}
 
 	content, err := json.Marshal(&update)
