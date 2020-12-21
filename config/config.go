@@ -23,8 +23,7 @@ type Config struct {
 	Databases []Database `yaml:"databases,omitempty"`
 	Services  Services   `yaml:"services,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`
-
-	File string `yaml:"-"`
+	File      string     `yaml:"-"`
 }
 
 // Blackfire allows users to setup their containers to use blackfire locally.
