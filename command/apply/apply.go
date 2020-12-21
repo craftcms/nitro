@@ -101,7 +101,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// check the databases
 			for _, db := range cfg.Databases {
-				if err := checkDatabase(ctx, docker, output, filter, db, envNetwork.ID, env, skipPulls); err != nil {
+				if err := checkDatabase(ctx, docker, output, filter, db, envNetwork.ID, env); err != nil {
 					return err
 				}
 			}
@@ -445,7 +445,7 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 	return types.Container{}, ErrNoProxyContainer
 }
 
-func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, networkID, env string, skipPull bool) error {
+func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, networkID, env string) error {
 	// add filters to check for the container
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
@@ -528,25 +528,23 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 
 		// check for if we should skip pulling an image
-		if skipPull != false {
-			output.Pending("pulling", image)
+		output.Pending("pulling", image)
 
-			// pull the image
-			rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-			if err != nil {
-				output.Warning()
-				return fmt.Errorf("unable to pull image %s, %w", image, err)
-			}
-
-			// read the output to pull the image
-			buf := &bytes.Buffer{}
-			if _, err := buf.ReadFrom(rdr); err != nil {
-				output.Warning()
-				return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-			}
-
-			output.Done()
+		// pull the image
+		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+		if err != nil {
+			output.Warning()
+			return fmt.Errorf("unable to pull image %s, %w", image, err)
 		}
+
+		// read the output to pull the image
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
+			output.Warning()
+			return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		}
+
+		output.Done()
 
 		output.Pending("creating", hostname)
 
