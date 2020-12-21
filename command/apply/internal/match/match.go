@@ -12,7 +12,7 @@ import (
 // Site takes the home directory, site, and a container to determine if they
 // match whats expected.
 func Site(home string, site config.Site, container types.ContainerJSON) bool {
-	// check if the image does not match
+	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
 		return false
 	}
@@ -28,8 +28,13 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 		return false
 	}
 
+	// run the final check on the environment variables
+	return checkEnvs(site, container.Config.Env)
+}
+
+func checkEnvs(site config.Site, envs []string) bool {
 	// check the environment variables
-	for _, e := range container.Config.Env {
+	for _, e := range envs {
 		sp := strings.Split(e, "=")
 
 		// show only the environment variables we know about/support
