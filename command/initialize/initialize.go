@@ -216,11 +216,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						return fmt.Errorf("unable to set the HTTP port, %w", err)
 					}
 				default:
-					if os.Getenv("NITRO_HTTP_PORT") != "" {
-						httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
-						if err != nil {
-							return fmt.Errorf("unable to set the HTTP port, %w", err)
-						}
+					httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
+					if err != nil {
+						return fmt.Errorf("unable to set the HTTP port, %w", err)
 					}
 				}
 
@@ -232,11 +230,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						return fmt.Errorf("unable to set the HTTPS port, %w", err)
 					}
 				default:
-					if os.Getenv("NITRO_HTTPS_PORT") != "" {
-						httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
-						if err != nil {
-							return fmt.Errorf("unable to set the HTTPS port, %w", err)
-						}
+					httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
+					if err != nil {
+						return fmt.Errorf("unable to set the HTTPS port, %w", err)
 					}
 				}
 
@@ -248,27 +244,25 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						return fmt.Errorf("unable to set the API port, %w", err)
 					}
 				default:
-					if os.Getenv("NITRO_API_PORT") != "" {
-						apiPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
-						if err != nil {
-							return fmt.Errorf("unable to set the API port, %w", err)
-						}
+					apiPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
+					if err != nil {
+						return fmt.Errorf("unable to set the API port, %w", err)
 					}
 				}
 
 				// check for a custom xdebug port
 				switch os.Getenv("NITRO_XDEBUG_PORT") {
 				case "":
+					// use the default environment variable
 					xdebugPort, err = nat.NewPort("tcp", "9003")
 					if err != nil {
 						return fmt.Errorf("unable to set the API port, %w", err)
 					}
 				default:
-					if os.Getenv("NITRO_XDEBUG_PORT") != "" {
-						xdebugPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_XDEBUG_PORT"))
-						if err != nil {
-							return fmt.Errorf("unable to set the xdebug port, %w", err)
-						}
+					// get the port using the environment variable
+					xdebugPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_XDEBUG_PORT"))
+					if err != nil {
+						return fmt.Errorf("unable to set the xdebug port, %w", err)
 					}
 				}
 
