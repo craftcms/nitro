@@ -123,11 +123,6 @@ func TestLoad(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				// check php
-				if !reflect.DeepEqual(got.PHP, tt.want.PHP) {
-					t.Errorf("Load() = \ngot:\n%v,\nwant\n%v", got.PHP, tt.want.PHP)
-				}
-
 				// check blackfire
 				if !reflect.DeepEqual(got.Blackfire, tt.want.Blackfire) {
 					t.Errorf("Load() = \ngot:\n%v,\nwant\n%v", got.Blackfire, tt.want.Blackfire)

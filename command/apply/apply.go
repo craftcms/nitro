@@ -110,10 +110,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			output.Info("Checking Sites...")
 
 			// get the envs for the sites
-			envs := cfg.AsEnvs()
-
 			for _, site := range cfg.Sites {
 				output.Pending("checking", site.Hostname)
+				envs := site.AsEnvs()
 
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
@@ -226,7 +225,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// make sure container is in sync
-					if match.Site(home, site, cfg.PHP, details) == false {
+					if match.Site(home, site, details) == false {
 						fmt.Print("- updating... ")
 						// stop container
 						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {

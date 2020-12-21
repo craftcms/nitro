@@ -17,54 +17,54 @@ var Envs = map[string]string{
 // AsEnvs takes a configuration and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
-func (c *Config) AsEnvs() []string {
+func (s *Site) AsEnvs() []string {
 	var envs []string
 
-	if c.PHP.DisplayErrors {
+	if s.PHP.DisplayErrors {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
 	} else {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=off")
 	}
 
-	if c.PHP.MemoryLimit == "" {
+	if s.PHP.MemoryLimit == "" {
 		envs = append(envs, "PHP_MEMORY_LIMIT=512M")
 	} else {
-		envs = append(envs, "PHP_MEMORY_LIMIT="+c.PHP.MemoryLimit)
+		envs = append(envs, "PHP_MEMORY_LIMIT="+s.PHP.MemoryLimit)
 	}
 
-	if c.PHP.MaxExecutionTime == 0 {
+	if s.PHP.MaxExecutionTime == 0 {
 		envs = append(envs, "PHP_MAX_EXECUTION_TIME=5000")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_EXECUTION_TIME", c.PHP.MaxExecutionTime))
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_EXECUTION_TIME", s.PHP.MaxExecutionTime))
 	}
 
-	if c.PHP.UploadMaxFileSize == "" {
+	if s.PHP.UploadMaxFileSize == "" {
 		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE=512M")
 	} else {
-		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+c.PHP.UploadMaxFileSize)
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+s.PHP.UploadMaxFileSize)
 	}
 
-	if c.PHP.MaxInputVars == 0 {
+	if s.PHP.MaxInputVars == 0 {
 		envs = append(envs, "PHP_MAX_INPUT_VARS=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", c.PHP.MaxInputVars))
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", s.PHP.MaxInputVars))
 	}
 
-	if c.PHP.PostMaxSize == "" {
+	if s.PHP.PostMaxSize == "" {
 		envs = append(envs, "PHP_POST_MAX_SIZE=512M")
 	} else {
-		envs = append(envs, fmt.Sprintf("%s=%s", "PHP_POST_MAX_SIZE", c.PHP.PostMaxSize))
+		envs = append(envs, fmt.Sprintf("%s=%s", "PHP_POST_MAX_SIZE", s.PHP.PostMaxSize))
 	}
 
 	// handle opcache settings
-	if c.PHP.OpcacheEnable == true {
+	if s.PHP.OpcacheEnable == true {
 		envs = append(envs, "PHP_OPCACHE_ENABLE=1")
 	} else {
 		envs = append(envs, "PHP_OPCACHE_ENABLE=0")
 	}
 
-	if c.PHP.OpcacheRevalidateFreq > 0 {
-		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", c.PHP.OpcacheRevalidateFreq))
+	if s.PHP.OpcacheRevalidateFreq > 0 {
+		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", s.PHP.OpcacheRevalidateFreq))
 	} else {
 		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ=0")
 	}
@@ -78,12 +78,12 @@ func (c *Config) AsEnvs() []string {
 	// "PHP_OPCACHE_FAST_SHUTDOWN=1"
 
 	// set the blackfire envs if available
-	if c.Blackfire.ServerID != "" {
-		envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
-	}
-	if c.Blackfire.ServerToken != "" {
-		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
-	}
+	// if s.Blackfire.ServerID != "" {
+	// 	envs = append(envs, "BLACKFIRE_SERVER_ID="+s.Blackfire.ServerID)
+	// }
+	// if s.Blackfire.ServerToken != "" {
+	// 	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+s.Blackfire.ServerToken)
+	// }
 
 	return envs
 }

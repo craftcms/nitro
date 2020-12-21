@@ -13,6 +13,7 @@ type Site struct {
 	Aliases  []string `yaml:"aliases,omitempty"`
 	Path     string   `yaml:"path"`
 	Version  string   `yaml:"version"`
+	PHP      PHP      `yaml:"php,omitempty"`
 	Dir      string   `yaml:"dir"`
 	Xdebug   bool     `yaml:"xdebug"`
 }

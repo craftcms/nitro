@@ -20,7 +20,6 @@ var (
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
-	PHP       PHP        `yaml:"php,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
 	Services  Services   `yaml:"services,omitempty"`
 	Sites     []Site     `yaml:"sites,omitempty"`

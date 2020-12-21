@@ -30,7 +30,7 @@ init:
 	nitro init
 
 test:
-	go test -v ./...
+	go test ./...
 coverage:
 	go test -v ./... -coverprofile profile.out
 	go tool cover -html=profile.out

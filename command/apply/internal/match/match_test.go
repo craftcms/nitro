@@ -12,7 +12,6 @@ func TestSite(t *testing.T) {
 	type args struct {
 		home      string
 		site      config.Site
-		php       config.PHP
 		container types.ContainerJSON
 	}
 	tests := []struct {
@@ -25,8 +24,8 @@ func TestSite(t *testing.T) {
 			args: args{
 				home: "testdata/example-site",
 				site: config.Site{
-					Path: "testdata/new-site",
-					PHP:  "7.4",
+					Path:    "testdata/new-site",
+					Version: "7.4",
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
@@ -40,7 +39,7 @@ func TestSite(t *testing.T) {
 			name: "mismatched images return false",
 			args: args{
 				site: config.Site{
-					PHP: "7.4",
+					Version: "7.4",
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
@@ -53,7 +52,7 @@ func TestSite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Site(tt.args.home, tt.args.site, tt.args.php, tt.args.container); got != tt.want {
+			if got := Site(tt.args.home, tt.args.site, tt.args.container); got != tt.want {
 				t.Errorf("Site() = %v, want %v", got, tt.want)
 			}
 		})
