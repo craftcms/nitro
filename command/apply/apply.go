@@ -131,8 +131,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 					// should we skip pulling the image
 					if skipPulls == false {
-						output.Pending("pulling", image)
-
 						// pull the image
 						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 						if err != nil {
@@ -143,8 +141,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						if _, err := buf.ReadFrom(rdr); err != nil {
 							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 						}
-
-						output.Done()
 					}
 
 					// get the sites path
@@ -242,8 +238,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 						// should we skip pulling the image
 						if skipPulls == false {
-							output.Pending("pulling", image)
-
 							// pull the image
 							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 							if err != nil {
@@ -254,8 +248,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							if _, err := buf.ReadFrom(rdr); err != nil {
 								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 							}
-
-							output.Done()
 						}
 
 						// get the sites path
