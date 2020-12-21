@@ -26,6 +26,7 @@ _API_PORT`.
 - Machine name is now the environment name, the `NITRO_DEFAULT_MACHINE` has been renamed to `NITRO_DEFAULT_ENVIRONMENT`.
 - The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
 - The `create` command will now install composer dependencies.
+- PHP settings are now site specific.
 
 ## 1.1.0 - 2020-10-06
 
