@@ -20,7 +20,8 @@ var Envs = map[string]string{
 func (s *Site) AsEnvs() []string {
 	var envs []string
 
-	if s.PHP.DisplayErrors {
+	// if they do not specify the error false means on
+	if s.PHP.DisplayErrors == false {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
 	} else {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=off")

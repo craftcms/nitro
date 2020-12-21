@@ -43,7 +43,6 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 				// if there is a custom value
 				if site.PHP.DisplayErrors {
 					if val != "on" {
-						fmt.Println("display errors is not on")
 						return false
 					}
 				}
