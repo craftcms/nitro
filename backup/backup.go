@@ -32,11 +32,39 @@ type Options struct {
 	Commands      []string
 }
 
-// Prompt is used to ask a user for input and walk them
-// through selecting a database engine (container) and
-// a database to backup. It will return the container ID
-// as the first string, the database name to backup, and
-// the last return is an error.
+func (o *Options) Validate() error {
+	if o == nil {
+		return fmt.Errorf("options must be provided for the backup")
+	}
+
+	// check the options
+	if o.BackupName == "" {
+		return fmt.Errorf("invalid backup name")
+	}
+	if o.Commands == nil {
+		return fmt.Errorf("invalid commands")
+	}
+	if o.ContainerID == "" {
+		return fmt.Errorf("invalid container id")
+	}
+	if o.ContainerName == "" {
+		return fmt.Errorf("invalid container name")
+	}
+	if o.Database == "" {
+		return fmt.Errorf("invalid database")
+	}
+	if o.Environment == "" {
+		return fmt.Errorf("invalid environment")
+	}
+	if o.Home == "" {
+		return fmt.Errorf("invalid home path")
+	}
+
+	return nil
+}
+
+// Prompt is used to ask a user for input and walk them through selecting a database engine (container) and a database to backup. It will return the container ID
+// as the first string, the database name to backup, and the last return is an error.
 func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPIClient, output terminal.Outputer, containers []types.Container, containerList []string) (string, string, string, string, error) {
 	// prompt the user for which database to backup
 	selected, err := output.Select(reader, "Which database engine? ", containerList)
@@ -152,31 +180,8 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 // is used to determine the engine (container) and the specific database to backup. Perform accepts the backup commands and is
 // agnositic to the database engine for the requested backup.
 func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Options) error {
-	if opts == nil {
-		return fmt.Errorf("options must be provided for the backup")
-	}
-
-	// check the options
-	if opts.BackupName == "" {
-		return fmt.Errorf("invalid backup name")
-	}
-	if opts.Commands == nil {
-		return fmt.Errorf("invalid commands")
-	}
-	if opts.ContainerID == "" {
-		return fmt.Errorf("invalid container id")
-	}
-	if opts.ContainerName == "" {
-		return fmt.Errorf("invalid container name")
-	}
-	if opts.Database == "" {
-		return fmt.Errorf("invalid database")
-	}
-	if opts.Environment == "" {
-		return fmt.Errorf("invalid environment")
-	}
-	if opts.Home == "" {
-		return fmt.Errorf("invalid home path")
+	if err := opts.Validate(); err != nil {
+		return err
 	}
 
 	// create the backup in the container
