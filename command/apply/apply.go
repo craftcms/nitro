@@ -584,21 +584,24 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		}
 	}
 
-	if len(sites) > 0 {
-		// wait for the api to be ready
-		wait := true
-		for wait {
-			_, err := nitrod.Ping(ctx, &protob.PingRequest{})
-			if err == nil {
-				wait = false
-				break
-			}
-		}
+	// if there are no sites, we are done
+	if len(sites) == 0 {
+		return nil
+	}
 
-		// configure the proxy with the sites
-		if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
-			return err
+	// wait for the api to be ready
+	wait := true
+	for wait {
+		_, err := nitrod.Ping(ctx, &protob.PingRequest{})
+		if err == nil {
+			wait = false
+			break
 		}
+	}
+
+	// configure the proxy with the sites
+	if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
+		return err
 	}
 
 	return nil
