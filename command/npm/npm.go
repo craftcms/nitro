@@ -24,13 +24,13 @@ var (
 )
 
 const exampleText = `  # run npm install in a current directory
-  nitro npm
+  nitro npm install
 
-  # run npm install in current directory
-  nitro npm --install
+  # run npm update
+  nitro npm update
 
-  # updating a node project outside of the current directory
-  nitro npm ./project-dir --version 10 --update`
+  # run a script
+  nitro npm run dev`
 
 // New is used for scaffolding new commands
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -38,9 +38,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Use:     "npm",
 		Short:   "Run npm install or update",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return nil, cobra.ShellCompDirectiveFilterDirs
-		},
+		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
@@ -52,47 +50,30 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 			version := cmd.Flag("version").Value.String()
 
-			var path string
-			switch len(args) {
-			case 0:
-				wd, err := os.Getwd()
-				if err != nil {
-					return fmt.Errorf("unable to get the current directory, %w", err)
-				}
+			wd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("unable to get the current directory, %w", err)
+			}
 
-				path, err = filepath.Abs(wd)
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
-			default:
-				var err error
-				path, err = filepath.Abs(args[0])
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
+			path, err := filepath.Abs(wd)
+			if err != nil {
+				return fmt.Errorf("unable to find the absolute path, %w", err)
 			}
 
 			// determine the default action
-			action := "install"
-			if cmd.Flag("update").Value.String() == "true" {
-				action = "update"
-			}
+			action := args[0]
 
 			// get the full file path
 			nodePath := filepath.Join(path, "package.json")
-			if action == "update" {
-				nodePath = filepath.Join(path, "package-lock.json")
-			}
 
 			// set the container name to keep the ephemeral
-			name := containerName(path, version, action)
+			containerName := name(path, version, action)
 
 			output.Pending("checking", nodePath)
 
 			// make sure the file exists
-			_, err := os.Stat(nodePath)
-			if os.IsNotExist(err) {
-				fmt.Println("")
+			if _, err := os.Stat(nodePath); os.IsNotExist(err) {
+				output.Warning()
 				return ErrNoPackageFile
 			}
 
@@ -126,18 +107,12 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			var commands []string
-			switch action {
-			case "install":
-				commands = []string{"npm", "install"}
-			default:
-				commands = []string{"npm", "update"}
-			}
+			commands := append([]string{"npm"}, args...)
 
 			// set filters for the container name and environment
 			containerFilter := filters.NewArgs()
 			containerFilter.Add("label", labels.Environment+"="+env)
-			containerFilter.Add("name", name)
+			containerFilter.Add("name", containerName)
 
 			// check if there is an existing container
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: containerFilter})
@@ -174,7 +149,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 						},
 					},
 					nil,
-					name)
+					containerName)
 				if err != nil {
 					return fmt.Errorf("unable to create container\n%w", err)
 				}
@@ -208,18 +183,25 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Info("npm", action, "complete 🤘")
 
+			// should we remove the container
+			if cmd.Flag("keep").Value.String() == "false" {
+				if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
+					return err
+				}
+			}
+
 			return nil
 		},
 	}
 
 	// set flags for the command
-	cmd.Flags().Bool("update", false, "run node update instead of install")
 	cmd.Flags().String("version", "14", "which node version to use")
+	cmd.Flags().Bool("keep", true, "keep the container (faster since it will cache dependencies)")
 
 	return cmd
 }
 
-func containerName(path, version, action string) string {
+func name(path, version, action string) string {
 	// combine the path and version
 	n := fmt.Sprintf("%s_%s_%s_%s", path, "composer", version, action)
 

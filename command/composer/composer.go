@@ -73,7 +73,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			composerPath := filepath.Join(path, "composer.json")
 
 			// set the container name to keep the ephemeral
-			name := containerName(path, version, action)
+			containerName := name(path, version, action)
 
 			// make sure the file exists
 			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
@@ -112,7 +112,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// set filters for the container name and environment
 			containerFilter := filters.NewArgs()
 			containerFilter.Add("label", labels.Environment+"="+env)
-			containerFilter.Add("name", name)
+			containerFilter.Add("name", containerName)
 
 			// check if there is an existing container
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: containerFilter})
@@ -149,7 +149,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						},
 					},
 					nil,
-					name)
+					containerName)
 				if err != nil {
 					return fmt.Errorf("unable to create the composer container\n%w", err)
 				}
@@ -199,7 +199,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	return cmd
 }
 
-func containerName(path, version, action string) string {
+func name(path, version, action string) string {
 	// combine the path and version
 	n := fmt.Sprintf("%s_%s_%s_%s", path, "composer", version, action)
 
