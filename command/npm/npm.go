@@ -79,7 +79,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Done()
 
-			image := fmt.Sprintf("docker.io/library/%s:%s", "node", version)
+			image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
 
 			imageFilter := filters.NewArgs()
 			imageFilter.Add("reference", image)
@@ -92,7 +92,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// if we don't have the image, pull it
 			if len(images) == 0 {
-				output.Pending("pulling")
+				output.Pending("pulling", image)
 
 				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 				if err != nil {
@@ -138,13 +138,14 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 							// TODO abstract this?
 							"com.craftcms.nitro.path": path,
 						},
+						WorkingDir: "/home/node/app",
 					},
 					&container.HostConfig{
 						Mounts: []mount.Mount{
 							{
 								Type:   "bind",
 								Source: path,
-								Target: "/app",
+								Target: "/home/node/app",
 							},
 						},
 					},
