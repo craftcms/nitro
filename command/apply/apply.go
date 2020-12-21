@@ -68,7 +68,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// parse flags
 
 			// should we skip pulls?
-			skipPulls, err := strconv.ParseBool(cmd.Flag("skip-pulls").Value.String())
+			skipPulls, err := strconv.ParseBool(cmd.Flag("skip-pull").Value.String())
 			if err != nil {
 				skipPulls = false
 			}
@@ -124,24 +124,94 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					return fmt.Errorf("error getting a list of containers")
 				}
 
-				// create the site options
-				opts := &SiteOptions{
-					Site:            site,
-					Home:            home,
-					Environment:     env,
-					EnvironmentVars: envs,
-					SkipPulls:       skipPulls,
-					Network:         envNetwork,
-					Proxy:           &proxy,
-				}
-
 				// if there are no containers we need to create one
 				switch len(containers) == 0 {
 				case true:
 					// create the container
-					if err := createSiteContainer(ctx, docker, output, opts); err != nil {
+					image := fmt.Sprintf(NginxImage, site.PHP)
+
+					// should we skip pulling the image
+					if skipPulls == false {
+						output.Pending("pulling", image)
+
+						// pull the image
+						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+						if err != nil {
+							return fmt.Errorf("unable to pull the image, %w", err)
+						}
+
+						buf := &bytes.Buffer{}
+						if _, err := buf.ReadFrom(rdr); err != nil {
+							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+						}
+
+						output.Done()
+					}
+
+					// get the sites path
+					path, err := site.GetAbsPath(home)
+					if err != nil {
 						return err
 					}
+
+					// add the site itself to the extra hosts
+					extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
+					for _, s := range site.Aliases {
+						extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+					}
+
+					// check if xdebug is enabled
+					switch site.Xdebug {
+					case false:
+						envs = append(envs, "XDEBUG_MODE=off")
+					default:
+						// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
+						// opts.Network.IPAM.Config[0].Gateway
+						envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks[env].IPAddress))
+						envs = append(envs, "XDEBUG_SESSION=nitro")
+						envs = append(envs, "XDEBUG_MODE=develop,debug")
+					}
+
+					// create the container
+					resp, err := docker.ContainerCreate(
+						ctx,
+						&container.Config{
+							Image: image,
+							Labels: map[string]string{
+								labels.Environment: env,
+								labels.Host:        site.Hostname,
+							},
+							Env: envs,
+						},
+						&container.HostConfig{
+							Mounts: []mount.Mount{
+								{
+									Type:   mount.TypeBind,
+									Source: path,
+									Target: "/app",
+								},
+							},
+							ExtraHosts: extraHosts,
+						},
+						&network.NetworkingConfig{
+							EndpointsConfig: map[string]*network.EndpointSettings{
+								env: {
+									NetworkID: envNetwork.ID,
+								},
+							},
+						},
+						site.Hostname,
+					)
+					if err != nil {
+						return fmt.Errorf("unable to create the container, %w", err)
+					}
+
+					// start the container
+					if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the container, %w", err)
+					}
+
+					// TODO(jasonmccallister) check for a custom root and copt the template to the container
 
 					// remove the site filter
 					filter.Del("label", labels.Host+"="+site.Hostname)
@@ -168,11 +238,91 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							return err
 						}
 
-						// create the site container
-						if err := createSiteContainer(ctx, docker, output, opts); err != nil {
-							output.Warning()
+						// create the container
+						image := fmt.Sprintf(NginxImage, site.PHP)
+
+						// should we skip pulling the image
+						if skipPulls == false {
+							output.Pending("pulling", image)
+
+							// pull the image
+							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+							if err != nil {
+								return fmt.Errorf("unable to pull the image, %w", err)
+							}
+
+							buf := &bytes.Buffer{}
+							if _, err := buf.ReadFrom(rdr); err != nil {
+								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+							}
+
+							output.Done()
+						}
+
+						// get the sites path
+						path, err := site.GetAbsPath(home)
+						if err != nil {
 							return err
 						}
+
+						// add the site itself to the extra hosts
+						extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
+						for _, s := range site.Aliases {
+							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+						}
+
+						// check if xdebug is enabled
+						switch site.Xdebug {
+						case false:
+							envs = append(envs, "XDEBUG_MODE=off")
+						default:
+							// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
+							// opts.Network.IPAM.Config[0].Gateway
+							envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks[env].IPAddress))
+							envs = append(envs, "XDEBUG_SESSION=nitro")
+							envs = append(envs, "XDEBUG_MODE=develop,debug")
+						}
+
+						// create the container
+						resp, err := docker.ContainerCreate(
+							ctx,
+							&container.Config{
+								Image: image,
+								Labels: map[string]string{
+									labels.Environment: env,
+									labels.Host:        site.Hostname,
+								},
+								Env: envs,
+							},
+							&container.HostConfig{
+								Mounts: []mount.Mount{
+									{
+										Type:   mount.TypeBind,
+										Source: path,
+										Target: "/app",
+									},
+								},
+								ExtraHosts: extraHosts,
+							},
+							&network.NetworkingConfig{
+								EndpointsConfig: map[string]*network.EndpointSettings{
+									env: {
+										NetworkID: envNetwork.ID,
+									},
+								},
+							},
+							site.Hostname,
+						)
+						if err != nil {
+							return fmt.Errorf("unable to create the container, %w", err)
+						}
+
+						// start the container
+						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+							return fmt.Errorf("unable to start the container, %w", err)
+						}
+
+						// TODO(jasonmccallister) check for a custom root and copt the template to the container
 					}
 
 					// remove the site filter
@@ -473,95 +623,6 @@ type SiteOptions struct {
 	SkipPulls       bool
 	Network         *types.NetworkResource
 	Proxy           *types.Container
-}
-
-func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, opts *SiteOptions) error {
-	image := fmt.Sprintf(NginxImage, opts.Site.PHP)
-
-	// should we skip pulling the image
-	if opts.SkipPulls {
-		output.Pending("pulling", image)
-
-		// pull the image
-		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-		if err != nil {
-			return fmt.Errorf("unable to pull the image, %w", err)
-		}
-
-		buf := &bytes.Buffer{}
-		if _, err := buf.ReadFrom(rdr); err != nil {
-			return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-		}
-
-		output.Done()
-	}
-
-	// get the sites path
-	path, err := opts.Site.GetAbsPath(opts.Home)
-	if err != nil {
-		return err
-	}
-
-	// add the site itself to the extra hosts
-	extraHosts := []string{fmt.Sprintf("%s:%s", opts.Site.Hostname, "127.0.0.1")}
-	for _, s := range opts.Site.Aliases {
-		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-	}
-
-	// check if xdebug is enabled
-	switch opts.Site.Xdebug {
-	case false:
-		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=off")
-	default:
-		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
-		// opts.Network.IPAM.Config[0].Gateway
-		opts.EnvironmentVars = append(opts.EnvironmentVars, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress))
-		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_SESSION=nitro")
-		opts.EnvironmentVars = append(opts.EnvironmentVars, "XDEBUG_MODE=develop,debug")
-	}
-
-	// create the container
-	resp, err := docker.ContainerCreate(
-		ctx,
-		&container.Config{
-			Image: image,
-			Labels: map[string]string{
-				labels.Environment: opts.Environment,
-				labels.Host:        opts.Site.Hostname,
-			},
-			Env: opts.EnvironmentVars,
-		},
-		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: path,
-					Target: "/app",
-				},
-			},
-			ExtraHosts: extraHosts,
-		},
-		&network.NetworkingConfig{
-			EndpointsConfig: map[string]*network.EndpointSettings{
-				opts.Environment: {
-					NetworkID: opts.Network.ID,
-				},
-			},
-		},
-		opts.Site.Hostname,
-	)
-	if err != nil {
-		return fmt.Errorf("unable to create the container, %w", err)
-	}
-
-	// start the container
-	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return fmt.Errorf("unable to start the container, %w", err)
-	}
-
-	// TODO(jasonmccallister) check for a custom root and copt the template to the container
-
-	return nil
 }
 
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
