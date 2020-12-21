@@ -38,8 +38,12 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Use:       "composer",
 		Short:     "Run composer install or update",
 		Example:   exampleText,
-		ValidArgs: []string{"install", "update"},
+		ValidArgs: []string{"install", "update", "require", "why", "remove", "search", "dump-autoload", "status", "run-script", "exec"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("you must specify at least one arguement to this command")
+			}
+
 			env := cmd.Flag("environment").Value.String()
 			version := cmd.Flag("version").Value.String()
 			ctx := cmd.Context()
@@ -71,14 +75,10 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// set the container name to keep the ephemeral
 			name := containerName(path, version, action)
 
-			output.Pending("checking", composerPath)
-
 			// make sure the file exists
 			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
 				return ErrNoComposerFile
 			}
-
-			output.Done()
 
 			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
@@ -94,8 +94,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// if we don't have the image, pull it
 			if len(images) == 0 {
-				output.Pending("pulling image")
-
 				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 				if err != nil {
 					return fmt.Errorf("unable to pull the docker image, %w", err)
@@ -105,8 +103,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				if _, err := buf.ReadFrom(rdr); err != nil {
 					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
 				}
-
-				output.Done()
 			}
 
 			// build the args
