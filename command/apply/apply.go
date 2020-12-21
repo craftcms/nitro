@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -67,12 +66,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// parse flags
 
-			// should we skip pulls?
-			skipPulls, err := strconv.ParseBool(cmd.Flag("skip-pull").Value.String())
-			if err != nil {
-				skipPulls = false
-			}
-
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Environment+"="+env)
@@ -129,18 +122,15 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// create the container
 					image := fmt.Sprintf(NginxImage, site.Version)
 
-					// should we skip pulling the image
-					if skipPulls == false {
-						// pull the image
-						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-						if err != nil {
-							return fmt.Errorf("unable to pull the image, %w", err)
-						}
+					// pull the image
+					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+					if err != nil {
+						return fmt.Errorf("unable to pull the image, %w", err)
+					}
 
-						buf := &bytes.Buffer{}
-						if _, err := buf.ReadFrom(rdr); err != nil {
-							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-						}
+					buf := &bytes.Buffer{}
+					if _, err := buf.ReadFrom(rdr); err != nil {
+						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 					}
 
 					// get the sites path
@@ -236,18 +226,15 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						// create the container
 						image := fmt.Sprintf(NginxImage, site.Version)
 
-						// should we skip pulling the image
-						if skipPulls == false {
-							// pull the image
-							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-							if err != nil {
-								return fmt.Errorf("unable to pull the image, %w", err)
-							}
+						// pull the image
+						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+						if err != nil {
+							return fmt.Errorf("unable to pull the image, %w", err)
+						}
 
-							buf := &bytes.Buffer{}
-							if _, err := buf.ReadFrom(rdr); err != nil {
-								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-							}
+						buf := &bytes.Buffer{}
+						if _, err := buf.ReadFrom(rdr); err != nil {
+							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 						}
 
 						// get the sites path
@@ -375,7 +362,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	}
 
 	// add flag to skip pulling images
-	cmd.Flags().Bool("skip-pull", false, "skip pulling images")
 	cmd.Flags().Bool("skip-hosts", false, "skip modifying the hosts file")
 
 	return cmd
@@ -601,17 +587,6 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 	filter.Del("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Del("label", labels.Type+"=database")
 	return nil
-}
-
-// SiteOptions are used to create site containers
-type SiteOptions struct {
-	Site            config.Site
-	Home            string
-	Environment     string
-	EnvironmentVars []string
-	SkipPulls       bool
-	Network         *types.NetworkResource
-	Proxy           *types.Container
 }
 
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
