@@ -657,29 +657,35 @@ func createSiteContainer(ctx context.Context, docker client.CommonAPIClient, out
 	}
 
 	// create the container
-	resp, err := docker.ContainerCreate(ctx, &container.Config{
-		Image: image,
-		Labels: map[string]string{
-			labels.Environment: opts.Environment,
-			labels.Host:        opts.Site.Hostname,
+	resp, err := docker.ContainerCreate(
+		ctx,
+		&container.Config{
+			Image: image,
+			Labels: map[string]string{
+				labels.Environment: opts.Environment,
+				labels.Host:        opts.Site.Hostname,
+			},
+			Env: opts.EnvironmentVars,
 		},
-		Env: opts.EnvironmentVars,
-	}, &container.HostConfig{
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: path,
-				Target: "/app",
+		&container.HostConfig{
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: path,
+					Target: "/app",
+				},
+			},
+			ExtraHosts: extraHosts,
+		},
+		&network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				opts.Environment: {
+					NetworkID: opts.Network.ID,
+				},
 			},
 		},
-		ExtraHosts: extraHosts,
-	}, &network.NetworkingConfig{
-		EndpointsConfig: map[string]*network.EndpointSettings{
-			opts.Environment: {
-				NetworkID: opts.Network.ID,
-			},
-		},
-	}, opts.Site.Hostname)
+		opts.Site.Hostname,
+	)
 	if err != nil {
 		return fmt.Errorf("unable to create the container, %w", err)
 	}
