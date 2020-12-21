@@ -166,9 +166,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// set the version of php
-			site.PHP = versions[selected]
+			site.Version = versions[selected]
 
-			output.Success("setting PHP version", site.PHP)
+			output.Success("setting PHP version", site.Version)
 
 			// load the config
 			cfg, err := config.Load(home, env)

@@ -48,7 +48,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 				if len(site.Aliases) > 0 {
 					output.Info("  aliases:\t", strings.Join(site.Aliases, ", "))
 				}
-				output.Info("  php:\t", site.PHP)
+				output.Info("  php:\t", site.Version)
 				output.Info("  webroot:\t", site.Dir)
 				output.Info("  path:\t", site.Path)
 				output.Info("  ---")

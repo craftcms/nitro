@@ -13,7 +13,7 @@ import (
 // match whats expected.
 func Site(home string, site config.Site, php config.PHP, container types.ContainerJSON) bool {
 	// check if the image does not match
-	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.PHP) != container.Config.Image {
+	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
 		return false
 	}
 

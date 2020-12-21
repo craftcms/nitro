@@ -109,7 +109,7 @@ func (c *Config) AddSite(s Site) error {
 		}
 
 		// does the path match
-		if e.Path == s.PHP {
+		if e.Path == s.Path {
 			return fmt.Errorf("site path already exists")
 		}
 	}

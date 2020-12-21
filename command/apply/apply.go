@@ -128,7 +128,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				switch len(containers) == 0 {
 				case true:
 					// create the container
-					image := fmt.Sprintf(NginxImage, site.PHP)
+					image := fmt.Sprintf(NginxImage, site.Version)
 
 					// should we skip pulling the image
 					if skipPulls == false {
@@ -239,7 +239,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						}
 
 						// create the container
-						image := fmt.Sprintf(NginxImage, site.PHP)
+						image := fmt.Sprintf(NginxImage, site.Version)
 
 						// should we skip pulling the image
 						if skipPulls == false {
@@ -537,7 +537,7 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 
 		// check for if we should skip pulling an image
-		if skipPull {
+		if skipPull != false {
 			output.Pending("pulling", image)
 
 			// pull the image

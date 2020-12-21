@@ -68,7 +68,7 @@ func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *
 					}
 
 					// validate the php version
-					if err := validator.PHPVersion(s.PHP); err != nil {
+					if err := validator.PHPVersion(s.Version); err != nil {
 						siteErrs = append(siteErrs, fmt.Errorf("the php version for %s is not valid", s.Hostname))
 					}
 				}
