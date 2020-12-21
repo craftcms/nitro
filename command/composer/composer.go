@@ -24,23 +24,21 @@ var (
 	ErrNoComposerFile = fmt.Errorf("No composer.json or composer.lock was found")
 )
 
-const exampleText = `  # run composer install in a current directory
-  nitro composer
+const exampleText = `  # run composer install in a current directory using a container
+  nitro composer install
 
-  # updating a composer project outside of the current directory
-  nitro composer ./project-dir --version 2 --update`
+  # update a composer project using verison 1
+  nitro composer update --version 1`
 
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run
 // all the commands in a disposable docker container.
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "composer",
-		Short:   "Run composer install or update",
-		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return nil, cobra.ShellCompDirectiveFilterDirs
-		},
+		Use:       "composer",
+		Short:     "Run composer install or update",
+		Example:   exampleText,
+		ValidArgs: []string{"install", "update"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := cmd.Flag("environment").Value.String()
 			version := cmd.Flag("version").Value.String()
@@ -54,39 +52,21 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// get the path from args or current directory
 			var path string
-			switch len(args) {
-			case 0:
-				wd, err := os.Getwd()
-				if err != nil {
-					return fmt.Errorf("unable to get the current directory, %w", err)
-				}
+			wd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("unable to get the current directory, %w", err)
+			}
 
-				path, err = filepath.Abs(wd)
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
-			default:
-				var err error
-				path, err = filepath.Abs(args[0])
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
+			path, err = filepath.Abs(wd)
+			if err != nil {
+				return fmt.Errorf("unable to find the absolute path, %w", err)
 			}
 
 			// determine the default action
-			action := "install"
-			if cmd.Flag("update").Value.String() == "true" {
-				action = "update"
-			}
+			action := args[0]
 
 			// get the full file path
-			var composerPath string
-			switch action {
-			case "install":
-				composerPath = filepath.Join(path, "composer.json")
-			default:
-				composerPath = filepath.Join(path, "composer.lock")
-			}
+			composerPath := filepath.Join(path, "composer.json")
 
 			// set the container name to keep the ephemeral
 			name := containerName(path, version, action)
@@ -94,8 +74,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			output.Pending("checking", composerPath)
 
 			// make sure the file exists
-			_, err := os.Stat(composerPath)
-			if os.IsNotExist(err) {
+			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
 				return ErrNoComposerFile
 			}
 
@@ -130,13 +109,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Done()
 			}
 
-			var commands []string
-			switch action {
-			case "install":
-				commands = []string{"composer", "install", "--ignore-platform-reqs", "--prefer-dist"}
-			default:
-				commands = []string{"composer", "update", "--ignore-platform-reqs", "--prefer-dist"}
-			}
+			// build the args
+			commands := []string{"composer"}
+			commands = append(commands, args...)
 
 			// set filters for the container name and environment
 			containerFilter := filters.NewArgs()
@@ -210,13 +185,20 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			output.Info("composer", action, "completed 🤘")
 
+			// should we remove the container
+			if cmd.Flag("keep").Value.String() == "false" {
+				if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
+					return err
+				}
+			}
+
 			return nil
 		},
 	}
 
 	// set flags for the command
-	cmd.Flags().Bool("update", false, "run composer update instead of install")
 	cmd.Flags().String("version", "2", "which composer version to use")
+	cmd.Flags().Bool("keep", true, "keep the container (faster since it will cache dependencies)")
 
 	return cmd
 }
