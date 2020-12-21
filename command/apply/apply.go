@@ -661,8 +661,13 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 	}
 
 	// configure the proxy with the sites
-	if _, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites}); err != nil {
+	resp, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites})
+	if err != nil {
 		return err
+	}
+
+	if resp.Error == true {
+		return fmt.Errorf("unable to update the proxy, %s", resp.GetMessage())
 	}
 
 	return nil
