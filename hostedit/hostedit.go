@@ -72,3 +72,38 @@ func IsUpdated(file, addr string, hosts ...string) (bool, error) {
 	// compare the two to see if they are updated
 	return string(orig) == updated, nil
 }
+
+// func Remove(file, addr string) (string, error) {
+// 	f, err := ioutil.ReadFile(file)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	// split the file into multiple lines
+// 	lines := strings.Split(string(f), "\n")
+
+// 	// the index represents where the content (addr and hosts) should be placed
+// 	// which is in between the start and end text comment
+// 	var index int
+// 	for l, t := range lines {
+// 		// look for the beginning text
+// 		if strings.Contains(t, startText) {
+// 			// the next line is the empty line
+// 			index = l + 1
+// 		}
+
+// 		// look for the end text
+// 		if strings.Contains(t, endText) {
+// 			// we want the previous line
+// 			index = l - 1
+// 		}
+// 	}
+
+// 	// if there is an index, we need to remove the lines
+// 	if index > 0 {
+// 		// replace the line between the start and end text with the contents of the address and hosts
+// 		lines = append(lines[:index], lines[index+1:]...)
+// 	}
+
+// 	return strings.Join(lines, "\n"), fmt.Errorf("not yet tested or implemented")
+// }
