@@ -132,3 +132,52 @@ func TestIsUpdated(t *testing.T) {
 		})
 	}
 }
+
+func Test_indexes(t *testing.T) {
+	type args struct {
+		content []byte
+	}
+	tests := []struct {
+		name   string
+		args   args
+		start  int
+		middle int
+		end    int
+	}{
+		{
+			name: "can find the start, middle, and end",
+			args: args{content: []byte(`# <nitro>
+127.0.0.1 host
+# </nitro>`)},
+			start:  0,
+			middle: 1,
+			end:    2,
+		},
+		{
+			name: "can find the start, middle, and end in random",
+			args: args{content: []byte(`something host
+
+
+# <nitro>
+127.0.0.1 host
+# </nitro>`)},
+			start:  3,
+			middle: 4,
+			end:    5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, got2 := indexes(tt.args.content)
+			if got != tt.start {
+				t.Errorf("indexes() got = %v, want %v", got, tt.start)
+			}
+			if got1 != tt.middle {
+				t.Errorf("indexes() got1 = %v, want %v", got1, tt.middle)
+			}
+			if got2 != tt.end {
+				t.Errorf("indexes() got2 = %v, want %v", got2, tt.end)
+			}
+		})
+	}
+}

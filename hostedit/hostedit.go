@@ -107,3 +107,29 @@ func IsUpdated(file, addr string, hosts ...string) (bool, error) {
 
 // 	return strings.Join(lines, "\n"), fmt.Errorf("not yet tested or implemented")
 // }
+
+func indexes(content []byte) (int, int, int) {
+	// split the file into multiple lines
+	lines := strings.Split(string(content), "\n")
+
+	// the index represents where the content (addr and hosts) should be placed
+	// which is in between the start and end text comment
+	var start, middle, end int
+	for l, t := range lines {
+		// look for the beginning text
+		if strings.Contains(t, startText) {
+			start = l
+			// the next line is the empty line
+			middle = l + 1
+		}
+
+		// look for the end text
+		if strings.Contains(t, endText) {
+			// we want the previous line
+			end = l
+			middle = l - 1
+		}
+	}
+
+	return start, middle, end
+}
