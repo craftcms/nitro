@@ -51,20 +51,21 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			version := cmd.Flag("version").Value.String()
 
 			var path string
-			if cmd.Flag("path").Value.String() == "" {
+			switch cmd.Flag("path").Value.String() == "" {
+			case false:
+				dir, err := filepath.Abs(cmd.Flag("path").Value.String())
+				if err != nil {
+					return fmt.Errorf("unable to find the absolute path, %w", err)
+				}
+
+				path = dir
+			default:
 				wd, err := os.Getwd()
 				if err != nil {
 					return fmt.Errorf("unable to get the current directory, %w", err)
 				}
 
 				dir, err := filepath.Abs(wd)
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
-
-				path = dir
-			} else {
-				dir, err := filepath.Abs(cmd.Flag("path").Value.String())
 				if err != nil {
 					return fmt.Errorf("unable to find the absolute path, %w", err)
 				}
@@ -190,18 +191,18 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// copy the stream to stdout
-			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, stream.Reader); err != nil {
+			if _, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.ErrOrStderr(), stream.Reader); err != nil {
 				return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 			}
 
 			output.Info("npm", action, "complete 🤘")
 
 			// should we remove the container
-			if cmd.Flag("keep").Value.String() == "false" {
-				if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
-					return err
-				}
-			}
+			// if cmd.Flag("keep").Value.String() == "false" {
+			// 	if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
+			// 		return err
+			// 	}
+			// }
 
 			return nil
 		},
