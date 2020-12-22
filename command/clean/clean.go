@@ -190,7 +190,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Done()
 			}
 
-			output.Info("Cleanup completed 🧹")
+			output.Info("Cleanup completed 🛁")
 
 			return nil
 		},
