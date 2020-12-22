@@ -35,10 +35,11 @@ const exampleText = `  # run composer install in a current directory using a con
 // all the commands in a disposable docker container.
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "composer",
-		Short:   "Run composer commands",
-		Example: exampleText,
-		Args:    cobra.MinimumNArgs(1),
+		Use:                "composer",
+		Short:              "Run composer commands",
+		Example:            exampleText,
+		DisableFlagParsing: true,
+		Args:               cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return fmt.Errorf("you must specify at least one arguement to this command")
