@@ -50,17 +50,29 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 			version := cmd.Flag("version").Value.String()
 
-			wd, err := os.Getwd()
-			if err != nil {
-				return fmt.Errorf("unable to get the current directory, %w", err)
+			var path string
+			if cmd.Flag("path").Value.String() == "" {
+				wd, err := os.Getwd()
+				if err != nil {
+					return fmt.Errorf("unable to get the current directory, %w", err)
+				}
+
+				dir, err := filepath.Abs(wd)
+				if err != nil {
+					return fmt.Errorf("unable to find the absolute path, %w", err)
+				}
+
+				path = dir
+			} else {
+				dir, err := filepath.Abs(cmd.Flag("path").Value.String())
+				if err != nil {
+					return fmt.Errorf("unable to find the absolute path, %w", err)
+				}
+
+				path = dir
 			}
 
-			path, err := filepath.Abs(wd)
-			if err != nil {
-				return fmt.Errorf("unable to find the absolute path, %w", err)
-			}
-
-			// determine the default action
+			// determine the command
 			action := args[0]
 
 			// get the full file path
@@ -198,6 +210,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	// set flags for the command
 	cmd.Flags().String("version", "14", "which node version to use")
 	cmd.Flags().Bool("keep", true, "keep the container (faster since it will cache dependencies)")
+	cmd.Flags().String("path", "", "the path to run npm commands")
 
 	return cmd
 }
