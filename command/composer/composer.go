@@ -36,7 +36,7 @@ const exampleText = `  # run composer install in a current directory using a con
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "composer",
-		Short:   "Run composer install or update",
+		Short:   "Run composer commands",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
