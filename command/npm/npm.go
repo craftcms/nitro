@@ -32,8 +32,8 @@ const exampleText = `  # run npm install in a current directory
   # run a script
   nitro npm run dev`
 
-// New is used for scaffolding new commands
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// NewCommand is the command used to run npm commands in a container.
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "npm",
 		Short:   "Run npm commands",

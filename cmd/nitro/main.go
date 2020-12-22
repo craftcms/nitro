@@ -112,7 +112,7 @@ func init() {
 		hosts.New(home, term),
 		initialize.NewCommand(home, client, term),
 		logs.NewCommand(home, client, term),
-		npm.New(client, term),
+		npm.NewCommand(client, term),
 		queue.NewCommand(home, client, term),
 		restart.New(client, term),
 		ssh.NewCommand(home, client, term),
