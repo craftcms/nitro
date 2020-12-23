@@ -107,7 +107,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// build the args
-			commands := []string{"composer"}
+			commands := []string{"composer", "--ignore-platform-reqs"}
 			commands = append(commands, args...)
 
 			// set filters for the container name and environment
