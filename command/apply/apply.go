@@ -20,6 +20,7 @@ import (
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/hostedit"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/protob"
 	"github.com/craftcms/nitro/sudo"
@@ -347,22 +348,37 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if len(hostnames) > 0 {
-				// get the executable
-				nitro, err := os.Executable()
-				if err != nil {
-					return fmt.Errorf("unable to locate the nitro path, %w", err)
+				// set the hosts file based on the OS
+				defaultFile := "/etc/hosts"
+				if runtime.GOOS == "windows" {
+					defaultFile = `C:\Windows\System32\Drivers\etc\hosts`
 				}
 
-				// run the hosts command
-				switch runtime.GOOS {
-				case "windows":
-					return fmt.Errorf("setting hosts file is not yet supported on windows")
-				default:
-					output.Info("Modifying hosts file (you might be prompted for your password)")
+				// check if hosts is already up to date
+				updated, err := hostedit.IsUpdated(defaultFile, "127.0.0.1", hostnames...)
+				if err != nil {
+					return err
+				}
 
-					// add the hosts
-					if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
-						return err
+				// if the hosts file is not updated
+				if updated == false {
+					// get the executable
+					nitro, err := os.Executable()
+					if err != nil {
+						return fmt.Errorf("unable to locate the nitro path, %w", err)
+					}
+
+					// run the hosts command
+					switch runtime.GOOS {
+					case "windows":
+						return fmt.Errorf("setting hosts file is not yet supported on windows")
+					default:
+						output.Info("Modifying hosts file (you might be prompted for your password)")
+
+						// add the hosts
+						if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {
+							return err
+						}
 					}
 				}
 			}
