@@ -20,6 +20,7 @@ var (
 const exampleText = `  # start containers for the default environment
   nitro start`
 
+// NewCommand returns the command used to start all of the containers for an environment.
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
