@@ -30,12 +30,14 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 // on the container instances.
 var Envs = map[string]string{
 	// PHP specific settings
-	"PHP_DISPLAY_ERRORS":      "display_errors",
-	"PHP_MEMORY_LIMIT":        "memory_limit",
-	"PHP_MAX_EXECUTION_TIME":  "max_execution_time",
-	"PHP_UPLOAD_MAX_FILESIZE": "upload_max_filesize",
-	"PHP_MAX_INPUT_VARS":      "max_input_vars",
-	"PHP_POST_MAX_SIZE":       "post_max_size",
+	"PHP_DISPLAY_ERRORS":          "display_errors",
+	"PHP_MEMORY_LIMIT":            "memory_limit",
+	"PHP_MAX_EXECUTION_TIME":      "max_execution_time",
+	"PHP_UPLOAD_MAX_FILESIZE":     "upload_max_filesize",
+	"PHP_MAX_INPUT_VARS":          "max_input_vars",
+	"PHP_POST_MAX_SIZE":           "post_max_size",
+	"PHP_OPCACHE_ENABLE":          "opcache_enable",
+	"PHP_OPCACHE_REVALIDATE_FREQ": "opcache_revalidate_freq",
 }
 
 // AsEnvs takes a configuration and turns specific options
@@ -70,7 +72,7 @@ func (s *Site) AsEnvs() []string {
 	}
 
 	if s.PHP.MaxInputVars == 0 {
-		envs = append(envs, "PHP_MAX_INPUT_VARS=512M")
+		envs = append(envs, "PHP_MAX_INPUT_VARS=5000")
 	} else {
 		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", s.PHP.MaxInputVars))
 	}
