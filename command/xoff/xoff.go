@@ -53,7 +53,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// if its not the current site
-			if site == "" && len(sites) > 1 {
+			if site == "" {
 				// show all of the sites to the user
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
 				if err != nil {
@@ -61,11 +61,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				site = sites[selected]
-			}
-
-			// if there is only one site
-			if len(sites) == 1 {
-				site = sites[0]
 			}
 
 			// diable xdebug for the sites hostname

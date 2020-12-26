@@ -89,6 +89,11 @@ func (t terminal) Warning() {
 // }
 
 func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
+	// if the options only have one item, return it
+	if len(opts) == 1 {
+		return 0, nil
+	}
+
 	// show the message
 	fmt.Println(msg)
 	// show all the options
