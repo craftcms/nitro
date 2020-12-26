@@ -51,7 +51,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			for _, c := range containers {
 				// don't start composer or npm containers
 				if c.Labels[labels.Type] == "composer" || c.Labels[labels.Type] == "npm" {
-					break
+					continue
 				}
 
 				n := strings.TrimLeft(c.Names[0], "/")
