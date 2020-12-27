@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/cli/main.go",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
             "env": {},
             "args": ["apply"]
         },
@@ -18,7 +18,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/cli/main.go",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
             "env": {},
             "args": ["ssh"]
         }
