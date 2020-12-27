@@ -1,6 +1,8 @@
 package envedit
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestEdit(t *testing.T) {
 	type args struct {
