@@ -33,8 +33,10 @@ func New(client client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				return fmt.Errorf("unable to get docker server version, %w", err)
 			}
 
-			output.Info("Nitro:  CLI", Version, "\tgRPC", nitro.GetVersion())
-			output.Info("Docker: CLI", client.ClientVersion(), "\tServer", ver.APIVersion, "("+ver.MinAPIVersion+" min)")
+			output.Info("Nitro CLI: \t", Version)
+			output.Info("Nitro gRPC: \t", nitro.GetVersion())
+			output.Info("Docker API: \t", ver.APIVersion, "("+ver.MinAPIVersion+" min)")
+			output.Info("Docker CLI: \t", client.ClientVersion())
 
 			if Version != nitro.GetVersion() {
 				output.Info("")
