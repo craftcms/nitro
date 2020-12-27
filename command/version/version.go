@@ -40,6 +40,7 @@ func New(client client.CommonAPIClient, nitrod protob.NitroClient, output termin
 			output.Info("Docker API: \t", ver.APIVersion, "("+ver.MinAPIVersion+" min)")
 			output.Info("Docker CLI: \t", client.ClientVersion())
 
+			// check if the cli and API do not match
 			if Version != nitro.GetVersion() {
 				output.Info("")
 				output.Info("The Nitro CLI and gRPC versions do not match")
