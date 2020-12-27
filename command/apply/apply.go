@@ -17,8 +17,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
-	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
