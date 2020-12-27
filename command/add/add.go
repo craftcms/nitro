@@ -112,7 +112,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// if the directory is considered a web root
 				if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
 					root = info.Name()
+				}
 
+				// if its not set, keep trying
+				if root != "" {
 					return nil
 				}
 
@@ -152,7 +155,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// set the input as the hostname
-				site.Path = input
+				site.Dir = input
 				break
 			}
 
