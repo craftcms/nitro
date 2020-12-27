@@ -21,7 +21,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating...")
 
-			images := []string{"docker.io/craftcms/nginx:7.4-dev", "docker.io/craftcms/nginx:7.3-dev", "docker.io/craftcms/nginx:7.2-dev"}
+			images := []string{"docker.io/craftcms/nginx:8.0-dev", "docker.io/craftcms/nginx:7.4-dev", "docker.io/craftcms/nginx:7.3-dev", "docker.io/craftcms/nginx:7.2-dev", "docker.io/craftcms/nginx:7.1-dev", "docker.io/craftcms/nginx:7.0-dev"}
 
 			for _, image := range images {
 				output.Pending("updating", image)
@@ -29,7 +29,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				// pull the image
 				rdr, err := docker.ImagePull(cmd.Context(), image, types.ImagePullOptions{All: false})
 				if err != nil {
-					return fmt.Errorf("unable to pull image %s, %w", image, err)
+					output.Warning()
+					output.Info("  \u2717 unable to pull image", image)
+					continue
 				}
 
 				buf := &bytes.Buffer{}
