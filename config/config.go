@@ -94,11 +94,6 @@ func Load(home, env string) (*Config, error) {
 
 // AddSite takes a site and adds it to the config
 func (c *Config) AddSite(s Site) error {
-	// if there are no aliases
-	if len(s.Aliases) == 0 {
-		s.Aliases = nil
-	}
-
 	// check existing sites
 	for _, e := range c.Sites {
 		// does the hostname match
@@ -106,7 +101,7 @@ func (c *Config) AddSite(s Site) error {
 			return fmt.Errorf("hostname already exists")
 		}
 
-		// does the path match
+		// does the path match?
 		if e.Path == s.Path {
 			return fmt.Errorf("site path already exists")
 		}
