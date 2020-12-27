@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
+	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
@@ -73,9 +74,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// get the full file path
 			composerPath := filepath.Join(path, "composer.json")
 
-			// set the container name to keep the ephemeral
-			containerName := name(path, version, action)
-
 			// make sure the file exists
 			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
 				return ErrNoComposerFile
@@ -106,60 +104,80 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				}
 			}
 
-			// build the args
-			commands := []string{"composer", "--ignore-platform-reqs"}
-			commands = append(commands, args...)
+			// add filters for the volume
+			volumeFilter := filters.NewArgs()
+			volumeFilter.Add("label", labels.Type+"=composer")
+			volumeFilter.Add("label", labels.Environment+"="+env)
+			volumeFilter.Add("label", "com.craftcms.nitro.path="+path)
 
-			// set filters for the container name and environment
-			containerFilter := filters.NewArgs()
-			containerFilter.Add("label", labels.Environment+"="+env)
-			containerFilter.Add("name", containerName)
-
-			// check if there is an existing container
-			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: containerFilter})
+			// check if there is an existing volume
+			volumes, err := docker.VolumeList(ctx, volumeFilter)
 			if err != nil {
 				return err
 			}
 
-			// check the length of the container
-			var containerID string
-			switch len(containers) {
+			// set the volume name
+			volumeName := name(path, version)
+
+			var pathVolume types.Volume
+			switch len(volumes.Volumes) {
 			case 1:
-				containerID = containers[0].ID
-			default:
-				// create the container
-				resp, err := docker.ContainerCreate(ctx,
-					&container.Config{
-						Image: image,
-						Cmd:   commands,
-						Tty:   false,
-						Labels: map[string]string{
-							labels.Environment: env,
-							labels.Type:        "composer",
-							// TODO abstract this?
-							"com.craftcms.nitro.path": path,
-						},
-					},
-					&container.HostConfig{
-						Mounts: []mount.Mount{
-							{
-								Type:   mount.TypeBind,
-								Source: path,
-								Target: "/app",
-							},
-						},
-					},
-					nil,
-					containerName)
+				pathVolume = *volumes.Volumes[0]
+			case 0:
+				// create the volume if it does not exist
+				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{Driver: "local", Name: volumeName, Labels: map[string]string{
+					labels.Environment:        env,
+					labels.Type:               "composer",
+					"com.craftcms.nitro.path": path,
+				}})
 				if err != nil {
-					return fmt.Errorf("unable to create the composer container\n%w", err)
+					return fmt.Errorf("unable to create the volume, %w", err)
 				}
 
-				containerID = resp.ID
+				pathVolume = volume
+			}
+
+			// build the args
+			commands := []string{"composer", "--ignore-platform-reqs"}
+			commands = append(commands, args...)
+
+			// create the container
+			resp, err := docker.ContainerCreate(ctx,
+				&container.Config{
+					Image: image,
+					Cmd:   commands,
+					Tty:   false,
+					Labels: map[string]string{
+						labels.Environment: env,
+						labels.Type:        "composer",
+						// TODO abstract this?
+						"com.craftcms.nitro.path": path,
+					},
+					Env: []string{"COMPOSER_HOME=/root"},
+				},
+				&container.HostConfig{
+					Mounts: []mount.Mount{
+						{
+							Type:   mount.TypeVolume,
+							Source: pathVolume.Name,
+							// /root is the COMPOSER_HOME environment variable
+							Target: "/root",
+						},
+						{
+							Type:   mount.TypeBind,
+							Source: path,
+							Target: "/app",
+						},
+					},
+				},
+				nil,
+				"")
+			if err != nil {
+				return fmt.Errorf("unable to create the composer container\n%w", err)
 			}
 
 			// attach to the container
-			stream, err := docker.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
+			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 				Stream: true,
 				Stdout: true,
 				Stderr: true,
@@ -171,7 +189,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			defer stream.Close()
 
 			// run the container
-			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
@@ -182,11 +200,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			output.Info("composer", action, "completed 🤘")
 
-			// should we remove the container
-			if cmd.Flag("keep").Value.String() == "false" {
-				if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
-					return err
-				}
+			// remove the container
+			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{}); err != nil {
+				return err
 			}
 
 			return nil
@@ -195,14 +211,13 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 	// set flags for the command
 	cmd.Flags().String("version", "2", "which composer version to use")
-	cmd.Flags().Bool("keep", true, "keep the container (faster since it will cache dependencies)")
 
 	return cmd
 }
 
-func name(path, version, action string) string {
+func name(path, version string) string {
 	// combine the path and version
-	n := fmt.Sprintf("%s_%s_%s_%s", path, "composer", version, action)
+	n := fmt.Sprintf("%s_%s_%s", path, "composer", version)
 
 	// make it lower case
 	n = strings.ToLower(n)
