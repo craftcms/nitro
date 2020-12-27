@@ -1,9 +1,11 @@
 package apply
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -16,9 +18,11 @@ import (
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
+	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/hostedit"
 	"github.com/craftcms/nitro/labels"
@@ -217,6 +221,88 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// TODO(jasonmccallister) check for a custom root and copt the template to the container
+					if site.Dir != "web" {
+						// create the nginx file
+						conf := nginx.Generate(site.Dir)
+
+						// create the temp file
+						var buf bytes.Buffer
+						tw := tar.NewWriter(&buf)
+						defer tw.Close()
+
+						header := &tar.Header{
+							Name: "default.conf",
+							Mode: 0600,
+							Size: int64(len(conf)),
+						}
+
+						if err := tw.WriteHeader(header); err != nil {
+							return err
+						}
+
+						if _, err := tw.Write([]byte(conf)); err != nil {
+							return fmt.Errorf("error writing to temp file, %w", err)
+						}
+
+						tw.Flush()
+
+						tr := tar.NewReader(&buf)
+						if _, err := io.Copy(tw, tr); err != nil {
+							return err
+						}
+
+						// copy the file into the container
+						if err := docker.CopyToContainer(ctx, resp.ID, "/home/www-data", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
+							return err
+						}
+
+						// create the exec
+						e, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+							User:         "root",
+							AttachStdout: true,
+							AttachStderr: true,
+							Tty:          false,
+							Cmd:          []string{"cp", "/home/www-data/default.conf", "/etc/nginx/conf.d/default.conf"},
+						})
+						if err != nil {
+							return err
+						}
+
+						// attach to the container
+						attach, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecConfig{
+							AttachStdout: true,
+							AttachStderr: true,
+							Tty:          false,
+							Cmd:          []string{"cp", "/home/www-data/default.conf", "/etc/nginx/conf.d/default.conf"},
+						})
+						defer attach.Close()
+
+						// show the output to stdout and stderr
+						if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
+							return fmt.Errorf("unable to copy the output of container, %w", err)
+						}
+
+						// start the exec
+						if err := docker.ContainerExecStart(ctx, e.ID, types.ExecStartCheck{}); err != nil {
+							return fmt.Errorf("unable to start the container, %w", err)
+						}
+
+						// wait for the container exec to complete
+						waiting := true
+						for waiting {
+							resp, err := docker.ContainerExecInspect(ctx, e.ID)
+							if err != nil {
+								return err
+							}
+
+							waiting = resp.Running
+						}
+
+						// start the container
+						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+							return fmt.Errorf("unable to start the container, %w", err)
+						}
+					}
 
 					// remove the site filter
 					filter.Del("label", labels.Host+"="+site.Hostname)
@@ -319,8 +405,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 							return fmt.Errorf("unable to start the container, %w", err)
 						}
-
-						// TODO(jasonmccallister) check for a custom root and copt the template to the container
 					}
 
 					// remove the site filter
