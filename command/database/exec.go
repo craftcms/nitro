@@ -31,7 +31,7 @@ func execCreate(ctx context.Context, docker client.ContainerAPIClient, container
 	})
 	defer resp.Close()
 
-	// should we dispaly output?
+	// should we display output?
 	if show {
 		// show the output to stdout and stderr
 		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, resp.Reader); err != nil {
