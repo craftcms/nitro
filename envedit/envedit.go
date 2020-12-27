@@ -30,13 +30,13 @@ func Edit(file string, updates map[string]string) (string, error) {
 
 	// split the file into multiple lines
 	lines := strings.Split(string(f), "\n")
-	for line, text := range lines {
-		// split the text using the =
-		sp := strings.Split(text, "=")
+	for l, t := range lines {
+		// split using =
+		sp := strings.Split(t, "=")
 
 		// check if this is a thing we should modify
 		if _, ok := updates[sp[0]]; ok {
-			lines[line] = strings.Join([]string{sp[0], updates[sp[0]]}, "=")
+			lines[l] = strings.Join([]string{sp[0], updates[sp[0]]}, "=")
 		}
 	}
 
