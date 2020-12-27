@@ -33,6 +33,8 @@ func New(client client.CommonAPIClient, nitrod protob.NitroClient, output termin
 				return fmt.Errorf("unable to get docker server version, %w", err)
 			}
 
+			output.Info(fmt.Sprintf("View the changelog at https://github.com/craftcms/nitro/blob/%s/CHANGELOG.md\n", Version))
+
 			output.Info("Nitro CLI: \t", Version)
 			output.Info("Nitro gRPC: \t", nitro.GetVersion())
 			output.Info("Docker API: \t", ver.APIVersion, "("+ver.MinAPIVersion+" min)")
