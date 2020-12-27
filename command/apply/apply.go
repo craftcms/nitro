@@ -42,8 +42,13 @@ var (
 )
 
 const exampleText = `  # apply changes from a config
-  nitro apply`
+  nitro apply
 
+  # skip editing the hosts file
+  nitro apply --skip-hosts
+  # you can also set the environment variable "NITRO_EDIT_HOSTS" to "false" to completely disable editing`
+
+// NewCommand returns the command used to apply configuration file changes to a nitro environment.
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
@@ -159,6 +164,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// check if xdebug is enabled
+					// TODO(jasonmccallister) move this to the sites config func since we now
+					// set php configurations per site.
 					switch site.Xdebug {
 					case false:
 						envs = append(envs, "XDEBUG_MODE=off")
