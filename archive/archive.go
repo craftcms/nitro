@@ -2,7 +2,6 @@ package archive
 
 import (
 	"archive/tar"
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -15,6 +14,7 @@ import (
 func FromFile(file *os.File) (io.Reader, error) {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
+	defer tw.Close()
 
 	info, err := os.Stat(file.Name())
 	if err != nil {
@@ -40,14 +40,5 @@ func FromFile(file *os.File) (io.Reader, error) {
 		return nil, err
 	}
 
-	err = file.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := tw.Close(); err != nil {
-		return nil, err
-	}
-
-	return bufio.NewReader(&buf), nil
+	return tar.NewReader(&buf), nil
 }
