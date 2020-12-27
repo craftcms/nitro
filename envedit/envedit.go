@@ -1,8 +1,8 @@
 package envedit
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -16,35 +16,29 @@ var (
 // represent the ENV_VAR VAL. Edit will check the file line by line for each change
 // and if the environment variable is contained in the updates, it will update and
 // save the file.
-func Edit(file string, updates ...map[string]string) error {
+func Edit(file string, updates map[string]string) (string, error) {
 	// make sure the file exists
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return ErrNoEnvFile
+		return "", ErrNoEnvFile
 	}
 
-	// open the file
-	f, err := os.Open(file)
+	// read the file
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
-		return err
+		return "", err
 	}
-	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		// split the string
-		sp := strings.Split(scanner.Text(), "=")
+	// split the file into multiple lines
+	lines := strings.Split(string(f), "\n")
+	for line, text := range lines {
+		// split the text using the =
+		sp := strings.Split(text, "=")
 
-		// check each of the updates
-		for _, update := range updates {
-			// is this an update we need to take action on?
-			if _, ok := update[sp[0]]; ok {
-				fmt.Println(sp[0])
-			}
+		// check if this is a thing we should modify
+		if _, ok := updates[sp[0]]; ok {
+			lines[line] = strings.Join([]string{sp[0], updates[sp[0]]}, "=")
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		return err
-	}
 
-	return nil
+	return strings.Join(lines, "\n"), nil
 }
