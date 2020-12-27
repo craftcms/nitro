@@ -1,4 +1,4 @@
-package database
+package archive
 
 import (
 	"archive/tar"
@@ -9,7 +9,10 @@ import (
 	"os"
 )
 
-func newTarArchiveFromFile(file *os.File) (io.Reader, error) {
+// FromFile takes a file and returns a reader or error.
+// It is used for creating a tar/archive to copy items
+// into a container.
+func FromFile(file *os.File) (io.Reader, error) {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
 
@@ -28,7 +31,6 @@ func newTarArchiveFromFile(file *os.File) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if info.IsDir() {
 		return nil, fmt.Errorf("is directory")
 	}

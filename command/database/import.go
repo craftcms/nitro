@@ -14,6 +14,7 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/archive"
 	"github.com/craftcms/nitro/database"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
@@ -143,7 +144,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			switch compressed {
 			case false:
 				// create a new archive
-				rdr, err := newTarArchiveFromFile(file)
+				rdr, err := archive.FromFile(file)
 				if err != nil {
 					return err
 				}
