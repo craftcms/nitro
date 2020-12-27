@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type spyOutputer struct {
@@ -50,7 +51,7 @@ func newMockDockerClient(networks []types.NetworkResource, containers []types.Co
 	return &mockDockerClient{
 		networks:   networks,
 		containers: containers,
-		volumes:    volumetypes.VolumesListOKBody{Volumes: volumes},
+		volumes:    volumetypes.VolumeListOKBody{Volumes: volumes},
 	}
 }
 
@@ -77,8 +78,8 @@ type mockDockerClient struct {
 	networkCreateResponse types.NetworkCreateResponse
 
 	// volume related resources
-	volumes              volumetypes.VolumesListOKBody
-	volumeCreateRequest  volumetypes.VolumesCreateBody
+	volumes              volumetypes.VolumeListOKBody
+	volumeCreateRequest  volumetypes.VolumeCreateBody
 	volumeCreateResponse types.Volume
 
 	// mockError allows us to override any func to return a method, we do not
@@ -102,13 +103,13 @@ func (c *mockDockerClient) NetworkCreate(ctx context.Context, name string, optio
 	return c.networkCreateResponse, c.mockError
 }
 
-func (c *mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumesListOKBody, error) {
+func (c *mockDockerClient) VolumeList(ctx context.Context, filter filters.Args) (volumetypes.VolumeListOKBody, error) {
 	c.filterArgs = append(c.filterArgs, filter)
 
 	return c.volumes, c.mockError
 }
 
-func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumesCreateBody) (types.Volume, error) {
+func (c *mockDockerClient) VolumeCreate(ctx context.Context, options volumetypes.VolumeCreateBody) (types.Volume, error) {
 	c.volumeCreateRequest = options
 
 	return c.volumeCreateResponse, c.mockError
@@ -120,7 +121,7 @@ func (c *mockDockerClient) ContainerList(ctx context.Context, options types.Cont
 	return c.containers, c.mockError
 }
 
-func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, containerName string) (container.ContainerCreateCreatedBody, error) {
+func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, platform *v1.Platform, containerName string) (container.ContainerCreateCreatedBody, error) {
 	// save the request on the struct field
 	// TODO(jasonmccallister) this is wrong, need to look at the code to determine the correct
 	// types are set and returned

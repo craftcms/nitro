@@ -126,11 +126,8 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 	}
 
 	// attach to the container
-	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          commands,
+	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+		Tty: false,
 	})
 	if err != nil {
 		return nil, err
@@ -196,11 +193,8 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 	}
 
 	// attach to the container
-	stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          opts.Commands,
+	stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+		Tty: false,
 	})
 	if err != nil {
 		return err

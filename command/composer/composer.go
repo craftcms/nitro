@@ -125,7 +125,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				pathVolume = *volumes.Volumes[0]
 			case 0:
 				// create the volume if it does not exist
-				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{Driver: "local", Name: volumeName, Labels: map[string]string{
+				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: volumeName, Labels: map[string]string{
 					labels.Environment:        env,
 					labels.Type:               "composer",
 					"com.craftcms.nitro.path": path,
@@ -170,6 +170,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						},
 					},
 				},
+				nil,
 				nil,
 				"")
 			if err != nil {

@@ -163,6 +163,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						},
 					},
 					nil,
+					nil,
 					containerName)
 				if err != nil {
 					return fmt.Errorf("unable to create container\n%w", err)

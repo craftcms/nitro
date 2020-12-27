@@ -123,7 +123,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Pending("creating volume")
 
 				// create a volume with the same name of the machine
-				resp, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{
+				resp, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
 					Driver: "local",
 					Name:   env,
 					Labels: map[string]string{
@@ -326,6 +326,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							},
 						},
 					},
+					nil,
 					env,
 				)
 				if err != nil {

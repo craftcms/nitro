@@ -209,6 +209,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 								},
 							},
 						},
+						nil,
 						site.Hostname,
 					)
 					if err != nil {
@@ -269,11 +270,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						}
 
 						// attach to the container
-						attach, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecConfig{
-							AttachStdout: true,
-							AttachStderr: true,
-							Tty:          false,
-							Cmd:          []string{"cp", "/home/www-data/default.conf", "/etc/nginx/conf.d/default.conf"},
+						attach, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
+							Tty: false,
 						})
 						defer attach.Close()
 
@@ -395,6 +393,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 									},
 								},
 							},
+							nil,
 							site.Hostname,
 						)
 						if err != nil {
@@ -488,7 +487,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 func createContainer(ctx context.Context, docker client.ContainerAPIClient, config *container.Config, host *container.HostConfig, network *network.NetworkingConfig, name string) (string, error) {
 	// create the container
-	resp, err := docker.ContainerCreate(ctx, config, host, network, name)
+	resp, err := docker.ContainerCreate(ctx, config, host, network, nil, name)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the container, %w", err)
 	}
@@ -594,7 +593,7 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 
 		// create the volume
-		volume, err := docker.VolumeCreate(ctx, volumetypes.VolumesCreateBody{Driver: "local", Name: hostname, Labels: lbls})
+		volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: hostname, Labels: lbls})
 		if err != nil {
 			return fmt.Errorf("unable to create the volume, %w", err)
 		}

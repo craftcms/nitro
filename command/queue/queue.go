@@ -74,11 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 
 					// attach to the exec
-					resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecConfig{
-						// AttachStdin:  true,
-						AttachStderr: true,
-						AttachStdout: true,
-						Cmd:          []string{"./craft", "queue/listen", "--verbose"},
+					resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{
 						// Tty:          true,
 					})
 					if err != nil {

@@ -42,7 +42,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 		Name: "testing-init",
 	}
 	// set the volume create request
-	volumeReq := volumetypes.VolumesCreateBody{
+	volumeReq := volumetypes.VolumeCreateBody{
 		Driver: "local",
 		Name:   "testing-init",
 		Labels: map[string]string{

@@ -1,10 +1,7 @@
 package ssh
 
 import (
-	"bufio"
-	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -15,7 +12,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 )
 
@@ -113,55 +109,4 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	return cmd
-}
-
-func connect(ctx context.Context, docker client.ContainerAPIClient, containerID string) error {
-	inout := make(chan []byte)
-	errCh := make(chan error)
-
-	// attach to the container
-	waiter, err := docker.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
-		Stream: true,
-		Stdin:  true,
-		Stdout: true,
-		Stderr: true,
-	})
-	if err != nil {
-		return fmt.Errorf("error attaching to the container, %w", err)
-	}
-
-	if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
-		errCh <- err
-	}
-
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-
-		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, waiter.Reader)
-		errCh <- err
-		for scanner.Scan() {
-			fmt.Println("scanner")
-			inout <- []byte(scanner.Text())
-		}
-	}()
-
-	// Write to docker container
-	go func(w io.WriteCloser) {
-		for {
-			data, ok := <-inout
-			if !ok {
-				fmt.Println("!ok")
-				w.Close()
-				return
-			}
-
-			w.Write(append(data, '\n'))
-		}
-	}(waiter.Conn)
-
-	if _, err := docker.ContainerWait(ctx, containerID); err != nil {
-		errCh <- err
-	}
-
-	return nil
 }

@@ -23,11 +23,8 @@ func execCreate(ctx context.Context, docker client.ContainerAPIClient, container
 	}
 
 	// attach to the container
-	resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecConfig{
-		AttachStdout: true,
-		AttachStderr: true,
-		Tty:          false,
-		Cmd:          cmds,
+	resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
+		Tty: false,
 	})
 	defer resp.Close()
 
