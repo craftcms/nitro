@@ -3,6 +3,7 @@ package match
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/craftcms/nitro/config"
@@ -42,9 +43,8 @@ func checkEnvs(site config.Site, envs []string) bool {
 			env := sp[0]
 			val := sp[1]
 
-			// check the value of each environment variable
-			// we want to ensure the site.php.config is not the "default" value and that the
-			// default value
+			// check the value of each environment variable we want to ensure the site.php.config is not the "default" value and that the
+			// current value from the container match
 			switch env {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
@@ -52,23 +52,23 @@ func checkEnvs(site config.Site, envs []string) bool {
 					return false
 				}
 			case "PHP_MEMORY_LIMIT":
-				if site.PHP.MemoryLimit != "" && val != config.DefaultEnvs[env] {
+				if (site.PHP.MemoryLimit == "" && val != config.DefaultEnvs[env]) || (site.PHP.MemoryLimit != "" && val != site.PHP.MemoryLimit) {
 					return false
 				}
 			case "PHP_MAX_EXECUTION_TIME":
-				if site.PHP.MaxExecutionTime != 0 && val != config.DefaultEnvs[env] {
+				if (site.PHP.MaxExecutionTime == 0 && val != config.DefaultEnvs[env]) || (site.PHP.MaxExecutionTime != 0 && val != strconv.Itoa(site.PHP.MaxExecutionTime)) {
 					return false
 				}
 			case "PHP_UPLOAD_MAX_FILESIZE":
-				if site.PHP.MaxFileUpload != "" && val != config.DefaultEnvs[env] {
+				if (site.PHP.MaxFileUpload == "" && val != config.DefaultEnvs[env]) || (site.PHP.MaxFileUpload != "" && val != site.PHP.MaxFileUpload) {
 					return false
 				}
 			case "PHP_MAX_INPUT_VARS":
-				if site.PHP.MaxInputVars != 0 && val != config.DefaultEnvs[env] {
+				if (site.PHP.MaxInputVars == 0 && val != config.DefaultEnvs[env]) || (site.PHP.MaxInputVars != 0 && val != strconv.Itoa(site.PHP.MaxInputVars)) {
 					return false
 				}
 			case "PHP_POST_MAX_SIZE":
-				if site.PHP.PostMaxSize != "" && val != config.DefaultEnvs[env] {
+				if (site.PHP.PostMaxSize == "" && val != config.DefaultEnvs[env]) || (site.PHP.PostMaxSize != "" && val != site.PHP.PostMaxSize) {
 					return false
 				}
 			case "PHP_OPCACHE_ENABLE":
@@ -77,7 +77,7 @@ func checkEnvs(site config.Site, envs []string) bool {
 					return false
 				}
 			case "PHP_OPCACHE_REVALIDATE_FREQ":
-				if site.PHP.OpcacheRevalidateFreq != 0 && val != config.DefaultEnvs[env] {
+				if (site.PHP.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (site.PHP.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(site.PHP.OpcacheRevalidateFreq)) {
 					return false
 				}
 			}
