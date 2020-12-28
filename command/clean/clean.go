@@ -11,10 +11,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/backup"
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/datetime"
 	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/terminal"
 )
 
