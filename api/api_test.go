@@ -27,7 +27,8 @@ func TestService_Ping(t *testing.T) {
 		{
 			name: "can get a ping",
 			args: args{
-				ctx: context.TODO(),
+				ctx:     context.TODO(),
+				request: &protob.PingRequest{},
 			},
 			want:    &protob.PingResponse{Pong: "pong"},
 			wantErr: false,
