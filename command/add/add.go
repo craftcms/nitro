@@ -51,6 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				dir = filepath.Clean(wd)
 			}
 
+			// create a new site
 			site := config.Site{}
 
 			// get the hostname from the directory
