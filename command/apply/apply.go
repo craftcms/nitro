@@ -236,43 +236,50 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							return err
 						}
 
-						// create the exec
-						e, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-							User:         "root",
-							AttachStdout: true,
-							AttachStderr: true,
-							Tty:          false,
-							Cmd:          []string{"mv", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
-						})
-						if err != nil {
-							return err
+						commands := map[string][]string{
+							"copy the file":       {"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
+							"set the permissions": {"chmod", "0644", "/etc/nginx/conf.d/default.conf"},
 						}
 
-						// attach to the container
-						attach, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
-							Tty: false,
-						})
-						defer attach.Close()
-
-						// show the output to stdout and stderr
-						if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-							return fmt.Errorf("unable to copy the output of container, %w", err)
-						}
-
-						// start the exec
-						if err := docker.ContainerExecStart(ctx, e.ID, types.ExecStartCheck{}); err != nil {
-							return fmt.Errorf("unable to start the container, %w", err)
-						}
-
-						// wait for the container exec to complete
-						waiting := true
-						for waiting {
-							resp, err := docker.ContainerExecInspect(ctx, e.ID)
+						for _, c := range commands {
+							// create the exec
+							exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+								User:         "root",
+								AttachStdout: true,
+								AttachStderr: true,
+								Tty:          false,
+								Cmd:          c,
+							})
 							if err != nil {
 								return err
 							}
 
-							waiting = resp.Running
+							// attach to the container
+							attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+								Tty: false,
+							})
+							defer attach.Close()
+
+							// show the output to stdout and stderr
+							if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
+								return fmt.Errorf("unable to copy the output of container, %w", err)
+							}
+
+							// start the exec
+							if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+								return fmt.Errorf("unable to start the container, %w", err)
+							}
+
+							// wait for the container exec to complete
+							waiting := true
+							for waiting {
+								resp, err := docker.ContainerExecInspect(ctx, exec.ID)
+								if err != nil {
+									return err
+								}
+
+								waiting = resp.Running
+							}
 						}
 
 						// start the container
