@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/portavail"
+	"github.com/craftcms/nitro/pkg/portavail"
 	"github.com/craftcms/nitro/terminal"
 )
 
