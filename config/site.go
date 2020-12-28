@@ -26,18 +26,18 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return s.cleanPath(home, s.Path)
 }
 
-// Envs is used to map a config to a known environment variable that is used
-// on the container instances.
-var Envs = map[string]string{
+// DefaultEnvs is used to map a config to a known environment variable that is used
+// on the container instances to their default values
+var DefaultEnvs = map[string]string{
 	// PHP specific settings
-	"PHP_DISPLAY_ERRORS":          "display_errors",
-	"PHP_MEMORY_LIMIT":            "memory_limit",
-	"PHP_MAX_EXECUTION_TIME":      "max_execution_time",
-	"PHP_UPLOAD_MAX_FILESIZE":     "upload_max_filesize",
-	"PHP_MAX_INPUT_VARS":          "max_input_vars",
-	"PHP_POST_MAX_SIZE":           "post_max_size",
-	"PHP_OPCACHE_ENABLE":          "opcache_enable",
-	"PHP_OPCACHE_REVALIDATE_FREQ": "opcache_revalidate_freq",
+	"PHP_DISPLAY_ERRORS":          "on",
+	"PHP_MEMORY_LIMIT":            "512M",
+	"PHP_MAX_EXECUTION_TIME":      "5000",
+	"PHP_UPLOAD_MAX_FILESIZE":     "512M",
+	"PHP_MAX_INPUT_VARS":          "5000",
+	"PHP_POST_MAX_SIZE":           "512M",
+	"PHP_OPCACHE_ENABLE":          "0",
+	"PHP_OPCACHE_REVALIDATE_FREQ": "0",
 }
 
 // AsEnvs takes a configuration and turns specific options
@@ -48,37 +48,37 @@ func (s *Site) AsEnvs() []string {
 
 	// if they do not specify the error false means on
 	if s.PHP.DisplayErrors == false {
-		envs = append(envs, "PHP_DISPLAY_ERRORS=on")
+		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
 	} else {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=off")
 	}
 
 	if s.PHP.MemoryLimit == "" {
-		envs = append(envs, "PHP_MEMORY_LIMIT=512M")
+		envs = append(envs, "PHP_MEMORY_LIMIT="+DefaultEnvs["PHP_MEMORY_LIMIT"])
 	} else {
 		envs = append(envs, "PHP_MEMORY_LIMIT="+s.PHP.MemoryLimit)
 	}
 
 	if s.PHP.MaxExecutionTime == 0 {
-		envs = append(envs, "PHP_MAX_EXECUTION_TIME=5000")
+		envs = append(envs, "PHP_MAX_EXECUTION_TIME="+DefaultEnvs["PHP_MAX_EXECUTION_TIME"])
 	} else {
 		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_EXECUTION_TIME", s.PHP.MaxExecutionTime))
 	}
 
 	if s.PHP.UploadMaxFileSize == "" {
-		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE=512M")
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"])
 	} else {
 		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+s.PHP.UploadMaxFileSize)
 	}
 
 	if s.PHP.MaxInputVars == 0 {
-		envs = append(envs, "PHP_MAX_INPUT_VARS=5000")
+		envs = append(envs, "PHP_MAX_INPUT_VARS="+DefaultEnvs["PHP_MAX_INPUT_VARS"])
 	} else {
 		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", s.PHP.MaxInputVars))
 	}
 
 	if s.PHP.PostMaxSize == "" {
-		envs = append(envs, "PHP_POST_MAX_SIZE=512M")
+		envs = append(envs, "PHP_POST_MAX_SIZE="+DefaultEnvs["PHP_POST_MAX_SIZE"])
 	} else {
 		envs = append(envs, fmt.Sprintf("%s=%s", "PHP_POST_MAX_SIZE", s.PHP.PostMaxSize))
 	}
@@ -87,11 +87,11 @@ func (s *Site) AsEnvs() []string {
 	if s.PHP.OpcacheEnable == true {
 		envs = append(envs, "PHP_OPCACHE_ENABLE=1")
 	} else {
-		envs = append(envs, "PHP_OPCACHE_ENABLE=0")
+		envs = append(envs, "PHP_OPCACHE_ENABLE="+DefaultEnvs["PHP_OPCACHE_ENABLE"])
 	}
 
 	if s.PHP.OpcacheRevalidateFreq == 0 {
-		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ=0")
+		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ="+DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"])
 	} else {
 		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", s.PHP.OpcacheRevalidateFreq))
 

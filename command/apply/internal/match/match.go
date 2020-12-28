@@ -38,7 +38,7 @@ func checkEnvs(site config.Site, envs []string) bool {
 		sp := strings.Split(e, "=")
 
 		// show only the environment variables we know about/support
-		if _, ok := config.Envs[sp[0]]; ok {
+		if _, ok := config.DefaultEnvs[sp[0]]; ok {
 			env := sp[0]
 			val := sp[1]
 
