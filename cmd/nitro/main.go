@@ -20,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/command/database"
 	"github.com/craftcms/nitro/command/destroy"
 	"github.com/craftcms/nitro/command/disable"
+	"github.com/craftcms/nitro/command/edit"
 	"github.com/craftcms/nitro/command/enable"
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/initialize"
@@ -109,6 +110,7 @@ func init() {
 		destroy.NewCommand(home, client, term),
 		disable.NewCommand(home, client, term),
 		enable.NewCommand(home, client, term),
+		edit.NewCommand(home, client, term),
 		hosts.New(home, term),
 		initialize.NewCommand(home, client, term),
 		logs.NewCommand(home, client, term),
