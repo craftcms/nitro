@@ -6,6 +6,20 @@ import (
 	"strings"
 )
 
+// DefaultEnvs is used to map a config to a known environment variable that is used
+// on the container instances to their default values
+var DefaultEnvs = map[string]string{
+	// PHP specific settings
+	"PHP_DISPLAY_ERRORS":          "on",
+	"PHP_MEMORY_LIMIT":            "512M",
+	"PHP_MAX_EXECUTION_TIME":      "5000",
+	"PHP_UPLOAD_MAX_FILESIZE":     "512M",
+	"PHP_MAX_INPUT_VARS":          "5000",
+	"PHP_POST_MAX_SIZE":           "512M",
+	"PHP_OPCACHE_ENABLE":          "0",
+	"PHP_OPCACHE_REVALIDATE_FREQ": "0",
+}
+
 // Site represents a web application. It has a hostname, aliases (which
 // are alternate domains), the local path to the site, additional mounts
 // to add to the container, and the directory the index.php is located.
@@ -26,27 +40,13 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return s.cleanPath(home, s.Path)
 }
 
-// DefaultEnvs is used to map a config to a known environment variable that is used
-// on the container instances to their default values
-var DefaultEnvs = map[string]string{
-	// PHP specific settings
-	"PHP_DISPLAY_ERRORS":          "on",
-	"PHP_MEMORY_LIMIT":            "512M",
-	"PHP_MAX_EXECUTION_TIME":      "5000",
-	"PHP_UPLOAD_MAX_FILESIZE":     "512M",
-	"PHP_MAX_INPUT_VARS":          "5000",
-	"PHP_POST_MAX_SIZE":           "512M",
-	"PHP_OPCACHE_ENABLE":          "0",
-	"PHP_OPCACHE_REVALIDATE_FREQ": "0",
-}
-
-// AsEnvs takes a configuration and turns specific options
+// AsEnvs takes a site and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
 func (s *Site) AsEnvs() []string {
 	var envs []string
 
-	// if they do not specify the error false means on
+	// if they do not specify the error... false means on
 	if s.PHP.DisplayErrors == false {
 		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
 	} else {
