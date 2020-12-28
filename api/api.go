@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/craftcms/nitro/caddy"
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/pkg/caddy"
 	"github.com/craftcms/nitro/protob"
 )
 

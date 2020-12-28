@@ -37,7 +37,7 @@ import (
 	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
 
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 var rootCommand = &cobra.Command{

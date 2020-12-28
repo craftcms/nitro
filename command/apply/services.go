@@ -5,14 +5,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, enabled bool, networkID, env string) (string, error) {

@@ -6,13 +6,14 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 // https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/integration/internal/container/exec.go#L38

@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 // New returns the update command for updating images on the

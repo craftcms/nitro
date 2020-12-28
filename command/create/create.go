@@ -11,10 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/craftcms/nitro/command/create/internal/urlgen"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/command/create/internal/urlgen"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # create a new default craft project (similar to "composer create-project craftcms/craft my-project")

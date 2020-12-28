@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/datetime"
-	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/pkg/backup"
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/datetime"
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # remove unused containers

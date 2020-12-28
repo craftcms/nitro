@@ -19,9 +19,9 @@ import (
 
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/setup"
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/setup"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # create a new environment with the default environment

@@ -23,11 +23,11 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/hostedit"
-	"github.com/craftcms/nitro/labels"
+	"github.com/craftcms/nitro/pkg/hostedit"
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/sudo"
+	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
-	"github.com/craftcms/nitro/sudo"
-	"github.com/craftcms/nitro/terminal"
 )
 
 var (

@@ -3,10 +3,11 @@ package version
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/protob"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/protob"
 )
 
 // Version is used to set the version of nitro we are using

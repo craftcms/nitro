@@ -8,9 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/hostedit"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/pkg/hostedit"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # modify hosts file to match sites and aliases

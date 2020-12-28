@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # view all resources for the environment

@@ -15,8 +15,8 @@ import (
 	"github.com/docker/docker/client"
 
 	"github.com/craftcms/nitro/internal/helpers"
-	"github.com/craftcms/nitro/labels"
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 // Options are used to pass options to a database backup func.

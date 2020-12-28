@@ -9,7 +9,7 @@ import (
 
 	"github.com/craftcms/nitro/config"
 	"github.com/craftcms/nitro/pkg/portavail"
-	"github.com/craftcms/nitro/terminal"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 var (

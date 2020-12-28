@@ -3,10 +3,11 @@ package enable
 import (
 	"fmt"
 
-	"github.com/craftcms/nitro/config"
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 var (

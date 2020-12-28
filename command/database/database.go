@@ -1,9 +1,10 @@
 package database
 
 import (
-	"github.com/craftcms/nitro/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+
+	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 const exampleText = `  # import a database from a backup
