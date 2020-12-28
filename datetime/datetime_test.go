@@ -21,7 +21,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "can view the time in the correct format",
 			args: args{t: dt},
-			want: "200102_080102",
+			want: "2020-01-02-080102",
 		},
 	}
 	for _, tt := range tests {

@@ -1,6 +1,7 @@
 package datetime
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -18,7 +19,7 @@ func Parse(t time.Time) string {
 	mi := prepend(strconv.Itoa(min))
 	s := prepend(strconv.Itoa(sec))
 
-	return yr[len(yr)-2:] + mon + d + "_" + hr + mi + s
+	return fmt.Sprintf("%s-%s-%s-%s%s%s", yr, mon, d, hr, mi, s)
 }
 
 func prepend(s string) string {
