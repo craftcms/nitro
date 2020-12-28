@@ -172,7 +172,7 @@ func Test_checkEnvs(t *testing.T) {
 			args: args{
 				site: config.Site{
 					PHP: config.PHP{
-						DisplayErrors: true,
+						DisplayErrors: false,
 					},
 				},
 				envs: []string{

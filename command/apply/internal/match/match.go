@@ -48,10 +48,8 @@ func checkEnvs(site config.Site, envs []string) bool {
 			switch env {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
-				if site.PHP.DisplayErrors {
-					if val != "on" {
-						return false
-					}
+				if site.PHP.DisplayErrors == false && val != "on" {
+					return false
 				}
 			case "PHP_MEMORY_LIMIT":
 				if site.PHP.MemoryLimit != "" && val != "512M" {
