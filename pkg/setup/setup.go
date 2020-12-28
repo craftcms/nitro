@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/portavail"
 	"github.com/craftcms/nitro/pkg/terminal"
 )

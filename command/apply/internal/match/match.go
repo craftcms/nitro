@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftcms/nitro/config"
 	"github.com/docker/docker/api/types"
+
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 // Site takes the home directory, site, and a container to determine if they

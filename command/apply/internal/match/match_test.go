@@ -3,9 +3,10 @@ package match
 import (
 	"testing"
 
-	"github.com/craftcms/nitro/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 func TestSite(t *testing.T) {
