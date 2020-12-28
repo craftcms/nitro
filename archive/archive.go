@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -42,19 +41,4 @@ func FromFile(file *os.File) (io.Reader, error) {
 	}
 
 	return tar.NewReader(&buf), nil
-}
-
-func FromString(filename, content string) (io.Reader, error) {
-	// create a temp file
-	f, err := ioutil.TempFile(os.TempDir(), "nitro-archive-")
-	if err != nil {
-		return nil, err
-	}
-
-	// write the contents
-	if _, err := f.Write([]byte(content)); err != nil {
-		return nil, err
-	}
-
-	return FromFile(f)
 }
