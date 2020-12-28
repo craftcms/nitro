@@ -9,7 +9,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/craftcms/nitro/api"
+	"github.com/craftcms/nitro/pkg/api"
 	"github.com/craftcms/nitro/protob"
 )
 
