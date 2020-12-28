@@ -10,6 +10,7 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	type args struct {
 		t time.Time
 	}
