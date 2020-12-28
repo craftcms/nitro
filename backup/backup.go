@@ -128,9 +128,7 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 	}
 
 	// attach to the container
-	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-		Tty: false,
-	})
+	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{Tty: false})
 	if err != nil {
 		return nil, err
 	}
