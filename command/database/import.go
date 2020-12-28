@@ -2,7 +2,9 @@ package database
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -11,10 +13,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/archive"
 	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/archive"
 	"github.com/craftcms/nitro/database"
 	"github.com/craftcms/nitro/labels"
 	"github.com/craftcms/nitro/terminal"
@@ -141,20 +143,27 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 
 			output.Pending("uploading backup")
 
+			var rdr io.Reader
 			switch compressed {
 			case false:
-				// create a new archive
-				rdr, err := archive.FromFile(file)
+				// generate the reader
+				rdr, err = archive.Generate(file.Name())
+				if err != nil {
+					return err
+				}
+			default:
+				// read the file and create a reader
+				content, err := ioutil.ReadFile(file.Name())
 				if err != nil {
 					return err
 				}
 
-				// copy the file into the container
-				if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
-					return err
-				}
-			default:
-				return fmt.Errorf("importing compressed databases is not yet supported")
+				rdr = bytes.NewReader(content)
+			}
+
+			// copy the file into the container
+			if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
+				return err
 			}
 
 			output.Done()
