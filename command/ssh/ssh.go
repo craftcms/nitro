@@ -95,7 +95,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			c := exec.Command(cli, "exec", "-it", containers[0].ID, "sh")
+			// check if the root user should be used
+			user := "www-data"
+			if cmd.Flag("root").Value.String() == "true" {
+				user = "root"
+			}
+
+			c := exec.Command(cli, "exec", "-it", containers[0].ID, "sh", "-u", user)
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()
 			c.Stdout = cmd.OutOrStdout()
@@ -107,6 +113,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool("root", false, "ssh as the root user")
 
 	return cmd
 }

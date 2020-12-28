@@ -27,6 +27,7 @@ _API_PORT`.
 - The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
 - The `create` command will now install composer dependencies.
 - PHP settings are now site specific.
+- the `ssh` command allows you to ssh as the root user with the `--root` flag
 
 ## 1.1.0 - 2020-10-06
 
