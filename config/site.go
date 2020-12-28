@@ -90,10 +90,11 @@ func (s *Site) AsEnvs() []string {
 		envs = append(envs, "PHP_OPCACHE_ENABLE=0")
 	}
 
-	if s.PHP.OpcacheRevalidateFreq > 0 {
-		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", s.PHP.OpcacheRevalidateFreq))
-	} else {
+	if s.PHP.OpcacheRevalidateFreq == 0 {
 		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ=0")
+	} else {
+		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", s.PHP.OpcacheRevalidateFreq))
+
 	}
 
 	// TODO(jasonmccallister) add opcache settings
