@@ -104,6 +104,8 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	return id, name, compatability, db, nil
 }
 
+// Databases is used to get a list of all the databases for a specific engine. It is returned as a slice of strings using the
+// containers hostname (e.g. mysql-8.0-3306) so it can be presented to the user as a list.
 func Databases(ctx context.Context, docker client.ContainerAPIClient, containerID, compatability string) ([]string, error) {
 	// get a list of the databases from the container
 	var commands []string
@@ -193,17 +195,15 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 	}
 
 	// attach to the container
-	stream, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-		Tty: false,
-	})
+	resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{Tty: false})
 	if err != nil {
 		return err
 	}
-	defer stream.Close()
+	defer resp.Close()
 
 	// start the exec
 	if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-		return fmt.Errorf("unable to start the container, %w", err)
+		return fmt.Errorf("unable to start the container exec, %w", err)
 	}
 
 	// wait for the container exec to complete
