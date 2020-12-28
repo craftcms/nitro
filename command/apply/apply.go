@@ -1,11 +1,9 @@
 package apply
 
 import (
-	"archive/tar"
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -17,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
@@ -227,33 +226,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						conf := nginx.Generate(site.Dir)
 
 						// create the temp file
-						var buf bytes.Buffer
-						tw := tar.NewWriter(&buf)
-						defer tw.Close()
-
-						header := &tar.Header{
-							Name: "default.conf",
-							Mode: 0600,
-							Size: int64(len(conf)),
-						}
-
-						if err := tw.WriteHeader(header); err != nil {
-							return err
-						}
-
-						if _, err := tw.Write([]byte(conf)); err != nil {
-							return fmt.Errorf("error writing to temp file, %w", err)
-						}
-
-						tw.Flush()
-
-						tr := tar.NewReader(&buf)
-						if _, err := io.Copy(tw, tr); err != nil {
+						tr, err := archive.Generate("default.conf", conf)
+						if err != nil {
 							return err
 						}
 
 						// copy the file into the container
-						if err := docker.CopyToContainer(ctx, resp.ID, "/home/www-data", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
+						if err := docker.CopyToContainer(ctx, resp.ID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
 							return err
 						}
 
@@ -263,7 +242,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							AttachStdout: true,
 							AttachStderr: true,
 							Tty:          false,
-							Cmd:          []string{"cp", "/home/www-data/default.conf", "/etc/nginx/conf.d/default.conf"},
+							Cmd:          []string{"mv", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
 						})
 						if err != nil {
 							return err
