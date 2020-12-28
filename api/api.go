@@ -36,8 +36,6 @@ func (svc *Service) Ping(ctx context.Context, request *protob.PingRequest) (*pro
 // port for the service. The NGINX container type uses port 8080 and the PHP-FPM container type
 // uses port 9000.
 func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*protob.ApplyResponse, error) {
-	resp := &protob.ApplyResponse{}
-
 	// if there is no client, use the default
 	if svc.HTTP == nil {
 		svc.HTTP = http.DefaultClient
@@ -108,28 +106,28 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	// send the update
 	res, err := svc.HTTP.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
-		resp.Message = "error updating Caddy API"
-		resp.Error = true
-
-		return resp, err
+		return &protob.ApplyResponse{
+			Message: fmt.Sprintf("error updating Caddy API, err: %s", err.Error()),
+			Error:   true,
+		}, err
 	}
 
 	// check the status code
 	if res.StatusCode != http.StatusOK {
-		resp.Message = fmt.Sprintf("received %d response from caddy api", res.StatusCode)
-		resp.Error = true
-
-		return resp, nil
+		return &protob.ApplyResponse{
+			Message: fmt.Sprintf("received %d response from caddy api", res.StatusCode),
+			Error:   true,
+		}, nil
 	}
 
 	// set the message and error to false
-	resp.Message = fmt.Sprintf("successfully applied changes, sites: %d", len(request.GetSites()))
-	resp.Error = false
-
-	return resp, nil
+	return &protob.ApplyResponse{
+		Message: fmt.Sprintf("successfully applied changes, sites: %d", len(request.GetSites())),
+		Error:   false,
+	}, nil
 }
 
 // Version is used to check the container image version with the CLI version
-func (svc *Service) Version(context.Context, *protob.VersionRequest) (*protob.VersionResponse, error) {
+func (svc *Service) Version(ctx context.Context, request *protob.VersionRequest) (*protob.VersionResponse, error) {
 	return &protob.VersionResponse{Version: version.Version}, nil
 }
