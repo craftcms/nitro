@@ -11,13 +11,11 @@ service Nitro {
 }
 
 message PingRequest {}
-
 message PingResponse {
     string pong = 1;
 }
 
 message VersionRequest {}
-
 message VersionResponse {
     string version = 1;
 }
@@ -25,7 +23,6 @@ message VersionResponse {
 message ApplyRequest {
     map<string, Site> sites = 1;
 }
-
 message ApplyResponse {
     bool error = 1;
     string message = 2;

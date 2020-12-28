@@ -12,7 +12,7 @@ import (
 func NewClient(ip, port string) (protob.NitroClient, error) {
 	cc, err := grpc.Dial(ip+":"+port, grpc.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("unable to create a gRPC client, %w", err)
+		return nil, fmt.Errorf("unable to create a gRPC client for nitrod, %w", err)
 	}
 
 	return protob.NewNitroClient(cc), nil
