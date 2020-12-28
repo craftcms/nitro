@@ -101,7 +101,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				user = "root"
 			}
 
-			c := exec.Command(cli, "exec", "-it", containers[0].ID, "sh", "-u", user)
+			c := exec.Command(cli, "exec", "-u", user, "-it", containers[0].ID, "sh")
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()
 			c.Stdout = cmd.OutOrStdout()
