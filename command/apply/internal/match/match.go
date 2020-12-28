@@ -48,37 +48,36 @@ func checkEnvs(site config.Site, envs []string) bool {
 			switch env {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
-				if site.PHP.DisplayErrors == false && val != "on" {
+				if site.PHP.DisplayErrors == false && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_MEMORY_LIMIT":
-				if site.PHP.MemoryLimit != "" && val != "512M" {
+				if site.PHP.MemoryLimit != "" && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_MAX_EXECUTION_TIME":
-				if site.PHP.MaxExecutionTime != 0 && val != "5000" {
+				if site.PHP.MaxExecutionTime != 0 && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_UPLOAD_MAX_FILESIZE":
-				if site.PHP.MaxFileUpload != "" && val != "512M" {
+				if site.PHP.MaxFileUpload != "" && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_MAX_INPUT_VARS":
-				if site.PHP.MaxInputVars != 0 && val != "5000" {
+				if site.PHP.MaxInputVars != 0 && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_POST_MAX_SIZE":
-				if site.PHP.PostMaxSize != "" && val != "512M" {
+				if site.PHP.PostMaxSize != "" && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_OPCACHE_ENABLE":
-				if site.PHP.OpcacheEnable {
-					if val != "1" {
-						return false
-					}
+				// TODO(jasonmccallister) verify this logic
+				if site.PHP.OpcacheEnable && val == config.DefaultEnvs[env] {
+					return false
 				}
 			case "PHP_OPCACHE_REVALIDATE_FREQ":
-				if site.PHP.OpcacheRevalidateFreq != 0 && val != "0" {
+				if site.PHP.OpcacheRevalidateFreq != 0 && val != config.DefaultEnvs[env] {
 					return false
 				}
 			}
