@@ -19,6 +19,7 @@ func main() {
 
 	// assign the port as a flag with a default
 	port := flag.String("port", "5000", "which port API should listen on")
+	addr := flag.String("addr", "http://127.0.0.1:2019", "the address for the Caddy API")
 	flag.Parse()
 
 	// create the network listener
@@ -30,7 +31,7 @@ func main() {
 	// create the grpc server
 	s := grpc.NewServer()
 
-	protob.RegisterNitroServer(s, api.NewService("http://127.0.0.1:2019"))
+	protob.RegisterNitroServer(s, api.NewService(*addr))
 
 	fmt.Println("gRPC API listening on port", *port)
 
