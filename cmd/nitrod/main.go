@@ -14,7 +14,7 @@ import (
 
 func main() {
 	log.SetOutput(os.Stdout)
-	log.SetPrefix("api")
+	log.SetPrefix("nitrod")
 
 	// assign the port as a flag with a default
 	port := flag.String("port", "5000", "which port API should listen on")
@@ -36,6 +36,6 @@ func main() {
 
 	// server the grpc service
 	if err := s.Serve(lis); err != nil {
-		log.Fatal("error when running the api", err)
+		log.Fatal("error when running the gRPC API", err)
 	}
 }
