@@ -23,6 +23,7 @@ import (
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
+	"github.com/craftcms/nitro/command/apply/internal/proxycontainer"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
@@ -105,8 +106,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Info("Checking Proxy...")
 
-			// check the proxy
-			proxy, err := checkProxy(ctx, docker, env)
+			// check the proxy and ensure its started
+			proxy, err := proxycontainer.FindAndStart(ctx, docker, env)
 			if err != nil {
 				return err
 			}
@@ -128,7 +129,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// get the envs for the sites
 			for _, site := range cfg.Sites {
 				output.Pending("checking", site.Hostname)
-				envs := site.AsEnvs(envNetwork.IPAM.Config[0].Gateway)
+				envs := site.AsEnvs(proxy.NetworkSettings.Networks[env].IPAddress)
 
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
@@ -468,21 +469,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	return cmd
 }
 
-func createContainer(ctx context.Context, docker client.ContainerAPIClient, config *container.Config, host *container.HostConfig, network *network.NetworkingConfig, name string) (string, error) {
-	// create the container
-	resp, err := docker.ContainerCreate(ctx, config, host, network, nil, name)
-	if err != nil {
-		return "", fmt.Errorf("unable to create the container, %w", err)
-	}
-
-	// start the container
-	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return "", fmt.Errorf("unable to start the container, %w", err)
-	}
-
-	return resp.ID, nil
-}
-
 func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env string) (types.Container, error) {
 	f := filters.NewArgs()
 	f.Add("label", labels.Proxy+"="+env)
@@ -657,9 +643,14 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 
 		// create the container for the database
-		if _, err := createContainer(ctx, docker, containerConfig, hostConfig, networkConfig, hostname); err != nil {
-			output.Warning()
-			return err
+		resp, err := docker.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, hostname)
+		if err != nil {
+			return fmt.Errorf("unable to create the container, %w", err)
+		}
+
+		// start the container
+		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+			return fmt.Errorf("unable to start the container, %w", err)
 		}
 
 		output.Done()
@@ -675,7 +666,6 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
 	// convert the sites into the gRPC API Apply request
 	sites := make(map[string]*protob.Site)
-
 	for _, s := range cfg.Sites {
 		hosts := []string{s.Hostname}
 
