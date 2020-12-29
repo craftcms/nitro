@@ -1,9 +1,7 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
     - go mod download
-    - go test ./...
+    - go test -v ./...
 builds:
   - binary: nitro
     id: nitro
@@ -17,8 +15,7 @@ builds:
       - arm64
     ldflags: -s -w -X github.com/craftcms/nitro/command/version.Version={{.Version}}
 archives:
-  -
-    name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+  - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
     id: nitro
     builds:
       - nitro
@@ -34,8 +31,8 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 release:
   github:
     owner: craftcms
