@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 
@@ -410,7 +411,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Done()
 
-			// update the hosts files
+			// should we update the hosts file?
 			if os.Getenv("NITRO_EDIT_HOSTS") == "false" || cmd.Flag("skip-hosts").Value.String() == "true" {
 				// skip updating the hosts file
 				return nil
@@ -447,7 +448,16 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// run the hosts command
 					switch runtime.GOOS {
 					case "windows":
-						return fmt.Errorf("setting hosts file is not yet supported on windows")
+						// windows users should be running as admin, so just execute the hosts command
+						// as is
+						c := exec.Command(nitro, "hosts", "--hostnames="+strings.Join(hostnames, ","))
+
+						c.Stdout = os.Stdout
+						c.Stderr = os.Stderr
+
+						if c.Run() != nil {
+							return err
+						}
 					default:
 						output.Info("Modifying hosts file (you might be prompted for your password)")
 
