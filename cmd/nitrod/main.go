@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -33,7 +32,7 @@ func main() {
 
 	protob.RegisterNitroServer(s, api.NewService(*addr))
 
-	fmt.Println("gRPC API listening on port", *port)
+	log.Println("gRPC API listening on port", *port)
 
 	// server the grpc service
 	if err := s.Serve(lis); err != nil {
