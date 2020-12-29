@@ -58,6 +58,8 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 				if !preview {
 					output.Info("Removing sites from hosts file...")
 				}
+
+				// TODO(jasonmccallister) implement the remove funtionality
 				return fmt.Errorf("remove is not yet implemented")
 			default:
 				if !preview {
@@ -104,7 +106,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 	cmd.Flags().StringSlice("hostnames", nil, "list of hostnames to set")
 	cmd.MarkFlagRequired("hostnames")
 	cmd.Flags().Bool("remove", false, "remove hosts from file")
-	cmd.Flags().Bool("preview", false, "preview the hosts file change")
+	cmd.Flags().Bool("preview", false, "preview hosts file change")
 
 	return cmd
 }
