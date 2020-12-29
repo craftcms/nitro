@@ -13,16 +13,20 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-// NewService returns an API struct that implements the gRPC API used in the proxy container.
-// The gRPC API is used to handle making changes to the Caddy Server via its local API.
-func NewService() *Service {
+// NewService takes the address to the Casdy API and returns an API struct that
+// implements the gRPC API used in the proxy container. The gRPC API is used to
+// handle making changes to the Caddy Server via its local API. If no addr is
+// provided, it will set the default addr to http://127.0.0.1:2019
+func NewService(addr string) *Service {
 	return &Service{
+		Addr: addr,
 		HTTP: http.DefaultClient,
 	}
 }
 
 // Service implements the protob.NitroServer interface
 type Service struct {
+	Addr string
 	HTTP *http.Client
 }
 
@@ -39,6 +43,11 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	// if there is no client, use the default
 	if svc.HTTP == nil {
 		svc.HTTP = http.DefaultClient
+	}
+
+	// set the addr if not provided
+	if svc.Addr == "" {
+		svc.Addr = "http://127.0.0.1:2019"
 	}
 
 	// convert each of the sites into a route
@@ -104,10 +113,10 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	}
 
 	// send the update
-	res, err := svc.HTTP.Post("http://127.0.0.1:2019/config/apps/http/servers", "application/json", bytes.NewReader(content))
+	res, err := svc.HTTP.Post(svc.Addr+"/config/apps/http/servers", "application/json", bytes.NewReader(content))
 	if err != nil {
 		return &protob.ApplyResponse{
-			Message: fmt.Sprintf("error updating Caddy API, err: %s", err.Error()),
+			Message: fmt.Sprintf("Error updating Caddy API, err: %s", err.Error()),
 			Error:   true,
 		}, err
 	}
@@ -115,14 +124,14 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	// check the status code
 	if res.StatusCode != http.StatusOK {
 		return &protob.ApplyResponse{
-			Message: fmt.Sprintf("received %d response from caddy api", res.StatusCode),
+			Message: fmt.Sprintf("Received %d response from Caddy API", res.StatusCode),
 			Error:   true,
 		}, nil
 	}
 
 	// set the message and error to false
 	return &protob.ApplyResponse{
-		Message: fmt.Sprintf("successfully applied changes, sites: %d", len(request.GetSites())),
+		Message: fmt.Sprintf("Successfully applied changes, sites: %d", len(request.GetSites())),
 		Error:   false,
 	}, nil
 }

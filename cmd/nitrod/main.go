@@ -30,7 +30,7 @@ func main() {
 	// create the grpc server
 	s := grpc.NewServer()
 
-	protob.RegisterNitroServer(s, api.NewService())
+	protob.RegisterNitroServer(s, api.NewService("http://127.0.0.1:2019"))
 
 	fmt.Println("gRPC API listening on port", *port)
 
