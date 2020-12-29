@@ -98,9 +98,14 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			}
 
 			// create the container
-			if _, err := createContainer(ctx, docker, containerConfig, hostconfig, networkConfig, "mailhog"); err != nil {
-				output.Warning()
-				return "", err
+			resp, err := docker.ContainerCreate(ctx, containerConfig, hostconfig, networkConfig, nil, "mailhog.service.internal")
+			if err != nil {
+				return "", fmt.Errorf("unable to create the container, %w", err)
+			}
+
+			// start the container
+			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+				return "", fmt.Errorf("unable to start the container, %w", err)
 			}
 
 			output.Done()
