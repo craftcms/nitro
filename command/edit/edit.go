@@ -12,6 +12,8 @@ import (
 const exampleText = `  # edit the config file
   nitro edit`
 
+// NewCommand returns the command to edit a config file with the users default editor as defined by the
+// $EDITOR variable.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "edit",
