@@ -46,11 +46,24 @@ var (
 )
 
 const exampleText = `  # apply changes from a config
-  nitro apply
+  $ nitro apply
+  Checking Network...
+    ✓ network ready
+  Checking Proxy...
+    ✓ proxy ready
+  Checking Databases...
+    ✓ mysql-8.0-3306 ready
+    ✓ postgres-13-5432 ready
+  Checking Sites...
+    … checking id.craftcms.test ✓
+    … checking laravel-app.nitro ✓
+  Checking Proxy...
+    … updating proxy ✓
+  nitro-dev is up and running 😃
 
   # skip editing the hosts file
   nitro apply --skip-hosts
-  # you can also set the environment variable "NITRO_EDIT_HOSTS" to "false" to completely disable editing`
+  # you can also set the environment variable "NITRO_EDIT_HOSTS" to "false"`
 
 // NewCommand returns the command used to apply configuration file changes to a nitro environment.
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
