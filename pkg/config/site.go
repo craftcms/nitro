@@ -40,10 +40,10 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return s.cleanPath(home, s.Path)
 }
 
-// AsEnvs takes a site and turns specific options
+// AsEnvs takes a gateway addr and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
-func (s *Site) AsEnvs() []string {
+func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
 	// if they do not specify the error... false means on
@@ -95,6 +95,20 @@ func (s *Site) AsEnvs() []string {
 	} else {
 		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", s.PHP.OpcacheRevalidateFreq))
 
+	}
+
+	// check if xdebug is enabled
+	// TODO(jasonmccallister) move this to the sites config func since we now
+	// set php configurations per site.
+	switch s.Xdebug {
+	case false:
+		envs = append(envs, "XDEBUG_MODE=off")
+	default:
+		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
+		// opts.Network.IPAM.Config[0].Gateway
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, addr))
+		envs = append(envs, "XDEBUG_SESSION=nitro")
+		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
 
 	// TODO(jasonmccallister) add opcache settings

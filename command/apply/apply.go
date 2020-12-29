@@ -128,7 +128,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// get the envs for the sites
 			for _, site := range cfg.Sites {
 				output.Pending("checking", site.Hostname)
-				envs := site.AsEnvs()
+				envs := site.AsEnvs(envNetwork.IPAM.Config[0].Gateway)
 
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
@@ -162,24 +162,10 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						return err
 					}
 
-					// add the site itself to the extra hosts
+					// add the site itself and any aliases to the extra hosts
 					extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
 					for _, s := range site.Aliases {
 						extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-					}
-
-					// check if xdebug is enabled
-					// TODO(jasonmccallister) move this to the sites config func since we now
-					// set php configurations per site.
-					switch site.Xdebug {
-					case false:
-						envs = append(envs, "XDEBUG_MODE=off")
-					default:
-						// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
-						// opts.Network.IPAM.Config[0].Gateway
-						envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks[env].IPAddress))
-						envs = append(envs, "XDEBUG_SESSION=nitro")
-						envs = append(envs, "XDEBUG_MODE=develop,debug")
 					}
 
 					// create the container

@@ -7,6 +7,88 @@ import (
 	"testing"
 )
 
+func TestSite_AsEnvs(t *testing.T) {
+	type fields struct {
+		Hostname string
+		Aliases  []string
+		Path     string
+		Version  string
+		PHP      PHP
+		Dir      string
+		Xdebug   bool
+	}
+	type args struct {
+		addr string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{
+			name: "defaults are overridden when set on the site",
+			fields: fields{
+				Hostname: "somewebsite.nitro",
+				PHP: PHP{
+					DisplayErrors:         true,
+					MemoryLimit:           "256M",
+					MaxExecutionTime:      3000,
+					UploadMaxFileSize:     "128M",
+					MaxInputVars:          2000,
+					PostMaxSize:           "128M",
+					OpcacheEnable:         true,
+					OpcacheRevalidateFreq: 60,
+				},
+			},
+			want: []string{
+				"PHP_DISPLAY_ERRORS=off",
+				"PHP_MEMORY_LIMIT=256M",
+				"PHP_MAX_EXECUTION_TIME=3000",
+				"PHP_UPLOAD_MAX_FILESIZE=128M",
+				"PHP_MAX_INPUT_VARS=2000",
+				"PHP_POST_MAX_SIZE=128M",
+				"PHP_OPCACHE_ENABLE=1",
+				"PHP_OPCACHE_REVALIDATE_FREQ=60",
+				"XDEBUG_MODE=off",
+			},
+		},
+		{
+			name: "can get the defaults that are expected",
+			fields: fields{
+				Hostname: "somewebsite.nitro",
+			},
+			want: []string{
+				"PHP_DISPLAY_ERRORS=on",
+				"PHP_MEMORY_LIMIT=512M",
+				"PHP_MAX_EXECUTION_TIME=5000",
+				"PHP_UPLOAD_MAX_FILESIZE=512M",
+				"PHP_MAX_INPUT_VARS=5000",
+				"PHP_POST_MAX_SIZE=512M",
+				"PHP_OPCACHE_ENABLE=0",
+				"PHP_OPCACHE_REVALIDATE_FREQ=0",
+				"XDEBUG_MODE=off",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Site{
+				Hostname: tt.fields.Hostname,
+				Aliases:  tt.fields.Aliases,
+				Path:     tt.fields.Path,
+				Version:  tt.fields.Version,
+				PHP:      tt.fields.PHP,
+				Dir:      tt.fields.Dir,
+				Xdebug:   tt.fields.Xdebug,
+			}
+			if got := s.AsEnvs(tt.args.addr); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Site.AsEnvs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestSite_cleanPath(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -43,82 +125,6 @@ func TestSite_cleanPath(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("Site.cleanPath() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestSite_AsEnvs(t *testing.T) {
-	type fields struct {
-		Hostname string
-		Aliases  []string
-		Path     string
-		Version  string
-		PHP      PHP
-		Dir      string
-		Xdebug   bool
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   []string
-	}{
-		{
-			name: "defaults are overridden when set on the site",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
-				},
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=off",
-				"PHP_MEMORY_LIMIT=256M",
-				"PHP_MAX_EXECUTION_TIME=3000",
-				"PHP_UPLOAD_MAX_FILESIZE=128M",
-				"PHP_MAX_INPUT_VARS=2000",
-				"PHP_POST_MAX_SIZE=128M",
-				"PHP_OPCACHE_ENABLE=1",
-				"PHP_OPCACHE_REVALIDATE_FREQ=60",
-			},
-		},
-		{
-			name: "can get the defaults that are expected",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=on",
-				"PHP_MEMORY_LIMIT=512M",
-				"PHP_MAX_EXECUTION_TIME=5000",
-				"PHP_UPLOAD_MAX_FILESIZE=512M",
-				"PHP_MAX_INPUT_VARS=5000",
-				"PHP_POST_MAX_SIZE=512M",
-				"PHP_OPCACHE_ENABLE=0",
-				"PHP_OPCACHE_REVALIDATE_FREQ=0",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Site{
-				Hostname: tt.fields.Hostname,
-				Aliases:  tt.fields.Aliases,
-				Path:     tt.fields.Path,
-				Version:  tt.fields.Version,
-				PHP:      tt.fields.PHP,
-				Dir:      tt.fields.Dir,
-				Xdebug:   tt.fields.Xdebug,
-			}
-			if got := s.AsEnvs(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Site.AsEnvs() = %v, want %v", got, tt.want)
 			}
 		})
 	}
