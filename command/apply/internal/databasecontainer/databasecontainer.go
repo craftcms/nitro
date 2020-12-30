@@ -151,7 +151,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	networkConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			"nitro": {
+			"nitro-network": {
 				NetworkID: networkID,
 			},
 		},
