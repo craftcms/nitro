@@ -76,13 +76,16 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro+"=true")
+
+			// add the filter for the network name
 			filter.Add("name", "nitro-network")
 
 			output.Info("Checking Network...")
 
 			// check the network
 			var envNetwork types.NetworkResource
-			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{})
+			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to list docker networks\n%w", err)
 			}
@@ -99,6 +102,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if envNetwork.ID == "" {
 				return ErrNoNetwork
 			}
+
+			// remove the filter
+			filter.Del("name", "nitro-network")
 
 			output.Success("network ready")
 
@@ -178,7 +184,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							&container.Config{
 								Image: image,
 								Labels: map[string]string{
-									labels.Host: site.Hostname,
+									labels.Nitro: "true",
+									labels.Host:  site.Hostname,
 								},
 								Env: envs,
 							},
