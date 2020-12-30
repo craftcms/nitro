@@ -196,7 +196,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							},
 							&network.NetworkingConfig{
 								EndpointsConfig: map[string]*network.EndpointSettings{
-									"nitro": {
+									"nitro-network": {
 										NetworkID: envNetwork.ID,
 									},
 								},
@@ -630,7 +630,7 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 		networkConfig := &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				"nitro": {
+				"nitro-network": {
 					NetworkID: networkID,
 				},
 			},
