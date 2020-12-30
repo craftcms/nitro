@@ -28,12 +28,10 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 		Short:   "Backup a database",
 		Example: backupExampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
 			// add filters to show only the envrionment and database containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 			filter.Add("label", labels.Type+"=database")
 
 			// get a list of all the databases
@@ -64,7 +62,6 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				ContainerID:   containerID,
 				ContainerName: containerName,
 				Database:      db,
-				Environment:   env,
 				Home:          home,
 			}
 

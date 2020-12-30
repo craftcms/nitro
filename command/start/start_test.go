@@ -10,21 +10,19 @@ import (
 
 func TestStartSuccess(t *testing.T) {
 	// Arrange
-	environmentName := "testing-start"
 	containers := []types.Container{
 		{
-			ID:    "testing-start",
-			Names: []string{"/testing-start"},
+			ID:    "nitro",
+			Names: []string{"/nitro"},
 		},
 	}
-	expectedContainerID := "testing-start"
+	expectedContainerID := "nitro"
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
-	expectedOutput := []string{"Starting testing-start...\n", "testing-start started 👍\n"}
+	expectedOutput := []string{"Starting Nitro...\n", "Nitro started 👍\n"}
 
 	// Act
 	cmd := NewCommand(mock, output)
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert
@@ -43,7 +41,6 @@ func TestStartSuccess(t *testing.T) {
 
 func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	// Arrange
-	environmentName := "testing-start"
 	containers := []types.Container{
 		{
 			ID:    "testing-start",
@@ -58,7 +55,6 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 
 	// Act
 	cmd := NewCommand(mock, output)
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert
@@ -76,12 +72,10 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 
 func TestStartErrorsWhenThereAreNoContainers(t *testing.T) {
 	// Arrange
-	environmentName := "testing-start"
 	mock := newMockDockerClient(nil, nil, nil)
 
 	// Act
 	cmd := NewCommand(mock, &spyOutputer{})
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert

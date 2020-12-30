@@ -10,7 +10,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -29,13 +28,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "Restart an environment",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
 			// get all the containers using a filter, we only want to restart containers which
 			// have the label com.craftcms.nitro.environment=name
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
@@ -48,7 +45,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return ErrNoContainers
 			}
 
-			output.Info("Restarting", env+"...")
+			output.Info("Restarting Nitro...")
 
 			// set a timeout, consider making this a flag
 			timeout := time.Duration(5000) * time.Millisecond
@@ -67,7 +64,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			fmt.Println(env, "restarted 🎉")
+			fmt.Println("Nitro restarted 🎉")
 
 			return nil
 		},

@@ -33,8 +33,8 @@ var (
 const exampleText = `  # remove all resources (networks, containers, and volumes) for an environment
   nitro destroy
 
-  # destroy resources for a specific environment
-  nitro destroy --environment my-testing-environment`
+  # destroy resources without a database backup
+  nitro destroy --skip-backup`
 
 // NewCommand is used to destroy all resources for an environment. It will prompt for
 // user verification and defaults to no. Part of the destroy process is to
@@ -42,12 +42,11 @@ const exampleText = `  # remove all resources (networks, containers, and volumes
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "destroy",
-		Short:   "Destroy environment",
+		Short:   "Destroy the environment",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
@@ -70,13 +69,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			if !confirm {
-				output.Info("skipping destroy, all resources related to", env, "will remain 😅")
+				output.Info("skipping destroy, all resources will remain 😅")
 
 				return nil
 			}
 
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all related containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{
@@ -140,7 +138,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 								ContainerID:   c.ID,
 								ContainerName: name,
 								Database:      db,
-								Environment:   env,
 								Home:          home,
 							}
 
@@ -224,7 +221,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info(env, "destroyed ✨")
+			output.Info("Nitro destroyed ✨")
 
 			return nil
 		},

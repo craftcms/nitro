@@ -12,9 +12,6 @@ import (
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
-
-	// ErrNoEnvironmentSet is returned whan an environment is not provided
-	ErrNoEnvironmentSet = fmt.Errorf("missing the environment name")
 )
 
 // Config represents the nitro-dev.yaml users add for local development.
@@ -58,16 +55,12 @@ type Services struct {
 	Redis     bool `yaml:"redis"`
 }
 
-// Load is used to return the environment name, unmarshalled config, and
+// Load is used to return the unmarshalled config, and
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
-func Load(home, env string) (*Config, error) {
-	if env == "" {
-		return nil, ErrNoEnvironmentSet
-	}
-
+func Load(home string) (*Config, error) {
 	// set the config file
-	file := filepath.Join(home, ".nitro", env+".yaml")
+	file := filepath.Join(home, ".nitro", "nitro.yaml")
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return nil, ErrNoConfigFile
 	}

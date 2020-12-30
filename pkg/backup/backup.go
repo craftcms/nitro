@@ -20,10 +20,9 @@ import (
 )
 
 // Options are used to pass options to a database backup func.
-// The options contain information such as the environment,
-// container, home directory, and database to backup.
+// The options contain information such as the container, home
+// directory, and database to backup.
 type Options struct {
-	Environment   string
 	Home          string
 	ContainerID   string
 	ContainerName string
@@ -52,9 +51,6 @@ func (o *Options) Validate() error {
 	}
 	if o.Database == "" {
 		return fmt.Errorf("invalid database")
-	}
-	if o.Environment == "" {
-		return fmt.Errorf("invalid environment")
 	}
 	if o.Home == "" {
 		return fmt.Errorf("invalid home path")
@@ -240,7 +236,7 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 	}
 
 	// make the backup directory if it does not exist
-	dir := filepath.Join(opts.Home, ".nitro", "backups", opts.Environment, opts.ContainerName)
+	dir := filepath.Join(opts.Home, ".nitro", "backups", opts.ContainerName)
 	if err := helpers.MkdirIfNotExists(dir); err != nil {
 		return err
 	}

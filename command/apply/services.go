@@ -16,10 +16,10 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, enabled bool, networkID, env string) (string, error) {
+func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
 	// add the filter for mailhog
+	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=mailhog")
-	defer filter.Add("label", labels.Type+"=mailhog")
 
 	switch enabled {
 	case true:
@@ -63,8 +63,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			containerConfig := &container.Config{
 				Image: "docker.io/mailhog/mailhog",
 				Labels: map[string]string{
-					labels.Environment: env,
-					labels.Type:        "mailhog",
+					labels.Type: "mailhog",
 				},
 				ExposedPorts: nat.PortSet{
 					smtpPort: struct{}{},
@@ -91,7 +90,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 
 			networkConfig := &network.NetworkingConfig{
 				EndpointsConfig: map[string]*network.EndpointSettings{
-					env: {
+					"nitro": {
 						NetworkID: networkID,
 					},
 				},

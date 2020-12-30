@@ -37,7 +37,6 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "Trust certificates for environment",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
 				// when we call commands from other commands (e.g. create)
@@ -48,8 +47,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// find the nitro proxy for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
-			filter.Add("label", labels.Proxy+"="+env)
+			filter.Add("label", labels.Proxy+"=true")
 
 			// find the container, should only be one
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -65,7 +63,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			containerID := containers[0].ID
 
 			// get the contents of the certificate from the container
-			output.Pending(fmt.Sprintf("getting certificate for %s...", env))
+			output.Pending("getting certificate for Nitro...")
 
 			// verify the file exists in the container
 			for {
@@ -121,10 +119,10 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			switch runtime.GOOS {
 			case "linux":
 				// using the reference from: https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
-				if err := sudo.Run("mv", "mv", f.Name(), fmt.Sprintf("/usr/local/share/ca-certificates/%s.crt", env)); err != nil {
+				if err := sudo.Run("mv", "mv", f.Name(), fmt.Sprintf("/usr/local/share/ca-certificates/%s.crt", "nitro")); err != nil {
 					output.Info("Unable to automatically add certificate\n")
 					output.Info("To install the certificate, run the following command:")
-					output.Info(fmt.Sprintf("  sudo mv %s /usr/local/share/ca-certificates/%s.crt", f.Name(), env))
+					output.Info(fmt.Sprintf("  sudo mv %s /usr/local/share/ca-certificates/%s.crt", f.Name(), "nitro"))
 					output.Info("  sudo update-ca-certificates")
 
 					return nil
@@ -171,7 +169,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			output.Info(env, "certificates are now trusted 🔒")
+			output.Info("Nitro certificates are now trusted 🔒")
 
 			return nil
 		},

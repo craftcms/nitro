@@ -58,10 +58,9 @@ const exampleText = `  # apply changes from a config
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
-		Short:   "Apply changes to an environment",
+		Short:   "Apply changes",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
 				// when we call commands from other commands (e.g. init)
@@ -71,14 +70,14 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// load the config
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
+			filter.Add("label", labels.Type+"=network")
 
 			output.Info("Checking Network...")
 
@@ -91,7 +90,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// get the network for the environment
 			for _, n := range networks {
-				if n.Name == env {
+				if n.Name == "nitro" {
 					envNetwork = n
 					break
 				}
@@ -107,7 +106,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			output.Info("Checking Proxy...")
 
 			// check the proxy and ensure its started
-			proxy, err := proxycontainer.FindAndStart(ctx, docker, env)
+			proxy, err := proxycontainer.FindAndStart(ctx, docker)
 			if err != nil {
 				return err
 			}
@@ -118,7 +117,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// check the databases
 			for _, db := range cfg.Databases {
-				if err := checkDatabase(ctx, docker, output, filter, db, envNetwork.ID, env); err != nil {
+				if err := checkDatabase(ctx, docker, output, db, envNetwork.ID); err != nil {
 					return err
 				}
 			}
@@ -129,7 +128,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// get the envs for the sites
 			for _, site := range cfg.Sites {
 				output.Pending("checking", site.Hostname)
-				envs := site.AsEnvs(proxy.NetworkSettings.Networks[env].IPAddress)
+				envs := site.AsEnvs(proxy.NetworkSettings.Networks["nitro"].IPAddress)
 
 				// add the site filter
 				filter.Add("label", labels.Host+"="+site.Hostname)
@@ -175,8 +174,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						&container.Config{
 							Image: image,
 							Labels: map[string]string{
-								labels.Environment: env,
-								labels.Host:        site.Hostname,
+								labels.Host: site.Hostname,
 							},
 							Env: envs,
 						},
@@ -192,7 +190,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						},
 						&network.NetworkingConfig{
 							EndpointsConfig: map[string]*network.EndpointSettings{
-								env: {
+								"nitro": {
 									NetworkID: envNetwork.ID,
 								},
 							},
@@ -335,7 +333,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						default:
 							// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
 							// opts.Network.IPAM.Config[0].Gateway
-							envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks[env].IPAddress))
+							envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks["nitro"].IPAddress))
 							envs = append(envs, "XDEBUG_SESSION=nitro")
 							envs = append(envs, "XDEBUG_MODE=develop,debug")
 						}
@@ -346,8 +344,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							&container.Config{
 								Image: image,
 								Labels: map[string]string{
-									labels.Environment: env,
-									labels.Host:        site.Hostname,
+									labels.Host: site.Hostname,
 								},
 								Env: envs,
 							},
@@ -363,7 +360,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							},
 							&network.NetworkingConfig{
 								EndpointsConfig: map[string]*network.EndpointSettings{
-									env: {
+									"nitro": {
 										NetworkID: envNetwork.ID,
 									},
 								},
@@ -457,7 +454,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
-			output.Info(env, "is up and running 😃")
+			output.Info("Nitro is up and running 😃")
 
 			return nil
 		},
@@ -469,9 +466,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	return cmd
 }
 
-func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env string) (types.Container, error) {
+func checkProxy(ctx context.Context, docker client.ContainerAPIClient) (types.Container, error) {
 	f := filters.NewArgs()
-	f.Add("label", labels.Proxy+"="+env)
+	f.Add("label", labels.Type+"=proxy")
 	// TODO(jasonmccallister) add the type filter as well?
 
 	// check if there is an existing container for the nitro-proxy
@@ -483,7 +480,7 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 	// get the container id and determine if the container needs to start
 	for _, c := range containers {
 		for _, n := range c.Names {
-			if n == env || n == "/"+env {
+			if n == "nitro-proxy" || n == "/nitro-proxy" {
 				// check if it is running
 				if c.State != "running" {
 					if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
@@ -500,8 +497,9 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient, env strin
 	return types.Container{}, ErrNoProxyContainer
 }
 
-func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, filter filters.Args, db config.Database, networkID, env string) error {
+func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, db config.Database, networkID string) error {
 	// add filters to check for the container
+	filter := filters.NewArgs()
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")
@@ -542,7 +540,6 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 
 		// create the database labels
 		lbls := map[string]string{
-			labels.Environment:     env,
 			labels.DatabaseEngine:  db.Engine,
 			labels.DatabaseVersion: db.Version,
 			labels.Type:            "database",
@@ -636,7 +633,7 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		}
 		networkConfig := &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				env: {
+				"nitro": {
 					NetworkID: networkID,
 				},
 			},
@@ -656,10 +653,6 @@ func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output te
 		output.Done()
 	}
 
-	// remove the database filters
-	filter.Del("label", labels.DatabaseEngine+"="+db.Engine)
-	filter.Del("label", labels.DatabaseVersion+"="+db.Version)
-	filter.Del("label", labels.Type+"=database")
 	return nil
 }
 

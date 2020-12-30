@@ -40,21 +40,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
-			env := cmd.Flag("environment").Value.String()
-
 			// check if there is a config file
-			_, err := config.Load(home, env)
+			_, err := config.Load(home)
 			if errors.Is(err, config.ErrNoConfigFile) {
-				if err := setup.FirstTime(home, env, output); err != nil {
+				if err := setup.FirstTime(home, output); err != nil {
 					return err
 				}
 			}
 
-			output.Info(fmt.Sprintf("Checking %s...", env))
+			output.Info("Checking Nitro...")
 
 			// create filters for the development environment
 			filter := filters.NewArgs()
-			filter.Add("name", env)
+			filter.Add("name", "nitro")
 
 			// check if the network needs to be created
 			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
@@ -67,7 +65,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var skipNetwork bool
 			var networkID string
 			for _, n := range networks {
-				if n.Name == env {
+				if n.Name == "nitro" {
 					skipNetwork = true
 					networkID = n.ID
 				}
@@ -80,12 +78,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			default:
 				output.Pending("creating network")
 
-				resp, err := docker.NetworkCreate(ctx, env, types.NetworkCreate{
+				resp, err := docker.NetworkCreate(ctx, "nitro", types.NetworkCreate{
 					Driver:     "bridge",
 					Attachable: true,
 					Labels: map[string]string{
-						labels.Environment: env,
-						labels.Network:     env,
+						labels.Network: "nitro",
 					},
 				})
 				if err != nil {
@@ -109,7 +106,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var skipVolume bool
 			var volume *types.Volume
 			for _, v := range volumes.Volumes {
-				if v.Name == env {
+				if v.Name == "nitro" {
 					skipVolume = true
 					volume = v
 				}
@@ -125,10 +122,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// create a volume with the same name of the machine
 				resp, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
 					Driver: "local",
-					Name:   env,
+					Name:   "nitro",
 					Labels: map[string]string{
-						labels.Environment: env,
-						labels.Volume:      env,
+						labels.Volume: "nitro",
 					},
 				})
 				if err != nil {
@@ -176,7 +172,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the nitro proxy
 			proxyFilter := filters.NewArgs()
-			proxyFilter.Add("label", labels.Proxy+"="+env)
+			proxyFilter.Add("label", labels.Proxy+"=true")
 
 			// check if there is an existing container for the nitro-proxy
 			var containerID string
@@ -188,7 +184,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var proxyRunning bool
 			for _, c := range containers {
 				for _, n := range c.Names {
-					if n == env || n == "/"+env {
+					if n == "nitro-proxy" || n == "/nitro-proxy" {
 						output.Success("proxy ready")
 
 						containerID = c.ID
@@ -278,8 +274,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						},
 						Labels: map[string]string{
 							labels.Type:         "proxy",
-							labels.Environment:  env,
-							labels.Proxy:        env,
+							labels.Proxy:        "true",
 							labels.ProxyVersion: version.Version,
 						},
 					},
@@ -321,13 +316,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					},
 					&network.NetworkingConfig{
 						EndpointsConfig: map[string]*network.EndpointSettings{
-							env: {
+							"nitro": {
 								NetworkID: networkID,
 							},
 						},
 					},
 					nil,
-					env,
+					"nitro-proxy",
 				)
 				if err != nil {
 					return fmt.Errorf("unable to create the container from image %s\n%w", proxyImage, err)
@@ -371,7 +366,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info(env, "is ready! 🚀")
+			output.Info("Nitro is ready! 🚀")
 
 			return nil
 		},

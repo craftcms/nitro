@@ -11,17 +11,16 @@ import (
 )
 
 var (
-	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
+	// ErrNoProxyContainer is returned when the proxy container is not found
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
 )
 
 // FindAndStart will look for the proxy container and verify the container is started. It will return the
 // ErrNoProxyContainer error if it is unable to locate the proxy container. It is NOT responsible for
 // creating the proxy container as that is handled in the initialize package.
-func FindAndStart(ctx context.Context, docker client.ContainerAPIClient, env string) (types.Container, error) {
-	// create the filters for the environment
+func FindAndStart(ctx context.Context, docker client.ContainerAPIClient) (types.Container, error) {
+	// create the filters for the proxy
 	f := filters.NewArgs()
-	f.Add("label", labels.Proxy+"="+env)
 	f.Add("label", labels.Type+"=proxy")
 
 	// check if there is an existing container for the nitro-proxy
@@ -32,7 +31,7 @@ func FindAndStart(ctx context.Context, docker client.ContainerAPIClient, env str
 
 	for _, c := range containers {
 		for _, n := range c.Names {
-			if n == env || n == "/"+env {
+			if n == "nitro-proxy" || n == "/nitro-proxy" {
 				// check if it is running
 				if c.State != "running" {
 					if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {

@@ -25,7 +25,7 @@ var (
 
 // StartOrCreate is used to find a specific database and start the container. If there is no container for the database,
 // it will create a new volume and container for the database.
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, env string, db config.Database) error {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) error {
 	// create the filters for the database
 	f := filters.NewArgs()
 	f.Add("label", labels.DatabaseEngine+"="+db.Engine)
@@ -59,7 +59,6 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	// create the database labels
 	lbls := map[string]string{
-		labels.Environment:     env,
 		labels.DatabaseEngine:  db.Engine,
 		labels.DatabaseVersion: db.Version,
 		labels.Type:            "database",
@@ -144,7 +143,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	networkConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			env: {
+			"nitro": {
 				NetworkID: networkID,
 			},
 		},

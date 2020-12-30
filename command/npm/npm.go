@@ -41,7 +41,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 			if ctx == nil {
 				// when we call commands from other commands (e.g. create)
@@ -125,7 +124,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// set filters for the container name and environment
 			containerFilter := filters.NewArgs()
-			containerFilter.Add("label", labels.Environment+"="+env)
 			containerFilter.Add("name", containerName)
 
 			// check if there is an existing container
@@ -147,8 +145,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						Cmd:   commands,
 						Tty:   false,
 						Labels: map[string]string{
-							labels.Environment: env,
-							labels.Type:        "npm",
+							labels.Type: "npm",
 							// TODO abstract this?
 							"com.craftcms.nitro.path": path,
 						},
@@ -199,12 +196,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			output.Info("npm", action, "complete 🤘")
 
-			// should we remove the container
-			// if cmd.Flag("keep").Value.String() == "false" {
-			// 	if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
-			// 		return err
-			// 	}
-			// }
+			if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -212,7 +206,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 	// set flags for the command
 	cmd.Flags().String("version", "14", "which node version to use")
-	cmd.Flags().Bool("keep", true, "keep the container (faster since it will cache dependencies)")
 	cmd.Flags().String("path", "", "the path to run npm commands")
 
 	return cmd

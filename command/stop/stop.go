@@ -9,7 +9,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -29,13 +28,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Short:   "Stop environment",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the container
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
@@ -48,7 +45,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return ErrNoContainers
 			}
 
-			output.Info(fmt.Sprintf("Stopping %s...", env))
+			output.Info("Stopping Nitro...")
 
 			// stop each environment container
 			for _, c := range containers {
@@ -64,7 +61,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				output.Done()
 			}
 
-			output.Info(env, "shutdown 😴")
+			output.Info("Nitro shutdown 😴")
 
 			return nil
 		},

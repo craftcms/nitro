@@ -18,7 +18,6 @@ import (
 
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// Arrange
-	environmentName := "testing-init"
 	mock := newMockDockerClient(nil, nil, nil)
 	mock.networkCreateResponse = types.NetworkCreateResponse{
 		ID: "testing-init",
@@ -36,19 +35,17 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				labels.Environment: "testing-init",
-				labels.Network:     "testing-init",
+				labels.Network: "nitro",
 			},
 		},
-		Name: "testing-init",
+		Name: "nitro",
 	}
 	// set the volume create request
 	volumeReq := volumetypes.VolumeCreateBody{
 		Driver: "local",
-		Name:   "testing-init",
+		Name:   "nitro",
 		Labels: map[string]string{
-			labels.Environment: "testing-init",
-			labels.Volume:      "testing-init",
+			labels.Volume: "nitro",
 		},
 	}
 	// set the container create request
@@ -63,8 +60,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			},
 			Labels: map[string]string{
 				labels.Type:         "proxy",
-				labels.Environment:  "testing-init",
-				labels.Proxy:        "testing-init",
+				labels.Proxy:        "true",
 				labels.ProxyVersion: "develop",
 			},
 		},
@@ -107,19 +103,18 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 		},
 		NetworkingConfig: &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				"testing-init": {
+				"nitro": {
 					NetworkID: "testing-init",
 				},
 			},
 		},
-		Name: "testing-init",
+		Name: "nitro",
 	}
 	// set the container start request
 	containerStartRequest := types.ContainerStartOptions{}
 
 	// Act
 	cmd := NewCommand(home, mock, spyOutputer{})
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	// Assert
@@ -166,8 +161,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 		if !reflect.DeepEqual(mock.containerCreateRequests[0].NetworkingConfig, containerCreateReq.NetworkingConfig) {
 			t.Errorf(
 				"expected container create request networking to match\ngot:\n%v\n\nwant:\n%v",
-				mock.containerCreateRequests[0].NetworkingConfig,
-				containerCreateReq.NetworkingConfig,
+				&mock.containerCreateRequests[0].NetworkingConfig,
+				&containerCreateReq.NetworkingConfig,
 			)
 		}
 	}

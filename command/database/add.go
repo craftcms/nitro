@@ -25,7 +25,6 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Short:   "Add a new database",
 		Example: addExampleTest,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			show, err := strconv.ParseBool(cmd.Flag("show-output").Value.String())
 			if err != nil {
 				// set to false
@@ -34,7 +33,6 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 			filter.Add("label", labels.Type+"=database")
 
 			// get a list of all the databases

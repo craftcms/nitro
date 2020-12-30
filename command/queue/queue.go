@@ -29,22 +29,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Run a queue worker",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
-
 			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
 				return err
 			}
 
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
 			// create a filter for the enviroment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the sites
 			for _, s := range cfg.Sites {

@@ -40,10 +40,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
-
 			// load the configuration
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

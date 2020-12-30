@@ -12,23 +12,20 @@ import (
 
 func TestRestart(t *testing.T) {
 	// Arrange
-	environmentName := "testing-restart"
 	mock := newMockDockerClient(nil, nil, nil)
 	mock.containers = []types.Container{
 		{
 			ID:    "testing-restart",
 			Names: []string{"/testing-restart"},
 			Labels: map[string]string{
-				labels.Environment: "testing-restart",
-				labels.Proxy:       "testing-restart",
+				labels.Proxy: "testing-restart",
 			},
 		},
 		{
 			ID:    "testing-restart-hostname",
 			Names: []string{"/testing-restart-hostname"},
 			Labels: map[string]string{
-				labels.Environment: "testing-restart",
-				labels.Proxy:       "testing-restart",
+				labels.Proxy: "true",
 			},
 		},
 	}
@@ -38,7 +35,6 @@ func TestRestart(t *testing.T) {
 
 	// Act
 	cmd := New(mock, spyOutputer{})
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 	if err != nil {
 		t.Error(err)
@@ -56,12 +52,10 @@ func TestRestart(t *testing.T) {
 
 func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
 	// Arrange
-	environmentName := "testing-restart"
 	mock := newMockDockerClient(nil, nil, nil)
 
 	// Act
 	cmd := New(mock, spyOutputer{})
-	cmd.Flags().String("environment", environmentName, "test flag")
 	err := cmd.RunE(cmd, os.Args)
 
 	if err == nil {

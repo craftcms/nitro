@@ -29,10 +29,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Remove unused containers",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
-
 			// load the config file
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return fmt.Errorf("unable to load config, %w", err)
 			}
@@ -61,7 +59,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all of the containers for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
+			// TODO(jasonmccallister) add the additional types
+			filter.Add("label", labels.Type+"=composer")
+			filter.Add("label", labels.Type+"=node")
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return err
@@ -78,7 +78,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// if this is a proxy container
-				if c.Labels[labels.Proxy] == env {
+				if c.Labels[labels.Proxy] != "true" {
 					continue
 				}
 
@@ -115,7 +115,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							ContainerID:   c.ID,
 							ContainerName: name,
 							Database:      db,
-							Environment:   env,
 							Home:          home,
 						}
 

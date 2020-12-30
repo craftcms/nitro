@@ -34,7 +34,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Add a site",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			output.Info("Adding site...")
 
 			// get the current working directory
@@ -176,7 +175,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Success("setting PHP version", site.Version)
 
 			// load the config
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
@@ -197,7 +196,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Done()
 
-			output.Info(fmt.Sprintf("Site added to %s 🌍", env))
+			output.Info("Site added 🌍")
 
 			// ask if the apply command should run
 			var response string

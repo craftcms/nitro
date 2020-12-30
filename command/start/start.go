@@ -28,13 +28,11 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Short:   "Start environment",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			ctx := cmd.Context()
 
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the container
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -47,7 +45,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				return ErrNoContainers
 			}
 
-			output.Info(fmt.Sprintf("Starting %s...", env))
+			output.Info("Starting Nitro...")
 
 			// start each environment container
 			for _, c := range containers {
@@ -74,7 +72,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Done()
 			}
 
-			output.Info(env, "started 👍")
+			output.Info("Nitro started 👍")
 
 			return nil
 		},

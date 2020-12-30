@@ -30,10 +30,9 @@ func TestLoad(t *testing.T) {
 			name: "can load a config file",
 			args: args{
 				home: testdir,
-				env:  "nitro-test",
 			},
 			want: &Config{
-				File: filepath.Join(testdir, ".nitro", "nitro-test"+".yaml"),
+				File: filepath.Join(testdir, ".nitro", "nitro.yaml"),
 				Blackfire: Blackfire{
 					ServerID:    "my-id",
 					ServerToken: "my-token",
@@ -54,24 +53,16 @@ func TestLoad(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "no env returns error",
-			args: args{
-				home: testdir,
-			},
-			wantErr: true,
-		},
-		{
 			name: "missing file returns an error",
 			args: args{
-				home: testdir,
-				env:  "not-here",
+				home: filepath.Join(testdir, "something"),
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Load(tt.args.home, tt.args.env)
+			got, err := Load(tt.args.home)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Load() error = %v, wantErr %v", err, tt.wantErr)
 				return

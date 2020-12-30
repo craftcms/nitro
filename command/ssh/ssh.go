@@ -29,8 +29,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "SSH into a container",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
-
 			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
@@ -38,14 +36,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// load the config
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
 			// create a filter for the enviroment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Environment+"="+env)
 
 			// get all of the sites
 			var site string

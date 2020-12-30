@@ -18,16 +18,14 @@ const exampleText = `  # view all resources for the environment
   # show only the config file
   nitro context --yaml`
 
-// New is used for scaffolding new commands
-func New(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "View environment information",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			env := cmd.Flag("environment").Value.String()
 			// load the config file
-			cfg, err := config.Load(home, env)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

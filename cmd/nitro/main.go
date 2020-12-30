@@ -57,18 +57,6 @@ func rootMain(command *cobra.Command, _ []string) error {
 }
 
 func init() {
-	// set any global flags
-	flags := rootCommand.PersistentFlags()
-
-	// set a default environment if there is a variable
-	// set the default environment name
-	env := "nitro-dev"
-	if os.Getenv("NITRO_DEFAULT_ENVIRONMENT") != "" {
-		env = os.Getenv("NITRO_DEFAULT_ENVIRONMENT")
-	}
-
-	flags.StringP("environment", "e", env, "The environment")
-
 	// get the users home directory
 	home, err := homedir.Dir()
 	if err != nil {
@@ -103,7 +91,7 @@ func init() {
 		clean.NewCommand(home, client, term),
 		completion.New(),
 		composer.NewCommand(client, term),
-		context.New(home, client, term),
+		context.NewCommand(home, client, term),
 		craft.NewCommand(home, client, term),
 		create.New(client, term),
 		database.NewCommand(home, client, term),
@@ -122,7 +110,7 @@ func init() {
 		stop.New(client, term),
 		trust.New(client, term),
 		update.New(client, term),
-		validate.New(home, client, term),
+		validate.NewCommand(home, client, term),
 		version.New(client, nitrod, term),
 		xon.NewCommand(home, client, term),
 		xoff.NewCommand(home, client, term),

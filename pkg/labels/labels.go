@@ -1,6 +1,8 @@
 package labels
 
 const (
+	Nitro = "com.craftcms.nitro"
+
 	// DatabaseEngine is used to identify the engine that is being used for a database container (e.g. mysql, postgres)
 	DatabaseEngine = "com.craftcms.nitro.database-engine"
 
@@ -9,10 +11,6 @@ const (
 
 	// DatabaseCompatability is the compatability of the database (e.g. mariadb and mysql are compatible)
 	DatabaseCompatability = "com.craftcms.nitro.database-compatability"
-
-	// Environment is the constant used for the label used for docker images to determine
-	// the environment (e.g. nitro-dev) for the container
-	Environment = "com.craftcms.nitro.environment"
 
 	// Host is used to identify a web application by the hostname of the site (e.g demo.nitro)
 	Host = "com.craftcms.nitro.host"
