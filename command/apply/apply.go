@@ -90,7 +90,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// get the network for the environment
 			for _, n := range networks {
-				if n.Name == "nitro" {
+				if n.Name == "nitro-network" {
 					envNetwork = n
 					break
 				}
@@ -326,18 +326,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
 						}
 
-						// check if xdebug is enabled
-						switch site.Xdebug {
-						case false:
-							envs = append(envs, "XDEBUG_MODE=off")
-						default:
-							// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
-							// opts.Network.IPAM.Config[0].Gateway
-							envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, proxy.NetworkSettings.Networks["nitro"].IPAddress))
-							envs = append(envs, "XDEBUG_SESSION=nitro")
-							envs = append(envs, "XDEBUG_MODE=develop,debug")
-						}
-
 						// create the container
 						resp, err := docker.ContainerCreate(
 							ctx,
@@ -360,7 +348,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							},
 							&network.NetworkingConfig{
 								EndpointsConfig: map[string]*network.EndpointSettings{
-									"nitro": {
+									"nitro-network": {
 										NetworkID: envNetwork.ID,
 									},
 								},

@@ -41,4 +41,4 @@ VOLUME /data
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
-EXPOSE 443 80 5000 9003
+EXPOSE 443 80 5000

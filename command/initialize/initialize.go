@@ -52,8 +52,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create filters for the development environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			filter.Add("name", "nitro")
+			filter.Add("label", labels.Nitro+"=true")
+			filter.Add("name", "nitro-network")
 
 			// check if the network needs to be created
 			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
@@ -66,7 +66,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var skipNetwork bool
 			var networkID string
 			for _, n := range networks {
-				if n.Name == "nitro" {
+				if n.Name == "nitro-network" {
 					skipNetwork = true
 					networkID = n.ID
 				}
@@ -79,10 +79,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			default:
 				output.Pending("creating network")
 
-				resp, err := docker.NetworkCreate(ctx, "nitro", types.NetworkCreate{
+				resp, err := docker.NetworkCreate(ctx, "nitro-network", types.NetworkCreate{
 					Driver:     "bridge",
 					Attachable: true,
 					Labels: map[string]string{
+						labels.Nitro:   "true",
 						labels.Network: "nitro",
 					},
 				})
@@ -125,6 +126,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					Driver: "local",
 					Name:   "nitro",
 					Labels: map[string]string{
+						labels.Nitro:  "true",
 						labels.Volume: "nitro",
 					},
 				})
@@ -143,7 +145,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// TODO(jasonmccallister) remove this after development
 			if os.Getenv("NITRO_DEVELOPMENT") != "true" {
 				imageFilter := filters.NewArgs()
-				imageFilter.Add("label", labels.Nitro)
+				imageFilter.Add("label", labels.Nitro+"=true")
 				imageFilter.Add("reference", proxyImage)
 
 				// check for the proxy image
@@ -174,7 +176,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the nitro proxy
 			proxyFilter := filters.NewArgs()
-			proxyFilter.Add("label", labels.Nitro)
+			proxyFilter.Add("label", labels.Nitro+"=true")
 			proxyFilter.Add("label", labels.Proxy+"=true")
 
 			// check if there is an existing container for the nitro-proxy
@@ -205,7 +207,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Pending("creating proxy")
 
 				// set ports
-				var httpPort, httpsPort, apiPort, xdebugPort nat.Port
+				var httpPort, httpsPort, apiPort nat.Port
 
 				// check for a custom HTTP port
 				switch os.Getenv("NITRO_HTTP_PORT") {
@@ -249,33 +251,17 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				// check for a custom xdebug port
-				switch os.Getenv("NITRO_XDEBUG_PORT") {
-				case "":
-					// use the default environment variable
-					xdebugPort, err = nat.NewPort("tcp", "9003")
-					if err != nil {
-						return fmt.Errorf("unable to set the API port, %w", err)
-					}
-				default:
-					// get the port using the environment variable
-					xdebugPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_XDEBUG_PORT"))
-					if err != nil {
-						return fmt.Errorf("unable to set the xdebug port, %w", err)
-					}
-				}
-
 				// create a container
 				resp, err := docker.ContainerCreate(ctx,
 					&container.Config{
 						Image: proxyImage,
 						ExposedPorts: nat.PortSet{
-							httpPort:   struct{}{},
-							httpsPort:  struct{}{},
-							apiPort:    struct{}{},
-							xdebugPort: struct{}{},
+							httpPort:  struct{}{},
+							httpsPort: struct{}{},
+							apiPort:   struct{}{},
 						},
 						Labels: map[string]string{
+							labels.Nitro:        "true",
 							labels.Type:         "proxy",
 							labels.Proxy:        "true",
 							labels.ProxyVersion: version.Version,
@@ -309,17 +295,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 									HostPort: "5000",
 								},
 							},
-							xdebugPort: {
-								{
-									HostIP:   "127.0.0.1",
-									HostPort: "9003",
-								},
-							},
 						},
 					},
 					&network.NetworkingConfig{
 						EndpointsConfig: map[string]*network.EndpointSettings{
-							"nitro": {
+							"nitro-network": {
 								NetworkID: networkID,
 							},
 						},

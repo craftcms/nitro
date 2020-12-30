@@ -35,16 +35,18 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
+				labels.Nitro:   "true",
 				labels.Network: "nitro",
 			},
 		},
-		Name: "nitro",
+		Name: "nitro-network",
 	}
 	// set the volume create request
 	volumeReq := volumetypes.VolumeCreateBody{
 		Driver: "local",
 		Name:   "nitro",
 		Labels: map[string]string{
+			labels.Nitro:  "true",
 			labels.Volume: "nitro",
 		},
 	}
@@ -56,9 +58,9 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
 				"5000/tcp": struct{}{},
-				"9003/tcp": struct{}{},
 			},
 			Labels: map[string]string{
+				labels.Nitro:        "true",
 				labels.Type:         "proxy",
 				labels.Proxy:        "true",
 				labels.ProxyVersion: "develop",
@@ -93,22 +95,16 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 						HostPort: "5000",
 					},
 				},
-				"9003/tcp": {
-					{
-						HostIP:   "127.0.0.1",
-						HostPort: "9003",
-					},
-				},
 			},
 		},
 		NetworkingConfig: &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				"nitro": {
+				"nitro-network": {
 					NetworkID: "testing-init",
 				},
 			},
 		},
-		Name: "nitro",
+		Name: "nitro-proxy",
 	}
 	// set the container start request
 	containerStartRequest := types.ContainerStartOptions{}
