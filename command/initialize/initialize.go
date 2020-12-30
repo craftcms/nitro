@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -52,7 +53,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create filters for the development environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro+"=true")
 			filter.Add("name", "nitro-network")
 
 			// check if the network needs to be created
@@ -66,7 +66,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var skipNetwork bool
 			var networkID string
 			for _, n := range networks {
-				if n.Name == "nitro-network" {
+				if n.Name == "nitro-network" || strings.TrimLeft(n.Name, "/") == "nitro-network" {
 					skipNetwork = true
 					networkID = n.ID
 				}
