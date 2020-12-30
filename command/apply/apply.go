@@ -21,6 +21,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/command/apply/internal/proxycontainer"
@@ -77,13 +78,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Type+"=network")
+			filter.Add("name", "nitro-network")
 
 			output.Info("Checking Network...")
 
 			// check the network
 			var envNetwork types.NetworkResource
-			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
+			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{})
 			if err != nil {
 				return fmt.Errorf("unable to list docker networks\n%w", err)
 			}
@@ -106,8 +107,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			output.Info("Checking Proxy...")
 
 			// check the proxy and ensure its started
-			proxy, err := proxycontainer.FindAndStart(ctx, docker)
-			if err != nil {
+			if _, err := proxycontainer.FindAndStart(ctx, docker); err != nil {
 				return err
 			}
 
@@ -117,189 +117,37 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// check the databases
 			for _, db := range cfg.Databases {
-				if err := checkDatabase(ctx, docker, output, db, envNetwork.ID); err != nil {
+				n, _ := db.GetHostname()
+				output.Pending("checking", n)
+				if err := databasecontainer.StartOrCreate(ctx, docker, envNetwork.ID, db); err != nil {
+					output.Warning()
 					return err
 				}
+				output.Done()
 			}
 
-			// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-			output.Info("Checking Sites...")
+			if len(cfg.Sites) > 0 {
+				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
+				output.Info("Checking Sites...")
 
-			// get the envs for the sites
-			for _, site := range cfg.Sites {
-				output.Pending("checking", site.Hostname)
-				envs := site.AsEnvs(proxy.NetworkSettings.Networks["nitro"].IPAddress)
+				// get the envs for the sites
+				for _, site := range cfg.Sites {
+					output.Pending("checking", site.Hostname)
+					// TODO(jasonmccallister) check if this value should be set on linux hosts
+					envs := site.AsEnvs("host.docker.internal")
 
-				// add the site filter
-				filter.Add("label", labels.Host+"="+site.Hostname)
+					// add the site filter
+					filter.Add("label", labels.Host+"="+site.Hostname)
 
-				// look for a container for the site
-				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-				if err != nil {
-					return fmt.Errorf("error getting a list of containers")
-				}
-
-				// if there are no containers we need to create one
-				switch len(containers) == 0 {
-				case true:
-					// create the container
-					image := fmt.Sprintf(NginxImage, site.Version)
-
-					// pull the image
-					rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+					// look for a container for the site
+					containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 					if err != nil {
-						return fmt.Errorf("unable to pull the image, %w", err)
+						return fmt.Errorf("error getting a list of containers")
 					}
 
-					buf := &bytes.Buffer{}
-					if _, err := buf.ReadFrom(rdr); err != nil {
-						return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-					}
-
-					// get the sites path
-					path, err := site.GetAbsPath(home)
-					if err != nil {
-						return err
-					}
-
-					// add the site itself and any aliases to the extra hosts
-					extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
-					for _, s := range site.Aliases {
-						extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-					}
-
-					// create the container
-					resp, err := docker.ContainerCreate(
-						ctx,
-						&container.Config{
-							Image: image,
-							Labels: map[string]string{
-								labels.Host: site.Hostname,
-							},
-							Env: envs,
-						},
-						&container.HostConfig{
-							Mounts: []mount.Mount{
-								{
-									Type:   mount.TypeBind,
-									Source: path,
-									Target: "/app",
-								},
-							},
-							ExtraHosts: extraHosts,
-						},
-						&network.NetworkingConfig{
-							EndpointsConfig: map[string]*network.EndpointSettings{
-								"nitro": {
-									NetworkID: envNetwork.ID,
-								},
-							},
-						},
-						nil,
-						site.Hostname,
-					)
-					if err != nil {
-						return fmt.Errorf("unable to create the container, %w", err)
-					}
-
-					// start the container
-					if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-						return fmt.Errorf("unable to start the container, %w", err)
-					}
-
-					// TODO(jasonmccallister) check for a custom root and copt the template to the container
-					if site.Dir != "web" {
-						// create the nginx file
-						conf := nginx.Generate(site.Dir)
-
-						// create the temp file
-						tr, err := archive.Generate("default.conf", conf)
-						if err != nil {
-							return err
-						}
-
-						// copy the file into the container
-						if err := docker.CopyToContainer(ctx, resp.ID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
-							return err
-						}
-
-						commands := map[string][]string{
-							"copy the file":       {"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
-							"set the permissions": {"chmod", "0644", "/etc/nginx/conf.d/default.conf"},
-						}
-
-						for _, c := range commands {
-							// create the exec
-							exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-								User:         "root",
-								AttachStdout: true,
-								AttachStderr: true,
-								Tty:          false,
-								Cmd:          c,
-							})
-							if err != nil {
-								return err
-							}
-
-							// attach to the container
-							attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-								Tty: false,
-							})
-							defer attach.Close()
-
-							// show the output to stdout and stderr
-							if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-								return fmt.Errorf("unable to copy the output of container, %w", err)
-							}
-
-							// start the exec
-							if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-								return fmt.Errorf("unable to start the container, %w", err)
-							}
-
-							// wait for the container exec to complete
-							waiting := true
-							for waiting {
-								resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-								if err != nil {
-									return err
-								}
-
-								waiting = resp.Running
-							}
-						}
-
-						// start the container
-						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-							return fmt.Errorf("unable to start the container, %w", err)
-						}
-					}
-
-					// remove the site filter
-					filter.Del("label", labels.Host+"="+site.Hostname)
-				default:
-					// there is a running container
-					c := containers[0]
-
-					// get the containers details that include environment variables
-					details, err := docker.ContainerInspect(ctx, c.ID)
-					if err != nil {
-						return err
-					}
-
-					// make sure container is in sync
-					if match.Site(home, site, details) == false {
-						fmt.Print("- updating... ")
-						// stop container
-						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-							return err
-						}
-
-						// remove container
-						if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-							return err
-						}
-
+					// if there are no containers we need to create one
+					switch len(containers) == 0 {
+					case true:
 						// create the container
 						image := fmt.Sprintf(NginxImage, site.Version)
 
@@ -320,7 +168,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							return err
 						}
 
-						// add the site itself to the extra hosts
+						// add the site itself and any aliases to the extra hosts
 						extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
 						for _, s := range site.Aliases {
 							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
@@ -348,7 +196,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							},
 							&network.NetworkingConfig{
 								EndpointsConfig: map[string]*network.EndpointSettings{
-									"nitro-network": {
+									"nitro": {
 										NetworkID: envNetwork.ID,
 									},
 								},
@@ -364,13 +212,172 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 							return fmt.Errorf("unable to start the container, %w", err)
 						}
+
+						// TODO(jasonmccallister) check for a custom root and copt the template to the container
+						if site.Dir != "web" {
+							// create the nginx file
+							conf := nginx.Generate(site.Dir)
+
+							// create the temp file
+							tr, err := archive.Generate("default.conf", conf)
+							if err != nil {
+								return err
+							}
+
+							// copy the file into the container
+							if err := docker.CopyToContainer(ctx, resp.ID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
+								return err
+							}
+
+							commands := map[string][]string{
+								"copy the file":       {"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
+								"set the permissions": {"chmod", "0644", "/etc/nginx/conf.d/default.conf"},
+							}
+
+							for _, c := range commands {
+								// create the exec
+								exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+									User:         "root",
+									AttachStdout: true,
+									AttachStderr: true,
+									Tty:          false,
+									Cmd:          c,
+								})
+								if err != nil {
+									return err
+								}
+
+								// attach to the container
+								attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+									Tty: false,
+								})
+								defer attach.Close()
+
+								// show the output to stdout and stderr
+								if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
+									return fmt.Errorf("unable to copy the output of container, %w", err)
+								}
+
+								// start the exec
+								if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+									return fmt.Errorf("unable to start the container, %w", err)
+								}
+
+								// wait for the container exec to complete
+								waiting := true
+								for waiting {
+									resp, err := docker.ContainerExecInspect(ctx, exec.ID)
+									if err != nil {
+										return err
+									}
+
+									waiting = resp.Running
+								}
+							}
+
+							// start the container
+							if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+								return fmt.Errorf("unable to start the container, %w", err)
+							}
+						}
+
+						// remove the site filter
+						filter.Del("label", labels.Host+"="+site.Hostname)
+					default:
+						// there is a running container
+						c := containers[0]
+
+						// get the containers details that include environment variables
+						details, err := docker.ContainerInspect(ctx, c.ID)
+						if err != nil {
+							return err
+						}
+
+						// make sure container is in sync
+						if match.Site(home, site, details) == false {
+							fmt.Print("- updating... ")
+							// stop container
+							if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+								return err
+							}
+
+							// remove container
+							if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+								return err
+							}
+
+							// create the container
+							image := fmt.Sprintf(NginxImage, site.Version)
+
+							// pull the image
+							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+							if err != nil {
+								return fmt.Errorf("unable to pull the image, %w", err)
+							}
+
+							buf := &bytes.Buffer{}
+							if _, err := buf.ReadFrom(rdr); err != nil {
+								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+							}
+
+							// get the sites path
+							path, err := site.GetAbsPath(home)
+							if err != nil {
+								return err
+							}
+
+							// add the site itself to the extra hosts
+							extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
+							for _, s := range site.Aliases {
+								extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+							}
+
+							// create the container
+							resp, err := docker.ContainerCreate(
+								ctx,
+								&container.Config{
+									Image: image,
+									Labels: map[string]string{
+										labels.Host: site.Hostname,
+									},
+									Env: envs,
+								},
+								&container.HostConfig{
+									Mounts: []mount.Mount{
+										{
+											Type:   mount.TypeBind,
+											Source: path,
+											Target: "/app",
+										},
+									},
+									ExtraHosts: extraHosts,
+								},
+								&network.NetworkingConfig{
+									EndpointsConfig: map[string]*network.EndpointSettings{
+										"nitro-network": {
+											NetworkID: envNetwork.ID,
+										},
+									},
+								},
+								nil,
+								site.Hostname,
+							)
+							if err != nil {
+								return fmt.Errorf("unable to create the container, %w", err)
+							}
+
+							// start the container
+							if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+								return fmt.Errorf("unable to start the container, %w", err)
+							}
+						}
+
+						// remove the site filter
+						filter.Del("label", labels.Host+"="+site.Hostname)
 					}
 
-					// remove the site filter
-					filter.Del("label", labels.Host+"="+site.Hostname)
+					output.Done()
 				}
-
-				output.Done()
 			}
 
 			output.Info("Checking Proxy...")

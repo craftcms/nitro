@@ -33,6 +33,12 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")
 
+	if db.Engine == "mariadb" || db.Engine == "mysql" {
+		filter.Add("label", labels.DatabaseCompatability+"=mysql")
+	} else {
+		filter.Add("label", labels.DatabaseCompatability+"=postgres")
+	}
+
 	// get the containers for the database
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
@@ -58,8 +64,9 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		return nil
 	}
 
-	// create the database labels
+	// create the database labels for the new container
 	lbls := map[string]string{
+		labels.Nitro:           "true",
 		labels.DatabaseEngine:  db.Engine,
 		labels.DatabaseVersion: db.Version,
 		labels.Type:            "database",
