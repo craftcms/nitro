@@ -52,6 +52,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create filters for the development environment
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 			filter.Add("name", "nitro")
 
 			// check if the network needs to be created
@@ -142,6 +143,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// TODO(jasonmccallister) remove this after development
 			if os.Getenv("NITRO_DEVELOPMENT") != "true" {
 				imageFilter := filters.NewArgs()
+				imageFilter.Add("label", labels.Nitro)
 				imageFilter.Add("reference", proxyImage)
 
 				// check for the proxy image
@@ -172,6 +174,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the nitro proxy
 			proxyFilter := filters.NewArgs()
+			proxyFilter.Add("label", labels.Nitro)
 			proxyFilter.Add("label", labels.Proxy+"=true")
 
 			// check if there is an existing container for the nitro-proxy

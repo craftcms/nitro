@@ -27,13 +27,14 @@ var (
 // it will create a new volume and container for the database.
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) error {
 	// create the filters for the database
-	f := filters.NewArgs()
-	f.Add("label", labels.DatabaseEngine+"="+db.Engine)
-	f.Add("label", labels.DatabaseVersion+"="+db.Version)
-	f.Add("label", labels.Type+"=database")
+	filter := filters.NewArgs()
+	filter.Add("label", labels.Nitro)
+	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
+	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
+	filter.Add("label", labels.Type+"=database")
 
 	// get the containers for the database
-	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: f})
+	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
 		return fmt.Errorf("error getting a list of containers")
 	}

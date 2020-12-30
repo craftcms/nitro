@@ -47,6 +47,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// find the nitro proxy for the environment
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Proxy+"=true")
 
 			// find the container, should only be one

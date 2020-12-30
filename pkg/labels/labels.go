@@ -1,7 +1,8 @@
 package labels
 
 const (
-	Nitro = "com.craftcms.nitro"
+	// Nitro is used to label a container as "for nitro"
+	Nitro = "com.craftcms.nitro=true"
 
 	// DatabaseEngine is used to identify the engine that is being used for a database container (e.g. mysql, postgres)
 	DatabaseEngine = "com.craftcms.nitro.database-engine"

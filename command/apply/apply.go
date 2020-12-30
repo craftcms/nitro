@@ -468,6 +468,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 func checkProxy(ctx context.Context, docker client.ContainerAPIClient) (types.Container, error) {
 	f := filters.NewArgs()
+	f.Add("label", labels.Nitro)
 	f.Add("label", labels.Type+"=proxy")
 	// TODO(jasonmccallister) add the type filter as well?
 
@@ -500,6 +501,7 @@ func checkProxy(ctx context.Context, docker client.ContainerAPIClient) (types.Co
 func checkDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, db config.Database, networkID string) error {
 	// add filters to check for the container
 	filter := filters.NewArgs()
+	filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")

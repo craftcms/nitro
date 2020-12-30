@@ -32,6 +32,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// add filters to show only the envrionment and database containers
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
 
 			// get a list of all the databases

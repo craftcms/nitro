@@ -85,6 +85,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 
 			// add filters to show only the envrionment and database containers
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
 
 			// if we detected the engine type, add the compatability label to the filter

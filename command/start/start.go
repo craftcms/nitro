@@ -33,6 +33,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 
 			// get all of the container
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})

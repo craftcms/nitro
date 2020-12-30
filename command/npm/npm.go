@@ -95,6 +95,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
 
 			imageFilter := filters.NewArgs()
+			imageFilter.Add("label", labels.Nitro)
 			imageFilter.Add("reference", image)
 
 			// look for the image
@@ -124,6 +125,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// set filters for the container name and environment
 			containerFilter := filters.NewArgs()
+			containerFilter.Add("label", labels.Nitro)
 			containerFilter.Add("name", containerName)
 
 			// check if there is an existing container

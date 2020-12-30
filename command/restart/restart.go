@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -33,6 +34,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			// get all the containers using a filter, we only want to restart containers which
 			// have the label com.craftcms.nitro.environment=name
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 
 			// get all of the containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})

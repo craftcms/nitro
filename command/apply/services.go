@@ -19,6 +19,7 @@ import (
 func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
 	// add the filter for mailhog
 	filter := filters.NewArgs()
+	filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.Type+"=mailhog")
 
 	switch enabled {

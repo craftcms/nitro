@@ -75,6 +75,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 
 			// get all related containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{

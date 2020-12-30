@@ -33,6 +33,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
 
 			// get a list of all the databases

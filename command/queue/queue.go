@@ -42,6 +42,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the enviroment
 			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro)
 
 			// get all of the sites
 			for _, s := range cfg.Sites {
