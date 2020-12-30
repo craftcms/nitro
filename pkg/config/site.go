@@ -106,7 +106,7 @@ func (s *Site) AsEnvs(addr string) []string {
 	default:
 		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
 		// opts.Network.IPAM.Config[0].Gateway
-		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes log_level=10`, addr))
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes start_upon_error=yes log_level=10`, "host.docker.internal"))
 		envs = append(envs, "XDEBUG_SESSION=nitro")
 		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
