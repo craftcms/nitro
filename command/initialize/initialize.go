@@ -84,7 +84,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					Attachable: true,
 					Labels: map[string]string{
 						labels.Nitro:   "true",
-						labels.Network: "nitro",
+						labels.Network: "true",
 					},
 				})
 				if err != nil {

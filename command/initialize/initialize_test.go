@@ -36,7 +36,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Attachable: true,
 			Labels: map[string]string{
 				labels.Nitro:   "true",
-				labels.Network: "nitro",
+				labels.Network: "true",
 			},
 		},
 		Name: "nitro-network",
