@@ -18,6 +18,9 @@ var DefaultEnvs = map[string]string{
 	"PHP_POST_MAX_SIZE":           "512M",
 	"PHP_OPCACHE_ENABLE":          "0",
 	"PHP_OPCACHE_REVALIDATE_FREQ": "0",
+	"XDEBUG_MODE":                 "off",
+	"XDEBUG_SESSION":              "nitro",
+	"XDEBUG_CONFIG":               "",
 }
 
 // Site represents a web application. It has a hostname, aliases (which
@@ -98,15 +101,13 @@ func (s *Site) AsEnvs(addr string) []string {
 	}
 
 	// check if xdebug is enabled
-	// TODO(jasonmccallister) move this to the sites config func since we now
-	// set php configurations per site.
 	switch s.Xdebug {
 	case false:
 		envs = append(envs, "XDEBUG_MODE=off")
 	default:
 		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
 		// opts.Network.IPAM.Config[0].Gateway
-		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s log=/tmp/xdebug.log start_with_request=yes start_upon_error=yes log_level=10`, "host.docker.internal"))
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
 		envs = append(envs, "XDEBUG_SESSION=nitro")
 		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
