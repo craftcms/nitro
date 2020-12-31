@@ -49,6 +49,10 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
+	if addr == "" {
+		addr = "host.docker.internal"
+	}
+
 	// if they do not specify the error... false means on
 	if !s.PHP.DisplayErrors {
 		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
@@ -100,15 +104,15 @@ func (s *Site) AsEnvs(addr string) []string {
 
 	}
 
+	// always set the session
+	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
+
 	// check if xdebug is enabled
 	switch s.Xdebug {
 	case false:
 		envs = append(envs, "XDEBUG_MODE=off")
 	default:
-		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
-		// opts.Network.IPAM.Config[0].Gateway
 		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
-		envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
 		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
 
