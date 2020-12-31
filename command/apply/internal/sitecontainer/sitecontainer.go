@@ -28,7 +28,6 @@ var (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) error {
 	// set filters for the container
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro+"=true")
 	filter.Add("label", labels.Host+"="+site.Hostname)
 
 	// look for a container for the site
