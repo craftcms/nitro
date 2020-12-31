@@ -9,6 +9,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const FileName = "nitro.yml"
+
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
@@ -60,7 +62,7 @@ type Services struct {
 // while marshalling the config.
 func Load(home string) (*Config, error) {
 	// set the config file
-	file := filepath.Join(home, ".nitro", "nitro.yml")
+	file := filepath.Join(home, ".nitro", FileName)
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return nil, ErrNoConfigFile
 	}
