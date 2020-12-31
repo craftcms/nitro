@@ -73,7 +73,6 @@ func checkEnvs(site config.Site, envs []string) bool {
 					return false
 				}
 			case "PHP_OPCACHE_ENABLE":
-				// TODO(jasonmccallister) verify this logic
 				if site.PHP.OpcacheEnable && val == config.DefaultEnvs[env] {
 					return false
 				}

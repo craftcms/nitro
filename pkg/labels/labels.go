@@ -16,6 +16,9 @@ const (
 	// Host is used to identify a web application by the hostname of the site (e.g demo.nitro)
 	Host = "com.craftcms.nitro.host"
 
+	// PAth is used for containers that mount specific paths such as composer and npm
+	Path = "com.craftcms.nitro.path"
+
 	// Network is used to label a network for an environment
 	Network = "com.craftcms.nitro.network"
 

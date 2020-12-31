@@ -123,7 +123,6 @@ func (c *mockDockerClient) ContainerList(ctx context.Context, options types.Cont
 
 func (c *mockDockerClient) ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, platform *v1.Platform, containerName string) (container.ContainerCreateCreatedBody, error) {
 	// save the request on the struct field
-	// TODO(jasonmccallister) this is wrong, need to look at the code to determine the correct
 	// types are set and returned
 	c.containerCreateRequests = append(c.containerCreateRequests, types.ContainerCreateConfig{
 		Name:             containerName,

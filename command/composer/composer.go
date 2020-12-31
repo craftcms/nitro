@@ -106,7 +106,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// add filters for the volume
 			volumeFilter := filters.NewArgs()
 			volumeFilter.Add("label", labels.Type+"=composer")
-			volumeFilter.Add("label", "com.craftcms.nitro.path="+path)
+			volumeFilter.Add("label", labels.Path+"="+path)
 
 			// check if there is an existing volume
 			volumes, err := docker.VolumeList(ctx, volumeFilter)
@@ -124,8 +124,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			case 0:
 				// create the volume if it does not exist
 				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: volumeName, Labels: map[string]string{
-					labels.Type:               "composer",
-					"com.craftcms.nitro.path": path,
+					labels.Type: "composer",
+					labels.Path: path,
 				}})
 				if err != nil {
 					return fmt.Errorf("unable to create the volume, %w", err)
@@ -147,7 +147,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Labels: map[string]string{
 						labels.Type: "composer",
 						// TODO abstract this?
-						"com.craftcms.nitro.path": path,
+						labels.Path: path,
 					},
 					Env: []string{"COMPOSER_HOME=/root"},
 				},

@@ -148,8 +148,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						Tty:   false,
 						Labels: map[string]string{
 							labels.Type: "npm",
-							// TODO abstract this?
-							"com.craftcms.nitro.path": path,
+							labels.Path: path,
 						},
 						WorkingDir: "/home/node/app",
 					},

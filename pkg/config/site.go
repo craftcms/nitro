@@ -117,16 +117,7 @@ func (s *Site) AsEnvs(addr string) []string {
 		} else {
 			// TODO(jasonmccallister) set the environments for xdebug 2
 		}
-
 	}
-
-	// TODO(jasonmccallister) add opcache settings
-	// "PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
-	// "PHP_OPCACHE_MAX_ACCELERATED_FILES=10000",
-	// "PHP_OPCACHE_MEMORY_CONSUMPTION=128",
-	// "PHP_OPCACHE_MAX_WASTED_PERCENTAGE=10",
-	// "PHP_OPCACHE_INTERNED_STRINGS_BUFFER=16",
-	// "PHP_OPCACHE_FAST_SHUTDOWN=1"
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {

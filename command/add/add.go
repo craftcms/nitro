@@ -138,7 +138,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for {
 				rdr := bufio.NewReader(os.Stdin)
 
-				// TODO(jasonmccallister) this makes you enter twice...
 				input, _ := rdr.ReadString('\n')
 
 				input = strings.TrimSpace(input)

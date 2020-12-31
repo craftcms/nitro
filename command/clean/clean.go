@@ -59,8 +59,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all of the containers for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			// TODO(jasonmccallister) add the additional types
+			filter.Add("label", labels.Nitro+"=true")
 			filter.Add("label", labels.Type+"=composer")
 			filter.Add("label", labels.Type+"=node")
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
