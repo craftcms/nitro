@@ -108,7 +108,7 @@ func (s *Site) AsEnvs(addr string) []string {
 		// opts.Proxy.NetworkSettings.Networks[opts.Environment].IPAddress
 		// opts.Network.IPAM.Config[0].Gateway
 		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
-		envs = append(envs, "XDEBUG_SESSION=nitro")
+		envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
 		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
 
