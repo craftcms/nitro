@@ -50,7 +50,7 @@ func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
 	// if they do not specify the error... false means on
-	if s.PHP.DisplayErrors == false {
+	if !s.PHP.DisplayErrors {
 		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
 	} else {
 		envs = append(envs, "PHP_DISPLAY_ERRORS=off")
@@ -87,7 +87,7 @@ func (s *Site) AsEnvs(addr string) []string {
 	}
 
 	// handle opcache settings
-	if s.PHP.OpcacheEnable == true {
+	if s.PHP.OpcacheEnable {
 		envs = append(envs, "PHP_OPCACHE_ENABLE=1")
 	} else {
 		envs = append(envs, "PHP_OPCACHE_ENABLE="+DefaultEnvs["PHP_OPCACHE_ENABLE"])

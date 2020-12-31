@@ -18,7 +18,6 @@ func TestLoad(t *testing.T) {
 
 	type args struct {
 		home string
-		env  string
 	}
 	tests := []struct {
 		name    string
