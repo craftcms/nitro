@@ -1,7 +1,6 @@
 package apply
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -10,19 +9,13 @@ import (
 	"strings"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/archive"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
-	"github.com/craftcms/nitro/command/apply/internal/match"
-	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/command/apply/internal/proxycontainer"
+	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
@@ -37,9 +30,6 @@ var (
 
 	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
-
-	// NginxImage is the image used for sites, with the PHP version
-	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 
 	// DatabaseImage is used for determining the engine and version
 	DatabaseImage = "docker.io/library/%s:%s"
@@ -84,7 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			output.Info("Checking Network...")
 
 			// check the network
-			var envNetwork types.NetworkResource
+			var network types.NetworkResource
 			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to list docker networks\n%w", err)
@@ -93,13 +83,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// get the network for the environment
 			for _, n := range networks {
 				if n.Name == "nitro-network" {
-					envNetwork = n
+					network = n
 					break
 				}
 			}
 
 			// if the network is not found
-			if envNetwork.ID == "" {
+			if network.ID == "" {
 				output.Info("No network was found...")
 				output.Info("run `nitro init` to get started")
 				return nil
@@ -125,10 +115,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			for _, db := range cfg.Databases {
 				n, _ := db.GetHostname()
 				output.Pending("checking", n)
-				if err := databasecontainer.StartOrCreate(ctx, docker, envNetwork.ID, db); err != nil {
+
+				// start or create the database
+				if err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db); err != nil {
 					output.Warning()
 					return err
 				}
+
 				output.Done()
 			}
 
@@ -139,248 +132,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// get the envs for the sites
 				for _, site := range cfg.Sites {
 					output.Pending("checking", site.Hostname)
-					// TODO(jasonmccallister) check if this value should be set on linux hosts
-					envs := site.AsEnvs("host.docker.internal")
 
-					// add the site filter
-					filter.Add("label", labels.Host+"="+site.Hostname)
-
-					// look for a container for the site
-					containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-					if err != nil {
-						return fmt.Errorf("error getting a list of containers")
-					}
-
-					// if there are no containers we need to create one
-					switch len(containers) == 0 {
-					case true:
-						// create the container
-						image := fmt.Sprintf(NginxImage, site.Version)
-
-						// pull the image
-						rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-						if err != nil {
-							return fmt.Errorf("unable to pull the image, %w", err)
-						}
-
-						buf := &bytes.Buffer{}
-						if _, err := buf.ReadFrom(rdr); err != nil {
-							return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-						}
-
-						// get the sites path
-						path, err := site.GetAbsPath(home)
-						if err != nil {
-							return err
-						}
-
-						// add the site itself and any aliases to the extra hosts
-						extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
-						for _, s := range site.Aliases {
-							extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-						}
-
-						// create the container
-						resp, err := docker.ContainerCreate(
-							ctx,
-							&container.Config{
-								Image: image,
-								Labels: map[string]string{
-									labels.Nitro: "true",
-									labels.Host:  site.Hostname,
-								},
-								Env: envs,
-							},
-							&container.HostConfig{
-								Mounts: []mount.Mount{
-									{
-										Type:   mount.TypeBind,
-										Source: path,
-										Target: "/app",
-									},
-								},
-								ExtraHosts: extraHosts,
-							},
-							&network.NetworkingConfig{
-								EndpointsConfig: map[string]*network.EndpointSettings{
-									"nitro-network": {
-										NetworkID: envNetwork.ID,
-									},
-								},
-							},
-							nil,
-							site.Hostname,
-						)
-						if err != nil {
-							return fmt.Errorf("unable to create the container, %w", err)
-						}
-
-						// start the container
-						if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-							return fmt.Errorf("unable to start the container, %w", err)
-						}
-
-						// TODO(jasonmccallister) check for a custom root and copt the template to the container
-						if site.Dir != "web" {
-							// create the nginx file
-							conf := nginx.Generate(site.Dir)
-
-							// create the temp file
-							tr, err := archive.Generate("default.conf", conf)
-							if err != nil {
-								return err
-							}
-
-							// copy the file into the container
-							if err := docker.CopyToContainer(ctx, resp.ID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
-								return err
-							}
-
-							commands := map[string][]string{
-								"copy the file":       {"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
-								"set the permissions": {"chmod", "0644", "/etc/nginx/conf.d/default.conf"},
-							}
-
-							for _, c := range commands {
-								// create the exec
-								exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-									User:         "root",
-									AttachStdout: true,
-									AttachStderr: true,
-									Tty:          false,
-									Cmd:          c,
-								})
-								if err != nil {
-									return err
-								}
-
-								// attach to the container
-								attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-									Tty: false,
-								})
-								defer attach.Close()
-
-								// show the output to stdout and stderr
-								if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-									return fmt.Errorf("unable to copy the output of container, %w", err)
-								}
-
-								// start the exec
-								if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-									return fmt.Errorf("unable to start the container, %w", err)
-								}
-
-								// wait for the container exec to complete
-								waiting := true
-								for waiting {
-									resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-									if err != nil {
-										return err
-									}
-
-									waiting = resp.Running
-								}
-							}
-
-							// start the container
-							if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-								return fmt.Errorf("unable to start the container, %w", err)
-							}
-						}
-
-						// remove the site filter
-						filter.Del("label", labels.Host+"="+site.Hostname)
-					default:
-						// there is a running container
-						c := containers[0]
-
-						// get the containers details that include environment variables
-						details, err := docker.ContainerInspect(ctx, c.ID)
-						if err != nil {
-							return err
-						}
-
-						// make sure container is in sync
-						if match.Site(home, site, details) == false {
-							fmt.Print("- updating... ")
-							// stop container
-							if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-								return err
-							}
-
-							// remove container
-							if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-								return err
-							}
-
-							// create the container
-							image := fmt.Sprintf(NginxImage, site.Version)
-
-							// pull the image
-							rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-							if err != nil {
-								return fmt.Errorf("unable to pull the image, %w", err)
-							}
-
-							buf := &bytes.Buffer{}
-							if _, err := buf.ReadFrom(rdr); err != nil {
-								return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-							}
-
-							// get the sites path
-							path, err := site.GetAbsPath(home)
-							if err != nil {
-								return err
-							}
-
-							// add the site itself to the extra hosts
-							extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
-							for _, s := range site.Aliases {
-								extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
-							}
-
-							// create the container
-							resp, err := docker.ContainerCreate(
-								ctx,
-								&container.Config{
-									Image: image,
-									Labels: map[string]string{
-										labels.Host: site.Hostname,
-									},
-									Env: envs,
-								},
-								&container.HostConfig{
-									Mounts: []mount.Mount{
-										{
-											Type:   mount.TypeBind,
-											Source: path,
-											Target: "/app",
-										},
-									},
-									ExtraHosts: extraHosts,
-								},
-								&network.NetworkingConfig{
-									EndpointsConfig: map[string]*network.EndpointSettings{
-										"nitro-network": {
-											NetworkID: envNetwork.ID,
-										},
-									},
-								},
-								nil,
-								site.Hostname,
-							)
-							if err != nil {
-								return fmt.Errorf("unable to create the container, %w", err)
-							}
-
-							// start the container
-							if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-								return fmt.Errorf("unable to start the container, %w", err)
-							}
-						}
-
-						// remove the site filter
-						filter.Del("label", labels.Host+"="+site.Hostname)
+					// start, update or create the site container
+					if err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site); err != nil {
+						output.Warning()
+						return err
 					}
 
 					output.Done()
@@ -425,7 +181,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 
 				// if the hosts file is not updated
-				if updated == false {
+				if !updated {
 					// get the executable
 					nitro, err := os.Executable()
 					if err != nil {
@@ -468,38 +224,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	return cmd
 }
 
-func checkProxy(ctx context.Context, docker client.ContainerAPIClient) (types.Container, error) {
-	f := filters.NewArgs()
-	f.Add("label", labels.Nitro)
-	f.Add("label", labels.Type+"=proxy")
-	// TODO(jasonmccallister) add the type filter as well?
-
-	// check if there is an existing container for the nitro-proxy
-	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: f, All: true})
-	if err != nil {
-		return types.Container{}, fmt.Errorf("unable to list the containers\n%w", err)
-	}
-
-	// get the container id and determine if the container needs to start
-	for _, c := range containers {
-		for _, n := range c.Names {
-			if n == "nitro-proxy" || n == "/nitro-proxy" {
-				// check if it is running
-				if c.State != "running" {
-					if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-						return types.Container{}, fmt.Errorf("unable to start the nitro container, %w", err)
-					}
-				}
-
-				// return the container
-				return c, nil
-			}
-		}
-	}
-
-	return types.Container{}, ErrNoProxyContainer
-}
-
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
 	// convert the sites into the gRPC API Apply request
 	sites := make(map[string]*protob.Site)
@@ -540,7 +264,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		return err
 	}
 
-	if resp.Error == true {
+	if resp.Error {
 		return fmt.Errorf("unable to update the proxy, %s", resp.GetMessage())
 	}
 
