@@ -100,7 +100,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// if the network is not found
 			if envNetwork.ID == "" {
-				return ErrNoNetwork
+				output.Info("No network was found...")
+				output.Info("run `nitro init` to get started")
+				return nil
 			}
 
 			// remove the filter
