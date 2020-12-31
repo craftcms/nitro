@@ -46,25 +46,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter.Add("label", labels.Nitro)
 
 			// get all of the sites
-			var site string
+			var found []string
 			var sites []string
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
-				// TODO(jasonmccallister) sites can container the same path, so make sure there is only one otherwise prompt
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					site = s.Hostname
-					break
+					found = append(found, s.Hostname)
 				}
 
 				// add the site to the list in case we cannot find the directory
 				sites = append(sites, s.Hostname)
 			}
 
-			// check the current site
-			switch site == "" {
-			case true:
+			switch len(found) {
+			case 0:
 				// prompt for the site to ssh into
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
 				if err != nil {
@@ -73,9 +70,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// add the label to get the site
 				filter.Add("label", labels.Host+"="+sites[selected])
-			default:
+			case 1:
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+site)
+				filter.Add("label", labels.Host+"="+found[0])
+			default:
+				// prompt for the site to ssh into
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
+				if err != nil {
+					return err
+				}
+
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+found[selected])
 			}
 
 			// find the containers but limited to the site label
