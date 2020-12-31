@@ -85,7 +85,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", opts.ContainerName), "💾")
+			output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", "backups", opts.ContainerName), "💾")
 
 			return nil
 		},

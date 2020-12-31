@@ -235,8 +235,14 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 		buf.ReadFrom(tr)
 	}
 
+	// verify the backup dir exists
+	backupDir := filepath.Join(opts.Home, ".nitro", "backups")
+	if err := helpers.MkdirIfNotExists(backupDir); err != nil {
+		return err
+	}
+
 	// make the backup directory if it does not exist
-	dir := filepath.Join(opts.Home, ".nitro", "backups", opts.ContainerName)
+	dir := filepath.Join(backupDir, opts.ContainerName)
 	if err := helpers.MkdirIfNotExists(dir); err != nil {
 		return err
 	}
