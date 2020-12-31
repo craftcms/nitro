@@ -59,7 +59,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			site.Hostname = sp[len(sp)-1]
 
 			// append the test domain if there are no periods
-			if strings.Contains(site.Hostname, ".") == false {
+			if !strings.Contains(site.Hostname, ".") {
 				// set the default tld
 				tld := "nitro"
 				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
@@ -70,18 +70,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt for the hostname
-			fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
+			fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
 			for {
 				rdr := bufio.NewReader(os.Stdin)
 				char, _ := rdr.ReadString('\n')
 
 				// remove the carriage return
-				char = strings.TrimRight(char, "\n")
+				char = strings.TrimSpace(char)
 
 				// does it have spaces?
 				if strings.ContainsAny(char, " ") {
 					fmt.Println("Please enter a hostname without spaces 🙄...")
-					fmt.Print(fmt.Sprintf("Enter the hostname [%s]: ", site.Hostname))
+					fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
 
 					continue
 				}
@@ -106,7 +106,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var root string
 			if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 				// don't go into subdirectories and ignore files
-				if path != dir || info.IsDir() == false {
+				if path != dir || !info.IsDir() {
 					return nil
 				}
 
@@ -134,18 +134,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			site.Dir = root
 
 			// prompt for the webroot
-			fmt.Print(fmt.Sprintf("Enter the webroot for the site [%s]: ", site.Dir))
+			fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
 			for {
 				rdr := bufio.NewReader(os.Stdin)
+
+				// TODO(jasonmccallister) this makes you enter twice...
 				input, _ := rdr.ReadString('\n')
 
-				// remove the carriage return
-				input = strings.TrimRight(input, "\n")
+				input = strings.TrimSpace(input)
 
 				// does it have spaces?
 				if strings.ContainsAny(input, " ") {
 					fmt.Println("Please enter a webroot without spaces 🙄...")
-					fmt.Print(fmt.Sprintf("Enter the webroot for the site [%s]: ", site.Dir))
+					fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
 
 					continue
 				}
@@ -163,7 +164,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Success("using webroot", site.Dir)
 
 			// prompt for the php version
-			versions := []string{"7.4", "7.3", "7.2", "7.1"}
+			versions := []string{"8.0", "7.4", "7.3", "7.2", "7.1", "7.0"}
 			selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
 			if err != nil {
 				return err
@@ -215,7 +216,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// we are skipping the apply step
-			if confirm == false {
+			if !confirm {
 				return nil
 			}
 
