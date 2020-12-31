@@ -100,6 +100,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				user = "root"
 			}
 
+			if user != "www-data" {
+				output.Info("using root... system changes are ephemeral...")
+			}
+
 			c := exec.Command(cli, "exec", "-u", user, "-it", containers[0].ID, "sh")
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()
