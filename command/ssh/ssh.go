@@ -51,6 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
+				// TODO(jasonmccallister) sites can container the same path, so make sure there is only one otherwise prompt
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
 					site = s.Hostname
