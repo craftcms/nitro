@@ -95,11 +95,6 @@ func (c *Config) AddSite(s Site) error {
 		if e.Hostname == s.Hostname {
 			return fmt.Errorf("hostname already exists")
 		}
-
-		// does the path match?
-		if e.Path == s.Path {
-			return fmt.Errorf("site path already exists")
-		}
 	}
 
 	// add the site to the list

@@ -224,24 +224,6 @@ func TestConfig_AddSite(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "existing path returns an error",
-			fields: fields{
-				Sites: []Site{
-					{
-						Hostname: "example",
-						Path:     "some/path",
-					},
-				},
-			},
-			args: args{
-				s: Site{
-					Hostname: "nomatch",
-					Path:     "some/path",
-				},
-			},
-			wantErr: true,
-		},
-		{
 			name: "existing hostnames returns an error",
 			fields: fields{
 				Sites: []Site{
