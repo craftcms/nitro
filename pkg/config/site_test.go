@@ -40,7 +40,8 @@ func TestSite_AsEnvs(t *testing.T) {
 					OpcacheEnable:         true,
 					OpcacheRevalidateFreq: 60,
 				},
-				Xdebug: true,
+				Version: "7.4",
+				Xdebug:  true,
 			},
 			args: args{
 				addr: "host.docker.internal",

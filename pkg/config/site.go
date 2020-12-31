@@ -111,8 +111,13 @@ func (s *Site) AsEnvs(addr string) []string {
 	case false:
 		envs = append(envs, "XDEBUG_MODE=off")
 	default:
-		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
-		envs = append(envs, "XDEBUG_MODE=develop,debug")
+		if s.Version == "8.0" || s.Version == "7.4" || s.Version == "7.3" || s.Version == "7.2" {
+			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
+			envs = append(envs, "XDEBUG_MODE=develop,debug")
+		} else {
+			// TODO(jasonmccallister) set the environments for xdebug 2
+		}
+
 	}
 
 	// TODO(jasonmccallister) add opcache settings
