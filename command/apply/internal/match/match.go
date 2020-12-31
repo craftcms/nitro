@@ -81,6 +81,10 @@ func checkEnvs(site config.Site, envs []string) bool {
 				if (site.PHP.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (site.PHP.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(site.PHP.OpcacheRevalidateFreq)) {
 					return false
 				}
+			case "XDEBUG_MODE":
+				if (site.Xdebug && config.DefaultEnvs[env] == "off") || (!site.Xdebug && val != config.DefaultEnvs[env]) {
+					return false
+				}
 			}
 		}
 	}

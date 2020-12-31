@@ -9,57 +9,6 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 )
 
-func TestSite(t *testing.T) {
-	type args struct {
-		home      string
-		site      config.Site
-		container types.ContainerJSON
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "path mismatches return false",
-			args: args{
-				home: "testdata/example-site",
-				site: config.Site{
-					Path:    "testdata/new-site",
-					Version: "7.4",
-				},
-				container: types.ContainerJSON{
-					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
-					},
-				},
-			},
-			want: false,
-		},
-		{
-			name: "mismatched images return false",
-			args: args{
-				site: config.Site{
-					Version: "7.4",
-				},
-				container: types.ContainerJSON{
-					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.3-dev",
-					},
-				},
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Site(tt.args.home, tt.args.site, tt.args.container); got != tt.want {
-				t.Errorf("Site() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_checkEnvs(t *testing.T) {
 	type args struct {
 		site config.Site
@@ -70,6 +19,32 @@ func Test_checkEnvs(t *testing.T) {
 		args args
 		want bool
 	}{
+		{
+			name: "xdebug returns false if disable on the site but not for the container",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+					Xdebug:  false,
+				},
+				envs: []string{
+					"XDEBUG_MODE=debug,develop",
+				},
+			},
+			want: false,
+		},
+		{
+			name: "xdebug returns false if enabled on the site",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+					Xdebug:  true,
+				},
+				envs: []string{
+					"XDEBUG_MODE=off",
+				},
+			},
+			want: false,
+		},
 		{
 			name: "opcache_revalidate_freq returns false",
 			args: args{
@@ -187,6 +162,57 @@ func Test_checkEnvs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := checkEnvs(tt.args.site, tt.args.envs); got != tt.want {
 				t.Errorf("checkEnvs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSite(t *testing.T) {
+	type args struct {
+		home      string
+		site      config.Site
+		container types.ContainerJSON
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "path mismatches return false",
+			args: args{
+				home: "testdata/example-site",
+				site: config.Site{
+					Path:    "testdata/new-site",
+					Version: "7.4",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "mismatched images return false",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.3-dev",
+					},
+				},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Site(tt.args.home, tt.args.site, tt.args.container); got != tt.want {
+				t.Errorf("Site() = %v, want %v", got, tt.want)
 			}
 		})
 	}

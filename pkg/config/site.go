@@ -9,7 +9,6 @@ import (
 // DefaultEnvs is used to map a config to a known environment variable that is used
 // on the container instances to their default values
 var DefaultEnvs = map[string]string{
-	// PHP specific settings
 	"PHP_DISPLAY_ERRORS":          "on",
 	"PHP_MEMORY_LIMIT":            "512M",
 	"PHP_MAX_EXECUTION_TIME":      "5000",
@@ -19,7 +18,7 @@ var DefaultEnvs = map[string]string{
 	"PHP_OPCACHE_ENABLE":          "0",
 	"PHP_OPCACHE_REVALIDATE_FREQ": "0",
 	"XDEBUG_MODE":                 "off",
-	"XDEBUG_SESSION":              "nitro",
+	"XDEBUG_SESSION":              "PHPSTORM",
 	"XDEBUG_CONFIG":               "",
 }
 
