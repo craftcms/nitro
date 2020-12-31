@@ -124,9 +124,9 @@ func FirstTime(home string, output terminal.Outputer) error {
 
 func confirm(msg string, fallback bool) (bool, error) {
 	if fallback {
-		fmt.Print(fmt.Sprintf("%s [Y/n]? ", msg))
+		fmt.Printf("%s [Y/n]? ", msg)
 	} else {
-		fmt.Print(fmt.Sprintf("%s [y/N]? ", msg))
+		fmt.Printf("%s [y/N]? ", msg)
 	}
 
 	// prompt for confirmation
