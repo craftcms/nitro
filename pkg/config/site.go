@@ -27,7 +27,7 @@ var DefaultEnvs = map[string]string{
 // to add to the container, and the directory the index.php is located.
 type Site struct {
 	Hostname string   `yaml:"hostname"`
-	Aliases  []string `yaml:"aliases,omitempty"`
+	Aliases  []string `yaml:"aliases"`
 	Path     string   `yaml:"path"`
 	Version  string   `yaml:"version"`
 	PHP      PHP      `yaml:"php,omitempty"`

@@ -24,7 +24,7 @@ var (
 // level. If anything fails, we return an error.
 func FirstTime(home string, output terminal.Outputer) error {
 	c := config.Config{
-		File: filepath.Join(home, ".nitro", "nitro.yaml"),
+		File: filepath.Join(home, ".nitro", "nitro.yml"),
 	}
 
 	output.Info("Setting up Nitro...")

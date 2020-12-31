@@ -18,7 +18,7 @@ var (
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
-	Services  Services   `yaml:"services,omitempty"`
+	Services  Services   `yaml:"services"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 	File      string     `yaml:"-"`
 }
@@ -60,7 +60,7 @@ type Services struct {
 // while marshalling the config.
 func Load(home string) (*Config, error) {
 	// set the config file
-	file := filepath.Join(home, ".nitro", "nitro.yaml")
+	file := filepath.Join(home, ".nitro", "nitro.yml")
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return nil, ErrNoConfigFile
 	}

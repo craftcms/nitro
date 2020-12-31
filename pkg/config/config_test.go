@@ -31,7 +31,7 @@ func TestLoad(t *testing.T) {
 				home: testdir,
 			},
 			want: &Config{
-				File: filepath.Join(testdir, ".nitro", "nitro.yaml"),
+				File: filepath.Join(testdir, ".nitro", "nitro.yml"),
 				Blackfire: Blackfire{
 					ServerID:    "my-id",
 					ServerToken: "my-token",
