@@ -82,7 +82,7 @@ func checkEnvs(site config.Site, envs []string) bool {
 					return false
 				}
 			case "XDEBUG_MODE":
-				if (site.Xdebug && config.DefaultEnvs[env] == "off") || (!site.Xdebug && val != config.DefaultEnvs[env]) {
+				if (site.Xdebug && val == config.DefaultEnvs[env]) || (!site.Xdebug && val != config.DefaultEnvs[env]) {
 					return false
 				}
 			}
