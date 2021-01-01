@@ -16,8 +16,6 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-// https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/integration/internal/container/exec.go#L38
-
 const exampleText = `  # ssh into a container - assuming its the current working directory
   nitro ssh`
 
@@ -60,6 +58,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				sites = append(sites, s.Hostname)
 			}
 
+			// if there are found sites we want to show or connect to the first one, otherwise prompt for
+			// which site to connect to.
 			switch len(found) {
 			case 0:
 				// prompt for the site to ssh into
@@ -95,36 +95,44 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to find an matching site")
 			}
 
-			// find the docker executable
-			cli, err := exec.LookPath("docker")
-			if err != nil {
-				return err
+			// start the container if its not running
+			if containers[0].State != "running" {
+				if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
+					return err
+				}
 			}
 
-			// check if the root user should be used
-			user := "www-data"
-			if cmd.Flag("root").Value.String() == "true" {
-				user = "root"
-			}
-
-			if user != "www-data" {
-				output.Info("using root... system changes are ephemeral...")
-			}
-
-			c := exec.Command(cli, "exec", "-u", user, "-it", containers[0].ID, "sh")
-			c.Stdin = cmd.InOrStdin()
-			c.Stderr = cmd.ErrOrStderr()
-			c.Stdout = cmd.OutOrStdout()
-
-			if err := c.Run(); err != nil {
-				return err
-			}
-
-			return nil
+			return containerConnect(cmd, output, containers[0].ID)
 		},
 	}
 
 	cmd.Flags().Bool("root", false, "ssh as the root user")
+	// cmd.Flags().Bool("proxy", false, "connect to the proxy container")
 
 	return cmd
+}
+
+func containerConnect(cmd *cobra.Command, output terminal.Outputer, containerID string) error {
+	// find the docker executable
+	cli, err := exec.LookPath("docker")
+	if err != nil {
+		return err
+	}
+
+	// check if the root user should be used
+	user := "www-data"
+	if cmd.Flag("root").Value.String() == "true" {
+		user = "root"
+	}
+
+	if user != "www-data" {
+		output.Info("using root... system changes are ephemeral...")
+	}
+
+	c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")
+	c.Stdin = cmd.InOrStdin()
+	c.Stderr = cmd.ErrOrStderr()
+	c.Stdout = cmd.OutOrStdout()
+
+	return c.Run()
 }
