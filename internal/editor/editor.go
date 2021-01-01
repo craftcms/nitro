@@ -20,11 +20,11 @@ type PreferredEditorResolver func() string
 // GetPreferredEditorFromEnvironment returns the user's editor as defined by the
 // `$EDITOR` environment variable, or the `DefaultEditor` if it is not set.
 func GetPreferredEditorFromEnvironment() string {
-	editor := os.Getenv("EDITOR")
-
 	if runtime.GOOS == "windows" {
 		return "notepad.exe"
 	}
+
+	editor := os.Getenv("EDITOR")
 
 	if editor == "" {
 		return DefaultEditor
