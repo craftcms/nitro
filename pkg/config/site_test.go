@@ -27,7 +27,41 @@ func TestSite_AsEnvs(t *testing.T) {
 		want   []string
 	}{
 		{
-			name: "defaults are overridden when set on the site",
+			name: "xdebug 2 options are set if enabled",
+			fields: fields{
+				Hostname: "somewebsite.nitro",
+				PHP: PHP{
+					DisplayErrors:         true,
+					MemoryLimit:           "256M",
+					MaxExecutionTime:      3000,
+					UploadMaxFileSize:     "128M",
+					MaxInputVars:          2000,
+					PostMaxSize:           "128M",
+					OpcacheEnable:         true,
+					OpcacheRevalidateFreq: 60,
+				},
+				Version: "7.1",
+				Xdebug:  true,
+			},
+			args: args{
+				addr: "host.docker.internal",
+			},
+			want: []string{
+				"PHP_DISPLAY_ERRORS=off",
+				"PHP_MEMORY_LIMIT=256M",
+				"PHP_MAX_EXECUTION_TIME=3000",
+				"PHP_UPLOAD_MAX_FILESIZE=128M",
+				"PHP_MAX_INPUT_VARS=2000",
+				"PHP_POST_MAX_SIZE=128M",
+				"PHP_OPCACHE_ENABLE=1",
+				"PHP_OPCACHE_REVALIDATE_FREQ=60",
+				"XDEBUG_SESSION=PHPSTORM",
+				"XDEBUG_CONFIG=idekey=PHPSTORM remote_host=host.docker.internal profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1",
+				"XDEBUG_MODE=xdebug2",
+			},
+		},
+		{
+			name: "xdebug 3 options are set if enabled",
 			fields: fields{
 				Hostname: "somewebsite.nitro",
 				PHP: PHP{

@@ -116,7 +116,9 @@ func (s *Site) AsEnvs(addr string) []string {
 			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
 			envs = append(envs, "XDEBUG_MODE=develop,debug")
 		default:
-			// TODO(jasonmccallister) set the environments for xdebug 2
+			// use legacy xdebug settings to support older versions of php
+			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
+			envs = append(envs, "XDEBUG_MODE=xdebug2")
 		}
 	}
 
