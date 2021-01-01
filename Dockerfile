@@ -1,5 +1,5 @@
 # grab the caddy binary
-FROM caddy:2.2.1-alpine AS caddy
+FROM caddy:2.3.0-rc.1-alpine AS caddy
 
 # build the api
 FROM golang:1.15-alpine AS builder
