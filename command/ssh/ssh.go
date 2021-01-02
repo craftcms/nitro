@@ -125,11 +125,13 @@ func containerConnect(cmd *cobra.Command, output terminal.Outputer, containerID 
 		user = "root"
 	}
 
-	if user != "www-data" {
+	// show a notice about changes
+	if user == "root" {
 		output.Info("using root... system changes are ephemeral...")
 	}
 
 	c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")
+
 	c.Stdin = cmd.InOrStdin()
 	c.Stderr = cmd.ErrOrStderr()
 	c.Stdout = cmd.OutOrStdout()
