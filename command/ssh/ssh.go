@@ -44,8 +44,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter.Add("label", labels.Nitro)
 
 			// get all of the sites
-			var found []string
-			var sites []string
+			var sites, found []string
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
