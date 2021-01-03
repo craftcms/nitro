@@ -47,6 +47,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				addr: "host.docker.internal",
 			},
 			want: []string{
+				"COMPOSER_HOME=/tmp",
 				"PHP_DISPLAY_ERRORS=off",
 				"PHP_MEMORY_LIMIT=256M",
 				"PHP_MAX_EXECUTION_TIME=3000",
@@ -81,6 +82,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				addr: "host.docker.internal",
 			},
 			want: []string{
+				"COMPOSER_HOME=/tmp",
 				"PHP_DISPLAY_ERRORS=off",
 				"PHP_MEMORY_LIMIT=256M",
 				"PHP_MAX_EXECUTION_TIME=3000",
@@ -110,6 +112,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				},
 			},
 			want: []string{
+				"COMPOSER_HOME=/tmp",
 				"PHP_DISPLAY_ERRORS=off",
 				"PHP_MEMORY_LIMIT=256M",
 				"PHP_MAX_EXECUTION_TIME=3000",
@@ -128,6 +131,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				Hostname: "somewebsite.nitro",
 			},
 			want: []string{
+				"COMPOSER_HOME=/tmp",
 				"PHP_DISPLAY_ERRORS=on",
 				"PHP_MEMORY_LIMIT=512M",
 				"PHP_MAX_EXECUTION_TIME=5000",

@@ -52,6 +52,8 @@ func (s *Site) AsEnvs(addr string) []string {
 		addr = "host.docker.internal"
 	}
 
+	envs = append(envs, "COMPOSER_HOME=/tmp")
+
 	// if they do not specify the error... false means on
 	if !s.PHP.DisplayErrors {
 		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
