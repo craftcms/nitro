@@ -78,7 +78,7 @@ DB_TABLE_PREFIX=
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Edit() = %v, want %v", got, tt.want)
+				t.Errorf("Edit() = got\n%v \nwant: \n%v", got, tt.want)
 			}
 		})
 	}
