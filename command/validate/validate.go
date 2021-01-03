@@ -7,9 +7,9 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	validator "github.com/craftcms/nitro/internal/validate"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/terminal"
+	validator "github.com/craftcms/nitro/pkg/validate"
 )
 
 var (
