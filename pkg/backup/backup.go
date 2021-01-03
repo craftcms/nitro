@@ -14,7 +14,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
-	"github.com/craftcms/nitro/internal/helpers"
+	"github.com/craftcms/nitro/pkg/helpers"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
