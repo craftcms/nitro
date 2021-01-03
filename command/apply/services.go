@@ -16,10 +16,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
+var (
+	// DynamoDBImage is the image to use for the dynamodb
+	DynamoDBImage = "amazon/dynamodb-local:latest"
+)
+
 func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
 	// add the filter for mailhog
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.Type+"=mailhog")
 
 	switch enabled {
@@ -91,14 +95,14 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 
 			networkConfig := &network.NetworkingConfig{
 				EndpointsConfig: map[string]*network.EndpointSettings{
-					"nitro": {
+					"nitro-network": {
 						NetworkID: networkID,
 					},
 				},
 			}
 
 			// create the container
-			resp, err := docker.ContainerCreate(ctx, containerConfig, hostconfig, networkConfig, nil, "mailhog.service.internal")
+			resp, err := docker.ContainerCreate(ctx, containerConfig, hostconfig, networkConfig, nil, "mailhog.service.nitro")
 			if err != nil {
 				return "", fmt.Errorf("unable to create the container, %w", err)
 			}
@@ -155,6 +159,76 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 		if err := docker.ContainerRemove(ctx, id, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 			output.Warning()
 			output.Info(err.Error())
+		}
+	}
+
+	return "", nil
+}
+
+func dynamodb(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
+	// add the filter for mailhog
+	filter := filters.NewArgs()
+	filter.Add("label", labels.Type+"=mailhog")
+
+	// is the service enabled
+	if enabled {
+		// get a list of containers
+		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+		if err != nil {
+			return "", err
+		}
+
+		// if there is not a container create it
+		if len(containers) == 0 {
+			// pull the mailhog image
+			rdr, err := docker.ImagePull(ctx, DynamoDBImage, types.ImagePullOptions{})
+			if err != nil {
+				return "", err
+			}
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.ReadFrom(rdr); err != nil {
+				return "", fmt.Errorf("unable to read the output from pulling the image, %w", err)
+			}
+
+			port, err := nat.NewPort("tcp", "8000")
+			if err != nil {
+				return "", err
+			}
+
+			// create the container
+			resp, err := docker.ContainerCreate(ctx, &container.Config{
+				Image: DynamoDBImage,
+				Labels: map[string]string{
+					labels.Type: "dynamodb",
+				},
+				ExposedPorts: nat.PortSet{
+					port: struct{}{},
+				},
+			}, &container.HostConfig{
+				PortBindings: map[nat.Port][]nat.PortBinding{
+					port: {
+						{
+							HostIP:   "127.0.0.1",
+							HostPort: "8000",
+						},
+					},
+				},
+			}, &network.NetworkingConfig{
+				EndpointsConfig: map[string]*network.EndpointSettings{
+					"nitro-network": {
+						NetworkID: networkID,
+					},
+				},
+			}, nil, "dynamodb.service.nitro")
+			if err != nil {
+				return "", fmt.Errorf("unable to create the container, %w", err)
+			}
+
+			// start the container
+			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+				return "", fmt.Errorf("unable to start the container, %w", err)
+			}
 		}
 	}
 
