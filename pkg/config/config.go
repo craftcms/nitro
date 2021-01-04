@@ -50,7 +50,6 @@ type PHP struct {
 // networking options for these types of services. We plan to support "custom" container options to make local users
 // development even better.
 type Services struct {
-	Blackfire bool `yaml:"blackfire"`
 	DynamoDB  bool `yaml:"dynamodb"`
 	Mailhog   bool `yaml:"mailhog"`
 	Minio     bool `yaml:"minio"`

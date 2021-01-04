@@ -26,14 +26,8 @@ import (
 )
 
 var (
-	// ErrNoNetwork is used when we cannot find the network
-	ErrNoNetwork = fmt.Errorf("Unable to find the network")
-
 	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
-
-	// DatabaseImage is used for determining the engine and version
-	DatabaseImage = "docker.io/library/%s:%s"
 )
 
 const exampleText = `  # apply changes from a config
@@ -72,7 +66,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// add the filter for the network name
 			filter.Add("name", "nitro-network")
 
-			output.Info("Checking Network...")
+			output.Info("Checking network...")
 
 			// check the network
 			var network types.NetworkResource
@@ -100,7 +94,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Success("network ready")
 
-			output.Info("Checking Proxy...")
+			output.Info("Checking proxy...")
 
 			// check the proxy and ensure its started
 			_, err = proxycontainer.FindAndStart(ctx, docker)
@@ -114,7 +108,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Success("proxy ready")
 
-			output.Info("Checking Databases...")
+			output.Info("Checking databases...")
 
 			// check the databases
 			for _, db := range cfg.Databases {
@@ -130,11 +124,24 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
+			output.Info("Checking services...")
+
 			// check dynamodb service
 			if cfg.Services.DynamoDB {
 				output.Pending("checking dynamodb service")
 
-				if _, err := dynamodb(ctx, docker, output, cfg.Services.DynamoDB, network.ID); err != nil {
+				if _, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID); err != nil {
+					return err
+				}
+
+				output.Done()
+			}
+
+			// check dynamodb service
+			if cfg.Services.Mailhog {
+				output.Pending("checking mailhog service")
+
+				if _, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID); err != nil {
 					return err
 				}
 
@@ -143,7 +150,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(cfg.Sites) > 0 {
 				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-				output.Info("Checking Sites...")
+				output.Info("Checking sites...")
 
 				// get the envs for the sites
 				for _, site := range cfg.Sites {

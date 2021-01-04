@@ -13,7 +13,6 @@ import (
 	"github.com/docker/go-connections/nat"
 
 	"github.com/craftcms/nitro/pkg/labels"
-	"github.com/craftcms/nitro/pkg/terminal"
 )
 
 var (
@@ -21,13 +20,12 @@ var (
 	DynamoDBImage = "amazon/dynamodb-local:latest"
 )
 
-func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
-	// add the filter for mailhog
+func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, error) {
+	// add the filter
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=mailhog")
 
-	switch enabled {
-	case true:
+	if enabled {
 		// get a list of containers
 		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
@@ -35,14 +33,8 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 		}
 
 		if len(containers) == 0 {
-			output.Pending("creating mailhog service")
-		}
-
-		// if there is no container, create it
-		switch len(containers) {
-		case 0:
-			// pull the mailhog image
-			rdr, err := docker.ImagePull(ctx, "docker.io/mailhog/mailhog", types.ImagePullOptions{})
+			// pull the image
+			rdr, err := docker.ImagePull(ctx, DynamoDBImage, types.ImagePullOptions{})
 			if err != nil {
 				return "", err
 			}
@@ -55,20 +47,19 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			// configure the service
 			smtpPort, err := nat.NewPort("tcp/udp", "1025")
 			if err != nil {
-				output.Warning()
 				return "", fmt.Errorf("unable to create the port, %w", err)
 			}
 			httpPort, err := nat.NewPort("tcp", "8025")
 
 			if err != nil {
-				output.Warning()
 				return "", fmt.Errorf("unable to create the port, %w", err)
 			}
 
 			containerConfig := &container.Config{
 				Image: "docker.io/mailhog/mailhog",
 				Labels: map[string]string{
-					labels.Type: "mailhog",
+					labels.Nitro: "true",
+					labels.Type:  "mailhog",
 				},
 				ExposedPorts: nat.PortSet{
 					smtpPort: struct{}{},
@@ -111,61 +102,13 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return "", fmt.Errorf("unable to start the container, %w", err)
 			}
-
-			output.Done()
-		default:
-			// check if the container is running
-			if containers[0].State != "running" {
-				output.Pending("starting mailhog")
-
-				// start the container
-				if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
-					output.Warning()
-					break
-				}
-
-				output.Done()
-
-				break
-			}
-
-			output.Success("mailhog ready")
-		}
-	default:
-		// check if there is an existing container for mailhog
-		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
-		if err != nil {
-			return "", err
-		}
-
-		// if there are no containers, we can stop here
-		if len(containers) == 0 {
-			return "", nil
-		}
-
-		// if we have a container, we need to remove it
-		output.Pending("removing mailhog")
-
-		// set the container id
-		id := containers[0].ID
-
-		// stop the container
-		if err := docker.ContainerStop(ctx, id, nil); err != nil {
-			output.Warning()
-			output.Info(err.Error())
-		}
-
-		// remove the container
-		if err := docker.ContainerRemove(ctx, id, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
-			output.Warning()
-			output.Info(err.Error())
 		}
 	}
 
 	return "", nil
 }
 
-func dynamodb(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
+func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, error) {
 	// add the filter for dynamodb
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=dynamodb")
@@ -180,7 +123,7 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, output termina
 
 		// if there is not a container create it
 		if len(containers) == 0 {
-			// pull the mailhog image
+			// pull the image
 			rdr, err := docker.ImagePull(ctx, DynamoDBImage, types.ImagePullOptions{})
 			if err != nil {
 				return "", err
@@ -200,7 +143,8 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, output termina
 			resp, err := docker.ContainerCreate(ctx, &container.Config{
 				Image: DynamoDBImage,
 				Labels: map[string]string{
-					labels.Type: "dynamodb",
+					labels.Nitro: "true",
+					labels.Type:  "dynamodb",
 				},
 				ExposedPorts: nat.PortSet{
 					port: struct{}{},

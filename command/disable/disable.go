@@ -37,7 +37,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:       "disable",
 		Short:     "Disable services",
 		Args:      cobra.MinimumNArgs(1),
-		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
+		ValidArgs: []string{"dynamodb", "mailhog", "minio", "redis"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the configuration
@@ -48,8 +48,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// disable the service
 			switch args[0] {
-			case "blackfire":
-				cfg.Services.Blackfire = false
 			case "dynamodb":
 				cfg.Services.DynamoDB = false
 			case "mailhog":
