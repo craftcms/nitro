@@ -140,7 +140,7 @@ func xdebugVars(php PHP, xdebug bool, version, addr string) []string {
 	default:
 		switch version {
 		case "8.0", "7.4", "7.3", "7.2":
-			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003 discover_client_host=false`, addr))
+			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
 			envs = append(envs, "XDEBUG_MODE=develop,debug")
 
 		default:
