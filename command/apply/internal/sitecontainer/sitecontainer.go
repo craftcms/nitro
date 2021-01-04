@@ -25,7 +25,7 @@ var (
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 )
 
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) error {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Host+"="+site.Hostname)
@@ -33,7 +33,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	// look for a container for the site
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
-		return fmt.Errorf("error getting a list of containers")
+		return "", fmt.Errorf("error getting a list of containers")
 	}
 
 	// if there are no containers we need to create one
@@ -47,7 +47,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	// get the containers details that include environment variables
 	details, err := docker.ContainerInspect(ctx, container.ID)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// if the container is out of date
@@ -56,39 +56,39 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 		// stop container
 		if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {
-			return err
+			return "", err
 		}
 
 		// remove container
 		if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
-			return err
+			return "", err
 		}
 
 		return create(ctx, docker, home, networkID, site)
 	}
 
-	return nil
+	return container.ID, nil
 }
 
-func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) error {
+func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) (string, error) {
 	// create the container
 	image := fmt.Sprintf(NginxImage, site.Version)
 
 	// pull the image
 	rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 	if err != nil {
-		return fmt.Errorf("unable to pull the image, %w", err)
+		return "", fmt.Errorf("unable to pull the image, %w", err)
 	}
 
 	buf := &bytes.Buffer{}
 	if _, err := buf.ReadFrom(rdr); err != nil {
-		return fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		return "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 	}
 
 	// get the sites path
 	path, err := site.GetAbsPath(home)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// add the site itself and any aliases to the extra hosts
@@ -132,12 +132,12 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		site.Hostname,
 	)
 	if err != nil {
-		return fmt.Errorf("unable to create the container, %w", err)
+		return "", fmt.Errorf("unable to create the container, %w", err)
 	}
 
 	// start the container
 	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return fmt.Errorf("unable to start the container, %w", err)
+		return "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
 	// post installation commands
@@ -151,12 +151,12 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		// create the temp file
 		tr, err := archive.Generate("default.conf", conf)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		// copy the file into the container
 		if err := docker.CopyToContainer(ctx, resp.ID, "/tmp", tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
-			return err
+			return "", err
 		}
 
 		commands["copy-nginx-file"] = []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}
@@ -174,7 +174,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Cmd:          c,
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		// attach to the container
@@ -182,18 +182,18 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Tty: false,
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 		defer attach.Close()
 
 		// show the output to stdout and stderr
 		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-			return fmt.Errorf("unable to copy the output of container, %w", err)
+			return "", fmt.Errorf("unable to copy the output of container, %w", err)
 		}
 
 		// start the exec
 		if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-			return fmt.Errorf("unable to start the container, %w", err)
+			return "", fmt.Errorf("unable to start the container, %w", err)
 		}
 
 		// wait for the container exec to complete
@@ -201,7 +201,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		for waiting {
 			resp, err := docker.ContainerExecInspect(ctx, exec.ID)
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			waiting = resp.Running
@@ -209,9 +209,9 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 		// start the container
 		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-			return fmt.Errorf("unable to start the container, %w", err)
+			return "", fmt.Errorf("unable to start the container, %w", err)
 		}
 	}
 
-	return nil
+	return resp.ID, nil
 }
