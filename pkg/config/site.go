@@ -53,10 +53,10 @@ func (s *Site) AsEnvs(addr string) []string {
 	}
 
 	// set the php vars
-	envs = append(envs, phpVars(envs, s.PHP, s.Version)...)
+	envs = append(envs, phpVars(s.PHP, s.Version)...)
 
 	// get the xdebug vars
-	envs = append(envs, xdebugVars(envs, s.PHP, s.Xdebug, s.Version, addr)...)
+	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, addr)...)
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {
@@ -69,10 +69,10 @@ func (s *Site) AsEnvs(addr string) []string {
 	return envs
 }
 
-func phpVars(envs []string, php PHP, version string) []string {
+func phpVars(php PHP, version string) []string {
 	// set the composer home so we can install plugins and
 	// updates from the control panel
-	envs = append(envs, "COMPOSER_HOME=/tmp")
+	envs := []string{"COMPOSER_HOME=/tmp"}
 
 	// if they do not specify the error... false means on
 	if !php.DisplayErrors {
@@ -131,7 +131,9 @@ func phpVars(envs []string, php PHP, version string) []string {
 	return envs
 }
 
-func xdebugVars(envs []string, php PHP, xdebug bool, version, addr string) []string {
+func xdebugVars(php PHP, xdebug bool, version, addr string) []string {
+	envs := []string{}
+
 	switch xdebug {
 	case false:
 		envs = append(envs, "XDEBUG_MODE=off")

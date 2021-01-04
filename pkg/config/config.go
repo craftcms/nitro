@@ -59,10 +59,10 @@ func (m *Mount) AsEnvs(addr string) []string {
 	}
 
 	// set the php vars
-	envs = append(envs, phpVars(envs, m.PHP, m.Version)...)
+	envs = append(envs, phpVars(m.PHP, m.Version)...)
 
 	// get the xdebug vars
-	envs = append(envs, xdebugVars(envs, m.PHP, m.Xdebug, m.Version, addr)...)
+	envs = append(envs, xdebugVars(m.PHP, m.Xdebug, m.Version, addr)...)
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {
