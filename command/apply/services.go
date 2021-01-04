@@ -205,6 +205,7 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, output termina
 				ExposedPorts: nat.PortSet{
 					port: struct{}{},
 				},
+				Cmd: []string{"-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "."},
 			}, &container.HostConfig{
 				PortBindings: map[nat.Port][]nat.PortBinding{
 					port: {

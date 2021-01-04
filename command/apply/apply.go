@@ -125,6 +125,16 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
+			if cfg.Services.DynamoDB {
+				output.Pending("checking dynamodb service")
+
+				if _, err := dynamodb(ctx, docker, output, cfg.Services.DynamoDB, network.ID); err != nil {
+					return err
+				}
+
+				output.Done()
+			}
+
 			if len(cfg.Sites) > 0 {
 				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 				output.Info("Checking Sites...")
