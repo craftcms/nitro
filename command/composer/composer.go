@@ -37,11 +37,10 @@ const exampleText = `  # run composer install in a current directory using a con
 // all the commands in a disposable docker container.
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                "composer",
-		Short:              "Run composer commands",
-		Example:            exampleText,
-		DisableFlagParsing: true,
-		Args:               cobra.MinimumNArgs(1),
+		Use:     "composer",
+		Short:   "Run composer commands",
+		Example: exampleText,
+		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return fmt.Errorf("you must specify at least one arguement to this command")
@@ -81,14 +80,17 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
 			// filter for the image ref
-			imageFilter := filters.NewArgs()
-			imageFilter.Add("reference", image)
+			filter := filters.NewArgs()
+			filter.Add("reference", image)
 
 			// look for the image
-			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter})
+			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
+
+			// remove the image ref filter
+			filter.Del("reference", image)
 
 			// if we don't have the image, pull it
 			if len(images) == 0 {
@@ -104,12 +106,11 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// add filters for the volume
-			volumeFilter := filters.NewArgs()
-			volumeFilter.Add("label", labels.Type+"=composer")
-			volumeFilter.Add("label", labels.Path+"="+path)
+			filter.Add("label", labels.Type+"=composer")
+			filter.Add("label", labels.Path+"="+path)
 
 			// check if there is an existing volume
-			volumes, err := docker.VolumeList(ctx, volumeFilter)
+			volumes, err := docker.VolumeList(ctx, filter)
 			if err != nil {
 				return err
 			}
@@ -123,10 +124,14 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				pathVolume = *volumes.Volumes[0]
 			case 0:
 				// create the volume if it does not exist
-				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: volumeName, Labels: map[string]string{
-					labels.Type: "composer",
-					labels.Path: path,
-				}})
+				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
+					Driver: "local",
+					Name:   volumeName,
+					Labels: map[string]string{
+						labels.Type: "composer",
+						labels.Path: path,
+					},
+				})
 				if err != nil {
 					return fmt.Errorf("unable to create the volume, %w", err)
 				}
@@ -146,7 +151,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Tty:   false,
 					Labels: map[string]string{
 						labels.Type: "composer",
-						// TODO abstract this?
 						labels.Path: path,
 					},
 					Env: []string{"COMPOSER_HOME=/root"},
