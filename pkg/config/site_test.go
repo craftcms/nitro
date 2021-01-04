@@ -157,7 +157,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				Xdebug:   tt.fields.Xdebug,
 			}
 			if got := s.AsEnvs(tt.args.addr); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Site.AsEnvs() = %v, want %v", got, tt.want)
+				t.Errorf("Site.AsEnvs() = \ngot:\n%v, \nwant:\n%v", got, tt.want)
 			}
 		})
 	}

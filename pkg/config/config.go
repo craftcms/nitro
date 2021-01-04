@@ -48,6 +48,33 @@ func (m *Mount) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, m.Path)
 }
 
+// AsEnvs takes a gateway addr and turns specific options
+// such as PHP settings into env vars that can be set on the
+// containers environment
+func (m *Mount) AsEnvs(addr string) []string {
+	var envs []string
+
+	if addr == "" {
+		addr = "host.docker.internal"
+	}
+
+	// set the php vars
+	envs = append(envs, phpVars(m.PHP, m.Version)...)
+
+	// get the xdebug vars
+	envs = append(envs, xdebugVars(m.PHP, m.Xdebug, m.Version, addr)...)
+
+	// set the blackfire envs if available
+	// if s.Blackfire.ServerID != "" {
+	// 	envs = append(envs, "BLACKFIRE_SERVER_ID="+s.Blackfire.ServerID)
+	// }
+	// if s.Blackfire.ServerToken != "" {
+	// 	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+s.Blackfire.ServerToken)
+	// }
+
+	return envs
+}
+
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
