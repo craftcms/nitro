@@ -2,6 +2,7 @@ package apply
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -90,8 +91,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// if the network is not found
 			if network.ID == "" {
-				output.Info("No network was found...")
-				output.Info("run `nitro init` to get started")
+				output.Info("No network was found...\nrun `nitro init` to get started")
 				return nil
 			}
 
@@ -103,7 +103,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			output.Info("Checking Proxy...")
 
 			// check the proxy and ensure its started
-			if _, err := proxycontainer.FindAndStart(ctx, docker); err != nil {
+			_, err = proxycontainer.FindAndStart(ctx, docker)
+			if errors.Is(err, ErrNoProxyContainer) {
+				output.Info("unable to find the nitro proxy...\n run `nitro init` to resolve")
+				return nil
+			}
+			if err != nil {
 				return err
 			}
 

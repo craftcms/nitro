@@ -109,7 +109,7 @@ func init() {
 		start.NewCommand(client, term),
 		stop.New(client, term),
 		trust.New(client, term),
-		update.New(client, term),
+		update.NewCommand(client, term),
 		validate.NewCommand(home, client, term),
 		version.New(client, nitrod, term),
 		xon.NewCommand(home, client, term),

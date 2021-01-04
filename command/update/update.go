@@ -27,9 +27,8 @@ var (
 	}
 )
 
-// New returns the update command for updating images on the
-// local machine
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+// New returns the update command for updating images on the local machine as well as the nitro-proxy container.
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update nitro",
