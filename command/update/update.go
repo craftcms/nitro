@@ -17,13 +17,13 @@ import (
 )
 
 var (
-	// TODO(jasonmccallister) add "docker.io/craftcms/nginx:8.0-dev"
 	DockerImages = map[string]string{
+		// "docker.io/craftcms/nginx:8.0-dev": "nginx:8.0-dev",
 		"docker.io/craftcms/nginx:7.4-dev": "nginx:7.4-dev",
 		"docker.io/craftcms/nginx:7.3-dev": "nginx:7.3-dev",
 		"docker.io/craftcms/nginx:7.2-dev": "nginx:7.2-dev",
 		"docker.io/craftcms/nginx:7.1-dev": "nginx:7.1-dev",
-		"docker.io/craftcms/nginx:7.0-dev": "nginx:7.0-dev",
+		// "docker.io/craftcms/nginx:7.0-dev": "nginx:7.0-dev",
 	}
 )
 
@@ -51,7 +51,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 				buf := &bytes.Buffer{}
 				if _, err := buf.ReadFrom(rdr); err != nil {
-					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+					return fmt.Errorf("unable to read the output while pulling image, %w", err)
 				}
 
 				output.Done()
