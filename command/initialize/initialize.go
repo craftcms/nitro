@@ -245,7 +245,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						return fmt.Errorf("unable to set the API port, %w", err)
 					}
 				default:
-					apiPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
+					apiPort, err = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
 					if err != nil {
 						return fmt.Errorf("unable to set the API port, %w", err)
 					}
