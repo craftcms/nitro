@@ -258,11 +258,9 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 	}
 
 	// wait for the api to be ready
-	wait := true
-	for wait {
+	for {
 		_, err := nitrod.Ping(ctx, &protob.PingRequest{})
 		if err == nil {
-			wait = false
 			break
 		}
 	}
