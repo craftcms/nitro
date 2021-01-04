@@ -117,8 +117,9 @@ func (s *Site) AsEnvs(addr string) []string {
 	default:
 		switch s.Version {
 		case "8.0", "7.4", "7.3", "7.2":
-			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s start_with_request=yes discover_client_host=1`, addr))
+			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003 discover_client_host=false`, addr))
 			envs = append(envs, "XDEBUG_MODE=develop,debug")
+
 		default:
 			// use legacy xdebug settings to support older versions of php
 			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
