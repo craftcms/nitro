@@ -1,0 +1,196 @@
+{
+    "srv0": {
+        "listen": [
+            ":443"
+        ],
+        "routes": [
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "laravel-app.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "laravel-app.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "id.craftcms.test:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "id.craftcms.test",
+                            "plugins.craftcms.test",
+                            "api.craftcms.test"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "another-site.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "another-site.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "craft-support.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "craft-support.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            }
+        ]
+    },
+    "srv1": {
+        "listen": [
+            ":80"
+        ],
+        "routes": [
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "laravel-app.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "laravel-app.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "id.craftcms.test:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "id.craftcms.test",
+                            "plugins.craftcms.test",
+                            "api.craftcms.test"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "another-site.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "another-site.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "reverse_proxy",
+                        "upstreams": [
+                            {
+                                "dial": "craft-support.nitro:8080"
+                            }
+                        ]
+                    }
+                ],
+                "match": [
+                    {
+                        "host": [
+                            "craft-support.nitro"
+                        ]
+                    }
+                ],
+                "terminal": true
+            },
+            {
+                "handle": [
+                    {
+                        "handler": "vars",
+                        "root": "/var/www/html"
+                    },
+                    {
+                        "handler": "file_server",
+                        "root": "/var/www/html",
+                        "hide": [
+                            "/etc/caddy/Caddyfile"
+                        ]
+                    }
+                ],
+                "terminal": true
+            }
+        ]
+    }
+}
