@@ -19,7 +19,11 @@ import (
 )
 
 var (
+	// ProxyImage is the docker hub image with the current CLI version
 	ProxyImage = fmt.Sprintf("craftcms/nitro-proxy:%s", version.Version)
+
+	// ProxyName is the name of the proxy container (e.g. nitro-proxy)
+	ProxyName = "nitro-proxy"
 
 	// ErrNoProxyContainer is returned when the proxy container is not found
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
@@ -64,148 +68,144 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 	filter.Add("label", labels.Proxy+"=true")
 
 	// check if there is an existing container for the nitro-proxy
-	var containerID string
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
 		return fmt.Errorf("unable to list the containers\n%w", err)
 	}
 
+	// check the containers and verify its running
 	var proxyRunning bool
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == "nitro-proxy" || n == "/nitro-proxy" {
-				output.Success("proxy ready")
-
-				containerID = c.ID
-
 				// check if it is running
 				if c.State == "running" {
 					proxyRunning = true
 				}
+
+				output.Success("proxy ready")
+
+				return nil
 			}
 		}
 	}
 
-	// if we do not have a container id, it needs to be create
-	if containerID == "" {
-		output.Pending("creating proxy")
+	// if we do not have a proxy, it needs to be create
+	output.Pending("creating proxy")
 
-		// set ports
-		var httpPort, httpsPort, apiPort nat.Port
+	// set ports
+	var httpPort, httpsPort, apiPort nat.Port
 
-		// check for a custom HTTP port
-		switch os.Getenv("NITRO_HTTP_PORT") {
-		case "":
-			httpPort, err = nat.NewPort("tcp", "80")
-			if err != nil {
-				return fmt.Errorf("unable to set the HTTP port, %w", err)
-			}
-		default:
-			httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
-			if err != nil {
-				return fmt.Errorf("unable to set the HTTP port, %w", err)
-			}
-		}
-
-		// check for a custom HTTPS port
-		switch os.Getenv("NITRO_HTTPS_PORT") {
-		case "":
-			httpsPort, err = nat.NewPort("tcp", "443")
-			if err != nil {
-				return fmt.Errorf("unable to set the HTTPS port, %w", err)
-			}
-		default:
-			httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
-			if err != nil {
-				return fmt.Errorf("unable to set the HTTPS port, %w", err)
-			}
-		}
-
-		// check for a custom API port
-		switch os.Getenv("NITRO_API_PORT") {
-		case "":
-			apiPort, err = nat.NewPort("tcp", "5000")
-			if err != nil {
-				return fmt.Errorf("unable to set the API port, %w", err)
-			}
-		default:
-			apiPort, err = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
-			if err != nil {
-				return fmt.Errorf("unable to set the API port, %w", err)
-			}
-		}
-
-		// create a container
-		resp, err := docker.ContainerCreate(ctx,
-			&container.Config{
-				Image: ProxyImage,
-				ExposedPorts: nat.PortSet{
-					httpPort:  struct{}{},
-					httpsPort: struct{}{},
-					apiPort:   struct{}{},
-				},
-				Labels: map[string]string{
-					labels.Nitro:        "true",
-					labels.Type:         "proxy",
-					labels.Proxy:        "true",
-					labels.ProxyVersion: version.Version,
-				},
-			},
-			&container.HostConfig{
-				NetworkMode: "default",
-				Mounts: []mount.Mount{
-					{
-						Type:   mount.TypeVolume,
-						Source: volume.Name,
-						Target: "/data",
-					},
-				},
-				PortBindings: map[nat.Port][]nat.PortBinding{
-					httpPort: {
-						{
-							HostIP:   "127.0.0.1",
-							HostPort: "80",
-						},
-					},
-					httpsPort: {
-						{
-							HostIP:   "127.0.0.1",
-							HostPort: "443",
-						},
-					},
-					apiPort: {
-						{
-							HostIP:   "127.0.0.1",
-							HostPort: "5000",
-						},
-					},
-				},
-			},
-			&network.NetworkingConfig{
-				EndpointsConfig: map[string]*network.EndpointSettings{
-					"nitro-network": {
-						NetworkID: networkID,
-					},
-				},
-			},
-			nil,
-			"nitro-proxy",
-		)
+	// check for a custom HTTP port
+	switch os.Getenv("NITRO_HTTP_PORT") {
+	case "":
+		httpPort, err = nat.NewPort("tcp", "80")
 		if err != nil {
-			return fmt.Errorf("unable to create the container from image %s\n%w", ProxyImage, err)
+			return fmt.Errorf("unable to set the HTTP port, %w", err)
 		}
+	default:
+		httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
+		if err != nil {
+			return fmt.Errorf("unable to set the HTTP port, %w", err)
+		}
+	}
 
-		containerID = resp.ID
+	// check for a custom HTTPS port
+	switch os.Getenv("NITRO_HTTPS_PORT") {
+	case "":
+		httpsPort, err = nat.NewPort("tcp", "443")
+		if err != nil {
+			return fmt.Errorf("unable to set the HTTPS port, %w", err)
+		}
+	default:
+		httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
+		if err != nil {
+			return fmt.Errorf("unable to set the HTTPS port, %w", err)
+		}
+	}
 
-		output.Done()
+	// check for a custom API port
+	switch os.Getenv("NITRO_API_PORT") {
+	case "":
+		apiPort, err = nat.NewPort("tcp", "5000")
+		if err != nil {
+			return fmt.Errorf("unable to set the API port, %w", err)
+		}
+	default:
+		apiPort, err = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
+		if err != nil {
+			return fmt.Errorf("unable to set the API port, %w", err)
+		}
+	}
+
+	// create a container
+	resp, err := docker.ContainerCreate(ctx,
+		&container.Config{
+			Image: ProxyImage,
+			ExposedPorts: nat.PortSet{
+				httpPort:  struct{}{},
+				httpsPort: struct{}{},
+				apiPort:   struct{}{},
+			},
+			Labels: map[string]string{
+				labels.Nitro:        "true",
+				labels.Type:         "proxy",
+				labels.Proxy:        "true",
+				labels.ProxyVersion: version.Version,
+			},
+		},
+		&container.HostConfig{
+			NetworkMode: "default",
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: volume.Name,
+					Target: "/data",
+				},
+			},
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				httpPort: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "80",
+					},
+				},
+				httpsPort: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "443",
+					},
+				},
+				apiPort: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "5000",
+					},
+				},
+			},
+		},
+		&network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				"nitro-network": {
+					NetworkID: networkID,
+				},
+			},
+		},
+		nil,
+		ProxyName,
+	)
+	if err != nil {
+		return fmt.Errorf("unable to create proxy container: %s\n%w", ProxyImage, err)
 	}
 
 	// start the container for the proxy if its not running
 	if !proxyRunning {
-		if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 			return fmt.Errorf("unable to start the nitro container, %w", err)
 		}
 	}
+
+	output.Done()
 
 	return nil
 }
