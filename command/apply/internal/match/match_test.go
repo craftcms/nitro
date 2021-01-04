@@ -160,7 +160,7 @@ func Test_checkEnvs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkEnvs(tt.args.site, tt.args.envs); got != tt.want {
+			if got := checkEnvs(tt.args.site.PHP, tt.args.site.Xdebug, tt.args.envs); got != tt.want {
 				t.Errorf("checkEnvs() = %v, want %v", got, tt.want)
 			}
 		})
