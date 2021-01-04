@@ -14,11 +14,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
-	"github.com/craftcms/nitro/command/apply/internal/proxycontainer"
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
