@@ -29,6 +29,8 @@ import (
 var (
 	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
+
+	knownContainers = map[string]bool{}
 )
 
 const exampleText = `  # apply changes from a config
@@ -45,6 +47,31 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		Use:     "apply",
 		Short:   "Apply changes",
 		Example: exampleText,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// create a filter for the environment
+			filter := filters.NewArgs()
+			filter.Add("label", labels.Nitro+"=true")
+
+			// look for a container for the site
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
+			if err != nil {
+				return fmt.Errorf("error getting a list of containers")
+			}
+
+			// if there are no matching containers we are done
+			if len(containers) == 0 {
+				return nil
+			}
+
+			for _, c := range containers {
+				if _, ok := knownContainers[c.ID]; !ok {
+					// stop and remove the container we don't know about
+					// TODO(jasonmccallister) update the databases, proxy, services to return the container id
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -174,10 +201,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("checking", site.Hostname)
 
 					// start, update or create the site container
-					if err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site); err != nil {
+					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site)
+					if err != nil {
 						output.Warning()
 						return err
 					}
+
+					knownContainers[id] = true
 
 					output.Done()
 				}
