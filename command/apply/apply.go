@@ -239,17 +239,10 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 	// convert the sites into the gRPC API Apply request
 	sites := make(map[string]*protob.Site)
 	for _, s := range cfg.Sites {
-		hosts := []string{s.Hostname}
-
-		// if there are aliases lets append them to the hosts
-		if len(s.Aliases) > 0 {
-			hosts = append(hosts, s.Aliases...)
-		}
-
 		// create the site
 		sites[s.Hostname] = &protob.Site{
 			Hostname: s.Hostname,
-			Aliases:  strings.Join(hosts, ","),
+			Aliases:  strings.Join(s.Aliases, ","),
 			Port:     8080,
 		}
 	}
