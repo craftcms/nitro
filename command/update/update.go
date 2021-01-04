@@ -32,8 +32,8 @@ var (
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update Docker images",
-		Example: `  # update docker images
+		Short: "Update nitro containers",
+		Example: `  # update nitro containers
   nitro update`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating...")
