@@ -38,6 +38,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating...")
 
+			// update all of the images
 			for image, name := range DockerImages {
 				output.Pending("updating", name)
 
