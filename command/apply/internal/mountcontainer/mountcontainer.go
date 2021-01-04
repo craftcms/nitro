@@ -99,6 +99,8 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	p = filepath.Clean(abs)
 
+	envs := mnt.AsEnvs("")
+
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
@@ -109,6 +111,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 				labels.Type:  "mount",
 				labels.Path:  p,
 			},
+			Env: envs,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
