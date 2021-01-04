@@ -125,6 +125,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
+			// check dynamodb service
 			if cfg.Services.DynamoDB {
 				output.Pending("checking dynamodb service")
 

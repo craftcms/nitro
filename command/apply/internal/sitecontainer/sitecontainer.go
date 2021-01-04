@@ -140,6 +140,9 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		return fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	// post installation commands
+	commands := map[string][]string{}
+
 	// check for a custom root and copt the template to the container
 	if site.Dir != "web" {
 		// create the nginx file
@@ -156,50 +159,52 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			return err
 		}
 
-		commands := map[string][]string{
-			"copy file":       {"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"},
-			"set permissions": {"chmod", "0644", "/etc/nginx/conf.d/default.conf"},
+		commands["copy-nginx-file"] = []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}
+		commands["set-nginx-permissions"] = []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}
+	}
+
+	// run the commands
+	for _, c := range commands {
+		// create the exec
+		exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+			User:         "root",
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          false,
+			Cmd:          c,
+		})
+		if err != nil {
+			return err
 		}
 
-		for _, c := range commands {
-			// create the exec
-			exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-				User:         "root",
-				AttachStdout: true,
-				AttachStderr: true,
-				Tty:          false,
-				Cmd:          c,
-			})
+		// attach to the container
+		attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+			Tty: false,
+		})
+		if err != nil {
+			return err
+		}
+		defer attach.Close()
+
+		// show the output to stdout and stderr
+		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
+			return fmt.Errorf("unable to copy the output of container, %w", err)
+		}
+
+		// start the exec
+		if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+			return fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		// wait for the container exec to complete
+		waiting := true
+		for waiting {
+			resp, err := docker.ContainerExecInspect(ctx, exec.ID)
 			if err != nil {
 				return err
 			}
 
-			// attach to the container
-			attach, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-				Tty: false,
-			})
-			defer attach.Close()
-
-			// show the output to stdout and stderr
-			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-				return fmt.Errorf("unable to copy the output of container, %w", err)
-			}
-
-			// start the exec
-			if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// wait for the container exec to complete
-			waiting := true
-			for waiting {
-				resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-				if err != nil {
-					return err
-				}
-
-				waiting = resp.Running
-			}
+			waiting = resp.Running
 		}
 
 		// start the container
