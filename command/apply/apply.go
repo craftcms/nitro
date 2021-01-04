@@ -166,7 +166,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
-			output.Info("Checking Proxy...")
+			output.Info("Checking proxy...")
 
 			output.Pending("updating proxy")
 
