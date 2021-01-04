@@ -168,7 +168,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, output terminal
 func dynamodb(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, enabled bool, networkID string) (string, error) {
 	// add the filter for mailhog
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Type+"=mailhog")
+	filter.Add("label", labels.Type+"=dynamodb")
 
 	// is the service enabled
 	if enabled {
