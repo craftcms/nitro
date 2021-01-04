@@ -31,10 +31,30 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 	}
 
 	// run the final check on the environment variables
-	return checkEnvs(site, container.Config.Env)
+	return checkEnvs(site.PHP, site.Xdebug, container.Config.Env)
 }
 
-func checkEnvs(site config.Site, envs []string) bool {
+func Mount(home string, mount config.Mount, container types.ContainerJSON) bool {
+	// check if the image does not match - this uses the image name, not ref
+	if fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", mount.Version) != container.Config.Image {
+		return false
+	}
+
+	// get the mount path (e.g. ~/dev)
+	path, err := mount.GetAbsPath(home)
+	if err != nil {
+		return false
+	}
+
+	// check if the path exists
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+
+	return checkEnvs(mount.PHP, mount.Xdebug, container.Config.Env)
+}
+
+func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
 	// check the environment variables
 	for _, e := range envs {
 		sp := strings.Split(e, "=")
@@ -44,44 +64,44 @@ func checkEnvs(site config.Site, envs []string) bool {
 			env := sp[0]
 			val := sp[1]
 
-			// check the value of each environment variable we want to ensure the site.php.config is not the "default" value and that the
+			// check the value of each environment variable we want to ensure the php config is not the "default" value and that the
 			// current value from the container match
 			switch env {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
-				if site.PHP.DisplayErrors == false && val != config.DefaultEnvs[env] {
+				if php.DisplayErrors == false && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_MEMORY_LIMIT":
-				if (site.PHP.MemoryLimit == "" && val != config.DefaultEnvs[env]) || (site.PHP.MemoryLimit != "" && val != site.PHP.MemoryLimit) {
+				if (php.MemoryLimit == "" && val != config.DefaultEnvs[env]) || (php.MemoryLimit != "" && val != php.MemoryLimit) {
 					return false
 				}
 			case "PHP_MAX_EXECUTION_TIME":
-				if (site.PHP.MaxExecutionTime == 0 && val != config.DefaultEnvs[env]) || (site.PHP.MaxExecutionTime != 0 && val != strconv.Itoa(site.PHP.MaxExecutionTime)) {
+				if (php.MaxExecutionTime == 0 && val != config.DefaultEnvs[env]) || (php.MaxExecutionTime != 0 && val != strconv.Itoa(php.MaxExecutionTime)) {
 					return false
 				}
 			case "PHP_UPLOAD_MAX_FILESIZE":
-				if (site.PHP.MaxFileUpload == "" && val != config.DefaultEnvs[env]) || (site.PHP.MaxFileUpload != "" && val != site.PHP.MaxFileUpload) {
+				if (php.MaxFileUpload == "" && val != config.DefaultEnvs[env]) || (php.MaxFileUpload != "" && val != php.MaxFileUpload) {
 					return false
 				}
 			case "PHP_MAX_INPUT_VARS":
-				if (site.PHP.MaxInputVars == 0 && val != config.DefaultEnvs[env]) || (site.PHP.MaxInputVars != 0 && val != strconv.Itoa(site.PHP.MaxInputVars)) {
+				if (php.MaxInputVars == 0 && val != config.DefaultEnvs[env]) || (php.MaxInputVars != 0 && val != strconv.Itoa(php.MaxInputVars)) {
 					return false
 				}
 			case "PHP_POST_MAX_SIZE":
-				if (site.PHP.PostMaxSize == "" && val != config.DefaultEnvs[env]) || (site.PHP.PostMaxSize != "" && val != site.PHP.PostMaxSize) {
+				if (php.PostMaxSize == "" && val != config.DefaultEnvs[env]) || (php.PostMaxSize != "" && val != php.PostMaxSize) {
 					return false
 				}
 			case "PHP_OPCACHE_ENABLE":
-				if site.PHP.OpcacheEnable && val == config.DefaultEnvs[env] {
+				if php.OpcacheEnable && val == config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_OPCACHE_REVALIDATE_FREQ":
-				if (site.PHP.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (site.PHP.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(site.PHP.OpcacheRevalidateFreq)) {
+				if (php.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (php.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(php.OpcacheRevalidateFreq)) {
 					return false
 				}
 			case "XDEBUG_MODE":
-				if (site.Xdebug && val == config.DefaultEnvs[env]) || (!site.Xdebug && val != config.DefaultEnvs[env]) {
+				if (xdebug && val == config.DefaultEnvs[env]) || (!xdebug && val != config.DefaultEnvs[env]) {
 					return false
 				}
 			}

@@ -39,7 +39,7 @@ type Site struct {
 // It is used to create the mount for a sites
 // container.
 func (s *Site) GetAbsPath(home string) (string, error) {
-	return s.cleanPath(home, s.Path)
+	return cleanPath(home, s.Path)
 }
 
 // AsEnvs takes a gateway addr and turns specific options
@@ -137,7 +137,7 @@ func (s *Site) AsEnvs(addr string) []string {
 	return envs
 }
 
-func (s *Site) cleanPath(home, path string) (string, error) {
+func cleanPath(home, path string) (string, error) {
 	p := path
 	if strings.Contains(p, "~") {
 		p = strings.Replace(p, "~", home, -1)

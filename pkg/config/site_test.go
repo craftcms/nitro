@@ -191,8 +191,7 @@ func TestSite_cleanPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &Site{}
-			got, err := s.cleanPath(tt.args.home, tt.args.path)
+			got, err := cleanPath(tt.args.home, tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Site.cleanPath() error = %v, wantErr %v", err, tt.wantErr)
 				return

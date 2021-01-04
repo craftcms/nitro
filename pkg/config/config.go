@@ -20,6 +20,7 @@ var (
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
+	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Services  Services   `yaml:"services"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 	File      string     `yaml:"-"`
@@ -29,6 +30,22 @@ type Config struct {
 type Blackfire struct {
 	ServerID    string `yaml:"server_id,omitempty"`
 	ServerToken string `yaml:"server_token,omitempty"`
+}
+
+// Mount represents a docker container that is not mounted in an nginx container
+// and does not accept routing through the proxy. It is however added to the nitro
+// network so it can access other resources.
+type Mount struct {
+	Path    string `yaml:"path"`
+	Version string `yaml:"version"`
+	PHP     PHP    `yaml:"php,omitempty"`
+	Xdebug  bool   `yaml:"xdebug,omitempty"`
+}
+
+// GetAbsPath gets the directory for a mount.Path,
+// It is used to create the mount for a container.
+func (m *Mount) GetAbsPath(home string) (string, error) {
+	return cleanPath(home, m.Path)
 }
 
 // PHP is nested in a configuration and allows setting environment variables
@@ -50,10 +67,10 @@ type PHP struct {
 // networking options for these types of services. We plan to support "custom" container options to make local users
 // development even better.
 type Services struct {
-	DynamoDB  bool `yaml:"dynamodb"`
-	Mailhog   bool `yaml:"mailhog"`
-	Minio     bool `yaml:"minio"`
-	Redis     bool `yaml:"redis"`
+	DynamoDB bool `yaml:"dynamodb"`
+	Mailhog  bool `yaml:"mailhog"`
+	Minio    bool `yaml:"minio"`
+	Redis    bool `yaml:"redis"`
 }
 
 // Load is used to return the unmarshalled config, and
