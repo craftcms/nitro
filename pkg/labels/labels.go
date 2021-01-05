@@ -7,7 +7,7 @@ const (
 	// DatabaseEngine is used to identify the engine that is being used for a database container (e.g. mysql, postgres)
 	DatabaseEngine = "com.craftcms.nitro.database-engine"
 
-	// DatabaseVersion is the version of the datbase the container is running (e.g. 11, 12, 5.7)
+	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
 
 	// DatabaseCompatibility is the compatibility of the database (e.g. mariadb and mysql are compatible)
@@ -31,6 +31,6 @@ const (
 	// ProxyVersion is used to label a proxy container with a specific version
 	ProxyVersion = "com.craftcms.nitro.proxy-version"
 
-	// Type is used to idenity the type of container
+	// Type is used to identity the type of container
 	Type = "com.craftcms.nitro.type"
 )

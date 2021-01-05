@@ -22,7 +22,7 @@ func sshCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "SSH into a db container",
 		Example: sshExampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// add filters to show only the envrionment and database containers
+			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
