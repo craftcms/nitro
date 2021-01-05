@@ -4,6 +4,8 @@
 
 ### Added
 - Added support for HTTPS on a per-site basis.
+- Added support for PHP 8.
+- Added support for Xdebug 3 for PHP 7.2 and higher.
 - Added the `nitro trust` command to import and trust the certificates used for sites.
 - Added the `nitro composer` command with the `--version` flag to install or update projects without Composer installed locally.
 - Added the `nitro npm` command with the `--version` flag to install or update projects without node/npm installed locally.
@@ -21,11 +23,10 @@
   
 ### Changed
 - Nitro now requires Docker, instead of Multipass.
+- Greatly improved Nitro support on Windows.
 - Nitro now has a single `~/.nitro/nitro.yml` file to manage everything, instead of a YAML file per machine like in v1.
 - Nitro will now check for port collisions during `init` and when adding database engines.
-- Terminal output now has colors to identify info and error output.
 - The `nitro create` command now accepts custom GitHub repositories and installs Composer and node dependencies automatically using `nitro composer` and `nitro npm`.
-- Machine name is now the environment name, the `NITRO_DEFAULT_MACHINE` has been renamed to `NITRO_DEFAULT_ENVIRONMENT`.
 - The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
 - The `create` command will now install composer dependencies.
 - PHP versions and settings are now applied on a per-site basis.
