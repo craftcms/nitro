@@ -226,6 +226,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if len(cfg.Mounts) > 0 {
 				output.Info("Checking mounts...")
 
+				fmt.Println(len(cfg.Mounts))
+
 				for _, m := range cfg.Mounts {
 					output.Pending("checking", m.Path)
 
