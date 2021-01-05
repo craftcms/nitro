@@ -5,7 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/craftcms/nitro/pkg/helpers"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,6 +50,16 @@ func (m *Mount) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, m.Path)
 }
 
+func (m *Mount) Hostname() string {
+	// remove the home directory
+	n := strings.Replace(m.Path, "~/", "", 1)
+
+	// replace path separator with underscores
+	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
+
+	return fmt.Sprintf("mount_%s", n)
+}
+
 // AsEnvs takes a gateway addr and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
@@ -62,7 +74,7 @@ func (m *Mount) AsEnvs(addr string) []string {
 	envs = append(envs, phpVars(m.PHP, m.Version)...)
 
 	// get the xdebug vars
-	envs = append(envs, xdebugVars(m.PHP, m.Xdebug, m.Version, addr)...)
+	envs = append(envs, xdebugVars(m.PHP, m.Xdebug, m.Version, m.Hostname(), addr)...)
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {
@@ -198,6 +210,12 @@ func (c *Config) EnableXdebug(site string) error {
 func (c *Config) Save() error {
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
+		// create the .nitro directory if it does not exist
+		dir, _ := filepath.Split(c.File)
+		if err := helpers.MkdirIfNotExists(dir); err != nil {
+			return err
+		}
+
 		// otherwise create it
 		f, err := os.Create(c.File)
 		if err != nil {
@@ -205,7 +223,9 @@ func (c *Config) Save() error {
 		}
 		defer f.Close()
 
-		f.Chown(os.Geteuid(), os.Getuid())
+		if err := f.Chown(os.Geteuid(), os.Getuid()); err != nil {
+			return err
+		}
 	}
 
 	// unmarshal

@@ -19,7 +19,7 @@ local: build
 local-win: build-win
 	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 local-linux: build
-	mv nitro ${HOME}/bin/nitro
+	sudo mv nitro /usr/local/bin/nitro
 local-prod: build upx
 	mv nitro /usr/local/bin/nitro
 
