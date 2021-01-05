@@ -77,6 +77,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// set the container name
 					name := strings.TrimLeft(c.Names[0], "/")
 
+					output.Info("removing", name)
+
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
 						// get all of the databases

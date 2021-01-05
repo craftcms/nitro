@@ -11,12 +11,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
-)
-
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
 )
 
 // TODO - prompt user for the database engine and new database
@@ -163,7 +159,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Success("using webroot", site.Dir)
 
 			// prompt for the php version
-			versions := []string{"8.0", "7.4", "7.3", "7.2", "7.1", "7.0"}
+			versions := phpversions.Versions
 			selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
 			if err != nil {
 				return err

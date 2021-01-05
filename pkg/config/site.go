@@ -27,7 +27,7 @@ var DefaultEnvs = map[string]string{
 // to add to the container, and the directory the index.php is located.
 type Site struct {
 	Hostname string   `yaml:"hostname"`
-	Aliases  []string `yaml:"aliases"`
+	Aliases  []string `yaml:"aliases,omitempty"`
 	Path     string   `yaml:"path"`
 	Version  string   `yaml:"version"`
 	PHP      PHP      `yaml:"php,omitempty"`
@@ -125,29 +125,28 @@ func phpVars(php PHP, version string) []string {
 
 	}
 
-	// always set the session
-	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
-
 	return envs
 }
 
 func xdebugVars(php PHP, xdebug bool, version, addr string) []string {
 	envs := []string{}
 
-	switch xdebug {
-	case false:
-		envs = append(envs, "XDEBUG_MODE=off")
-	default:
-		switch version {
-		case "8.0", "7.4", "7.3", "7.2":
-			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
-			envs = append(envs, "XDEBUG_MODE=develop,debug")
+	// always set the session
+	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
 
-		default:
-			// use legacy xdebug settings to support older versions of php
-			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
-			envs = append(envs, "XDEBUG_MODE=xdebug2")
-		}
+	// if xdebug is not enabled
+	if !xdebug {
+		return append(envs, "XDEBUG_MODE=off")
+	}
+
+	switch version {
+	case "8.0", "7.4", "7.3", "7.2":
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
+		envs = append(envs, "XDEBUG_MODE=develop,debug")
+	default:
+		// use legacy xdebug settings to support older versions of php
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
+		envs = append(envs, "XDEBUG_MODE=xdebug2")
 	}
 
 	return envs
