@@ -168,5 +168,47 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		return "", "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	// if the container is mysql compatible
+	if db.Engine == "mysql" || db.Engine == "mariadb" {
+		cmds := []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")}
+
+		// create the exec
+		exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          false,
+			Cmd:          cmds,
+		})
+		if err != nil {
+			return "", "", err
+		}
+
+		// attach to the container
+		resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+			Tty: false,
+		})
+		if err != nil {
+			return "", "", err
+		}
+		defer resp.Close()
+
+		// start the exec
+		if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+			return "", "", fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		// wait for the container exec to complete
+		for {
+			resp, err := docker.ContainerExecInspect(ctx, exec.ID)
+			if err != nil {
+				return "", "", err
+			}
+
+			if !resp.Running {
+				break
+			}
+		}
+	}
+
 	return resp.ID, hostname, nil
 }
