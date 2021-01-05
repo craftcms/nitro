@@ -141,7 +141,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// TODO(jasonmccallister) prompt the user for the version of php, webroot, hostname
 			// prompt for the php version
-			// versions := []string{"7.4", "7.3", "7.2", "7.1"}
+			// versions := phpversions.Versions
 			// selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
 			// if err != nil {
 			// 	return err
