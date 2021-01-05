@@ -102,7 +102,16 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return "", fmt.Errorf("unable to start the container, %w", err)
 			}
+
+			return resp.ID, nil
 		}
+
+		// start the container
+		if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
+			return "", fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		return containers[0].ID, nil
 	}
 
 	return "", nil
@@ -174,7 +183,16 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, 
 			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return "", fmt.Errorf("unable to start the container, %w", err)
 			}
+
+			return resp.ID, nil
 		}
+
+		// start the container
+		if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
+			return "", fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		return containers[0].ID, nil
 	}
 
 	return "", nil

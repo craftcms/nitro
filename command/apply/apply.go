@@ -65,6 +65,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			for _, c := range containers {
 				if _, ok := knownContainers[c.ID]; !ok {
+					fmt.Println(c.Names[0], "will be removed")
 					// stop and remove the container we don't know about
 					// TODO(jasonmccallister) update the databases, proxy, services to return the container id
 				}
@@ -144,10 +145,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking", n)
 
 				// start or create the database
-				if err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db); err != nil {
+				id, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db)
+				if err != nil {
 					output.Warning()
 					return err
 				}
+
+				knownContainers[id] = true
 
 				output.Done()
 			}
@@ -159,10 +163,14 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				for _, m := range cfg.Mounts {
 					output.Pending("checking", m.Path)
 
-					if err := mountcontainer.FindOrCreate(ctx, docker, home, network.ID, m); err != nil {
+					id, err := mountcontainer.FindOrCreate(ctx, docker, home, network.ID, m)
+					if err != nil {
 						output.Warning()
 						return err
 					}
+
+					// set the container id as known
+					knownContainers[id] = true
 
 					output.Done()
 				}
@@ -174,8 +182,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if cfg.Services.DynamoDB {
 				output.Pending("checking dynamodb service")
 
-				if _, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID); err != nil {
+				id, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
+				if err != nil {
 					return err
+				}
+				if id != "" {
+					knownContainers[id] = true
 				}
 
 				output.Done()
@@ -185,8 +197,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if cfg.Services.Mailhog {
 				output.Pending("checking mailhog service")
 
-				if _, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID); err != nil {
+				id, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
+				if err != nil {
 					return err
+				}
+				if id != "" {
+					knownContainers[id] = true
 				}
 
 				output.Done()
