@@ -25,6 +25,7 @@ import (
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/logs"
+	"github.com/craftcms/nitro/command/mount"
 	"github.com/craftcms/nitro/command/npm"
 	"github.com/craftcms/nitro/command/queue"
 	"github.com/craftcms/nitro/command/restart"
@@ -87,6 +88,7 @@ func init() {
 	// register all of the commands
 	commands := []*cobra.Command{
 		add.NewCommand(home, client, term),
+		mount.NewCommand(home, client, term),
 		apply.NewCommand(home, client, nitrod, term),
 		clean.NewCommand(home, client, term),
 		completion.New(),

@@ -39,7 +39,7 @@ type Mount struct {
 	Path    string `yaml:"path"`
 	Version string `yaml:"version"`
 	PHP     PHP    `yaml:"php,omitempty"`
-	Xdebug  bool   `yaml:"xdebug,omitempty"`
+	Xdebug  bool   `yaml:"xdebug"`
 }
 
 // GetAbsPath gets the directory for a mount.Path,
@@ -142,6 +142,22 @@ func (c *Config) AddSite(s Site) error {
 
 	// add the site to the list
 	c.Sites = append(c.Sites, s)
+
+	return nil
+}
+
+// AddMount takes a site and adds it to the config
+func (c *Config) AddMount(m Mount) error {
+	// check existing sites
+	for _, e := range c.Mounts {
+		// does the hostname match
+		if e.Path == m.Path {
+			return fmt.Errorf("path already exists")
+		}
+	}
+
+	// add the mount to the list
+	c.Mounts = append(c.Mounts, m)
 
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -130,7 +131,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			},
 		},
 		nil,
-		fmt.Sprintf("mount-%s", strings.Replace(mnt.Path, "~/", "", 1)),
+		containerName(mnt),
 	)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the container, %w", err)
@@ -142,4 +143,14 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	return resp.ID, nil
+}
+
+func containerName(mount config.Mount) string {
+	// remove the home directory
+	n := strings.Replace(mount.Path, "~/", "", 1)
+
+	// replace path separator with underscores
+	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
+
+	return fmt.Sprintf("mount_%s", n)
 }

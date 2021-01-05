@@ -37,6 +37,7 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 func Mount(home string, mount config.Mount, container types.ContainerJSON) bool {
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", mount.Version) != container.Config.Image {
+		fmt.Println("false here image")
 		return false
 	}
 
@@ -51,7 +52,11 @@ func Mount(home string, mount config.Mount, container types.ContainerJSON) bool 
 		return false
 	}
 
-	return checkEnvs(mount.PHP, mount.Xdebug, container.Config.Env)
+	if !checkEnvs(mount.PHP, mount.Xdebug, container.Config.Env) {
+		return false
+	}
+
+	return true
 }
 
 func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
@@ -69,7 +74,7 @@ func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
 			switch env {
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
-				if php.DisplayErrors == false && val != config.DefaultEnvs[env] {
+				if !php.DisplayErrors && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "PHP_MEMORY_LIMIT":
@@ -101,7 +106,19 @@ func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
 					return false
 				}
 			case "XDEBUG_MODE":
-				if (xdebug && val == config.DefaultEnvs[env]) || (!xdebug && val != config.DefaultEnvs[env]) {
+				if xdebug && val == config.DefaultEnvs[env] {
+					fmt.Println("\n xdebug is true")
+					fmt.Println("env", env)
+					fmt.Println("value", val)
+					fmt.Println("default", config.DefaultEnvs[env])
+					return false
+				}
+
+				if !xdebug && val != config.DefaultEnvs[env] {
+					fmt.Println("\n xdebug is false")
+					fmt.Println("env", env)
+					fmt.Println("value", val)
+					fmt.Println("default", config.DefaultEnvs[env])
 					return false
 				}
 			}
