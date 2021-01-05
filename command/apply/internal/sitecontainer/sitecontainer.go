@@ -52,7 +52,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 	// if the container is out of date
 	if !match.Site(home, site, details) {
-		fmt.Print("- updating... ")
+		fmt.Print("- updating… ")
 
 		// stop container
 		if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {

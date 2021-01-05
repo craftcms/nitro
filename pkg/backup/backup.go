@@ -83,7 +83,7 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	var db string
 	switch len(databases) {
 	case 1:
-		output.Info("There is only one database to backup...")
+		output.Info("There is only one database to backup…")
 
 		db = databases[0]
 	case 0:

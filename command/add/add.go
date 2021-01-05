@@ -30,7 +30,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Add a site",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Adding site...")
+			output.Info("Adding site…")
 
 			// get the current working directory
 			wd, err := os.Getwd()
@@ -76,7 +76,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// does it have spaces?
 				if strings.ContainsAny(char, " ") {
-					fmt.Println("Please enter a hostname without spaces 🙄...")
+					fmt.Println("Please enter a hostname without spaces…")
 					fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
 
 					continue
@@ -140,7 +140,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// does it have spaces?
 				if strings.ContainsAny(input, " ") {
-					fmt.Println("Please enter a webroot without spaces 🙄...")
+					fmt.Println("Please enter a webroot without spaces…")
 					fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
 
 					continue

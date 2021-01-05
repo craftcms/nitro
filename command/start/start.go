@@ -46,7 +46,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				return ErrNoContainers
 			}
 
-			output.Info("Starting Nitro...")
+			output.Info("Starting Nitro…")
 
 			// start each environment container
 			for _, c := range containers {

@@ -26,7 +26,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Mount directory into a container",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Mounting directory...")
+			output.Info("Mounting directory…")
 
 			// get the current working directory
 			wd, err := os.Getwd()

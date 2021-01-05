@@ -64,7 +64,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			containerID := containers[0].ID
 
 			// get the contents of the certificate from the container
-			output.Pending("getting certificate for Nitro...")
+			output.Pending("getting certificate for Nitro…")
 
 			// verify the file exists in the container
 			for {

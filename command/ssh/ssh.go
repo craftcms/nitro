@@ -126,7 +126,7 @@ func containerConnect(cmd *cobra.Command, output terminal.Outputer, containerID 
 
 	// show a notice about changes
 	if user == "root" {
-		output.Info("using root... system changes are ephemeral...")
+		output.Info("using root… system changes are ephemeral…")
 	}
 
 	c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")

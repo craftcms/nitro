@@ -50,7 +50,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					output.Info("Listening for queue jobs...")
+					output.Info("Listening for queue jobs…")
 
 					filter.Add("label", labels.Host+"="+s.Hostname)
 

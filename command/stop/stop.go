@@ -47,7 +47,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return ErrNoContainers
 			}
 
-			output.Info("Stopping Nitro...")
+			output.Info("Stopping Nitro…")
 
 			// stop each environment container
 			for _, c := range containers {

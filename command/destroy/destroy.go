@@ -116,7 +116,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if len(containers) > 0 {
 				timeout := time.Duration(5000) * time.Millisecond
 
-				output.Info("Removing Containers...")
+				output.Info("Removing Containers…")
 
 				for _, c := range containers {
 					name := strings.TrimLeft(c.Names[0], "/")
@@ -186,7 +186,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all the volumes
 			if len(volumes.Volumes) > 0 {
-				output.Info("Removing Volumes...")
+				output.Info("Removing Volumes…")
 
 				for _, v := range volumes.Volumes {
 					output.Pending("removing", v.Name)
@@ -203,7 +203,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all the networks
 			if len(networks) > 0 {
-				output.Info("Removing Networks...")
+				output.Info("Removing Networks…")
 
 				for _, n := range networks {
 					output.Pending("removing", n.Name)

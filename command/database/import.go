@@ -66,9 +66,9 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				compressed = true
 			}
 
-			output.Info("Preparing import...")
+			output.Info("Preparing import…")
 
-			// dectect the type of backup if not compressed
+			// detect the type of backup if not compressed
 			detected := ""
 			if compressed == false {
 				output.Pending("detecting backup type")
@@ -83,12 +83,12 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				output.Info("Detected", detected, "backup")
 			}
 
-			// add filters to show only the envrionment and database containers
+			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
 
-			// if we detected the engine type, add the compatability label to the filter
+			// if we detected the engine type, add the compatibility label to the filter
 			switch detected {
 			case "mysql":
 				filter.Add("label", labels.DatabaseCompatability+"=mysql")
@@ -136,7 +136,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 					break
 				}
 
-				fmt.Println("  no spaces or hypens allowed 🙄...")
+				fmt.Println("  no spaces or hyphens allowed…")
 				fmt.Print(msg)
 			}
 

@@ -38,7 +38,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info("Checking Nitro...")
+			output.Info("Checking Nitro…")
 
 			// create filters for the development environment
 			filter := filters.NewArgs()

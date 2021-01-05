@@ -76,7 +76,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					break
 				}
 
-				fmt.Println("  no spaces or hyphens allowed 🙄...")
+				fmt.Println("  no spaces or hyphens are allowed…")
 				fmt.Print(msg)
 			}
 

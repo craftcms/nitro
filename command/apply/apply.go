@@ -163,7 +163,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// add the filter for the network name
 			filter.Add("name", "nitro-network")
 
-			output.Info("Checking network...")
+			output.Info("Checking network…")
 
 			// check the network
 			var network types.NetworkResource
@@ -182,7 +182,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// if the network is not found
 			if network.ID == "" {
-				output.Info("No network was found...\nrun `nitro init` to get started")
+				output.Info("No network was found…\nrun `nitro init` to get started")
 				return nil
 			}
 
@@ -191,12 +191,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Success("network ready")
 
-			output.Info("Checking proxy...")
+			output.Info("Checking proxy…")
 
 			// check the proxy and ensure its started
 			_, err = proxycontainer.FindAndStart(ctx, docker)
 			if errors.Is(err, ErrNoProxyContainer) {
-				output.Info("unable to find the nitro proxy...\n run `nitro init` to resolve")
+				output.Info("unable to find the nitro proxy…\n run `nitro init` to resolve")
 				return nil
 			}
 			if err != nil {
@@ -205,7 +205,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Success("proxy ready")
 
-			output.Info("Checking databases...")
+			output.Info("Checking databases…")
 
 			// check the databases
 			for _, db := range cfg.Databases {
@@ -230,7 +230,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// check the mounts
 			if len(cfg.Mounts) > 0 {
-				output.Info("Checking mounts...")
+				output.Info("Checking mounts…")
 
 				for _, m := range cfg.Mounts {
 					output.Pending("checking", m.Path)
@@ -248,7 +248,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
-			output.Info("Checking services...")
+			output.Info("Checking services…")
 
 			// check dynamodb service
 			if cfg.Services.DynamoDB {
@@ -282,7 +282,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(cfg.Sites) > 0 {
 				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
-				output.Info("Checking sites...")
+				output.Info("Checking sites…")
 
 				// get the envs for the sites
 				for _, site := range cfg.Sites {
@@ -301,7 +301,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
-			output.Info("Checking proxy...")
+			output.Info("Checking proxy…")
 
 			output.Pending("updating proxy")
 

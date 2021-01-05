@@ -35,7 +35,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Example: `  # update nitro
   nitro update`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Updating...")
+			output.Info("Updating…")
 
 			// update all of the images
 			for image, name := range DockerImages {
@@ -93,7 +93,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			}
 
-			output.Info("Images updated 👍, apply changes...")
+			output.Info("Images updated 👍, applying changes…")
 
 			// TODO(jasonmccallister) make this better :)
 			for _, c := range cmd.Parent().Commands() {

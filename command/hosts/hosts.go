@@ -56,14 +56,14 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 			switch cmd.Flag("remove").Value.String() {
 			case "true":
 				if !preview {
-					output.Info("Removing sites from hosts file...")
+					output.Info("Removing sites from hosts file…")
 				}
 
-				// TODO(jasonmccallister) implement the remove funtionality
+				// TODO(jasonmccallister) implement the remove functionality
 				return fmt.Errorf("remove is not yet implemented")
 			default:
 				if !preview {
-					output.Info("Adding sites to hosts file...")
+					output.Info("Adding sites to hosts file…")
 				}
 
 				// add the hosts
@@ -76,7 +76,7 @@ func New(home string, output terminal.Outputer) *cobra.Command {
 
 			// if we are previewing, show the hosts file without saving
 			if preview {
-				output.Info("Previewing changes to hosts file...\n")
+				output.Info("Previewing changes to hosts file…\n")
 
 				output.Info(updatedContent)
 

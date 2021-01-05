@@ -47,7 +47,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				return ErrNoContainers
 			}
 
-			output.Info("Restarting Nitro...")
+			output.Info("Restarting Nitro…")
 
 			// set a timeout, consider making this a flag
 			timeout := time.Duration(5000) * time.Millisecond

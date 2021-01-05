@@ -47,7 +47,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
-			output.Info("Getting ready to backup...")
+			output.Info("Getting ready to backup…")
 
 			// get the container id, name, and database from the user
 			containerID, containerName, compatability, db, err := backup.Prompt(ctx, os.Stdin, docker, output, containers, containerList)
@@ -55,7 +55,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
-			output.Info("Preparing backup...")
+			output.Info("Preparing backup…")
 
 			// create the options for the backup
 			opts := &backup.Options{
@@ -66,7 +66,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 				Home:          home,
 			}
 
-			// create the backup command based on the compatability type
+			// create the backup command based on the compatibility type
 			switch compatability {
 			case "postgres":
 				opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}

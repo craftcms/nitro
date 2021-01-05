@@ -19,7 +19,7 @@ func TestStartSuccess(t *testing.T) {
 	expectedContainerID := "nitro"
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
-	expectedOutput := []string{"Starting Nitro...\n", "Nitro started 👍\n"}
+	expectedOutput := []string{"Starting Nitro…\n", "Nitro started 👍\n"}
 
 	// Act
 	cmd := NewCommand(mock, output)

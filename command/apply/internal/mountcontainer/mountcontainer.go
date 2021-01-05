@@ -57,7 +57,7 @@ func FindOrCreate(ctx context.Context, docker client.CommonAPIClient, home, netw
 
 	// check its config/envs
 	if !match.Mount(home, mount, details) {
-		fmt.Print("- updating... ")
+		fmt.Print("- updating… ")
 
 		// stop container
 		if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {

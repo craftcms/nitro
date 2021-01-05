@@ -35,7 +35,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to load config, %w", err)
 			}
 
-			output.Info("Cleaning up...")
+			output.Info("Cleaning up…")
 
 			output.Pending("gathering details")
 

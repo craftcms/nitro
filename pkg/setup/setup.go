@@ -27,7 +27,7 @@ func FirstTime(home string, output terminal.Outputer) error {
 		File: filepath.Join(home, ".nitro", config.FileName),
 	}
 
-	output.Info("Setting up Nitro...")
+	output.Info("Setting up Nitro…")
 
 	mysql, err := confirm("Would you like to use MySQL", true)
 	if err != nil {

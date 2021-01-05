@@ -31,7 +31,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			output.Info("Validating...")
+			output.Info("Validating…")
 
 			// set errors
 			var siteErrs, dbErrs []error
