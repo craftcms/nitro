@@ -92,7 +92,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				"PHP_OPCACHE_ENABLE=1",
 				"PHP_OPCACHE_REVALIDATE_FREQ=60",
 				"XDEBUG_SESSION=PHPSTORM",
-				"XDEBUG_CONFIG=client_host=host.docker.internal start_with_request=yes discover_client_host=1",
+				"XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003",
 				"XDEBUG_MODE=develop,debug",
 			},
 		},
