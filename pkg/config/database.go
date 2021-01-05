@@ -22,5 +22,5 @@ func (d *Database) GetHostname() (string, error) {
 		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
 	}
 
-	return fmt.Sprintf("%s-%s-%s", d.Engine, d.Version, d.Port), nil
+	return fmt.Sprintf("%s-%s-%s.nitro", d.Engine, d.Version, d.Port), nil
 }
