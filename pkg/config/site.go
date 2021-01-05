@@ -56,7 +56,7 @@ func (s *Site) AsEnvs(addr string) []string {
 	envs = append(envs, phpVars(s.PHP, s.Version)...)
 
 	// get the xdebug vars
-	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, addr)...)
+	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, s.Hostname, addr)...)
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {
@@ -128,11 +128,14 @@ func phpVars(php PHP, version string) []string {
 	return envs
 }
 
-func xdebugVars(php PHP, xdebug bool, version, addr string) []string {
+func xdebugVars(php PHP, xdebug bool, version, hostname, addr string) []string {
 	envs := []string{}
 
 	// always set the session
 	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
+
+	// set the site name for xdebug clients
+	envs = append(envs, "PHP_IDE_CONFIG=siteName=", hostname)
 
 	// if xdebug is not enabled
 	if !xdebug {
