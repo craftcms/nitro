@@ -135,7 +135,7 @@ func xdebugVars(php PHP, xdebug bool, version, hostname, addr string) []string {
 	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
 
 	// set the site name for xdebug clients
-	envs = append(envs, fmt.Sprintf("PHP_IDE_CONFIG=siteName=%s", hostname))
+	envs = append(envs, fmt.Sprintf("PHP_IDE_CONFIG=serverName=%s", hostname))
 
 	// if xdebug is not enabled
 	if !xdebug {
