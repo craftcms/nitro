@@ -25,13 +25,18 @@ var (
 
 // StartOrCreate is used to find a specific database and start the container. If there is no container for the database,
 // it will create a new volume and container for the database.
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) (string, error) {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) (string, string, error) {
 	// create the filters for the database
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")
+
+	hostname, err := db.GetHostname()
+	if err != nil {
+		return "", "", err
+	}
 
 	// set the container database compatability
 	if db.Engine == "mariadb" || db.Engine == "mysql" {
@@ -43,13 +48,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	// get the containers for the database
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
-		return "", fmt.Errorf("error getting a list of containers")
-	}
-
-	// set the hostname for the database container
-	hostname, err := db.GetHostname()
-	if err != nil {
-		return "", err
+		return "", "", fmt.Errorf("error getting a list of containers")
 	}
 
 	// if there is a container, we should start it and return
@@ -58,11 +57,11 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		if containers[0].State != "running" {
 			// start the container
 			if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
-				return "", err
+				return "", "", err
 			}
 		}
 
-		return containers[0].ID, nil
+		return containers[0].ID, hostname, nil
 	}
 
 	// create the database labels for the new container
@@ -89,7 +88,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	// create the volume
 	volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: hostname, Labels: lbls})
 	if err != nil {
-		return "", fmt.Errorf("unable to create the volume, %w", err)
+		return "", "", fmt.Errorf("unable to create the volume, %w", err)
 	}
 
 	// determine the image name
@@ -108,19 +107,19 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	// pull the image
 	rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 	if err != nil {
-		return "", fmt.Errorf("unable to pull image %s, %w", image, err)
+		return "", "", fmt.Errorf("unable to pull image %s, %w", image, err)
 	}
 
 	// read the output to pull the image
 	buf := &bytes.Buffer{}
 	if _, err := buf.ReadFrom(rdr); err != nil {
-		return "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		return "", "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 	}
 
 	// set the port for the database
 	port, err := nat.NewPort("tcp", db.Port)
 	if err != nil {
-		return "", fmt.Errorf("unable to create the port, %w", err)
+		return "", "", fmt.Errorf("unable to create the port, %w", err)
 	}
 
 	containerConfig := &container.Config{
@@ -161,13 +160,13 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	// create the container for the database
 	resp, err := docker.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, hostname)
 	if err != nil {
-		return "", fmt.Errorf("unable to create the container, %w", err)
+		return "", "", fmt.Errorf("unable to create the container, %w", err)
 	}
 
 	// start the container
 	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return "", fmt.Errorf("unable to start the container, %w", err)
+		return "", "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
-	return resp.ID, nil
+	return resp.ID, hostname, nil
 }

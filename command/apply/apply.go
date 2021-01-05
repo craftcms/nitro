@@ -148,6 +148,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// context just in case.
 				ctx = cmd.Parent().Context()
 			}
+			var hostnames []string
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -212,13 +213,17 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking", n)
 
 				// start or create the database
-				id, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db)
+				id, hostname, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db)
 				if err != nil {
 					output.Warning()
 					return err
 				}
 
+				// set the container as known
 				knownContainers[id] = true
+
+				// add the hostname to the hosts files
+				hostnames = append(hostnames, hostname)
 
 				output.Done()
 			}
@@ -226,8 +231,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// check the mounts
 			if len(cfg.Mounts) > 0 {
 				output.Info("Checking mounts...")
-
-				fmt.Println(len(cfg.Mounts))
 
 				for _, m := range cfg.Mounts {
 					output.Pending("checking", m.Path)
@@ -316,7 +319,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// get all possible hostnames
-			var hostnames []string
 			for _, s := range cfg.Sites {
 				hostnames = append(hostnames, s.Hostname)
 				hostnames = append(hostnames, s.Aliases...)
