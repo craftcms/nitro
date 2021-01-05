@@ -39,6 +39,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Use:     "npm",
 		Short:   "Run npm commands",
 		Example: exampleText,
+		Hidden:  true,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

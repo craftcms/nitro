@@ -36,6 +36,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 		Use:     "create",
 		Short:   "Create project",
 		Example: exampleText,
+		Hidden:  true,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default
