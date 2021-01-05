@@ -38,11 +38,11 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		return "", "", err
 	}
 
-	// set the container database compatability
+	// set the container database compatibility
 	if db.Engine == "mariadb" || db.Engine == "mysql" {
-		filter.Add("label", labels.DatabaseCompatability+"=mysql")
+		filter.Add("label", labels.DatabaseCompatibility+"=mysql")
 	} else {
-		filter.Add("label", labels.DatabaseCompatability+"=postgres")
+		filter.Add("label", labels.DatabaseCompatibility+"=postgres")
 	}
 
 	// get the containers for the database
@@ -75,14 +75,14 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	// if the database is mysql or mariadb, mark them as
 	// mysql compatible (used for importing backups)
 	if db.Engine == "mariadb" || db.Engine == "mysql" {
-		lbls[labels.DatabaseCompatability] = "mysql"
+		lbls[labels.DatabaseCompatibility] = "mysql"
 	}
 
 	// if the database is postgres, mark it as compatible
 	// with postgres. This is not needed but a place holder
 	// if cockroachdb is ever supported by craft.
 	if db.Engine == "postgres" {
-		lbls[labels.DatabaseCompatability] = "postgres"
+		lbls[labels.DatabaseCompatibility] = "postgres"
 	}
 
 	// create the volume

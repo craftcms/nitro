@@ -62,7 +62,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[selected]
 			}
 
-			// diable xdebug for the sites hostname
+			// disable xdebug for the sites hostname
 			if err := cfg.DisableXdebug(site); err != nil {
 				return err
 			}

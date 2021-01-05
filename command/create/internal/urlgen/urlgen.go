@@ -19,7 +19,7 @@ func Generate(addr string) (*url.URL, error) {
 	// check the length
 	switch len(sp) {
 	case 5:
-		// parse a conplete url for github and append the download
+		// parse a complete url for github and append the download
 		u, err := url.Parse(fmt.Sprintf("%s/archive/HEAD.zip", addr))
 		if err != nil {
 			return nil, err

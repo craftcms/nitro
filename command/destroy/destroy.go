@@ -124,7 +124,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
 						// get all of the databases
-						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
+						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatibility])
 						if err != nil {
 							output.Info("Unable to get the databases from", name, err.Error())
 
@@ -142,8 +142,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 								Home:          home,
 							}
 
-							// create the backup command based on the compatability type
-							switch c.Labels[labels.DatabaseCompatability] {
+							// create the backup command based on the compatibility type
+							switch c.Labels[labels.DatabaseCompatibility] {
 							case "postgres":
 								opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 							default:

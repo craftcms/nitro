@@ -44,7 +44,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// create a filter for the enviroment
+			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 
@@ -146,7 +146,7 @@ func execCreate(ctx context.Context, docker client.ContainerAPIClient, container
 	})
 	defer resp.Close()
 
-	// should we dispaly output?
+	// should we display output?
 	if show {
 		// show the output to stdout and stderr
 		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, resp.Reader); err != nil {

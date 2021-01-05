@@ -71,10 +71,10 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	// get the selected container details
 	name := containers[selected].Names[0]
 	id := containers[selected].ID
-	compatability := containers[selected].Labels[labels.DatabaseCompatability]
+	compatibility := containers[selected].Labels[labels.DatabaseCompatibility]
 
 	// get all of the databases based on the engine
-	databases, err := Databases(ctx, docker, id, compatability)
+	databases, err := Databases(ctx, docker, id, compatibility)
 	if err != nil {
 		return "", "", "", "", err
 	}
@@ -97,15 +97,15 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 		db = databases[selected]
 	}
 
-	return id, name, compatability, db, nil
+	return id, name, compatibility, db, nil
 }
 
 // Databases is used to get a list of all the databases for a specific engine. It is returned as a slice of strings using the
 // containers hostname (e.g. mysql-8.0-3306) so it can be presented to the user as a list.
-func Databases(ctx context.Context, docker client.ContainerAPIClient, containerID, compatability string) ([]string, error) {
+func Databases(ctx context.Context, docker client.ContainerAPIClient, containerID, compatibility string) ([]string, error) {
 	// get a list of the databases from the container
 	var commands []string
-	if compatability == "mysql" {
+	if compatibility == "mysql" {
 		// get a list of the mysql databases
 		commands = []string{"mysql", "-unitro", "-pnitro", "-e", `SHOW DATABASES;`}
 	} else {
@@ -142,7 +142,7 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 	}
 
 	var databases []string
-	switch compatability {
+	switch compatibility {
 	case "mysql":
 		// get all the databases from the mysql engine
 		for _, d := range strings.Split(buf.String(), "\n") {
@@ -171,7 +171,7 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 
 // Perform is used to perform a backup for a database container, it does not prompt the user as it assumed the Prompt func above
 // is used to determine the engine (container) and the specific database to backup. Perform accepts the backup commands and is
-// agnositic to the database engine for the requested backup.
+// agnostic to the database engine for the requested backup.
 func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Options) error {
 	if err := opts.Validate(); err != nil {
 		return err

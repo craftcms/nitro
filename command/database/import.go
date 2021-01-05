@@ -91,9 +91,9 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			// if we detected the engine type, add the compatibility label to the filter
 			switch detected {
 			case "mysql":
-				filter.Add("label", labels.DatabaseCompatability+"=mysql")
+				filter.Add("label", labels.DatabaseCompatibility+"=mysql")
 			case "postgres":
-				filter.Add("label", labels.DatabaseCompatability+"=postgres")
+				filter.Add("label", labels.DatabaseCompatibility+"=postgres")
 			}
 
 			// get a list of all the databases

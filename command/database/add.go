@@ -54,7 +54,7 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// set the container id and db engine
 			containerID = containers[selected].ID
-			databaseEngine = containers[selected].Labels[labels.DatabaseCompatability]
+			databaseEngine = containers[selected].Labels[labels.DatabaseCompatibility]
 			if containerID == "" {
 				return fmt.Errorf("unable to get the container")
 			}

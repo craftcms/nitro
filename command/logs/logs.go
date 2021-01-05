@@ -47,7 +47,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// create a filter for the enviroment
+			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 

@@ -22,7 +22,7 @@ _API_PORT`.
 - Multipass is no longer a dependency. Docker is now the only dependency and setting up a development environment is faster.
 - Nitro will now check for port collisions during `init` and when adding database engines.
 - Terminal output now has colors to identify info and error output.
-- The `nitro create` command now accepts custom GitHub repositiories and installs composer and node dependencies automatically using `nitro composer` and `nitro npm`.
+- The `nitro create` command now accepts custom GitHub repositories and installs composer and node dependencies automatically using `nitro composer` and `nitro npm`.
 - Machine name is now the environment name, the `NITRO_DEFAULT_MACHINE` has been renamed to `NITRO_DEFAULT_ENVIRONMENT`.
 - The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
 - The `create` command will now install composer dependencies.

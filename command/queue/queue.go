@@ -22,7 +22,7 @@ const exampleText = `  # example command
   nitro queue`
 
 // NewCommand returns the command to run queue listen inside of a sites container. It will check if the
-// current working directory is a known site and autoselect or prompt a user for a list of sites.
+// current working directory is a known site and auto-select or prompt a user for a list of sites.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "queue",
@@ -40,7 +40,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// create a filter for the enviroment
+			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 

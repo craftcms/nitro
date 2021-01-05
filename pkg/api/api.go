@@ -13,7 +13,7 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-// NewService takes the address to the Casdy API and returns an API struct that
+// NewService takes the address to the Caddy API and returns an API struct that
 // implements the gRPC API used in the proxy container. The gRPC API is used to
 // handle making changes to the Caddy Server via its local API. If no addr is
 // provided, it will set the default addr to http://127.0.0.1:2019

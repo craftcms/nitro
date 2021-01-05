@@ -14,7 +14,7 @@ import (
 const exampleText = `  # example command
   nitro xon`
 
-// NewCommand returns the command that is used to enable xdebug for a sepcific site. It will first check
+// NewCommand returns the command that is used to enable xdebug for a specific site. It will first check
 // if the current working directory or prompt the user for a site.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{

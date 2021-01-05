@@ -23,7 +23,7 @@ func Hostname(v string) error {
 	return nil
 }
 
-// path will check is a fali
+// path will check is a fail
 func Path(p string) error {
 	f, err := os.Stat(p)
 	if err != nil {

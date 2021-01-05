@@ -39,7 +39,7 @@ var conf = `server {
     }
 }`
 
-// Generate takes a root directort generates a nginx configuration file
+// Generate takes a root directory generates a nginx configuration file
 func Generate(root string) string {
 	// if the root was not provided, default to web
 	if root == "" {

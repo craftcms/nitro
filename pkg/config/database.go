@@ -4,7 +4,7 @@ import "fmt"
 
 // Database is the struct used to represent a database engine
 // that is a combination of a engine (e.g. mariadb, mysql, or
-// postgresl), the version number, and the port. The engine
+// postgres), the version number, and the port. The engine
 // and version are directly related to the official docker
 // images on the docker hub.
 type Database struct {

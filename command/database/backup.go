@@ -30,7 +30,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			// add filters to show only the envrionment and database containers
+			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 			filter.Add("label", labels.Type+"=database")
@@ -50,7 +50,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			output.Info("Getting ready to backup…")
 
 			// get the container id, name, and database from the user
-			containerID, containerName, compatability, db, err := backup.Prompt(ctx, os.Stdin, docker, output, containers, containerList)
+			containerID, containerName, compatibility, db, err := backup.Prompt(ctx, os.Stdin, docker, output, containers, containerList)
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			}
 
 			// create the backup command based on the compatibility type
-			switch compatability {
+			switch compatibility {
 			case "postgres":
 				opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 			default:
