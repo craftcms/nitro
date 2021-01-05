@@ -10,7 +10,7 @@ import (
 func Check(port string) error {
 	lis, err := net.Listen("tcp", "localhost:"+port)
 	if err != nil {
-		return fmt.Errorf("It appears port %s, is already in use", port)
+		return fmt.Errorf("it appears port %s, is already in use", port)
 	}
 
 	// check the close error

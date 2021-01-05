@@ -23,7 +23,7 @@ import (
 
 var (
 	// ErrNoComposerFile is returned when there is no composer.json file in a directory
-	ErrNoComposerFile = fmt.Errorf("No composer.json or composer.lock was found")
+	ErrNoComposerFile = fmt.Errorf("no composer.json or composer.lock was found")
 )
 
 const exampleText = `  # run composer install in a current directory using a container

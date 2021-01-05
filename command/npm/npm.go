@@ -21,7 +21,7 @@ import (
 
 var (
 	// ErrNoPackageFile is returned when there is no package.json or package-lock.json file in a directory
-	ErrNoPackageFile = fmt.Errorf("No package.json or package-lock.json was found")
+	ErrNoPackageFile = fmt.Errorf("no package.json or package-lock.json was found")
 )
 
 const exampleText = `  # run npm install in a current directory
