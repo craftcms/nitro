@@ -28,7 +28,7 @@ var (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) (string, string, error) {
 	// create the filters for the database
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro)
+	// filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")

@@ -17,7 +17,10 @@ import (
 
 var (
 	// DynamoDBImage is the image to use for the dynamodb
-	DynamoDBImage = "amazon/dynamodb-local:latest"
+	DynamoDBImage = "docker.io/amazon/dynamodb-local:latest"
+
+	// MailhogImage is the image to use for the mailhog container
+	MailhogImage = "docker.io/mailhog/mailhog:latest"
 )
 
 func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, error) {
@@ -34,7 +37,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 
 		if len(containers) == 0 {
 			// pull the image
-			rdr, err := docker.ImagePull(ctx, DynamoDBImage, types.ImagePullOptions{})
+			rdr, err := docker.ImagePull(ctx, MailhogImage, types.ImagePullOptions{})
 			if err != nil {
 				return "", err
 			}
@@ -56,7 +59,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 			}
 
 			containerConfig := &container.Config{
-				Image: "docker.io/mailhog/mailhog",
+				Image: MailhogImage,
 				Labels: map[string]string{
 					labels.Nitro: "true",
 					labels.Type:  "mailhog",
