@@ -77,15 +77,15 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// set the container name
 					name := strings.TrimLeft(c.Names[0], "/")
 
-					output.Info("removing", name)
+					output.Pending("removing", name)
 
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
 						// get all of the databases
 						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
 						if err != nil {
+							output.Warning()
 							output.Info("Unable to get the databases from", name, err.Error())
-
 							break
 						}
 
@@ -114,7 +114,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
 								output.Warning()
 								output.Info("Unable to backup database", db, err.Error())
-
 								break
 							}
 
@@ -134,6 +133,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					if err := docker.ContainerRemove(cmd.Context(), c.ID, types.ContainerRemoveOptions{}); err != nil {
 						return err
 					}
+
+					output.Done()
 				}
 			}
 
