@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -17,7 +19,9 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
 	"github.com/craftcms/nitro/command/apply/internal/mountcontainer"
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
+	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
@@ -65,9 +69,69 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			for _, c := range containers {
 				if _, ok := knownContainers[c.ID]; !ok {
-					fmt.Println(c.Names[0], "will be removed")
-					// stop and remove the container we don't know about
-					// TODO(jasonmccallister) update the databases, proxy, services to return the container id
+					// don't remove the proxy container
+					if c.Labels[labels.Proxy] != "" {
+						continue
+					}
+
+					// set the container name
+					name := strings.TrimLeft(c.Names[0], "/")
+
+					// only perform a backup if the container is for databases
+					if c.Labels[labels.DatabaseEngine] != "" {
+						// get all of the databases
+						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatability])
+						if err != nil {
+							output.Info("Unable to get the databases from", name, err.Error())
+
+							break
+						}
+
+						// backup each database
+						for _, db := range databases {
+							// create the database specific backup options
+							opts := &backup.Options{
+								BackupName:    fmt.Sprintf("%s-%s.sql", db, datetime.Parse(time.Now())),
+								ContainerID:   c.ID,
+								ContainerName: name,
+								Database:      db,
+								Home:          home,
+							}
+
+							// create the backup command based on the compatability type
+							switch c.Labels[labels.DatabaseCompatability] {
+							case "postgres":
+								opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
+							default:
+								opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "-unitro", "--password=nitro", db, "--result-file=" + "/tmp/" + opts.BackupName}
+							}
+
+							output.Pending("creating backup", opts.BackupName)
+
+							// backup the container
+							if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
+								output.Warning()
+								output.Info("Unable to backup database", db, err.Error())
+
+								break
+							}
+
+							output.Done()
+						}
+
+						// show where all backups are saved for this container
+						output.Info("Backups saved in", filepath.Join(home, ".nitro", name), "💾")
+					}
+
+					// stop and remove a container we don't know about
+					if err := docker.ContainerStop(cmd.Context(), c.ID, nil); err != nil {
+						return err
+					}
+
+					// remove container
+					if err := docker.ContainerRemove(cmd.Context(), c.ID, types.ContainerRemoveOptions{}); err != nil {
+						return err
+					}
 				}
 			}
 
