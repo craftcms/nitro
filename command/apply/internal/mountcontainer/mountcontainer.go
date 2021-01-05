@@ -28,6 +28,13 @@ func FindOrCreate(ctx context.Context, docker client.CommonAPIClient, home, netw
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=mount")
 
+	absPath, err := mount.GetAbsPath(home)
+	if err != nil {
+		return "", err
+	}
+
+	filter.Add("label", labels.Path+"="+absPath)
+
 	// look for a container for the site
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 	if err != nil {
@@ -80,7 +87,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	// pull the image
 	rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 	if err != nil {
-		return "", fmt.Errorf("unable to pull the image, %w", err)
+		return "", fmt.Errorf("unable to pull image, %w", err)
 	}
 
 	buf := &bytes.Buffer{}
@@ -89,6 +96,8 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	p := mnt.Path
+
+	// replace the home directory
 	if strings.Contains(p, "~") {
 		p = strings.Replace(p, "~", home, -1)
 	}
@@ -100,10 +109,10 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	p = filepath.Clean(abs)
 
-	envs := mnt.AsEnvs("")
+	envs := mnt.AsEnvs("host.docker.internal")
 
 	// create the container
-	resp, err := docker.ContainerCreate(
+	created, err := docker.ContainerCreate(
 		ctx,
 		&container.Config{
 			Image: image,
@@ -138,11 +147,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	// start the container
-	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := docker.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
 		return "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
-	return resp.ID, nil
+	return created.ID, nil
 }
 
 func containerName(mount config.Mount) string {
