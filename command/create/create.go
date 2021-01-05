@@ -1,20 +1,14 @@
 package create
 
 import (
-	"archive/zip"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
+	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -27,11 +21,9 @@ const exampleText = `  # create a new default craft project (similar to "compose
   # you can also provide shorthand urls for github
   nitro create craftcms/demo my-project`
 
-var download = "https://github.com/craftcms/craft/archive/HEAD.zip"
-
 // New returns the create command to automate the process of setting up a new Craft project.
 // It also allows you to pass an option argument that is a URL to your own github repo.
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func New(docker client.CommonAPIClient, getter downloader.Getter, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Short:   "Create project",
@@ -66,74 +58,9 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			output.Pending("setting up project")
 
-			// download the zip
-			resp, err := http.Get(download.String())
-			if err != nil {
+			// download the file
+			if err := getter.Get(download.String(), dir); err != nil {
 				return err
-			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode != http.StatusOK {
-				return fmt.Errorf("\nUnable to download %s.\nStatus: %d", download.String(), resp.StatusCode)
-			}
-
-			// create a temp file
-			file, err := ioutil.TempFile(os.TempDir(), "nitro-create-download-")
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			defer os.Remove(file.Name())
-
-			// copy the download into the new file
-			_, err = io.Copy(file, resp.Body)
-			if err != nil {
-				return fmt.Errorf("unable to copy the file, %w", err)
-			}
-
-			// extract the zip
-			r, err := zip.OpenReader(file.Name())
-			if err != nil {
-				return err
-			}
-			defer r.Close()
-
-			// TODO(jasonmccallister) ask for the version of PHP
-
-			for _, f := range r.File {
-				// github archives has a nested folder, so we need to trim the first directory
-				p := strings.Split(f.Name, string(os.PathSeparator))
-				fpath := filepath.Join(dir, strings.Join(p[1:], string(os.PathSeparator)))
-
-				// if !strings.HasPrefix(fpath, filepath.Clean(dir)+string(os.PathSeparator)) {
-				// 	return fmt.Errorf("%s: illegal file path", fpath)
-				// }
-
-				if f.FileInfo().IsDir() {
-					os.MkdirAll(fpath, os.ModePerm)
-
-					continue
-				}
-
-				if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-					return err
-				}
-
-				out, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-				if err != nil {
-					return err
-				}
-
-				rc, err := f.Open()
-				if err != nil {
-					return err
-				}
-
-				_, err = io.Copy(out, rc)
-
-				// Close the file without defer to close before next iteration of loop
-				out.Close()
-				rc.Close()
 			}
 
 			output.Done()

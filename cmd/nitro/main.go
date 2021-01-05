@@ -39,6 +39,7 @@ import (
 	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
 
+	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -85,6 +86,9 @@ func init() {
 	// create the "terminal" for capturing output
 	term := terminal.New()
 
+	// create the downloaded for creating projects
+	downloader := downloader.NewDownloader()
+
 	// register all of the commands
 	commands := []*cobra.Command{
 		add.NewCommand(home, client, term),
@@ -95,7 +99,7 @@ func init() {
 		composer.NewCommand(client, term),
 		context.NewCommand(home, client, term),
 		craft.NewCommand(home, client, term),
-		create.New(client, term),
+		create.New(client, downloader, term),
 		database.NewCommand(home, client, term),
 		destroy.NewCommand(home, client, term),
 		disable.NewCommand(home, client, term),
