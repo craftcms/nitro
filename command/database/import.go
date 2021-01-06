@@ -152,8 +152,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				fmt.Print(msg)
 			}
 
-			output.Pending("importing backup")
-
 			var rdr io.Reader
 			switch compressed {
 			case false:
@@ -181,18 +179,25 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			// should we stream the output
 			switch stream {
 			case true:
+				output.Pending("importing backup")
+
 				if err := streamToContainer(cmd.Context(), file, containers[selected], db); err != nil {
-					return err
-				}
-			default:
-				// copy into the container if not streaming
-				if err := copyToContainer(cmd.Context(), docker, output, show, file, rdr, detected, db, containerID); err != nil {
 					output.Warning()
 					return err
 				}
-			}
 
-			output.Done()
+				output.Done()
+			default:
+				output.Pending("uploading backup")
+
+				// copy into the container if not streaming
+				if err := copyToContainer(cmd.Context(), docker, show, file, rdr, detected, db, containerID); err != nil {
+					output.Warning()
+					return err
+				}
+
+				output.Done()
+			}
 
 			output.Info("Import successful 💪")
 
@@ -287,13 +292,22 @@ func streamToContainer(ctx context.Context, file *os.File, container types.Conta
 	return nil
 }
 
-func copyToContainer(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, show bool, file *os.File, rdr io.Reader, detected, db, containerID string) error {
+func copyToContainer(ctx context.Context, docker client.CommonAPIClient, show bool, file *os.File, rdr io.Reader, detected, db, containerID string) error {
 	// copy the file into the container
 	if err := docker.CopyToContainer(ctx, containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
 		return err
 	}
 
-	output.Done()
+	path := fmt.Sprintf("/tmp/%s", file.Name())
+	fmt.Println(path)
+
+	// wait for the file to exist
+	for {
+		stat, _ := docker.ContainerStatPath(ctx, containerID, path)
+		if stat.Name != "" {
+			break
+		}
+	}
 
 	// determine if the backup is to mysql or postgres and run the import file command
 	var createCmd, importCmd []string
@@ -304,8 +318,6 @@ func copyToContainer(ctx context.Context, docker client.CommonAPIClient, output 
 	default:
 		return fmt.Errorf("mysql imports have not been implemented")
 	}
-
-	output.Pending("importing database to", db)
 
 	// create the database
 	if _, err := execCreate(ctx, docker, containerID, createCmd, show); err != nil {
