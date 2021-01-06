@@ -1,4 +1,4 @@
-.PHONY: docker
+.PHONY: docker docs
 
 VERSION ?= 2.0.0-alpha
 
