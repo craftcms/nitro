@@ -26,6 +26,9 @@ func execCreate(ctx context.Context, docker client.ContainerAPIClient, container
 	resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
 		Tty: false,
 	})
+	if err != nil {
+		return false, err
+	}
 	defer resp.Close()
 
 	// should we display output?
