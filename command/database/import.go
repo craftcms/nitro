@@ -17,7 +17,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
-	"github.com/h2non/filetype"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/database"
@@ -63,17 +62,15 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 			defer file.Close()
 
-			// read the file
-			b, err := ioutil.ReadFile(file.Name())
-			if err != nil {
-				return err
-			}
-
 			// check if the file is an archive
 			compressed := false
-			if filetype.IsArchive(b) {
+			if archive.IsArchivePath(path) {
 				compressed = true
 			}
+
+			fmt.Println("file", file.Name(), "compressed:", compressed)
+
+			return nil
 
 			output.Info("Preparing import…")
 
@@ -160,6 +157,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				if err != nil {
 					return err
 				}
+
 			default:
 				// read the file and create a reader
 				content, err := ioutil.ReadFile(file.Name())
@@ -316,6 +314,7 @@ func copyToContainer(ctx context.Context, docker client.CommonAPIClient, show bo
 		createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
 		importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", "/tmp/" + file.Name()}
 	default:
+		// TODO(jasonmccallister) add mysql import functionality
 		return fmt.Errorf("mysql imports have not been implemented")
 	}
 
