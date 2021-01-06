@@ -10,14 +10,14 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v20.10.1+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/go-delve/delve v1.5.1 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3
+	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.0
-	github.com/hashicorp/consul v1.9.1 // indirect
-	github.com/hashicorp/vault/api v1.0.5-0.20200717191844-f687267c8086 // indirect
-	github.com/jmoiron/sqlx v1.2.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
+	github.com/lib/pq v1.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
@@ -28,10 +28,13 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.6.1 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
+	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
 	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d // indirect
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 	gotest.tools/v3 v3.0.3 // indirect
 )
