@@ -30,41 +30,39 @@ var (
 )
 
 func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, volume *types.Volume, networkID string) error {
-	// TODO(jasonmccallister) remove this after development
-	if os.Getenv("NITRO_DEVELOPMENT") != "true" {
-		imageFilter := filters.NewArgs()
-		imageFilter.Add("label", labels.Nitro+"=true")
-		imageFilter.Add("reference", ProxyImage)
-
-		// check for the proxy image
-		images, err := docker.ImageList(ctx, types.ImageListOptions{
-			Filters: imageFilter,
-		})
-		if err != nil {
-			return fmt.Errorf("unable to get a list of images, %w", err)
-		}
-
-		// if there are no local images, pull it
-		if len(images) == 0 {
-			output.Pending("pulling image")
-
-			rdr, err := docker.ImagePull(ctx, ProxyImage, types.ImagePullOptions{All: false})
-			if err != nil {
-				return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
-			}
-
-			buf := &bytes.Buffer{}
-			if _, err := buf.ReadFrom(rdr); err != nil {
-				return fmt.Errorf("unable to read the output from pulling the image, %w", err)
-			}
-
-			output.Done()
-		}
-	}
-
-	// create a filter for the nitro proxy
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro+"=true")
+	filter.Add("reference", ProxyImage)
+
+	// check for the proxy image
+	images, err := docker.ImageList(ctx, types.ImageListOptions{
+		Filters: filter,
+	})
+	if err != nil {
+		return fmt.Errorf("unable to get a list of images, %w", err)
+	}
+
+	// if there are no local images, pull it
+	if len(images) == 0 {
+		output.Pending("pulling image")
+
+		rdr, err := docker.ImagePull(ctx, ProxyImage, types.ImagePullOptions{All: false})
+		if err != nil {
+			return fmt.Errorf("unable to pull the nitro-proxy from docker hub, %w", err)
+		}
+
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
+			return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+		}
+
+		output.Done()
+	}
+
+	// remove the reference filter
+	filter.Del("reference", ProxyImage)
+
+	// create a filter for the nitro proxy
 	filter.Add("label", labels.Proxy+"=true")
 
 	// check if there is an existing container for the nitro-proxy
@@ -74,13 +72,14 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 	}
 
 	// check the containers and verify its running
-	var proxyRunning bool
 	for _, c := range containers {
 		for _, n := range c.Names {
 			if n == "nitro-proxy" || n == "/nitro-proxy" {
 				// check if it is running
-				if c.State == "running" {
-					proxyRunning = true
+				if c.State != "running" {
+					if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the nitro container, %w", err)
+					}
 				}
 
 				output.Success("proxy ready")
@@ -198,11 +197,8 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		return fmt.Errorf("unable to create proxy container: %s\n%w", ProxyImage, err)
 	}
 
-	// start the container for the proxy if its not running
-	if !proxyRunning {
-		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-			return fmt.Errorf("unable to start the nitro container, %w", err)
-		}
+	if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return fmt.Errorf("unable to start the nitro container, %w", err)
 	}
 
 	output.Done()
