@@ -10,12 +10,12 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v20.10.1+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/go-delve/delve v1.5.1
+	github.com/go-delve/delve v1.5.1 // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.0
-	github.com/hashicorp/consul v1.9.1
-	github.com/hashicorp/vault/api v1.0.5-0.20200717191844-f687267c8086
+	github.com/hashicorp/consul v1.9.1 // indirect
+	github.com/hashicorp/vault/api v1.0.5-0.20200717191844-f687267c8086 // indirect
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/mount v0.2.0 // indirect
