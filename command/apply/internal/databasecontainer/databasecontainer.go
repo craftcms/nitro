@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -203,9 +204,14 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 	db.SetMaxIdleConns(0)
 	db.SetMaxOpenConns(151)
 
+	wait := time.Duration(10 * time.Millisecond)
+
 	for {
+		time.Sleep(wait)
+
 		err := db.Ping()
-		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
+		if err == io.EOF {
+			wait = wait + 10
 			continue
 		}
 		if err == nil {
