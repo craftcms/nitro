@@ -136,11 +136,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// convert the apply flag to a boolean
 			skipApply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
 			if err != nil {
-				// don't do anything
+				// don't do anything with the error
+				skipApply = false
 			}
 
 			// check if we need to run the
-			if skipApply != true && cmd.Parent() != nil {
+			if !skipApply && cmd.Parent() != nil {
 				// TODO(jasonmccallister) make this better :)
 				for _, c := range cmd.Parent().Commands() {
 					// set the apply command
