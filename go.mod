@@ -11,6 +11,7 @@ require (
 	github.com/docker/docker v20.10.1+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/go-delve/delve v1.5.1 // indirect
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.0

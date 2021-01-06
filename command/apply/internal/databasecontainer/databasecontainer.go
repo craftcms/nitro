@@ -3,9 +3,10 @@ package databasecontainer
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
-	"os"
 	"strings"
+	"time"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
@@ -16,8 +17,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -172,73 +173,94 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	// if the container is mysql compatible
 	if db.Engine == "mysql" || db.Engine == "mariadb" {
-		// verify the file exists in the container
+		if err := waitForMySQLContainer(ctx, docker, resp.ID, db); err != nil {
+			return "", "", err
+		}
+	}
+
+	return resp.ID, hostname, nil
+}
+
+func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, containerID string, d config.Database) error {
+	// verify the mysql socket exists in the container
+	for {
+		// wait until the socket is ready
+		stat, _ := docker.ContainerStatPath(ctx, containerID, "/var/run/mysqld/mysqld.sock")
+		if stat.Name != "" {
+			break
+		}
+	}
+
+	// connect to the database
+	db, err := sql.Open("mysql", fmt.Sprintf("root:nitro@tcp(127.0.0.1:%s)/nitro", d.Port))
+	if err != nil {
+		return fmt.Errorf("error opening connection: %w", err)
+	}
+	defer db.Close()
+
+	// set the connection time to 5 seconds
+	db.SetConnMaxLifetime(5 * time.Second)
+	db.SetMaxIdleConns(0)
+	db.SetMaxOpenConns(151)
+
+	for {
+		err := db.Ping()
+		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
+			continue
+		}
+		if err == nil {
+			break
+		}
+	}
+
+	// setup the commands
+	commands := map[string][]string{
+		"create localhost user": {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY 'nitro';`, "nitro", "localhost")},
+		"grant wildcard":        {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")},
+		"grant localhost":       {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "localhost")},
+		"flush privs":           {"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
+	}
+
+	for _, c := range commands {
+		// create the exec
+		exec, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          false,
+			Cmd:          c,
+		})
+		if err != nil {
+			return err
+		}
+
+		// attach to the container
+		resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+			Tty: false,
+		})
+		if err != nil {
+			return err
+		}
+
+		// start the exec
+		if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
+			return fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		// wait for the container exec to complete
 		for {
-			// wait until the socket is ready
-			stat, _ := docker.ContainerStatPath(ctx, resp.ID, "/var/run/mysqld/mysqld.sock")
-			if stat.Name != "" {
+			resp, err := docker.ContainerExecInspect(ctx, exec.ID)
+			if err != nil {
+				return err
+			}
+
+			if !resp.Running {
 				break
 			}
 		}
 
-		// add an additional wait for the mysql container to have our user
-		// TODO(jasonmccallister) this is a nasty hack, perhaps we should just import a SQL client and connect to the container?
-
-		// setup the commands
-		commands := map[string][]string{
-			"create localhost user": {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY 'nitro';`, "nitro", "localhost")},
-			"grant wildcard":        {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")},
-			"grant localhost":       {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "localhost")},
-			"flush privs":           {"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
-		}
-
-		for _, c := range commands {
-			// create the exec
-			exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				Tty:          false,
-				Cmd:          c,
-			})
-			if err != nil {
-				return "", "", err
-			}
-
-			// attach to the container
-			resp, err := docker.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
-				Tty: false,
-			})
-			if err != nil {
-				return "", "", err
-			}
-
-			// show the output to stdout and stderr
-			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, resp.Reader); err != nil {
-				return "", "", fmt.Errorf("unable to copy the output of container, %w", err)
-			}
-
-			// start the exec
-			if err := docker.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-				return "", "", fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// wait for the container exec to complete
-			for {
-				resp, err := docker.ContainerExecInspect(ctx, exec.ID)
-				if err != nil {
-					return "", "", err
-				}
-
-				if !resp.Running {
-					break
-				}
-			}
-
-			// close the exec attach
-			resp.Close()
-		}
-
+		// close the exec attach
+		resp.Close()
 	}
 
-	return resp.ID, hostname, nil
+	return nil
 }
