@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,7 +18,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := doc.GenMarkdownTree(cli, filepath.Join(path, "docs")); err != nil {
+	dir := filepath.Join(path, "docs")
+
+	if err := doc.GenMarkdownTree(cli, dir); err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println("docs output to", dir)
 }
