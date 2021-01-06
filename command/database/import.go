@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -52,13 +53,17 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				show = false
 			}
 
-			// get the abs clean path for the file
-			file, err := os.Open(args[0])
+			// get the clean path for the file
+			path := filepath.Join(args[0])
+
+			// open the file
+			file, err := os.Open(path)
 			if err != nil {
 				return err
 			}
 			defer file.Close()
 
+			// read the file
 			b, err := ioutil.ReadFile(file.Name())
 			if err != nil {
 				return err
