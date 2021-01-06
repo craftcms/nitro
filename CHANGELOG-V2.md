@@ -22,7 +22,7 @@
   _API_PORT`.
   
 ### Changed
-- Nitro now requires Docker, instead of Multipass. [#224](https://github.com/craftcms/nitro/issues/224) [#222](https://github.com/craftcms/nitro/issues/222) [#215](https://github.com/craftcms/nitro/issues/215) [#205](https://github.com/craftcms/nitro/issues/205) [#182](https://github.com/craftcms/nitro/issues/182) [#181](https://github.com/craftcms/nitro/issues/181) [#180](https://github.com/craftcms/nitro/issues/180) [#152](https://github.com/craftcms/nitro/issues/152) [#22](https://github.com/craftcms/nitro/issues/22) [#18](https://github.com/craftcms/nitro/issues/18)
+- Nitro now requires Docker, instead of Multipass. [#224](https://github.com/craftcms/nitro/issues/224) [#222](https://github.com/craftcms/nitro/issues/222) [#215](https://github.com/craftcms/nitro/issues/215) [#205](https://github.com/craftcms/nitro/issues/205) [#182](https://github.com/craftcms/nitro/issues/182) [#181](https://github.com/craftcms/nitro/issues/181) [#180](https://github.com/craftcms/nitro/issues/180) [#152](https://github.com/craftcms/nitro/issues/152) [#22](https://github.com/craftcms/nitro/issues/22) [#18](https://github.com/craftcms/nitro/issues/18) [#216](https://github.com/craftcms/nitro/issues/216)
 - Greatly improved Nitro support on Windows.
 - Nitro now has a single `~/.nitro/nitro.yml` file to manage everything, instead of a YAML file per machine like in v1.
 - Nitro will now check for port collisions during `init` and when adding database engines.
