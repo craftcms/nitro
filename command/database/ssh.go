@@ -61,7 +61,7 @@ func containerConnect(output terminal.Outputer, containerName string) error {
 		return err
 	}
 
-	c := exec.Command(cli, "exec", "-u", "root", "-it", containerName, "sh")
+	c := exec.Command(cli, "exec", "-u", "root", "-it", containerName, "bash")
 
 	c.Stdin = os.Stdin
 	c.Stderr = os.Stderr
