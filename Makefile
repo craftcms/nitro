@@ -13,6 +13,8 @@ upx: build
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
+docs:
+	go run cmd/docs/main.go
 
 local: build
 	mv nitro /usr/local/bin/nitro
