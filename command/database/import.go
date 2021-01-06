@@ -68,10 +68,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				compressed = true
 			}
 
-			fmt.Println("file", file.Name(), "compressed:", compressed)
-
-			return nil
-
 			output.Info("Preparing import…")
 
 			// detect the type of backup if not compressed
@@ -297,7 +293,6 @@ func copyToContainer(ctx context.Context, docker client.CommonAPIClient, show bo
 	}
 
 	path := fmt.Sprintf("/tmp/%s", file.Name())
-	fmt.Println(path)
 
 	// wait for the file to exist
 	for {
