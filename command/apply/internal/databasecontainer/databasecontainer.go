@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/docker/docker/api/types"
@@ -15,9 +18,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
-	"os"
-	"strings"
-	"time"
 )
 
 var (
@@ -172,19 +172,17 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	// if the container is mysql compatible
 	if db.Engine == "mysql" || db.Engine == "mariadb" {
-		fmt.Println("running mysql commands, waiting")
-
 		// verify the file exists in the container
 		for {
-			fmt.Println("waiting")
+			// wait until the socket is ready
 			stat, _ := docker.ContainerStatPath(ctx, resp.ID, "/var/run/mysqld/mysqld.sock")
-
 			if stat.Name != "" {
 				break
 			}
 		}
 
-		time.Sleep(time.Second * 10)
+		// add an additional wait for the mysql container to have our user
+		// TODO(jasonmccallister) this is a nasty hack, perhaps we should just import a SQL client and connect to the container?
 
 		// setup the commands
 		commands := map[string][]string{
