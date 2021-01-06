@@ -223,9 +223,8 @@ func (c *Config) Save() error {
 		}
 		defer f.Close()
 
-		if err := f.Chown(os.Geteuid(), os.Getuid()); err != nil {
-			return err
-		}
+		// try to chown otherwise be quiet
+		_ = f.Chown(os.Geteuid(), os.Getuid())
 	}
 
 	// unmarshal
