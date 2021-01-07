@@ -34,30 +34,6 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 	return checkEnvs(site.PHP, site.Xdebug, container.Config.Env)
 }
 
-func Mount(home string, mount config.Mount, container types.ContainerJSON) bool {
-	// check if the image does not match - this uses the image name, not ref
-	if fmt.Sprintf("docker.io/craftcms/php-fpm:%s-dev", mount.Version) != container.Config.Image {
-		return false
-	}
-
-	// get the mount path (e.g. ~/dev)
-	path, err := mount.GetAbsPath(home)
-	if err != nil {
-		return false
-	}
-
-	// check if the path exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-
-	if !checkEnvs(mount.PHP, mount.Xdebug, container.Config.Env) {
-		return false
-	}
-
-	return true
-}
-
 func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
 	// check the environment variables
 	for _, e := range envs {

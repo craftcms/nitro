@@ -17,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
-	"github.com/craftcms/nitro/command/apply/internal/mountcontainer"
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
@@ -227,26 +226,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				hostnames = append(hostnames, hostname)
 
 				output.Done()
-			}
-
-			// check the mounts
-			if len(cfg.Mounts) > 0 {
-				output.Info("Checking mounts…")
-
-				for _, m := range cfg.Mounts {
-					output.Pending("checking", m.Path)
-
-					id, err := mountcontainer.FindOrCreate(ctx, docker, home, network.ID, m)
-					if err != nil {
-						output.Warning()
-						return err
-					}
-
-					// set the container id as known
-					knownContainers[id] = true
-
-					output.Done()
-				}
 			}
 
 			output.Info("Checking services…")
