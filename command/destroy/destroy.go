@@ -31,10 +31,7 @@ var (
 )
 
 const exampleText = `  # remove all resources (networks, containers, and volumes) for an environment
-  nitro destroy
-
-  # destroy resources without a database backup
-  nitro destroy --skip-backup`
+  nitro destroy`
 
 // NewCommand is used to destroy all resources for an environment. It will prompt for
 // user verification and defaults to no. Part of the destroy process is to
