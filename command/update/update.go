@@ -17,12 +17,13 @@ import (
 )
 
 var (
-	DockerImages = map[string]string{
+	dockerImages = map[string]string{
 		// "docker.io/craftcms/nginx:8.0-dev": "nginx:8.0-dev",
-		"docker.io/craftcms/nginx:7.4-dev": "nginx:7.4-dev",
-		"docker.io/craftcms/nginx:7.3-dev": "nginx:7.3-dev",
-		"docker.io/craftcms/nginx:7.2-dev": "nginx:7.2-dev",
-		"docker.io/craftcms/nginx:7.1-dev": "nginx:7.1-dev",
+		"docker.io/craftcms/nginx:7.4-dev":                  "nginx:7.4-dev",
+		"docker.io/craftcms/nginx:7.3-dev":                  "nginx:7.3-dev",
+		"docker.io/craftcms/nginx:7.2-dev":                  "nginx:7.2-dev",
+		"docker.io/craftcms/nginx:7.1-dev":                  "nginx:7.1-dev",
+		"docker.io/craftcms/nitro-proxy:" + version.Version: "nitro-proxy:" + version.Version,
 		// "docker.io/craftcms/nginx:7.0-dev": "nginx:7.0-dev",
 	}
 )
@@ -35,10 +36,10 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Example: `  # update nitro
   nitro update`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Updating…")
+			output.Info("Updating nitro…")
 
 			// update all of the images
-			for image, name := range DockerImages {
+			for image, name := range dockerImages {
 				output.Pending("updating", name)
 
 				// pull the image
@@ -82,7 +83,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				}
 
 				// if the images match, we are up to date
-				if _, ok := DockerImages[c.Image]; ok {
+				if _, ok := dockerImages[c.Image]; ok {
 					continue
 				}
 
@@ -90,12 +91,10 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				if err := remove(cmd.Context(), docker, c); err != nil {
 					return fmt.Errorf("unable to remove container for %s: %w", strings.TrimLeft(c.Names[0], "/"), err)
 				}
-
 			}
 
 			output.Info("Images updated 👍, applying changes…")
 
-			// TODO(jasonmccallister) make this better :)
 			for _, c := range cmd.Parent().Commands() {
 				// set the apply command
 				if c.Use == "apply" {
