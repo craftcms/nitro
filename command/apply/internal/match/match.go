@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/api/types"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/labels"
 )
 
 // Site takes the home directory, site, and a container to determine if they
@@ -16,6 +17,11 @@ import (
 func Site(home string, site config.Site, container types.ContainerJSON) bool {
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
+		return false
+	}
+
+	// check the sites hostname using the label
+	if container.Config.Labels[labels.Host] != site.Hostname {
 		return false
 	}
 

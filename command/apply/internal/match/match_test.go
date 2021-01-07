@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/labels"
 )
 
 func Test_checkEnvs(t *testing.T) {
@@ -178,6 +179,26 @@ func TestSite(t *testing.T) {
 		args args
 		want bool
 	}{
+		{
+			name: "hostname updates return false using labels",
+			args: args{
+				home: "testdata/example-site",
+				site: config.Site{
+					Hostname: "newname",
+					Path:     "testdata/example-site",
+					Version:  "7.4",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Labels: map[string]string{
+							labels.Host: "oldname",
+						},
+					},
+				},
+			},
+			want: false,
+		},
 		{
 			name: "path mismatches return false",
 			args: args{
