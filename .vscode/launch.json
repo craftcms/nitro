@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Apply Command",
+            "name": "nitro apply",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -13,8 +13,17 @@
             "env": {},
             "args": ["apply"]
         },
+         {
+             "name": "nitro init",
+             "type": "go",
+             "request": "launch",
+             "mode": "auto",
+             "program": "${workspaceFolder}/cmd/nitro/main.go",
+             "env": {},
+             "args": ["init"]
+         },
         {
-            "name": "SSH Command",
+            "name": "nitro ssh",
             "type": "go",
             "request": "launch",
             "mode": "auto",
