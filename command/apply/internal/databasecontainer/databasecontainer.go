@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
@@ -197,27 +196,15 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 	if err != nil {
 		return fmt.Errorf("error opening connection: %w", err)
 	}
-	defer db.Close()
 
 	// set the connection time to 5 seconds
 	db.SetConnMaxLifetime(5 * time.Second)
 	db.SetMaxIdleConns(0)
 	db.SetMaxOpenConns(151)
 
-	wait := time.Duration(10 * time.Millisecond)
-
-	for {
-		time.Sleep(wait)
-
-		err := db.Ping()
-		if err == io.EOF {
-			wait = wait + 10
-			continue
-		}
-		if err == nil {
-			break
-		}
-	}
+	// ugh, sleep for 10 seconds because of mysql...
+	wait := time.Duration(time.Second * 10)
+	time.Sleep(wait)
 
 	// setup the commands
 	commands := map[string][]string{
@@ -267,6 +254,8 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 		// close the exec attach
 		resp.Close()
 	}
+
+	db.Close()
 
 	return nil
 }
