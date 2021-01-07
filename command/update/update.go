@@ -2,9 +2,7 @@ package update
 
 import (
 	"bytes"
-	"context"
 	"fmt"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -37,13 +35,14 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
   nitro update`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating nitro…")
+			ctx := cmd.Context()
 
 			// update all of the images
 			for image, name := range dockerImages {
 				output.Pending("updating", name)
 
 				// pull the image
-				rdr, err := docker.ImagePull(cmd.Context(), image, types.ImagePullOptions{All: false})
+				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 				if err != nil {
 					output.Warning()
 					output.Info("  \u2717 unable to pull image", name)
@@ -63,7 +62,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			filter.Add("label", labels.Nitro)
 
 			// get a list of containers
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return err
 			}
@@ -75,21 +74,22 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					continue
 				}
 
-				// check the proxy container image
-				if c.Labels[labels.Proxy] != "" && c.Image != fmt.Sprintf("docker.io/craftcms/nitro-proxy:%s", version.Version) {
-					if err := remove(cmd.Context(), docker, c); err != nil {
-						return fmt.Errorf("unable to remove container for %s: %w", strings.TrimLeft(c.Names[0], "/"), err)
-					}
-				}
-
 				// if the images match, we are up to date
 				if _, ok := dockerImages[c.Image]; ok {
+					fmt.Println(c.Image)
 					continue
 				}
 
-				// otherwise we need to recreate the container
-				if err := remove(cmd.Context(), docker, c); err != nil {
-					return fmt.Errorf("unable to remove container for %s: %w", strings.TrimLeft(c.Names[0], "/"), err)
+				// stop the container if it is running
+				if c.State == "running" {
+					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+						return err
+					}
+				}
+
+				// remove the container
+				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					return err
 				}
 			}
 
@@ -111,17 +111,4 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	// set the flags
 
 	return cmd
-}
-
-func remove(ctx context.Context, docker client.ContainerAPIClient, container types.Container) error {
-	if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {
-		return err
-	}
-
-	// remove the container
-	if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
-		return err
-	}
-
-	return nil
 }
