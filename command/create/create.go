@@ -1,14 +1,20 @@
 package create
 
 import (
+	"bufio"
+	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/downloader"
+	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -21,14 +27,13 @@ const exampleText = `  # create a new default craft project (similar to "compose
   # you can also provide shorthand urls for github
   nitro create craftcms/demo my-project`
 
-// New returns the create command to automate the process of setting up a new Craft project.
+// NewCommand returns the create command to automate the process of setting up a new Craft project.
 // It also allows you to pass an option argument that is a URL to your own github repo.
-func New(docker client.CommonAPIClient, getter downloader.Getter, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Getter, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Short:   "Create project",
 		Example: exampleText,
-		Hidden:  true,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default
@@ -56,6 +61,8 @@ func New(docker client.CommonAPIClient, getter downloader.Getter, output termina
 				dir = cleanDirectory(args[0])
 			}
 
+			output.Info("Downloading", download.String(), "...")
+
 			output.Pending("setting up project")
 
 			// download the file
@@ -65,30 +72,203 @@ func New(docker client.CommonAPIClient, getter downloader.Getter, output termina
 
 			output.Done()
 
-			output.Info("project created 🤓")
+			output.Info("New site downloaded 🤓")
 
-			// TODO(jasonmccallister) prompt the user for the version of php, webroot, hostname
+			// create a new site
+			site := config.Site{}
+			// get the hostname from the directory
+			sp := strings.Split(dir, string(os.PathSeparator))
+			site.Hostname = sp[len(sp)-1]
+
+			// append the test domain if there are no periods
+			if !strings.Contains(site.Hostname, ".") {
+				// set the default tld
+				tld := "nitro"
+				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+					tld = os.Getenv("NITRO_DEFAULT_TLD")
+				}
+
+				site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
+			}
+
+			// prompt for the hostname
+			fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
+			for {
+				rdr := bufio.NewReader(os.Stdin)
+				char, _ := rdr.ReadString('\n')
+
+				// remove the carriage return
+				char = strings.TrimSpace(char)
+
+				// does it have spaces?
+				if strings.ContainsAny(char, " ") {
+					fmt.Println("Please enter a hostname without spaces…")
+					fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
+
+					continue
+				}
+
+				// if its empty, we are setting the default
+				if char == "" {
+					break
+				}
+
+				// set the input as the hostname
+				site.Hostname = char
+			}
+
+			output.Success("setting hostname to", site.Hostname)
+
+			// set the sites directory but make the path relative
+			site.Path = strings.Replace(dir, home, "~", 1)
+
+			output.Success("adding site", site.Path)
+
+			// get the web directory
+			var root string
+			if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+				// don't go into subdirectories and ignore files
+				if path != dir || !info.IsDir() {
+					return nil
+				}
+
+				// if the directory is considered a web root
+				if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
+					root = info.Name()
+				}
+
+				// if its not set, keep trying
+				if root != "" {
+					return nil
+				}
+
+				return nil
+			}); err != nil {
+				return err
+			}
+
+			// if the root is still empty, we fall back to the default
+			if root == "" {
+				root = "web"
+			}
+
+			// set the webroot
+			site.Dir = root
+
+			// prompt for the webroot
+			fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+			for {
+				rdr := bufio.NewReader(os.Stdin)
+
+				input, _ := rdr.ReadString('\n')
+
+				input = strings.TrimSpace(input)
+
+				// does it have spaces?
+				if strings.ContainsAny(input, " ") {
+					fmt.Println("Please enter a webroot without spaces…")
+					fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+
+					continue
+				}
+
+				// if its empty, we are setting the default
+				if input == "" {
+					break
+				}
+
+				// set the input as the hostname
+				site.Dir = input
+				break
+			}
+
+			output.Success("using webroot", site.Dir)
+
 			// prompt for the php version
-			// versions := phpversions.Versions
-			// selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
-			// if err != nil {
-			// 	return err
-			// }
+			versions := phpversions.Versions
+			selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
+			if err != nil {
+				return err
+			}
+
+			// set the version of php
+			site.Version = versions[selected]
+
+			output.Success("setting PHP version", site.Version)
+
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// add the site to the config
+			if err := cfg.AddSite(site); err != nil {
+				return err
+			}
+
+			output.Pending("saving file")
+
+			// save the config file
+			if err := cfg.Save(); err != nil {
+				output.Warning()
+
+				return err
+			}
+
+			output.Done()
+
+			output.Info("Site added 🌍")
 
 			// run the composer install command
 			for _, c := range cmd.Parent().Commands() {
 				if c.Use == "composer" {
+					// change into the projects new directory for the composer install
+					if err := os.Chdir(filepath.Join(dir)); err != nil {
+						break
+					}
+
 					// run composer install using the new directory
 					// we pass the command itself instead of the parent
 					// command
-					if err := c.RunE(c, []string{dir, "--version=" + cmd.Flag("composer-version").Value.String()}); err != nil {
-						return err
+					if err := c.RunE(c, []string{"install", "--ignore-platform-reqs"}); err != nil {
+						output.Info(err.Error())
+						break
 					}
 				}
 			}
 
+			// TODO(jasonmccallister) prompt for a new database
 			// TODO(jasonmccallister) edit the .env
-			// TODO(jasonmccallister) ask if we should run apply now
+
+			// ask if we should run apply now
+			// ask if the apply command should run
+			var response string
+			fmt.Print("Apply changes now [Y/n]? ")
+			if _, err := fmt.Scanln(&response); err != nil {
+				return fmt.Errorf("unable to provide a prompt, %w", err)
+			}
+
+			// get the response
+			resp := strings.TrimSpace(response)
+			var confirm bool
+			for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
+				if resp == answer {
+					confirm = true
+				}
+			}
+
+			// we are skipping the apply step
+			if !confirm {
+				return nil
+			}
+
+			// get the apply command and run it
+			for _, c := range cmd.Parent().Commands() {
+				if c.Use == "apply" {
+					return c.RunE(c, args)
+				}
+			}
 
 			return nil
 		},
