@@ -51,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 				download = u
 				dir = cleanDirectory(args[1])
 			default:
-				// only the directory was provided, download craft to that repo
+				// only the directory was provided, download craft to that directory
 				u, err := urlgen.Generate("")
 				if err != nil {
 					return err
@@ -59,6 +59,11 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 
 				download = u
 				dir = cleanDirectory(args[0])
+			}
+
+			// check if the directory already exists
+			if exists, err := pathExists(dir); err != nil || exists {
+				return fmt.Errorf("directory %q already exists", dir)
 			}
 
 			output.Info("Downloading", download.String(), "...")
@@ -74,151 +79,11 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 
 			output.Info("New site downloaded 🤓")
 
-			// create a new site
-			site := config.Site{}
-			// get the hostname from the directory
-			sp := strings.Split(dir, string(os.PathSeparator))
-			site.Hostname = sp[len(sp)-1]
+			// --- done with download
 
-			// append the test domain if there are no periods
-			if !strings.Contains(site.Hostname, ".") {
-				// set the default tld
-				tld := "nitro"
-				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
-					tld = os.Getenv("NITRO_DEFAULT_TLD")
-				}
-
-				site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
-			}
-
-			// prompt for the hostname
-			fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
-			for {
-				rdr := bufio.NewReader(os.Stdin)
-				char, _ := rdr.ReadString('\n')
-
-				// remove the carriage return
-				char = strings.TrimSpace(char)
-
-				// does it have spaces?
-				if strings.ContainsAny(char, " ") {
-					fmt.Println("Please enter a hostname without spaces…")
-					fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
-
-					continue
-				}
-
-				// if its empty, we are setting the default
-				if char == "" {
-					break
-				}
-
-				// set the input as the hostname
-				site.Hostname = char
-			}
-
-			output.Success("setting hostname to", site.Hostname)
-
-			// set the sites directory but make the path relative
-			site.Path = strings.Replace(dir, home, "~", 1)
-
-			output.Success("adding site", site.Path)
-
-			// get the web directory
-			var root string
-			if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-				// don't go into subdirectories and ignore files
-				if path != dir || !info.IsDir() {
-					return nil
-				}
-
-				// if the directory is considered a web root
-				if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
-					root = info.Name()
-				}
-
-				// if its not set, keep trying
-				if root != "" {
-					return nil
-				}
-
-				return nil
-			}); err != nil {
+			if err := promptSiteAdd(home, dir, output); err != nil {
 				return err
 			}
-
-			// if the root is still empty, we fall back to the default
-			if root == "" {
-				root = "web"
-			}
-
-			// set the webroot
-			site.Dir = root
-
-			// prompt for the webroot
-			fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
-			for {
-				rdr := bufio.NewReader(os.Stdin)
-
-				input, _ := rdr.ReadString('\n')
-
-				input = strings.TrimSpace(input)
-
-				// does it have spaces?
-				if strings.ContainsAny(input, " ") {
-					fmt.Println("Please enter a webroot without spaces…")
-					fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
-
-					continue
-				}
-
-				// if its empty, we are setting the default
-				if input == "" {
-					break
-				}
-
-				// set the input as the hostname
-				site.Dir = input
-				break
-			}
-
-			output.Success("using webroot", site.Dir)
-
-			// prompt for the php version
-			versions := phpversions.Versions
-			selected, err := output.Select(cmd.InOrStdin(), "Choose a PHP version: ", versions)
-			if err != nil {
-				return err
-			}
-
-			// set the version of php
-			site.Version = versions[selected]
-
-			output.Success("setting PHP version", site.Version)
-
-			// load the config
-			cfg, err := config.Load(home)
-			if err != nil {
-				return err
-			}
-
-			// add the site to the config
-			if err := cfg.AddSite(site); err != nil {
-				return err
-			}
-
-			output.Pending("saving file")
-
-			// save the config file
-			if err := cfg.Save(); err != nil {
-				output.Warning()
-
-				return err
-			}
-
-			output.Done()
-
-			output.Info("Site added 🌍")
 
 			// run the composer install command
 			for _, c := range cmd.Parent().Commands() {
@@ -282,5 +147,174 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 }
 
 func cleanDirectory(s string) string {
-	return strings.TrimSpace(strings.Replace(s, " ", "-", -1))
+	return filepath.Join(s)
+}
+
+func promptSiteAdd(home, dir string, output terminal.Outputer) error {
+	// create a new site
+	site := config.Site{}
+
+	// get the hostname from the directory
+	// p := filepath.Join(dir)
+	sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
+	site.Hostname = sp[len(sp)-1]
+
+	// append the test domain if there are no periods
+	if !strings.Contains(site.Hostname, ".") {
+		// set the default tld
+		tld := "nitro"
+		if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+			tld = os.Getenv("NITRO_DEFAULT_TLD")
+		}
+
+		site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
+	}
+
+	// prompt for the hostname
+	fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
+	for {
+		rdr := bufio.NewReader(os.Stdin)
+		char, _ := rdr.ReadString('\n')
+
+		// remove the carriage return
+		char = strings.TrimSpace(char)
+
+		// does it have spaces?
+		if strings.ContainsAny(char, " ") {
+			fmt.Println("Please enter a hostname without spaces…")
+			fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
+
+			continue
+		}
+
+		// if its empty, we are setting the default
+		if char == "" {
+			break
+		}
+
+		// set the input as the hostname
+		site.Hostname = char
+	}
+
+	output.Success("setting hostname to", site.Hostname)
+
+	// set the sites directory but make the path relative
+	siteAbsPath, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	site.Path = strings.Replace(siteAbsPath, home, "~", 1)
+
+	output.Success("adding site", site.Path)
+
+	// get the web directory
+	var root string
+	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		// don't go into subdirectories and ignore files
+		if path != dir || !info.IsDir() {
+			return nil
+		}
+
+		// if the directory is considered a web root
+		if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
+			root = info.Name()
+		}
+
+		// if its not set, keep trying
+		if root != "" {
+			return nil
+		}
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	// if the root is still empty, we fall back to the default
+	if root == "" {
+		root = "web"
+	}
+
+	// set the webroot
+	site.Dir = root
+
+	// prompt for the webroot
+	fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+	for {
+		rdr := bufio.NewReader(os.Stdin)
+
+		input, _ := rdr.ReadString('\n')
+
+		input = strings.TrimSpace(input)
+
+		// does it have spaces?
+		if strings.ContainsAny(input, " ") {
+			fmt.Println("Please enter a webroot without spaces…")
+			fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+
+			continue
+		}
+
+		// if its empty, we are setting the default
+		if input == "" {
+			break
+		}
+
+		// set the input as the hostname
+		site.Dir = input
+		break
+	}
+
+	output.Success("using webroot", site.Dir)
+
+	// prompt for the php version
+	versions := phpversions.Versions
+	selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
+	if err != nil {
+		return err
+	}
+
+	// set the version of php
+	site.Version = versions[selected]
+
+	output.Success("setting PHP version", site.Version)
+
+	// load the config
+	cfg, err := config.Load(home)
+	if err != nil {
+		return err
+	}
+
+	// add the site to the config
+	if err := cfg.AddSite(site); err != nil {
+		return err
+	}
+
+	output.Pending("saving file")
+
+	// save the config file
+	if err := cfg.Save(); err != nil {
+		output.Warning()
+
+		return err
+	}
+
+	output.Done()
+
+	output.Info("Site added 🌍")
+
+	return nil
+}
+
+func pathExists(dir string) (bool, error) {
+	_, err := os.Stat(dir)
+	if err == nil {
+		return true, nil
+	}
+
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return false, err
 }
