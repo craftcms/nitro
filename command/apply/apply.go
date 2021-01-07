@@ -62,9 +62,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				return fmt.Errorf("error getting a list of containers")
 			}
 
-			// if there are no matching containers we are done
-			if len(containers) == 0 {
-				return nil
+			if len(containers) > 0 {
+				output.Info("Removing old containers...")
 			}
 
 			for _, c := range containers {
@@ -137,6 +136,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Done()
 				}
 			}
+
+			output.Info("Nitro is up and running 😃")
 
 			return nil
 		},
@@ -368,8 +369,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 				}
 			}
-
-			output.Info("Nitro is up and running 😃")
 
 			return nil
 		},
