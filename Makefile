@@ -11,6 +11,9 @@ build-win:
 upx: build
 	upx --brute nitro
 
+alpha: build
+	zip -X nitro_v2_alpha.zip nitro
+
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
 docs:
