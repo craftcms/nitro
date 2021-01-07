@@ -228,46 +228,48 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
-			output.Info("Checking services…")
+			if checkServices(cfg) {
+				output.Info("Checking services…")
 
-			// check dynamodb service
-			if cfg.Services.DynamoDB {
-				output.Pending("checking dynamodb service")
+				// check dynamodb service
+				if cfg.Services.DynamoDB {
+					output.Pending("checking dynamodb service")
 
-				id, hostname, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
-				if err != nil {
-					return err
+					id, hostname, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
+					if err != nil {
+						return err
+					}
+
+					if id != "" {
+						knownContainers[id] = true
+					}
+
+					if hostname != "" {
+						hostnames = append(hostnames, hostname)
+					}
+
+					output.Done()
 				}
 
-				if id != "" {
-					knownContainers[id] = true
+				// check dynamodb service
+				if cfg.Services.Mailhog {
+					output.Pending("checking mailhog service")
+
+					id, hostname, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
+					if err != nil {
+						return err
+					}
+
+					if id != "" {
+						knownContainers[id] = true
+					}
+
+					if hostname != "" {
+						hostnames = append(hostnames, hostname)
+					}
+
+					output.Done()
 				}
-
-				if hostname != "" {
-					hostnames = append(hostnames, hostname)
-				}
-
-				output.Done()
-			}
-
-			// check dynamodb service
-			if cfg.Services.Mailhog {
-				output.Pending("checking mailhog service")
-
-				id, hostname, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
-				if err != nil {
-					return err
-				}
-
-				if id != "" {
-					knownContainers[id] = true
-				}
-
-				if hostname != "" {
-					hostnames = append(hostnames, hostname)
-				}
-
-				output.Done()
 			}
 
 			if len(cfg.Sites) > 0 {
@@ -367,6 +369,10 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	cmd.Flags().Bool("skip-hosts", false, "skip modifying the hosts file")
 
 	return cmd
+}
+
+func checkServices(cfg *config.Config) bool {
+	return cfg.Services.DynamoDB || cfg.Services.Mailhog || cfg.Services.Minio || cfg.Services.Redis
 }
 
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
