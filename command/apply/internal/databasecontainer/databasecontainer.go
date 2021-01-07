@@ -191,6 +191,9 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 		}
 	}
 
+	// we need to up the http timeout for the docker HTTP client to avoid timeouts
+	docker.HTTPClient().Timeout = 0
+
 	// connect to the database
 	db, err := sql.Open("mysql", fmt.Sprintf("root:nitro@tcp(127.0.0.1:%s)/nitro", d.Port))
 	if err != nil {
