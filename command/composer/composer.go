@@ -27,10 +27,7 @@ var (
 )
 
 const exampleText = `  # run composer install in a current directory using a container
-  nitro composer install
-
-  # update a composer project using version 1
-  nitro composer update --version 1`
+  nitro composer install`
 
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run
