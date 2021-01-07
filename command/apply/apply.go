@@ -234,12 +234,17 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if cfg.Services.DynamoDB {
 				output.Pending("checking dynamodb service")
 
-				id, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
+				id, hostname, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
 				if err != nil {
 					return err
 				}
+
 				if id != "" {
 					knownContainers[id] = true
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
 				}
 
 				output.Done()
@@ -249,12 +254,17 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if cfg.Services.Mailhog {
 				output.Pending("checking mailhog service")
 
-				id, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
+				id, hostname, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
 				if err != nil {
 					return err
 				}
+
 				if id != "" {
 					knownContainers[id] = true
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
 				}
 
 				output.Done()
@@ -339,7 +349,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							return err
 						}
 					default:
-						output.Info("Modifying hosts file (you might be prompted for your password)")
+						output.Info("Updating hosts file (you might be prompted for your password)")
 
 						// add the hosts
 						if err := sudo.Run(nitro, "nitro", "hosts", "--hostnames="+strings.Join(hostnames, ",")); err != nil {

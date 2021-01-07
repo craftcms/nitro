@@ -17,7 +17,7 @@ import (
 // DynamoDBImage is the image to use for the dynamodb
 var DynamoDBImage = "docker.io/amazon/dynamodb-local:latest"
 
-func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, error) {
+func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, string, error) {
 	// add the filter for dynamodb
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=dynamodb")
@@ -27,7 +27,7 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, 
 		// get a list of containers
 		containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 
 		// if there is not a container create it
@@ -35,17 +35,17 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, 
 			// pull the image
 			rdr, err := docker.ImagePull(ctx, DynamoDBImage, types.ImagePullOptions{})
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 
 			buf := &bytes.Buffer{}
 			if _, err := buf.ReadFrom(rdr); err != nil {
-				return "", fmt.Errorf("unable to read the output from pulling the image, %w", err)
+				return "", "", fmt.Errorf("unable to read the output from pulling the image, %w", err)
 			}
 
 			port, err := nat.NewPort("tcp", "8000")
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 
 			// create the container
@@ -76,24 +76,24 @@ func dynamodb(ctx context.Context, docker client.CommonAPIClient, enabled bool, 
 				},
 			}, nil, "dynamodb.service.nitro")
 			if err != nil {
-				return "", fmt.Errorf("unable to create the container, %w", err)
+				return "", "", fmt.Errorf("unable to create the container, %w", err)
 			}
 
 			// start the container
 			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-				return "", fmt.Errorf("unable to start the container, %w", err)
+				return "", "", fmt.Errorf("unable to start the container, %w", err)
 			}
 
-			return resp.ID, nil
+			return resp.ID, "dynamodb.service.nitro", nil
 		}
 
 		// start the container
 		if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
-			return "", fmt.Errorf("unable to start the container, %w", err)
+			return "", "", fmt.Errorf("unable to start the container, %w", err)
 		}
 
-		return containers[0].ID, nil
+		return containers[0].ID, "dynamodb.service.nitro", nil
 	}
 
-	return "", nil
+	return "", "", nil
 }
