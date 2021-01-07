@@ -120,10 +120,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 					// only perform a backup if the container is for databases
 					if c.Labels[labels.DatabaseEngine] != "" {
+						// this container needs to be running before we can backup the system
+						if c.State != "running" {
+							if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+								output.Info("unable to start the container to begin backups", name)
+								break
+							}
+						}
+
 						// get all of the databases
-						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatibility])
+						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[labels.DatabaseCompatibility])
 						if err != nil {
-							output.Info("Unable to get the databases from", name, err.Error())
+							output.Info("unable to get the databases from", name, err.Error())
 
 							break
 						}
@@ -150,7 +158,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							output.Pending("creating backup", opts.BackupName)
 
 							// backup the container
-							if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
+							if err := backup.Perform(ctx, docker, opts); err != nil {
 								output.Warning()
 								output.Info("Unable to backup database", db, err.Error())
 
@@ -225,6 +233,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 	}
 
+	// add flags to the command
 	cmd.Flags().Bool("clean", false, "remove configuration file")
 
 	return cmd
