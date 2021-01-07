@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	volumetypes "github.com/docker/docker/api/types/volume"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -52,26 +54,14 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			version := cmd.Flag("version").Value.String()
 
 			var path string
-			switch cmd.Flag("path").Value.String() == "" {
-			case false:
-				dir, err := filepath.Abs(cmd.Flag("path").Value.String())
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
+			wd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("unable to get the current directory, %w", err)
+			}
 
-				path = dir
-			default:
-				wd, err := os.Getwd()
-				if err != nil {
-					return fmt.Errorf("unable to get the current directory, %w", err)
-				}
-
-				dir, err := filepath.Abs(wd)
-				if err != nil {
-					return fmt.Errorf("unable to find the absolute path, %w", err)
-				}
-
-				path = dir
+			path, err = filepath.Abs(wd)
+			if err != nil {
+				return fmt.Errorf("unable to find the absolute path, %w", err)
 			}
 
 			// determine the command
@@ -79,9 +69,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// get the full file path
 			nodePath := filepath.Join(path, "package.json")
-
-			// set the container name to keep the ephemeral
-			containerName := name(path, version, action)
 
 			output.Pending("checking", nodePath)
 
@@ -95,15 +82,17 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
 
-			imageFilter := filters.NewArgs()
-			imageFilter.Add("label", labels.Nitro)
-			imageFilter.Add("reference", image)
+			filter := filters.NewArgs()
+			filter.Add("reference", image)
 
 			// look for the image
-			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter})
+			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
+
+			// remove the image ref filter
+			filter.Del("reference", image)
 
 			// if we don't have the image, pull it
 			if len(images) == 0 {
@@ -122,60 +111,81 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Done()
 			}
 
-			commands := append([]string{"npm"}, args...)
+			// add filters for the volume
+			filter.Add("label", labels.Type+"=npm")
+			filter.Add("label", labels.Path+"="+path)
 
-			// set filters for the container name and environment
-			containerFilter := filters.NewArgs()
-			containerFilter.Add("label", labels.Nitro)
-			containerFilter.Add("name", containerName)
-
-			// check if there is an existing container
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: containerFilter})
+			// check if there is an existing volume
+			volumes, err := docker.VolumeList(ctx, filter)
 			if err != nil {
 				return err
 			}
 
-			// check the length of the container
-			var containerID string
-			switch len(containers) {
+			// set the volume name
+			// TODO(jasonmccallister) remove this hardcoded version
+			volumeName := name(path, "14")
+
+			var pathVolume types.Volume
+			switch len(volumes.Volumes) {
 			case 1:
-				containerID = containers[0].ID
-			default:
-				// create the container
-				resp, err := docker.ContainerCreate(ctx,
-					&container.Config{
-						Image: image,
-						Cmd:   commands,
-						Tty:   false,
-						Labels: map[string]string{
-							labels.Type: "npm",
-							labels.Path: path,
-						},
-						WorkingDir: "/home/node/app",
+				pathVolume = *volumes.Volumes[0]
+			case 0:
+				// create the volume if it does not exist
+				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
+					Driver: "local",
+					Name:   volumeName,
+					Labels: map[string]string{
+						labels.Type: "npm",
+						labels.Path: path,
 					},
-					&container.HostConfig{
-						Mounts: []mount.Mount{
-							{
-								Type:   "bind",
-								Source: path,
-								Target: "/home/node/app",
-							},
-						},
-					},
-					nil,
-					nil,
-					containerName)
+				})
 				if err != nil {
-					return fmt.Errorf("unable to create container\n%w", err)
+					return fmt.Errorf("unable to create the volume, %w", err)
 				}
 
-				containerID = resp.ID
+				pathVolume = volume
+			}
+
+			commands := append([]string{"npm"}, args...)
+
+			// create the container
+			resp, err := docker.ContainerCreate(ctx,
+				&container.Config{
+					Image: image,
+					Cmd:   commands,
+					Tty:   false,
+					Labels: map[string]string{
+						labels.Type: "npm",
+						labels.Path: path,
+					},
+					WorkingDir: "/home/node/app",
+				},
+				&container.HostConfig{
+					Mounts: []mount.Mount{
+						{
+							Type:   mount.TypeVolume,
+							Source: pathVolume.Name,
+							// TODO(jasonmccallister) get the path where node sotres deps
+							Target: "/root",
+						},
+						{
+							Type:   "bind",
+							Source: path,
+							Target: "/home/node/app",
+						},
+					},
+				},
+				nil,
+				nil,
+				"")
+			if err != nil {
+				return fmt.Errorf("unable to create container\n%w", err)
 			}
 
 			output.Info("Running npm", action)
 
 			// attach to the container
-			stream, err := docker.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
+			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 				Stream: true,
 				Stdout: true,
 				Stderr: true,
@@ -187,7 +197,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			defer stream.Close()
 
 			// run the container
-			if err := docker.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
+			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
@@ -198,7 +208,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			output.Info("npm", action, "complete 🤘")
 
-			if err := docker.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
+			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{}); err != nil {
 				return err
 			}
 
@@ -208,14 +218,13 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 	// set flags for the command
 	cmd.Flags().String("version", "14", "which node version to use")
-	cmd.Flags().String("path", "", "the path to run npm commands")
 
 	return cmd
 }
 
-func name(path, version, action string) string {
+func name(path, version string) string {
 	// combine the path and version
-	n := fmt.Sprintf("%s_%s_%s_%s", path, "composer", version, action)
+	n := fmt.Sprintf("%s_%s_%s", path, "npm", version)
 
 	// make it lower case
 	n = strings.ToLower(n)
