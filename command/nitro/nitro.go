@@ -21,7 +21,6 @@ import (
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/logs"
-	"github.com/craftcms/nitro/command/mount"
 	"github.com/craftcms/nitro/command/npm"
 	"github.com/craftcms/nitro/command/queue"
 	"github.com/craftcms/nitro/command/restart"
@@ -64,7 +63,7 @@ func NewCommand() *cobra.Command {
 	}
 
 	// create the docker client
-	client, err := client.NewClientWithOpts(client.FromEnv)
+	docker, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,35 +88,34 @@ func NewCommand() *cobra.Command {
 
 	// register all of the commands
 	commands := []*cobra.Command{
-		add.NewCommand(home, client, term),
-		mount.NewCommand(home, client, term),
-		apply.NewCommand(home, client, nitrod, term),
-		clean.NewCommand(home, client, term),
+		add.NewCommand(home, docker, term),
+		apply.NewCommand(home, docker, nitrod, term),
+		clean.NewCommand(home, docker, term),
 		completion.New(),
-		composer.NewCommand(client, term),
-		context.NewCommand(home, client, term),
-		craft.NewCommand(home, client, term),
-		create.New(client, downloader, term),
-		database.NewCommand(home, client, term),
-		destroy.NewCommand(home, client, term),
-		disable.NewCommand(home, client, term),
-		enable.NewCommand(home, client, term),
-		edit.NewCommand(home, client, term),
+		composer.NewCommand(docker, term),
+		context.NewCommand(home, docker, term),
+		craft.NewCommand(home, docker, term),
+		create.New(docker, downloader, term),
+		database.NewCommand(home, docker, term),
+		destroy.NewCommand(home, docker, term),
+		disable.NewCommand(home, docker, term),
+		enable.NewCommand(home, docker, term),
+		edit.NewCommand(home, docker, term),
 		hosts.New(home, term),
-		initialize.NewCommand(home, client, term),
-		logs.NewCommand(home, client, term),
-		npm.NewCommand(client, term),
-		queue.NewCommand(home, client, term),
-		restart.New(client, term),
-		ssh.NewCommand(home, client, term),
-		start.NewCommand(client, term),
-		stop.New(client, term),
-		trust.New(client, term),
-		update.NewCommand(client, term),
-		validate.NewCommand(home, client, term),
-		version.New(client, nitrod, term),
-		xon.NewCommand(home, client, term),
-		xoff.NewCommand(home, client, term),
+		initialize.NewCommand(home, docker, term),
+		logs.NewCommand(home, docker, term),
+		npm.NewCommand(docker, term),
+		queue.NewCommand(home, docker, term),
+		restart.New(docker, term),
+		ssh.NewCommand(home, docker, term),
+		start.NewCommand(docker, term),
+		stop.New(docker, term),
+		trust.New(docker, term),
+		update.NewCommand(docker, term),
+		validate.NewCommand(home, docker, term),
+		version.New(docker, nitrod, term),
+		xon.NewCommand(home, docker, term),
+		xoff.NewCommand(home, docker, term),
 	}
 
 	// add the commands
