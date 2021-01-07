@@ -69,10 +69,15 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// get the full file path
 			composerPath := filepath.Join(path, "composer.json")
 
+			output.Pending("checking", composerPath)
+
 			// make sure the file exists
 			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
+				output.Warning()
 				return ErrNoComposerFile
 			}
+
+			output.Done()
 
 			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
