@@ -16,13 +16,28 @@ const FileName = "nitro.yml"
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
+
+	// DefaultEnvs is used to map a config to a known environment variable that is used
+	// on the container instances to their default values
+	DefaultEnvs = map[string]string{
+		"PHP_DISPLAY_ERRORS":          "on",
+		"PHP_MEMORY_LIMIT":            "512M",
+		"PHP_MAX_EXECUTION_TIME":      "5000",
+		"PHP_UPLOAD_MAX_FILESIZE":     "512M",
+		"PHP_MAX_INPUT_VARS":          "5000",
+		"PHP_POST_MAX_SIZE":           "512M",
+		"PHP_OPCACHE_ENABLE":          "0",
+		"PHP_OPCACHE_REVALIDATE_FREQ": "0",
+		"XDEBUG_MODE":                 "off",
+		"XDEBUG_SESSION":              "PHPSTORM",
+		"XDEBUG_CONFIG":               "",
+	}
 )
 
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
 	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
 	Databases []Database `yaml:"databases,omitempty"`
-	Mounts    []Mount    `yaml:"mounts,omitempty"`
 	Services  Services   `yaml:"services"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 	File      string     `yaml:"-"`
@@ -34,36 +49,63 @@ type Blackfire struct {
 	ServerToken string `yaml:"server_token,omitempty"`
 }
 
-// Mount represents a docker container that is not mounted in an nginx container
-// and does not accept routing through the proxy. It is however added to the nitro
-// network so it can access other resources.
-type Mount struct {
-	Path    string `yaml:"path"`
-	Version string `yaml:"version"`
-	PHP     PHP    `yaml:"php,omitempty"`
-	Xdebug  bool   `yaml:"xdebug"`
+// Database is the struct used to represent a database engine
+// that is a combination of a engine (e.g. mariadb, mysql, or
+// postgres), the version number, and the port. The engine
+// and version are directly related to the official docker
+// images on the docker hub.
+type Database struct {
+	Engine  string `yaml:"engine,omitempty"`
+	Version string `yaml:"version,omitempty"`
+	Port    string `yaml:"port,omitempty"`
 }
 
-// GetAbsPath gets the directory for a mount.Path,
-// It is used to create the mount for a container.
-func (m *Mount) GetAbsPath(home string) (string, error) {
-	return cleanPath(home, m.Path)
+// GetHostname returns a friendly and predictable name for a database
+// container. It is used for accessing a database by hostname. For
+// example, mysql-8.0-3306 would be the hostname to use in the .env
+// for DB_HOST.
+func (d *Database) GetHostname() (string, error) {
+	if d.Engine == "" || d.Version == "" || d.Port == "" {
+		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
+	}
+
+	return fmt.Sprintf("%s-%s-%s.nitro", d.Engine, d.Version, d.Port), nil
 }
 
-func (m *Mount) Hostname() string {
-	// remove the home directory
-	n := strings.Replace(m.Path, "~/", "", 1)
+// Services define common tools for development that should run as containers. We don't expose the volumes, ports, and
+// networking options for these types of services. We plan to support "custom" container options to make local users
+// development even better.
+type Services struct {
+	DynamoDB bool `yaml:"dynamodb"`
+	Mailhog  bool `yaml:"mailhog"`
+	Minio    bool `yaml:"minio"`
+	Redis    bool `yaml:"redis"`
+}
 
-	// replace path separator with underscores
-	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
+// Site represents a web application. It has a hostname, aliases (which
+// are alternate domains), the local path to the site, additional mounts
+// to add to the container, and the directory the index.php is located.
+type Site struct {
+	Hostname string   `yaml:"hostname"`
+	Aliases  []string `yaml:"aliases,omitempty"`
+	Path     string   `yaml:"path"`
+	Version  string   `yaml:"version"`
+	PHP      PHP      `yaml:"php,omitempty"`
+	Dir      string   `yaml:"dir"`
+	Xdebug   bool     `yaml:"xdebug"`
+}
 
-	return fmt.Sprintf("mount_%s", n)
+// GetAbsPath gets the directory for a site.Path,
+// It is used to create the mount for a sites
+// container.
+func (s *Site) GetAbsPath(home string) (string, error) {
+	return cleanPath(home, s.Path)
 }
 
 // AsEnvs takes a gateway addr and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
-func (m *Mount) AsEnvs(addr string) []string {
+func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
 	if addr == "" {
@@ -71,10 +113,10 @@ func (m *Mount) AsEnvs(addr string) []string {
 	}
 
 	// set the php vars
-	envs = append(envs, phpVars(m.PHP, m.Version)...)
+	envs = append(envs, phpVars(s.PHP, s.Version)...)
 
 	// get the xdebug vars
-	envs = append(envs, xdebugVars(m.PHP, m.Xdebug, m.Version, m.Hostname(), addr)...)
+	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, s.Hostname, addr)...)
 
 	// set the blackfire envs if available
 	// if s.Blackfire.ServerID != "" {
@@ -100,16 +142,6 @@ type PHP struct {
 	OpcacheRevalidateFreq int    `yaml:"opcache_revalidate_freq,omitempty"`
 	PostMaxSize           string `yaml:"post_max_size,omitempty"`
 	UploadMaxFileSize     string `yaml:"upload_max_file_size,omitempty"`
-}
-
-// Services define common tools for development that should run as containers. We don't expose the volumes, ports, and
-// networking options for these types of services. We plan to support "custom" container options to make local users
-// development even better.
-type Services struct {
-	DynamoDB bool `yaml:"dynamodb"`
-	Mailhog  bool `yaml:"mailhog"`
-	Minio    bool `yaml:"minio"`
-	Redis    bool `yaml:"redis"`
 }
 
 // Load is used to return the unmarshalled config, and
@@ -154,22 +186,6 @@ func (c *Config) AddSite(s Site) error {
 
 	// add the site to the list
 	c.Sites = append(c.Sites, s)
-
-	return nil
-}
-
-// AddMount takes a site and adds it to the config
-func (c *Config) AddMount(m Mount) error {
-	// check existing sites
-	for _, e := range c.Mounts {
-		// does the hostname match
-		if e.Path == m.Path {
-			return fmt.Errorf("path already exists")
-		}
-	}
-
-	// add the mount to the list
-	c.Mounts = append(c.Mounts, m)
 
 	return nil
 }
@@ -250,4 +266,104 @@ func (c *Config) Save() error {
 // GetFile returns the file location for the config
 func (c *Config) GetFile() string {
 	return c.File
+}
+
+func phpVars(php PHP, version string) []string {
+	// set the composer home so we can install plugins and
+	// updates from the control panel
+	envs := []string{"COMPOSER_HOME=/tmp"}
+
+	// if they do not specify the error... false means on
+	if !php.DisplayErrors {
+		envs = append(envs, "PHP_DISPLAY_ERRORS="+DefaultEnvs["PHP_DISPLAY_ERRORS"])
+	} else {
+		envs = append(envs, "PHP_DISPLAY_ERRORS=off")
+	}
+
+	if php.MemoryLimit == "" {
+		envs = append(envs, "PHP_MEMORY_LIMIT="+DefaultEnvs["PHP_MEMORY_LIMIT"])
+	} else {
+		envs = append(envs, "PHP_MEMORY_LIMIT="+php.MemoryLimit)
+	}
+
+	if php.MaxExecutionTime == 0 {
+		envs = append(envs, "PHP_MAX_EXECUTION_TIME="+DefaultEnvs["PHP_MAX_EXECUTION_TIME"])
+	} else {
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_EXECUTION_TIME", php.MaxExecutionTime))
+	}
+
+	if php.UploadMaxFileSize == "" {
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"])
+	} else {
+		envs = append(envs, "PHP_UPLOAD_MAX_FILESIZE="+php.UploadMaxFileSize)
+	}
+
+	if php.MaxInputVars == 0 {
+		envs = append(envs, "PHP_MAX_INPUT_VARS="+DefaultEnvs["PHP_MAX_INPUT_VARS"])
+	} else {
+		envs = append(envs, fmt.Sprintf("%s=%d", "PHP_MAX_INPUT_VARS", php.MaxInputVars))
+	}
+
+	if php.PostMaxSize == "" {
+		envs = append(envs, "PHP_POST_MAX_SIZE="+DefaultEnvs["PHP_POST_MAX_SIZE"])
+	} else {
+		envs = append(envs, fmt.Sprintf("%s=%s", "PHP_POST_MAX_SIZE", php.PostMaxSize))
+	}
+
+	// handle opcache settings
+	if php.OpcacheEnable {
+		envs = append(envs, "PHP_OPCACHE_ENABLE=1")
+	} else {
+		envs = append(envs, "PHP_OPCACHE_ENABLE="+DefaultEnvs["PHP_OPCACHE_ENABLE"])
+	}
+
+	if php.OpcacheRevalidateFreq == 0 {
+		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ="+DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"])
+	} else {
+		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", php.OpcacheRevalidateFreq))
+
+	}
+
+	return envs
+}
+
+func xdebugVars(php PHP, xdebug bool, version, hostname, addr string) []string {
+	envs := []string{}
+
+	// always set the session
+	envs = append(envs, "XDEBUG_SESSION=PHPSTORM")
+
+	// set the site name for xdebug clients
+	envs = append(envs, fmt.Sprintf("PHP_IDE_CONFIG=serverName=%s", hostname))
+
+	// if xdebug is not enabled
+	if !xdebug {
+		return append(envs, "XDEBUG_MODE=off")
+	}
+
+	switch version {
+	case "8.0", "7.4", "7.3", "7.2":
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
+		envs = append(envs, "XDEBUG_MODE=develop,debug")
+	default:
+		// use legacy xdebug settings to support older versions of php
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
+		envs = append(envs, "XDEBUG_MODE=xdebug2")
+	}
+
+	return envs
+}
+
+func cleanPath(home, path string) (string, error) {
+	p := path
+	if strings.Contains(p, "~") {
+		p = strings.Replace(p, "~", home, -1)
+	}
+
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Clean(abs), nil
 }
