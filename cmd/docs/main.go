@@ -19,6 +19,9 @@ func main() {
 	}
 
 	dir := filepath.Join(path, "docs")
+	// file the file
+	// writer := bufio.NewWriter()
+	// doc.GenMarkdownCustom(cli, )
 
 	if err := doc.GenMarkdownTree(cli, dir); err != nil {
 		log.Fatal(err)
