@@ -36,6 +36,13 @@ func sshCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// generate a list of engines for the prompt
 			var containerList []string
 			for _, c := range containers {
+				// start the container if not running
+				if c.State != "running" {
+					if err := docker.ContainerStart(cmd.Context(), c.ID, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
