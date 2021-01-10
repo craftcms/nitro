@@ -310,8 +310,11 @@ func copyToContainer(ctx context.Context, docker client.CommonAPIClient, show bo
 		importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", "/tmp/" + file.Name()}
 	default:
 		// TODO(jasonmccallister) add mysql import functionality
-		return fmt.Errorf("mysql imports have not been implemented")
+		createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+		importCmd = []string{"mysqlimport", "-host=127.0.0.1", "--user=nitro", "--password=nitro", db, "/tmp/" + file.Name()}
 	}
+
+	fmt.Println(importCmd)
 
 	// create the database
 	if _, err := execCreate(ctx, docker, containerID, createCmd, show); err != nil {
