@@ -190,6 +190,20 @@ func (c *Config) AddSite(s Site) error {
 	return nil
 }
 
+// RemoveSite takes a hostname and will remove the site by its
+// hostname from the config file.
+func (c *Config) RemoveSite(hostname string) error {
+	for i := len(c.Sites) - 1; i >= 0; i-- {
+		site := c.Sites[i]
+		if site.Hostname == hostname {
+			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to find the hostname %q to remove", hostname)
+}
+
 // DisableXdebug takes a sites hostname and sets the xdebug option
 // to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableXdebug(site string) error {
