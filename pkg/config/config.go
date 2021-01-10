@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const FileName = "nitro.yml"
+const FileName = "nitro.yaml"
 
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
