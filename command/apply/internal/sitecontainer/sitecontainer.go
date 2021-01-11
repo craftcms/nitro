@@ -144,9 +144,9 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	commands := map[string][]string{}
 
 	// check for a custom root and copt the template to the container
-	if site.Dir != "web" {
+	if site.Webroot != "web" {
 		// create the nginx file
-		conf := nginx.Generate(site.Dir)
+		conf := nginx.Generate(site.Webroot)
 
 		// create the temp file
 		tr, err := archive.Generate("default.conf", conf)

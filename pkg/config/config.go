@@ -91,7 +91,7 @@ type Site struct {
 	Path     string   `yaml:"path"`
 	Version  string   `yaml:"version"`
 	PHP      PHP      `yaml:"php,omitempty"`
-	Dir      string   `yaml:"dir"`
+	Webroot  string   `yaml:"webroot"`
 	Xdebug   bool     `yaml:"xdebug"`
 }
 

@@ -127,10 +127,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// set the webroot
-			site.Dir = root
+			site.Webroot = root
 
 			// prompt for the webroot
-			fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+			fmt.Printf("Enter the webroot for the site [%s]: ", site.Webroot)
 			for {
 				rdr := bufio.NewReader(os.Stdin)
 
@@ -141,7 +141,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// does it have spaces?
 				if strings.ContainsAny(input, " ") {
 					fmt.Println("Please enter a webroot without spaces…")
-					fmt.Printf("Enter the webroot for the site [%s]: ", site.Dir)
+					fmt.Printf("Enter the webroot for the site [%s]: ", site.Webroot)
 
 					continue
 				}
@@ -152,11 +152,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// set the input as the hostname
-				site.Dir = input
+				site.Webroot = input
 				break
 			}
 
-			output.Success("using webroot", site.Dir)
+			output.Success("using webroot", site.Webroot)
 
 			// prompt for the php version
 			versions := phpversions.Versions

@@ -14,7 +14,7 @@ func TestSite_AsEnvs(t *testing.T) {
 		Path     string
 		Version  string
 		PHP      PHP
-		Dir      string
+		Webroot  string
 		Xdebug   bool
 	}
 	type args struct {
@@ -157,7 +157,7 @@ func TestSite_AsEnvs(t *testing.T) {
 				Path:     tt.fields.Path,
 				Version:  tt.fields.Version,
 				PHP:      tt.fields.PHP,
-				Dir:      tt.fields.Dir,
+				Webroot:  tt.fields.Webroot,
 				Xdebug:   tt.fields.Xdebug,
 			}
 			if got := s.AsEnvs(tt.args.addr); !reflect.DeepEqual(got, tt.want) {
