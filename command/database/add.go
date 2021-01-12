@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -42,6 +43,11 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				return err
 			}
 
+			// sort containers by the name
+			sort.SliceStable(containers, func(i, j int) bool {
+				return containers[i].Names[0] < containers[j].Names[0]
+			})
+
 			// get all of the containers as a list
 			var engineOpts []string
 			for _, c := range containers {
@@ -51,6 +57,9 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// prompt the user for the engine to add the database
 			var containerID, databaseEngine string
 			selected, err := output.Select(os.Stdin, "Select the database engine: ", engineOpts)
+			if err != nil {
+				return err
+			}
 
 			// set the container id and db engine
 			containerID = containers[selected].ID
