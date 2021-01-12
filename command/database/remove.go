@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -42,31 +44,26 @@ func removeCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return err
 			}
 
-			// get all of the containers as a list
-			var engines []string
+			// sort containers by the name
+			sort.SliceStable(containers, func(i, j int) bool {
+				return containers[i].Names[0] < containers[j].Names[0]
+			})
+
+			var containerList []string
 			for _, c := range containers {
-				engines = append(engines, strings.TrimLeft(c.Names[0], "/"))
+				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
-			// prompt the user for the engine to add the database
-			var containerID, databaseEngine string
-			selected, err := output.Select(os.Stdin, "Select the database engine: ", engines)
+			// get the container id, name, and database from the user
+			containerID, _, compatibility, db, err := backup.Prompt(cmd.Context(), os.Stdin, docker, output, containers, containerList)
 			if err != nil {
 				return err
 			}
 
-			// set the container id and db engine
-			containerID = containers[selected].ID
-			databaseEngine = containers[selected].Labels[labels.DatabaseCompatibility]
-			if containerID == "" {
-				return fmt.Errorf("unable to get the container")
-			}
-
 			// ask the user for the database to create
-			msg := "Enter the new database name: "
+			msg := "Enter the new database to drop: "
 
 			fmt.Print(msg)
-			var db string
 			for {
 				rdr := bufio.NewReader(os.Stdin)
 				input, err := rdr.ReadString('\n')
@@ -87,7 +84,7 @@ func removeCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 
 			// set the commands based on the engine type
 			var cmds []string
-			switch databaseEngine {
+			switch compatibility {
 			case "mysql":
 				cmds = []string{"mysqladmin", "-user=root", "-pnitro", "drop", db}
 			default:
