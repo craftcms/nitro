@@ -59,8 +59,8 @@ func (o *Options) Validate() error {
 	return nil
 }
 
-// Prompt is used to ask a user for input and walk them through selecting a database engine (container) and a database to backup. It will return the container ID
-// as the first string, the database name to backup, and the last return is an error.
+// Prompt is used to ask a user for input and walk them through selecting a database engine (container) and a database. It will return the container ID
+// as the first string, the database name, and the last return is an error.
 func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPIClient, output terminal.Outputer, containers []types.Container, containerList []string) (string, string, string, string, error) {
 	// prompt the user for which database to backup
 	selected, err := output.Select(reader, "Which database engine? ", containerList)
