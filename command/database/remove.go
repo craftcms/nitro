@@ -1,9 +1,7 @@
 package database
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,38 +47,34 @@ func removeCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return containers[i].Names[0] < containers[j].Names[0]
 			})
 
+			// generate a list of engines for the prompt
 			var containerList []string
 			for _, c := range containers {
 				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
 			}
 
-			// get the container id, name, and database from the user
-			containerID, _, compatibility, db, err := backup.Prompt(cmd.Context(), os.Stdin, docker, output, containers, containerList)
+			// prompt the user for which database to backup
+			engine, err := output.Select(cmd.InOrStdin(), "Which database engine? ", containerList)
 			if err != nil {
 				return err
 			}
 
-			// ask the user for the database to create
-			msg := "Enter the new database to drop: "
+			id := containers[engine].ID
+			compatibility := containers[engine].Labels[labels.DatabaseCompatibility]
 
-			fmt.Print(msg)
-			for {
-				rdr := bufio.NewReader(os.Stdin)
-				input, err := rdr.ReadString('\n')
-				if err != nil {
-					return err
-				}
-
-				if !strings.ContainsAny(input, " -") {
-					db = strings.TrimSpace(input)
-					break
-				}
-
-				fmt.Println("  no spaces or hyphens are allowed…")
-				fmt.Print(msg)
+			// get all of the databases
+			databases, err := backup.Databases(cmd.Context(), docker, id, compatibility)
+			if err != nil {
+				return err
 			}
 
-			output.Pending("creating database", db)
+			// ask the user which database
+			selected, err := output.Select(cmd.InOrStdin(), "Which datbase should we remove? ", databases)
+			if err != nil {
+				return err
+			}
+
+			db := databases[selected]
 
 			// set the commands based on the engine type
 			var cmds []string
@@ -88,11 +82,13 @@ func removeCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			case "mysql":
 				cmds = []string{"mysqladmin", "-user=root", "-pnitro", "drop", db}
 			default:
-				cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c "DROP DATABASE IF EXISTS %s;"`, db)}
+				cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c DROP DATABASE IF EXISTS %s;`, db)}
 			}
 
+			output.Pending("removing", db)
+
 			// execute the command to create the database
-			if _, err := execCreate(cmd.Context(), docker, containerID, cmds, show); err != nil {
+			if _, err := execCreate(cmd.Context(), docker, id, cmds, show); err != nil {
 				return err
 			}
 
