@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -40,6 +41,11 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			if err != nil {
 				return err
 			}
+
+			// sort containers by the name
+			sort.SliceStable(containers, func(i, j int) bool {
+				return containers[i].Names[0] < containers[j].Names[0]
+			})
 
 			// generate a list of engines for the prompt
 			var containerList []string
