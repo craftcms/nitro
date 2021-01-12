@@ -357,6 +357,23 @@ func TestConfig_EnableXdebug(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "struct is not modified when xdebug is already true",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "somesite",
+						Xdebug:   true,
+					},
+					{
+						Hostname: "anothersite",
+						Xdebug:   true,
+					},
+				},
+			},
+			args:    args{site: "somesite"},
+			wantErr: false,
+		},
+		{
 			name: "can enable xdebug for a site",
 			fields: fields{
 				Sites: []Site{

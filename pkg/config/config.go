@@ -226,7 +226,7 @@ func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
-			// replace the site if
+			// replace the site
 			if s.Xdebug {
 				return nil
 			}
