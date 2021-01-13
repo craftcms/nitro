@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	volumetypes "github.com/docker/docker/api/types/volume"
+
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -29,7 +31,7 @@ var (
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
 )
 
-func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, volume *types.Volume, networkID string) error {
+func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, networkID string) error {
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro+"=true")
 	filter.Add("reference", ProxyImage)
@@ -55,6 +57,49 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		if _, err := buf.ReadFrom(rdr); err != nil {
 			return fmt.Errorf("unable to read the output from pulling the image, %w", err)
 		}
+
+		output.Done()
+	}
+
+	filter.Del("reference", ProxyImage)
+	// check if the volume needs to be created
+	volumes, err := docker.VolumeList(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("unable to list volumes, %w", err)
+	}
+
+	// since the filter is fuzzy, do an exact match (e.g. filtering for
+	// `nitro-dev` will also return `nitro-dev-host`
+	var skipVolume bool
+	var volume *types.Volume
+	for _, v := range volumes.Volumes {
+		if v.Name == "nitro" {
+			skipVolume = true
+			volume = v
+		}
+	}
+
+	// check if the volume needs to be created
+	switch skipVolume {
+	case true:
+		output.Success("volume ready")
+	default:
+		output.Pending("creating volume")
+
+		// create a volume with the same name of the machine
+		resp, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
+			Driver: "local",
+			Name:   "nitro",
+			Labels: map[string]string{
+				labels.Nitro:  "true",
+				labels.Volume: "nitro",
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("unable to create the volume, %w", err)
+		}
+
+		volume = &resp
 
 		output.Done()
 	}
