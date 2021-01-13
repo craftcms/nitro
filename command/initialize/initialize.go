@@ -8,7 +8,6 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -86,50 +85,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Done()
 			}
 
-			// check if the volume needs to be created
-			volumes, err := docker.VolumeList(ctx, filter)
-			if err != nil {
-				return fmt.Errorf("unable to list volumes, %w", err)
-			}
-
-			// since the filter is fuzzy, do an exact match (e.g. filtering for
-			// `nitro-dev` will also return `nitro-dev-host`
-			var skipVolume bool
-			var volume *types.Volume
-			for _, v := range volumes.Volumes {
-				if v.Name == "nitro" {
-					skipVolume = true
-					volume = v
-				}
-			}
-
-			// check if the volume needs to be created
-			switch skipVolume {
-			case true:
-				output.Success("volume ready")
-			default:
-				output.Pending("creating volume")
-
-				// create a volume with the same name of the machine
-				resp, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
-					Driver: "local",
-					Name:   "nitro",
-					Labels: map[string]string{
-						labels.Nitro:  "true",
-						labels.Volume: "nitro",
-					},
-				})
-				if err != nil {
-					return fmt.Errorf("unable to create the volume, %w", err)
-				}
-
-				volume = &resp
-
-				output.Done()
-			}
-
 			// create the proxy container
-			if err := proxycontainer.Create(cmd.Context(), docker, output, volume, networkID); err != nil {
+			if err := proxycontainer.Create(cmd.Context(), docker, output, networkID); err != nil {
 				return err
 			}
 
