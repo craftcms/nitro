@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -104,6 +105,11 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return err
 			}
 
+			// sort containers by the name
+			sort.SliceStable(containers, func(i, j int) bool {
+				return containers[i].Names[0] < containers[j].Names[0]
+			})
+
 			// get all of the containers as a list
 			var engineOpts []string
 			for _, c := range containers {
@@ -153,7 +159,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				if err != nil {
 					return err
 				}
-
 			default:
 				// read the file and create a reader
 				content, err := ioutil.ReadFile(file.Name())
