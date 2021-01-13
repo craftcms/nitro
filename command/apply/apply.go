@@ -30,9 +30,6 @@ import (
 )
 
 var (
-	// ErrNoProxyContainer is returned when the proxy container is not found for an environment
-	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
-
 	knownContainers = map[string]bool{}
 )
 
@@ -195,11 +192,14 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// check the proxy and ensure its started
 			_, err = proxycontainer.FindAndStart(ctx, docker)
-			if errors.Is(err, ErrNoProxyContainer) {
-				output.Info("unable to find the nitro proxy…\n run `nitro init` to resolve")
-				return nil
+			if errors.Is(err, proxycontainer.ErrNoProxyContainer) {
+				// create the proxy
+				if err := proxycontainer.Create(cmd.Context(), docker, output, network.ID); err != nil {
+					output.Info("unable to find the nitro proxy…\n run `nitro init` to resolve")
+					return err
+				}
 			}
-			if err != nil {
+			if err != nil && !errors.Is(err, proxycontainer.ErrNoProxyContainer) {
 				return err
 			}
 
