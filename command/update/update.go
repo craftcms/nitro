@@ -17,11 +17,11 @@ import (
 var (
 	dockerImages = map[string]string{
 		// "docker.io/craftcms/nginx:8.0-dev": "nginx:8.0-dev",
-		"docker.io/craftcms/nginx:7.4-dev":                  "nginx:7.4-dev",
-		"docker.io/craftcms/nginx:7.3-dev":                  "nginx:7.3-dev",
-		"docker.io/craftcms/nginx:7.2-dev":                  "nginx:7.2-dev",
-		"docker.io/craftcms/nginx:7.1-dev":                  "nginx:7.1-dev",
-		"docker.io/craftcms/nitro-proxy:" + version.Version: "nitro-proxy:" + version.Version,
+		"nginx:7.4-dev":                  "docker.io/craftcms/nginx:7.4-dev",
+		"nginx:7.3-dev":                  "docker.io/craftcms/nginx:7.3-dev",
+		"nginx:7.2-dev":                  "docker.io/craftcms/nginx:7.2-dev",
+		"nginx:7.1-dev":                  "docker.io/craftcms/nginx:7.1-dev",
+		"nitro-proxy:" + version.Version: "docker.io/craftcms/nitro-proxy:" + version.Version,
 		// "docker.io/craftcms/nginx:7.0-dev": "nginx:7.0-dev",
 	}
 )
@@ -38,7 +38,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			ctx := cmd.Context()
 
 			// update all of the images
-			for image, name := range dockerImages {
+			for name, image := range dockerImages {
 				output.Pending("updating", name)
 
 				// pull the image
@@ -70,13 +70,12 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// check all of the containers
 			for _, c := range containers {
 				// only show the site containers and proxy container
-				if c.Labels[labels.Host] == "" || c.Labels[labels.Proxy] == "" {
+				if c.Labels[labels.Type] == "dynamodb" || c.Labels[labels.Type] == "mailhog" || c.Labels[labels.Type] == "minio" || c.Labels[labels.Type] == "redis" {
 					continue
 				}
 
 				// if the images match, we are up to date
 				if _, ok := dockerImages[c.Image]; ok {
-					fmt.Println(c.Image)
 					continue
 				}
 
