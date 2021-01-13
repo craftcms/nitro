@@ -251,11 +251,51 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Done()
 				}
 
-				// check dynamodb service
+				// check mailhog service
 				if cfg.Services.Mailhog {
 					output.Pending("checking mailhog service")
 
 					id, hostname, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
+					if err != nil {
+						return err
+					}
+
+					if id != "" {
+						knownContainers[id] = true
+					}
+
+					if hostname != "" {
+						hostnames = append(hostnames, hostname)
+					}
+
+					output.Done()
+				}
+
+				// check minio service
+				if cfg.Services.Minio {
+					output.Pending("checking minio service")
+
+					id, hostname, err := minio(ctx, docker, cfg.Services.Minio, network.ID)
+					if err != nil {
+						return err
+					}
+
+					if id != "" {
+						knownContainers[id] = true
+					}
+
+					if hostname != "" {
+						hostnames = append(hostnames, hostname)
+					}
+
+					output.Done()
+				}
+
+				// check redis service
+				if cfg.Services.Redis {
+					output.Pending("checking redis service")
+
+					id, hostname, err := redis(ctx, docker, cfg.Services.Redis, network.ID)
 					if err != nil {
 						return err
 					}
@@ -384,6 +424,22 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 			Hostname: s.Hostname,
 			Aliases:  strings.Join(s.Aliases, ","),
 			Port:     8080,
+		}
+	}
+
+	// check the mailhog service
+	if cfg.Services.Mailhog {
+		sites["mailhog.service.internal"] = &protob.Site{
+			Hostname: "mailhog.service.internal",
+			Port:     8025,
+		}
+	}
+
+	// check the minio service
+	if cfg.Services.Minio {
+		sites["minio.service.internal"] = &protob.Site{
+			Hostname: "minio.service.internal",
+			Port:     9000,
 		}
 	}
 

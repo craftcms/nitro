@@ -223,7 +223,7 @@ func TestDatabase_GetHostname(t *testing.T) {
 		{
 			name:    "can get the hostname for a database container",
 			fields:  fields{Engine: "mysql", Version: "5.7", Port: "3306"},
-			want:    "mysql-5.7-3306.nitro",
+			want:    "mysql-5.7-3306.database.nitro",
 			wantErr: false,
 		},
 		{

@@ -69,7 +69,7 @@ func (d *Database) GetHostname() (string, error) {
 		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
 	}
 
-	return fmt.Sprintf("%s-%s-%s.nitro", d.Engine, d.Version, d.Port), nil
+	return fmt.Sprintf("%s-%s-%s.database.nitro", d.Engine, d.Version, d.Port), nil
 }
 
 // Services define common tools for development that should run as containers. We don't expose the volumes, ports, and

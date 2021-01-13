@@ -5,26 +5,26 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-
-	"github.com/craftcms/nitro/pkg/labels"
 )
 
 var (
-	// MailhogImage is the image to use for the mailhog container
-	MailhogImage = "docker.io/mailhog/mailhog:latest"
-	MailhogHost  = "mailhog.service.nitro"
+	// RedisImage is the image to use for the redis container
+	RedisImage = "docker.io/library/redis:latest"
+	// RedisHost is the name for the container
+	RedisHost = "redis.service.nitro"
 )
 
-func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, string, error) {
+func redis(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, string, error) {
 	// add the filter
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Type+"=mailhog")
+	filter.Add("label", labels.Type+"=redis")
 
 	if enabled {
 		// get a list of containers
@@ -35,7 +35,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 
 		if len(containers) == 0 {
 			// pull the image
-			rdr, err := docker.ImagePull(ctx, MailhogImage, types.ImagePullOptions{})
+			rdr, err := docker.ImagePull(ctx, RedisImage, types.ImagePullOptions{})
 			if err != nil {
 				return "", "", err
 			}
@@ -46,40 +46,28 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 			}
 
 			// configure the service
-			smtpPort, err := nat.NewPort("tcp/udp", "1025")
-			if err != nil {
-				return "", "", fmt.Errorf("unable to create the port, %w", err)
-			}
-			httpPort, err := nat.NewPort("tcp", "8025")
-
+			port, err := nat.NewPort("tcp", "6379")
 			if err != nil {
 				return "", "", fmt.Errorf("unable to create the port, %w", err)
 			}
 
 			containerConfig := &container.Config{
-				Image: MailhogImage,
+				Image: RedisImage,
 				Labels: map[string]string{
 					labels.Nitro: "true",
-					labels.Type:  "mailhog",
+					labels.Type:  "redis",
 				},
 				ExposedPorts: nat.PortSet{
-					smtpPort: struct{}{},
-					httpPort: struct{}{},
+					port: struct{}{},
 				},
 			}
 
 			hostconfig := &container.HostConfig{
 				PortBindings: map[nat.Port][]nat.PortBinding{
-					smtpPort: {
+					port: {
 						{
 							HostIP:   "127.0.0.1",
-							HostPort: "1025",
-						},
-					},
-					httpPort: {
-						{
-							HostIP:   "127.0.0.1",
-							HostPort: "8025",
+							HostPort: "6379",
 						},
 					},
 				},
@@ -94,7 +82,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 			}
 
 			// create the container
-			resp, err := docker.ContainerCreate(ctx, containerConfig, hostconfig, networkConfig, nil, MailhogHost)
+			resp, err := docker.ContainerCreate(ctx, containerConfig, hostconfig, networkConfig, nil, RedisHost)
 			if err != nil {
 				return "", "", fmt.Errorf("unable to create the container, %w", err)
 			}
@@ -104,7 +92,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 				return "", "", fmt.Errorf("unable to start the container, %w", err)
 			}
 
-			return resp.ID, MailhogHost, nil
+			return resp.ID, RedisHost, nil
 		}
 
 		// start the container
@@ -112,7 +100,7 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 			return "", "", fmt.Errorf("unable to start the container, %w", err)
 		}
 
-		return containers[0].ID, MailhogHost, nil
+		return containers[0].ID, RedisHost, nil
 	}
 
 	return "", "", nil
