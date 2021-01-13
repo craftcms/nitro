@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/craftcms/nitro/pkg/helpers"
 	"gopkg.in/yaml.v3"
@@ -41,6 +42,8 @@ type Config struct {
 	Services  Services   `yaml:"services"`
 	Sites     []Site     `yaml:"sites,omitempty"`
 	File      string     `yaml:"-"`
+
+	rw sync.RWMutex
 }
 
 // Blackfire allows users to setup their containers to use blackfire locally.
@@ -193,6 +196,9 @@ func (c *Config) AddSite(s Site) error {
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(hostname string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	for i := len(c.Sites) - 1; i >= 0; i-- {
 		site := c.Sites[i]
 		if site.Hostname == hostname {
@@ -207,6 +213,9 @@ func (c *Config) RemoveSite(hostname string) error {
 // DisableXdebug takes a sites hostname and sets the xdebug option
 // to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableXdebug(site string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -223,6 +232,9 @@ func (c *Config) DisableXdebug(site string) error {
 // EnableXdebug takes a sites hostname and sets the xdebug option
 // to true. If the site cannot be found, it returns an error.
 func (c *Config) EnableXdebug(site string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -242,6 +254,9 @@ func (c *Config) EnableXdebug(site string) error {
 
 // Save takes a file path and marshals the config into a file.
 func (c *Config) Save() error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
 		// create the .nitro directory if it does not exist
