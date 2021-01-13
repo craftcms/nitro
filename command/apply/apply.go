@@ -429,16 +429,16 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 
 	// check the mailhog service
 	if cfg.Services.Mailhog {
-		sites["mailhog.service.internal"] = &protob.Site{
-			Hostname: "mailhog.service.internal",
+		sites["mailhog.service.nitro"] = &protob.Site{
+			Hostname: "mailhog.service.nitro",
 			Port:     8025,
 		}
 	}
 
 	// check the minio service
 	if cfg.Services.Minio {
-		sites["minio.service.internal"] = &protob.Site{
-			Hostname: "minio.service.internal",
+		sites["minio.service.nitro"] = &protob.Site{
+			Hostname: "minio.service.nitro",
 			Port:     9000,
 		}
 	}
