@@ -46,6 +46,42 @@ func TestVerifyRemoved(t *testing.T) {
 			wantErr:                    false,
 		},
 		{
+			name: "container stop returns error",
+			args: args{
+				ctx: context.TODO(),
+				spy: &mockClient{
+					containers: []types.Container{
+						{
+							ID:    "some-random-id",
+							State: "running",
+						},
+					},
+					containerStopError: fmt.Errorf("docker container stop error"),
+				},
+			},
+			wantContainerStopID: "some-random-id",
+			wantErr:             true,
+		},
+		{
+			name: "container remove returns error",
+			args: args{
+				ctx: context.TODO(),
+				spy: &mockClient{
+					containers: []types.Container{
+						{
+							ID:    "some-random-id",
+							State: "running",
+						},
+					},
+					containerRemoveError: fmt.Errorf("docker container remove error"),
+				},
+			},
+			wantContainerStopID:        "some-random-id",
+			wantContainerRemoveID:      "some-random-id",
+			wantContainerRemoveOptions: types.ContainerRemoveOptions{RemoveVolumes: true},
+			wantErr:                    true,
+		},
+		{
 			name: "non running containers do not get a stop request",
 			args: args{
 				ctx: context.TODO(),
