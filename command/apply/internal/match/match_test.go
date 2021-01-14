@@ -180,6 +180,31 @@ func TestSite(t *testing.T) {
 		want bool
 	}{
 		{
+			name: "mismatched paths return false",
+			args: args{
+				home: "testdata/example-site",
+				site: config.Site{
+					Hostname: "newname",
+					Path:     "testdata/example-site",
+					Version:  "7.4",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Labels: map[string]string{
+							labels.Host: "newname",
+						},
+					},
+					Mounts: []types.MountPoint{
+						{
+							Source: "testdata/update-path",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
 			name: "hostname updates return false using labels",
 			args: args{
 				home: "testdata/example-site",
