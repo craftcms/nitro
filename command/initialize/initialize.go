@@ -32,7 +32,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// check if there is a config file
 			_, err := config.Load(home)
 			if errors.Is(err, config.ErrNoConfigFile) {
-				if err := setup.FirstTime(home, output); err != nil {
+				// walk the user through the first time setup
+				if err := setup.FirstTime(home, cmd.InOrStdin(), output); err != nil {
 					return err
 				}
 			}

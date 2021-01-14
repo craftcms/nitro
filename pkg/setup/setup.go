@@ -1,7 +1,9 @@
 package setup
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,21 +17,18 @@ import (
 var (
 	mysqlDefaultPort    = 3306
 	postgresDefaultPort = 5432
-	redisDefaultPort    = 6379
 )
 
 // FirstTime is used when there is no configuration file found in a users
 // home/.nitro directory. We do not prompt for input such as memory, cpu,
 // disk space in version 2 as that is defined and managed at the docker
 // level. If anything fails, we return an error.
-func FirstTime(home string, output terminal.Outputer) error {
-	c := config.Config{
-		File: filepath.Join(home, ".nitro", config.FileName),
-	}
+func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
+	c := config.Config{File: filepath.Join(home, ".nitro", config.FileName)}
 
 	output.Info("Setting up Nitro…")
 
-	mysql, err := confirm("Would you like to use MySQL", true)
+	mysql, err := confirm(reader, "Would you like to use MySQL", true)
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,7 @@ func FirstTime(home string, output terminal.Outputer) error {
 	if mysql {
 		// prompt for the version
 		opts := []string{"8.0", "5.7", "5.6"}
-		selected, err := output.Select(os.Stderr, "Select the version of MySQL ", opts)
+		selected, err := output.Select(os.Stdin, "Select the version of MySQL ", opts)
 		if err != nil {
 			return err
 		}
@@ -65,7 +64,7 @@ func FirstTime(home string, output terminal.Outputer) error {
 		})
 	}
 
-	postgres, err := confirm("Would you like to use PostgreSQL", true)
+	postgres, err := confirm(reader, "Would you like to use PostgreSQL", true)
 	if err != nil {
 		return err
 	}
@@ -73,7 +72,7 @@ func FirstTime(home string, output terminal.Outputer) error {
 	if postgres {
 		// prompt for the version
 		opts := []string{"13", "12", "11", "10", "9"}
-		selected, err := output.Select(os.Stderr, "Select the version of PostgreSQL ", opts)
+		selected, err := output.Select(os.Stdin, "Select the version of PostgreSQL ", opts)
 		if err != nil {
 			return err
 		}
@@ -101,7 +100,7 @@ func FirstTime(home string, output terminal.Outputer) error {
 		})
 	}
 
-	redis, err := confirm("Would you like to use Redis", true)
+	redis, err := confirm(reader, "Would you like to use Redis", false)
 	if err != nil {
 		return err
 	}
@@ -122,74 +121,28 @@ func FirstTime(home string, output terminal.Outputer) error {
 	return nil
 }
 
-func confirm(msg string, fallback bool) (bool, error) {
+// Would you like to use PostgreSQL [Y/n]?
+func confirm(rdr io.Reader, msg string, fallback bool) (bool, error) {
 	if fallback {
-		fmt.Printf("%s [Y/n]? ", msg)
+		fmt.Printf("%s [Y/n] ", msg)
 	} else {
-		fmt.Printf("%s [y/N]? ", msg)
+		fmt.Printf("%s [y/N] ", msg)
 	}
 
-	// prompt for confirmation
-	var input string
-	_, err := fmt.Scanln(&input)
-	if err != nil && err.Error() != "unexpected newline" {
-		return false, fmt.Errorf("unable to provide a prompt, %w", err)
-	}
-
-	// check for empty newline and use the default
-	if err != nil && err.Error() == "unexpected newline" {
-		return fallback, nil
-	}
-
-	// read the confirmation from the input
-	resp := strings.TrimSpace(input)
-	for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
-		if resp == answer {
-			fallback = true
-		}
-	}
-
-	return fallback, nil
-}
-
-func setupPostgres() (bool, error) {
-	fmt.Print("Would you like to use PostgreSQL [Y/n]? ")
+	r := bufio.NewReader(rdr)
 
 	// prompt the user for confirmation
-	var response string
-	_, err := fmt.Scanln(&response)
+	response, err := r.ReadString('\n')
 	if err != nil {
-		return false, fmt.Errorf("unable to provide a prompt, %w", err)
+		return false, fmt.Errorf("unable to read input, %w", err)
 	}
 
-	var confirm bool
 	resp := strings.TrimSpace(response)
 	for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
 		if resp == answer {
-			confirm = true
+			return true, nil
 		}
 	}
 
-	return confirm, nil
-}
-
-func setupRedis() (bool, error) {
-	fmt.Print("Would you like to use Redis [Y/n]? ")
-
-	// prompt the user for confirmation
-	var response string
-	_, err := fmt.Scanln(&response)
-	if err != nil {
-		return false, fmt.Errorf("unable to provide a prompt, %w", err)
-	}
-
-	var confirm bool
-	resp := strings.TrimSpace(response)
-	for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
-		if resp == answer {
-			confirm = true
-		}
-	}
-
-	return confirm, nil
+	return false, nil
 }
