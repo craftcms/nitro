@@ -13,6 +13,39 @@ import (
 	"github.com/docker/docker/client"
 )
 
+func TestVerifyCreated(t *testing.T) {
+	type args struct {
+		ctx       context.Context
+		cli       client.CommonAPIClient
+		networkID string
+		output    terminal.Outputer
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantID       string
+		wantHostname string
+		wantErr      bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			id, hostname, err := VerifyCreated(tt.args.ctx, tt.args.cli, tt.args.networkID, tt.args.output)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("VerifyCreated() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if id != tt.wantID {
+				t.Errorf("VerifyCreated() got = %v, want %v", id, tt.wantID)
+			}
+			if hostname != tt.wantHostname {
+				t.Errorf("VerifyCreated() got1 = %v, want %v", hostname, tt.wantHostname)
+			}
+		})
+	}
+}
+
 func TestVerifyRemoved(t *testing.T) {
 	type args struct {
 		ctx    context.Context
