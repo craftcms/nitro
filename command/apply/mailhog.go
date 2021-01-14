@@ -51,7 +51,6 @@ func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, n
 				return "", "", fmt.Errorf("unable to create the port, %w", err)
 			}
 			httpPort, err := nat.NewPort("tcp", "8025")
-
 			if err != nil {
 				return "", "", fmt.Errorf("unable to create the port, %w", err)
 			}
