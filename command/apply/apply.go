@@ -143,7 +143,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// when we call commands from other commands (e.g. init)
 				// the context could be nil, so we set it to the parent
 				// context just in case.
-				ctx = cmd.Parent().Context()
+				ctx = context.Background()
 			}
 			var hostnames []string
 
@@ -194,7 +194,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			_, err = proxycontainer.FindAndStart(ctx, docker)
 			if errors.Is(err, proxycontainer.ErrNoProxyContainer) {
 				// create the proxy
-				if err := proxycontainer.Create(cmd.Context(), docker, output, network.ID); err != nil {
+				if err := proxycontainer.Create(ctx, docker, output, network.ID); err != nil {
 					output.Info("unable to find the nitro proxy…\n run `nitro init` to resolve")
 					return err
 				}
