@@ -21,7 +21,7 @@ var (
 	MailhogHost  = "mailhog.service.nitro"
 )
 
-func mailhog(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, string, error) {
+func mailhogService(ctx context.Context, docker client.CommonAPIClient, enabled bool, networkID string) (string, string, error) {
 	// add the filter
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Type+"=mailhog")

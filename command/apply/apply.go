@@ -24,6 +24,7 @@ import (
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
+	"github.com/craftcms/nitro/pkg/services/mailhog"
 	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
@@ -252,10 +253,16 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 
 				// check mailhog service
-				if cfg.Services.Mailhog {
+				switch cfg.Services.Mailhog {
+				case false:
+					// make sure the service container is removed
+					if err := mailhog.VerifyRemoved(ctx, docker, output); err != nil {
+						return err
+					}
+				default:
 					output.Pending("checking mailhog service")
 
-					id, hostname, err := mailhog(ctx, docker, cfg.Services.Mailhog, network.ID)
+					id, hostname, err := mailhogService(ctx, docker, cfg.Services.Mailhog, network.ID)
 					if err != nil {
 						return err
 					}

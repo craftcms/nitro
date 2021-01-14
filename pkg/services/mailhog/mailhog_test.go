@@ -16,7 +16,7 @@ import (
 func TestVerifyCreated(t *testing.T) {
 	type args struct {
 		ctx       context.Context
-		cli       client.CommonAPIClient
+		spy       *mockClient
 		networkID string
 		output    terminal.Outputer
 	}
@@ -31,7 +31,7 @@ func TestVerifyCreated(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, hostname, err := VerifyCreated(tt.args.ctx, tt.args.cli, tt.args.networkID, tt.args.output)
+			id, hostname, err := VerifyCreated(tt.args.ctx, tt.args.spy, tt.args.networkID, tt.args.output)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("VerifyCreated() error = %v, wantErr %v", err, tt.wantErr)
 				return
