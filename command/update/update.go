@@ -3,6 +3,7 @@ package update
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -80,17 +81,23 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					continue
 				}
 
+				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing")
+
 				// stop the container if it is running
 				if c.State == "running" {
 					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+						output.Warning()
 						return err
 					}
 				}
 
 				// remove the container
 				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					output.Warning()
 					return err
 				}
+
+				output.Done()
 			}
 
 			output.Info("Images updated 👍, applying changes…")
