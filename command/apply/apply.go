@@ -24,8 +24,8 @@ import (
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
-	"github.com/craftcms/nitro/pkg/services/mailhog"
 	"github.com/craftcms/nitro/pkg/sudo"
+	"github.com/craftcms/nitro/pkg/svc/mailhog"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
 )

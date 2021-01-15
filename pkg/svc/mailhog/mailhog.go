@@ -57,6 +57,8 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			return "", "", fmt.Errorf("unable to read output while pulling image, %w", err)
 		}
 
+		// TODO(jasonmccallister) set the nitro env overrides
+
 		// configure the service ports
 		smtpPort, err := nat.NewPort("tcp/udp", "1025")
 		if err != nil {
@@ -125,11 +127,9 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		if err := cli.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
 			return "", "", fmt.Errorf("unable to start the container, %w", err)
 		}
-
-		return c.ID, Host, nil
 	}
 
-	return "", "", fmt.Errorf("unable to find or create the %s service container", Host)
+	return containers[0].ID, Host, nil
 }
 
 // VerifyRemoved will try verify the container is not created for the mailhog service. If we find any containers that are
