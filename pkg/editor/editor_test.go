@@ -8,8 +8,7 @@ import (
 
 func TestGetPreferredEditorFromEnvironment(t *testing.T) {
 	type args struct {
-		goos string
-		env  string
+		env string
 	}
 	tests := []struct {
 		name string
@@ -18,18 +17,13 @@ func TestGetPreferredEditorFromEnvironment(t *testing.T) {
 	}{
 		{
 			name: "linux returns default",
-			args: args{goos: "linux"},
+			args: args{},
 			want: "vim",
 		},
 		{
 			name: "linux returns editor from env",
-			args: args{goos: "linux", env: "nano"},
+			args: args{env: "nano"},
 			want: "nano",
-		},
-		{
-			name: "windows returns notepad",
-			args: args{goos: "windows"},
-			want: "notepad.exe",
 		},
 	}
 	for _, tt := range tests {
@@ -39,7 +33,7 @@ func TestGetPreferredEditorFromEnvironment(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetPreferredEditorFromEnvironment(tt.args.goos); got != tt.want {
+			if got := GetPreferredEditorFromEnvironment(); got != tt.want {
 				t.Errorf("GetPreferredEditorFromEnvironment() = %v, want %v", got, tt.want)
 			}
 		})
