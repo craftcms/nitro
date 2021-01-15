@@ -25,7 +25,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			_, err = editor.CaptureInputFromEditor(cfg.GetFile(), editor.PreferredEditorResolver())
+			_, err = editor.CaptureInputFromEditor(cfg.GetFile(), editor.GetPreferredEditorFromEnvironment)
 
 			return err
 		},
