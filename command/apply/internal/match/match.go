@@ -36,8 +36,11 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 		return false
 	}
 
-	if path != container.Mounts[0].Source {
-		return false
+	// check the path
+	if len(container.Mounts) > 0 {
+		if path != container.Mounts[0].Source {
+			return false
+		}
 	}
 
 	// run the final check on the environment variables

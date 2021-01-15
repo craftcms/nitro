@@ -1,6 +1,8 @@
 package match
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -169,6 +171,11 @@ func Test_checkEnvs(t *testing.T) {
 }
 
 func TestSite(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	type args struct {
 		home      string
 		site      config.Site
@@ -197,7 +204,7 @@ func TestSite(t *testing.T) {
 					},
 					Mounts: []types.MountPoint{
 						{
-							Source: "testdata/update-path",
+							Source: filepath.Join(wd, "testdata", "new-path"),
 						},
 					},
 				},
