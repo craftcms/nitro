@@ -15,7 +15,7 @@ const DefaultEditor = "vim"
 
 // PreferredEditorResolver is a function that returns an editor that the user
 // prefers to use, such as the configured `$EDITOR` environment variable.
-type PreferredEditorResolver func(goos string) string
+type PreferredEditorResolver func() string
 
 // GetPreferredEditorFromEnvironment returns the user's editor as defined by the
 // `$EDITOR` environment variable, or the `DefaultEditor` if it is not set.
@@ -48,7 +48,7 @@ func resolveEditorArguments(executable string, filename string) []string {
 // OpenFileInEditor opens filename in a text editor.
 func OpenFileInEditor(filename string, resolveEditor PreferredEditorResolver) error {
 	// Get the full executable path for the editor.
-	executable, err := exec.LookPath(resolveEditor(runtime.GOOS))
+	executable, err := exec.LookPath(resolveEditor())
 	if err != nil {
 		return err
 	}
