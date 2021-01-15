@@ -25,8 +25,10 @@ import (
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/sudo"
+	"github.com/craftcms/nitro/pkg/svc/dynamodb"
 	"github.com/craftcms/nitro/pkg/svc/mailhog"
 	"github.com/craftcms/nitro/pkg/svc/minio"
+	"github.com/craftcms/nitro/pkg/svc/redis"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
 )
@@ -230,103 +232,124 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
-			if checkServices(cfg) {
-				output.Info("Checking services…")
+			output.Info("Checking services…")
 
-				// check dynamodb service
-				if cfg.Services.DynamoDB {
-					output.Pending("checking dynamodb service")
+			// check dynamodb service
+			switch cfg.Services.DynamoDB {
+			case false:
+				output.Pending("checking dynamodb service")
 
-					id, hostname, err := dynamodb(ctx, docker, cfg.Services.DynamoDB, network.ID)
-					if err != nil {
-						return err
-					}
-
-					if id != "" {
-						knownContainers[id] = true
-					}
-
-					if hostname != "" {
-						hostnames = append(hostnames, hostname)
-					}
-
-					output.Done()
+				if err := dynamodb.VerifyRemoved(ctx, docker, output); err != nil {
+					output.Warning()
+					return err
 				}
 
-				// check mailhog service
-				switch cfg.Services.Mailhog {
-				case false:
-					// make sure the service container is removed
-					if err := mailhog.VerifyRemoved(ctx, docker, output); err != nil {
-						return err
-					}
-				default:
-					output.Pending("checking mailhog service")
+				output.Done()
+			default:
+				output.Pending("checking dynamodb service")
 
-					// verify the mailhog container is created
-					id, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
-					if err != nil {
-						return err
-					}
-
-					if id != "" {
-						knownContainers[id] = true
-					}
-
-					if hostname != "" {
-						hostnames = append(hostnames, hostname)
-					}
-
-					output.Done()
+				id, hostname, err := dynamodb.VerifyCreated(ctx, docker, network.ID, output)
+				if err != nil {
+					return err
 				}
 
-				// check minio service
-				switch cfg.Services.Minio {
-				case false:
-					// make sure the service container is removed
-					err := minio.VerifyRemoved(ctx, docker, output)
-					if err != nil {
-						return err
-					}
-				default:
-					output.Pending("checking minio service")
-
-					// verify the minio container is created
-					id, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
-					if err != nil {
-						return err
-					}
-
-					if id != "" {
-						knownContainers[id] = true
-					}
-
-					if hostname != "" {
-						hostnames = append(hostnames, hostname)
-					}
-
-					output.Done()
+				if id != "" {
+					knownContainers[id] = true
 				}
 
-				// check redis service
-				if cfg.Services.Redis {
-					output.Pending("checking redis service")
-
-					id, hostname, err := redis(ctx, docker, cfg.Services.Redis, network.ID)
-					if err != nil {
-						return err
-					}
-
-					if id != "" {
-						knownContainers[id] = true
-					}
-
-					if hostname != "" {
-						hostnames = append(hostnames, hostname)
-					}
-
-					output.Done()
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
 				}
+
+				output.Done()
+			}
+
+			// check mailhog service
+			switch cfg.Services.Mailhog {
+			case false:
+				output.Pending("checking mailhog service")
+
+				// make sure the service container is removed
+				if err := mailhog.VerifyRemoved(ctx, docker, output); err != nil {
+					return err
+				}
+
+				output.Done()
+			default:
+				output.Pending("checking mailhog service")
+
+				// verify the mailhog container is created
+				id, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
+				if err != nil {
+					return err
+				}
+
+				if id != "" {
+					knownContainers[id] = true
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
+				}
+
+				output.Done()
+			}
+
+			// check minio service
+			switch cfg.Services.Minio {
+			case false:
+				// make sure the service container is removed
+				err := minio.VerifyRemoved(ctx, docker, output)
+				if err != nil {
+					return err
+				}
+			default:
+				output.Pending("checking minio service")
+
+				// verify the minio container is created
+				id, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
+				if err != nil {
+					return err
+				}
+
+				if id != "" {
+					knownContainers[id] = true
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
+				}
+
+				output.Done()
+			}
+
+			// check redis service
+			switch cfg.Services.Redis {
+			case false:
+				output.Pending("checking redis service")
+
+				if err := redis.VerifyRemoved(ctx, docker, output); err != nil {
+					return err
+				}
+
+				output.Done()
+			default:
+				output.Pending("checking redis service")
+
+				id, hostname, err := redis.VerifyCreated(ctx, docker, network.ID, output)
+				if err != nil {
+					return err
+				}
+
+				if id != "" {
+					knownContainers[id] = true
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
+				}
+
+				output.Done()
 			}
 
 			if len(cfg.Sites) > 0 {
@@ -354,7 +377,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			output.Pending("updating proxy")
 
-			if err := updateProxy(ctx, docker, nitrod, *cfg); err != nil {
+			if err := updateProxy(ctx, docker, nitrod, cfg); err != nil {
 				output.Warning()
 				return err
 			}
@@ -428,11 +451,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	return cmd
 }
 
-func checkServices(cfg *config.Config) bool {
-	return cfg.Services.DynamoDB || cfg.Services.Mailhog || cfg.Services.Minio || cfg.Services.Redis
-}
-
-func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg config.Config) error {
+func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg *config.Config) error {
 	// convert the sites into the gRPC API Apply request
 	sites := make(map[string]*protob.Site)
 	for _, s := range cfg.Sites {
