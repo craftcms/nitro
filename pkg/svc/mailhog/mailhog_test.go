@@ -42,7 +42,7 @@ func TestVerifyCreated(t *testing.T) {
 		wantSpyContainerCreateConfig types.ContainerCreateConfig
 		wantSpyContainerCreateHost   string
 		wantSpyContainerStartID      string
-		wantSpycontainerStartOptions types.ContainerStartOptions
+		wantSpyContainerStartOptions types.ContainerStartOptions
 
 		// response
 		wantID       string
@@ -151,7 +151,6 @@ func TestVerifyCreated(t *testing.T) {
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						// TODO(jasonmccallister) change the ports
 						"1026/tcp/udp": {
 							{
 								HostIP:   "127.0.0.1",
@@ -264,9 +263,9 @@ func TestVerifyCreated(t *testing.T) {
 				t.Errorf("expected the container start ids to match, got %s want %s", tt.args.spy.containerStartID, tt.wantSpyContainerStartID)
 			}
 
-			// if !reflect.DeepEqual(tt.wantSpyContainerStartOptions) {
-			// 	t.Errorf("expected the container create config to to match, got %v want %v", tt.args.spy.containerCreateConfig, tt.wantSpyContainerCreateConfig)
-			// }
+			if !reflect.DeepEqual(tt.wantSpyContainerStartOptions, tt.args.spy.containerStartOptions) {
+				t.Errorf("expected the container start options to to match, got %v want %v", tt.args.spy.containerCreateConfig, tt.wantSpyContainerCreateConfig)
+			}
 		})
 	}
 }
