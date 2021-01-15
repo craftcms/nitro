@@ -16,13 +16,14 @@ import (
 
 var (
 	dockerImages = map[string]string{
-		// "docker.io/craftcms/nginx:8.0-dev": "nginx:8.0-dev",
+		"nginx:8.0-dev":                  "docker.io/craftcms/nginx:8.0-dev",
 		"nginx:7.4-dev":                  "docker.io/craftcms/nginx:7.4-dev",
 		"nginx:7.3-dev":                  "docker.io/craftcms/nginx:7.3-dev",
 		"nginx:7.2-dev":                  "docker.io/craftcms/nginx:7.2-dev",
 		"nginx:7.1-dev":                  "docker.io/craftcms/nginx:7.1-dev",
 		"nitro-proxy:" + version.Version: "docker.io/craftcms/nitro-proxy:" + version.Version,
-		// "docker.io/craftcms/nginx:7.0-dev": "nginx:7.0-dev",
+		// TODO(jasonmccallister) finish adding builds for the 7.0 images
+		//"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
 	}
 )
 
