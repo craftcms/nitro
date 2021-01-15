@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 )
 
@@ -19,8 +18,8 @@ type PreferredEditorResolver func() string
 
 // GetPreferredEditorFromEnvironment returns the user's editor as defined by the
 // `$EDITOR` environment variable, or the `DefaultEditor` if it is not set.
-func GetPreferredEditorFromEnvironment() string {
-	if runtime.GOOS == "windows" {
+func GetPreferredEditorFromEnvironment(goos string) string {
+	if goos == "windows" {
 		return "notepad.exe"
 	}
 
