@@ -549,7 +549,7 @@ func TestSite_GetAbsPath(t *testing.T) {
 			args: args{
 				home: wd,
 			},
-			want:    "wd",
+			want:    filepath.Join(wd, "testdata"),
 			wantErr: false,
 		},
 	}
