@@ -262,7 +262,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				default:
 					output.Pending("checking mailhog service")
 
-					id, hostname, err := mailhogService(ctx, docker, cfg.Services.Mailhog, network.ID)
+					// verify the mailhog container is created
+					id, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
 					if err != nil {
 						return err
 					}
