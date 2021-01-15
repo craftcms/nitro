@@ -515,3 +515,63 @@ func TestConfig_AddSite(t *testing.T) {
 		})
 	}
 }
+
+func TestSite_GetAbsPath(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type fields struct {
+		Hostname string
+		Aliases  []string
+		Path     string
+		Version  string
+		PHP      PHP
+		Webroot  string
+		Xdebug   bool
+	}
+	type args struct {
+		home string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "existing paths return the complete path",
+			fields: fields{
+				Path: filepath.Join(wd, "testdata"),
+			},
+			args: args{
+				home: wd,
+			},
+			want:    "wd",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Site{
+				Hostname: tt.fields.Hostname,
+				Aliases:  tt.fields.Aliases,
+				Path:     tt.fields.Path,
+				Version:  tt.fields.Version,
+				PHP:      tt.fields.PHP,
+				Webroot:  tt.fields.Webroot,
+				Xdebug:   tt.fields.Xdebug,
+			}
+			got, err := s.GetAbsPath(tt.args.home)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Site.GetAbsPath() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Site.GetAbsPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
