@@ -26,6 +26,7 @@ import (
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/svc/mailhog"
+	"github.com/craftcms/nitro/pkg/svc/minio"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
 )
@@ -280,10 +281,18 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 
 				// check minio service
-				if cfg.Services.Minio {
+				switch cfg.Services.Minio {
+				case false:
+					// make sure the service container is removed
+					err := minio.VerifyRemoved(ctx, docker, output)
+					if err != nil {
+						return err
+					}
+				default:
 					output.Pending("checking minio service")
 
-					id, hostname, err := minio(ctx, docker, cfg.Services.Minio, network.ID)
+					// verify the minio container is created
+					id, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
 					if err != nil {
 						return err
 					}
