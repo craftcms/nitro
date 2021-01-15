@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/craftcms/nitro/pkg/labels"
@@ -57,15 +58,24 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			return "", "", fmt.Errorf("unable to read output while pulling image, %w", err)
 		}
 
-		// TODO(jasonmccallister) set the nitro env overrides
+		// set the nitro env overrides
+		defaultSMTPPort := "1025"
+		if os.Getenv("NITRO_MAILHOG_SMTP_PORT") != "" {
+			defaultSMTPPort = os.Getenv("NITRO_MAILHOG_SMTP_PORT")
+		}
+
+		defaultHTTPPort := "8025"
+		if os.Getenv("NITRO_MAILHOG_HTTP_PORT") != "" {
+			defaultHTTPPort = os.Getenv("NITRO_MAILHOG_HTTP_PORT")
+		}
 
 		// configure the service ports
-		smtpPort, err := nat.NewPort("tcp/udp", "1025")
+		smtpPort, err := nat.NewPort("tcp/udp", defaultSMTPPort)
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
 
-		httpPort, err := nat.NewPort("tcp", "8025")
+		httpPort, err := nat.NewPort("tcp", defaultHTTPPort)
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
@@ -124,8 +134,10 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 	// start each of the containers, there should only be one so the final return is an error
 	for _, c := range containers {
 		// start the container
-		if err := cli.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-			return "", "", fmt.Errorf("unable to start the container, %w", err)
+		if c.Status != "running" {
+			if err := cli.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+				return "", "", fmt.Errorf("unable to start the container, %w", err)
+			}
 		}
 	}
 

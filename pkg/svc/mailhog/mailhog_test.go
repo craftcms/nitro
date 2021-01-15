@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -31,6 +32,8 @@ func TestVerifyCreated(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
+
+		customEnvs map[string]string
 
 		// spys
 		wantSpyContainerListOptions  types.ContainerListOptions
@@ -120,6 +123,10 @@ func TestVerifyCreated(t *testing.T) {
 				},
 				networkID: "some-network-id",
 			},
+			customEnvs: map[string]string{
+				"NITRO_MAILHOG_SMTP_PORT": "1026",
+				"NITRO_MAILHOG_HTTP_PORT": "8026",
+			},
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
@@ -138,20 +145,20 @@ func TestVerifyCreated(t *testing.T) {
 					},
 					ExposedPorts: nat.PortSet{
 						// TODO(jasonmccallister) change the ports
-						"1025/tcp/udp": struct{}{},
-						"8025/tcp":     struct{}{},
+						"1026/tcp/udp": struct{}{},
+						"8026/tcp":     struct{}{},
 					},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
 						// TODO(jasonmccallister) change the ports
-						"1025/tcp/udp": {
+						"1026/tcp/udp": {
 							{
 								HostIP:   "127.0.0.1",
 								HostPort: "1025",
 							},
 						},
-						"8025/tcp": {
+						"8026/tcp": {
 							{
 								HostIP:   "127.0.0.1",
 								HostPort: "8025",
@@ -169,6 +176,32 @@ func TestVerifyCreated(t *testing.T) {
 			},
 			wantSpyContainerStartID: "someid",
 			wantID:                  "someid",
+			wantHostname:            "mailhog.service.nitro",
+			wantErr:                 false,
+		},
+		{
+			name: "containers that are already created are started",
+			args: args{
+				ctx: context.Background(),
+				spy: &mockClient{
+					containers: []types.Container{
+						{
+							ID:    "existing-container-id",
+							State: "not-running",
+						},
+					},
+				},
+				networkID: "some-network-id",
+			},
+			wantSpyContainerListOptions: types.ContainerListOptions{
+				All: true,
+				Filters: filters.NewArgs(
+					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: labels.Type + "=mailhog"},
+				),
+			},
+			wantSpyContainerStartID: "existing-container-id",
+			wantID:                  "existing-container-id",
 			wantHostname:            "mailhog.service.nitro",
 			wantErr:                 false,
 		},
@@ -193,6 +226,12 @@ func TestVerifyCreated(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		// set any custom envs
+		for k, v := range tt.customEnvs {
+			os.Setenv(k, v)
+			defer os.Unsetenv(k)
+		}
+
 		t.Run(tt.name, func(t *testing.T) {
 			id, hostname, err := VerifyCreated(tt.args.ctx, tt.args.spy, tt.args.networkID, tt.args.output)
 			if (err != nil) != tt.wantErr {
