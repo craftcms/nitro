@@ -1,8 +1,8 @@
 package caddy
 
 type UpdateRequest struct {
-	Srv0 Server `json:"srv0,omitempty"`
-	Srv1 Server `json:"srv1,omitempty"`
+	HTTPS Server `json:"https,omitempty"`
+	HTTP  Server `json:"http,omitempty"`
 }
 
 type Server struct {

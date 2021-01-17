@@ -83,13 +83,13 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	update := caddy.UpdateRequest{}
 
 	// add the routes to the first server
-	update.Srv0 = caddy.Server{
+	update.HTTPS = caddy.Server{
 		Listen: []string{":443"},
 		Routes: routes,
 	}
 
 	// set the default welcome server
-	update.Srv1 = caddy.Server{
+	update.HTTP = caddy.Server{
 		Listen: []string{":80"},
 		Routes: append(routes, caddy.ServerRoute{
 			Handle: []caddy.RouteHandle{
