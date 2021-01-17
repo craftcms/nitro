@@ -27,11 +27,11 @@ type Validator interface {
 	Validate(input, chars, msg string) error
 }
 
-// ValidateString is used to validate terminal input as a string
-type ValidateString struct{}
+// StringValidator is used to validate terminal input as a string
+type StringValidator struct{}
 
 // Validate takes the input and checks if the string contains any chars
-func (t *ValidateString) Validate(input, chars, msg string) error {
+func (t *StringValidator) Validate(input, chars, msg string) error {
 	if strings.ContainsAny(input, chars) {
 		return fmt.Errorf(msg)
 	}
@@ -96,9 +96,10 @@ func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 
 	// show the message
 	fmt.Println(msg)
+
 	// show all the options
 	for k, v := range opts {
-		fmt.Println(fmt.Sprintf("  %d. %s", k+1, v))
+		fmt.Printf("  %d. %s\n", k+1, v)
 	}
 
 	fmt.Print("Enter your selection: ")
