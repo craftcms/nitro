@@ -54,7 +54,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			sp := strings.Split(dir, string(os.PathSeparator))
 			site.Hostname = sp[len(sp)-1]
 
-			// append the test domain if there are no periods
+			// append the default TLD if there are no periods in the path name
 			if !strings.Contains(site.Hostname, ".") {
 				// set the default tld
 				tld := "nitro"
