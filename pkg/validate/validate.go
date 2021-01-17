@@ -8,6 +8,38 @@ import (
 	"strings"
 )
 
+type Validator interface {
+	Validate(input string) error
+}
+
+// HostnameValidator is used to validate a provided hostname
+type HostnameValidator struct{}
+
+func (v *HostnameValidator) Validate(input string) error {
+	// check for spaces
+	if strings.Contains(input, " ") {
+		return fmt.Errorf("hostname must not include spaces")
+	}
+
+	// check for special characters
+	if strings.ContainsAny(input, "!@#$%^&*()") {
+		return fmt.Errorf("hostname must not include any special characters")
+	}
+
+	return nil
+}
+
+type PHPVersionValidator struct{}
+
+func (v *PHPVersionValidator) Validate(input string) error {
+	switch input {
+	case "8.0", "7.4", "7.3", "7.2", "7.1", "7.0":
+		return nil
+	}
+
+	return fmt.Errorf("the PHP inputrsion %q is not valid", input)
+}
+
 func Hostname(v string) error {
 	msg := "you must provide a valid domain, without a TLD and only lowercase"
 
