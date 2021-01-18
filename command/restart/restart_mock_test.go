@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -20,6 +21,10 @@ type spyOutputer struct {
 	infos     []string
 	succesess []string
 	dones     []string
+}
+
+func (spy spyOutputer) Ask(message, fallback, sep string, validator terminal.Validator) (string, error) {
+	return fallback, nil
 }
 
 func (spy spyOutputer) Info(s ...string) {

@@ -7,13 +7,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/craftcms/nitro/pkg/validate"
 )
 
 // Outputer is an interface that captures the output to a terminal.
 // It is used to make our output consistent in the command line.
 type Outputer interface {
+	Ask(message, fallback, sep string, validator Validator) (string, error)
 	Info(s ...string)
 	Success(s ...string)
 	Pending(s ...string)
@@ -36,11 +35,11 @@ type Validator interface {
 type terminal struct{}
 
 // New returns an Outputer interface
-func New() Outputer {
-	return terminal{}
+func New() *terminal {
+	return &terminal{}
 }
 
-func (t *terminal) Ask(message, fallback, sep string, validator validate.Validator) (string, error) {
+func (t *terminal) Ask(message, fallback, sep string, validator Validator) (string, error) {
 	t.printMessage(message, fallback, sep)
 
 	// create a new scanner

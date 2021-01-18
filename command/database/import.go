@@ -130,25 +130,9 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 
 			// ask the user for the database to create
-			msg := "Enter the database name: "
-
-			fmt.Print(msg)
-
-			var db string
-			for {
-				rdr := bufio.NewReader(os.Stdin)
-				input, err := rdr.ReadString('\n')
-				if err != nil {
-					return err
-				}
-
-				if !strings.ContainsAny(input, " -") {
-					db = strings.TrimSpace(input)
-					break
-				}
-
-				fmt.Println("  no spaces or hyphens allowed…")
-				fmt.Print(msg)
+			db, err := output.Ask("Enter the database name", "", ":", nil)
+			if err != nil {
+				return err
 			}
 
 			var rdr io.Reader

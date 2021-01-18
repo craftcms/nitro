@@ -1,7 +1,6 @@
 package create
 
 import (
-	"bufio"
 	"fmt"
 	"net/url"
 	"os"
@@ -16,6 +15,8 @@ import (
 	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/pkg/webroot"
 )
 
 const exampleText = `  # create a new default craft project (similar to "composer create-project craftcms/craft my-project")
@@ -172,29 +173,13 @@ func promptSiteAdd(home, dir string, output terminal.Outputer) error {
 
 	// prompt for the hostname
 	fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
-	for {
-		rdr := bufio.NewReader(os.Stdin)
-		char, _ := rdr.ReadString('\n')
-
-		// remove the carriage return
-		char = strings.TrimSpace(char)
-
-		// does it have spaces?
-		if strings.ContainsAny(char, " ") {
-			fmt.Println("Please enter a hostname without spaces…")
-			fmt.Printf("Enter the hostname [%s]: ", site.Hostname)
-
-			continue
-		}
-
-		// if its empty, we are setting the default
-		if char == "" {
-			break
-		}
-
-		// set the input as the hostname
-		site.Hostname = char
+	hostname, err := output.Ask("Enter the hostname", site.Hostname, ":", &validate.HostnameValidator{})
+	if err != nil {
+		return err
 	}
+
+	// set the input as the hostname
+	site.Hostname = hostname
 
 	output.Success("setting hostname to", site.Hostname)
 
@@ -208,62 +193,26 @@ func promptSiteAdd(home, dir string, output terminal.Outputer) error {
 	output.Success("adding site", site.Path)
 
 	// get the web directory
-	var root string
-	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		// don't go into subdirectories and ignore files
-		if path != dir || !info.IsDir() {
-			return nil
-		}
-
-		// if the directory is considered a web root
-		if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
-			root = info.Name()
-		}
-
-		// if its not set, keep trying
-		if root != "" {
-			return nil
-		}
-
-		return nil
-	}); err != nil {
+	found, err := webroot.Find(dir)
+	if err != nil {
 		return err
 	}
 
 	// if the root is still empty, we fall back to the default
-	if root == "" {
-		root = "web"
+	if found == "" {
+		found = "web"
 	}
 
 	// set the webroot
-	site.Webroot = root
+	site.Webroot = found
 
 	// prompt for the webroot
-	fmt.Printf("Enter the webroot for the site [%s]: ", site.Webroot)
-	for {
-		rdr := bufio.NewReader(os.Stdin)
-
-		input, _ := rdr.ReadString('\n')
-
-		input = strings.TrimSpace(input)
-
-		// does it have spaces?
-		if strings.ContainsAny(input, " ") {
-			fmt.Println("Please enter a webroot without spaces…")
-			fmt.Printf("Enter the webroot for the site [%s]: ", site.Webroot)
-
-			continue
-		}
-
-		// if its empty, we are setting the default
-		if input == "" {
-			break
-		}
-
-		// set the input as the hostname
-		site.Webroot = input
-		break
+	root, err := output.Ask("Enter the webroot for the site", site.Webroot, ":", nil)
+	if err != nil {
+		return err
 	}
+
+	site.Webroot = root
 
 	output.Success("using webroot", site.Webroot)
 
