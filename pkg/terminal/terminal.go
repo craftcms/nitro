@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
+
+	"github.com/craftcms/nitro/pkg/validate"
 )
 
 // Outputer is an interface that captures the output to a terminal.
@@ -44,6 +47,66 @@ type terminal struct{}
 // New returns an Outputer interface
 func New() Outputer {
 	return terminal{}
+}
+
+func (t *terminal) Ask(message, fallback, sep string, validator validate.Validator) (string, error) {
+	t.printMessage(message, fallback, sep)
+
+	s := bufio.NewScanner(os.Stdin)
+
+	var a string
+	for s.Scan() {
+		txt := s.Text()
+
+		// return the fallback if blank
+		if txt == "" && fallback != "" {
+			a = fallback
+			break
+		}
+
+		// validate the input
+		if validator != nil {
+			if err := validator.Validate(txt); err != nil {
+				// there is an error, so display the error and show the message prompt again
+				t.printValidatorError(err)
+
+				t.printMessage(message, fallback, sep)
+
+				continue
+			}
+		}
+
+		if txt != "" {
+			a = txt
+			break
+		}
+
+		if txt == "" && fallback == "" {
+			t.printMessage(message, fallback, sep)
+
+			continue
+		}
+	}
+
+	// handle error
+	if err := s.Err(); err != nil {
+		return "", fmt.Errorf("unable to handle input, %w", err)
+	}
+
+	return a, nil
+}
+
+func (t *terminal) printMessage(message, fallback, sep string) {
+	if fallback == "" {
+		fmt.Fprintf(os.Stdout, "%s%s ", message, sep)
+		return
+	}
+
+	fmt.Fprintf(os.Stdout, "%s [%s]%s ", message, fallback, sep)
+}
+
+func (t *terminal) printValidatorError(err error) {
+	fmt.Fprintf(os.Stdin, " \u2717 %s\n", err.Error())
 }
 
 func (t terminal) Info(s ...string) {
