@@ -16,6 +16,11 @@ type Validator interface {
 type HostnameValidator struct{}
 
 func (v *HostnameValidator) Validate(input string) error {
+	// check length
+	if len(input) < 3 {
+		return fmt.Errorf("hostname must be more than 3 characters")
+	}
+
 	// check for spaces
 	if strings.Contains(input, " ") {
 		return fmt.Errorf("hostname must not include spaces")
