@@ -13,6 +13,7 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/webroot"
 )
 
 // TODO - prompt user for the database engine and new database
@@ -99,29 +100,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Success("adding site", site.Path)
 
 			// get the web directory
-			var root string
-			if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-				// don't go into subdirectories and ignore files
-				if path != dir || !info.IsDir() {
-					return nil
-				}
-
-				// if the directory is considered a web root
-				if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
-					root = info.Name()
-				}
-
-				// if its not set, keep trying
-				if root != "" {
-					return nil
-				}
-
-				return nil
-			}); err != nil {
+			root, err := webroot.Find(dir)
+			if err != nil {
 				return err
 			}
 
-			// if the root is still empty, we fall back to the default
 			if root == "" {
 				root = "web"
 			}
