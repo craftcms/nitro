@@ -23,23 +23,14 @@ type Outputer interface {
 	Done()
 }
 
+type Asker interface {
+	Ask(message, fallback, sep string, validator Validator) (string, error)
+}
+
 // Validator is used to pass information into a terminal prompt for
 // validating inputs that are strings
 type Validator interface {
-	// Validate takes an input, illegal chars, and the error message and returns an error
-	Validate(input, chars, msg string) error
-}
-
-// StringValidator is used to validate terminal input as a string
-type StringValidator struct{}
-
-// Validate takes the input and checks if the string contains any chars
-func (t *StringValidator) Validate(input, chars, msg string) error {
-	if strings.ContainsAny(input, chars) {
-		return fmt.Errorf(msg)
-	}
-
-	return nil
+	Validate(input string) error
 }
 
 type terminal struct{}
@@ -52,13 +43,17 @@ func New() Outputer {
 func (t *terminal) Ask(message, fallback, sep string, validator validate.Validator) (string, error) {
 	t.printMessage(message, fallback, sep)
 
+	// create a new scanner
 	s := bufio.NewScanner(os.Stdin)
+
+	// split on lines so we can listen for carriage returns
+	s.Split(bufio.ScanLines)
 
 	var a string
 	for s.Scan() {
 		txt := s.Text()
 
-		// return the fallback if blank
+		// return the fallback if the text is blank
 		if txt == "" && fallback != "" {
 			a = fallback
 			break
@@ -67,7 +62,7 @@ func (t *terminal) Ask(message, fallback, sep string, validator validate.Validat
 		// validate the input
 		if validator != nil {
 			if err := validator.Validate(txt); err != nil {
-				// there is an error, so display the error and show the message prompt again
+				// there is an error, so display the error and show the message again
 				t.printValidatorError(err)
 
 				t.printMessage(message, fallback, sep)
@@ -76,11 +71,13 @@ func (t *terminal) Ask(message, fallback, sep string, validator validate.Validat
 			}
 		}
 
+		// if there is text, set and break because it passed validation
 		if txt != "" {
 			a = txt
 			break
 		}
 
+		// last ditch effort here, check both the text and fallback
 		if txt == "" && fallback == "" {
 			t.printMessage(message, fallback, sep)
 
@@ -88,7 +85,7 @@ func (t *terminal) Ask(message, fallback, sep string, validator validate.Validat
 		}
 	}
 
-	// handle error
+	// handle error from the scanner
 	if err := s.Err(); err != nil {
 		return "", fmt.Errorf("unable to handle input, %w", err)
 	}
@@ -129,28 +126,6 @@ func (t terminal) Warning() {
 	fmt.Print("\u2717\n")
 }
 
-// func (t terminal) Input(r io.Reader, validate Validator, msg string) (string, error) {
-// 	// show the message
-// 	fmt.Print(msg)
-
-// 	var input string
-// 	w := true
-// 	for w {
-// 		rdr := bufio.NewReader(r)
-// 		char, err := rdr.ReadString('\n')
-// 		if err != nil {
-// 			return "", err
-// 		}
-
-// 		// remove the new line from string
-// 		char = strings.TrimSpace(char)
-
-// 		err := validate.Validate(input)
-// 	}
-
-// 	return input, nil
-// }
-
 func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 	// if the options only have one item, return it
 	if len(opts) == 1 {
@@ -187,7 +162,7 @@ func (t terminal) Select(r io.Reader, msg string, opts []string) (int, error) {
 			fmt.Println("Please choose a valid option…")
 
 			for k, v := range opts {
-				fmt.Println(fmt.Sprintf("  %d. %s", k+1, v))
+				fmt.Printf("  %d. %s\n", k+1, v)
 			}
 
 			fmt.Print(msg)
