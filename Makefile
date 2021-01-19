@@ -16,8 +16,8 @@ alpha-macos: build
 	zip -X macos_nitro_v2_alpha.zip nitro
 	rm nitro
 alpha-win: build-win
-	zip -X windows_nitro_v2_alpha.zip nitro
-	rm nitro
+	zip -X windows_nitro_v2_alpha.zip nitro.exe
+	rm nitro.exe
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
