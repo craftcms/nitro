@@ -134,7 +134,7 @@ func confirm(rdr io.Reader, msg string, fallback bool) (bool, error) {
 	// prompt the user for confirmation
 	response, err := r.ReadString('\n')
 	if err != nil {
-		return false, fmt.Errorf("unable to read input, %w", err)
+		return fallback, fmt.Errorf("unable to read input, %w", err)
 	}
 
 	resp := strings.TrimSpace(response)
@@ -144,5 +144,5 @@ func confirm(rdr io.Reader, msg string, fallback bool) (bool, error) {
 		}
 	}
 
-	return false, nil
+	return fallback, nil
 }
