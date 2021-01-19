@@ -152,6 +152,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for s.Scan() {
 				txt := s.Text()
 
+				txt = strings.TrimSpace(txt)
+
 				if txt == "" {
 					confirm = true
 					break
