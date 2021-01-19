@@ -1,8 +1,9 @@
 package remove
 
 import (
+	"bufio"
 	"fmt"
-	"strings"
+	"os"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -44,18 +45,25 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// ask if the apply command should run
-			var response string
 			fmt.Print("Apply changes now [Y/n]? ")
-			if _, err := fmt.Scanln(&response); err != nil {
-				return fmt.Errorf("unable to provide a prompt, %w", err)
-			}
 
-			// get the response
-			resp := strings.TrimSpace(response)
-			var confirm bool
-			for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
-				if resp == answer {
+			s := bufio.NewScanner(os.Stdin)
+			s.Split(bufio.ScanLines)
+
+			confirm := true
+			for s.Scan() {
+				txt := s.Text()
+
+				if txt == "" {
 					confirm = true
+					break
+				}
+
+				for _, answer := range []string{"n", "N", "no", "No", "NO"} {
+					if txt == answer {
+						confirm = false
+						break
+					}
 				}
 			}
 
