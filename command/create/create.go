@@ -131,6 +131,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					}
 				}
 			}
+
 			// we are skipping the apply step
 			if !confirm {
 				return nil
