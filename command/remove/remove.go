@@ -41,7 +41,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// remove the site
 			if err := cfg.RemoveSite(sites[selected]); err != nil {
+				return err
+			}
+
+			// save the config
+			if err := cfg.Save(); err != nil {
 				return err
 			}
 
