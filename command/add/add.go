@@ -2,15 +2,20 @@ package add
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/validate"
@@ -142,6 +147,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Info("Site added 🌍")
 
+			// prompt for a database
+			if err := promptForDatabase(cmd.Context(), docker, output); err != nil {
+				return err
+			}
+
 			// ask if the apply command should run
 			fmt.Print("Apply changes now [Y/n]? ")
 
@@ -188,4 +198,160 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	return cmd
+}
+
+func promptForDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer) error {
+	fmt.Print("Add a database for the site? [Y/n]? ")
+
+	s := bufio.NewScanner(os.Stdin)
+	s.Split(bufio.ScanLines)
+
+	var confirm bool
+	for s.Scan() {
+		txt := strings.TrimSpace(s.Text())
+
+		switch txt {
+		// if its no
+		case "n", "N", "no", "No", "NO":
+			confirm = false
+		default:
+			confirm = true
+		}
+
+		break
+	}
+	if err := s.Err(); err != nil {
+		return err
+	}
+
+	if !confirm {
+		return nil
+	}
+
+	// add filters to show only the environment and database containers
+	filter := filters.NewArgs()
+	filter.Add("label", labels.Nitro)
+	filter.Add("label", labels.Type+"=database")
+
+	// get a list of all the databases
+	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
+	if err != nil {
+		return err
+	}
+
+	// sort containers by the name
+	sort.SliceStable(containers, func(i, j int) bool {
+		return containers[i].Names[0] < containers[j].Names[0]
+	})
+
+	// get all of the containers as a list
+	var engineOpts []string
+	for _, c := range containers {
+		engineOpts = append(engineOpts, strings.TrimLeft(c.Names[0], "/"))
+	}
+
+	// prompt the user for the engine to add the database
+	var containerID, databaseEngine string
+	selected, err := output.Select(os.Stdin, "Select the database engine: ", engineOpts)
+	if err != nil {
+		return err
+	}
+
+	// set the container id and db engine
+	containerID = containers[selected].ID
+	databaseEngine = containers[selected].Labels[labels.DatabaseCompatibility]
+	if containerID == "" {
+		return fmt.Errorf("unable to get the container")
+	}
+
+	// ask the user for the database to create
+	db, err := output.Ask("Enter the new database name", "", ":", nil)
+	if err != nil {
+		return err
+	}
+
+	output.Pending("creating database", db)
+
+	// set the commands based on the engine type
+	var cmds, privileges []string
+	switch databaseEngine {
+	case "mysql":
+		cmds = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+		privileges = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON * TO '%s'@'%s';`, "nitro", "%")}
+	default:
+		cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
+	}
+
+	// create the exec
+	e, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          false,
+		Cmd:          cmds,
+	})
+	if err != nil {
+		return err
+	}
+
+	// attach to the container
+	resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
+		Tty: false,
+	})
+	if err != nil {
+		return err
+	}
+	defer resp.Close()
+
+	// start the exec
+	if err := docker.ContainerExecStart(ctx, e.ID, types.ExecStartCheck{}); err != nil {
+		return fmt.Errorf("unable to start the container, %w", err)
+	}
+
+	// check if we should grant privileges
+	if privileges != nil {
+		// create the exec
+		e, err := docker.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          false,
+			Cmd:          privileges,
+		})
+		if err != nil {
+			return err
+		}
+
+		// attach to the container
+		resp, err := docker.ContainerExecAttach(ctx, e.ID, types.ExecStartCheck{
+			Tty: false,
+		})
+		if err != nil {
+			return err
+		}
+		defer resp.Close()
+
+		// start the exec
+		if err := docker.ContainerExecStart(ctx, e.ID, types.ExecStartCheck{}); err != nil {
+			return fmt.Errorf("unable to start the container, %w", err)
+		}
+
+		// wait for the container exec to complete
+		waiting := true
+		for waiting {
+			resp, err := docker.ContainerExecInspect(ctx, e.ID)
+			if err != nil {
+				return err
+			}
+
+			waiting = resp.Running
+		}
+	}
+
+	output.Done()
+
+	output.Info("Database added 💪")
+
+	// TODO(jasonmccallister) edit the env
+
+	return nil
+
 }
