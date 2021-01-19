@@ -1,6 +1,7 @@
 package destroy
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,21 +49,28 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// prompt the user for confirmation
 			fmt.Print("Are you sure (this will remove all containers, volumes, and networks) [Y/n] ")
 
-			// prompt the user for confirmation
-			var response string
-			_, err = fmt.Scanln(&response)
-			if err != nil {
-				return fmt.Errorf("unable to provide a prompt, %w", err)
-			}
+			s := bufio.NewScanner(os.Stdin)
+			s.Split(bufio.ScanLines)
 
 			var confirm bool
-			resp := strings.TrimSpace(response)
-			for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
-				if resp == answer {
+			for s.Scan() {
+				txt := strings.TrimSpace(s.Text())
+
+				switch txt {
+				// if its no
+				case "n", "N", "no", "No", "NO":
+					confirm = false
+				default:
 					confirm = true
 				}
+
+				break
+			}
+			if err := s.Err(); err != nil {
+				return err
 			}
 
 			if !confirm {

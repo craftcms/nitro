@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -50,21 +51,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			s := bufio.NewScanner(os.Stdin)
 			s.Split(bufio.ScanLines)
 
-			confirm := true
+			var confirm bool
 			for s.Scan() {
-				txt := s.Text()
+				txt := strings.TrimSpace(s.Text())
 
-				if txt == "" {
+				switch txt {
+				// if its no
+				case "n", "N", "no", "No", "NO":
+					confirm = false
+				default:
 					confirm = true
-					break
 				}
 
-				for _, answer := range []string{"n", "N", "no", "No", "NO"} {
-					if txt == answer {
-						confirm = false
-						break
-					}
-				}
+				break
+			}
+			if err := s.Err(); err != nil {
+				return err
 			}
 
 			// we are skipping the apply step
