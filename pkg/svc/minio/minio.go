@@ -78,6 +78,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			ExposedPorts: nat.PortSet{
 				httpPort: struct{}{},
 			},
+			Cmd: []string{"server", "/data"},
 		}
 
 		hostconfig := &container.HostConfig{

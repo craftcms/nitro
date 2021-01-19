@@ -80,6 +80,7 @@ func TestVerifyCreated(t *testing.T) {
 					ExposedPorts: nat.PortSet{
 						"9000/tcp": struct{}{},
 					},
+					Cmd: []string{"server", "/data"},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
@@ -137,6 +138,7 @@ func TestVerifyCreated(t *testing.T) {
 					ExposedPorts: nat.PortSet{
 						"9001/tcp": struct{}{},
 					},
+					Cmd: []string{"server", "/data"},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
