@@ -232,6 +232,9 @@ func name(path, version string) string {
 	// replace path separators with underscores
 	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
 
+	// remove : to prevent error on windows
+	n = strings.Replace(n, ":", "_", -1)
+
 	// remove the first underscore
 	return strings.TrimLeft(n, "_")
 }
