@@ -17,7 +17,6 @@ type Outputer interface {
 	Success(s ...string)
 	Pending(s ...string)
 	Select(r io.Reader, msg string, opts []string) (int, error)
-	// Input(r io.Reader, validate Validator, msg string) (string, error)
 	Warning()
 	Done()
 }

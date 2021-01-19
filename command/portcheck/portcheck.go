@@ -19,15 +19,11 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 		Args:    cobra.MinimumNArgs(1),
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Pending("checking port", args[0])
-
 			if err := portavail.Check(args[0]); err != nil {
-				output.Warning()
 				output.Info("Port", args[0], "is already in use...")
+
 				return nil
 			}
-
-			output.Done()
 
 			output.Info("Port", args[0], "is available!")
 
