@@ -26,6 +26,7 @@ import (
 	"github.com/craftcms/nitro/command/queue"
 	"github.com/craftcms/nitro/command/remove"
 	"github.com/craftcms/nitro/command/restart"
+	"github.com/craftcms/nitro/command/share"
 	"github.com/craftcms/nitro/command/ssh"
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
@@ -111,6 +112,7 @@ func NewCommand() *cobra.Command {
 		queue.NewCommand(home, docker, term),
 		remove.NewCommand(home, docker, term),
 		restart.New(docker, term),
+		share.NewCommand(home, docker, term),
 		ssh.NewCommand(home, docker, term),
 		start.NewCommand(docker, term),
 		stop.New(docker, term),
