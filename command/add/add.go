@@ -152,11 +152,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for s.Scan() {
 				txt := s.Text()
 
-				txt = strings.TrimSpace(txt)
-
 				if txt == "" {
 					confirm = true
 					break
+				}
+
+				for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
+					if txt == answer {
+						confirm = true
+						break
+					}
 				}
 
 				for _, answer := range []string{"n", "N", "no", "No", "NO"} {
