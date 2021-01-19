@@ -79,6 +79,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				httpPort: struct{}{},
 			},
 			Cmd: []string{"server", "/data"},
+			Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
 		}
 
 		hostconfig := &container.HostConfig{

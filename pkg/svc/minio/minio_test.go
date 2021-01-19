@@ -81,6 +81,7 @@ func TestVerifyCreated(t *testing.T) {
 						"9000/tcp": struct{}{},
 					},
 					Cmd: []string{"server", "/data"},
+					Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
@@ -139,6 +140,7 @@ func TestVerifyCreated(t *testing.T) {
 						"9001/tcp": struct{}{},
 					},
 					Cmd: []string{"server", "/data"},
+					Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
