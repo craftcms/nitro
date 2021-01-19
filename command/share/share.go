@@ -19,6 +19,9 @@ import (
 var (
 	// ErrMissingNgrok is returned when nirto is unable to locate the ngrok binary
 	ErrMissingNgrok = fmt.Errorf("unable to locate ngrok")
+
+	// execName is the name of the executable to search for. We make it a variable so we can replace it during tests.
+	execName = "ngrok"
 )
 
 const exampleText = `  # share a local site with ngrok
@@ -34,6 +37,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
+			// find ngrok
+			ngrok, err := exec.LookPath(execName)
+			if err != nil {
+				return err
+			}
+
+			if ngrok == "" {
+				return ErrMissingNgrok
+			}
 
 			// get the current working directory
 			wd, err := os.Getwd()
@@ -106,16 +119,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
 					return err
 				}
-			}
-
-			// find ngrok
-			ngrok, err := exec.LookPath("ngrok")
-			if err != nil {
-				return err
-			}
-
-			if ngrok == "" {
-				return ErrMissingNgrok
 			}
 
 			hostname := strings.TrimLeft(containers[0].Names[0], "/")
