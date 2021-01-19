@@ -44,6 +44,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// if ngrok is missing, return the error
 			if ngrok == "" {
 				return ErrMissingNgrok
 			}
