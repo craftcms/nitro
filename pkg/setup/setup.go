@@ -1,13 +1,10 @@
 package setup
 
 import (
-	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/portavail"
@@ -28,7 +25,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 
 	output.Info("Setting up Nitro…")
 
-	mysql, err := confirm(reader, "Would you like to use MySQL", true)
+	mysql, err := output.Confirm("Would you like to use MySQL", true, "?")
 	if err != nil {
 		return err
 	}
@@ -64,7 +61,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		})
 	}
 
-	postgres, err := confirm(reader, "Would you like to use PostgreSQL", true)
+	postgres, err := output.Confirm("Would you like to use PostgreSQL", true, "?")
 	if err != nil {
 		return err
 	}
@@ -100,13 +97,13 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		})
 	}
 
-	redis, err := confirm(reader, "Would you like to use Redis", false)
+	redis, err := output.Confirm("Would you like to use Redis", true, "?")
 	if err != nil {
 		return err
 	}
 
 	if redis {
-		output.Pending("adding redis 6379")
+		output.Pending("adding redis service")
 
 		c.Services.Redis = true
 
@@ -119,30 +116,4 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 	}
 
 	return nil
-}
-
-// Would you like to use PostgreSQL [Y/n]?
-func confirm(rdr io.Reader, msg string, fallback bool) (bool, error) {
-	if fallback {
-		fmt.Printf("%s [Y/n] ", msg)
-	} else {
-		fmt.Printf("%s [y/N] ", msg)
-	}
-
-	r := bufio.NewReader(rdr)
-
-	// prompt the user for confirmation
-	response, err := r.ReadString('\n')
-	if err != nil {
-		return fallback, fmt.Errorf("unable to read input, %w", err)
-	}
-
-	resp := strings.TrimSpace(response)
-	for _, answer := range []string{"y", "Y", "yes", "Yes", "YES"} {
-		if resp == answer {
-			return true, nil
-		}
-	}
-
-	return fallback, nil
 }

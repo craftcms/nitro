@@ -69,7 +69,7 @@ func removeCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 
 			// ask the user which database
-			selected, err := output.Select(cmd.InOrStdin(), "Which datbase should we remove? ", databases)
+			selected, err := output.Select(cmd.InOrStdin(), "Which database should we remove? ", databases)
 			if err != nil {
 				return err
 			}

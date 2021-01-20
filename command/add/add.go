@@ -153,26 +153,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// ask if the apply command should run
-			fmt.Print("Apply changes now [Y/n]? ")
-
-			s := bufio.NewScanner(os.Stdin)
-			s.Split(bufio.ScanLines)
-
-			var confirm bool
-			for s.Scan() {
-				txt := strings.TrimSpace(s.Text())
-
-				switch txt {
-				// if its no
-				case "n", "N", "no", "No", "NO":
-					confirm = false
-				default:
-					confirm = true
-				}
-
-				break
-			}
-			if err := s.Err(); err != nil {
+			confirm, err := output.Confirm("Apply changes now", true, "?")
+			if err != nil {
 				return err
 			}
 
