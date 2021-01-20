@@ -36,6 +36,28 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "add",
 		Short:   "Add a site",
 		Example: exampleText,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// ask if the apply command should run
+			apply, err := output.Confirm("Apply changes now", true, "?")
+			if err != nil {
+				return err
+			}
+
+			// if apply is false return nil
+			if !apply {
+				return nil
+			}
+
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					return c.RunE(c, args)
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Adding site…")
 
@@ -150,29 +172,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// prompt for a database
 			if err := promptForDatabase(cmd.Context(), docker, output); err != nil {
 				return err
-			}
-
-			// ask if the apply command should run
-			confirm, err := output.Confirm("Apply changes now", true, "?")
-			if err != nil {
-				return err
-			}
-
-			// we are skipping the apply step
-			if !confirm {
-				return nil
-			}
-
-			// check if there is no parent command
-			if cmd.Parent() == nil {
-				return nil
-			}
-
-			// get the apply command and run it
-			for _, c := range cmd.Parent().Commands() {
-				if c.Use == "apply" {
-					return c.RunE(c, args)
-				}
 			}
 
 			return nil
