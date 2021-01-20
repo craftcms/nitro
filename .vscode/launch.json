@@ -22,6 +22,15 @@
             "env": {},
             "args": ["create", "craftcms/starter-blog", "blog"]
         },
+          {
+              "name": "nitro iniset",
+              "type": "go",
+              "request": "launch",
+              "mode": "auto",
+              "program": "${workspaceFolder}/cmd/nitro/main.go",
+              "env": {},
+              "args": ["iniset"]
+          },
          {
              "name": "nitro init",
              "type": "go",
