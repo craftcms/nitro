@@ -27,6 +27,10 @@ func (spy spyOutputer) Ask(message, fallback, sep string, validator terminal.Val
 	return fallback, nil
 }
 
+func (spy spyOutputer) Confirm(message string, fallback bool, sep string) (bool, error) {
+	return fallback, nil
+}
+
 func (spy spyOutputer) Info(s ...string) {
 	spy.infos = append(spy.infos, fmt.Sprintf("%s\n", strings.Join(s, " ")))
 }

@@ -13,6 +13,7 @@ import (
 // It is used to make our output consistent in the command line.
 type Outputer interface {
 	Ask(message, fallback, sep string, validator Validator) (string, error)
+	Confirm(message string, fallback bool, sep string) (bool, error)
 	Info(s ...string)
 	Success(s ...string)
 	Pending(s ...string)
