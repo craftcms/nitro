@@ -11,10 +11,7 @@
 - Added the `nitro npm` command with the `--version` flag to install or update projects without node/npm installed locally.
 - Added the `nitro version` command to display the cli and gRPC API versions
 - Added the `nitro craft` command to run `craft` console commands in a site’s container. [#189](https://github.com/craftcms/nitro/issues/189)
-- Added the `nitro clean` command, which will remove unused containers.
-- Added the `nitro mount` command, which lets you mount a folder not associated with a site.
 - Added the `nitro db ssh` command, which allows you to SSH into a database container.
-- Added the `nitro mount ssh` command, which allows you to SSH into a mount container.
 - Added `nitro enable` and `nitro disable` commands which let you enable and disable services.
 - Added the `nitro queue` command, which allows you to listen to Craft’s queue. [#189](https://github.com/craftcms/nitro/issues/189)
 - Added the `nitro validate` command, which validates your `~/.nitro/nitro.yml` file.
@@ -27,7 +24,7 @@
 ### Changed
 - Nitro now requires Docker, instead of Multipass. [#224](https://github.com/craftcms/nitro/issues/224) [#222](https://github.com/craftcms/nitro/issues/222) [#215](https://github.com/craftcms/nitro/issues/215) [#205](https://github.com/craftcms/nitro/issues/205) [#182](https://github.com/craftcms/nitro/issues/182) [#181](https://github.com/craftcms/nitro/issues/181) [#180](https://github.com/craftcms/nitro/issues/180) [#152](https://github.com/craftcms/nitro/issues/152) [#22](https://github.com/craftcms/nitro/issues/22) [#18](https://github.com/craftcms/nitro/issues/18) [#216](https://github.com/craftcms/nitro/issues/216)
 - Greatly improved Nitro support on Windows.
-- Nitro now has a single `~/.nitro/nitro.yml` file to manage everything, instead of a YAML file per machine like in v1.
+- Nitro now has a single `~/.nitro/nitro.yaml` file to manage everything, instead of a YAML file per machine like in v1.
 - Nitro will now check for port collisions during `init` and when adding database engines.
 - The `nitro create` command now accepts custom GitHub repositories and installs Composer and node dependencies automatically using `nitro composer` and `nitro npm`. [#101](https://github.com/craftcms/nitro/issues/101)
 - The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
