@@ -116,6 +116,11 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
 }
 
+// funcs to help change the php settings for a site
+func (s *Site) SetMaxExecutionTime(value int) {
+	s.PHP.MaxExecutionTime = value
+}
+
 // AsEnvs takes a gateway addr and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
@@ -132,21 +137,55 @@ func (s *Site) AsEnvs(addr string) []string {
 	// get the xdebug vars
 	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, s.Hostname, addr)...)
 
-	// set the blackfire envs if available
-	// if s.Blackfire.ServerID != "" {
-	// 	envs = append(envs, "BLACKFIRE_SERVER_ID="+s.Blackfire.ServerID)
-	// }
-	// if s.Blackfire.ServerToken != "" {
-	// 	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+s.Blackfire.ServerToken)
-	// }
-
 	return envs
 }
 
-// ChangePHPMemoryLimit sets a value without saving the file. Validate should
+// SetPHPMemoryLimit sets a value without saving the file. Validate should
 // occur outside of this func.
-func (s *Site) ChangePHPMemoryLimit(value string) {
+func (c *Config) SetPHPMemoryLimit(hostname, value string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	// find the site
+	s, err := c.FindSiteByHostName(hostname)
+	if err != nil {
+		return err
+	}
+
 	s.PHP.MemoryLimit = value
+
+	return nil
+}
+
+func (c *Config) SetPHPDisplayErrors(hostname string, value bool) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	// find the site
+	s, err := c.FindSiteByHostName(hostname)
+	if err != nil {
+		return err
+	}
+
+	s.PHP.DisplayErrors = value
+
+	return nil
+}
+
+// SetMaxExecutionTime
+func (c *Config) SetMaxExecutionTime(hostname string, value int) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	// find the site
+	s, err := c.FindSiteByHostName(hostname)
+	if err != nil {
+		return err
+	}
+
+	s.SetMaxExecutionTime(value)
+
+	return nil
 }
 
 // PHP is nested in a configuration and allows setting environment variables

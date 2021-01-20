@@ -3,6 +3,7 @@ package iniset
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -13,6 +14,7 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/validate"
 )
 
 var (
@@ -28,6 +30,28 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "iniset",
 		Short:   "Change PHP setting",
 		Example: exampleText,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// ask if the apply command should run
+			apply, err := output.Confirm("Apply changes now", true, "?")
+			if err != nil {
+				return err
+			}
+
+			// if apply is false return nil
+			if !apply {
+				return nil
+			}
+
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					return c.RunE(c, args)
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -105,6 +129,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			// set the hostname of the site based on the container name
 			hostname := strings.TrimLeft(containers[0].Names[0], "/")
 
 			settings := []string{
@@ -121,7 +146,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// which setting to change
-			selected, err := output.Select(cmd.InOrStdin(), "Which PHP setting would you like to change? ", settings)
+			selected, err := output.Select(cmd.InOrStdin(), "Which PHP setting would you like to change for "+hostname+"?", settings)
 			if err != nil {
 				return err
 			}
@@ -129,23 +154,54 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// get the specific setting to change
 			setting := settings[selected]
 
-			// find the site by the selected hostname
-			site, err := cfg.FindSiteByHostName(hostname)
-			if err != nil {
-				return err
-			}
-
 			// prompt the user for the setting to change
 			switch setting {
-			case "memory_limit":
-				// TODO(jasonmccallister) create and add a validator
-				answer, err := output.Ask("What should the new memeory limit be set to", "512M", ":", nil)
+			case "display_errors":
+				value, err := output.Ask("Should we display PHP errors", "true", "?", &validate.IsBoolean{})
+				if err != nil {
+					return err
+				}
+
+				// convert to bool
+				display, err := strconv.ParseBool(value)
 				if err != nil {
 					return err
 				}
 
 				// change the value because its validated
-				site.ChangePHPMemoryLimit(answer)
+				if err := cfg.SetPHPDisplayErrors(hostname, display); err != nil {
+					return err
+				}
+			case "max_execution_time":
+				value, err := output.Ask("What should the max execution time be", config.DefaultEnvs["PHP_MAX_EXECUTION_TIME"], "?", &validate.MaxExecutionTime{})
+				if err != nil {
+					return err
+				}
+
+				v, err := strconv.Atoi(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetMaxExecutionTime(hostname, v); err != nil {
+					return err
+				}
+
+				// save the config file
+				if err := cfg.Save(); err != nil {
+					return fmt.Errorf("unable to save config, %w", err)
+				}
+			case "memory_limit":
+				value, err := output.Ask("What should the new memory limit be", config.DefaultEnvs["PHP_MEMORY_LIMIT"], "?", &validate.IsMegabyte{})
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPMemoryLimit(hostname, value); err != nil {
+					return err
+				}
 			default:
 				return ErrUnknownSetting
 			}
@@ -153,27 +209,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// save the config file
 			if err := cfg.Save(); err != nil {
 				return fmt.Errorf("unable to save config, %w", err)
-			}
-
-			// ask if the apply command should run
-			apply, err := output.Confirm("Apply changes now", true, "?")
-			if err != nil {
-				return err
-			}
-
-			// if apply is false return nil
-			if !apply {
-				return nil
-			}
-
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
-				}
 			}
 
 			return nil

@@ -9,7 +9,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/terminal"
-	validator "github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/pkg/validate"
 )
 
 var (
@@ -67,8 +67,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 
 					// validate the php version
-					if err := validator.PHPVersion(s.Version); err != nil {
-						siteErrs = append(siteErrs, fmt.Errorf("the php version for %s is not valid", s.Hostname))
+					phpvalidator := validate.PHPVersionValidator{}
+					if err := phpvalidator.Validate(s.Version); err != nil {
+						siteErrs = append(siteErrs, fmt.Errorf("invalid php version %s", s.Version))
 					}
 				}
 

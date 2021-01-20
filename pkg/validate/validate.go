@@ -3,7 +3,6 @@ package validate
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -45,79 +44,30 @@ func (v *PHPVersionValidator) Validate(input string) error {
 	return fmt.Errorf("the PHP inputrsion %q is not valid", input)
 }
 
-func Hostname(v string) error {
-	msg := "you must provide a valid domain, without a TLD and only lowercase"
+type IsBoolean struct{}
 
-	if strings.Contains(v, " ") {
-		return errors.New(msg)
-	}
-
-	lower := strings.ToLower(v)
-	if lower != v {
-		return errors.New(msg)
-	}
-
-	return nil
-}
-
-// path will check is a fail
-func Path(p string) error {
-	f, err := os.Stat(p)
-	if err != nil {
-
+func (v *IsBoolean) Validate(input string) error {
+	if _, err := strconv.ParseBool(input); err != nil {
 		return err
 	}
 
-	if f.IsDir() {
-		return nil
-	}
-
-	return errors.New("you must provide a path to a valid directory")
-}
-
-// PHPVersion takes a string that represents a PHP version to install and returns and error if that PHP version
-// is not yet supported.
-func PHPVersion(v string) error {
-	switch v {
-	case "7.4":
-		return nil
-	case "7.3":
-		return nil
-	case "7.2":
-		return nil
-	}
-
-	return fmt.Errorf("the PHP version %q is not valid", v)
-}
-
-func Memory(v string) error {
-	if !strings.HasSuffix(v, "G") {
-		return errors.New("memory must end with a G")
-	}
-
 	return nil
 }
 
-func DiskSize(v string) error {
-	if !strings.HasSuffix(v, "G") {
-		return errors.New("disk must end with a G")
-	}
+type IsMegabyte struct{}
 
-	return nil
+func (v *IsMegabyte) Validate(input string) error {
+	return isMegabytes(input)
 }
 
-func MachineName(v string) error {
-	if v == "" {
-		return errors.New("machine name cannot be empty")
-	}
-	if strings.Contains(v, " ") {
-		return errors.New("machine name cannot contain spaces")
-	}
-
-	return nil
+type MaxExecutionTime struct {
 }
 
-func MaxExecutionTime(v string) error {
+func (v *MaxExecutionTime) Validate(input string) error {
+	return maxExecutionTime(input)
+}
+
+func maxExecutionTime(v string) error {
 	_, err := strconv.Atoi(v)
 	if err != nil {
 		return errors.New("max_execution_time must be a valid integer")
@@ -139,7 +89,7 @@ func MaxInputVars(v string) error {
 	return nil
 }
 
-func IsMegabytes(v string) error {
+func isMegabytes(v string) error {
 	if len(v) == 1 {
 		return errors.New("memory must be larger than 1 character (e.g. 256M)")
 	}

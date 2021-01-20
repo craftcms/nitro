@@ -4,140 +4,6 @@ import (
 	"testing"
 )
 
-func TestPHPVersionFlag(t *testing.T) {
-	type args struct {
-		v string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "7.4",
-			args: args{
-				"7.4",
-			},
-			wantErr: false,
-		},
-		{
-			name: "7.3",
-			args: args{
-				"7.3",
-			},
-			wantErr: false,
-		},
-		{
-			name: "7.2",
-			args: args{
-				"7.2",
-			},
-			wantErr: false,
-		},
-		{
-			name: "junk",
-			args: args{
-				"junk",
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := PHPVersion(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("PHPVersion() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestDomain(t *testing.T) {
-	type args struct {
-		v string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "is valid",
-			args:    args{v: "example.test"},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Hostname(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("Hostname() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestMemory(t *testing.T) {
-	type args struct {
-		v string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "integers only return error",
-			args:    args{v: "2"},
-			wantErr: true,
-		},
-		{
-			name:    "lower case G return error",
-			args:    args{v: "2g"},
-			wantErr: true,
-		},
-		{
-			name:    "proper values do not return error",
-			args:    args{v: "2G"},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Memory(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("Memory() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestPath(t *testing.T) {
-	type args struct {
-		p string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "valid path returns nil",
-			args:    args{p: "/tmp"},
-			wantErr: false,
-		},
-		{
-			name:    "invalid path returns error",
-			args:    args{p: "does-not-exist"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Path(tt.args.p); (err != nil) != tt.wantErr {
-				t.Errorf("Path() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestIsMegabytes(t *testing.T) {
 	type args struct {
 		v string
@@ -160,8 +26,149 @@ func TestIsMegabytes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := IsMegabytes(tt.args.v); (err != nil) != tt.wantErr {
-				t.Errorf("IsMegabytes() error = %v, wantErr %v", err, tt.wantErr)
+			if err := isMegabytes(tt.args.v); (err != nil) != tt.wantErr {
+				t.Errorf("isMegabytes() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestHostnameValidator_Validate(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		v       *HostnameValidator
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valide hostnames do not return an err",
+			args: args{
+				input: "validhostname.tld",
+			},
+			wantErr: false,
+		},
+		{
+			name: "special chars returns an err",
+			args: args{
+				input: "somehostname!",
+			},
+			wantErr: true,
+		},
+		{
+			name: "spaces returns an err",
+			args: args{
+				input: "12    ",
+			},
+			wantErr: true,
+		},
+		{
+			name: "less than 3 chars returns an err",
+			args: args{
+				input: "12",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &HostnameValidator{}
+			if err := v.Validate(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("HostnameValidator.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestPHPVersionValidator_Validate(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		v       *PHPVersionValidator
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "8.0 version is valid",
+			args: args{
+				input: "8.0",
+			},
+			wantErr: false,
+		},
+		{
+			name: "7.4 version is valid",
+			args: args{
+				input: "7.4",
+			},
+			wantErr: false,
+		},
+		{
+			name: "7.3 version is valid",
+			args: args{
+				input: "7.3",
+			},
+			wantErr: false,
+		},
+		{
+			name: "7.2 version is valid",
+			args: args{
+				input: "7.2",
+			},
+			wantErr: false,
+		},
+		{
+			name: "7.1 version is valid",
+			args: args{
+				input: "7.1",
+			},
+			wantErr: false,
+		},
+		{
+			name: "7.0 version is valid",
+			args: args{
+				input: "7.0",
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid versions returns an error",
+			args: args{
+				input: "nope",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &PHPVersionValidator{}
+			if err := v.Validate(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("PHPVersionValidator.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestIsBoolean_Validate(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		v       *IsBoolean
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &IsBoolean{}
+			if err := v.Validate(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("IsBoolean.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
