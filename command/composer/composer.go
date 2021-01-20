@@ -3,6 +3,7 @@ package composer
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/checkfile"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -65,19 +67,21 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// determine the default action
 			action := args[0]
+			// if this is not a create project request, check for a composer.json
+			if action != "create-project" {
+				// get the full file path
+				composerPath := filepath.Join(path, "composer.json")
 
-			// get the full file path
-			composerPath := filepath.Join(path, "composer.json")
+				output.Pending("checking", composerPath)
 
-			output.Pending("checking", composerPath)
+				// see if the file exists
+				if _, err := checkfile.Exists(ctx, composerPath); errors.Is(err, checkfile.ErrFileNotFound) {
+					output.Warning()
+					return err
+				}
 
-			// make sure the file exists
-			if _, err = os.Stat(composerPath); os.IsNotExist(err) {
-				output.Warning()
-				return ErrNoComposerFile
+				output.Done()
 			}
-
-			output.Done()
 
 			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
 
