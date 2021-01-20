@@ -116,11 +116,6 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
 }
 
-// funcs to help change the php settings for a site
-func (s *Site) SetMaxExecutionTime(value int) {
-	s.PHP.MaxExecutionTime = value
-}
-
 // AsEnvs takes a gateway addr and turns specific options
 // such as PHP settings into env vars that can be set on the
 // containers environment
@@ -140,52 +135,79 @@ func (s *Site) AsEnvs(addr string) []string {
 	return envs
 }
 
-// SetPHPMemoryLimit sets a value without saving the file. Validate should
-// occur outside of this func.
-func (c *Config) SetPHPMemoryLimit(hostname, value string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
+			switch setting {
+			case "display_errors":
+				c.Sites[i].PHP.DisplayErrors = value
 
-	// find the site
-	s, err := c.FindSiteByHostName(hostname)
-	if err != nil {
-		return err
+				return nil
+			case "opcache_enable":
+				c.Sites[i].PHP.OpcacheEnable = value
+
+				return nil
+			default:
+				return fmt.Errorf("unknown php setting %s", setting)
+			}
+		}
 	}
 
-	s.PHP.MemoryLimit = value
-
-	return nil
+	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
-func (c *Config) SetPHPDisplayErrors(hostname string, value bool) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
+			switch setting {
+			case "max_execution_time":
+				c.Sites[i].PHP.MaxExecutionTime = value
 
-	// find the site
-	s, err := c.FindSiteByHostName(hostname)
-	if err != nil {
-		return err
+				return nil
+			case "max_input_vars":
+				c.Sites[i].PHP.MaxInputVars = value
+
+				return nil
+			case "max_input_time":
+				c.Sites[i].PHP.MaxInputTime = value
+
+				return nil
+			case "opcache_revalidate_freq":
+				c.Sites[i].PHP.OpcacheRevalidateFreq = value
+
+				return nil
+			default:
+				return fmt.Errorf("unknown php setting %s", setting)
+			}
+		}
 	}
 
-	s.PHP.DisplayErrors = value
-
-	return nil
+	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
-// SetMaxExecutionTime
-func (c *Config) SetMaxExecutionTime(hostname string, value int) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
+func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
+			switch setting {
+			case "post_max_size":
+				c.Sites[i].PHP.PostMaxSize = value
 
-	// find the site
-	s, err := c.FindSiteByHostName(hostname)
-	if err != nil {
-		return err
+				return nil
+			case "max_file_upload":
+				c.Sites[i].PHP.MaxFileUpload = value
+
+				return nil
+			case "memory_limit":
+				c.Sites[i].PHP.MemoryLimit = value
+
+				return nil
+			default:
+				return fmt.Errorf("unknown php setting %s", setting)
+			}
+		}
 	}
 
-	s.SetMaxExecutionTime(value)
-
-	return nil
+	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
 // PHP is nested in a configuration and allows setting environment variables
