@@ -75,7 +75,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Pending("checking", composerPath)
 
 				// see if the file exists
-				if _, err := checkfile.Exists(ctx, composerPath); errors.Is(err, checkfile.ErrFileNotFound) {
+				if _, err := checkfile.Exists(composerPath); errors.Is(err, checkfile.ErrFileNotFound) {
 					output.Warning()
 					return err
 				}
