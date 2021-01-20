@@ -31,7 +31,6 @@ var (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) (string, string, error) {
 	// create the filters for the database
 	filter := filters.NewArgs()
-	// filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
 	filter.Add("label", labels.Type+"=database")
@@ -107,16 +106,31 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		envs = []string{"MYSQL_ROOT_PASSWORD=nitro", "MYSQL_DATABASE=nitro", "MYSQL_USER=nitro", "MYSQL_PASSWORD=nitro"}
 	}
 
-	// pull the image
-	rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+	// check if there is an image
+
+	// filter for the image ref
+	imageFilter := filters.NewArgs()
+	imageFilter.Add("reference", image)
+
+	// look for the image
+	images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter})
 	if err != nil {
-		return "", "", fmt.Errorf("unable to pull image %s, %w", image, err)
+		return "", "", fmt.Errorf("unable to get a list of images, %w", err)
 	}
 
-	// read the output to pull the image
-	buf := &bytes.Buffer{}
-	if _, err := buf.ReadFrom(rdr); err != nil {
-		return "", "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+	// if there are no images, pull one
+	if len(images) == 0 {
+		// pull the image
+		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+		if err != nil {
+			return "", "", fmt.Errorf("unable to pull image %s, %w", image, err)
+		}
+
+		// read the output to pull the image
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
+			return "", "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		}=
 	}
 
 	// set the port for the database
