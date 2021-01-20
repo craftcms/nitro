@@ -36,6 +36,28 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 		Short:   "Create project",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// ask if the apply command should run
+			apply, err := output.Confirm("Apply changes now", true, "?")
+			if err != nil {
+				return err
+			}
+
+			// if apply is false return nil
+			if !apply {
+				return nil
+			}
+
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					return c.RunE(c, args)
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default
 			var download *url.URL
@@ -106,24 +128,6 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 
 			// TODO(jasonmccallister) prompt for a new database
 			// TODO(jasonmccallister) edit the .env
-
-			// ask if we should run apply now
-			confirm, err := output.Confirm("Apply changes now", true, "?")
-			if err != nil {
-				return err
-			}
-
-			// we are skipping the apply step
-			if !confirm {
-				return nil
-			}
-
-			// get the apply command and run it
-			for _, c := range cmd.Parent().Commands() {
-				if c.Use == "apply" {
-					return c.RunE(c, args)
-				}
-			}
 
 			return nil
 		},
