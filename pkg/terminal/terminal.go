@@ -39,7 +39,7 @@ func New() *terminal {
 }
 
 func (t *terminal) Ask(message, fallback, sep string, validator Validator) (string, error) {
-	t.printMessage(message, fallback, sep)
+	t.printStrMessage(message, fallback, sep)
 
 	// create a new scanner
 	s := bufio.NewScanner(os.Stdin)
@@ -63,7 +63,7 @@ func (t *terminal) Ask(message, fallback, sep string, validator Validator) (stri
 				// there is an error, so display the error and show the message again
 				t.printValidatorError(err)
 
-				t.printMessage(message, fallback, sep)
+				t.printStrMessage(message, fallback, sep)
 
 				continue
 			}
@@ -77,7 +77,7 @@ func (t *terminal) Ask(message, fallback, sep string, validator Validator) (stri
 
 		// last ditch effort here, check both the text and fallback
 		if txt == "" && fallback == "" {
-			t.printMessage(message, fallback, sep)
+			t.printStrMessage(message, fallback, sep)
 
 			continue
 		}
@@ -91,7 +91,41 @@ func (t *terminal) Ask(message, fallback, sep string, validator Validator) (stri
 	return a, nil
 }
 
-func (t *terminal) printMessage(message, fallback, sep string) {
+func (t *terminal) Confirm(message string, fallback bool, sep string) (bool, error) {
+	t.printBoolMessage(message, fallback, sep)
+
+	s := bufio.NewScanner(os.Stdin)
+	s.Split(bufio.ScanLines)
+
+	for s.Scan() {
+		txt := strings.TrimSpace(s.Text())
+
+		switch txt {
+		case "n", "N", "no", "No", "NO":
+			return false, nil
+		default:
+			return true, nil
+		}
+
+		break
+	}
+	if err := s.Err(); err != nil {
+		return fallback, err
+	}
+
+	return fallback, nil
+}
+
+func (t *terminal) printBoolMessage(message string, fallback bool, sep string) {
+	if fallback {
+		fmt.Printf("%s [Y/n] ", message)
+		return
+	}
+
+	fmt.Printf("%s [y/N] ", message)
+}
+
+func (t *terminal) printStrMessage(message, fallback, sep string) {
 	if fallback == "" {
 		fmt.Fprintf(os.Stdout, "%s%s ", message, sep)
 		return
