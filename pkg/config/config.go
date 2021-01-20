@@ -46,6 +46,17 @@ type Config struct {
 	rw sync.RWMutex
 }
 
+func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
+	// find the site by the hostname
+	for _, s := range c.Sites {
+		if s.Hostname == hostname {
+			return &s, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find the site using the hostname %s", hostname)
+}
+
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
 	ServerID    string `yaml:"server_id,omitempty"`
@@ -130,6 +141,12 @@ func (s *Site) AsEnvs(addr string) []string {
 	// }
 
 	return envs
+}
+
+// ChangePHPMemoryLimit sets a value without saving the file. Validate should
+// occur outside of this func.
+func (s *Site) ChangePHPMemoryLimit(value string) {
+	s.PHP.MemoryLimit = value
 }
 
 // PHP is nested in a configuration and allows setting environment variables
