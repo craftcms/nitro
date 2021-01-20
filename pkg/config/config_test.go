@@ -592,6 +592,23 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		want    Config
 		wantErr bool
 	}{
+		// upload_max_file_size
+		{
+			name: "can change a sites php upload_max_file_size setting",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+			},
+			args: args{
+				hostname: "siteone.nitro",
+				setting:  "upload_max_file_size",
+				value:    "24M",
+			},
+			wantErr: false,
+		},
 		{
 			name: "can change a sites php post max size setting",
 			fields: fields{

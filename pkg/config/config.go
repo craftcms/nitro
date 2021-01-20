@@ -135,6 +135,9 @@ func (s *Site) AsEnvs(addr string) []string {
 	return envs
 }
 
+// SetPHPBoolSetting is used to set php settings that are bool. It will look
+// for the site by its hostname and change the setting. If it cannot find the
+// site or setting it will return an error.
 func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 	for i, s := range c.Sites {
 		if s.Hostname == hostname {
@@ -156,6 +159,9 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
+// SetPHPIntSetting is used to set php settings that are ints. It will look
+// for the site by its hostname and change the setting. If it cannot find the
+// site or setting it will return an error.
 func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
 	for i, s := range c.Sites {
 		if s.Hostname == hostname {
@@ -185,6 +191,9 @@ func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
 	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
+// SetPHPStrSetting is used to set php settings that are strings. It will look
+// for the site by its hostname and change the setting. If it cannot find the
+// site or setting it will return an error.
 func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 	for i, s := range c.Sites {
 		if s.Hostname == hostname {
@@ -199,6 +208,10 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 				return nil
 			case "memory_limit":
 				c.Sites[i].PHP.MemoryLimit = value
+
+				return nil
+			case "upload_max_file_size":
+				c.Sites[i].PHP.UploadMaxFileSize = value
 
 				return nil
 			default:

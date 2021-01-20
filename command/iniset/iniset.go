@@ -169,7 +169,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// change the value because its validated
-				if err := cfg.SetPHPDisplayErrors(hostname, display); err != nil {
+				if err := cfg.SetPHPBoolSetting(hostname, setting, display); err != nil {
 					return err
 				}
 			case "max_execution_time":
@@ -184,13 +184,48 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// change the value because its validated
-				if err := cfg.SetMaxExecutionTime(hostname, v); err != nil {
+				if err := cfg.SetPHPIntSetting(hostname, setting, v); err != nil {
+					return err
+				}
+			case "max_input_vars":
+				value, err := output.Ask("What should the max input vars be", config.DefaultEnvs["PHP_MAX_INPUT_VARS"], "?", &validate.MaxExecutionTime{})
+				if err != nil {
 					return err
 				}
 
-				// save the config file
-				if err := cfg.Save(); err != nil {
-					return fmt.Errorf("unable to save config, %w", err)
+				v, err := strconv.Atoi(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPIntSetting(hostname, setting, v); err != nil {
+					return err
+				}
+			case "max_input_time":
+				value, err := output.Ask("What should the max input time be", config.DefaultEnvs["PHP_MAX_INPUT_TIME"], "?", &validate.MaxExecutionTime{})
+				if err != nil {
+					return err
+				}
+
+				v, err := strconv.Atoi(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPIntSetting(hostname, setting, v); err != nil {
+					return err
+				}
+			case "max_file_upload":
+				value, err := output.Ask("What should the new max file upload be", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "?", &validate.IsMegabyte{})
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPStrSetting(hostname, setting, value); err != nil {
+					return err
 				}
 			case "memory_limit":
 				value, err := output.Ask("What should the new memory limit be", config.DefaultEnvs["PHP_MEMORY_LIMIT"], "?", &validate.IsMegabyte{})
@@ -199,7 +234,58 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// change the value because its validated
-				if err := cfg.SetPHPMemoryLimit(hostname, value); err != nil {
+				if err := cfg.SetPHPStrSetting(hostname, setting, value); err != nil {
+					return err
+				}
+			case "opcache_enable":
+				value, err := output.Ask("Should we enable OPCache", "false", "?", &validate.IsBoolean{})
+				if err != nil {
+					return err
+				}
+
+				// convert to bool
+				display, err := strconv.ParseBool(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPBoolSetting(hostname, setting, display); err != nil {
+					return err
+				}
+			case "opcache_revalidate_freq":
+				value, err := output.Ask("What should the OPCache revalidate frequency be", config.DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"], "?", &validate.MaxExecutionTime{})
+				if err != nil {
+					return err
+				}
+
+				v, err := strconv.Atoi(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPIntSetting(hostname, setting, v); err != nil {
+					return err
+				}
+			case "post_max_size":
+				value, err := output.Ask("What should post max size be", config.DefaultEnvs["PHP_POST_MAX_SIZE"], "?", &validate.IsMegabyte{})
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPStrSetting(hostname, setting, value); err != nil {
+					return err
+				}
+			case "upload_max_file_size":
+				value, err := output.Ask("What should upload maximum file size be", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "?", &validate.IsMegabyte{})
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPStrSetting(hostname, setting, value); err != nil {
 					return err
 				}
 			default:
