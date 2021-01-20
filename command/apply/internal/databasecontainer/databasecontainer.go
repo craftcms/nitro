@@ -130,7 +130,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		buf := &bytes.Buffer{}
 		if _, err := buf.ReadFrom(rdr); err != nil {
 			return "", "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
-		}=
+		}
 	}
 
 	// set the port for the database
