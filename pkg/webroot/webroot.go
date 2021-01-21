@@ -19,6 +19,11 @@ var (
 func Find(path string) (string, error) {
 	var root string
 	if err := filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+		// safety check
+		if info == nil {
+			return nil
+		}
+
 		// ignore files
 		if !info.IsDir() {
 			return nil
