@@ -81,7 +81,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					continue
 				}
 
-				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing")
+				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
 
 				// stop the container if it is running
 				if c.State == "running" {
