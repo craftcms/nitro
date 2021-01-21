@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"archive/zip"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -87,8 +86,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 					}
 
 					if err != nil {
-						fmt.Println(err)
-						os.Exit(1)
+						return err
 					}
 
 					switch header.Typeflag {
@@ -106,7 +104,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 
 								// self update
 								if err := selfupdate.Apply(tr, selfupdate.Options{}); err != nil {
-									log.Fatal(err)
+									return err
 								}
 
 								break
@@ -119,7 +117,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 
 								// self update
 								if err := selfupdate.Apply(tr, selfupdate.Options{}); err != nil {
-									log.Fatal(err)
+									return err
 								}
 
 								break
@@ -133,7 +131,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 				// unzip
 				zr, err := zip.OpenReader(file.Name())
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 
 				for _, file := range zr.Reader.File {
@@ -152,7 +150,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 
 							// self update
 							if err := selfupdate.Apply(f, selfupdate.Options{}); err != nil {
-								log.Fatal(err)
+								return err
 							}
 						}
 					}
