@@ -60,8 +60,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Adding site…")
-
 			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
@@ -77,10 +75,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				if exists := pathexists.IsDirectory(dir); !exists {
 					return fmt.Errorf("unable to find the directory: %s", dir)
 				}
-
 			default:
 				dir = filepath.Clean(wd)
 			}
+
+			output.Info("Adding site…")
 
 			// create a new site
 			site := config.Site{}
