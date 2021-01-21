@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"runtime"
 
@@ -40,37 +39,37 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 				return err
 			}
 
-			// make sure they are
+			// make sure the versions do not match
 			if release.Version == version.Version {
 				output.Info("up to date!")
 				return nil
 			}
 
-			output.Pending("found Nitro", release.Version, "updating")
+			output.Pending("found version", release.Version, "updating")
 
 			// create a temp file to save the release into
 			file, err := ioutil.TempFile(os.TempDir(), "nitro-release-download-")
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			defer file.Close()
 
 			// download the release
 			if err := releases.NewDownloader().Download(release.URL, file.Name()); err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			switch release.ContentType {
 			case "application/gzip":
 				file, err := os.Open(file.Name())
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 				defer file.Close()
 
 				gz, err := gzip.NewReader(file)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 				defer gz.Close()
 
