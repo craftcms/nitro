@@ -137,7 +137,25 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 				}
 
 				for _, file := range zr.Reader.File {
-					fmt.Println(file)
+					switch release.OperatingSystem {
+					case "windows":
+						if file.Name == "nitro.exe" {
+							output.Done()
+
+							output.Info("Updating to Nitro", release.Version+"!")
+
+							// read the file
+							f, err := os.Open(file.FileInfo().Name())
+							if err != nil {
+								return err
+							}
+
+							// self update
+							if err := selfupdate.Apply(f, selfupdate.Options{}); err != nil {
+								log.Fatal(err)
+							}
+						}
+					}
 				}
 			}
 
