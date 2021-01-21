@@ -47,7 +47,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 				return nil
 			}
 
-			output.Pending("found release", release.Version, "updating")
+			output.Pending("found Nitro", release.Version, "updating")
 
 			// create a temp file to save the release into
 			file, err := ioutil.TempFile(os.TempDir(), "nitro-release-download-")
@@ -102,7 +102,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 							if name == "nitro.exe" {
 								output.Done()
 
-								output.Info("Updating to Nitro", release.Version, "!")
+								output.Info("Updating to Nitro", release.Version+"!")
 
 								// self update
 								if err := selfupdate.Apply(tr, selfupdate.Options{}); err != nil {
@@ -115,7 +115,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 							if name == "nitro" {
 								output.Done()
 
-								output.Info("Updating to Nitro", release.Version, "!")
+								output.Info("Updating to Nitro", release.Version+"!")
 
 								// self update
 								if err := selfupdate.Apply(tr, selfupdate.Options{}); err != nil {
