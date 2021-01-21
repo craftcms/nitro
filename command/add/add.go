@@ -16,6 +16,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/validate"
@@ -72,6 +73,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			switch len(args) {
 			case 1:
 				dir = filepath.Join(wd, args[0])
+				// make sure the directory exists
+				if exists := pathexists.IsDirectory(dir); !exists {
+					return fmt.Errorf("unable to find the directory: %s", dir)
+				}
+
 			default:
 				dir = filepath.Clean(wd)
 			}
