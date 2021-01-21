@@ -35,6 +35,18 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Short: "Update nitro",
 		Example: `  # update nitro
   nitro update`,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					if err := c.RunE(c, args); err != nil {
+						return err
+					}
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Updating nitro…")
 			ctx := cmd.Context()
@@ -101,15 +113,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			output.Info("Images updated 👍, applying changes…")
-
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
-				}
-			}
 
 			return nil
 		},
