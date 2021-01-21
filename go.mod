@@ -17,6 +17,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/lib/pq v1.9.0
+	github.com/minio/selfupdate v0.3.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
