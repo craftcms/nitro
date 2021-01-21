@@ -12,12 +12,16 @@ upx: build
 	upx --brute nitro
 
 alpha: alpha-macos alpha-win
-alpha-macos: build
+alpha-macos: build upx-macos
 	zip -X macos_nitro_v2_alpha.zip nitro
 	rm nitro
-alpha-win: build-win
+alpha-win: build-win upx-win
 	zip -X windows_nitro_v2_alpha.zip nitro.exe
 	rm nitro.exe
+upx-macos:
+	upx --brute nitro
+upx-win:
+	upx --brute nitro.exe
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
