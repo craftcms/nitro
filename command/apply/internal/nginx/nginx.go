@@ -9,6 +9,11 @@ var conf = `server {
     set         $base /app;
     root        $base/%s;
 
+    proxy_send_timeout 240s;
+    proxy_read_timeout 240s;
+    fastcgi_send_timeout 240s;
+    fastcgi_read_timeout 240s;
+
     # security
     include     craftcms/security.conf;
 

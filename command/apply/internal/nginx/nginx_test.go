@@ -35,6 +35,11 @@ var defaultConf = `server {
     set         $base /app;
     root        $base/web;
 
+    proxy_send_timeout 240s;
+    proxy_read_timeout 240s;
+    fastcgi_send_timeout 240s;
+    fastcgi_read_timeout 240s;
+
     # security
     include     craftcms/security.conf;
 

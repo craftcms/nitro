@@ -23,7 +23,6 @@ import (
 	"github.com/craftcms/nitro/pkg/webroot"
 )
 
-// TODO - prompt user for the database engine and new database
 // TODO - edit the env file for the user
 
 const exampleText = `  # add the current project as a site
