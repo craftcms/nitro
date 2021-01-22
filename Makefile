@@ -4,24 +4,34 @@ VERSION ?= 2.0.0-alpha
 
 build:
 	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+build-macos:
+	GOOS=darwin go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-api:
 	GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitrod ./cmd/nitrod
 build-win:
 	GOOS="windows" go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro.exe ./cmd/nitro
+build-linux:
+	GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 upx: build
 	upx --brute nitro
 
-alpha: alpha-macos alpha-win
-alpha-macos: build upx-macos
+alpha: alpha-macos alpha-win alpha-linux
+alpha-macos: build-macos upx-macos
 	zip -X macos_nitro_v2_alpha.zip nitro
 	rm nitro
 alpha-win: build-win upx-win
 	zip -X windows_nitro_v2_alpha.zip nitro.exe
 	rm nitro.exe
+alpha-linux: build-linux upx-linux
+	zip -X linux_nitro_v2_alpha.zip nitro
+	rm nitro
+
 upx-macos:
 	upx --brute nitro
 upx-win:
 	upx --brute nitro.exe
+upx-linux:
+	upx --brute nitro
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
