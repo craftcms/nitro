@@ -3,7 +3,6 @@ package queue
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -108,18 +107,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			// get the container path
 			var cmds []string
-			if strings.Contains(site.Webroot, "/") {
-				parts := strings.Split(site.Webroot, "/")
-
-				var containerPath string
-				if len(parts) >= 2 {
-					containerPath = strings.Join(parts[:len(parts)-1], "/")
-				} else {
-					containerPath = parts[0]
-				}
-
-				cmds = []string{"php", fmt.Sprintf("%s/%s", containerPath, "craft"), "queue/listen", "--verbose"}
+			path := site.GetContainerPath()
+			if path != "" {
+				cmds = []string{"php", fmt.Sprintf("%s/%s", path, "craft"), "queue/listen", "--verbose"}
 			} else {
 				cmds = []string{"php", "craft", "queue/listen", "--verbose"}
 			}
@@ -137,16 +129,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// attach to the exec
-			resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{
-				// Tty:          true,
-			})
+			resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{})
 			if err != nil {
 				return err
 			}
 			defer resp.Close()
 
 			outputDone := make(chan error)
-
 			go func() {
 				_, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.OutOrStderr(), resp.Reader)
 				outputDone <- err

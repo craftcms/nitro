@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -113,17 +112,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create the command for running the craft console
 			cmds := []string{"exec", "-it", containers[0].ID, "php"}
-			if strings.Contains(site.Webroot, "/") {
-				parts := strings.Split(site.Webroot, "/")
 
-				var containerPath string
-				if len(parts) >= 2 {
-					containerPath = strings.Join(parts[:len(parts)-1], "/")
-				} else {
-					containerPath = parts[0]
-				}
-
-				cmds = append(cmds, fmt.Sprintf("%s/%s", containerPath, "craft"))
+			// get the container path
+			path := site.GetContainerPath()
+			if path != "" {
+				cmds = append(cmds, fmt.Sprintf("%s/%s", path, "craft"))
 			} else {
 				cmds = append(cmds, "craft")
 			}
