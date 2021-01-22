@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -73,9 +74,10 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			output.Pending("checking", nodePath)
 
 			// make sure the file exists
-			if _, err := os.Stat(nodePath); os.IsNotExist(err) {
+			// see if the file exists
+			if exists := pathexists.IsFile(nodePath); !exists {
 				output.Warning()
-				return ErrNoPackageFile
+				return fmt.Errorf("unable to find file %s", nodePath)
 			}
 
 			output.Done()

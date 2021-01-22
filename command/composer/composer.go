@@ -3,7 +3,6 @@ package composer
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,8 +17,8 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/checkfile"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -75,9 +74,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Pending("checking", composerPath)
 
 				// see if the file exists
-				if _, err := checkfile.Exists(composerPath); errors.Is(err, checkfile.ErrFileNotFound) {
+				if exists := pathexists.IsFile(composerPath); !exists {
 					output.Warning()
-					return err
+					return fmt.Errorf("unable to find file %s", composerPath)
 				}
 
 				output.Done()
