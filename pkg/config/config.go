@@ -46,6 +46,8 @@ type Config struct {
 	rw sync.RWMutex
 }
 
+// FindSiteByHostName takes a hostname and returns the site if the hostnames
+// match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
 	for _, s := range c.Sites {
@@ -286,21 +288,19 @@ func (c *Config) AddSite(s Site) error {
 
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
-func (c *Config) RemoveSite(hostname string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
-			c.Sites[i] = c.Sites[len(c.Sites)-1]
+func (c *Config) RemoveSite(site *Site) error {
+	for i := range c.Sites {
+		if c.Sites[i].Hostname == site.Hostname {
+			fmt.Println("removing", c.Sites[i].Hostname)
+			copy(c.Sites[i:], c.Sites[i+1:])
 			c.Sites[len(c.Sites)-1] = Site{}
 			c.Sites = c.Sites[:len(c.Sites)-1]
-
-			return nil
 		}
 	}
 
-	return fmt.Errorf("unable to find the hostname %q to remove", hostname)
+	fmt.Println("new sites", c.Sites)
+
+	return nil
 }
 
 // DisableXdebug takes a sites hostname and sets the xdebug option

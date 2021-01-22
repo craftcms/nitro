@@ -45,70 +45,136 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter.Add("label", labels.Nitro)
 
 			// get all of the sites
+			var sites, found []string
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					output.Info("Listening for queue jobs…")
+					found = append(found, s.Hostname)
+				}
 
-					filter.Add("label", labels.Host+"="+s.Hostname)
+				// add the site to the list in case we cannot find the directory
+				sites = append(sites, s.Hostname)
+			}
 
-					// find all of the containers, there should only be one though
-					containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
-					if err != nil {
-						return err
-					}
+			// check if we found a site
+			switch len(found) {
+			case 0:
+				// prompt for the site
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+				if err != nil {
+					return err
+				}
 
-					// create an exec
-					exec, err := docker.ContainerExecCreate(cmd.Context(), containers[0].ID, types.ExecConfig{
-						// AttachStdin:  true,
-						AttachStderr: true,
-						AttachStdout: true,
-						Cmd:          []string{"./craft", "queue/listen", "--verbose"},
-						// Tty:          true,
-					})
-					if err != nil {
-						return err
-					}
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+sites[selected])
+			case 1:
+				output.Info("connecting to", found[0])
 
-					// attach to the exec
-					resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{
-						// Tty:          true,
-					})
-					if err != nil {
-						return err
-					}
-					defer resp.Close()
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+found[0])
+			default:
+				// prompt for the site to ssh into
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
+				if err != nil {
+					return err
+				}
 
-					outputDone := make(chan error)
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+found[selected])
+			}
 
-					go func() {
-						_, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.OutOrStderr(), resp.Reader)
-						outputDone <- err
-					}()
+			// find the containers but limited to the site label
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
+			if err != nil {
+				return err
+			}
 
-					select {
-					case err := <-outputDone:
-						if err != nil {
-							return err
-						}
-						break
+			// are there any containers??
+			if len(containers) == 0 {
+				return fmt.Errorf("unable to find an matching site")
+			}
 
-					case <-cmd.Context().Done():
-						return cmd.Context().Err()
-					}
-
-					// get the exit code
-					exit, err := docker.ContainerExecInspect(cmd.Context(), exec.ID)
-					if err != nil {
-						return err
-					}
-
-					// do something with the exit code
-					output.Info(fmt.Sprintf("%d", exit.ExitCode))
+			// start the container if its not running
+			if containers[0].State != "running" {
+				if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
+					return err
 				}
 			}
+
+			// get the host name from the container
+			hostname := strings.TrimLeft(containers[0].Names[0], "/")
+
+			// if the webroot is not the default and has a path seperator, assume its a directory
+			s, err := cfg.FindSiteByHostName(hostname)
+			if err != nil {
+				return err
+			}
+
+			var cmds []string
+			if strings.Contains(s.Webroot, "/") {
+				parts := strings.Split(s.Webroot, "/")
+
+				var containerPath string
+				if len(parts) >= 2 {
+					containerPath = strings.Join(parts[:len(parts)-1], "/")
+				} else {
+					containerPath = parts[0]
+				}
+
+				cmds = []string{"php", fmt.Sprintf("%s/%s", containerPath, "craft"), "queue/listen", "--verbose"}
+			} else {
+				cmds = []string{"php", "craft", "queue/listen", "--verbose"}
+			}
+
+			output.Info("Listening for queue jobs…")
+
+			// create an exec
+			exec, err := docker.ContainerExecCreate(cmd.Context(), containers[0].ID, types.ExecConfig{
+				AttachStderr: true,
+				AttachStdout: true,
+				Cmd:          cmds,
+			})
+			if err != nil {
+				return err
+			}
+
+			// attach to the exec
+			resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{
+				// Tty:          true,
+			})
+			if err != nil {
+				return err
+			}
+			defer resp.Close()
+
+			outputDone := make(chan error)
+
+			go func() {
+				_, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.OutOrStderr(), resp.Reader)
+				outputDone <- err
+			}()
+
+			select {
+			case err := <-outputDone:
+				if err != nil {
+					return err
+				}
+				break
+
+			case <-cmd.Context().Done():
+				return cmd.Context().Err()
+			}
+
+			// get the exit code
+			exit, err := docker.ContainerExecInspect(cmd.Context(), exec.ID)
+			if err != nil {
+				return err
+			}
+
+			// do something with the exit code
+			output.Info(fmt.Sprintf("%d", exit.ExitCode))
 
 			return nil
 		},

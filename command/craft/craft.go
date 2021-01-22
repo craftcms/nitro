@@ -49,25 +49,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter.Add("label", labels.Nitro)
 
 			// get all of the sites
-			var site string
-			var sites []string
+			var sites, found []string
 			for _, s := range cfg.Sites {
 				p, _ := s.GetAbsPath(home)
 
 				// check if the path matches a sites path, then we are in a known site
 				if strings.Contains(wd, p) {
-					site = s.Hostname
-					break
+					found = append(found, s.Hostname)
 				}
 
 				// add the site to the list in case we cannot find the directory
 				sites = append(sites, s.Hostname)
 			}
 
-			// check the current site
-			switch site == "" {
-			case true:
-				// prompt for the site to ssh into
+			switch len(found) {
+			case 0:
+				// prompt for the site
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
 				if err != nil {
 					return err
@@ -75,9 +72,20 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// add the label to get the site
 				filter.Add("label", labels.Host+"="+sites[selected])
-			default:
+			case 1:
+				output.Info("connecting to", found[0])
+
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+site)
+				filter.Add("label", labels.Host+"="+found[0])
+			default:
+				// prompt for the site to ssh into
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
+				if err != nil {
+					return err
+				}
+
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+found[selected])
 			}
 
 			// find the containers but limited to the site label
@@ -91,8 +99,39 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to find an matching site")
 			}
 
-			// create the commands
-			cmds := []string{"exec", "-it", containers[0].ID, "php", "craft"}
+			// start the container if its not running
+			if containers[0].State != "running" {
+				if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
+					return err
+				}
+			}
+
+			// get the host name from the container
+			hostname := strings.TrimLeft(containers[0].Names[0], "/")
+
+			// if the webroot is not the default and has a path seperator, assume its a directory
+			s, err := cfg.FindSiteByHostName(hostname)
+			if err != nil {
+				return err
+			}
+
+			// create the command
+			cmds := []string{"exec", "-it", containers[0].ID, "php"}
+			if strings.Contains(s.Webroot, "/") {
+				parts := strings.Split(s.Webroot, "/")
+
+				var containerPath string
+				if len(parts) >= 2 {
+					containerPath = strings.Join(parts[:len(parts)-1], "/")
+				} else {
+					containerPath = parts[0]
+				}
+
+				cmds = append(cmds, fmt.Sprintf("%s/%s", containerPath, "craft"))
+			} else {
+				cmds = append(cmds, "craft")
+			}
+
 			switch len(args) == 0 {
 			case true:
 				// no args were provided, use the help command
