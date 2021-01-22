@@ -4,6 +4,8 @@ VERSION ?= 2.0.0-alpha
 
 build:
 	go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+build-macos:
+	GOOS=darwin go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-api:
 	GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitrod ./cmd/nitrod
 build-win:
@@ -14,7 +16,7 @@ upx: build
 	upx --brute nitro
 
 alpha: alpha-macos alpha-win alpha-linux
-alpha-macos: build upx-macos
+alpha-macos: build-macos upx-macos
 	zip -X macos_nitro_v2_alpha.zip nitro
 	rm nitro
 alpha-win: build-win upx-win
