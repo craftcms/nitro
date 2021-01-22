@@ -3,8 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "name": "nitro apply",
             "type": "go",
             "request": "launch",
@@ -22,29 +21,39 @@
             "env": {},
             "args": ["create", "craftcms/starter-blog", "blog"]
         },
-          {
-              "name": "nitro iniset",
-              "type": "go",
-              "request": "launch",
-              "mode": "auto",
-              "program": "${workspaceFolder}/cmd/nitro/main.go",
-              "env": {},
-              "args": ["iniset"]
-          },
-         {
-             "name": "nitro init",
-             "type": "go",
-             "request": "launch",
-             "mode": "auto",
-             "program": "${workspaceFolder}/cmd/nitro/main.go",
-             "env": {},
-             "args": ["init"]
-         },
+        {
+            "name": "nitro iniset",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "args": ["iniset"]
+        },
+        {
+            "name": "nitro init",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "args": ["init"]
+        },
+        {
+            "name": "nitro remove",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "internalConsoleOptions": "openOnSessionStart",
+            "args": ["remove"]
+        },
         {
             "name": "nitro ssh",
             "type": "go",
             "request": "launch",
-            "mode": "auto",
+            "mode": t"auto",
             "program": "${workspaceFolder}/cmd/nitro/main.go",
             "env": {},
             "args": ["ssh"]
