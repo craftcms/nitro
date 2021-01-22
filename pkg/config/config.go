@@ -310,9 +310,7 @@ func (c *Config) DisableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
-			// replace the site
-			s.Xdebug = false
-			c.Sites = append(c.Sites[:i], s)
+			c.Sites[i].Xdebug = false
 			return nil
 		}
 	}
@@ -329,13 +327,8 @@ func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
-			// replace the site
-			if s.Xdebug {
-				return nil
-			}
+			c.Sites[i].Xdebug = true
 
-			s.Xdebug = true
-			c.Sites = append(c.Sites[:i], s)
 			return nil
 		}
 	}
