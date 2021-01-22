@@ -63,7 +63,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if len(containers) > 0 {
-				output.Info("Cleaning up old containers...")
+				output.Info("Cleaning up...")
 			}
 
 			for _, c := range containers {

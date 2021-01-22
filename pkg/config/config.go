@@ -290,10 +290,12 @@ func (c *Config) RemoveSite(hostname string) error {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
-	for i := len(c.Sites) - 1; i >= 0; i-- {
-		site := c.Sites[i]
-		if site.Hostname == hostname {
-			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
+			c.Sites[i] = c.Sites[len(c.Sites)-1]
+			c.Sites[len(c.Sites)-1] = Site{}
+			c.Sites = c.Sites[:len(c.Sites)-1]
+
 			return nil
 		}
 	}
