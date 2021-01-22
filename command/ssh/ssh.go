@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -43,46 +42,41 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 
-			// get all of the sites
-			var sites, found []string
-			for _, s := range cfg.Sites {
-				p, _ := s.GetAbsPath(home)
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
 
-				// check if the path matches a sites path, then we are in a known site
-				if strings.Contains(wd, p) {
-					found = append(found, s.Hostname)
-				}
-
-				// add the site to the list in case we cannot find the directory
-				sites = append(sites, s.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
 			// if there are found sites we want to show or connect to the first one, otherwise prompt for
 			// which site to connect to.
-			switch len(found) {
+			switch len(sites) {
 			case 0:
 				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected])
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
 			case 1:
-				output.Info("connecting to", found[0])
+				output.Info("connecting to", sites[0].Hostname)
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+found[0])
+				filter.Add("label", labels.Host+"="+sites[0].Hostname)
 			default:
 				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+found[selected])
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
 			}
 
 			// find the containers but limited to the site label

@@ -59,6 +59,27 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	return nil, fmt.Errorf("unable to find the site using the hostname %s", hostname)
 }
 
+// ListOfSitesByDirectory takes the users home directory and the current
+// working directory and returns a list of sites that are "context-aware".
+func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
+	var found []Site
+	for _, s := range c.Sites {
+		p, _ := s.GetAbsPath(home)
+
+		// check if the path matches a sites path, then we are in a known site
+		if strings.Contains(wd, p) {
+			found = append(found, s)
+		}
+	}
+
+	// if we found any matching sites, return those
+	if len(found) > 0 {
+		return found
+	}
+
+	return c.Sites
+}
+
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
 	ServerID    string `yaml:"server_id,omitempty"`

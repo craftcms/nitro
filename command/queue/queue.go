@@ -44,45 +44,50 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 
-			// get all of the sites
-			var sites, found []string
-			for _, s := range cfg.Sites {
-				p, _ := s.GetAbsPath(home)
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
 
-				// check if the path matches a sites path, then we are in a known site
-				if strings.Contains(wd, p) {
-					found = append(found, s.Hostname)
-				}
-
-				// add the site to the list in case we cannot find the directory
-				sites = append(sites, s.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
 			// check if we found a site
-			switch len(found) {
+			var site config.Site
+			switch len(sites) {
 			case 0:
 				// prompt for the site
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
-				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected])
-			case 1:
-				output.Info("connecting to", found[0])
+				// set the site we selected
+				site = sites[selected]
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+found[0])
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+			case 1:
+				output.Info("connecting to", sites[0].Hostname)
+
+				// set the site we selected
+				site = sites[0]
+
+				// add the label to get the site
+				filter.Add("label", labels.Host+"="+sites[0].Hostname)
 			default:
 				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
+				// set the site we selected
+				site = sites[selected]
+
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+found[selected])
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
 			}
 
 			// find the containers but limited to the site label
@@ -103,18 +108,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			// get the host name from the container
-			hostname := strings.TrimLeft(containers[0].Names[0], "/")
-
-			// if the webroot is not the default and has a path seperator, assume its a directory
-			s, err := cfg.FindSiteByHostName(hostname)
-			if err != nil {
-				return err
-			}
-
 			var cmds []string
-			if strings.Contains(s.Webroot, "/") {
-				parts := strings.Split(s.Webroot, "/")
+			if strings.Contains(site.Webroot, "/") {
+				parts := strings.Split(site.Webroot, "/")
 
 				var containerPath string
 				if len(parts) >= 2 {
