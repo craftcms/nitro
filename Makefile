@@ -16,13 +16,13 @@ upx: build
 	upx --brute nitro
 
 alpha: alpha-macos alpha-win alpha-linux
-alpha-macos: build-macos upx-macos
+alpha-macos: build-macos
 	zip -X macos_nitro_v2_alpha.zip nitro
 	rm nitro
-alpha-win: build-win upx-win
+alpha-win: build-win
 	zip -X windows_nitro_v2_alpha.zip nitro.exe
 	rm nitro.exe
-alpha-linux: build-linux upx-linux
+alpha-linux: build-linux
 	zip -X linux_nitro_v2_alpha.zip nitro
 	rm nitro
 
