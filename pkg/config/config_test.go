@@ -973,3 +973,61 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		})
 	}
 }
+
+func TestSite_GetContainerPath(t *testing.T) {
+	type fields struct {
+		Webroot string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "handles more than one level of nesting",
+			fields: fields{
+				Webroot: "another-dir/another-site/web",
+			},
+			want: "another-dir/another-site",
+		},
+		{
+			name: "returns the correct directory",
+			fields: fields{
+				Webroot: "another-site/web",
+			},
+			want: "another-site",
+		},
+		{
+			name: "returns the correct directory for a nest site that has a trailing slash",
+			fields: fields{
+				Webroot: "another-site/web/",
+			},
+			want: "another-site",
+		},
+		{
+			name: "default webroots with a trailing slash return the correct value",
+			fields: fields{
+				Webroot: "web/",
+			},
+			want: "",
+		},
+		{
+			name: "defaults returns an empty string",
+			fields: fields{
+				Webroot: "web",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Site{
+				Webroot: tt.fields.Webroot,
+			}
+
+			if got := s.GetContainerPath(); got != tt.want {
+				t.Errorf("Site.GetContainerPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

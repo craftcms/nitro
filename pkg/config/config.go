@@ -46,8 +46,7 @@ type Config struct {
 	rw sync.RWMutex
 }
 
-// FindSiteByHostName takes a hostname and returns the site if the hostnames
-// match.
+// FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
 	for _, s := range c.Sites {
@@ -137,6 +136,27 @@ type Site struct {
 // container.
 func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
+}
+
+// GetContainerPath is responsible for looking at the
+// sites webroot and determing the correct path in the
+// container. This is used for the craft and queue
+// commands to identify the location of the "craft"
+// executable.
+func (s *Site) GetContainerPath() string {
+	// trim trailing slashes
+	webroot := strings.TrimRight(s.Webroot, "/")
+
+	// is there a path seperator?
+	if strings.Contains(webroot, "/") {
+		parts := strings.Split(webroot, "/")
+
+		if len(parts) >= 2 {
+			return strings.Join(parts[:len(parts)-1], "/")
+		}
+	}
+
+	return ""
 }
 
 // AsEnvs takes a gateway addr and turns specific options
