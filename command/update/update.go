@@ -41,7 +41,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// update all of the images
 			for name, image := range dockerImages {
-				output.Pending("updating", name)
+				output.Pending("downloading", name)
 
 				// pull the image
 				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
