@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/pkg/caddy"
 	"github.com/craftcms/nitro/protob"
 )
+
+var Version string
 
 // NewService takes the address to the Caddy API and returns an API struct that
 // implements the gRPC API used in the proxy container. The gRPC API is used to
@@ -138,5 +139,5 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 
 // Version is used to check the container image version with the CLI version
 func (svc *Service) Version(ctx context.Context, request *protob.VersionRequest) (*protob.VersionResponse, error) {
-	return &protob.VersionResponse{Version: version.Version}, nil
+	return &protob.VersionResponse{Version: Version}, nil
 }
