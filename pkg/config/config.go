@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -122,13 +123,14 @@ type Services struct {
 // are alternate domains), the local path to the site, additional mounts
 // to add to the container, and the directory the index.php is located.
 type Site struct {
-	Hostname string   `yaml:"hostname"`
-	Aliases  []string `yaml:"aliases,omitempty"`
-	Path     string   `yaml:"path"`
-	Version  string   `yaml:"version"`
-	PHP      PHP      `yaml:"php,omitempty"`
-	Webroot  string   `yaml:"webroot"`
-	Xdebug   bool     `yaml:"xdebug"`
+	Hostname   string   `yaml:"hostname"`
+	Aliases    []string `yaml:"aliases,omitempty"`
+	Path       string   `yaml:"path"`
+	Version    string   `yaml:"version"`
+	PHP        PHP      `yaml:"php,omitempty"`
+	Extensions []string `yaml:"extensions,omitempty"`
+	Webroot    string   `yaml:"webroot"`
+	Xdebug     bool     `yaml:"xdebug"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
@@ -196,6 +198,32 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 			default:
 				return fmt.Errorf("unknown php setting %s", setting)
 			}
+		}
+	}
+
+	return fmt.Errorf("unable to find the site: %s", hostname)
+}
+
+// SetPHPExtension is used to set php settings that are bool. It will look
+// for the site by its hostname and change the setting. If it cannot find the
+// site or setting it will return an error.
+func (c *Config) SetPHPExtension(hostname, extension string) error {
+	for i, s := range c.Sites {
+		if s.Hostname == hostname {
+			// if the extension is already set, we return an error
+			for _, e := range c.Sites[i].Extensions {
+				if e == extension {
+					return fmt.Errorf("extension %s is already set for %s", extension, hostname)
+				}
+			}
+
+			// add the extension to the list
+			c.Sites[i].Extensions = append(c.Sites[i].Extensions, extension)
+
+			// sort the extensions by alhpa
+			sort.Strings(c.Sites[i].Extensions)
+
+			return nil
 		}
 	}
 
