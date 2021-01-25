@@ -13,6 +13,9 @@ const (
 	// DatabaseCompatibility is the compatibility of the database (e.g. mariadb and mysql are compatible)
 	DatabaseCompatibility = "com.craftcms.nitro.database-compatibility"
 
+	// Extensions is used for a list of comma seperated extensions for a site
+	Extensions = "com.craftcms.nitro.extensions"
+
 	// Host is used to identify a web application by the hostname of the site (e.g demo.nitro)
 	Host = "com.craftcms.nitro.host"
 

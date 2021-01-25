@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
@@ -100,16 +101,24 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	// get the sites environment variables
 	envs := site.AsEnvs("host.docker.internal")
 
+	// set the labels
+	lbls := map[string]string{
+		labels.Nitro: "true",
+		labels.Host:  site.Hostname,
+	}
+
+	// if there are extensions a
+	if len(site.Extensions) > 0 {
+		lbls[labels.Extensions] = strings.Join(site.Extensions, ",")
+	}
+
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
 		&container.Config{
-			Image: image,
-			Labels: map[string]string{
-				labels.Nitro: "true",
-				labels.Host:  site.Hostname,
-			},
-			Env: envs,
+			Image:  image,
+			Labels: lbls,
+			Env:    envs,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -163,8 +172,13 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		commands["set-nginx-permissions"] = []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}
 	}
 
+	// check if there are custom extensions
+	for _, ext := range site.Extensions {
+		commands["installing-"+ext+"-extension"] = []string{"docker-php-ext-install", ext}
+	}
+
 	// run the commands
-	for _, c := range commands {
+	for n, c := range commands {
 		// create the exec
 		exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
 			User:         "root",
@@ -186,9 +200,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 		defer attach.Close()
 
-		// show the output to stdout and stderr
-		if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
-			return "", fmt.Errorf("unable to copy the output of container, %w", err)
+		// if the option is for a php extension, don't show output
+		if strings.Contains(n, "-extension") {
+			// read the output to pull the image
+			fmt.Print("installing ", c[len(c)-1], "… ")
+
+			buf := &bytes.Buffer{}
+			if _, err := buf.ReadFrom(attach.Reader); err != nil {
+				return "", fmt.Errorf("unable to read output from container exect attach, %w", err)
+			}
+		} else {
+			// show the output to stdout and stderr
+			if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, attach.Reader); err != nil {
+				return "", fmt.Errorf("unable to copy the output of container, %w", err)
+			}
 		}
 
 		// start the exec

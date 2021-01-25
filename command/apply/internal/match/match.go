@@ -43,6 +43,20 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 		}
 	}
 
+	// TODO(jasonmccallister) check the labels for php extensions
+	switch len(site.Extensions) > 0 {
+	case false:
+		if container.Config.Labels[labels.Extensions] != "" {
+			return false
+		}
+	default:
+		exts := strings.Join(site.Extensions, ",")
+
+		if container.Config.Labels[labels.Extensions] != exts {
+			return false
+		}
+	}
+
 	// run the final check on the environment variables
 	return checkEnvs(site.PHP, site.Xdebug, container.Config.Env)
 }
