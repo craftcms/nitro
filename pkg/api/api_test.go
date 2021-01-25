@@ -55,6 +55,7 @@ func TestService_Version(t *testing.T) {
 	type args struct {
 		ctx     context.Context
 		request *protob.VersionRequest
+		version string
 	}
 	tests := []struct {
 		name    string
@@ -67,14 +68,19 @@ func TestService_Version(t *testing.T) {
 			args: args{
 				ctx:     context.TODO(),
 				request: &protob.VersionRequest{},
+				version: "2.0.0",
 			},
-			want:    &protob.VersionResponse{Version: "develop"},
+			want:    &protob.VersionResponse{Version: "2.0.0"},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			svc := &Service{}
+
+			// set the version
+			Version = tt.args.version
+
 			got, err := svc.Version(tt.args.ctx, tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Service.Version() error = %v, wantErr %v", err, tt.wantErr)
