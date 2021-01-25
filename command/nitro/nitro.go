@@ -18,6 +18,7 @@ import (
 	"github.com/craftcms/nitro/command/disable"
 	"github.com/craftcms/nitro/command/edit"
 	"github.com/craftcms/nitro/command/enable"
+	"github.com/craftcms/nitro/command/extensions"
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/iniset"
 	"github.com/craftcms/nitro/command/initialize"
@@ -106,6 +107,7 @@ func NewCommand() *cobra.Command {
 		disable.NewCommand(home, docker, term),
 		enable.NewCommand(home, docker, term),
 		edit.NewCommand(home, docker, term),
+		extensions.NewCommand(home, docker, term),
 		hosts.New(home, term),
 		iniset.NewCommand(home, docker, term),
 		initialize.NewCommand(home, docker, term),
