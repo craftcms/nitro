@@ -61,7 +61,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro+"=true")
 			filter.Add("label", labels.Type+"=composer")
-			filter.Add("label", labels.Type+"=node")
+			filter.Add("label", labels.Type+"=npm")
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return err
