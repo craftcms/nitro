@@ -2,6 +2,7 @@ package add
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,8 +19,6 @@ import (
 	"github.com/craftcms/nitro/pkg/validate"
 	"github.com/craftcms/nitro/pkg/webroot"
 )
-
-// TODO - edit the env file for the user
 
 const exampleText = `  # add the current project as a site
   nitro add
@@ -168,6 +167,29 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Done()
 
 			output.Info("Site added 🌍")
+
+			exampleEnv := filepath.Join(dir, ".env.example")
+
+			// check if the directory has a .env-example
+			if pathexists.IsFile(exampleEnv) {
+				// open the example
+				example, err := os.Open(exampleEnv)
+				if err != nil {
+					output.Info("unable to open the file", exampleEnv)
+				}
+				defer example.Close()
+
+				// create the env file
+				env, err := os.Create(filepath.Join(dir, ".env"))
+				if err != nil {
+					output.Info("unable to create the file", filepath.Join(dir, ".env"))
+				}
+				defer env.Close()
+
+				if _, err := io.Copy(env, example); err != nil {
+					output.Info("unable to copy the example env")
+				}
+			}
 
 			// prompt for a database
 			database, dbhost, dbname, port, driver, err := prompt.CreateDatabase(cmd.Context(), docker, output)
