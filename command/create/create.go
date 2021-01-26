@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/docker/docker/client"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
@@ -153,14 +154,17 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 				}
 
 				if updateEnv {
+					key := uuid.New()
+
 					// update the env
 					update, err := envedit.Edit(envFilePath, map[string]string{
-						"DB_SERVER":   dbhost,
-						"DB_DATABASE": dbname,
-						"DB_PORT":     port,
-						"DB_DRIVER":   driver,
-						"DB_USER":     "nitro",
-						"DB_PASSWORD": "nitro",
+						"SECURITY_KEY": key.String(),
+						"DB_SERVER":    dbhost,
+						"DB_DATABASE":  dbname,
+						"DB_PORT":      port,
+						"DB_DRIVER":    driver,
+						"DB_USER":      "nitro",
+						"DB_PASSWORD":  "nitro",
 					})
 					if err != nil {
 						output.Info("unable to edit the env")
