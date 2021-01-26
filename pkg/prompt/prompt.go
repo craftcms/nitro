@@ -4,11 +4,16 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/pkg/webroot"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -173,4 +178,109 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 	}
 
 	return true, hostname, db, port, driver, nil
+}
+
+// CreateSite takes the users home directory and the site path and walked the user
+// through adding a site to the config.
+func CreateSite(home, dir string, output terminal.Outputer) error {
+	// create a new site
+	site := config.Site{}
+
+	// get the hostname from the directory
+	// p := filepath.Join(dir)
+	sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
+	site.Hostname = sp[len(sp)-1]
+
+	// append the test domain if there are no periods
+	if !strings.Contains(site.Hostname, ".") {
+		// set the default tld
+		tld := "nitro"
+		if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+			tld = os.Getenv("NITRO_DEFAULT_TLD")
+		}
+
+		site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
+	}
+
+	// prompt for the hostname
+	hostname, err := output.Ask("Enter the hostname", site.Hostname, ":", &validate.HostnameValidator{})
+	if err != nil {
+		return err
+	}
+
+	// set the input as the hostname
+	site.Hostname = hostname
+
+	output.Success("setting hostname to", site.Hostname)
+
+	// set the sites directory but make the path relative
+	siteAbsPath, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	site.Path = strings.Replace(siteAbsPath, home, "~", 1)
+
+	output.Success("adding site", site.Path)
+
+	// get the web directory
+	found, err := webroot.Find(dir)
+	if err != nil {
+		return err
+	}
+
+	// if the root is still empty, we fall back to the default
+	if found == "" {
+		found = "web"
+	}
+
+	// set the webroot
+	site.Webroot = found
+
+	// prompt for the webroot
+	root, err := output.Ask("Enter the webroot for the site", site.Webroot, ":", nil)
+	if err != nil {
+		return err
+	}
+
+	site.Webroot = root
+
+	output.Success("using webroot", site.Webroot)
+
+	// prompt for the php version
+	versions := phpversions.Versions
+	selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
+	if err != nil {
+		return err
+	}
+
+	// set the version of php
+	site.Version = versions[selected]
+
+	output.Success("setting PHP version", site.Version)
+
+	// load the config
+	cfg, err := config.Load(home)
+	if err != nil {
+		return err
+	}
+
+	// add the site to the config
+	if err := cfg.AddSite(site); err != nil {
+		return err
+	}
+
+	output.Pending("saving file")
+
+	// save the config file
+	if err := cfg.Save(); err != nil {
+		output.Warning()
+
+		return err
+	}
+
+	output.Done()
+
+	output.Info("Site added 🌍")
+
+	return nil
 }

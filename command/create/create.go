@@ -6,22 +6,17 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/envedit"
 	"github.com/craftcms/nitro/pkg/pathexists"
-	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
-	"github.com/craftcms/nitro/pkg/validate"
-	"github.com/craftcms/nitro/pkg/webroot"
 )
 
 const exampleText = `  # create a new default craft project (similar to "composer create-project craftcms/craft my-project")
@@ -77,7 +72,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 				}
 
 				download = u
-				dir = cleanDirectory(args[1])
+
+				dir = filepath.Join(args[1])
 			default:
 				// only the directory was provided, download craft to that directory
 				u, err := urlgen.Generate("")
@@ -86,7 +82,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 				}
 
 				download = u
-				dir = cleanDirectory(args[0])
+
+				dir = filepath.Join(args[0])
 			}
 
 			// check if the directory already exists
@@ -133,7 +130,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			// walk the user through the site
-			if err := promptSiteAdd(home, dir, output); err != nil {
+			if err := prompt.CreateSite(home, dir, output); err != nil {
 				return err
 			}
 
@@ -221,116 +218,5 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 		},
 	}
 
-	// TODO(jasonmccallister) add flags for the composer and node versions
-	cmd.Flags().String("composer-version", "2", "version of composer to use")
-	cmd.Flags().String("node-version", "14", "version of node to use")
-
 	return cmd
-}
-
-func cleanDirectory(s string) string {
-	return filepath.Join(s)
-}
-
-func promptSiteAdd(home, dir string, output terminal.Outputer) error {
-	// create a new site
-	site := config.Site{}
-
-	// get the hostname from the directory
-	// p := filepath.Join(dir)
-	sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
-	site.Hostname = sp[len(sp)-1]
-
-	// append the test domain if there are no periods
-	if !strings.Contains(site.Hostname, ".") {
-		// set the default tld
-		tld := "nitro"
-		if os.Getenv("NITRO_DEFAULT_TLD") != "" {
-			tld = os.Getenv("NITRO_DEFAULT_TLD")
-		}
-
-		site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
-	}
-
-	// prompt for the hostname
-	hostname, err := output.Ask("Enter the hostname", site.Hostname, ":", &validate.HostnameValidator{})
-	if err != nil {
-		return err
-	}
-
-	// set the input as the hostname
-	site.Hostname = hostname
-
-	output.Success("setting hostname to", site.Hostname)
-
-	// set the sites directory but make the path relative
-	siteAbsPath, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-	site.Path = strings.Replace(siteAbsPath, home, "~", 1)
-
-	output.Success("adding site", site.Path)
-
-	// get the web directory
-	found, err := webroot.Find(dir)
-	if err != nil {
-		return err
-	}
-
-	// if the root is still empty, we fall back to the default
-	if found == "" {
-		found = "web"
-	}
-
-	// set the webroot
-	site.Webroot = found
-
-	// prompt for the webroot
-	root, err := output.Ask("Enter the webroot for the site", site.Webroot, ":", nil)
-	if err != nil {
-		return err
-	}
-
-	site.Webroot = root
-
-	output.Success("using webroot", site.Webroot)
-
-	// prompt for the php version
-	versions := phpversions.Versions
-	selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
-	if err != nil {
-		return err
-	}
-
-	// set the version of php
-	site.Version = versions[selected]
-
-	output.Success("setting PHP version", site.Version)
-
-	// load the config
-	cfg, err := config.Load(home)
-	if err != nil {
-		return err
-	}
-
-	// add the site to the config
-	if err := cfg.AddSite(site); err != nil {
-		return err
-	}
-
-	output.Pending("saving file")
-
-	// save the config file
-	if err := cfg.Save(); err != nil {
-		output.Warning()
-
-		return err
-	}
-
-	output.Done()
-
-	output.Info("Site added 🌍")
-
-	return nil
 }
