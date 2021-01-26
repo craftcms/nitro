@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/docker/docker/pkg/archive"
 )
 
 // Determine takes a file path and will determine
@@ -25,11 +23,13 @@ func Determine(file string) (string, error) {
 		return "", fmt.Errorf("file provided is a directory")
 	}
 
+	// read the contents
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return "", err
 	}
 
+	// detect the type
 	kind := http.DetectContentType(data)
 
 	switch kind {
@@ -37,11 +37,9 @@ func Determine(file string) (string, error) {
 		return "text", nil
 	case "application/zip":
 		return "zip", nil
-	default:
-		if archive.IsArchivePath(file) {
-			return "tar", nil
-		}
+	case "application/x-gzip":
+		return "tar", nil
 	}
 
-	return "", fmt.Errorf("unknown file type")
+	return "", fmt.Errorf("unknown file type: %s", kind)
 }
