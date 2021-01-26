@@ -1,10 +1,6 @@
 package database
 
 import (
-	"bufio"
-	"bytes"
-	"context"
-	"database/sql"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -21,7 +17,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/database"
+	"github.com/craftcms/nitro/pkg/filetype"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -56,17 +54,26 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			// get the clean path for the file
 			path := filepath.Join(args[0])
 
-			// open the file
-			file, err := os.Open(path)
+			// make sure the file exists
+			if exists := pathexists.IsFile(path); !exists {
+				return fmt.Errorf("unable to find file at %s", path)
+			}
+
+			// check the kind of file
+			var compressed bool
+			kind, err := filetype.Determine(path)
 			if err != nil {
 				return err
 			}
-			defer file.Close()
 
-			// check if the file is an archive
-			compressed := false
-			if archive.IsArchivePath(path) {
+			switch kind {
+			case "tar", "zip":
 				compressed = true
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
 			}
 
 			output.Info("Preparing import…")
@@ -76,6 +83,7 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			if !compressed {
 				output.Pending("detecting backup type")
 
+				// determine the database engine
 				detected, err = database.DetermineEngine(file.Name())
 				if err != nil {
 					return err
@@ -111,14 +119,14 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			})
 
 			// get all of the containers as a list
-			var engineOpts []string
+			var options []string
 			for _, c := range containers {
-				engineOpts = append(engineOpts, strings.TrimLeft(c.Names[0], "/"))
+				options = append(options, strings.TrimLeft(c.Names[0], "/"))
 			}
 
 			// prompt the user for the engine to import the backup into
 			var containerID string
-			selected, err := output.Select(os.Stdin, "Select a database engine: ", engineOpts)
+			selected, err := output.Select(os.Stdin, "Select a database engine: ", options)
 			if err != nil {
 				return err
 			}
@@ -138,49 +146,70 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			var rdr io.Reader
 			switch compressed {
 			case false:
-				// generate the reader
-				rdr, err = archive.Generate(file.Name())
-				if err != nil {
-					return err
-				}
-			default:
-				// read the file and create a reader
+				// read the file content
 				content, err := ioutil.ReadFile(file.Name())
 				if err != nil {
 					return err
 				}
 
-				rdr = bytes.NewReader(content)
-			}
-
-			// should we steam or copy into the container
-			stream := true
-			if cmd.Flag("stream").Value.String() != "true" {
-				stream = false
-			}
-
-			// should we stream the output
-			switch stream {
-			case true:
-				output.Pending("importing backup")
-
-				if err := streamToContainer(cmd.Context(), file, containers[selected], db); err != nil {
-					output.Warning()
+				// generate the reader
+				rdr, err = archive.Generate(file.Name(), string(content))
+				if err != nil {
 					return err
 				}
-
-				output.Done()
 			default:
-				output.Pending("uploading backup")
+				// determine if zip or tar
+				return fmt.Errorf("compressed files are not supported")
+			}
 
-				// copy into the container if not streaming
-				if err := copyToContainer(cmd.Context(), docker, show, file, rdr, detected, db, containerID); err != nil {
-					output.Warning()
-					return err
+			// get the filename by itself
+			_, filename := filepath.Split(file.Name())
+
+			output.Pending("uploading backup", filename)
+
+			// copy the file into the container
+			if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
+				output.Warning()
+				return err
+			}
+
+			// wait for the file to exist
+			waiting := true
+			for waiting {
+				_, err := docker.ContainerStatPath(cmd.Context(), containerID, "/tmp/"+filename)
+				if err == nil {
+					waiting = false
 				}
 
-				output.Done()
+				if !waiting {
+					break
+				}
 			}
+
+			// determine if the backup is to mysql or postgres and run the import file command
+			var createCmd, importCmd []string
+			switch detected {
+			case "postgres":
+				createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
+				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", "/tmp/" + filename}
+			default:
+				createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+				importCmd = []string{"mysqlimport", "--host=127.0.0.1", "--user=nitro", "--password=nitro", db, "/tmp/" + filename}
+			}
+
+			// create the database
+			if _, err := execCreate(cmd.Context(), docker, containerID, createCmd, show); err != nil {
+				output.Warning()
+				return fmt.Errorf("unable to create the database, %w", err)
+			}
+
+			// import the database
+			if _, err := execCreate(cmd.Context(), docker, containerID, importCmd, show); err != nil {
+				output.Warning()
+				return fmt.Errorf("unable to import the database, %w", err)
+			}
+
+			output.Done()
 
 			output.Info("Import successful 💪")
 
@@ -189,128 +218,6 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 	}
 
 	cmd.Flags().Bool("show-output", false, "show debug from import")
-	cmd.Flags().Bool("stream", false, "stream the file contents into the database")
 
 	return cmd
-}
-
-func streamToContainer(ctx context.Context, file *os.File, container types.Container, database string) error {
-	// create the connection to the database
-	if len(container.Ports) == 0 {
-		return fmt.Errorf("expected the container to have ports")
-	}
-
-	// get the IP and port of the database
-	ip := container.Ports[0].IP
-	port := container.Ports[0].PublicPort
-
-	var db *sql.DB
-	var createStatement, privilegesStatement string
-	switch container.Labels[labels.DatabaseCompatibility] {
-	case "mysql":
-		conn, err := sql.Open("mysql", fmt.Sprintf("root:nitro@tcp(%s:%d)/nitro", ip, port))
-		if err != nil {
-			return fmt.Errorf("error opening mysql connection: %w", err)
-		}
-
-		createStatement = fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", database)
-		privilegesStatement = fmt.Sprintf(`GRANT ALL PRIVILEGES ON * TO '%s'@'%s';`, "nitro", "%")
-
-		db = conn
-	default:
-		conn, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", ip, port, "nitro", "nitro"))
-		if err != nil {
-			return fmt.Errorf("error opening postgres connection: %w", err)
-		}
-
-		createStatement = fmt.Sprintf("CREATE DATABASE %s;", database)
-
-		db = conn
-	}
-	defer db.Close()
-
-	// make sure we can reach the database
-	for {
-		if err := db.PingContext(ctx); err == nil {
-			break
-		}
-	}
-
-	if createStatement == "" {
-		return fmt.Errorf("expected the create statement but it was empty")
-	}
-
-	// create the database
-	if _, err := db.ExecContext(ctx, createStatement); err != nil {
-		return err
-	}
-
-	// do we need to set the privileges on the database?
-	if privilegesStatement != "" {
-		if _, err := db.ExecContext(ctx, privilegesStatement); err != nil {
-			return err
-		}
-	}
-
-	reader := bufio.NewReader(file)
-	for {
-		n, err := reader.ReadString(';')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		// check for comments and empty lines
-		if strings.HasPrefix(n, "--") || n == "" {
-			continue
-		}
-
-		if _, err := db.ExecContext(ctx, string(n)); err != nil {
-			return fmt.Errorf("\nerror executing import on line %s\nerror: %w", string(n), err)
-		}
-	}
-
-	return nil
-}
-
-func copyToContainer(ctx context.Context, docker client.CommonAPIClient, show bool, file *os.File, rdr io.Reader, detected, db, containerID string) error {
-	// copy the file into the container
-	if err := docker.CopyToContainer(ctx, containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
-		return err
-	}
-
-	path := fmt.Sprintf("/tmp/%s", file.Name())
-
-	// wait for the file to exist
-	for {
-		stat, _ := docker.ContainerStatPath(ctx, containerID, path)
-		if stat.Name != "" {
-			break
-		}
-	}
-
-	// determine if the backup is to mysql or postgres and run the import file command
-	var createCmd, importCmd []string
-	switch detected {
-	case "postgres":
-		createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
-		importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", "/tmp/" + file.Name()}
-	default:
-		createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
-		importCmd = []string{"mysqlimport", "--host=127.0.0.1", "--user=nitro", "--password=nitro", db, "/tmp/" + file.Name()}
-	}
-
-	// create the database
-	if _, err := execCreate(ctx, docker, containerID, createCmd, show); err != nil {
-		return fmt.Errorf("unable to create the database, %w", err)
-	}
-
-	// import the database
-	if _, err := execCreate(ctx, docker, containerID, importCmd, show); err != nil {
-		return fmt.Errorf("unable to import the database, %w", err)
-	}
-
-	return nil
 }
