@@ -2,11 +2,13 @@ package npm
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 
 	"github.com/docker/docker/api/types"
@@ -42,7 +44,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Use:     "npm",
 		Short:   "Run npm commands",
 		Example: exampleText,
-		Hidden:  true,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -50,7 +51,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				// when we call commands from other commands (e.g. create)
 				// the context could be nil, so we set it to the parent
 				// context just in case.
-				ctx = cmd.Parent().Context()
+				ctx = context.Background()
 			}
 			version := cmd.Flag("version").Value.String()
 
@@ -81,6 +82,24 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			output.Done()
+
+			// find the network
+			// create filters for the development environment
+			networkFilter := filters.NewArgs()
+			networkFilter.Add("name", "nitro-network")
+
+			// check if the network needs to be created
+			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: networkFilter})
+			if err != nil {
+				return fmt.Errorf("unable to list the docker networks, %w", err)
+			}
+
+			var networkID string
+			for _, n := range networks {
+				if n.Name == "nitro-network" || strings.TrimLeft(n.Name, "/") == "nitro-network" {
+					networkID = n.ID
+				}
+			}
 
 			image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
 
@@ -150,6 +169,17 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			commands := append([]string{"npm"}, args...)
 
+			networkConfig := &network.NetworkingConfig{}
+			if networkID != "" {
+				networkConfig = &network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						"nitro-network": {
+							NetworkID: networkID,
+						},
+					},
+				}
+			}
+
 			// create the container
 			resp, err := docker.ContainerCreate(ctx,
 				&container.Config{
@@ -162,12 +192,12 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					},
 					WorkingDir: "/home/node/app",
 				},
+
 				&container.HostConfig{
 					Mounts: []mount.Mount{
 						{
 							Type:   mount.TypeVolume,
 							Source: pathVolume.Name,
-							// TODO(jasonmccallister) get the path where node sotres deps
 							Target: "/root",
 						},
 						{
@@ -177,7 +207,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 						},
 					},
 				},
-				nil,
+				networkConfig,
 				nil,
 				"")
 			if err != nil {
