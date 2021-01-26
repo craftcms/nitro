@@ -148,6 +148,11 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		Env: envs,
 	}
 
+	// if the mysql engine is being used, override the cmd
+	if db.Engine == "mysql" {
+		containerConfig.Cmd = []string{"/usr/sbin/mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"}
+	}
+
 	hostConfig := &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
