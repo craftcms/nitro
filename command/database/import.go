@@ -158,8 +158,17 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 					return err
 				}
 			default:
-				// determine if zip or tar
-				return fmt.Errorf("compressed files are not supported")
+				// check the kind of compressed file
+				switch kind {
+				case "zip":
+					return fmt.Errorf("zip files are not supported")
+				case "gzip":
+					output.Info("tar file")
+					rdr, err = os.Open(file.Name())
+					if err != nil {
+						return err
+					}
+				}
 			}
 
 			// get the filename by itself
