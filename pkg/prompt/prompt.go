@@ -182,7 +182,7 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 
 // CreateSite takes the users home directory and the site path and walked the user
 // through adding a site to the config.
-func CreateSite(home, dir string, output terminal.Outputer) error {
+func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error) {
 	// create a new site
 	site := config.Site{}
 
@@ -205,7 +205,7 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	// prompt for the hostname
 	hostname, err := output.Ask("Enter the hostname", site.Hostname, ":", &validate.HostnameValidator{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// set the input as the hostname
@@ -216,7 +216,7 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	// set the sites directory but make the path relative
 	siteAbsPath, err := filepath.Abs(dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	site.Path = strings.Replace(siteAbsPath, home, "~", 1)
 
@@ -225,7 +225,7 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	// get the web directory
 	found, err := webroot.Find(dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// if the root is still empty, we fall back to the default
@@ -239,7 +239,7 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	// prompt for the webroot
 	root, err := output.Ask("Enter the webroot for the site", site.Webroot, ":", nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	site.Webroot = root
@@ -250,7 +250,7 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	versions := phpversions.Versions
 	selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// set the version of php
@@ -261,12 +261,12 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	// load the config
 	cfg, err := config.Load(home)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// add the site to the config
 	if err := cfg.AddSite(site); err != nil {
-		return err
+		return nil, err
 	}
 
 	output.Pending("saving file")
@@ -275,12 +275,12 @@ func CreateSite(home, dir string, output terminal.Outputer) error {
 	if err := cfg.Save(); err != nil {
 		output.Warning()
 
-		return err
+		return nil, err
 	}
 
 	output.Done()
 
 	output.Info("Site added 🌍")
 
-	return nil
+	return &site, nil
 }
