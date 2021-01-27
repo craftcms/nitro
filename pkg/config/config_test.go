@@ -1052,6 +1052,35 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 		want   []Site
 	}{
 		{
+			name: "all sites are returned if nothing is found",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "site-three"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
+					},
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "site-one"),
+				},
+				{
+					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+				},
+			},
+		},
+		{
 			name: "multiple sites are presented when the working directory is the container directory",
 			args: args{
 				home: filepath.Join(wd),
