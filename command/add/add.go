@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/docker/docker/client"
 	"github.com/google/uuid"
@@ -155,13 +154,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			output.Info("New site added! 🎉")
-
-			switch runtime.GOOS {
-			case "windows", "linux":
-				output.Info(fmt.Sprintf("Site will be available at http://%s after apply", site.Hostname))
-			default:
-				output.Info(fmt.Sprintf("site will be available at https://%s after apply", site.Hostname))
-			}
 
 			return nil
 		},
