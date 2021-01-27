@@ -130,7 +130,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			// walk the user through the site
-			if err := prompt.CreateSite(home, dir, output); err != nil {
+			_, err := prompt.CreateSite(home, dir, output)
+			if err != nil {
 				return err
 			}
 
