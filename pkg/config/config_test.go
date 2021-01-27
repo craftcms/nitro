@@ -1031,3 +1031,93 @@ func TestSite_GetContainerPath(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_ListOfSitesByDirectory(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type fields struct {
+		Sites []Site
+	}
+	type args struct {
+		home string
+		wd   string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []Site
+	}{
+		{
+			name: "multiple sites are presented when the working directory is the container directory",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					},
+					{
+						Webroot: "site-one/public",
+						Path:    filepath.Join(wd, "testdata", "home"),
+					},
+					{
+						Webroot: "site-two/public",
+						Path:    filepath.Join(wd, "testdata", "home"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home"),
+					Webroot: "site-one/public",
+				},
+				{
+					Path:    filepath.Join(wd, "testdata", "home"),
+					Webroot: "site-two/public",
+				},
+			},
+		},
+		{
+			name: "a single site is presented when the working directory is the site path",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "site-two"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
+					},
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					Webroot: "public",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Sites: tt.fields.Sites,
+			}
+			if got := c.ListOfSitesByDirectory(tt.args.home, tt.args.wd); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Config.ListOfSitesByDirectory() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
