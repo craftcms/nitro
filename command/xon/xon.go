@@ -2,7 +2,6 @@ package xon
 
 import (
 	"os"
-	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -21,6 +20,28 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "xon",
 		Short:   "Enable xdebug for a site",
 		Example: exampleText,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// ask if the apply command should run
+			apply, err := output.Confirm("Apply changes now", true, "?")
+			if err != nil {
+				return err
+			}
+
+			// if apply is false return nil
+			if !apply {
+				return nil
+			}
+
+			// run the apply command
+			for _, c := range cmd.Parent().Commands() {
+				// set the apply command
+				if c.Use == "apply" {
+					return c.RunE(c, args)
+				}
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config
 			cfg, err := config.Load(home)
@@ -34,27 +55,30 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// check each of the sites for a match
-			var site string
-			var sites []string
-			for _, s := range cfg.Sites {
-				// get the path
-				path, _ := s.GetAbsPath(home)
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
 
-				// see if the sites path matches the current directory
-				if strings.Contains(wd, path) {
-					site = s.Hostname
-					break
-				}
-
-				// add the site as an option
-				sites = append(sites, s.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
-			// if its not the current site
-			if site == "" {
-				// show all of the sites to the user
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+			var site config.Site
+			switch len(sites) {
+			case 0:
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				if err != nil {
+					return err
+				}
+
+				site = sites[selected]
+			case 1:
+				output.Info("enabling xdebug for ", sites[0].Hostname)
+
+				site = sites[0]
+			default:
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
@@ -63,23 +87,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// enable xdebug for the sites hostname
-			if err := cfg.EnableXdebug(site); err != nil {
+			if err := cfg.EnableXdebug(site.Hostname); err != nil {
 				return err
 			}
 
 			// save the config
 			if err := cfg.Save(); err != nil {
 				return err
-			}
-
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
-				}
 			}
 
 			return nil
