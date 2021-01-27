@@ -74,7 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				site = sites[selected]
 			case 1:
-				output.Info("disabling xdebug for ", sites[0].Hostname)
+				output.Info("Disabling xdebug for", sites[0].Hostname)
 
 				site = sites[0]
 			default:
