@@ -269,18 +269,10 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 		return nil, err
 	}
 
-	output.Pending("saving file")
-
 	// save the config file
 	if err := cfg.Save(); err != nil {
-		output.Warning()
-
 		return nil, err
 	}
-
-	output.Done()
-
-	output.Info("Site added 🌍")
 
 	return &site, nil
 }

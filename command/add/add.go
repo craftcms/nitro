@@ -71,8 +71,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Info("Adding site…")
 
-			site, err := prompt.CreateSite(home, dir, output)
-			if err != nil {
+			if _, err := prompt.CreateSite(home, dir, output); err != nil {
 				return err
 			}
 
