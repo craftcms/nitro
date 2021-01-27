@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/database"
@@ -59,32 +60,34 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return fmt.Errorf("unable to find file at %s", path)
 			}
 
-			// check the kind of file
-			var compressed bool
+			// check if this is a known archive type for docker
+			isArchive := archive.IsArchivePath(path)
+
+			// check if this is a zip file
+			var isZip bool
 			kind, err := filetype.Determine(path)
 			if err != nil {
 				return err
 			}
 
 			switch kind {
-			case "tar", "zip":
-				compressed = true
+			case "zip", "tar":
+				isZip = true
 			}
-
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-
-			output.Info("Preparing import…")
 
 			// detect the type of backup if not compressed
 			detected := ""
-			if !compressed {
+			if !isArchive && !isZip {
 				output.Pending("detecting backup type")
 
+				// open the file
+				f, err := os.Open(path)
+				if err != nil {
+					return err
+				}
+
 				// determine the database engine
-				detected, err = database.DetermineEngine(file.Name())
+				detected, err = database.DetermineEngine(f.Name())
 				if err != nil {
 					return err
 				}
@@ -138,41 +141,37 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 
 			// ask the user for the database to create
-			db, err := output.Ask("Enter the database name", "", ":", nil)
-			if err != nil {
-				return err
-			}
+			// db, err := output.Ask("Enter the database name", "", ":", nil)
+			// if err != nil {
+			// 	return err
+			// }
+			db := strings.Replace(uuid.New().String(), "-", "", -1)
+
+			// get the filename by itself
+			_, filename := filepath.Split(path)
+
+			output.Info("Preparing import…")
 
 			var rdr io.Reader
-			switch compressed {
+			switch isArchive {
 			case false:
 				// read the file content
-				content, err := ioutil.ReadFile(file.Name())
+				content, err := ioutil.ReadFile(path)
 				if err != nil {
 					return err
 				}
 
 				// generate the reader
-				rdr, err = archive.Generate(file.Name(), string(content))
+				rdr, err = archive.Generate(filename, string(content))
 				if err != nil {
 					return err
 				}
 			default:
-				// check the kind of compressed file
-				switch kind {
-				case "zip":
-					return fmt.Errorf("zip files are not supported")
-				case "gzip":
-					output.Info("tar file")
-					rdr, err = os.Open(file.Name())
-					if err != nil {
-						return err
-					}
+				rdr, err = os.Open(path)
+				if err != nil {
+					return err
 				}
 			}
-
-			// get the filename by itself
-			_, filename := filepath.Split(file.Name())
 
 			output.Pending("uploading backup", filename)
 
@@ -182,10 +181,12 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				return err
 			}
 
+			containerPath := "/tmp/" + filename
+
 			// wait for the file to exist
 			waiting := true
 			for waiting {
-				_, err := docker.ContainerStatPath(cmd.Context(), containerID, "/tmp/"+filename)
+				_, err := docker.ContainerStatPath(cmd.Context(), containerID, containerPath)
 				if err == nil {
 					waiting = false
 				}
