@@ -10,6 +10,7 @@
 - Added the `nitro composer` command with the `--version` flag to install or update projects without Composer installed locally.
 - Added the `nitro npm` command with the `--version` flag to install or update projects without node/npm installed locally.
 - Added the `nitro version` command to display the cli and gRPC API versions
+- Added the `nitro clean` command to remove unused containers for composer/npm
 - Added the `nitro craft` command to run `craft` console commands in a site’s container. [#189](https://github.com/craftcms/nitro/issues/189)
 - Added the `nitro db ssh` command, which allows you to SSH into a database container.
 - Added `nitro enable` and `nitro disable` commands which let you enable and disable services.
