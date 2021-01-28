@@ -146,7 +146,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			// if the wanted a new database edit the env
 			if database && pathexists.IsFile(envFilePath) {
 				// ask the user if we should update the .env?
-				updateEnv, err := output.Confirm("Should we update the env file?", false, "")
+				updateEnv, err := output.Confirm("Should we update the env file?", true, "")
 				if err != nil {
 					return err
 				}

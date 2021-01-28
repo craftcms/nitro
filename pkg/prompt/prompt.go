@@ -22,7 +22,7 @@ import (
 // CreateDatabase is used to interactively walk a user through creating a new database. It will return true if the user created a database along
 // with the hostname, database, port, and driver for the database container.
 func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer) (bool, string, string, string, string, error) {
-	confirm, err := output.Confirm("Add a database for the site?", false, "?")
+	confirm, err := output.Confirm("Add a database for the site", true, "")
 	if err != nil {
 		return false, "", "", "", "", err
 	}

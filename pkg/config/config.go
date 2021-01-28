@@ -361,9 +361,6 @@ func (c *Config) RemoveSite(site *Site) error {
 	for i := range c.Sites {
 		if c.Sites[i].Hostname == site.Hostname {
 			fmt.Println("removing", c.Sites[i].Hostname)
-			copy(c.Sites[i:], c.Sites[i+1:])
-			c.Sites[len(c.Sites)-1] = Site{}
-			c.Sites = c.Sites[:len(c.Sites)-1]
 		}
 	}
 
