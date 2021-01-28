@@ -192,25 +192,17 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			// run the composer install command
 			for _, c := range cmd.Parent().Commands() {
 				if c.Use == "composer" {
-					// ask the user if we should install composer dependencies
-					installComposerDeps, err := output.Confirm("Should we install composer dependencies?", false, "")
-					if err != nil {
-						return err
+					// change into the projects new directory for the composer install
+					if err := os.Chdir(filepath.Join(dir)); err != nil {
+						break
 					}
 
-					if installComposerDeps {
-						// change into the projects new directory for the composer install
-						if err := os.Chdir(filepath.Join(dir)); err != nil {
-							break
-						}
-
-						// run composer install using the new directory
-						// we pass the command itself instead of the parent
-						// command
-						if err := c.RunE(c, []string{"install", "--ignore-platform-reqs"}); err != nil {
-							output.Info(err.Error())
-							break
-						}
+					// run composer install using the new directory
+					// we pass the command itself instead of the parent
+					// command
+					if err := c.RunE(c, []string{"install", "--ignore-platform-reqs"}); err != nil {
+						output.Info(err.Error())
+						break
 					}
 				}
 			}
