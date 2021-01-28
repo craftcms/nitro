@@ -22,7 +22,7 @@ var (
 	LatestURL = "https://api.github.com/repos/craftcms/nitro/releases/latest"
 )
 
-const exampleText = `  # update to the latest version
+const exampleText = `  # update to the latest version of the nitro CLI
   nitro self-update`
 
 func NewCommand(output terminal.Outputer) *cobra.Command {

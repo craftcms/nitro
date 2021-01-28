@@ -19,14 +19,14 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # restart containers for the default environment
+const exampleText = `  # restart containers
   nitro restart`
 
 // New returns the command to restart all of an environments containers
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "restart",
-		Short:   "Restart an environment",
+		Short:   "Restart all containers",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

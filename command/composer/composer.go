@@ -28,7 +28,10 @@ var (
 )
 
 const exampleText = `  # run composer install in a current directory using a container
-  nitro composer install`
+  nitro composer install
+
+  # use composer (without local installation) to create a new project
+  nitro composer create-project craftcms/craft my-project`
 
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run

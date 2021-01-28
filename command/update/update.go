@@ -32,7 +32,7 @@ var (
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update nitro",
+		Short: "Update nitro containers and proxy",
 		Example: `  # update nitro
   nitro update`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {

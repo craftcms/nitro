@@ -15,10 +15,7 @@ import (
 )
 
 const exampleText = `  # modify hosts file to match sites and aliases
-  nitro hosts
-
-  # remove sites and aliases from hosts file
-  nitro hosts --remove`
+  nitro hosts`
 
 // New returns a command used to modify the hosts file to point sites to the nitro
 // proxy.

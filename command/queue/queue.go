@@ -15,9 +15,7 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-// https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/integration/internal/container/exec.go#L38
-
-const exampleText = `  # example command
+const exampleText = `  # execut the craft queue command for a site
   nitro queue`
 
 // NewCommand returns the command to run queue listen inside of a sites container. It will check if the

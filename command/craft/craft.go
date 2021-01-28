@@ -20,8 +20,11 @@ import (
 const exampleText = `  # run craft console command in a sites container
   nitro craft update all
 
-  # view craft console help
-  nitro craft help`
+  # view craft console help command
+  nitro craft
+
+  # enter the craft shell
+  nitro craft shell`
 
 // NewCommand returns the craft command which allows users to pass craft specific commands to a sites
 // container. Its context aware and will prompt the user for the site if its not in a directory.

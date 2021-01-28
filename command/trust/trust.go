@@ -25,7 +25,7 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # get the certificates for an environment
+const exampleText = `  # get the root certificate for the proxy
   nitro trust`
 
 // New returns `trust` to retrieve the certificates from the nitro proxy and install on the

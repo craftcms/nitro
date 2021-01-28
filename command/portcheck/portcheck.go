@@ -8,7 +8,7 @@ import (
 )
 
 const exampleText = `  # check if a port is in use
-  nitro enable <service-name>`
+  nitro portcheck 8080`
 
 // NewCommand returns the command to enable common nitro services. These services are provided as containers
 // and do not require a user to configure the ports/volumes or images.

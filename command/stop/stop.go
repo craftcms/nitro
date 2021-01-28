@@ -18,7 +18,7 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # stop containers for the default environment
+const exampleText = `  # stop all containers
   nitro stop`
 
 // New is used to stop all running containers for an environment. The process
@@ -26,7 +26,7 @@ const exampleText = `  # stop containers for the default environment
 func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "stop",
-		Short:   "Stop environment",
+		Short:   "Stop all containers",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

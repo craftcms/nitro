@@ -12,11 +12,6 @@ import (
 	"github.com/craftcms/nitro/pkg/validate"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
-)
-
 const exampleText = `  # validate a config file
   nitro validate`
 

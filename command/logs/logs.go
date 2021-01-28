@@ -3,7 +3,6 @@ package logs
 import (
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -16,7 +15,7 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # show logs from the current site project
+const exampleText = `  # show logs from a site
   nitro logs
 
   # show only the last 5 minutes
@@ -51,36 +50,34 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 
-			// check each of the sites for a match
-			var currentSite string
-			var sites []string
-			for _, site := range cfg.Sites {
-				// get the path
-				path, _ := site.GetAbsPath(home)
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
 
-				// see if the sites path matches the current directory
-				if strings.Contains(wd, path) {
-					currentSite = site.Hostname
-					break
-				}
-
-				// append the site hostname to the list of sites
-				sites = append(sites, site.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
-			// check the current site and add the filters
-			switch currentSite == "" {
-			case true:
-				// show all of the sites to the user
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+			switch len(sites) {
+			case 0:
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
-				// add the filter for the selected site
-				filter.Add("label", labels.Host+"="+sites[selected])
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+			case 1:
+				output.Info("show logs for", sites[0].Hostname)
+
+				filter.Add("label", labels.Host+"="+sites[0].Hostname)
 			default:
-				filter.Add("label", labels.Host+"="+currentSite)
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				if err != nil {
+					return err
+				}
+
+				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
 			}
 
 			// find all of the containers, there should only be one if we are in a known directory

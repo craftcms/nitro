@@ -1,7 +1,6 @@
 package destroy
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -31,7 +30,7 @@ var (
 	ErrNoVolumes = fmt.Errorf("there are no volumes")
 )
 
-const exampleText = `  # remove all resources (networks, containers, and volumes) for an environment
+const exampleText = `  # remove all resources (networks, containers, and volumes)
   nitro destroy`
 
 // NewCommand is used to destroy all resources for an environment. It will prompt for
@@ -40,7 +39,7 @@ const exampleText = `  # remove all resources (networks, containers, and volumes
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "destroy",
-		Short:   "Destroy the environment",
+		Short:   "Destroy resources",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -50,26 +49,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt the user for confirmation
-			fmt.Print("Are you sure (this will remove all containers, volumes, and networks) [Y/n] ")
-
-			s := bufio.NewScanner(os.Stdin)
-			s.Split(bufio.ScanLines)
-
-			var confirm bool
-			for s.Scan() {
-				txt := strings.TrimSpace(s.Text())
-
-				switch txt {
-				// if its no
-				case "n", "N", "no", "No", "NO":
-					confirm = false
-				default:
-					confirm = true
-				}
-
-				break
-			}
-			if err := s.Err(); err != nil {
+			confirm, err := output.Confirm("Are you sure (this will remove all containers, volumes, and networks)", false, "")
+			if err != nil {
 				return err
 			}
 

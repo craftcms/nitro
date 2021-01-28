@@ -16,7 +16,10 @@ import (
 )
 
 const exampleText = `  # ssh into a container - assuming its the current working directory
-  nitro ssh`
+  nitro ssh
+
+  # ssh into the container as root - changes may not persist after "nitro apply"
+  nitro ssh --root`
 
 // NewCommand returns the ssh command to get a shell in a container. The command is context aware and if
 // it is not in a known project directory, it will provide a list of known sites to the user.
