@@ -1,14 +1,8 @@
 package database
 
 import (
-	"archive/zip"
-	"bytes"
-	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -308,74 +302,4 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
-}
-
-func getReader(supportedArchive bool, kind, path string) (io.Reader, string, error) {
-	_, filename := filepath.Split(path)
-
-	// if the file is a zip or gzip file
-	if !supportedArchive {
-		// get the file content based on the kind
-		switch kind {
-		case "zip":
-			// create a new zip reader
-			r, err := zip.OpenReader(path)
-			if err != nil {
-				return nil, "", err
-			}
-			defer r.Close()
-
-			// read each of the files
-			for _, file := range r.File {
-				if strings.HasSuffix(file.Name, ".sql") {
-					// create the temp file
-					temp, err := ioutil.TempFile(os.TempDir(), "nitro-import-zip-"+filename)
-					if err != nil {
-						return nil, "", err
-					}
-					defer temp.Close()
-
-					// read the content of the zip file
-					rc, err := file.Open()
-					if err != nil {
-						return nil, "", err
-					}
-
-					buf := new(bytes.Buffer)
-					if _, err := buf.ReadFrom(rc); err != nil && !errors.Is(err, io.EOF) {
-						return nil, "", err
-					}
-
-					// write the content to the temp file
-					if _, err := temp.Write(buf.Bytes()); err != nil {
-						return nil, "", err
-					}
-
-					// read the file content from the temp file
-					content, err := ioutil.ReadFile(temp.Name())
-					if err != nil {
-						return nil, "", err
-					}
-
-					reader, err := archive.Generate(file.Name, string(content))
-					return reader, file.Name, err
-				}
-			}
-
-			// we did not find a sql file, so we need to return an error
-			return nil, "", fmt.Errorf("unable to find a .sql file in the zip")
-		default:
-			return nil, "", fmt.Errorf("unsupported kind %q provided", kind)
-		}
-	}
-
-	// read the file content
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, "", err
-	}
-
-	// generate the reader
-	reader, err := archive.Generate(filename, string(content))
-	return reader, filename, err
 }
