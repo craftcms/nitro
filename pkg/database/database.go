@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
@@ -171,7 +172,40 @@ func PrepareArchiveFromPath(path string) (io.Reader, string, error) {
 		// we did not find a sql file, so we need to return an error
 		return nil, "", fmt.Errorf("unable to find a .sql file in the zip")
 	case "tar":
+		f, err := os.Open(path)
+		if err != nil {
+			return nil, "", err
+		}
+		defer f.Close()
 
+		r, err := gzip.NewReader(f)
+		if err != nil {
+			return nil, "", err
+		}
+
+		// create the temp file
+		temp, err := ioutil.TempFile(os.TempDir(), "nitro-import-gzip-")
+		if err != nil {
+			return nil, "", err
+		}
+		defer temp.Close()
+
+		if _, err := io.Copy(temp, r); err != nil {
+			return nil, "", err
+		}
+
+		// read from the temp file
+		b, err := ioutil.ReadFile(temp.Name())
+		if err != nil {
+			return nil, "", err
+		}
+
+		reader, err := archive.Generate(name, string(b))
+		if err != nil {
+			return nil, "", err
+		}
+
+		return reader, name, err
 	}
 
 	// if we are here, its a plain file so just read the file
