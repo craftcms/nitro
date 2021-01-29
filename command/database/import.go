@@ -40,6 +40,8 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 		Short: "Import a database",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
+				fmt.Println(cmd.UsageString())
+
 				return fmt.Errorf("database backup file path param missing")
 			}
 
