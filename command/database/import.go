@@ -14,7 +14,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/database"
@@ -36,11 +35,17 @@ var importExampleText = `  # import a sql file into a database
   nitro db import /Users/oli/Desktop/backup.sql`
 
 // importCommand is the command for creating new development environments
-func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func importCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import a database",
-		Args:  cobra.MinimumNArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("database backup file path param missing")
+			}
+
+			return nil
+		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return []string{"sql", "gz", "zip", "dump"}, cobra.ShellCompDirectiveFilterFileExt
 		},
@@ -52,8 +57,11 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 				show = false
 			}
 
-			// get the clean path for the file
-			path := filepath.Join(args[0])
+			// replace the relative path
+			path := args[0]
+			if strings.HasPrefix(path, "~") {
+				path = strings.Replace(path, "~", home, 1)
+			}
 
 			// make sure the file exists
 			if exists := pathexists.IsFile(path); !exists {
@@ -141,11 +149,10 @@ func importCommand(docker client.CommonAPIClient, output terminal.Outputer) *cob
 			}
 
 			// ask the user for the database to create
-			// db, err := output.Ask("Enter the database name", "", ":", nil)
-			// if err != nil {
-			// 	return err
-			// }
-			db := strings.Replace(uuid.New().String(), "-", "", -1)
+			db, err := output.Ask("Enter the database name", "", ":", nil)
+			if err != nil {
+				return err
+			}
 
 			// get the filename by itself
 			_, filename := filepath.Split(path)
