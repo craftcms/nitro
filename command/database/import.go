@@ -160,7 +160,7 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 			output.Info("Preparing import…")
 
 			// get the reader, along with the filename to use to set the container path
-			rdr, filename, err := getReader(supportedArchive, kind, path)
+			rdr, filename, err := database.PrepareArchiveFromPath(path)
 			if err != nil {
 				return err
 			}
@@ -328,7 +328,6 @@ func getReader(supportedArchive bool, kind, path string) (io.Reader, string, err
 			// read each of the files
 			for _, file := range r.File {
 				if strings.HasSuffix(file.Name, ".sql") {
-					fmt.Println(file.Name)
 					// create the temp file
 					temp, err := ioutil.TempFile(os.TempDir(), "nitro-import-zip-"+filename)
 					if err != nil {

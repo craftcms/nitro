@@ -1,10 +1,19 @@
 package database
 
 import (
+	"archive/zip"
 	"bufio"
+	"bytes"
 	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/craftcms/nitro/pkg/filetype"
+	"github.com/docker/docker/pkg/archive"
 )
 
 // DetermineEngine takes a file and will check if the
@@ -78,4 +87,104 @@ func HasCreateStatement(file string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// PrepareArchiveFromPath takes a path to a file, which is presumed to
+// be a database backup and will determine if the file is already a format
+// the Docker API can use. If the file is a zip or tar file, it will open
+// the sql file in the archive and write the contents to a temporary file
+// and then use the docker archive.Generate functionality to prepare for
+// copying the file to the API.
+func PrepareArchiveFromPath(path string) (io.Reader, string, error) {
+	// get the filename from the path directory
+	_, name := filepath.Split(path)
+
+	// if this is a support type docker can already use
+	if archive.IsArchivePath(path) {
+		// read the file
+		b, err := ioutil.ReadFile(path)
+		if err != nil {
+			return nil, "", err
+		}
+
+		r, err := archive.Generate(name, string(b))
+		return r, name, err
+	}
+
+	// determine the kind of file
+	kind, err := filetype.Determine(path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	switch kind {
+	case "zip":
+		// create a new zip reader
+		r, err := zip.OpenReader(path)
+		if err != nil {
+			return nil, "", err
+		}
+		defer r.Close()
+
+		// read each of the files
+		for _, file := range r.File {
+			if strings.HasSuffix(file.Name, ".sql") {
+				// create the temp file
+				temp, err := ioutil.TempFile(os.TempDir(), "nitro-import-zip-")
+				if err != nil {
+					return nil, "", err
+				}
+				defer temp.Close()
+
+				// read of the zip file
+				rc, err := file.Open()
+				if err != nil {
+					return nil, "", err
+				}
+				defer rc.Close()
+
+				buf := new(bytes.Buffer)
+				if _, err := buf.ReadFrom(rc); err != nil && !errors.Is(err, io.EOF) {
+					return nil, "", err
+				}
+
+				// write to the temp file
+				if _, err := temp.Write(buf.Bytes()); err != nil {
+					return nil, "", err
+				}
+
+				// read from the temp file
+				b, err := ioutil.ReadFile(temp.Name())
+				if err != nil {
+					return nil, "", err
+				}
+
+				reader, err := archive.Generate(file.Name, string(b))
+				if err != nil {
+					return nil, "", err
+				}
+
+				return reader, file.Name, err
+			}
+		}
+
+		// we did not find a sql file, so we need to return an error
+		return nil, "", fmt.Errorf("unable to find a .sql file in the zip")
+	case "tar":
+
+	}
+
+	// if we are here, its a plain file so just read the file
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// generate the reader
+	reader, err := archive.Generate(name, string(b))
+	if err != nil {
+		return nil, "", err
+	}
+
+	return reader, name, err
 }
