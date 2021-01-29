@@ -158,8 +158,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Cmd:   commands,
 					Tty:   false,
 					Labels: map[string]string{
-						labels.Type: "composer",
-						labels.Path: path,
+						labels.Nitro: "true",
+						labels.Type:  "composer",
+						labels.Path:  path,
 					},
 					Env: []string{"COMPOSER_HOME=/root"},
 				},

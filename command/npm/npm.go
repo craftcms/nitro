@@ -187,8 +187,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Cmd:   commands,
 					Tty:   false,
 					Labels: map[string]string{
-						labels.Type: "npm",
-						labels.Path: path,
+						labels.Nitro: "true",
+						labels.Type:  "npm",
+						labels.Path:  path,
 					},
 					WorkingDir: "/home/node/app",
 				},
