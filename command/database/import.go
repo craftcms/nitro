@@ -145,6 +145,9 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to get the container")
 			}
 
+			// get the database compatability from the container labelsmake l
+			detected = containers[selected].Labels[labels.DatabaseCompatibility]
+
 			// ask the user for the database to create
 			db, err := output.Ask("Enter the database name", "", ":", nil)
 			if err != nil {
