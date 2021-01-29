@@ -61,8 +61,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			switch len(args) {
 			case 1:
 				dir = filepath.Join(wd, args[0])
+				
 				// make sure the directory exists
-				if exists := pathexists.IsDirectory(dir); !exists {
+				if !pathexists.IsDirectory(dir) {
 					return fmt.Errorf("unable to find the directory: %s", dir)
 				}
 			default:
@@ -138,7 +139,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 					defer f.Close()
 
-					// trunacte the file
+					// truncate the file
 					if err := f.Truncate(0); err != nil {
 						return err
 					}

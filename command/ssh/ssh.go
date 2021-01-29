@@ -28,6 +28,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "ssh",
 		Short:   "SSH into a container",
 		Example: exampleText,
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
 			wd, err := os.Getwd()

@@ -21,9 +21,6 @@ const exampleText = `  # disable services
   # disable mailhog
   nitro disable mailhog
 
-  # disable blackfire
-  nitro disable blackfire
-
   # disable minio
   nitro disable minio
 
@@ -34,9 +31,15 @@ const exampleText = `  # disable services
 // and do not require a user to configure the ports/volumes or images.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:       "disable",
-		Short:     "Disable services",
-		Args:      cobra.MinimumNArgs(1),
+		Use:   "disable",
+		Short: "Disable services",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("service name param missing")
+			}
+
+			return nil
+		},
 		ValidArgs: []string{"dynamodb", "mailhog", "minio", "redis"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
