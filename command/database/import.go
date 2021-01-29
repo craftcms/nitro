@@ -1,6 +1,9 @@
 package database
 
 import (
+	"archive/zip"
+	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -51,6 +54,14 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 			return []string{"sql", "gz", "zip", "dump"}, cobra.ShellCompDirectiveFilterFileExt
 		},
 		Example: importExampleText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// make sure the file exists
+			if exists := pathexists.IsFile(args[0]); !exists {
+				return fmt.Errorf("unable to find file %s", args[0])
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			show, err := strconv.ParseBool(cmd.Flag("show-output").Value.String())
 			if err != nil {
@@ -58,19 +69,14 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				show = false
 			}
 
-			// replace the relative path
+			// replace the relative path with the full directory
 			path := args[0]
 			if strings.HasPrefix(path, "~") {
 				path = strings.Replace(path, "~", home, 1)
 			}
 
-			// make sure the file exists
-			if exists := pathexists.IsFile(path); !exists {
-				return fmt.Errorf("unable to find file at %s", path)
-			}
-
 			// check if this is a known archive type for docker
-			isArchive := archive.IsArchivePath(path)
+			supportedArchive := archive.IsArchivePath(path)
 
 			// check if this is a zip file
 			var isZip bool
@@ -86,18 +92,14 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			// detect the type of backup if not compressed
 			detected := ""
-			if !isArchive && !isZip {
+			if !supportedArchive && !isZip {
 				output.Pending("detecting backup type")
 
-				// open the file
-				f, err := os.Open(path)
-				if err != nil {
-					return err
-				}
-
 				// determine the database engine
-				detected, err = database.DetermineEngine(f.Name())
+				detected, err = database.DetermineEngine(path)
 				if err != nil {
+					output.Warning()
+
 					return err
 				}
 
@@ -155,30 +157,12 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
-			// get the filename by itself
-			_, filename := filepath.Split(path)
-
 			output.Info("Preparing import…")
 
-			var rdr io.Reader
-			switch isArchive {
-			case false:
-				// read the file content
-				content, err := ioutil.ReadFile(path)
-				if err != nil {
-					return err
-				}
-
-				// generate the reader
-				rdr, err = archive.Generate(filename, string(content))
-				if err != nil {
-					return err
-				}
-			default:
-				rdr, err = os.Open(path)
-				if err != nil {
-					return err
-				}
+			// get the reader, along with the filename to use to set the container path
+			rdr, filename, err := getReader(supportedArchive, kind, path)
+			if err != nil {
+				return err
 			}
 
 			output.Pending("uploading backup", filename)
@@ -189,6 +173,7 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
+			// set the path to the file in the container
 			containerPath := "/tmp/" + filename
 
 			// wait for the file to exist
@@ -209,11 +194,11 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 			switch detected {
 			case "postgres":
 				createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
-				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", fmt.Sprintf(`/tmp/%s`, filename)}
+				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", containerPath}
 			default:
 				createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
 				// https: //dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html
-				importCmd = []string{"mysql", "-unitro", "-pnitro", db, fmt.Sprintf(`-e source /tmp/%s`, filename)}
+				importCmd = []string{"mysql", "-unitro", "-pnitro", db, fmt.Sprintf(`-e source %s`, containerPath)}
 			}
 
 			// create the database
@@ -323,4 +308,75 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
+}
+
+func getReader(supportedArchive bool, kind, path string) (io.Reader, string, error) {
+	_, filename := filepath.Split(path)
+
+	// if the file is a zip or gzip file
+	if !supportedArchive {
+		// get the file content based on the kind
+		switch kind {
+		case "zip":
+			// create a new zip reader
+			r, err := zip.OpenReader(path)
+			if err != nil {
+				return nil, "", err
+			}
+			defer r.Close()
+
+			// read each of the files
+			for _, file := range r.File {
+				if strings.HasSuffix(file.Name, ".sql") {
+					fmt.Println(file.Name)
+					// create the temp file
+					temp, err := ioutil.TempFile(os.TempDir(), "nitro-import-zip-"+filename)
+					if err != nil {
+						return nil, "", err
+					}
+					defer temp.Close()
+
+					// read the content of the zip file
+					rc, err := file.Open()
+					if err != nil {
+						return nil, "", err
+					}
+
+					buf := new(bytes.Buffer)
+					if _, err := buf.ReadFrom(rc); err != nil && !errors.Is(err, io.EOF) {
+						return nil, "", err
+					}
+
+					// write the content to the temp file
+					if _, err := temp.Write(buf.Bytes()); err != nil {
+						return nil, "", err
+					}
+
+					// read the file content from the temp file
+					content, err := ioutil.ReadFile(temp.Name())
+					if err != nil {
+						return nil, "", err
+					}
+
+					reader, err := archive.Generate(file.Name, string(content))
+					return reader, file.Name, err
+				}
+			}
+
+			// we did not find a sql file, so we need to return an error
+			return nil, "", fmt.Errorf("unable to find a .sql file in the zip")
+		default:
+			return nil, "", fmt.Errorf("unsupported kind %q provided", kind)
+		}
+	}
+
+	// read the file content
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// generate the reader
+	reader, err := archive.Generate(filename, string(content))
+	return reader, filename, err
 }
