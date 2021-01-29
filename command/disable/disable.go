@@ -35,6 +35,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short: "Disable services",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
+				fmt.Println(cmd.UsageString())
+
 				return fmt.Errorf("service name param missing")
 			}
 
