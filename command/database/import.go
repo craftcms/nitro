@@ -14,15 +14,17 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 
 	"github.com/craftcms/nitro/pkg/database"
 	"github.com/craftcms/nitro/pkg/filetype"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
 )
 
 var importExampleText = `  # import a sql file into a database
@@ -208,10 +210,11 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 			switch detected {
 			case "postgres":
 				createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
-				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", "/tmp/" + filename}
+				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", fmt.Sprintf(`/tmp/%s`, filename)}
 			default:
 				createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
-				importCmd = []string{"mysqlimport", "--host=127.0.0.1", "--user=nitro", "--password=nitro", db, "/tmp/" + filename}
+				// https: //dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html
+				importCmd = []string{"mysql", "-unitro", "-pnitro", db, fmt.Sprintf(`-e source /tmp/%s`, filename)}
 			}
 
 			// create the database
@@ -220,10 +223,94 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to create the database, %w", err)
 			}
 
-			// import the database
-			if _, err := execCreate(cmd.Context(), docker, containerID, importCmd, show); err != nil {
-				output.Warning()
-				return fmt.Errorf("unable to import the database, %w", err)
+			// create the exec for create
+			createExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				AttachStdin:  true,
+				Tty:          false,
+				Cmd:          createCmd,
+			})
+			if err != nil {
+				return err
+			}
+
+			// attach to the container
+			createResp, err := docker.ContainerExecAttach(cmd.Context(), createExec.ID, types.ExecStartCheck{
+				Tty: false,
+			})
+			if err != nil {
+				return err
+			}
+			defer createResp.Close()
+
+			// should we display output?
+			if show {
+				// show the output to stdout and stderr
+				if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, createResp.Reader); err != nil {
+					return fmt.Errorf("unable to copy the output of container, %w", err)
+				}
+			}
+
+			// start the exec
+			if err := docker.ContainerExecStart(cmd.Context(), createExec.ID, types.ExecStartCheck{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			// wait for the container exec to complete
+			createWaiting := true
+			for createWaiting {
+				resp, err := docker.ContainerExecInspect(cmd.Context(), createExec.ID)
+				if err != nil {
+					return err
+				}
+
+				createWaiting = resp.Running
+			}
+
+			// create the exec for import
+			importExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
+				AttachStdout: true,
+				AttachStderr: true,
+				AttachStdin:  true,
+				Tty:          true,
+				Cmd:          importCmd,
+			})
+			if err != nil {
+				return err
+			}
+
+			// attach to the container
+			importResp, err := docker.ContainerExecAttach(cmd.Context(), importExec.ID, types.ExecStartCheck{
+				Tty: false,
+			})
+			if err != nil {
+				return err
+			}
+			defer importResp.Close()
+
+			// should we display output?
+			if show {
+				// show the output to stdout and stderr
+				if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, importResp.Reader); err != nil {
+					return fmt.Errorf("unable to copy the output of container, %w", err)
+				}
+			}
+
+			// start the exec
+			if err := docker.ContainerExecStart(cmd.Context(), importExec.ID, types.ExecStartCheck{}); err != nil {
+				return fmt.Errorf("unable to start the container, %w", err)
+			}
+
+			// wait for the container exec to complete
+			importWaiting := true
+			for importWaiting {
+				resp, err := docker.ContainerExecInspect(cmd.Context(), importExec.ID)
+				if err != nil {
+					return err
+				}
+
+				importWaiting = resp.Running
 			}
 
 			output.Done()
