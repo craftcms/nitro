@@ -17,9 +17,6 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-
 	"github.com/craftcms/nitro/pkg/database"
 	"github.com/craftcms/nitro/pkg/filetype"
 	"github.com/craftcms/nitro/pkg/labels"
