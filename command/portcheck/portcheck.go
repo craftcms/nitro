@@ -19,7 +19,9 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 		Args:    cobra.MinimumNArgs(1),
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := portavail.Check(args[0]); err != nil {
+			hostname := cmd.Flag("hostname").Value.String()
+
+			if err := portavail.Check(hostname, args[0]); err != nil {
 				output.Info("Port", args[0], "is already in use...")
 
 				return nil
@@ -30,6 +32,8 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().String("hostname", "localhost", "The hostname to use when checking the port")
 
 	return cmd
 }
