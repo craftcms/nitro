@@ -105,8 +105,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 	}
 
-	cmd.Flags().Bool("root", false, "ssh as the root user")
-	// cmd.Flags().Bool("proxy", false, "connect to the proxy container")
+	cmd.Flags().Bool("root", false, "connect as root user")
+	cmd.Flags().Bool("proxy", false, "connect to proxy container")
 
 	return cmd
 }
