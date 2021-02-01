@@ -12,6 +12,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -19,7 +20,10 @@ const exampleText = `  # ssh into a container - assuming its the current working
   nitro ssh
 
   # ssh into the container as root - changes may not persist after "nitro apply"
-  nitro ssh --root`
+  nitro ssh --root
+
+  # ssh into the proxy container
+  nitro ssh --proxy`
 
 // NewCommand returns the ssh command to get a shell in a container. The command is context aware and if
 // it is not in a known project directory, it will provide a list of known sites to the user.
@@ -45,6 +49,32 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
+
+			// if this is for the proxy, skip the extra details
+			proxy := cmd.Flag("proxy").Value.String()
+			if proxy == "true" {
+				// file by the container name
+				filter.Add("name", proxycontainer.ProxyName)
+
+				// find the containers but limited to the site label
+				containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
+				if err != nil {
+					return err
+				}
+
+				if len(containers) == 0 {
+					return fmt.Errorf("no containers found")
+				}
+
+				// start the container if its not running
+				if containers[0].State != "running" {
+					if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
+				return containerConnect(cmd, output, containers[0].ID)
+			}
 
 			// get a context aware list of sites
 			sites := cfg.ListOfSitesByDirectory(home, wd)
