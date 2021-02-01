@@ -150,7 +150,7 @@ func containerConnect(cmd *cobra.Command, output terminal.Outputer, containerID 
 
 	// check if the root user should be used
 	user := "www-data"
-	if cmd.Flag("root").Value.String() == "true" {
+	if cmd.Flag("root").Value.String() == "true" || cmd.Flag("proxy").Value.String() == "true" {
 		user = "root"
 	}
 
