@@ -137,7 +137,7 @@ func (importer *importer) extract(path string) (string, error) {
 
 		// look at all the files
 		for _, f := range r.File {
-			if strings.HasSuffix(f.Name, ".sql") {
+			if strings.HasSuffix(f.Name, ".sql") && !strings.Contains(f.Name, "MACOSX") {
 				// open the file
 				rc, err := f.Open()
 				if err != nil {
