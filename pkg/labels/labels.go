@@ -4,14 +4,17 @@ const (
 	// Nitro is used to label a container as "for nitro"
 	Nitro = "com.craftcms.nitro"
 
+	// DatabaseCompatibility is the compatibility of the database (e.g. mariadb and mysql are compatible)
+	DatabaseCompatibility = "com.craftcms.nitro.database-compatibility"
+
 	// DatabaseEngine is used to identify the engine that is being used for a database container (e.g. mysql, postgres)
 	DatabaseEngine = "com.craftcms.nitro.database-engine"
 
+	// DatabasePort is used to identify the port that is being used for a database container (e.g. mysql, postgres)
+	DatabasePort = "com.craftcms.nitro.database-port"
+
 	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
-
-	// DatabaseCompatibility is the compatibility of the database (e.g. mariadb and mysql are compatible)
-	DatabaseCompatibility = "com.craftcms.nitro.database-compatibility"
 
 	// Extensions is used for a list of comma seperated extensions for a site
 	Extensions = "com.craftcms.nitro.extensions"
