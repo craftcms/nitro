@@ -33,6 +33,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	filter := filters.NewArgs()
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
 	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
+	filter.Add("label", labels.DatabasePort+"="+db.Port)
 	filter.Add("label", labels.Type+"=database")
 
 	hostname, err := db.GetHostname()
@@ -72,6 +73,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		labels.DatabaseEngine:  db.Engine,
 		labels.DatabaseVersion: db.Version,
 		labels.Type:            "database",
+		labels.DatabasePort:    db.Port,
 	}
 
 	// if the database is mysql or mariadb, mark them as
@@ -230,7 +232,13 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 		"create localhost user": {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY 'nitro';`, "nitro", "localhost")},
 		"grant wildcard":        {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")},
 		"grant localhost":       {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "localhost")},
-		"flush privs":           {"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
+		"flush privileges":      {"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
+	}
+
+	// for mysql 8.0 images
+	// ALTER USER ‘username’@‘ip_address’ IDENTIFIED WITH mysql_native_password BY ‘password’
+	if strings.Contains(d.Version, "8.0") {
+		commands["alter user"] = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e ALTER USER '%s'@'%s' IDENTIFIED WITH mysql_native_password BY 'nitro';`, "nitro", "%")}
 	}
 
 	for _, c := range commands {
