@@ -43,7 +43,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		// check if the port is available
 		var port string
 		for {
-			if err := portavail.Check(strconv.Itoa(mysqlDefaultPort)); err != nil {
+			if err := portavail.Check("", strconv.Itoa(mysqlDefaultPort)); err != nil {
 				mysqlDefaultPort = mysqlDefaultPort + 1
 				continue
 			}
@@ -79,7 +79,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		// check if the port is available
 		var port string
 		for {
-			if err := portavail.Check(strconv.Itoa(postgresDefaultPort)); err != nil {
+			if err := portavail.Check("", strconv.Itoa(postgresDefaultPort)); err != nil {
 				postgresDefaultPort = postgresDefaultPort + 1
 				continue
 			}

@@ -17,6 +17,10 @@ import (
 )
 
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
+	// remove environment var
+	os.Setenv("NITRO_DEVELOPMENT", "false")
+	defer os.Unsetenv("NITRO_DEVELOPMENT")
+
 	// Arrange
 	mock := newMockDockerClient(nil, nil, nil)
 	mock.networkCreateResponse = types.NetworkCreateResponse{
@@ -65,6 +69,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				labels.Proxy:        "true",
 				labels.ProxyVersion: "develop",
 			},
+			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro"},
 		},
 		HostConfig: &container.HostConfig{
 			NetworkMode: "default",

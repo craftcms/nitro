@@ -107,7 +107,7 @@ func NewCommand() *cobra.Command {
 		context.NewCommand(home, docker, term),
 		craft.NewCommand(home, docker, term),
 		create.NewCommand(home, docker, downloader, term),
-		database.NewCommand(home, docker, term),
+		database.NewCommand(home, docker, nitrod, term),
 		destroy.NewCommand(home, docker, term),
 		disable.NewCommand(home, docker, term),
 		enable.NewCommand(home, docker, term),

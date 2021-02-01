@@ -31,21 +31,20 @@ var (
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
 )
 
+// Create is used to create a new proxy container for the nitro development environment.
 func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, networkID string) error {
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro+"=true")
 	filter.Add("reference", ProxyImage)
 
 	// check for the proxy image
-	images, err := docker.ImageList(ctx, types.ImageListOptions{
-		Filters: filter,
-	})
+	images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filter})
 	if err != nil {
 		return fmt.Errorf("unable to get a list of images, %w", err)
 	}
 
 	// if there are no local images, pull it
-	if len(images) == 0 {
+	if len(images) == 0 && os.Getenv("NITRO_DEVELOPMENT") != "true" {
 		output.Pending("pulling image")
 
 		rdr, err := docker.ImagePull(ctx, ProxyImage, types.ImagePullOptions{All: false})
@@ -197,6 +196,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 				labels.Proxy:        "true",
 				labels.ProxyVersion: version.Version,
 			},
+			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro"},
 		},
 		&container.HostConfig{
 			NetworkMode: "default",

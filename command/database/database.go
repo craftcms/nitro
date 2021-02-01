@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/protob"
 )
 
 const exampleText = `  # import a database from a backup
@@ -17,7 +18,7 @@ const exampleText = `  # import a database from a backup
   nitro db add`
 
 // NewCommand returns the db commands for importing, backing up, and adding databases
-func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "db",
 		Short:   "Manage databases",
@@ -27,7 +28,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 	}
 
-	cmd.AddCommand(importCommand(home, docker, output), backupCommand(home, docker, output), addCommand(docker, output), sshCommand(home, docker, output), removeCommand(docker, output))
+	cmd.AddCommand(
+		importCommand(home, docker, nitrod, output),
+		backupCommand(home, docker, output),
+		addCommand(docker, output),
+		sshCommand(home, docker, output),
+		removeCommand(docker, output),
+	)
 
 	return cmd
 }

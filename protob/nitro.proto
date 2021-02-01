@@ -8,6 +8,12 @@ service Nitro {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Apply(ApplyRequest) returns (ApplyResponse) {}
     rpc Version(VersionRequest) returns (VersionResponse) {}
+    // rpc AddDatabase(AddDatabaseRequest) returns (stream AddDatabaseResponse) {}
+    // rpc BackupDatabase(BackupDatabaseRequest) returns (stream BackupDatabaseResponse) {}
+    // ImportDatabase is used to stream a database backup from the client to the proxy.
+    rpc ImportDatabase(stream ImportDatabaseRequest) returns (ImportDatabaseResponse) {}
+    // rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {}
+    // rpc RemoveDatabase(RemoveDatabaseRequest) returns (RemoveDatabaseResponse) {}
 }
 
 message PingRequest {}
@@ -33,3 +39,64 @@ message Site {
     string aliases = 2;
     int32 port = 3;
 }
+
+message DatabaseInfo {
+    // engine is the type of database (e.g. mysql or postgres)
+    string engine = 1;
+    // version is the database version (e.g. 5.7 or 13)
+    string version = 2;
+    // port is the port used to connect to the datbase (e.g. 3306)
+    string port = 3;
+    // hostname is the container name used to connect (e.g. mysql-5.7-3306.database.nitro)
+    string hostname = 4;
+    // datbase is the name of the database
+    string database = 5;
+    // if the client was able to detect the database is compressed (only used during importing)
+    bool compressed = 6;
+}
+
+// message AddDatabaseRequest {
+//     DatabaseInfo database = 1;
+// }
+
+// message AddDatabaseResponse {
+//         string message = 1;
+// }
+
+// message BackupDatabaseRequest {
+//     DatabaseInfo database = 1;
+// }
+
+// message BackupDatabaseResponse {
+//     // data is the data of the file, used in stream to reduce memory usage.
+//     bytes data = 1;
+// }
+
+message ImportDatabaseRequest {
+    oneof payload {
+        DatabaseInfo database = 1;
+        // data is the data of the file, used in stream to reduce memory usage.
+        bytes data = 2;
+    }
+}
+
+message ImportDatabaseResponse {
+    string message = 1;
+}
+
+// message ListDatabasesRequest {
+//     DatabaseInfo database = 1;
+// }
+
+// message ListDatabasesResponse {
+//     // databases is a list of databases from the database server
+//     map<int32, string> databases = 1;
+// }
+
+// message RemoveDatabaseRequest {
+//     DatabaseInfo database = 1;
+// }
+
+// message RemoveDatabaseResponse {
+//     string message = 1;
+// }

@@ -14,7 +14,7 @@ import (
 
 func main() {
 	log.SetOutput(os.Stdout)
-	log.SetPrefix("nitrod")
+	log.SetPrefix("nitrod: ")
 
 	// assign the port as a flag with a default
 	port := flag.String("port", "5000", "which port API should listen on")

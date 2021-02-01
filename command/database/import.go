@@ -1,17 +1,17 @@
 package database
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/archive"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/database"
@@ -19,6 +19,8 @@ import (
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/protob"
 )
 
 var importExampleText = `  # import a sql file into a database
@@ -31,7 +33,7 @@ var importExampleText = `  # import a sql file into a database
   nitro db import /Users/oli/Desktop/backup.sql`
 
 // importCommand is the command for creating new development environments
-func importCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func importCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import a database",
@@ -45,35 +47,28 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 			return nil
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return []string{"sql", "gz", "zip", "dump"}, cobra.ShellCompDirectiveFilterFileExt
+			return []string{"sql", "gz", "zip"}, cobra.ShellCompDirectiveFilterFileExt
 		},
 		Example: importExampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// make sure the file exists
 			if exists := pathexists.IsFile(args[0]); !exists {
+				output.Info(cmd.UsageString())
+
 				return fmt.Errorf("unable to find file %s", args[0])
 			}
 
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			show, err := strconv.ParseBool(cmd.Flag("show-output").Value.String())
-			if err != nil {
-				// set to false
-				show = false
-			}
-
 			// replace the relative path with the full directory
 			path := args[0]
 			if strings.HasPrefix(path, "~") {
 				path = strings.Replace(path, "~", home, 1)
 			}
 
-			// check if this is a known archive type for docker
-			supportedArchive := archive.IsArchivePath(path)
-
 			// check if this is a zip file
-			var isZip bool
+			var compressed bool
 			kind, err := filetype.Determine(path)
 			if err != nil {
 				return err
@@ -81,12 +76,12 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			switch kind {
 			case "zip", "tar":
-				isZip = true
+				compressed = true
 			}
 
 			// detect the type of backup if not compressed
 			detected := ""
-			if !supportedArchive && !isZip {
+			if !compressed {
 				output.Pending("detecting backup type")
 
 				// determine the database engine
@@ -145,164 +140,110 @@ func importCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to get the container")
 			}
 
-			// get the database compatability from the container labelsmake l
-			detected = containers[selected].Labels[labels.DatabaseCompatibility]
-
 			// ask the user for the database to create
-			db, err := output.Ask("Enter the database name", "", ":", nil)
+			db, err := output.Ask("Enter the database name", "", ":", &validate.DatabaseName{})
 			if err != nil {
 				return err
 			}
 
 			output.Info("Preparing import…")
 
-			// get the reader, along with the filename to use to set the container path
-			rdr, filename, err := database.PrepareArchiveFromPath(path)
+			stream, err := nitrod.ImportDatabase(cmd.Context())
 			if err != nil {
 				return err
 			}
 
-			output.Pending("uploading backup", filename)
-
-			// copy the file into the container
-			if err := docker.CopyToContainer(cmd.Context(), containerID, "/tmp", rdr, types.CopyToContainerOptions{}); err != nil {
-				output.Warning()
+			// get the containers info
+			info, err := docker.ContainerInspect(cmd.Context(), containers[selected].ID)
+			if err != nil {
 				return err
 			}
 
-			// set the path to the file in the container
-			containerPath := "/tmp/" + filename
+			// get the database compatability from the container labelsmake l
+			detected = info.Config.Labels[labels.DatabaseCompatibility]
+			hostname := strings.TrimLeft(info.Name, "/")
+			version := info.Config.Labels[labels.DatabaseVersion]
 
-			// wait for the file to exist
-			waiting := true
-			for waiting {
-				_, err := docker.ContainerStatPath(cmd.Context(), containerID, containerPath)
-				if err == nil {
-					waiting = false
+			var port string
+			// get the port from the container info
+			for p, bind := range info.HostConfig.PortBindings {
+				for _, v := range bind {
+					if v.HostPort != "" {
+						port = p.Port()
+					}
 				}
+			}
 
-				if !waiting {
+			// create a request with the database information to populate the database info for the import
+			if err := stream.Send(&protob.ImportDatabaseRequest{
+				Payload: &protob.ImportDatabaseRequest_Database{
+					Database: &protob.DatabaseInfo{
+						Engine:     detected,
+						Version:    version,
+						Database:   db,
+						Port:       port,
+						Compressed: compressed,
+						Hostname:   hostname,
+					},
+				},
+			}); err != nil {
+				return stream.RecvMsg(nil)
+			}
+
+			// create a timer
+			start := time.Now()
+
+			// open the file
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+
+			// create a buffer to handle large files more gracefully
+			buffer := make([]byte, 1024*20)
+			reader := bufio.NewReader(file)
+
+			output.Pending(fmt.Sprintf("importing database %q into %q", db, hostname))
+
+			// stream to backup file to the api
+			for {
+				n, err := reader.Read(buffer)
+				if err == io.EOF {
 					break
 				}
+				if err != nil {
+					output.Warning()
+
+					return stream.RecvMsg(nil)
+				}
+
+				// send the chunked file data in pieces
+				if err := stream.Send(&protob.ImportDatabaseRequest{
+					Payload: &protob.ImportDatabaseRequest_Data{
+						Data: buffer[:n],
+					},
+				}); err != nil {
+					output.Warning()
+
+					return err
+				}
 			}
 
-			// determine if the backup is to mysql or postgres and run the import file command
-			var createCmd, importCmd []string
-			switch detected {
-			case "postgres":
-				createCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
-				importCmd = []string{"psql", "--username=nitro", "--host=127.0.0.1", db, "--file", containerPath}
-			default:
-				createCmd = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
-				// https: //dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html
-				importCmd = []string{"mysql", "-unitro", "-pnitro", db, fmt.Sprintf(`-e source %s`, containerPath)}
-			}
-
-			// create the database
-			if _, err := execCreate(cmd.Context(), docker, containerID, createCmd, show); err != nil {
+			// handle the response
+			reply, err := stream.CloseAndRecv()
+			if err != nil {
 				output.Warning()
-				return fmt.Errorf("unable to create the database, %w", err)
-			}
 
-			// create the exec for create
-			createExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				AttachStdin:  true,
-				Tty:          false,
-				Cmd:          createCmd,
-			})
-			if err != nil {
-				return err
-			}
-
-			// attach to the container
-			createResp, err := docker.ContainerExecAttach(cmd.Context(), createExec.ID, types.ExecStartCheck{
-				Tty: false,
-			})
-			if err != nil {
-				return err
-			}
-			defer createResp.Close()
-
-			// should we display output?
-			if show {
-				// show the output to stdout and stderr
-				if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, createResp.Reader); err != nil {
-					return fmt.Errorf("unable to copy the output of container, %w", err)
-				}
-			}
-
-			// start the exec
-			if err := docker.ContainerExecStart(cmd.Context(), createExec.ID, types.ExecStartCheck{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// wait for the container exec to complete
-			createWaiting := true
-			for createWaiting {
-				resp, err := docker.ContainerExecInspect(cmd.Context(), createExec.ID)
-				if err != nil {
-					return err
-				}
-
-				createWaiting = resp.Running
-			}
-
-			// create the exec for import
-			importExec, err := docker.ContainerExecCreate(cmd.Context(), containerID, types.ExecConfig{
-				AttachStdout: true,
-				AttachStderr: true,
-				AttachStdin:  true,
-				Tty:          true,
-				Cmd:          importCmd,
-			})
-			if err != nil {
-				return err
-			}
-
-			// attach to the container
-			importResp, err := docker.ContainerExecAttach(cmd.Context(), importExec.ID, types.ExecStartCheck{
-				Tty: false,
-			})
-			if err != nil {
-				return err
-			}
-			defer importResp.Close()
-
-			// should we display output?
-			if show {
-				// show the output to stdout and stderr
-				if _, err := stdcopy.StdCopy(os.Stdout, os.Stderr, importResp.Reader); err != nil {
-					return fmt.Errorf("unable to copy the output of container, %w", err)
-				}
-			}
-
-			// start the exec
-			if err := docker.ContainerExecStart(cmd.Context(), importExec.ID, types.ExecStartCheck{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// wait for the container exec to complete
-			importWaiting := true
-			for importWaiting {
-				resp, err := docker.ContainerExecInspect(cmd.Context(), importExec.ID)
-				if err != nil {
-					return err
-				}
-
-				importWaiting = resp.Running
+				return stream.RecvMsg(nil)
 			}
 
 			output.Done()
 
-			output.Info("Import successful 💪")
+			output.Info(fmt.Sprintf("%s, took %.2f seconds 💪...", reply.Message, time.Since(start).Seconds()))
 
 			return nil
 		},
 	}
-
-	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
 }

@@ -4,12 +4,20 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/caddy"
+	"github.com/craftcms/nitro/pkg/database"
+	"github.com/craftcms/nitro/pkg/portavail"
 	"github.com/craftcms/nitro/protob"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var Version string
@@ -18,17 +26,19 @@ var Version string
 // implements the gRPC API used in the proxy container. The gRPC API is used to
 // handle making changes to the Caddy Server via its local API. If no addr is
 // provided, it will set the default addr to http://127.0.0.1:2019
-func NewService(addr string) *Service {
+func NewService(addr string) protob.NitroServer {
 	return &Service{
-		Addr: addr,
-		HTTP: http.DefaultClient,
+		Addr:     addr,
+		HTTP:     http.DefaultClient,
+		Importer: database.NewImporter(),
 	}
 }
 
 // Service implements the protob.NitroServer interface
 type Service struct {
-	Addr string
-	HTTP *http.Client
+	Addr     string
+	HTTP     *http.Client
+	Importer database.Importer
 }
 
 // Ping returns a simple response "pong" from the gRPC API to verify connectivity.
@@ -140,4 +150,98 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 // Version is used to check the container image version with the CLI version
 func (svc *Service) Version(ctx context.Context, request *protob.VersionRequest) (*protob.VersionResponse, error) {
 	return &protob.VersionResponse{Version: Version}, nil
+}
+
+// ImportDatabase is used to handle streaming requests from the client and import a
+// database from a backup into the remote database container.
+func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) error {
+	// verify the importer is declared
+	if svc.Importer == nil {
+		svc.Importer = database.NewImporter()
+	}
+
+	// create the options for the import
+	opts := database.ImportOptions{}
+
+	// create a temp file used to import the database content
+	tempFile, err := ioutil.TempFile(os.TempDir(), "nitro-db-import")
+	if err != nil {
+		return status.Errorf(codes.Internal, "Unable creating a temp file for the upload")
+	}
+
+	// defer the file close and deletion
+	defer tempFile.Close()
+	defer os.Remove(tempFile.Name())
+
+	// set the temporary file
+	opts.File = tempFile.Name()
+
+	req, err := stream.Recv()
+	if err != nil {
+		return status.Errorf(codes.Internal, "unable to receive from stream: %s", err.Error())
+	}
+
+	// get the database engine
+	if opts.Engine == "" {
+		opts.Engine = req.GetDatabase().GetEngine()
+	}
+
+	// get the database version
+	if opts.Version == "" {
+		opts.Version = req.GetDatabase().GetVersion()
+	}
+
+	// get the database port
+	if opts.Port == "" {
+		opts.Port = req.GetDatabase().GetPort()
+	}
+
+	// get the database hostname
+	if opts.Hostname == "" {
+		opts.Hostname = req.GetDatabase().GetHostname()
+	}
+
+	// get the database name
+	if opts.DatabaseName == "" {
+		opts.DatabaseName = req.GetDatabase().GetDatabase()
+	}
+
+	// check if the file is compressed
+	if (!opts.Compressed) && (req.GetDatabase().GetCompressed()) {
+		opts.Compressed = req.GetDatabase().GetCompressed()
+	}
+
+	// handle the streaming request
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return status.Errorf(codes.Internal, "unable to create the stream: %s", err.Error())
+		}
+
+		// write the streamed content into the temp file
+		_, err = tempFile.Write(req.GetData())
+		if err != nil && !errors.Is(err, io.EOF) {
+			return status.Errorf(codes.Internal, "unable to write content to the temp file")
+		}
+	}
+
+	// verify we can connect to the database hostname - no error means its reachable
+	if err := portavail.Check(opts.Hostname, opts.Port); err == nil {
+		return status.Errorf(codes.Internal, "it does not appear the database is available on host %s using port %s: %v", opts.Hostname, opts.Port, err)
+	}
+
+	// import the database
+	if err := database.NewImporter().Import(&opts, database.DefaultImportToolFinder); err != nil {
+		return status.Errorf(codes.Internal, "error importing the database %v", err)
+	}
+
+	// send and close the stream
+	return stream.SendAndClose(
+		&protob.ImportDatabaseResponse{
+			Message: fmt.Sprintf("Imported database %q", opts.DatabaseName),
+		},
+	)
 }

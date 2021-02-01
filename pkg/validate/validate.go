@@ -11,6 +11,28 @@ type Validator interface {
 	Validate(input string) error
 }
 
+// DatabaseName is used to validate a database names
+type DatabaseName struct{}
+
+func (v *DatabaseName) Validate(input string) error {
+	// check length
+	if len(input) < 3 {
+		return fmt.Errorf("database must be more than 3 characters")
+	}
+
+	// check for spaces
+	if strings.Contains(input, " ") {
+		return fmt.Errorf("database must not include spaces")
+	}
+
+	// check for special characters
+	if strings.ContainsAny(input, "!@#$%^&*()-") {
+		return fmt.Errorf("database must not include any special characters except underscores")
+	}
+
+	return nil
+}
+
 // HostnameValidator is used to validate a provided hostname
 type HostnameValidator struct{}
 

@@ -24,7 +24,7 @@ LABEL org.opencontainers.image.documentation=https://craftcms.com/docs/nitro
 LABEL org.opencontainers.image.vendor="Craft CMS"
 LABEL org.opencontainers.image.source="https://github.com/craftcms/nitro"
 
-RUN apk --no-cache add ca-certificates nss-tools supervisor
+RUN apk --no-cache add ca-certificates nss-tools supervisor postgresql-client mysql-client
 RUN mkdir --parents /var/www/html
 RUN mkdir --parents /etc/caddy/
 RUN mkdir --parents /config
