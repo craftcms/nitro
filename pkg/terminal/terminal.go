@@ -104,6 +104,8 @@ func (t *terminal) Confirm(message string, fallback bool, sep string) (bool, err
 		switch txt {
 		case "n", "N", "no", "No", "NO":
 			return false, nil
+		case "y", "Y", "yes", "Yes", "YES":
+			return true, nil
 		default:
 			return fallback, nil
 		}
