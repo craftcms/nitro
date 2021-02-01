@@ -16,6 +16,7 @@ func TestCheck(t *testing.T) {
 	usedPort := strconv.Itoa(p)
 
 	type args struct {
+		host string
 		port string
 	}
 	tests := []struct {
@@ -31,7 +32,7 @@ func TestCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Check(tt.args.port); (err != nil) != tt.wantErr {
+			if err := Check(tt.args.host, tt.args.port); (err != nil) != tt.wantErr {
 				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
