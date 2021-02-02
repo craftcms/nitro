@@ -356,6 +356,6 @@ func (svc *Service) RemoveDatabase(ctx context.Context, req *protob.RemoveDataba
 	}
 
 	return &protob.RemoveDatabaseResponse{
-		Message: fmt.Sprintf("Removed the database %q from %q successfully", db, hostname),
+		Message: fmt.Sprintf("Removed %q from %q successfully", db, hostname),
 	}, nil
 }
