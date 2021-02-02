@@ -147,7 +147,7 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 		// get all the databases from the mysql engine
 		for _, d := range strings.Split(buf.String(), "\n") {
 			// ignore the system defaults
-			if d == "Database" || strings.Contains(d, `"Database`) || d == "information_schema" || d == "performance_schema" || d == "sys" || strings.Contains(d, "password on the command line") || d == "mysql" || d == "" {
+			if d == "Database" || strings.Contains(d, `"Database`) || strings.Contains(d, `[Database`) || d == "information_schema" || d == "performance_schema" || d == "sys" || strings.Contains(d, "password on the command line") || d == "mysql" || d == "" {
 				continue
 			}
 
@@ -213,7 +213,7 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 
 	// copy the backup from the container into the host machine
 	rdr, stat, err := docker.CopyFromContainer(ctx, opts.ContainerID, "/tmp/"+opts.BackupName)
-	if err != nil || stat.Mode.IsRegular() == false {
+	if err != nil || !stat.Mode.IsRegular() {
 		return err
 	}
 	defer rdr.Close()
@@ -232,7 +232,9 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 			return err
 		}
 
-		buf.ReadFrom(tr)
+		if _, err := buf.ReadFrom(tr); err != nil {
+			return err
+		}
 	}
 
 	// verify the backup dir exists
