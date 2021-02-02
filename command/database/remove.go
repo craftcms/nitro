@@ -147,7 +147,5 @@ func removeCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, out
 		},
 	}
 
-	cmd.Flags().Bool("show-output", false, "show debug from import")
-
 	return cmd
 }
