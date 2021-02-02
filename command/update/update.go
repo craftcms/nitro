@@ -27,6 +27,7 @@ var (
 		// TODO(jasonmccallister) finish adding builds for the 7.0 images
 		//"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
 	}
+	hasUpdates bool
 )
 
 // New returns the update command for updating images on the local machine as well as the nitro-proxy container.
@@ -37,6 +38,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Example: `  # update nitro
   nitro update`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// if there are no updates to apply return
+			if !hasUpdates {
+				return nil
+			}
+
 			for _, c := range cmd.Parent().Commands() {
 				// set the apply command
 				if c.Use == "apply" {
@@ -110,41 +116,48 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// check all of the containers
 			for _, c := range containers {
 				// only show the site containers and proxy container
-				if c.Labels[labels.Type] == "dynamodb" || c.Labels[labels.Type] == "mailhog" || c.Labels[labels.Type] == "minio" || c.Labels[labels.Type] == "redis" {
+				if c.Labels[labels.Type] == "dynamodb" || c.Labels[labels.Type] == "mailhog" || c.Labels[labels.Type] == "minio" || c.Labels[labels.Type] == "redis" || c.Labels[labels.Type] == "database" {
 					continue
 				}
 
-				// if the images match, we are up to date
-				if _, ok := dockerImages[c.Image]; ok {
+				// if its the proxy container and its up to date, don't replace it
+				if c.Labels[labels.Proxy] == "true" && c.Labels[labels.ProxyVersion] == version.Version {
 					continue
 				}
 
-				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
+				// if the site images match, we are up to date
+				if dockerImages[imageName(c.Image)] != c.Image {
+					output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
 
-				// stop the container if it is running
-				if c.State == "running" {
-					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+					// stop the container if it is running
+					if c.State == "running" {
+						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+							output.Warning()
+							return err
+						}
+					}
+
+					// remove the container
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
 						output.Warning()
 						return err
 					}
-				}
 
-				// remove the container
-				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-					output.Warning()
-					return err
-				}
+					hasUpdates = true
 
-				output.Done()
+					output.Done()
+				}
 			}
 
-			output.Info("Images updated 👍, applying changes…")
+			if hasUpdates {
+				output.Info("Images updated 👍, applying changes…")
+			} else {
+				output.Info("Everything is up to date 👍...")
+			}
 
 			return nil
 		},
 	}
-
-	// set the flags
 
 	return cmd
 }
@@ -155,4 +168,11 @@ func versionFromName(name string) string {
 	p := strings.Split(name, ":")
 	v := strings.Split(p[1], "-")
 	return v[0]
+}
+
+// docker.io/craftcms/nginx:7.1-dev to nginx:7.1-dev
+func imageName(image string) string {
+	p := strings.Split(image, "/")
+
+	return p[len(p)-1]
 }
