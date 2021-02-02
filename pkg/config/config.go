@@ -33,6 +33,8 @@ var (
 		"XDEBUG_MODE":                 "off",
 		"XDEBUG_SESSION":              "PHPSTORM",
 		"XDEBUG_CONFIG":               "",
+		"BLACKFIRE_SERVER_ID":         "",
+		"BLACKFIRE_SERVER_TOKEN":      "",
 	}
 )
 

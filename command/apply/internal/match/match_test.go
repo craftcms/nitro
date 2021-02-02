@@ -14,14 +14,69 @@ import (
 
 func Test_checkEnvs(t *testing.T) {
 	type args struct {
-		site config.Site
-		envs []string
+		site      config.Site
+		envs      []string
+		blackfire config.Blackfire
 	}
 	tests := []struct {
 		name string
 		args args
 		want bool
 	}{
+		{
+			name: "blackfire server token returns false if there are no credentials but the environment variables are set",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+				},
+				envs: []string{
+					"BLACKFIRE_SERVER_TOKEN=someid",
+				},
+			},
+			want: false,
+		},
+		{
+			name: "blackfire server token returns false if there are credentials but the environment variables are not set",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+				},
+				envs: []string{
+					"BLACKFIRE_SERVER_TOKEN=",
+				},
+				blackfire: config.Blackfire{
+					ServerToken: "someid",
+				},
+			},
+			want: false,
+		},
+		{
+			name: "blackfire server id returns false if there are no credentials but the environment variables are set",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+				},
+				envs: []string{
+					"BLACKFIRE_SERVER_ID=someid",
+				},
+			},
+			want: false,
+		},
+		{
+			name: "blackfire server id returns false if there are credentials but the environment variables are not set",
+			args: args{
+				site: config.Site{
+					Version: "7.4",
+				},
+				envs: []string{
+					"BLACKFIRE_SERVER_ID=",
+				},
+				blackfire: config.Blackfire{
+					ServerID: "someid",
+				},
+			},
+			want: false,
+		},
 		{
 			name: "xdebug returns false if disable on the site but not for the container",
 			args: args{
@@ -163,7 +218,7 @@ func Test_checkEnvs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkEnvs(tt.args.site.PHP, tt.args.site.Xdebug, tt.args.envs); got != tt.want {
+			if got := checkEnvs(tt.args.site.PHP, tt.args.site.Xdebug, tt.args.envs, tt.args.blackfire); got != tt.want {
 				t.Errorf("checkEnvs() = %v, want %v", got, tt.want)
 			}
 		})
@@ -180,6 +235,7 @@ func TestSite(t *testing.T) {
 		home      string
 		site      config.Site
 		container types.ContainerJSON
+		blackfire config.Blackfire
 	}
 	tests := []struct {
 		name string
@@ -264,7 +320,7 @@ func TestSite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Site(tt.args.home, tt.args.site, tt.args.container); got != tt.want {
+			if got := Site(tt.args.home, tt.args.site, tt.args.container, tt.args.blackfire); got != tt.want {
 				t.Errorf("Site() = %v, want %v", got, tt.want)
 			}
 		})

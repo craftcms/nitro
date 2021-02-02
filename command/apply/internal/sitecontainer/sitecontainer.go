@@ -26,7 +26,7 @@ var (
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 )
 
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) (string, error) {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, blackfire config.Blackfire) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Host+"="+site.Hostname)
@@ -52,7 +52,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	}
 
 	// if the container is out of date
-	if !match.Site(home, site, details) {
+	if !match.Site(home, site, details, blackfire) {
 		fmt.Print("- updating… ")
 
 		// stop container

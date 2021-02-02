@@ -361,7 +361,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("checking", site.Hostname)
 
 					// start, update or create the site container
-					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site)
+					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg.Blackfire)
 					if err != nil {
 						output.Warning()
 						return err

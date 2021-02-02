@@ -14,7 +14,7 @@ import (
 
 // Site takes the home directory, site, and a container to determine if they
 // match whats expected.
-func Site(home string, site config.Site, container types.ContainerJSON) bool {
+func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
 		return false
@@ -43,7 +43,7 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 		}
 	}
 
-	// TODO(jasonmccallister) check the labels for php extensions
+	// TODO(jasonmccallister) check the labels for php extensions and write tests
 	switch len(site.Extensions) > 0 {
 	case false:
 		if container.Config.Labels[labels.Extensions] != "" {
@@ -58,10 +58,10 @@ func Site(home string, site config.Site, container types.ContainerJSON) bool {
 	}
 
 	// run the final check on the environment variables
-	return checkEnvs(site.PHP, site.Xdebug, container.Config.Env)
+	return checkEnvs(site.PHP, site.Xdebug, container.Config.Env, blackfire)
 }
 
-func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
+func checkEnvs(php config.PHP, xdebug bool, envs []string, blackfire config.Blackfire) bool {
 	// check the environment variables
 	for _, e := range envs {
 		sp := strings.Split(e, "=")
@@ -74,6 +74,14 @@ func checkEnvs(php config.PHP, xdebug bool, envs []string) bool {
 			// check the value of each environment variable we want to ensure the php config is not the "default" value and that the
 			// current value from the container match
 			switch env {
+			case "BLACKFIRE_SERVER_ID":
+				if blackfire.ServerID != val {
+					return false
+				}
+			case "BLACKFIRE_SERVER_TOKEN":
+				if blackfire.ServerToken != val {
+					return false
+				}
 			case "PHP_DISPLAY_ERRORS":
 				// if there is a custom value
 				if !php.DisplayErrors && val != config.DefaultEnvs[env] {
