@@ -1,19 +1,11 @@
 package database
 
 import (
-	"archive/zip"
-	"bytes"
-	"compress/gzip"
-	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 
-	"github.com/craftcms/nitro/pkg/filetype"
 	"github.com/craftcms/nitro/pkg/pathexists"
 )
 
@@ -31,13 +23,14 @@ type Importer interface {
 // ImportOptions are used to create a new importer.
 // It contains all of the information needed to run an import.
 type ImportOptions struct {
-	Engine       string
-	Version      string
-	Hostname     string
-	Port         string
-	DatabaseName string
-	File         string
-	Compressed   bool
+	Compressed      bool
+	CompressionType string
+	Engine          string
+	Version         string
+	Hostname        string
+	Port            string
+	DatabaseName    string
+	File            string
 }
 
 type importer struct{}
@@ -71,17 +64,6 @@ func (importer *importer) Import(opts *ImportOptions, find func(engine, version 
 		return err
 	}
 
-	// check if the file is compressed
-	if opts.Compressed {
-		// extract the contents into a new file
-		extracted, err := importer.extract(opts.File)
-		if err != nil {
-			return err
-		}
-
-		opts.File = extracted
-	}
-
 	// generate the commands to execute
 	var createCommand, importCommand []string
 	switch opts.Engine {
@@ -103,91 +85,18 @@ func (importer *importer) Import(opts *ImportOptions, find func(engine, version 
 	}
 
 	// import the database
-	return importer.exec(tool, importCommand)
-}
-
-func (importer *importer) extract(path string) (string, error) {
-	// create the temp file to store the data
-	temp, err := ioutil.TempFile(os.TempDir(), "nitro-db-compressed")
-	if err != nil {
-		return "", err
-	}
-	defer temp.Close()
-
-	// open the file
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	// detect the kind
-	kind, err := filetype.Determine(path)
-	if err != nil {
-		return "", err
-	}
-	switch kind {
-	case "zip":
-		// create a new gzip reader for the uploading path/file
-		r, err := zip.OpenReader(path)
-		if err != nil {
-			return "", err
-		}
-		defer r.Close()
-
-		// look at all the files
-		for _, f := range r.File {
-			if strings.HasSuffix(f.Name, ".sql") && !strings.Contains(f.Name, "MACOSX") {
-				// open the file
-				rc, err := f.Open()
-				if err != nil {
-					return "", err
-				}
-				defer rc.Close()
-
-				buf := new(bytes.Buffer)
-				if _, err := buf.ReadFrom(rc); err != nil && !errors.Is(err, io.EOF) {
-					return "", err
-				}
-
-				// write to the temp file
-				if _, err := temp.Write(buf.Bytes()); err != nil {
-					return "", err
-				}
-
-				return temp.Name(), nil
-			}
-		}
-	case "tar":
-		// open the compressed file
-		f, err := os.Open(path)
-		if err != nil {
-			return "", err
-		}
-		defer f.Close()
-
-		// read the file
-		reader, err := gzip.NewReader(f)
-		if err != nil {
-			return "", err
-		}
-
-		// copy the content into the new temp file
-		if _, err := io.Copy(temp, reader); err != nil {
-			return "", err
-		}
-
-		return temp.Name(), nil
+	if err := importer.exec(tool, importCommand); err != nil {
+		return err
 	}
 
-	return "", fmt.Errorf("unsupported compressed file type %q provided", kind)
+	return nil
 }
 
 func (importer *importer) exec(tool string, commands []string) error {
 	c := exec.Command(tool, commands...)
 
-	c.Stderr = os.Stderr
-	c.Stdout = os.Stdout
+	c.Stderr = ioutil.Discard
+	c.Stdout = ioutil.Discard
 
 	if err := c.Start(); err != nil {
 		return fmt.Errorf("unable to start the command: %w", err)

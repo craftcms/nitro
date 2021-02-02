@@ -1,7 +1,9 @@
 package api
 
 import (
+	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,7 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 
 	"github.com/craftcms/nitro/pkg/caddy"
 	"github.com/craftcms/nitro/pkg/database"
@@ -272,6 +273,67 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 		return status.Errorf(codes.Internal, "it does not appear the database is available on host %s using port %s: %v", opts.Hostname, opts.Port, err)
 	}
 
+	if opts.Compressed {
+		// create the temp file to store the data
+		temp, err := ioutil.TempFile(os.TempDir(), "nitro-db-compressed")
+		if err != nil {
+			return status.Errorf(codes.Internal, "unable to create a temp file: %s", err)
+		}
+		defer temp.Close()
+		defer os.Remove(temp.Name())
+
+		switch opts.CompressionType {
+		case "zip":
+			// create a new gzip reader for the uploading src/file
+			r, err := zip.OpenReader(opts.File)
+			if err != nil {
+				return status.Error(codes.Internal, "internal error occured")
+			}
+			defer r.Close()
+
+			// look at all the files
+			for _, f := range r.File {
+				if strings.HasSuffix(f.Name, ".sql") && !strings.Contains(f.Name, "MACOSX") {
+					// open the file
+					r, err := f.Open()
+					if err != nil {
+						return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+					}
+					defer r.Close()
+
+					if _, err := io.Copy(temp, r); err != nil {
+						return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+					}
+
+					opts.File = temp.Name()
+				}
+			}
+		case "tar":
+			// open the compressed file
+			f, err := os.Open(opts.File)
+			if err != nil {
+				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+			}
+			defer f.Close()
+
+			// read the file
+			r, err := gzip.NewReader(f)
+			if err != nil {
+				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+			}
+			defer r.Close()
+
+			// copy the content into the new temp file
+			if _, err := io.Copy(temp, r); err != nil {
+				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+			}
+
+			opts.File = temp.Name()
+		default:
+			return fmt.Errorf("unsupported compressed file type %q provided", opts.CompressionType)
+		}
+	}
+
 	// import the database
 	if err := database.NewImporter().Import(&opts, database.DefaultImportToolFinder); err != nil {
 		return status.Errorf(codes.Internal, "error importing the database %v", err)
@@ -340,22 +402,7 @@ func (svc *Service) exec(tool string, commands []string) error {
 	c := exec.Command(tool, commands...)
 
 	c.Stderr = os.Stderr
-	c.Stdout = os.Stdout
+	c.Stdout = ioutil.Discard
 
-	if err := c.Start(); err != nil {
-		return fmt.Errorf("unable to start the command: %w", err)
-	}
-
-	if err := c.Wait(); err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			// The program has exited with an exit code != 0
-			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-				return fmt.Errorf("Exit Status: %d", status.ExitStatus())
-			}
-		} else {
-			return err
-		}
-	}
-
-	return nil
+	return c.Run()
 }

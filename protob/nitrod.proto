@@ -56,6 +56,8 @@ message DatabaseInfo {
     string database = 5;
     // if the client was able to detect the database is compressed (only used during importing)
     bool compressed = 6;
+    // the kind of compression type, e.g. zip or tar
+    string compressionType = 7;
 }
 
 message AddDatabaseRequest {

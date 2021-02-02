@@ -76,9 +76,11 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				return err
 			}
 
+			var compressionType string
 			switch kind {
 			case "zip", "tar":
 				compressed = true
+				compressionType = kind
 			}
 
 			// detect the type of backup if not compressed
@@ -206,12 +208,13 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			err = stream.Send(&protob.ImportDatabaseRequest{
 				Payload: &protob.ImportDatabaseRequest_Database{
 					Database: &protob.DatabaseInfo{
-						Engine:     detected,
-						Version:    version,
-						Database:   db,
-						Port:       port,
-						Compressed: compressed,
-						Hostname:   hostname,
+						Compressed:      compressed,
+						CompressionType: compressionType,
+						Database:        db,
+						Engine:          detected,
+						Hostname:        hostname,
+						Port:            port,
+						Version:         version,
 					},
 				},
 			})
