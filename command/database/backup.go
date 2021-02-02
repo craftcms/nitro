@@ -77,7 +77,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 			case "postgres":
 				opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 			default:
-				opts.Commands = []string{"/usr/bin/mysqldump", "-h", "127.0.0.1", "--username=nitro", "--password=nitro", db, "--result-file=" + "/tmp/" + opts.BackupName}
+				opts.Commands = []string{"mysqldump", "--user=nitro", "-pnitro", db, "--result-file=" + "/tmp/" + opts.BackupName}
 			}
 
 			output.Pending("creating backup", opts.BackupName)
