@@ -137,28 +137,6 @@ func addCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output
 			output.Info(fmt.Sprintf("%s 💪", resp.Message))
 
 			return nil
-
-			// // set the commands based on the engine type
-			// var cmds, privileges []string
-			// switch databaseEngine {
-			// case "mysql":
-			// 	cmds = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
-			// 	privileges = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON * TO '%s'@'%s';`, "nitro", "%")}
-			// default:
-			// 	cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
-			// }
-
-			// // execute the command to create the database
-			// if _, err := execCreate(cmd.Context(), docker, containerID, cmds, show); err != nil {
-			// 	return err
-			// }
-
-			// // check if we should grant privileges
-			// if privileges != nil {
-			// 	if _, err := execCreate(cmd.Context(), docker, containerID, privileges, show); err != nil {
-			// 		return err
-			// 	}
-			// }
 		},
 	}
 

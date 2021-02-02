@@ -14,7 +14,9 @@ service Nitro {
     // ImportDatabase is used to stream a database backup from the client to the proxy.
     rpc ImportDatabase(stream ImportDatabaseRequest) returns (ImportDatabaseResponse) {}
     // rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {}
-    // rpc RemoveDatabase(RemoveDatabaseRequest) returns (RemoveDatabaseResponse) {}
+
+    // RemoveDatabase handles connecting to a database and removing the database from the engine
+    rpc RemoveDatabase(RemoveDatabaseRequest) returns (RemoveDatabaseResponse) {}
 }
 
 message PingRequest {}
@@ -94,10 +96,10 @@ message ImportDatabaseResponse {
 //     map<int32, string> databases = 1;
 // }
 
-// message RemoveDatabaseRequest {
-//     DatabaseInfo database = 1;
-// }
+message RemoveDatabaseRequest {
+    DatabaseInfo database = 1;
+}
 
-// message RemoveDatabaseResponse {
-//     string message = 1;
-// }
+message RemoveDatabaseResponse {
+    string message = 1;
+}

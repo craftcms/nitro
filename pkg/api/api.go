@@ -170,7 +170,7 @@ func (svc *Service) AddDatabase(ctx context.Context, req *protob.AddDatabaseRequ
 		return nil, status.Errorf(codes.Internal, "it does not appear the database is available on host %s using port %s: %v", hostname, port, err)
 	}
 
-	// find the backup tool based on the engine
+	// find the tool based on the engine
 	tool, err := database.DefaultImportToolFinder(engine, version)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "error finding the database tool")
@@ -317,4 +317,45 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 			Message: fmt.Sprintf("Imported database %q", opts.DatabaseName),
 		},
 	)
+}
+
+// RemoveDatabase handles removing a specific database from a database container
+func (svc *Service) RemoveDatabase(ctx context.Context, req *protob.RemoveDatabaseRequest) (*protob.RemoveDatabaseResponse, error) {
+	// get the database info from the request
+	hostname := req.GetDatabase().GetHostname()
+	port := req.GetDatabase().GetPort()
+	engine := req.GetDatabase().GetEngine()
+	version := req.GetDatabase().GetVersion()
+	db := req.GetDatabase().GetDatabase()
+
+	// TODO(jasonmccallister) validate the request
+
+	// verify we can connect to the database hostname - no error means its reachable
+	if err := portavail.Check(hostname, port); err == nil {
+		return nil, status.Errorf(codes.Internal, "it does not appear the database is available on host %s using port %s: %v", hostname, port, err)
+	}
+
+	// find the tool based on the engine
+	tool, err := database.DefaultImportToolFinder(engine, version)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error finding the database tool")
+	}
+
+	// run the commands to remove the database
+	var removeCommand []string
+	switch engine {
+	case "mysql":
+		removeCommand = []string{"--user=nitro", fmt.Sprintf("--host=%s", hostname), "-pnitro", fmt.Sprintf(`-e DROP DATABASE IF EXISTS %s;`, db)}
+	default:
+		removeCommand = []string{fmt.Sprintf("--host=%s", hostname), "--port=" + port, "--username=nitro", fmt.Sprintf(`-c DROP DATABASE IF EXISTS %s;`, db)}
+	}
+
+	// remove the database
+	if err := svc.exec(tool, removeCommand); err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error removing database: %s", err.Error()))
+	}
+
+	return &protob.RemoveDatabaseResponse{
+		Message: fmt.Sprintf("Removed the database %q from %q successfully", db, hostname),
+	}, nil
 }
