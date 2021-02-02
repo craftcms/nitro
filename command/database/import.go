@@ -150,6 +150,27 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 			output.Info("Preparing import…")
 
+			// get the containers info
+			info, err := docker.ContainerInspect(cmd.Context(), containers[selected].ID)
+			if err != nil {
+				return err
+			}
+
+			// get the database compatability from the container labelsmake l
+			detected = info.Config.Labels[labels.DatabaseCompatibility]
+			hostname := strings.TrimLeft(info.Name, "/")
+			version := info.Config.Labels[labels.DatabaseVersion]
+
+			var port string
+			// get the port from the container info
+			for p, bind := range info.HostConfig.PortBindings {
+				for _, v := range bind {
+					if v.HostPort != "" {
+						port = p.Port()
+					}
+				}
+			}
+
 			stream, err := nitrod.ImportDatabase(cmd.Context())
 			// check if the error code is unimplemented
 			if code := status.Code(err); code == codes.Unimplemented {
@@ -179,27 +200,6 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			}
 			if err != nil {
 				return err
-			}
-
-			// get the containers info
-			info, err := docker.ContainerInspect(cmd.Context(), containers[selected].ID)
-			if err != nil {
-				return err
-			}
-
-			// get the database compatability from the container labelsmake l
-			detected = info.Config.Labels[labels.DatabaseCompatibility]
-			hostname := strings.TrimLeft(info.Name, "/")
-			version := info.Config.Labels[labels.DatabaseVersion]
-
-			var port string
-			// get the port from the container info
-			for p, bind := range info.HostConfig.PortBindings {
-				for _, v := range bind {
-					if v.HostPort != "" {
-						port = p.Port()
-					}
-				}
 			}
 
 			// create a request with the database information to populate the database info for the import
