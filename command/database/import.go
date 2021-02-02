@@ -151,6 +151,32 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			output.Info("Preparing import…")
 
 			stream, err := nitrod.ImportDatabase(cmd.Context())
+			// check if the error code is unimplemented
+			if code := status.Code(err); code == codes.Unimplemented {
+				output.Warning()
+
+				// ask if the update command should run
+				confirm, err := output.Confirm("The API does not appear to be updated, run `nitro update` now", true, "?")
+				if err != nil {
+					return err
+				}
+
+				if !confirm {
+					output.Info("Skipping the update command, you need to update before using this command")
+
+					return nil
+				}
+
+				// run the update command
+				for _, c := range cmd.Parent().Commands() {
+					// set the update command
+					if c.Use == "update" {
+						if err := c.RunE(c, args); err != nil {
+							return err
+						}
+					}
+				}
+			}
 			if err != nil {
 				return err
 			}
