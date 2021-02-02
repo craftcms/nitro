@@ -135,10 +135,19 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 		}
 	}
 
-	// set the port for the database
-	port, err := nat.NewPort("tcp", db.Port)
-	if err != nil {
-		return "", "", fmt.Errorf("unable to create the port, %w", err)
+	// get the default port for the database
+	var port nat.Port
+	switch db.Engine {
+	case "postgres":
+		port, err = nat.NewPort("tcp", "5432")
+		if err != nil {
+			return "", "", fmt.Errorf("unable to create the port, %w", err)
+		}
+	default:
+		port, err = nat.NewPort("tcp", "3306")
+		if err != nil {
+			return "", "", fmt.Errorf("unable to create the port, %w", err)
+		}
 	}
 
 	containerConfig := &container.Config{
