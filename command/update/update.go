@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/version"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -29,7 +30,7 @@ var (
 )
 
 // New returns the update command for updating images on the local machine as well as the nitro-proxy container.
-func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update nitro containers and proxy",
@@ -48,11 +49,36 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			output.Info("Updating nitro…")
 			ctx := cmd.Context()
+
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// get all of the php versions from the site
+			versions := make(map[string]bool)
+			for _, s := range cfg.Sites {
+				// check if the php version is already set otherwise set it
+				if _, ok := versions[s.Version]; !ok {
+					versions[s.Version] = true
+				}
+			}
+
+			output.Info("Updating nitro…")
 
 			// update all of the images
 			for name, image := range dockerImages {
+				// make sure this is version that is installed
+				ver := versionFromName(name)
+				if _, ok := versions[ver]; !ok {
+					// make sure its not the proxy
+					if !strings.Contains(name, "proxy") {
+						continue
+					}
+				}
+
 				output.Pending("downloading", name)
 
 				// pull the image
@@ -121,4 +147,12 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	// set the flags
 
 	return cmd
+}
+
+// get the php version from the container image name (e.g. nginx:7.3-dev)
+func versionFromName(name string) string {
+
+	p := strings.Split(name, ":")
+	v := strings.Split(p[1], "-")
+	return v[0]
 }

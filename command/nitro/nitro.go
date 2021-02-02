@@ -128,7 +128,7 @@ func NewCommand() *cobra.Command {
 		start.NewCommand(docker, term),
 		stop.New(docker, term),
 		trust.New(docker, term),
-		update.NewCommand(docker, term),
+		update.NewCommand(home, docker, term),
 		validate.NewCommand(home, docker, term),
 		version.New(docker, nitrod, term),
 		xon.NewCommand(home, docker, term),
