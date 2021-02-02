@@ -27,7 +27,7 @@ var (
 		// TODO(jasonmccallister) finish adding builds for the 7.0 images
 		//"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
 	}
-	hasUpdates bool
+	runApply bool
 )
 
 // New returns the update command for updating images on the local machine as well as the nitro-proxy container.
@@ -39,7 +39,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
   nitro update`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			// if there are no updates to apply return
-			if !hasUpdates {
+			if !runApply {
 				return nil
 			}
 
@@ -143,13 +143,15 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						return err
 					}
 
-					hasUpdates = true
+					// we need to run the apply command
+					runApply = true
 
 					output.Done()
 				}
 			}
 
-			if hasUpdates {
+			// if there are changes show a apply changes prompt
+			if runApply {
 				output.Info("Images updated 👍, applying changes…")
 			} else {
 				output.Info("Everything is up to date 👍...")
