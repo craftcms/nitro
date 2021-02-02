@@ -68,4 +68,4 @@ win-home:
 	mkdir "${HOME}"/Nitro
 
 proto:
-	protoc protob/nitro.proto --go_out=plugins=grpc:.
+	protoc protob/nitrod.proto --go_out=plugins=grpc:.

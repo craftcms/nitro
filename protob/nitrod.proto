@@ -5,16 +5,16 @@ package nitrod;
 option go_package = "/protob";
 
 service Nitro {
+    // Ping returns pong when the API is online
     rpc Ping(PingRequest) returns (PingResponse) {}
+    // Apply takes a list of sites and services to configure caddy as a reverse proxy
     rpc Apply(ApplyRequest) returns (ApplyResponse) {}
+    // Version returns the version of the API
     rpc Version(VersionRequest) returns (VersionResponse) {}
+    // AddDatabase is used to create a new database for a project
     rpc AddDatabase(AddDatabaseRequest) returns (AddDatabaseResponse) {}
-    // rpc BackupDatabase(BackupDatabaseRequest) returns (stream BackupDatabaseResponse) {}
-
     // ImportDatabase is used to stream a database backup from the client to the proxy.
     rpc ImportDatabase(stream ImportDatabaseRequest) returns (ImportDatabaseResponse) {}
-    // rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {}
-
     // RemoveDatabase handles connecting to a database and removing the database from the engine
     rpc RemoveDatabase(RemoveDatabaseRequest) returns (RemoveDatabaseResponse) {}
 }
@@ -61,19 +61,9 @@ message DatabaseInfo {
 message AddDatabaseRequest {
     DatabaseInfo database = 1;
 }
-
 message AddDatabaseResponse {
         string message = 1;
 }
-
-// message BackupDatabaseRequest {
-//     DatabaseInfo database = 1;
-// }
-
-// message BackupDatabaseResponse {
-//     // data is the data of the file, used in stream to reduce memory usage.
-//     bytes data = 1;
-// }
 
 message ImportDatabaseRequest {
     oneof payload {
@@ -82,24 +72,13 @@ message ImportDatabaseRequest {
         bytes data = 2;
     }
 }
-
 message ImportDatabaseResponse {
     string message = 1;
 }
 
-// message ListDatabasesRequest {
-//     DatabaseInfo database = 1;
-// }
-
-// message ListDatabasesResponse {
-//     // databases is a list of databases from the database server
-//     map<int32, string> databases = 1;
-// }
-
 message RemoveDatabaseRequest {
     DatabaseInfo database = 1;
 }
-
 message RemoveDatabaseResponse {
     string message = 1;
 }
