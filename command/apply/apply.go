@@ -67,6 +67,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			for _, c := range containers {
+				// start the container if not running
+				if c.State != "running" {
+					if err := docker.ContainerStart(cmd.Context(), c.ID, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
 				if _, ok := knownContainers[c.ID]; !ok {
 					// don't remove the proxy container
 					if c.Labels[labels.Proxy] != "" {
