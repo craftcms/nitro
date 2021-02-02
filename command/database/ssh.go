@@ -3,6 +3,7 @@ package database
 import (
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/labels"
@@ -32,6 +33,11 @@ func sshCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if err != nil {
 				return err
 			}
+
+			// sort containers by the name
+			sort.SliceStable(containers, func(i, j int) bool {
+				return containers[i].Names[0] < containers[j].Names[0]
+			})
 
 			// generate a list of engines for the prompt
 			var containerList []string
