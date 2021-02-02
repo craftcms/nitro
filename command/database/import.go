@@ -13,6 +13,8 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/craftcms/nitro/pkg/database"
 	"github.com/craftcms/nitro/pkg/filetype"
@@ -175,7 +177,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			}
 
 			// create a request with the database information to populate the database info for the import
-			if err := stream.Send(&protob.ImportDatabaseRequest{
+			err = stream.Send(&protob.ImportDatabaseRequest{
 				Payload: &protob.ImportDatabaseRequest_Database{
 					Database: &protob.DatabaseInfo{
 						Engine:     detected,
@@ -186,7 +188,14 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 						Hostname:   hostname,
 					},
 				},
-			}); err != nil {
+			})
+			// check if the error code is unimplemented
+			if code := status.Code(err); code == codes.Unimplemented {
+				output.Info("The API does not appear to be updated, please run `nitro update` to get the latest")
+
+				return nil
+			}
+			if err != nil {
 				return stream.RecvMsg(nil)
 			}
 
