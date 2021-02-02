@@ -8,8 +8,9 @@ service Nitro {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Apply(ApplyRequest) returns (ApplyResponse) {}
     rpc Version(VersionRequest) returns (VersionResponse) {}
-    // rpc AddDatabase(AddDatabaseRequest) returns (stream AddDatabaseResponse) {}
+    rpc AddDatabase(AddDatabaseRequest) returns (AddDatabaseResponse) {}
     // rpc BackupDatabase(BackupDatabaseRequest) returns (stream BackupDatabaseResponse) {}
+
     // ImportDatabase is used to stream a database backup from the client to the proxy.
     rpc ImportDatabase(stream ImportDatabaseRequest) returns (ImportDatabaseResponse) {}
     // rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {}
@@ -55,13 +56,13 @@ message DatabaseInfo {
     bool compressed = 6;
 }
 
-// message AddDatabaseRequest {
-//     DatabaseInfo database = 1;
-// }
+message AddDatabaseRequest {
+    DatabaseInfo database = 1;
+}
 
-// message AddDatabaseResponse {
-//         string message = 1;
-// }
+message AddDatabaseResponse {
+        string message = 1;
+}
 
 // message BackupDatabaseRequest {
 //     DatabaseInfo database = 1;

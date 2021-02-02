@@ -10,7 +10,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/craftcms/nitro/pkg/caddy"
 	"github.com/craftcms/nitro/pkg/database"
@@ -150,6 +152,77 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 // Version is used to check the container image version with the CLI version
 func (svc *Service) Version(ctx context.Context, request *protob.VersionRequest) (*protob.VersionResponse, error) {
 	return &protob.VersionResponse{Version: Version}, nil
+}
+
+// AddDatabase handle creating a new database for a hostname
+func (svc *Service) AddDatabase(ctx context.Context, req *protob.AddDatabaseRequest) (*protob.AddDatabaseResponse, error) {
+	// get the database info from the request
+	hostname := req.GetDatabase().GetHostname()
+	port := req.GetDatabase().GetPort()
+	engine := req.GetDatabase().GetEngine()
+	version := req.GetDatabase().GetVersion()
+	db := req.GetDatabase().GetDatabase()
+
+	// TODO(jasonmccallister) validate the request
+
+	// verify we can connect to the database hostname - no error means its reachable
+	if err := portavail.Check(hostname, port); err == nil {
+		return nil, status.Errorf(codes.Internal, "it does not appear the database is available on host %s using port %s: %v", hostname, port, err)
+	}
+
+	// find the backup tool based on the engine
+	tool, err := database.DefaultImportToolFinder(engine, version)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error finding the database tool")
+	}
+
+	// run the commands to add the database
+	var addCommand, privilegesCommand []string
+	switch engine {
+	case "mysql":
+		addCommand = []string{"--user=nitro", fmt.Sprintf("--host=%s", hostname), "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+		privilegesCommand = []string{"--user=nitro", fmt.Sprintf("--host=%s", hostname), "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+	default:
+		addCommand = []string{fmt.Sprintf("--host=%s", hostname), "--port=" + port, "--username=nitro", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
+	}
+
+	// add the database
+	if err := svc.exec(tool, addCommand); err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating database: %s", err.Error()))
+	}
+
+	// set privileges if required
+	if privilegesCommand != nil {
+		if err := svc.exec(tool, addCommand); err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("error setting privileges on database: %s", err.Error()))
+		}
+	}
+
+	return &protob.AddDatabaseResponse{Message: fmt.Sprintf("Database %q added to %q successfully", db, hostname)}, nil
+}
+
+func (svc *Service) exec(tool string, commands []string) error {
+	c := exec.Command(tool, commands...)
+
+	c.Stderr = os.Stderr
+	c.Stdout = os.Stdout
+
+	if err := c.Start(); err != nil {
+		return fmt.Errorf("unable to start the command: %w", err)
+	}
+
+	if err := c.Wait(); err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			// The program has exited with an exit code != 0
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				return fmt.Errorf("Exit Status: %d", status.ExitStatus())
+			}
+		} else {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // ImportDatabase is used to handle streaming requests from the client and import a

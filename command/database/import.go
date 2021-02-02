@@ -191,6 +191,8 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			})
 			// check if the error code is unimplemented
 			if code := status.Code(err); code == codes.Unimplemented {
+				output.Warning()
+
 				// ask if the update command should run
 				confirm, err := output.Confirm("The API does not appear to be updated, run `nitro update` now", true, "?")
 				if err != nil {

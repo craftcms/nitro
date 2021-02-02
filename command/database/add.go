@@ -4,33 +4,30 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/protob"
 )
 
 var addExampleTest = `  # add a new database
   nitro db add`
 
-func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func addCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
 		Short:   "Add a new database",
 		Example: addExampleTest,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			show, err := strconv.ParseBool(cmd.Flag("show-output").Value.String())
-			if err != nil {
-				// set to false
-				show = false
-			}
-
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
@@ -54,58 +51,116 @@ func addCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// prompt the user for the engine to add the database
-			var containerID, databaseEngine string
 			selected, err := output.Select(os.Stdin, "Select the database engine: ", engineOpts)
 			if err != nil {
 				return err
 			}
 
-			// set the container id and db engine
-			containerID = containers[selected].ID
-			databaseEngine = containers[selected].Labels[labels.DatabaseCompatibility]
-			if containerID == "" {
-				return fmt.Errorf("unable to get the container")
+			// get the containers info
+			info, err := docker.ContainerInspect(cmd.Context(), containers[selected].ID)
+			if err != nil {
+				return err
 			}
 
 			// ask the user for the database to create
-			db, err := output.Ask("Enter the new database name", "", ":", nil)
+			db, err := output.Ask("Enter the new database name", "", ":", &validate.DatabaseName{})
 			if err != nil {
 				return err
 			}
 
 			output.Pending("creating database", db)
 
-			// set the commands based on the engine type
-			var cmds, privileges []string
-			switch databaseEngine {
-			case "mysql":
-				cmds = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
-				privileges = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON * TO '%s'@'%s';`, "nitro", "%")}
-			default:
-				cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
+			// wait for the api to be ready
+			for {
+				_, err := nitrod.Ping(cmd.Context(), &protob.PingRequest{})
+				if err == nil {
+					break
+				}
 			}
 
-			// execute the command to create the database
-			if _, err := execCreate(cmd.Context(), docker, containerID, cmds, show); err != nil {
-				return err
+			// get the containers details
+			engine := info.Config.Labels[labels.DatabaseCompatibility]
+			hostname := strings.TrimLeft(info.Name, "/")
+			version := info.Config.Labels[labels.DatabaseVersion]
+			var port string
+			// get the port from the container info
+			for p, bind := range info.HostConfig.PortBindings {
+				for _, v := range bind {
+					if v.HostPort != "" {
+						port = p.Port()
+					}
+				}
 			}
 
-			// check if we should grant privileges
-			if privileges != nil {
-				if _, err := execCreate(cmd.Context(), docker, containerID, privileges, show); err != nil {
+			// create the database
+			resp, err := nitrod.AddDatabase(cmd.Context(), &protob.AddDatabaseRequest{
+				Database: &protob.DatabaseInfo{
+					Engine:   engine,
+					Hostname: hostname,
+					Version:  version,
+					Port:     port,
+					Database: db,
+				},
+			})
+			// check if the error code is unimplemented
+			if code := status.Code(err); code == codes.Unimplemented {
+				output.Warning()
+
+				// ask if the update command should run
+				confirm, err := output.Confirm("The API does not appear to be updated, run `nitro update` now", true, "?")
+				if err != nil {
 					return err
 				}
+
+				if !confirm {
+					output.Info("Skipping the update command, you need to update before using this command")
+
+					return nil
+				}
+
+				// run the update command
+				for _, c := range cmd.Parent().Commands() {
+					// set the update command
+					if c.Use == "update" {
+						if err := c.RunE(c, args); err != nil {
+							return err
+						}
+					}
+				}
+			}
+			if err != nil {
+				return err
 			}
 
 			output.Done()
 
-			output.Info("Database added 💪")
+			output.Info(fmt.Sprintf("%s 💪", resp.Message))
 
 			return nil
+
+			// // set the commands based on the engine type
+			// var cmds, privileges []string
+			// switch databaseEngine {
+			// case "mysql":
+			// 	cmds = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, db)}
+			// 	privileges = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON * TO '%s'@'%s';`, "nitro", "%")}
+			// default:
+			// 	cmds = []string{"psql", "--username=nitro", "--host=127.0.0.1", fmt.Sprintf(`-c CREATE DATABASE %s;`, db)}
+			// }
+
+			// // execute the command to create the database
+			// if _, err := execCreate(cmd.Context(), docker, containerID, cmds, show); err != nil {
+			// 	return err
+			// }
+
+			// // check if we should grant privileges
+			// if privileges != nil {
+			// 	if _, err := execCreate(cmd.Context(), docker, containerID, privileges, show); err != nil {
+			// 		return err
+			// 	}
+			// }
 		},
 	}
-
-	cmd.Flags().Bool("show-output", false, "show debug from import")
 
 	return cmd
 }
