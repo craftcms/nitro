@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/craftcms/nitro/pkg/caddy"
 	"github.com/craftcms/nitro/pkg/database"
@@ -404,5 +405,20 @@ func (svc *Service) exec(tool string, commands []string) error {
 	c.Stderr = os.Stderr
 	c.Stdout = ioutil.Discard
 
-	return c.Run()
+	if err := c.Start(); err != nil {
+		return fmt.Errorf("unable to start the command: %w", err)
+	}
+
+	if err := c.Wait(); err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			// The program has exited with an exit code != 0
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				return fmt.Errorf("Exit Status: %d\nCommands: %s", status.ExitStatus(), strings.Join(commands, " "))
+			}
+		} else {
+			return err
+		}
+	}
+
+	return nil
 }
