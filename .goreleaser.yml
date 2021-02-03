@@ -40,7 +40,7 @@ release:
 brews:
   - tap:
       owner: craftcms
-      name: nitro-brew
+      name: homebrew-nitro
     folder: Formula
     homepage:  https://goreleaser.com
     description: Deliver Go binaries as fast and easily as possible
@@ -51,5 +51,3 @@ brews:
     - name: go
     install: |-
       bin.install "nitro"
-      bash_completion.install "completions/nitro.bash" => "nitro"
-      zsh_completion.install "completions/nitro.zsh" => "_nitro"
