@@ -5,6 +5,9 @@
 ### Added
 - Added the `nitro alias` command to quickly setup alias domains for a site.
 
+### Fixed
+- Fixed and error that could occur when downloading database images.
+
 ## 2.0.0-alpha - 2021-02-02
 
 ### Added
