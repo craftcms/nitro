@@ -27,7 +27,7 @@ archives:
         format: zip
 dockers:
   - image_templates:
-    - craftcms/nitro-proxy
+      - craftcms/nitro-proxy
   dockerfile: Dockerfile
 snapshot:
   name_template: "{{ .Tag }}"
