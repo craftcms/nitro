@@ -76,13 +76,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// update all of the images
 			for name, image := range dockerImages {
-				// make sure this is version that is installed
-				ver := versionFromName(name)
-				if _, ok := versions[ver]; !ok {
-					// make sure its not the proxy
-					if !strings.Contains(name, "proxy") {
-						continue
-					}
+				// make sure this is version that is installed and not the proxy
+				if _, ok := versions[versionFromName(name)]; !ok && !strings.Contains(name, "proxy") {
+					continue
 				}
 
 				output.Pending("downloading", name)
@@ -131,31 +127,30 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 
-				fmt.Println("image", image.ID, "container:", container.Image)
+				if image.ID == container.Image {
+					continue
+				}
 
-				// check if the image id sha and the running container id sha match
-				if image.ID != container.Image {
-					output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
+				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
 
-					// stop the container if it is running
-					if c.State == "running" {
-						if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
-							output.Warning()
-							return err
-						}
-					}
-
-					// remove the container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+				// stop the container if it is running
+				if c.State == "running" {
+					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
 						output.Warning()
 						return err
 					}
-
-					// we need to run the apply command
-					runApply = true
-
-					output.Done()
 				}
+
+				// remove the container
+				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					output.Warning()
+					return err
+				}
+
+				// we need to run the apply command
+				runApply = true
+
+				output.Done()
 			}
 
 			// if there are changes show a apply changes prompt
