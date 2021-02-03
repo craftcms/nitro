@@ -252,6 +252,11 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 		opts.Compressed = req.GetDatabase().GetCompressed()
 	}
 
+	// set the compression type
+	if opts.CompressionType == "" && req.GetDatabase().GetCompressionType() != "" {
+		opts.CompressionType = req.GetDatabase().GetCompressionType()
+	}
+
 	// handle the streaming request
 	for {
 		req, err := stream.Recv()
