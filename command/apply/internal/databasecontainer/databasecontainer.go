@@ -10,6 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -23,12 +24,12 @@ import (
 
 var (
 	// DatabaseImage is used for determining the engine and version
-	DatabaseImage = "docker.io/library/%s:%s"
+	DatabaseImage = "%s:%s"
 )
 
 // StartOrCreate is used to find a specific database and start the container. If there is no container for the database,
 // it will create a new volume and container for the database.
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database) (string, string, error) {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database, output terminal.Outputer) (string, string, error) {
 	// create the filters for the database
 	filter := filters.NewArgs()
 	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
@@ -115,22 +116,27 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	imageFilter.Add("reference", image)
 
 	// look for the image
-	images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter})
+	images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: imageFilter, All: true})
 	if err != nil {
 		return "", "", fmt.Errorf("unable to get a list of images, %w", err)
 	}
 
 	// if there are no images, pull one
 	if len(images) == 0 {
+		output.Pending("downloading", image)
+
 		// pull the image
 		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 		if err != nil {
+			output.Warning()
+
 			return "", "", fmt.Errorf("unable to pull image %s, %w", image, err)
 		}
 
 		// read the output to pull the image
 		buf := &bytes.Buffer{}
 		if _, err := buf.ReadFrom(rdr); err != nil {
+			output.Warning()
 			return "", "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
 		}
 	}

@@ -34,6 +34,7 @@ changelog:
       - "^docs:"
       - "^test:"
 release:
+  prerelease: auto
   github:
     owner: craftcms
     name: nitro
@@ -42,12 +43,10 @@ brews:
       owner: craftcms
       name: homebrew-nitro
     folder: Formula
-    homepage:  https://goreleaser.com
-    description: Deliver Go binaries as fast and easily as possible
+    homepage:  https://getnitro.sh/
+    description: Nitro is a speedy Docker-based local development environment tuned for Craft CMS
     license: MIT
     test: |
-      system "#{bin}/nitro -v"
-    dependencies:
-    - name: go
+      system "#{bin}/nitro --version"
     install: |-
       bin.install "nitro"
