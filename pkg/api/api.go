@@ -293,7 +293,7 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 			// create a new gzip reader for the uploading src/file
 			r, err := zip.OpenReader(opts.File)
 			if err != nil {
-				return status.Error(codes.Internal, "internal error occured")
+				return status.Error(codes.Unknown, fmt.Sprintf("unable to open zip reader for %s: %s", opts.File, err))
 			}
 			defer r.Close()
 
@@ -303,12 +303,12 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 					// open the file
 					r, err := f.Open()
 					if err != nil {
-						return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+						return status.Error(codes.Unknown, fmt.Sprintf("unable to open file %s: %s", f.Name, err))
 					}
 					defer r.Close()
 
 					if _, err := io.Copy(temp, r); err != nil {
-						return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+						return status.Error(codes.Unknown, fmt.Sprintf("unable to copy zip reader into temp file %s: %s", temp.Name(), err))
 					}
 
 					opts.File = temp.Name()
@@ -318,25 +318,25 @@ func (svc *Service) ImportDatabase(stream protob.Nitro_ImportDatabaseServer) err
 			// open the compressed file
 			f, err := os.Open(opts.File)
 			if err != nil {
-				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+				return status.Error(codes.Unknown, fmt.Sprintf("unable to open file for gzip reader %s: %s", opts.File, err))
 			}
 			defer f.Close()
 
 			// read the file
 			r, err := gzip.NewReader(f)
 			if err != nil {
-				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+				return status.Error(codes.Unknown, fmt.Sprintf("unable to open gzip reader %s: %s", opts.File, err))
 			}
 			defer r.Close()
 
 			// copy the content into the new temp file
 			if _, err := io.Copy(temp, r); err != nil {
-				return status.Error(codes.Internal, fmt.Sprintf("internal error occurred: %s", err))
+				return status.Error(codes.Unknown, fmt.Sprintf("unable to copy gzip reader into temp file %s: %s", temp.Name(), err))
 			}
 
 			opts.File = temp.Name()
 		default:
-			return fmt.Errorf("unsupported compressed file type %q provided", opts.CompressionType)
+			return status.Error(codes.InvalidArgument, fmt.Sprintf("unsupported compressed file type %q provided", opts.CompressionType))
 		}
 	}
 
