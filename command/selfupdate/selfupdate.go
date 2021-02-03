@@ -29,6 +29,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "self-update",
 		Short:   "Update nitro to the latest version",
+		Hidden:  true,
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Checking for updates")

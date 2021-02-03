@@ -1,47 +1,41 @@
 # Release Notes for Craft Nitro
 
-## 2.0.0-beta - 2021-02-03
+## 2.0.0-beta.1 - 2021-02-03
 
 ### Added
-- Added the `nitro alias` command to quickly setup alias domains for a site.
+- Nitro now runs on Docker rather than Multipass. ([#224](https://github.com/craftcms/nitro/issues/224), [#222](https://github.com/craftcms/nitro/issues/222), [#215](https://github.com/craftcms/nitro/issues/215), [#205](https://github.com/craftcms/nitro/issues/205), [#182](https://github.com/craftcms/nitro/issues/182), [#181](https://github.com/craftcms/nitro/issues/181), [#180](https://github.com/craftcms/nitro/issues/180), [#152](https://github.com/craftcms/nitro/issues/152), [#22](https://github.com/craftcms/nitro/issues/22), [#18](https://github.com/craftcms/nitro/issues/18), [#216](https://github.com/craftcms/nitro/issues/216))
+- PHP versions and settings are now applied on a per-site basis. ([#200](https://github.com/craftcms/nitro/issues/200), [#105](https://github.com/craftcms/nitro/issues/105), [#225](https://github.com/craftcms/nitro/issues/225))
+- Xdebug is now applied on a per-site basis.
+- Added support for SSL. ([#10](https://github.com/craftcms/nitro/issues/10))
+- Added support for PHP 8.
+- Added support for Xdebug 3 when using PHP 7.2 or later.
+- Added the `alias` command.
+- Added the `clean` command.
+- Added the `composer` command.
+- Added the `craft` command, which will run `craft` commands within a site’s container. ([#189](https://github.com/craftcms/nitro/issues/189))
+- Added the `db ssh` command.
+- Added the `enable` and `disable` commands.
+- Added the `extensions` command.
+- Added the `iniset` command.
+- Added the `npm` command.
+- Added the `portcheck` command.
+- Added the `queue` command. ([#189](https://github.com/craftcms/nitro/issues/189))
+- Added the `share` command, which shares a site via Ngrok. ([#2](https://github.com/craftcms/nitro/issues/189))
+- Added the `trust` command.
+- Added the `validate` command.
+- Added the `version` command.
+
+### Changed
+- Nitro now has a single `~/.nitro/nitro.yaml` file to manage everything, instead of a YAML file per machine.
+- Most Nitro commands are now context aware of the directory they are executed in. ([#167](https://github.com/craftcms/nitro/issues/167))
+- The `apply` command will only update the `hosts` file if it has changed. ([#117](https://github.com/craftcms/nitro/issues/117))
+- The `create` command now accepts custom GitHub repositories and installs Composer and Node dependencies automatically. ([#101](https://github.com/craftcms/nitro/issues/101))
+- The `db import` command can now import database backups that live outside the project directory.
+- The `ssh` command now has a `--root` flag, which will SSH into the container as the root user.
+- Greatly improved Windows support.
+- It’s now possible to set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO_API_PORT`.
+- Nitro will now check for port collisions during `init` and when adding database engines.
+- Sites’ containers’ `hosts` files now list other Nitro site host names. ([#150](https://github.com/craftcms/nitro/issues/150))
 
 ### Fixed
 - Fixed and error that could occur when downloading database images.
-
-## 2.0.0-alpha - 2021-02-02
-
-### Added
-- Added support for HTTPS on a per-site basis. [#10](https://github.com/craftcms/nitro/issues/10)
-- Added support for PHP 8.
-- Added support for Xdebug 3 for PHP 7.2 and higher.
-- Added the `nitro trust` command to import and trust the certificates used for sites.
-- Added the `nitro composer` command with the `--version` flag to install or update projects without Composer installed locally.
-- Added the `nitro npm` command with the `--version` flag to install or update projects without node/npm installed locally.
-- Added the `nitro version` command to display the cli and gRPC API versions
-- Added the `nitro clean` command to remove unused containers for composer/npm
-- Added the `nitro craft` command to run `craft` console commands in a site’s container. [#189](https://github.com/craftcms/nitro/issues/189)
-- Added the `nitro db ssh` command, which allows you to SSH into a database container.
-- Added `nitro enable` and `nitro disable` commands which let you enable and disable services.
-- Added the `nitro queue` command, which allows you to listen to Craft’s queue. [#189](https://github.com/craftcms/nitro/issues/189)
-- Added the `nitro validate` command, which validates your `~/.nitro/nitro.yml` file.
-- You can now set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO
-  _API_PORT`.
-  - Added the `nitro portcheck` command to quickly check if a port is available.
-  - Added `nitro share` to quickly share sites with ngrok. [#2](https://github.com/craftcms/nitro/issues/189)
-  - Added the `nitro iniset` command to walk user through setting PHP settings for a site.
-  - Added the `nitro extensions` command to walk users through setting custom PHP extensions to install during `nitro apply`.
-
-### Changed
-- Nitro now requires Docker, instead of Multipass. [#224](https://github.com/craftcms/nitro/issues/224) [#222](https://github.com/craftcms/nitro/issues/222) [#215](https://github.com/craftcms/nitro/issues/215) [#205](https://github.com/craftcms/nitro/issues/205) [#182](https://github.com/craftcms/nitro/issues/182) [#181](https://github.com/craftcms/nitro/issues/181) [#180](https://github.com/craftcms/nitro/issues/180) [#152](https://github.com/craftcms/nitro/issues/152) [#22](https://github.com/craftcms/nitro/issues/22) [#18](https://github.com/craftcms/nitro/issues/18) [#216](https://github.com/craftcms/nitro/issues/216)
-- Greatly improved Nitro support on Windows.
-- Nitro now has a single `~/.nitro/nitro.yaml` file to manage everything, instead of a YAML file per machine like in v1.
-- Nitro will now check for port collisions during `init` and when adding database engines.
-- The `nitro create` command now accepts custom GitHub repositories and installs Composer and node dependencies automatically using `nitro composer` and `nitro npm`. [#101](https://github.com/craftcms/nitro/issues/101)
-- The `create` command now accepts Github URLs as an argument to allow you to build your own boilerplate.
-- The `create` command will now install composer dependencies.
-- PHP versions and settings are now applied on a per-site basis. [#200](https://github.com/craftcms/nitro/issues/200) [#105](https://github.com/craftcms/nitro/issues/105) [#225](https://github.com/craftcms/nitro/issues/225)
-- Xdebug is now applied on a per-site basis.
-- The `ssh` command allows you to ssh as the root user with the `--root` flag.
-- Most Nitro commands are now context aware of the directory they are executed in. [#167](https://github.com/craftcms/nitro/issues/167)
-- The `apply` command will only update the hosts file if it has changed. [#117](https://github.com/craftcms/nitro/issues/117)
-- Site hostnames and aliases are set on the containers hosts file. [#150](https://github.com/craftcms/nitro/issues/150)
