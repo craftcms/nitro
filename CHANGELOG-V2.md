@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta - 2021-02-03
 
 ### Added
 - Added the `nitro alias` command to quickly setup alias domains for a site.
