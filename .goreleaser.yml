@@ -40,7 +40,7 @@ release:
 brews:
   - tap:
       owner: craftcms
-      name: homebrew-nitro
+      name: homebrew-tap
     folder: Formula
     homepage:  https://goreleaser.com
     description: Deliver Go binaries as fast and easily as possible
