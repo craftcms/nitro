@@ -41,3 +41,19 @@ release:
   github:
     owner: craftcms
     name: nitro
+brews:
+  - tap:
+      owner: craftcms
+      name: nitro-brew
+    folder: Formula
+    homepage:  https://goreleaser.com
+    description: Deliver Go binaries as fast and easily as possible
+    license: MIT
+    test: |
+      system "#{bin}/nitro -v"
+    dependencies:
+    - name: go
+    install: |-
+      bin.install "nitro"
+      bash_completion.install "completions/nitro.bash" => "nitro"
+      zsh_completion.install "completions/nitro.zsh" => "_nitro"
