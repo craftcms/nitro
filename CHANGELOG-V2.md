@@ -32,7 +32,6 @@
 - The `create` command now accepts custom GitHub repositories and installs Composer and Node dependencies automatically. ([#101](https://github.com/craftcms/nitro/issues/101))
 - The `db import` command can now import database backups that live outside the project directory.
 - The `ssh` command now has a `--root` flag, which will SSH into the container as the root user.
-- Greatly improved Windows support.
 - It’s now possible to set the default ports for HTTP, HTTPS, and the API to avoid any port collisions using `NITRO_HTTP_PORT`, `NITRO_HTTPS_PORT`, and `NITRO_API_PORT`.
 - Nitro will now check for port collisions during `init` and when adding database engines.
 - Sites’ containers’ `hosts` files now list other Nitro site host names. ([#150](https://github.com/craftcms/nitro/issues/150))
