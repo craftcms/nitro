@@ -120,13 +120,21 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					continue
 				}
 
-				// if its the proxy container and its up to date, don't replace it
-				if c.Labels[labels.Proxy] == "true" && c.Labels[labels.ProxyVersion] == version.Version {
-					continue
+				// get the image the container is using
+				image, _, err := docker.ImageInspectWithRaw(ctx, c.Image)
+				if err != nil {
+					return err
 				}
 
-				// if the site images match, we are up to date
-				if dockerImages[imageName(c.Image)] != c.Image {
+				container, _, err := docker.ContainerInspectWithRaw(ctx, c.ID, false)
+				if err != nil {
+					return err
+				}
+
+				fmt.Println("image", image.ID, "container:", container.Image)
+
+				// check if the image id sha and the running container id sha match
+				if image.ID != container.Image {
 					output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
 
 					// stop the container if it is running
@@ -166,15 +174,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 // get the php version from the container image name (e.g. nginx:7.3-dev)
 func versionFromName(name string) string {
-
 	p := strings.Split(name, ":")
 	v := strings.Split(p[1], "-")
 	return v[0]
-}
-
-// docker.io/craftcms/nginx:7.1-dev to nginx:7.1-dev
-func imageName(image string) string {
-	p := strings.Split(image, "/")
-
-	return p[len(p)-1]
 }
