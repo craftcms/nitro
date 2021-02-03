@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## 2.0.0-beta - 2021-02-03
+## 2.0.0-beta.1 - 2021-02-03
 
 ### Added
 - Nitro now runs on Docker rather than Multipass. ([#224](https://github.com/craftcms/nitro/issues/224), [#222](https://github.com/craftcms/nitro/issues/222), [#215](https://github.com/craftcms/nitro/issues/215), [#205](https://github.com/craftcms/nitro/issues/205), [#182](https://github.com/craftcms/nitro/issues/182), [#181](https://github.com/craftcms/nitro/issues/181), [#180](https://github.com/craftcms/nitro/issues/180), [#152](https://github.com/craftcms/nitro/issues/152), [#22](https://github.com/craftcms/nitro/issues/22), [#18](https://github.com/craftcms/nitro/issues/18), [#216](https://github.com/craftcms/nitro/issues/216))
