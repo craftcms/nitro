@@ -122,12 +122,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 
-				container, _, err := docker.ContainerInspectWithRaw(ctx, c.ID, false)
+				info, _, err := docker.ContainerInspectWithRaw(ctx, c.ID, false)
 				if err != nil {
 					return err
 				}
 
-				if image.ID == container.Image {
+				if image.ID == info.Image {
 					continue
 				}
 
