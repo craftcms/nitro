@@ -47,6 +47,6 @@ brews:
     description: Speedy local dev environment for Craft CMS. Powered by Docker.
     license: MIT
     test: |
-      system "#{bin}/nitro -v"
+      system "#{bin}/nitro --version"
     install: |-
       bin.install "nitro"
