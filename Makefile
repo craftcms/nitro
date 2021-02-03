@@ -6,6 +6,8 @@ build:
 	go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-macos:
 	GOOS=darwin go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+build-macos-arm:
+	GOOS=darwin GOARH=arm64 go1.16rc1 build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-api:
 	go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitrod ./cmd/nitrod
 build-win:
@@ -15,9 +17,12 @@ build-linux:
 upx: build
 	upx --brute nitro
 
-alpha: alpha-macos alpha-win alpha-linux
+alpha: alpha-macos alpha-macos-arm alpha-win alpha-linux
 alpha-macos: build-macos
 	zip -X macos_nitro_v2_alpha.zip nitro
+	rm nitro
+alpha-macos-arm: build-macos-arm
+	zip -X macos_arm_nitro_v2_alpha.zip nitro
 	rm nitro
 alpha-win: build-win
 	zip -X windows_nitro_v2_alpha.zip nitro.exe
