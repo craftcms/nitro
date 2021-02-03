@@ -40,14 +40,12 @@ release:
 brews:
   - tap:
       owner: craftcms
-      name: homebrew-tap
+      name: homebrew-nitro
     folder: Formula
-    homepage:  https://goreleaser.com
-    description: Deliver Go binaries as fast and easily as possible
+    homepage:  https://getnitro.sh/
+    description: Speedy local dev environment for Craft CMS. Powered by Docker.
     license: MIT
     test: |
       system "#{bin}/nitro -v"
-    dependencies:
-    - name: go
     install: |-
       bin.install "nitro"
