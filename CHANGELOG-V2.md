@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed and error where custom ports were not being used for the proxy container.
+
 ## 2.0.0-beta.1 - 2021-02-03
 
 ### Added
