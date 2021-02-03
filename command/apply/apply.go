@@ -224,7 +224,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking", n)
 
 				// start or create the database
-				id, hostname, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db)
+				id, hostname, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db, output)
 				if err != nil {
 					output.Warning()
 					return err
