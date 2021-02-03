@@ -51,5 +51,3 @@ brews:
     - name: go
     install: |-
       bin.install "nitro"
-      bash_completion.install "completions/nitro.bash" => "nitro"
-      zsh_completion.install "completions/nitro.zsh" => "_nitro"
