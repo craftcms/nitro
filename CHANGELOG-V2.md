@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-alpha - 2021-02-02
 
 ### Added
 - Added support for HTTPS on a per-site basis. [#10](https://github.com/craftcms/nitro/issues/10)
