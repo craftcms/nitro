@@ -44,7 +44,7 @@ brews:
       name: homebrew-nitro
     folder: Formula
     homepage:  https://getnitro.sh/
-    description: Speedy local dev environment for Craft CMS. Powered by Docker.
+    description: Nitro is a speedy Docker-based local development environment tuned for Craft CMS
     license: MIT
     test: |
       system "#{bin}/nitro --version"
