@@ -206,6 +206,43 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
+// SetSiteAlias is used to add an alias domain to a site. If
+// the site cannot be found or the alias is already set it
+// will return an error.
+func (c *Config) SetSiteAlias(hostname, alias string) error {
+	for i, s := range c.Sites {
+		// if its not the right hostname
+		if s.Hostname != hostname {
+			continue
+		}
+
+		// check how many aliases are set
+		switch len(c.Sites[i].Aliases) == 0 {
+		case false:
+			for _, a := range c.Sites[i].Aliases {
+				// make sure its not already set
+				if a == alias {
+					return fmt.Errorf("alias %s is already set for %s", alias, hostname)
+				}
+
+				// add the alias
+				c.Sites[i].Aliases = append(c.Sites[i].Aliases, alias)
+
+				// sort aliases
+				sort.Strings(c.Sites[i].Aliases)
+
+				return nil
+			}
+		default:
+			c.Sites[i].Aliases = append(c.Sites[i].Aliases, alias)
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to find the site: %s", hostname)
+}
+
 // SetPHPExtension is used to set php settings that are bool. It will look
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
@@ -222,7 +259,7 @@ func (c *Config) SetPHPExtension(hostname, extension string) error {
 			// add the extension to the list
 			c.Sites[i].Extensions = append(c.Sites[i].Extensions, extension)
 
-			// sort the extensions by alhpa
+			// sort the extensions by alpha
 			sort.Strings(c.Sites[i].Extensions)
 
 			return nil
