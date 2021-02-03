@@ -25,6 +25,10 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+dockers:
+  - image_templates:
+    - craftcms/nitro-proxy
+  dockerfile: Dockerfile
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
