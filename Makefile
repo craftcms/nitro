@@ -31,6 +31,9 @@ beta-linux: build-linux
 	zip -X linux_nitro_${VERSION}.zip nitro
 	rm nitro
 
+mod:
+	go mod tidy && go mod verify
+
 upx-macos:
 	upx --brute nitro
 upx-win:
