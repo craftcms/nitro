@@ -4,6 +4,7 @@
 
 ### Changed
 - The `share` command returns a helpful message when ngrok is not found.
+- The `xon` command will now return an error when trying to enable xdebug for sites with PHP version 7.0
 
 ### Fixed
 - Fixed and error where custom ports were not being used for the proxy container.
