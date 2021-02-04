@@ -2,13 +2,16 @@
 
 ## Unreleased
 
+### Added
+- Nitro now supports Arm CPUs, including M1 Macs.
+
 ### Changed
-- The `share` command returns a helpful message when ngrok is not found.
-- The `xon` command will now return an error when trying to enable xdebug for sites with PHP version 7.0
+- The `share` command now outputs a more helpful message if Ngrok isn’t installed.
+- Xdebug is no longer supported for PHP 7.0.
 
 ### Fixed
-- Fixed an error where custom ports were not being used for the proxy container.
-- Fixed an error where the containers would not get updated.
+- Fixed a bug where Nitro wasn’t respecting custom service ports.
+- Fixed a bug where the `update` command wasn’t immediately updating containers.
 
 ## 2.0.0-beta.1 - 2021-02-03
 
