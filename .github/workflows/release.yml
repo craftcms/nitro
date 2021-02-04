@@ -26,7 +26,6 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v1
         with:
           images: craftcms/nitro-proxy
-          tag-sha: true
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
