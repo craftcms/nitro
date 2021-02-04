@@ -116,7 +116,7 @@ func TestVerifyCreated(t *testing.T) {
 				networkID: "some-network-id",
 			},
 			customEnvs: map[string]string{
-				"NITRO_DYNAMODB_HTTP_PORT": "8001",
+				"NITRO_DYNAMODB_PORT": "8001",
 			},
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,

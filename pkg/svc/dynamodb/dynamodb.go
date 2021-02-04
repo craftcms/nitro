@@ -60,8 +60,8 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 
 		// set the nitro env overrides
 		httpPort := "8000"
-		if os.Getenv("NITRO_DYNAMODB_HTTP_PORT") != "" {
-			httpPort = os.Getenv("NITRO_DYNAMODB_HTTP_PORT")
+		if os.Getenv("NITRO_DYNAMODB_PORT") != "" {
+			httpPort = os.Getenv("NITRO_DYNAMODB_PORT")
 		}
 
 		httpPortNat, err := nat.NewPort("tcp", "8000")

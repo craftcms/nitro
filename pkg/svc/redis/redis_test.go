@@ -115,7 +115,7 @@ func TestVerifyCreated(t *testing.T) {
 				networkID: "some-network-id",
 			},
 			customEnvs: map[string]string{
-				"NITRO_REDIS_HTTP_PORT": "6380",
+				"NITRO_REDIS_PORT": "6380",
 			},
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,

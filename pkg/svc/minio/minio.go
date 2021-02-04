@@ -60,8 +60,8 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 
 		// set the nitro env overrides
 		httpPort := "9000"
-		if os.Getenv("NITRO_MINIO_HTTP_PORT") != "" {
-			httpPort = os.Getenv("NITRO_MINIO_HTTP_PORT")
+		if os.Getenv("NITRO_MINIO_PORT") != "" {
+			httpPort = os.Getenv("NITRO_MINIO_PORT")
 		}
 
 		httpPortNat, err := nat.NewPort("tcp", "9000")
