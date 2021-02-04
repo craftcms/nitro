@@ -118,7 +118,7 @@ func TestVerifyCreated(t *testing.T) {
 				networkID: "some-network-id",
 			},
 			customEnvs: map[string]string{
-				"NITRO_MINIO_HTTP_PORT": "9001",
+				"NITRO_MINIO_PORT": "9001",
 			},
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
@@ -137,17 +137,17 @@ func TestVerifyCreated(t *testing.T) {
 						labels.Type:  "minio",
 					},
 					ExposedPorts: nat.PortSet{
-						"9001/tcp": struct{}{},
+						"9000/tcp": struct{}{},
 					},
 					Cmd: []string{"server", "/data"},
 					Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						"9001/tcp": {
+						"9000/tcp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "9000",
+								HostPort: "9001",
 							},
 						},
 					},

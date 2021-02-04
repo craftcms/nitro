@@ -59,12 +59,12 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		}
 
 		// set the nitro env overrides
-		defaultHTTPPort := "6379"
-		if os.Getenv("NITRO_REDIS_HTTP_PORT") != "" {
-			defaultHTTPPort = os.Getenv("NITRO_REDIS_HTTP_PORT")
+		httpPort := "6379"
+		if os.Getenv("NITRO_REDIS_PORT") != "" {
+			httpPort = os.Getenv("NITRO_REDIS_PORT")
 		}
 
-		httpPort, err := nat.NewPort("tcp", defaultHTTPPort)
+		httpPortNat, err := nat.NewPort("tcp", "6379")
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
@@ -76,16 +76,16 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				labels.Type:  Label,
 			},
 			ExposedPorts: nat.PortSet{
-				httpPort: struct{}{},
+				httpPortNat: struct{}{},
 			},
 		}
 
 		hostconfig := &container.HostConfig{
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				httpPort: {
+				httpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "6379",
+						HostPort: httpPort,
 					},
 				},
 			},

@@ -17,9 +17,6 @@ import (
 )
 
 var (
-	// ErrMissingNgrok is returned when nirto is unable to locate the ngrok binary
-	ErrMissingNgrok = fmt.Errorf("unable to locate ngrok")
-
 	// execName is the name of the executable to search for. We make it a variable so we can replace it during tests.
 	execName = "ngrok"
 )
@@ -46,7 +43,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// if ngrok is missing, return the error
 			if ngrok == "" {
-				return ErrMissingNgrok
+				output.Info("Ngrok is required to share sites, download ngrok from https://ngrok.com")
+
+				return nil
 			}
 
 			// get the current working directory

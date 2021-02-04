@@ -116,7 +116,7 @@ func TestVerifyCreated(t *testing.T) {
 				networkID: "some-network-id",
 			},
 			customEnvs: map[string]string{
-				"NITRO_DYNAMODB_HTTP_PORT": "8001",
+				"NITRO_DYNAMODB_PORT": "8001",
 			},
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
@@ -135,16 +135,16 @@ func TestVerifyCreated(t *testing.T) {
 						labels.Type:  "dynamodb",
 					},
 					ExposedPorts: nat.PortSet{
-						"8001/tcp": struct{}{},
+						"8000/tcp": struct{}{},
 					},
 					Cmd: []string{"-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "."},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						"8001/tcp": {
+						"8000/tcp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "8000",
+								HostPort: "8001",
 							},
 						},
 					},

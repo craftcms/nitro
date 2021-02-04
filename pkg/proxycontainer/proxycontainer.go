@@ -136,49 +136,37 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 	// if we do not have a proxy, it needs to be create
 	output.Pending("creating proxy")
 
-	// set ports
-	var httpPort, httpsPort, apiPort nat.Port
-
 	// check for a custom HTTP port
-	switch os.Getenv("NITRO_HTTP_PORT") {
-	case "":
-		httpPort, err = nat.NewPort("tcp", "80")
-		if err != nil {
-			return fmt.Errorf("unable to set the HTTP port, %w", err)
-		}
-	default:
-		httpPort, err = nat.NewPort("tcp", os.Getenv("NITRO_HTTP_PORT"))
-		if err != nil {
-			return fmt.Errorf("unable to set the HTTP port, %w", err)
-		}
+	httpPort := "80"
+	if _, defined := os.LookupEnv("NITRO_HTTP_PORT"); defined {
+		httpPort = os.Getenv("NITRO_HTTP_PORT")
 	}
 
 	// check for a custom HTTPS port
-	switch os.Getenv("NITRO_HTTPS_PORT") {
-	case "":
-		httpsPort, err = nat.NewPort("tcp", "443")
-		if err != nil {
-			return fmt.Errorf("unable to set the HTTPS port, %w", err)
-		}
-	default:
-		httpsPort, _ = nat.NewPort("tcp", os.Getenv("NITRO_HTTPS_PORT"))
-		if err != nil {
-			return fmt.Errorf("unable to set the HTTPS port, %w", err)
-		}
+	httpsPort := "443"
+	if _, defined := os.LookupEnv("NITRO_HTTPS_PORT"); defined {
+		httpsPort = os.Getenv("NITRO_HTTPS_PORT")
 	}
 
 	// check for a custom API port
-	switch os.Getenv("NITRO_API_PORT") {
-	case "":
-		apiPort, err = nat.NewPort("tcp", "5000")
-		if err != nil {
-			return fmt.Errorf("unable to set the API port, %w", err)
-		}
-	default:
-		apiPort, err = nat.NewPort("tcp", os.Getenv("NITRO_API_PORT"))
-		if err != nil {
-			return fmt.Errorf("unable to set the API port, %w", err)
-		}
+	apiPort := "5000"
+	if _, defined := os.LookupEnv("NITRO_API_PORT"); defined {
+		apiPort = os.Getenv("NITRO_API_PORT")
+	}
+
+	httpPortNat, err := nat.NewPort("tcp", "80")
+	if err != nil {
+		return fmt.Errorf("unable to set the HTTP port, %w", err)
+	}
+
+	httpsPortNat, err := nat.NewPort("tcp", "443")
+	if err != nil {
+		return fmt.Errorf("unable to set the HTTPS port, %w", err)
+	}
+
+	apiPortNat, err := nat.NewPort("tcp", "5000")
+	if err != nil {
+		return fmt.Errorf("unable to set the API port, %w", err)
 	}
 
 	// create a container
@@ -186,9 +174,9 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		&container.Config{
 			Image: ProxyImage,
 			ExposedPorts: nat.PortSet{
-				httpPort:  struct{}{},
-				httpsPort: struct{}{},
-				apiPort:   struct{}{},
+				httpPortNat:  struct{}{},
+				httpsPortNat: struct{}{},
+				apiPortNat:   struct{}{},
 			},
 			Labels: map[string]string{
 				labels.Nitro:        "true",
@@ -208,22 +196,22 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 				},
 			},
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				httpPort: {
+				httpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "80",
+						HostPort: httpPort,
 					},
 				},
-				httpsPort: {
+				httpsPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "443",
+						HostPort: httpsPort,
 					},
 				},
-				apiPort: {
+				apiPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "5000",
+						HostPort: apiPort,
 					},
 				},
 			},

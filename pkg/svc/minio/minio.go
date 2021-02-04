@@ -59,12 +59,12 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		}
 
 		// set the nitro env overrides
-		defaultHTTPPort := "9000"
-		if os.Getenv("NITRO_MINIO_HTTP_PORT") != "" {
-			defaultHTTPPort = os.Getenv("NITRO_MINIO_HTTP_PORT")
+		httpPort := "9000"
+		if os.Getenv("NITRO_MINIO_PORT") != "" {
+			httpPort = os.Getenv("NITRO_MINIO_PORT")
 		}
 
-		httpPort, err := nat.NewPort("tcp", defaultHTTPPort)
+		httpPortNat, err := nat.NewPort("tcp", "9000")
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
@@ -76,7 +76,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				labels.Type:  Label,
 			},
 			ExposedPorts: nat.PortSet{
-				httpPort: struct{}{},
+				httpPortNat: struct{}{},
 			},
 			Cmd: []string{"server", "/data"},
 			Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
@@ -84,10 +84,10 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 
 		hostconfig := &container.HostConfig{
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				httpPort: {
+				httpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "9000",
+						HostPort: httpPort,
 					},
 				},
 			},

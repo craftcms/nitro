@@ -3,11 +3,13 @@ package update
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/version"
@@ -17,15 +19,14 @@ import (
 )
 
 var (
-	dockerImages = map[string]string{
+	DockerImages = map[string]string{
 		"nginx:8.0-dev":                  "docker.io/craftcms/nginx:8.0-dev",
 		"nginx:7.4-dev":                  "docker.io/craftcms/nginx:7.4-dev",
 		"nginx:7.3-dev":                  "docker.io/craftcms/nginx:7.3-dev",
 		"nginx:7.2-dev":                  "docker.io/craftcms/nginx:7.2-dev",
 		"nginx:7.1-dev":                  "docker.io/craftcms/nginx:7.1-dev",
+		"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
 		"nitro-proxy:" + version.Version: "docker.io/craftcms/nitro-proxy:" + version.Version,
-		// TODO(jasonmccallister) finish adding builds for the 7.0 images
-		//"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
 	}
 	runApply bool
 )
@@ -56,6 +57,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+			debug, err := strconv.ParseBool(cmd.Flag("debug").Value.String())
+			if err != nil {
+				debug = false
+			}
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -75,7 +80,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Info("Updating nitro…")
 
 			// update all of the images
-			for name, image := range dockerImages {
+			for name, image := range DockerImages {
 				// make sure this is version that is installed and not the proxy
 				if _, ok := versions[versionFromName(name)]; !ok && !strings.Contains(name, "proxy") {
 					continue
@@ -88,11 +93,14 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				if err != nil {
 					output.Warning()
 					output.Info("  \u2717 unable to pull image", name)
+
 					continue
 				}
 
 				buf := &bytes.Buffer{}
 				if _, err := buf.ReadFrom(rdr); err != nil {
+					output.Warning()
+
 					return fmt.Errorf("unable to read the output while pulling image, %w", err)
 				}
 
@@ -110,45 +118,38 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check all of the containers
-			for _, c := range containers {
-				// only show the site containers and proxy container
-				if c.Labels[labels.Type] == "dynamodb" || c.Labels[labels.Type] == "mailhog" || c.Labels[labels.Type] == "minio" || c.Labels[labels.Type] == "redis" || c.Labels[labels.Type] == "database" {
+			for _, container := range containers {
+				// is this a database, service, composer, or node container?
+				if container.Labels[labels.Type] == "dynamodb" || container.Labels[labels.Type] == "mailhog" || container.Labels[labels.Type] == "minio" || container.Labels[labels.Type] == "redis" || container.Labels[labels.Type] == "database" {
 					continue
 				}
 
-				// get the image the container is using
-				image, _, err := docker.ImageInspectWithRaw(ctx, c.Image)
-				if err != nil {
-					return err
-				}
-
-				info, _, err := docker.ContainerInspectWithRaw(ctx, c.ID, false)
-				if err != nil {
-					return err
-				}
-
-				if image.ID == info.Image {
+				// is this image up to date?
+				if _, ok := DockerImages[shortImageName(container.Image)]; ok {
 					continue
 				}
 
-				output.Pending(strings.TrimLeft(c.Names[0], "/"), "is out of date, replacing...")
+				output.Pending(strings.TrimLeft(container.Names[0], "/"), "is out of date, replacing...")
 
-				// stop the container if it is running
-				if c.State == "running" {
-					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+				// if we are dubugging, don't actually remove or apply changes
+				if !debug {
+					// stop the container if it is running
+					if container.State == "running" {
+						if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {
+							output.Warning()
+							return err
+						}
+					}
+
+					// remove the container
+					if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
 						output.Warning()
 						return err
 					}
-				}
 
-				// remove the container
-				if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
-					output.Warning()
-					return err
+					// we need to run the apply command
+					runApply = true
 				}
-
-				// we need to run the apply command
-				runApply = true
 
 				output.Done()
 			}
@@ -164,7 +165,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 	}
 
+	cmd.Flags().Bool("debug", false, "Show what will be updated without removing the container")
+
 	return cmd
+}
+
+// docker.io/craftcms/nginx:7.4-dev => nginx:7.4-dev
+func shortImageName(s string) string {
+	parts := strings.Split(s, "/")
+
+	return parts[len(parts)-1]
 }
 
 // get the php version from the container image name (e.g. nginx:7.3-dev)

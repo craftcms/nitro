@@ -1,5 +1,19 @@
 # Release Notes for Craft Nitro
 
+## 2.0.0-beta.2 - 2021-02-04
+
+### Added
+- Nitro now supports Arm CPUs, including M1 Macs.
+
+### Changed
+- The `share` command now outputs a more helpful message if Ngrok isn’t installed.
+- Xdebug is no longer supported for PHP 7.0.
+
+### Fixed
+- Fixed a bug where Nitro wasn’t respecting custom service ports.
+- Fixed a bug where the `update` command wasn’t immediately updating containers.
+- Fixed a bug where the `add` command would overwrite an existing `.env` file. ([#232](https://github.com/craftcms/nitro/issues/232)
+
 ## 2.0.0-beta.1 - 2021-02-03
 
 ### Added

@@ -1,6 +1,6 @@
 .PHONY: docker docs
 
-VERSION ?= 2.0.0-alpha
+VERSION ?= 2.0.0-beta.2
 
 build:
 	go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
@@ -17,19 +17,22 @@ build-linux:
 upx: build
 	upx --brute nitro
 
-alpha: alpha-macos alpha-macos-arm alpha-win alpha-linux
-alpha-macos: build-macos
-	zip -X macos_nitro_v2_alpha.zip nitro
+beta: beta-macos beta-macos-arm beta-win beta-linux
+beta-macos: build-macos
+	zip -X macos_nitro_${VERSION}.zip nitro
 	rm nitro
-alpha-macos-arm: build-macos-arm
-	zip -X macos_arm_nitro_v2_alpha.zip nitro
+beta-macos-arm: build-macos-arm
+	zip -X macos_arm_nitro_${VERSION}.zip nitro
 	rm nitro
-alpha-win: build-win
-	zip -X windows_nitro_v2_alpha.zip nitro.exe
+beta-win: build-win
+	zip -X windows_nitro_${VERSION}.zip nitro.exe
 	rm nitro.exe
-alpha-linux: build-linux
-	zip -X linux_nitro_v2_alpha.zip nitro
+beta-linux: build-linux
+	zip -X linux_nitro_${VERSION}.zip nitro
 	rm nitro
+
+mod:
+	go mod tidy && go mod verify
 
 upx-macos:
 	upx --brute nitro

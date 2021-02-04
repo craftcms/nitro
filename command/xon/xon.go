@@ -1,6 +1,7 @@
 package xon
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/docker/docker/client"
@@ -84,6 +85,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				site = sites[selected]
+			}
+
+			// php 7.0 does not support xdebug
+			if site.Version == "7.0" {
+				return fmt.Errorf("Xdebug with PHP 7.0 is not supported")
 			}
 
 			// enable xdebug for the sites hostname

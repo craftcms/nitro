@@ -61,7 +61,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			switch len(args) {
 			case 1:
 				dir = filepath.Join(wd, args[0])
-				
+
 				// make sure the directory exists
 				if !pathexists.IsDirectory(dir) {
 					return fmt.Errorf("unable to find the directory: %s", dir)
@@ -77,9 +77,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			exampleEnv := filepath.Join(dir, ".env.example")
+			envFilePath := filepath.Join(dir, ".env")
 
 			// check if the directory has a .env-example
-			if pathexists.IsFile(exampleEnv) {
+			if pathexists.IsFile(exampleEnv) && !pathexists.IsFile(envFilePath) {
 				// open the example
 				example, err := os.Open(exampleEnv)
 				if err != nil {
@@ -104,8 +105,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if err != nil {
 				return err
 			}
-
-			envFilePath := filepath.Join(dir, ".env")
 
 			// if the wanted a new database edit the env
 			if database && pathexists.IsFile(envFilePath) {
