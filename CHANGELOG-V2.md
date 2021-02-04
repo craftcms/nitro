@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- The `share` command returns a helpful message when ngrok is not found.
+
 ### Fixed
 - Fixed and error where custom ports were not being used for the proxy container.
 
