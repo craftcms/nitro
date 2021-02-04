@@ -137,7 +137,7 @@ func TestVerifyCreated(t *testing.T) {
 						labels.Type:  "minio",
 					},
 					ExposedPorts: nat.PortSet{
-						"9001/tcp": struct{}{},
+						"9000/tcp": struct{}{},
 					},
 					Cmd: []string{"server", "/data"},
 					Env: []string{"MINIO_ROOT_USER=nitro", "MINIO_ROOT_PASSWORD=nitropassword"},
