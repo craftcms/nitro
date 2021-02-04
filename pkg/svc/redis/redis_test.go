@@ -134,15 +134,15 @@ func TestVerifyCreated(t *testing.T) {
 						labels.Type:  "redis",
 					},
 					ExposedPorts: nat.PortSet{
-						"6380/tcp": struct{}{},
+						"6379/tcp": struct{}{},
 					},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						"6380/tcp": {
+						"6379/tcp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "6379",
+								HostPort: "6380",
 							},
 						},
 					},

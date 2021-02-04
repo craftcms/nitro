@@ -144,23 +144,22 @@ func TestVerifyCreated(t *testing.T) {
 						labels.Type:  "mailhog",
 					},
 					ExposedPorts: nat.PortSet{
-						// TODO(jasonmccallister) change the ports
-						"1026/tcp/udp": struct{}{},
-						"8026/tcp":     struct{}{},
+						"1025/tcp/udp": struct{}{},
+						"8025/tcp":     struct{}{},
 					},
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						"1026/tcp/udp": {
+						"1025/tcp/udp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "1025",
+								HostPort: "1026",
 							},
 						},
-						"8026/tcp": {
+						"8025/tcp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "8025",
+								HostPort: "8026",
 							},
 						},
 					},

@@ -144,10 +144,10 @@ func TestVerifyCreated(t *testing.T) {
 				},
 				HostConfig: &container.HostConfig{
 					PortBindings: map[nat.Port][]nat.PortBinding{
-						"9001/tcp": {
+						"9000/tcp": {
 							{
 								HostIP:   "127.0.0.1",
-								HostPort: "9000",
+								HostPort: "9001",
 							},
 						},
 					},

@@ -59,23 +59,23 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		}
 
 		// set the nitro env overrides
-		defaultSMTPPort := "1025"
+		smtpPort := "1025"
 		if os.Getenv("NITRO_MAILHOG_SMTP_PORT") != "" {
-			defaultSMTPPort = os.Getenv("NITRO_MAILHOG_SMTP_PORT")
+			smtpPort = os.Getenv("NITRO_MAILHOG_SMTP_PORT")
 		}
 
-		defaultHTTPPort := "8025"
+		httpPort := "8025"
 		if os.Getenv("NITRO_MAILHOG_HTTP_PORT") != "" {
-			defaultHTTPPort = os.Getenv("NITRO_MAILHOG_HTTP_PORT")
+			httpPort = os.Getenv("NITRO_MAILHOG_HTTP_PORT")
 		}
 
 		// configure the service ports
-		smtpPort, err := nat.NewPort("tcp/udp", defaultSMTPPort)
+		smtpPortNat, err := nat.NewPort("tcp/udp", "1025")
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
 
-		httpPort, err := nat.NewPort("tcp", defaultHTTPPort)
+		httpPortNat, err := nat.NewPort("tcp", "8025")
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
@@ -87,23 +87,23 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				labels.Type:  Label,
 			},
 			ExposedPorts: nat.PortSet{
-				smtpPort: struct{}{},
-				httpPort: struct{}{},
+				smtpPortNat: struct{}{},
+				httpPortNat: struct{}{},
 			},
 		}
 
 		hostconfig := &container.HostConfig{
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				smtpPort: {
+				smtpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "1025",
+						HostPort: smtpPort,
 					},
 				},
-				httpPort: {
+				httpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "8025",
+						HostPort: httpPort,
 					},
 				},
 			},

@@ -59,12 +59,12 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		}
 
 		// set the nitro env overrides
-		defaultHTTPPort := "8000"
+		httpPort := "8000"
 		if os.Getenv("NITRO_DYNAMODB_HTTP_PORT") != "" {
-			defaultHTTPPort = os.Getenv("NITRO_DYNAMODB_HTTP_PORT")
+			httpPort = os.Getenv("NITRO_DYNAMODB_HTTP_PORT")
 		}
 
-		httpPort, err := nat.NewPort("tcp", defaultHTTPPort)
+		httpPortNat, err := nat.NewPort("tcp", "8000")
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the port, %w", err)
 		}
@@ -76,17 +76,17 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				labels.Type:  Label,
 			},
 			ExposedPorts: nat.PortSet{
-				httpPort: struct{}{},
+				httpPortNat: struct{}{},
 			},
 			Cmd: []string{"-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "."},
 		}
 
 		hostconfig := &container.HostConfig{
 			PortBindings: map[nat.Port][]nat.PortBinding{
-				httpPort: {
+				httpPortNat: {
 					{
 						HostIP:   "127.0.0.1",
-						HostPort: "8000",
+						HostPort: httpPort,
 					},
 				},
 			},
