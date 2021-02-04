@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.2 - 2021-02-04
 
 ### Added
 - Nitro now supports Arm CPUs, including M1 Macs.
