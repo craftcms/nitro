@@ -1,9 +1,9 @@
 name: Tests
 on:
   push:
-    branches: [ 2.0, develop ]
+    branches: [ 2.0, develop, main ]
   pull_request:
-    branches: [ 2.0, develop ]
+    branches: [ 2.0, develop, main ]
 jobs:
   test:
     name: Run tests
