@@ -12,6 +12,7 @@
 ### Fixed
 - Fixed a bug where Nitro wasn’t respecting custom service ports.
 - Fixed a bug where the `update` command wasn’t immediately updating containers.
+- Fixed a bug where the `add` command would overwrite an existing `.env` files. ([#232](https://github.com/craftcms/nitro/issues/232)
 
 ## 2.0.0-beta.1 - 2021-02-03
 
