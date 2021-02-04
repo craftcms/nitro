@@ -63,10 +63,19 @@
             "name": "nitro ssh",
             "type": "go",
             "request": "launch",
-            "mode": t "auto",
+            "mode": "auto",
             "program": "${workspaceFolder}/cmd/nitro/main.go",
             "env": {},
             "args": ["ssh"]
-        }
+        },
+        {
+            "name": "nitro update",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "args": ["update"]
+        },
     ]
 }

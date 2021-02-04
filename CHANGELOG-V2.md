@@ -7,7 +7,8 @@
 - The `xon` command will now return an error when trying to enable xdebug for sites with PHP version 7.0
 
 ### Fixed
-- Fixed and error where custom ports were not being used for the proxy container.
+- Fixed an error where custom ports were not being used for the proxy container.
+- Fixed an error where the containers would not get updated.
 
 ## 2.0.0-beta.1 - 2021-02-03
 
