@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.3 - 2021-02-05
 
 ### Added
 - Nitro will now remove entries from your hosts file when running `destroy`. (#235)[https://github.com/craftcms/nitro/issues/235]
