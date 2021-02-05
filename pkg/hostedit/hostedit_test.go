@@ -1,6 +1,7 @@
 package hostedit
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -177,6 +178,70 @@ func Test_indexes(t *testing.T) {
 			}
 			if got2 != tt.end {
 				t.Errorf("indexes() got2 = %v, want %v", got2, tt.end)
+			}
+		})
+	}
+}
+
+func TestRemove(t *testing.T) {
+	type args struct {
+		file string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "removes the nitro hosts from the file",
+			args: args{
+				file: filepath.Join("testdata", "to-remove.txt"),
+			},
+			want: `##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1        localhost
+255.255.255.255  broadcasthost
+::1              localhost
+
+
+127.0.0.1        kubernetes.docker.internal
+# Added by Docker Desktop
+# To allow the same kube context to work on the host and the container:
+127.0.0.1        kubernetes.docker.internal
+# End of section
+`,
+		},
+		{
+			name: "no nitro hosts does not returns an error there is no entries to remove",
+			args: args{
+				file: filepath.Join("testdata", "no-section.txt"),
+			},
+			want:    ``,
+			wantErr: true,
+		},
+		{
+			name: "no file returns error",
+			args: args{
+				file: filepath.Join("testdata", "empty"),
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Remove(tt.args.file)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Remove() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Remove() = \ngot:\n%v\nwant \n%v", got, tt.want)
 			}
 		})
 	}

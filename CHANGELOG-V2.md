@@ -4,6 +4,7 @@
 
 ### Added
 - Nitro now supports Arm CPUs, including M1 Macs.
+- Nitro will now remove entries from your hosts file when running `destroy`. (#235)[https://github.com/craftcms/nitro/issues/235]
 
 ### Changed
 - The `share` command now outputs a more helpful message if Ngrok isn’t installed.

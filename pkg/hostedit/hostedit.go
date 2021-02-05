@@ -11,6 +11,8 @@ const (
 	endText   = "# </nitro>"
 )
 
+var ErrNotNitroEntries = fmt.Errorf("there are no nitro entries to remove from the hosts file")
+
 // Update takes a file, reads the content and updates or appends
 // the addr and hosts for the sites.
 func Update(file, addr string, hosts ...string) (string, error) {
@@ -53,10 +55,6 @@ func Update(file, addr string, hosts ...string) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func Remove(file string) (string, error) {
-	return "", fmt.Errorf("not implemented")
-}
-
 // IsUpdated is used to check if an update will make any changes
 // to the hosts file and return true if there is nothing to change
 func IsUpdated(file, addr string, hosts ...string) (bool, error) {
@@ -77,40 +75,39 @@ func IsUpdated(file, addr string, hosts ...string) (bool, error) {
 	return string(orig) == updated, nil
 }
 
-// func Remove(file, addr string) (string, error) {
-// 	f, err := ioutil.ReadFile(file)
-// 	if err != nil {
-// 		return "", err
-// 	}
+// Remove is responsible for removing all of the hosts entries
+// for the nitro config from the hosts file.
+func Remove(file string) (string, error) {
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
 
-// 	// split the file into multiple lines
-// 	lines := strings.Split(string(f), "\n")
+	// split the lines
+	lines := strings.Split(string(f), "\n")
 
-// 	// the index represents where the content (addr and hosts) should be placed
-// 	// which is in between the start and end text comment
-// 	var index int
-// 	for l, t := range lines {
-// 		// look for the beginning text
-// 		if strings.Contains(t, startText) {
-// 			// the next line is the empty line
-// 			index = l + 1
-// 		}
+	// get the indexes to remove (start, middle and end)
+	start, middle, end := indexes(f)
 
-// 		// look for the end text
-// 		if strings.Contains(t, endText) {
-// 			// we want the previous line
-// 			index = l - 1
-// 		}
-// 	}
+	// if there are no entries, return a specific error
+	if start == 0 && middle == 0 && end == 0 {
+		return "", ErrNotNitroEntries
+	}
 
-// 	// if there is an index, we need to remove the lines
-// 	if index > 0 {
-// 		// replace the line between the start and end text with the contents of the address and hosts
-// 		lines = append(lines[:index], lines[index+1:]...)
-// 	}
+	// create a new hosts file in memory
+	new := []string{}
+	for i, v := range lines {
+		// if this is one of the indexes, remove
+		if i == start || i == middle || i == end {
+			continue
+		}
 
-// 	return strings.Join(lines, "\n"), fmt.Errorf("not yet tested or implemented")
-// }
+		// append the entry to the new file
+		new = append(new, v)
+	}
+
+	return strings.Join(new, "\n"), nil
+}
 
 func indexes(content []byte) (int, int, int) {
 	// split the file into multiple lines

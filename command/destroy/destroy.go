@@ -3,7 +3,9 @@ package destroy
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -16,6 +18,7 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -214,6 +217,35 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if cmd.Flag("clean").Value.String() == "true" {
 				if err := os.Remove(cfg.GetFile()); err != nil {
 					output.Info("Unable to remove configuration file")
+				}
+			}
+
+			// remove nitro hosts entries
+
+			// get the executable
+			nitro, err := os.Executable()
+			if err != nil {
+				return fmt.Errorf("unable to locate the nitro path, %w", err)
+			}
+
+			// run the hosts command
+			switch runtime.GOOS {
+			case "windows":
+				// windows users should be running as admin, so just execute the hosts command as is
+				c := exec.Command(nitro, "hosts", "remove")
+
+				c.Stdout = os.Stdout
+				c.Stderr = os.Stderr
+
+				if c.Run() != nil {
+					return err
+				}
+			default:
+				output.Info("Updating hosts file (you might be prompted for your password)")
+
+				// add the hosts
+				if err := sudo.Run(nitro, "nitro", "hosts", "remove"); err != nil {
+					return err
 				}
 			}
 
