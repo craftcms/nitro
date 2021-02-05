@@ -1,6 +1,7 @@
 package add
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/envedit"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/prompt"
@@ -22,11 +24,42 @@ const exampleText = `  # add the current project as a site
   # add a directory as the site
   nitro add my-project`
 
+// NewCommand returns the command to add a site to the nitro config.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
 		Short:   "Add a site",
 		Example: exampleText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// verify the config exists
+			_, err := config.Load(home)
+			if errors.Is(err, config.ErrNoConfigFile) {
+				output.Info("Warning:", err.Error())
+
+				// ask if the init command should run
+				init, err := output.Confirm("Run `nitro init` now to create the config", true, "?")
+				if err != nil {
+					return err
+				}
+
+				// if init is false return nil
+				if !init {
+					return fmt.Errorf("You must run `nitro init` in order to add a site...")
+				}
+
+				// run the init command
+				for _, c := range cmd.Parent().Commands() {
+					// set the init command
+					if c.Use == "init" {
+						if err := c.RunE(c, args); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			return nil
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			// ask if the apply command should run
 			apply, err := output.Confirm("Apply changes now", true, "?")

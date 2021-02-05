@@ -8,6 +8,7 @@
 ### Changed
 - The `share` command now outputs a more helpful message if Ngrok isn’t installed.
 - Xdebug is no longer supported for PHP 7.0.
+- The `add` command will prompt to run `init` if no configuration file is found. [#237](https://github.com/craftcms/nitro/issues/237)
 
 ### Fixed
 - Fixed a bug where Nitro wasn’t respecting custom service ports.
