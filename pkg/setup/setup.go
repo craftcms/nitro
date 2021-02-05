@@ -29,7 +29,8 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 	// if this is running on Apple Silicone, we need to prompt for mariadb instead until this issue is resolved: https://docs.docker.com/docker-for-mac/apple-m1/
 	switch (runtime.GOOS == "darwin" && runtime.GOARCH == "arm64") || (runtime.GOOS == "ios" && runtime.GOARCH == "arm64") {
 	case true:
-		output.Info("")
+		output.Info("Apple computers with the new silicone do not work with mysql images at this time...")
+
 		mariadb, err := output.Confirm("Would you like to use MariaDB", true, "?")
 		if err != nil {
 			return err
