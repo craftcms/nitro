@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -25,40 +26,81 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 
 	output.Info("Setting up Nitro…")
 
-	mysql, err := output.Confirm("Would you like to use MySQL", true, "?")
-	if err != nil {
-		return err
-	}
-
-	if mysql {
-		// prompt for the version
-		opts := []string{"8.0", "5.7", "5.6"}
-		selected, err := output.Select(os.Stdin, "Select the version of MySQL ", opts)
+	// if this is running on Apple Silicone, we need to prompt for mariadb instead until this issue is resolved: https://docs.docker.com/docker-for-mac/apple-m1/
+	switch runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+	case true:
+		output.Info("")
+		mariadb, err := output.Confirm("Would you like to use MariaDB", true, "?")
 		if err != nil {
 			return err
 		}
 
-		version := opts[selected]
-
-		// check if the port is available
-		var port string
-		for {
-			if err := portavail.Check("", strconv.Itoa(mysqlDefaultPort)); err != nil {
-				mysqlDefaultPort = mysqlDefaultPort + 1
-				continue
+		if mariadb {
+			// prompt for the version
+			opts := []string{"10.5", "10.4", "10.3", "10.2", "10.1", "10"}
+			selected, err := output.Select(os.Stdin, "Select the version of MariaDB ", opts)
+			if err != nil {
+				return err
 			}
 
-			port = strconv.Itoa(mysqlDefaultPort)
+			version := opts[selected]
 
-			break
+			// check if the port is available
+			var port string
+			for {
+				if err := portavail.Check("", strconv.Itoa(mysqlDefaultPort)); err != nil {
+					mysqlDefaultPort = mysqlDefaultPort + 1
+					continue
+				}
+
+				port = strconv.Itoa(mysqlDefaultPort)
+
+				break
+			}
+
+			// add a default mariadb database
+			c.Databases = append(c.Databases, config.Database{
+				Engine:  "mariadb",
+				Version: version,
+				Port:    port,
+			})
+		}
+	default:
+		mysql, err := output.Confirm("Would you like to use MySQL", true, "?")
+		if err != nil {
+			return err
 		}
 
-		// add a default mysql database
-		c.Databases = append(c.Databases, config.Database{
-			Engine:  "mysql",
-			Version: version,
-			Port:    port,
-		})
+		if mysql {
+			// prompt for the version
+			opts := []string{"8.0", "5.7", "5.6"}
+			selected, err := output.Select(os.Stdin, "Select the version of MySQL ", opts)
+			if err != nil {
+				return err
+			}
+
+			version := opts[selected]
+
+			// check if the port is available
+			var port string
+			for {
+				if err := portavail.Check("", strconv.Itoa(mysqlDefaultPort)); err != nil {
+					mysqlDefaultPort = mysqlDefaultPort + 1
+					continue
+				}
+
+				port = strconv.Itoa(mysqlDefaultPort)
+
+				break
+			}
+
+			// add a default mysql database
+			c.Databases = append(c.Databases, config.Database{
+				Engine:  "mysql",
+				Version: version,
+				Port:    port,
+			})
+		}
 	}
 
 	postgres, err := output.Confirm("Would you like to use PostgreSQL", true, "?")
