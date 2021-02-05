@@ -44,7 +44,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				return fmt.Errorf("you must specify at least one arguement to this command")
+				return fmt.Errorf("you must specify at least one argument to this command")
 			}
 			version := cmd.Flag("version").Value.String()
 			ctx := cmd.Context()

@@ -115,7 +115,7 @@ func NewCommand() *cobra.Command {
 		enable.NewCommand(home, docker, term),
 		edit.NewCommand(home, docker, term),
 		extensions.NewCommand(home, docker, term),
-		hosts.New(home, term),
+		hosts.NewCommand(home, term),
 		iniset.NewCommand(home, docker, term),
 		initialize.NewCommand(home, docker, term),
 		logs.NewCommand(home, docker, term),

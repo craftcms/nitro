@@ -1,41 +1,30 @@
 package hosts
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
-	"strings"
-
-	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/spf13/cobra"
 )
 
-const exampleText = `  # modify hosts file to match sites and aliases
-  nitro hosts`
-
-// New returns a command used to modify the hosts file to point sites to the nitro proxy.
-func NewCommand(home string, output terminal.Outputer) *cobra.Command {
+// removeCommand returns a command used to remove entries from the hosts file
+func removeCommand(home string, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "hosts",
-		Short:   "Modify your hosts file",
-		Example: exampleText,
+		Use:   "remove",
+		Short: "Remove nitro entries from hosts file",
+		Example: `  # remove nitro entries from your hosts file
+  nitro hosts remove`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			hosts := cmd.Flag("hostnames").Value.String()
 			var preview bool
 			previewFlag := cmd.Flag("preview").Value.String()
 			if previewFlag == "true" {
 				preview = true
 			}
-
-			// remove [ and ] from the string
-			hosts = strings.Replace(hosts, "[", "", 1)
-			hosts = strings.Replace(hosts, "]", "", 1)
-
-			var hostnames []string
-			hostnames = append(hostnames, strings.Split(hosts, ",")...)
 
 			// set the file based on the OS
 			defaultFile := "/etc/hosts"
@@ -44,7 +33,12 @@ func NewCommand(home string, output terminal.Outputer) *cobra.Command {
 			}
 
 			// add the hosts
-			updated, err := hostedit.Update(defaultFile, "127.0.0.1", hostnames...)
+			updated, err := hostedit.Remove(defaultFile)
+			if errors.Is(err, hostedit.ErrNotNitroEntries) {
+				output.Info("There are no entries to remove from the hosts file...")
+
+				return nil
+			}
 			if err != nil {
 				return err
 			}
@@ -80,11 +74,7 @@ func NewCommand(home string, output terminal.Outputer) *cobra.Command {
 	}
 
 	// set flags for the command
-	cmd.Flags().StringSlice("hostnames", nil, "list of hostnames to set")
-	cmd.MarkFlagRequired("hostnames")
 	cmd.Flags().Bool("preview", false, "preview hosts file change")
-
-	cmd.AddCommand(removeCommand(home, output))
 
 	return cmd
 }
