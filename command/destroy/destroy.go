@@ -210,6 +210,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			// remove the config file when --clean is true
 			if cmd.Flag("clean").Value.String() == "true" {
 				if err := os.Remove(cfg.GetFile()); err != nil {
 					output.Info("Unable to remove configuration file")
