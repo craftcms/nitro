@@ -6,7 +6,7 @@
 - Nitro will now remove entries from your hosts file when running `destroy`. (#235)[https://github.com/craftcms/nitro/issues/235]
 
 ### Changed
-- Users on M1 Macs will be provided for a MariaDB database instead of MySQL during `init`. [#234](https://github.com/craftcms/nitro/issues/234)
+- Nitro will use MariaDB instead of MySQL on a M1 Mac. [#234](https://github.com/craftcms/nitro/issues/234)
 - The `add` command will prompt to run `init` if no configuration file is found. [#237](https://github.com/craftcms/nitro/issues/237)
 
 ## 2.0.0-beta.2 - 2021-02-04
