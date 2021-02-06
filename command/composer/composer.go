@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/composer"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -38,15 +37,42 @@ const exampleText = `  # run composer install in a current directory using a con
 // all the commands in a disposable docker container.
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "composer",
-		Short:   "Run composer commands",
-		Example: exampleText,
-		Args:    cobra.MinimumNArgs(1),
+		Use:                "composer",
+		Short:              "Run composer commands",
+		Example:            exampleText,
+		DisableFlagParsing: true,
+		Args:               cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				return fmt.Errorf("you must specify at least one arguement to this command")
+			var version string
+
+			// get the version from the args
+			var newArgs []string
+			for i, a := range args {
+				// get the version if using =
+				if strings.Contains(a, "--composer-version=") {
+					parts := strings.Split(a, "=")
+					version = parts[len(parts)-1]
+					continue
+				}
+
+				// get the version if using a space
+				if a == "--composer-version" {
+					version = args[i+1]
+					continue
+				}
+
+				// append the new args
+				newArgs = append(newArgs, a)
 			}
-			version := cmd.Flag("version").Value.String()
+
+			// if the version is not set, use the default
+			if version == "" {
+				version = "2"
+			}
+
+			// reassign the args
+			args = newArgs
+
 			ctx := cmd.Context()
 			if ctx == nil {
 				// when we call commands from other commands (e.g. create)
@@ -147,47 +173,27 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				pathVolume = volume
 			}
 
-			// build the args
-			commands := []string{"composer", "--ignore-platform-reqs"}
-			commands = append(commands, args...)
+			// build the container options
+			opts := &composer.Options{
+				Image:    image,
+				Commands: args,
+				Labels: map[string]string{
+					labels.Nitro: "true",
+					labels.Type:  "composer",
+					labels.Path:  path,
+				},
+				Volume: &pathVolume,
+				Path:   path,
+			}
 
 			// create the container
-			resp, err := docker.ContainerCreate(ctx,
-				&container.Config{
-					Image: image,
-					Cmd:   commands,
-					Tty:   false,
-					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "composer",
-						labels.Path:  path,
-					},
-					Env: []string{"COMPOSER_HOME=/root"},
-				},
-				&container.HostConfig{
-					Mounts: []mount.Mount{
-						{
-							Type:   mount.TypeVolume,
-							Source: pathVolume.Name,
-							// /root is the COMPOSER_HOME environment variable
-							Target: "/root",
-						},
-						{
-							Type:   mount.TypeBind,
-							Source: path,
-							Target: "/app",
-						},
-					},
-				},
-				nil,
-				nil,
-				"")
+			container, err := composer.CreateContainer(ctx, docker, opts)
 			if err != nil {
 				return fmt.Errorf("unable to create the composer container\n%w", err)
 			}
 
 			// attach to the container
-			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
+			stream, err := docker.ContainerAttach(ctx, container.ID, types.ContainerAttachOptions{
 				Stream: true,
 				Stdout: true,
 				Stderr: true,
@@ -199,7 +205,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			defer stream.Close()
 
 			// run the container
-			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+			if err := docker.ContainerStart(ctx, container.ID, types.ContainerStartOptions{}); err != nil {
 				return fmt.Errorf("unable to start the container, %w", err)
 			}
 
@@ -211,7 +217,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			output.Info("composer", action, "completed 🤘")
 
 			// remove the container
-			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{}); err != nil {
+			if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
 				return err
 			}
 
@@ -220,7 +226,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	}
 
 	// set flags for the command
-	cmd.Flags().String("version", "2", "which composer version to use")
+	cmd.Flags().String("composer-version", "2", "which composer version to use")
 
 	return cmd
 }
