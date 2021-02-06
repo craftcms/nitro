@@ -15,5 +15,7 @@ profile.out
 /nitro.upx
 /*nitro_v2_alpha.zip
 /*nitro_*beta*.zip
+/*nitro_*.zip
+/*nitro_*.tar.gz
 /cmd/test/*.go
 
