@@ -366,7 +366,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Info("Checking containers...")
 
 				for _, c := range cfg.Containers {
-					output.Pending("checking", c.Name)
+					output.Pending("checking", fmt.Sprintf("%s.containers.nitro", c.Name))
 
 					// start, update or create the custom container
 					id, err := customcontainer.StartOrCreate(ctx, docker, home, network.ID, c)
@@ -423,6 +423,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			for _, s := range cfg.Sites {
 				hostnames = append(hostnames, s.Hostname)
 				hostnames = append(hostnames, s.Aliases...)
+			}
+
+			// get custom container hostnames
+			for _, c := range cfg.Containers {
+				hostnames = append(hostnames, fmt.Sprintf("%s.containers.nitro", c.Name))
 			}
 
 			if len(hostnames) > 0 {

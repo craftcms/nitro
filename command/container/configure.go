@@ -184,8 +184,10 @@ func configureCommand(home string, docker client.CommonAPIClient, output termina
 					return err
 				}
 
+				clean := strings.Split(ports[selected], ":")
+
 				// get the container port not the host port
-				p, err := strconv.Atoi(ports[selected])
+				p, err := strconv.Atoi(clean[1])
 				if err != nil {
 					return err
 				}
