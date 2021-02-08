@@ -121,11 +121,11 @@ func (t *terminal) Confirm(message string, fallback bool, sep string) (bool, err
 
 func (t *terminal) printBoolMessage(message string, fallback bool, sep string) {
 	if fallback {
-		fmt.Printf("%s [Y/n] ", message)
+		fmt.Printf("%s [Y/n]%s ", message, sep)
 		return
 	}
 
-	fmt.Printf("%s [y/N] ", message)
+	fmt.Printf("%s [y/N]%s ", message, sep)
 }
 
 func (t *terminal) printStrMessage(message, fallback, sep string) {

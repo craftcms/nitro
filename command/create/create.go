@@ -37,26 +37,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			// ask if the apply command should run
-			apply, err := output.Confirm("Apply changes now", true, "?")
-			if err != nil {
-				return err
-			}
-
-			// if apply is false return nil
-			if !apply {
-				return nil
-			}
-
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					return c.RunE(c, args)
-				}
-			}
-
-			return nil
+			return prompt.RunApply(cmd, args, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default

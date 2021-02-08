@@ -2,6 +2,7 @@ package prompt
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/spf13/cobra"
 )
 
 // CreateDatabase is used to interactively walk a user through creating a new database. It will return true if the user created a database along
@@ -275,4 +277,59 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 	}
 
 	return &site, nil
+}
+
+func RunApply(cmd *cobra.Command, args []string, output terminal.Outputer) error {
+	// ask if the apply command should run
+	apply, err := output.Confirm("Apply changes now", true, "?")
+	if err != nil {
+		return err
+	}
+
+	// if apply is false return nil
+	if !apply {
+		return nil
+	}
+
+	// run the apply command
+	for _, c := range cmd.Parent().Commands() {
+		// set the apply command
+		if c.Use == "apply" {
+			return c.RunE(c, args)
+		}
+	}
+
+	return nil
+}
+
+// VerifyInit is used to verify the init command has been run by checking if a config file exists.
+func VerifyInit(cmd *cobra.Command, args []string, home string, output terminal.Outputer) error {
+	// verify the config exists
+	_, err := config.Load(home)
+	if errors.Is(err, config.ErrNoConfigFile) {
+		output.Info("Warning:", err.Error())
+
+		// ask if the init command should run
+		init, err := output.Confirm("Run `nitro init` now to create the config", true, "?")
+		if err != nil {
+			return err
+		}
+
+		// if init is false return nil
+		if !init {
+			return fmt.Errorf("You must run `nitro init` in order to add a site...")
+		}
+
+		// run the init command
+		for _, c := range cmd.Parent().Commands() {
+			// set the init command
+			if c.Use == "init" {
+				if err := c.RunE(c, args); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }
