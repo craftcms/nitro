@@ -5,6 +5,9 @@
 ### Added
 - Added `containers configure` command. [#170](https://github.com/craftcms/nitro/issues/170)
 
+### Changed
+- Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
+
 ## 2.0.0-beta.3 - 2021-02-05
 
 ### Added
