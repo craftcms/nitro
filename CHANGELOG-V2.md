@@ -7,6 +7,7 @@
 
 ### Changed
 - Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
+- The `init` command will use mariadb on any Arm based device.
 
 ## 2.0.0-beta.3 - 2021-02-05
 
