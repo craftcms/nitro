@@ -286,16 +286,13 @@ func RunApply(cmd *cobra.Command, args []string, output terminal.Outputer) error
 		return err
 	}
 
-	fmt.Println("entered:", apply)
-
 	// if apply is false return nil
 	if !apply {
 		return nil
 	}
 
 	// run the apply command
-	for _, c := range cmd.Parent().Commands() {
-		fmt.Println(c.Use)
+	for _, c := range cmd.Root().Commands() {
 		// set the apply command
 		if c.Use == "apply" {
 			return c.RunE(c, args)
@@ -324,7 +321,7 @@ func VerifyInit(cmd *cobra.Command, args []string, home string, output terminal.
 		}
 
 		// run the init command
-		for _, c := range cmd.Parent().Commands() {
+		for _, c := range cmd.Root().Commands() {
 			// set the init command
 			if c.Use == "init" {
 				if err := c.RunE(c, args); err != nil {

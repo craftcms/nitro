@@ -164,13 +164,13 @@ func configureCommand(home string, docker client.CommonAPIClient, output termina
 				}
 			}
 
-			ui, err := output.Confirm("Does the image contain a web based UI", true, "?")
+			exposesUI, err := output.Confirm("Does the image contain a web based UI", true, "?")
 			if err != nil {
 				return err
 			}
 
 			var uiPort int
-			if ui {
+			if exposesUI {
 				// format the ports to grab only the right side (container port)
 				opts := []string{}
 				for _, p := range ports {
