@@ -2,7 +2,9 @@ package match
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -11,6 +13,52 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
 )
+
+// Container checks if a custom container is up to date with the configuration
+func Container(home string, container config.Container, details types.ContainerJSON) bool {
+	// check if the image does not match - this uses the image name, not ref
+	if fmt.Sprintf("docker.io/%s:%s", container.Image, container.Tag) != details.Config.Image {
+		return false
+	}
+
+	// check the name has been changed
+	if details.Config.Labels[labels.NitroContainer] != container.Name {
+		return false
+	}
+
+	customEnvs := make(map[string]string)
+
+	if container.EnvFile != "" {
+		content, err := ioutil.ReadFile(filepath.Join(home, ".nitro", "."+container.Name))
+		if err != nil {
+			return false
+		}
+
+		for _, line := range strings.Split(string(content), "\n") {
+			parts := strings.Split(line, "=")
+			customEnvs[parts[0]] = parts[1]
+		}
+	}
+
+	// check the containers env against the file and merge
+	for _, e := range details.Config.Env {
+		parts := strings.Split(e, "=")
+		env := parts[0]
+		val := parts[1]
+
+		// is there a custom env val for the variable?
+		if custom, ok := customEnvs[env]; ok {
+			if val != custom {
+				return false
+			}
+		}
+	}
+
+	// TODO(jasonmccallister) check the port mappings
+	// TODO(jasonmccallister) check the volumes
+
+	return false
+}
 
 // Site takes the home directory, site, and a container to determine if they
 // match whats expected.
@@ -50,9 +98,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 			return false
 		}
 	default:
-		exts := strings.Join(site.Extensions, ",")
-
-		if container.Config.Labels[labels.Extensions] != exts {
+		if container.Config.Labels[labels.Extensions] != strings.Join(site.Extensions, ",") {
 			return false
 		}
 	}

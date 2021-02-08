@@ -94,22 +94,22 @@ type Blackfire struct {
 type Container struct {
 	// Name is a uniq name, with no spaces or special characters and is used to generate the hostname
 	Name string `yaml:"name"`
+
 	// Image the is canonical name of the image to use for the container `docker.elastic.co/elasticsearch/elasticsearch`
-	Image string `yaml:"tag"`
+	Image string `yaml:"image"`
+
 	// Tag tells Nitro which docker image tag to use, it defaults to latest.
 	Tag string `yaml:"tag,omitempty"`
+
 	// Ports is used to expose ports on the host machine to the
 	// containers port in the <host>:<container> syntax
-	Ports []ContainerPort `yaml:"ports,omitempty"`
+	Ports []string `yaml:"ports,omitempty"`
+
+	// Volume stores the volumes we should create and maintain for the container (e.g. <name>_container_<vol>_nitro_volume)
+	Volumes []string `yaml:"volumes,omitempty"`
 
 	WebGui  int    `yaml:"web,omitempty"`
 	EnvFile string `yaml:"env_file,omitempty"`
-}
-
-// ContainerPort is a helper to map a host port to a containers port.
-type ContainerPort struct {
-	Host      string
-	Container string
 }
 
 // AddContainer adds a new container config to an config. It will validate there are no other
@@ -126,7 +126,7 @@ func (c *Config) AddContainer(container Container) error {
 
 	c.Containers = append(c.Containers, container)
 
-	return fmt.Errorf("not yet implemented")
+	return nil
 }
 
 // Database is the struct used to represent a database engine
@@ -438,15 +438,7 @@ func (c *Config) AddSite(s Site) error {
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(site *Site) error {
-	for i := range c.Sites {
-		if c.Sites[i].Hostname == site.Hostname {
-			fmt.Println("removing", c.Sites[i].Hostname)
-		}
-	}
-
-	fmt.Println("new sites", c.Sites)
-
-	return nil
+	return fmt.Errorf("please use `nitro edit` to manually remove a site for now")
 }
 
 // DisableXdebug takes a sites hostname and sets the xdebug option

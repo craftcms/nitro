@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Added
+- Added `containers configure` command. [#170](https://github.com/craftcms/nitro/issues/170)
+
 ## 2.0.0-beta.3 - 2021-02-05
 
 ### Added
