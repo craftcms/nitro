@@ -24,7 +24,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 	}
 
-	cmd.AddCommand(configureCommand(home, docker, output))
+	cmd.AddCommand(
+		configureCommand(home, docker, output),
+		sshCommand(home, docker, output),
+	)
 
 	return cmd
 }
