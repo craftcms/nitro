@@ -26,9 +26,9 @@ func Container(home string, container config.Container, details types.ContainerJ
 		return false
 	}
 
-	customEnvs := make(map[string]string)
-
 	if container.EnvFile != "" {
+		customEnvs := make(map[string]string)
+
 		content, err := ioutil.ReadFile(filepath.Join(home, ".nitro", "."+container.Name))
 		if err != nil {
 			return false
@@ -38,18 +38,18 @@ func Container(home string, container config.Container, details types.ContainerJ
 			parts := strings.Split(line, "=")
 			customEnvs[parts[0]] = parts[1]
 		}
-	}
 
-	// check the containers env against the file and merge
-	for _, e := range details.Config.Env {
-		parts := strings.Split(e, "=")
-		env := parts[0]
-		val := parts[1]
+		// check the containers env against the file and merge
+		for _, e := range details.Config.Env {
+			parts := strings.Split(e, "=")
+			env := parts[0]
+			val := parts[1]
 
-		// is there a custom env val for the variable?
-		if custom, ok := customEnvs[env]; ok {
-			if val != custom {
-				return false
+			// is there a custom env val for the variable?
+			if custom, ok := customEnvs[env]; ok {
+				if val != custom {
+					return false
+				}
 			}
 		}
 	}
