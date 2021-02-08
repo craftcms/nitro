@@ -7,6 +7,9 @@ const (
 	// NitroContainer is used to identify a custom container added to the config
 	NitroContainer = "com.craftcms.nitro.container"
 
+	// NitroContainerPort is used to identify a custom containers port in the config
+	NitroContainerPort = "com.craftcms.nitro.container-port"
+
 	// DatabaseCompatibility is the compatibility of the database (e.g. mariadb and mysql are compatible)
 	DatabaseCompatibility = "com.craftcms.nitro.database-compatibility"
 

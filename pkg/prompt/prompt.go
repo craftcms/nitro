@@ -286,6 +286,8 @@ func RunApply(cmd *cobra.Command, args []string, output terminal.Outputer) error
 		return err
 	}
 
+	fmt.Println("entered:", apply)
+
 	// if apply is false return nil
 	if !apply {
 		return nil
@@ -293,6 +295,7 @@ func RunApply(cmd *cobra.Command, args []string, output terminal.Outputer) error
 
 	// run the apply command
 	for _, c := range cmd.Parent().Commands() {
+		fmt.Println(c.Use)
 		// set the apply command
 		if c.Use == "apply" {
 			return c.RunE(c, args)
