@@ -8,8 +8,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # add custom containers
-  nitro container configure`
+const exampleText = `  # manage custom containers
+  nitro container
+
+  # add a new container
+  nitro container new
+
+  # ssh into a custom container
+  nitro container ssh`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -25,7 +31,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	cmd.AddCommand(
-		configureCommand(home, docker, output),
+		newCommand(home, docker, output),
 		sshCommand(home, docker, output),
 	)
 

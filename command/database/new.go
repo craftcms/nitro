@@ -12,14 +12,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var configureExampleTest = `  # configure a new database engine
-  nitro db configure`
+var newExampleTest = `  # add a new database engine
+  nitro db new`
 
-func configureCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func newCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "configure",
-		Short:   "Configure a new database engine",
-		Example: configureExampleTest,
+		Use:     "new",
+		Short:   "Add a database engine",
+		Example: newExampleTest,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
 		},

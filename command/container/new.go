@@ -19,15 +19,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func configureCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func newCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "configure",
-		Short: "Configure a custom container",
+		Use:   "new",
+		Short: "Add a new custom container",
 		Example: `  # add a new custom container
-  nitro container configure
+  nitro container new
 
   # expand the number of images from the search
-  nitro container configure --limit 50`,
+  nitro container new --limit 50`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// verify the config exists
 			_, err := config.Load(home)
