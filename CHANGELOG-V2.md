@@ -3,24 +3,23 @@
 ## Unreleased
 
 ### Added
-- Added `container` commands to allow users to create custom containers. [#170](https://github.com/craftcms/nitro/issues/170)
-- Added `db configure` to setup new database engines.
+- Added the `container new` command, which creates new containers based on any available Docker image. ([#170](https://github.com/craftcms/nitro/issues/170))
+- Added the `container ssh` command.
+- Added the `db new` command, which creates new database engine containers.
 
 ### Changed
-- Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
-- The `init` command will use mariadb on any Arm based device.
+- The `init` command will now use MariaDB rather than MySQL on any Arm-based device.
+- All commands that rely on existing config files now prompt to run the `init` command if no configuration file is found.
 
 ### Fixed
-- Fixed a bug where the `add` and `create` commands did not validate database names. [#243](https://github.com/craftcms/nitro/issues/243)
+- Fixed a bug where the `add` and `create` commands weren’t validating database names. ([#243](https://github.com/craftcms/nitro/issues/243))
 
 ## 2.0.0-beta.3 - 2021-02-05
 
-### Added
-- Nitro will now remove entries from your hosts file when running `destroy`. (#235)[https://github.com/craftcms/nitro/issues/235]
-
 ### Changed
-- Nitro will use MariaDB instead of MySQL on M1 Macs. [#234](https://github.com/craftcms/nitro/issues/234)
-- The `add` command will prompt to run `init` if no configuration file is found. [#237](https://github.com/craftcms/nitro/issues/237)
+- The `destroy` command now removes entries from the `hosts` file. ([#235](https://github.com/craftcms/nitro/issues/235))
+- The `init` command will now use MariaDB rather than MySQL on M1 Macs. ([#234](https://github.com/craftcms/nitro/issues/234))
+- The `add` command will now prompt to run `init` if no configuration file is found. ([#237](https://github.com/craftcms/nitro/issues/237))
 
 ## 2.0.0-beta.2 - 2021-02-04
 
@@ -34,7 +33,7 @@
 ### Fixed
 - Fixed a bug where Nitro wasn’t respecting custom service ports.
 - Fixed a bug where the `update` command wasn’t immediately updating containers.
-- Fixed a bug where the `add` command would overwrite an existing `.env` file. ([#232](https://github.com/craftcms/nitro/issues/232)
+- Fixed a bug where the `add` command would overwrite an existing `.env` file. ([#232](https://github.com/craftcms/nitro/issues/232))
 
 ## 2.0.0-beta.1 - 2021-02-03
 
