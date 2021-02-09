@@ -14,16 +14,23 @@ import (
 	"github.com/craftcms/nitro/pkg/labels"
 )
 
+var (
+	ErrMisMatchedImage  = fmt.Errorf("container image does not match")
+	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
+	ErrEnvFileNotFound  = fmt.Errorf("unable to find the containers env file")
+	ErrMisMatchedEnvVar = fmt.Errorf("container environment variables do not match")
+)
+
 // Container checks if a custom container is up to date with the configuration
-func Container(home string, container config.Container, details types.ContainerJSON) bool {
+func Container(home string, container config.Container, details types.ContainerJSON) error {
 	// check if the image does not match - this uses the image name, not ref
-	if fmt.Sprintf("docker.io/%s:%s", container.Image, container.Tag) != details.Config.Image {
-		return false
+	if fmt.Sprintf("%s:%s", container.Image, container.Tag) != details.Config.Image {
+		return ErrMisMatchedImage
 	}
 
 	// check the name has been changed
 	if details.Config.Labels[labels.NitroContainer] != container.Name {
-		return false
+		return ErrMisMatchedLabel
 	}
 
 	if container.EnvFile != "" {
@@ -31,7 +38,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 
 		content, err := ioutil.ReadFile(filepath.Join(home, ".nitro", "."+container.Name))
 		if err != nil {
-			return false
+			return ErrEnvFileNotFound
 		}
 
 		for _, line := range strings.Split(string(content), "\n") {
@@ -48,7 +55,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 			// is there a custom env val for the variable?
 			if custom, ok := customEnvs[env]; ok {
 				if val != custom {
-					return false
+					return ErrMisMatchedEnvVar
 				}
 			}
 		}
@@ -57,7 +64,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 	// TODO(jasonmccallister) check the port mappings
 	// TODO(jasonmccallister) check the volumes
 
-	return false
+	return nil
 }
 
 // Site takes the home directory, site, and a container to determine if they
