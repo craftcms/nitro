@@ -45,6 +45,12 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	// there is a container, so inspect it and make sure it matched
 	container := containers[0]
 
+	if container.State != "running" {
+		if err := docker.ContainerStart(ctx, container.ID, types.ContainerStartOptions{}); err != nil {
+			return "", err
+		}
+	}
+
 	// get the containers details that include environment variables
 	details, err := docker.ContainerInspect(ctx, container.ID)
 	if err != nil {

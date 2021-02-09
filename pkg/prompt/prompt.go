@@ -52,6 +52,13 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 	// get all of the containers as a list
 	var engineOpts []string
 	for _, c := range containers {
+		// start the container if not running
+		if c.State != "running" {
+			if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+				return false, "", "", "", "", err
+			}
+		}
+
 		engineOpts = append(engineOpts, strings.TrimLeft(c.Names[0], "/"))
 	}
 
