@@ -7,28 +7,33 @@ build:
 build-macos:
 	GOOS=darwin go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-macos-arm:
-	GOOS=darwin GOARH=arm64 go1.16rc1 build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+	GOOS=darwin GOARCH=arm64 go1.16rc1 build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-api:
 	go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitrod ./cmd/nitrod
 build-win:
 	GOOS="windows" go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro.exe ./cmd/nitro
 build-linux:
 	GOOS=linux go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
+build-linux-arm:
+	GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 upx: build
 	upx --brute nitro
 
-beta: beta-macos beta-macos-arm beta-win beta-linux
+beta: beta-macos beta-macos-arm beta-win beta-linux beta-linux-arm
 beta-macos: build-macos
-	zip -X macos_nitro_${VERSION}.zip nitro
+	tar -cvzf nitro_darwin_x84_64.tar.gz nitro
 	rm nitro
 beta-macos-arm: build-macos-arm
-	zip -X macos_arm_nitro_${VERSION}.zip nitro
+	tar -cvzf nitro_darwin_arm64.tar.gz nitro
 	rm nitro
 beta-win: build-win
-	zip -X windows_nitro_${VERSION}.zip nitro.exe
+	zip -X nitro_windows_x86_64.zip nitro.exe
 	rm nitro.exe
 beta-linux: build-linux
-	zip -X linux_nitro_${VERSION}.zip nitro
+	tar -cvzf nitro_linux_x86_64.tar.gz nitro
+	rm nitro
+beta-linux-arm: build-linux-arm
+	tar -cvzf nitro_linux_arm64.tar.gz nitro
 	rm nitro
 
 mod:
