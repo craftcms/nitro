@@ -9,6 +9,9 @@
 - Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
 - The `init` command will use mariadb on any Arm based device.
 
+### Fixed
+- Fixed a bug where the `add` and `create` commands did not validate database names. [#243](https://github.com/craftcms/nitro/issues/243)
+
 ## 2.0.0-beta.3 - 2021-02-05
 
 ### Added

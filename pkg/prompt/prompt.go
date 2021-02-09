@@ -70,7 +70,7 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 	}
 
 	// ask the user for the database to create
-	db, err := output.Ask("Enter the new database name", "", ":", nil)
+	db, err := output.Ask("Enter the new database name", "", ":", &validate.DatabaseName{})
 	if err != nil {
 		return false, "", "", "", "", err
 	}
