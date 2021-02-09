@@ -40,11 +40,12 @@ var (
 
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
-	Blackfire Blackfire  `yaml:"blackfire,omitempty"`
-	Databases []Database `yaml:"databases,omitempty"`
-	Services  Services   `yaml:"services"`
-	Sites     []Site     `yaml:"sites,omitempty"`
-	File      string     `yaml:"-"`
+	Containers []Container `yaml:"containers,omitempty"`
+	Blackfire  Blackfire   `yaml:"blackfire,omitempty"`
+	Databases  []Database  `yaml:"databases,omitempty"`
+	Services   Services    `yaml:"services"`
+	Sites      []Site      `yaml:"sites,omitempty"`
+	File       string      `yaml:"-"`
 
 	rw sync.RWMutex
 }
@@ -86,6 +87,46 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 type Blackfire struct {
 	ServerID    string `yaml:"server_id,omitempty"`
 	ServerToken string `yaml:"server_token,omitempty"`
+}
+
+// Container represents a custom container to add to nitro. Containers can be
+// publicly hosted on Docker Hub.
+type Container struct {
+	// Name is a uniq name, with no spaces or special characters and is used to generate the hostname
+	Name string `yaml:"name"`
+
+	// Image the is canonical name of the image to use for the container `docker.elastic.co/elasticsearch/elasticsearch`
+	Image string `yaml:"image"`
+
+	// Tag tells Nitro which docker image tag to use, it defaults to latest.
+	Tag string `yaml:"tag,omitempty"`
+
+	// Ports is used to expose ports on the host machine to the
+	// containers port in the <host>:<container> syntax
+	Ports []string `yaml:"ports,omitempty"`
+
+	// Volume stores the volumes we should create and maintain for the container (e.g. <name>_container_<vol>_nitro_volume)
+	Volumes []string `yaml:"volumes,omitempty"`
+
+	WebGui  int    `yaml:"web,omitempty"`
+	EnvFile string `yaml:"env_file,omitempty"`
+}
+
+// AddContainer adds a new container config to an config. It will validate there are no other
+// container names to avoid colision or duplicate ports.
+func (c *Config) AddContainer(container Container) error {
+	for _, e := range c.Containers {
+		// check the containers name
+		if e.Name == container.Name {
+			return fmt.Errorf("an existing container %q already exists", e.Name)
+		}
+
+		// TODO(jasonmccallister) check is a port already is in use
+	}
+
+	c.Containers = append(c.Containers, container)
+
+	return nil
 }
 
 // Database is the struct used to represent a database engine
@@ -397,15 +438,7 @@ func (c *Config) AddSite(s Site) error {
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(site *Site) error {
-	for i := range c.Sites {
-		if c.Sites[i].Hostname == site.Hostname {
-			fmt.Println("removing", c.Sites[i].Hostname)
-		}
-	}
-
-	fmt.Println("new sites", c.Sites)
-
-	return nil
+	return fmt.Errorf("please use `nitro edit` to manually remove a site for now")
 }
 
 // DisableXdebug takes a sites hostname and sets the xdebug option

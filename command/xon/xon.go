@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -22,26 +23,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Enable xdebug for a site",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			// ask if the apply command should run
-			apply, err := output.Confirm("Apply changes now", true, "?")
-			if err != nil {
-				return err
-			}
-
-			// if apply is false return nil
-			if !apply {
-				return nil
-			}
-
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					return c.RunE(c, args)
-				}
-			}
-
-			return nil
+			return prompt.RunApply(cmd, args, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config

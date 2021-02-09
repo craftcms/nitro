@@ -16,10 +16,12 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
+
 	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/labels"
@@ -359,6 +361,26 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Done()
 			}
 
+			if len(cfg.Containers) > 0 {
+				// get all of the containers
+				output.Info("Checking containers...")
+
+				for _, c := range cfg.Containers {
+					output.Pending("checking", fmt.Sprintf("%s.containers.nitro", c.Name))
+
+					// start, update or create the custom container
+					id, err := customcontainer.StartOrCreate(ctx, docker, home, network.ID, c)
+					if err != nil {
+						output.Warning()
+						return err
+					}
+
+					knownContainers[id] = true
+
+					output.Done()
+				}
+			}
+
 			if len(cfg.Sites) > 0 {
 				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
 				output.Info("Checking sites…")
@@ -401,6 +423,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			for _, s := range cfg.Sites {
 				hostnames = append(hostnames, s.Hostname)
 				hostnames = append(hostnames, s.Aliases...)
+			}
+
+			// get custom container hostnames
+			for _, c := range cfg.Containers {
+				hostnames = append(hostnames, fmt.Sprintf("%s.containers.nitro", c.Name))
 			}
 
 			if len(hostnames) > 0 {
@@ -483,6 +510,16 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		sites["minio.service.nitro"] = &protob.Site{
 			Hostname: "minio.service.nitro",
 			Port:     9000,
+		}
+	}
+
+	// add any custom containers that need to be proxied
+	for _, c := range cfg.Containers {
+		if c.WebGui != 0 {
+			sites[fmt.Sprintf("%s.containers.nitro", c.Name)] = &protob.Site{
+				Hostname: fmt.Sprintf("%s.containers.nitro", c.Name),
+				Port:     int32(c.WebGui),
+			}
 		}
 	}
 

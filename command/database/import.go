@@ -128,6 +128,12 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			// get all of the containers as a list
 			var options []string
 			for _, c := range containers {
+				if c.State != "running" {
+					if err := docker.ContainerStart(cmd.Context(), c.ID, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
 				options = append(options, strings.TrimLeft(c.Names[0], "/"))
 			}
 

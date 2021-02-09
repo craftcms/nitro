@@ -147,7 +147,7 @@ func Databases(ctx context.Context, docker client.ContainerAPIClient, containerI
 		// get all the databases from the mysql engine
 		for _, d := range strings.Split(buf.String(), "\n") {
 			// ignore the system defaults
-			if d == "Database" || strings.Contains(d, `"Database`) || strings.Contains(d, `[Database`) || d == "information_schema" || d == "performance_schema" || d == "sys" || strings.Contains(d, "password on the command line") || d == "mysql" || d == "" {
+			if d == "Database" || strings.Contains(d, `"Database`) || strings.Contains(d, `?Database`) || strings.Contains(d, `[Database`) || d == "information_schema" || d == "performance_schema" || d == "sys" || strings.Contains(d, "password on the command line") || d == "mysql" || d == "" {
 				continue
 			}
 
