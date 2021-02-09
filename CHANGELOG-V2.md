@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Added
-- Added `containers configure` command. [#170](https://github.com/craftcms/nitro/issues/170)
+- Added `container` commands to allow users to create custom containers. [#170](https://github.com/craftcms/nitro/issues/170)
 
 ### Changed
 - Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
