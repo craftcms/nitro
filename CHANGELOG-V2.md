@@ -4,6 +4,7 @@
 
 ### Added
 - Added `container` commands to allow users to create custom containers. [#170](https://github.com/craftcms/nitro/issues/170)
+- Added `db configure` to setup new database engines.
 
 ### Changed
 - Commands that rely on existing config files now prompt to run the `init` command if there is no config file.
