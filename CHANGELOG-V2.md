@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.4 - 2021-02-09
 
 ### Added
 - Added the `container new` command, which creates new containers based on any available Docker image. ([#170](https://github.com/craftcms/nitro/issues/170))
