@@ -17,4 +17,4 @@ labels: bug
 ### Additional info
 
 - Nitro version:
-- Multipass version:
+- Docker version:
