@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Added the `blackfire` command to setup Blackfire credentials in the config file.
+
 ### Changed
 - Windows users will not be prompted to manually update their hosts file for hostnames to work.
 
