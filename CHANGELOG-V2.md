@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Changed
+- Windows users will not be prompted to manually update their hosts file for hostnames to work.
+
 ## 2.0.0-beta.4 - 2021-02-09
 
 ### Added

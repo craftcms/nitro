@@ -36,7 +36,10 @@ import (
 )
 
 var (
+	defaultFile     = "/etc/hosts"
+	hostnames       []string
 	knownContainers = map[string]bool{}
+	isWSL           = false
 )
 
 const exampleText = `  # apply changes from a config
@@ -146,6 +149,19 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
+			if isWSL {
+				content, err := hostedit.Update(defaultFile, "127.0.0.1", hostnames...)
+				if err != nil {
+					return err
+				}
+
+				output.Info(fmt.Sprintf("For your hostnames to work, add the following to `%s`:", `C:\Windows\System32\Drivers\etc\hosts`))
+
+				output.Info("---- COPY BELOW ----")
+				output.Info(content)
+				output.Info("---- COPY ABOVE ----")
+			}
+
 			output.Info("Nitro is up and running 😃")
 
 			return nil
@@ -158,7 +174,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// context just in case.
 				ctx = context.Background()
 			}
-			var hostnames []string
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -431,8 +446,10 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if len(hostnames) > 0 {
+				// is this wsl?
+				_, isWSL = os.LookupEnv("WSLENV")
+
 				// set the hosts file based on the OS
-				defaultFile := "/etc/hosts"
 				if runtime.GOOS == "windows" {
 					defaultFile = `C:\Windows\System32\Drivers\etc\hosts`
 				}
@@ -444,7 +461,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 
 				// if the hosts file is not updated
-				if !updated {
+				if !updated && !isWSL {
 					// get the executable
 					nitro, err := os.Executable()
 					if err != nil {
