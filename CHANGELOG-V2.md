@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Added the `bridge` command to share sites over a local network.
 - Added the `--region` and `--port` flags to the `share` command.
 - Added the `blackfire on` and `blackfire off` commands to setup Blackfire credentials in the config file and enable blackfire per site.
 

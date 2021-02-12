@@ -161,7 +161,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	// add flags to the command
 	cmd.Flags().String("region", "us", "which ngrok region to use for sharing")
 	cmd.Flags().String("port", "80", "which port to use for ngrok")
-	// --host-header
 
 	return cmd
 }
