@@ -3,10 +3,10 @@
 ## Unreleased
 
 ### Added
-- Added the `blackfire` command to setup Blackfire credentials in the config file.
+- Added the `blackfire on` and `blackfire off` commands to setup Blackfire credentials in the config file and enable blackfire per site.
 
 ### Changed
-- Windows users will not be prompted to manually update their hosts file for hostnames to work.
+- Windows users will now be prompted to manually update their hosts file for hostnames to work.
 
 ## 2.0.0-beta.4 - 2021-02-09
 
