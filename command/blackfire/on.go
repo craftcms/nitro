@@ -18,7 +18,6 @@ func onCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 	cmd := &cobra.Command{
 		Use:     "on",
 		Short:   "Enable blackfire for a site",
-		Aliases: []string{"bon"},
 		Example: onTest,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
