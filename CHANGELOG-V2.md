@@ -3,9 +3,11 @@
 ## Unreleased
 
 ### Added
+- Added the `--region` and `--port` flags to the `share` command.
 - Added the `blackfire on` and `blackfire off` commands to setup Blackfire credentials in the config file and enable blackfire per site.
 
 ### Changed
+- The `share` command now properly seta all site aliases as host headers in ngrok.
 - Windows users will now be prompted to manually update their hosts file for hostnames to work.
 
 ## 2.0.0-beta.4 - 2021-02-09
