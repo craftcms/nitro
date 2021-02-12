@@ -461,7 +461,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 
 				// if the hosts file is not updated
-				if !updated && !isWSL {
+				if !updated {
 					// get the executable
 					nitro, err := os.Executable()
 					if err != nil {
