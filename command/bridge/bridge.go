@@ -177,7 +177,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				r.URL.Host = target.Host
 				r.URL.Scheme = target.Scheme
-				r.Header.Set("X-Forwarded-Host", target.Host)
+				r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 				r.Host = target.Host
 
 				logger.Println(r.RequestURI)
