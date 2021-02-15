@@ -199,6 +199,5 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 }
 
 func isIpv4(ipAddress string) bool {
-	ipAddress = strings.Trim(ipAddress, " ")
-	return ipRegex.MatchString(ipAddress)
+	return ipRegex.MatchString(strings.Trim(ipAddress, " "))
 }
