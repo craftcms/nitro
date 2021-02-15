@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -134,6 +135,29 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[selected]
 			}
 
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
+			if err != nil {
+				return err
+			}
+
+			if len(containers) == 0 {
+				return fmt.Errorf("no containers found")
+			}
+
+			// start the containers
+			for _, c := range containers {
+				// start the containers if not running
+				if c.State != "running" {
+					for _, command := range cmd.Root().Commands() {
+						if command.Use == "start" {
+							if err := command.RunE(cmd, []string{}); err != nil {
+								return err
+							}
+						}
+					}
+				}
+			}
+
 			target, err := url.Parse(fmt.Sprintf("http://%s", site.Hostname))
 			if err != nil {
 				return err
@@ -145,6 +169,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				port = "8000"
 			}
 
+			logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
 			// create the handle
 			http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
 				proxy := httputil.NewSingleHostReverseProxy(target)
@@ -154,8 +180,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 				r.Host = target.Host
 
-				log.SetOutput(os.Stdout)
-				log.Println(r.RequestURI)
+				logger.Println(r.RequestURI)
 
 				proxy.ServeHTTP(rw, r)
 			})
