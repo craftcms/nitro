@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"runtime"
 
 	"github.com/docker/docker/api/types"
@@ -15,8 +14,8 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/certinstall"
 	"github.com/craftcms/nitro/pkg/labels"
-	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -98,76 +97,30 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 					return err
 				}
 
-				buf.ReadFrom(tr)
+				if _, err := buf.ReadFrom(tr); err != nil {
+					return err
+				}
 			}
 
 			// create a temp file
-			f, err := ioutil.TempFile(os.TempDir(), "nitro-cert")
+			temp, err := ioutil.TempFile(os.TempDir(), "nitro-local-root-ca")
 			if err != nil {
 				return fmt.Errorf("unable to create a temporary file, %w", err)
 			}
+			defer temp.Close()
 
 			// write the certificate to the temporary file
-			if _, err := f.Write(buf.Bytes()); err != nil {
+			if _, err := temp.Write(buf.Bytes()); err != nil {
 				return fmt.Errorf("unable to write the certificate to the temporary file, %w", err)
 			}
-			defer f.Close()
 
 			output.Done()
 
 			output.Info("Installing certificate (you might be prompted for your password)")
 
-			switch runtime.GOOS {
-			case "linux":
-				// using the reference from: https://askubuntu.com/questions/645818/how-to-install-certificates-for-command-line
-				if err := sudo.Run("mv", "mv", f.Name(), fmt.Sprintf("/usr/local/share/ca-certificates/%s.crt", "nitro")); err != nil {
-					output.Info("Unable to automatically add certificate\n")
-					output.Info("To install the certificate, run the following command:")
-					output.Info(fmt.Sprintf("  sudo mv %s /usr/local/share/ca-certificates/%s.crt", f.Name(), "nitro"))
-					output.Info("  sudo update-ca-certificates")
-
-					return nil
-				}
-
-				// update the ca certs
-				if err := sudo.Run("update-ca-certificates", "update-ca-certificates"); err != nil {
-					output.Info("Unable to automatically add certificate\n")
-					output.Info("To install the certificate, run the following command:")
-					output.Info("  sudo update-ca-certificates")
-
-					return nil
-				}
-			case "windows":
-				// automate the certificate installation from this article: https://superuser.com/a/1506481/215387
-				// we cannot assume PowerShell is enabled, so we use certutil.exe
-				if err := exec.Command("certutil.exe", "-addstore", "root", f.Name()).Run(); err != nil {
-					output.Info("Unable to automatically add certificate\n")
-					output.Info("To install the certificate, run the following command:")
-					output.Info(fmt.Sprintf("  certutil.exe -addstore root %s", f.Name()))
-
-					return nil
-				}
-			default:
-				// add the certificate to the keychain
-				if err := sudo.Run("security", "security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k", "/Library/Keychains/System.keychain", f.Name()); err != nil {
-					output.Info("Unable to automatically add certificate\n")
-					output.Info("To install the certificate, run the following command:")
-					output.Info(fmt.Sprintf("  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s", f.Name()))
-
-					return nil
-				}
-			}
-
-			// clean up
-			output.Pending("cleaning up")
-
-			// remove the temp file
-			if err := os.Remove(f.Name()); err != nil {
-				output.Warning()
-
-				output.Info("unable to remove temporary file, it will be automatically removed on reboot")
-			} else {
-				output.Done()
+			// install the certificate
+			if err := certinstall.Install(temp.Name(), runtime.GOOS); err != nil {
+				return err
 			}
 
 			output.Info("Nitro certificates are now trusted 🔒")
