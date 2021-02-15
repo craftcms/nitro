@@ -150,15 +150,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if isWSL {
-				content, err := hostedit.Update(defaultFile, "127.0.0.1", hostnames...)
-				if err != nil {
-					return err
-				}
-
 				output.Info(fmt.Sprintf("For your hostnames to work, add the following to `%s`:", `C:\Windows\System32\Drivers\etc\hosts`))
-
 				output.Info("---- COPY BELOW ----")
-				output.Info(content)
+				output.Info(fmt.Sprintf(`# <nitro>
+%s\t%s
+# </nitro>`, "127.0.0.1", hostnames))
 				output.Info("---- COPY ABOVE ----")
 			}
 
