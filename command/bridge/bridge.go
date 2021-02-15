@@ -175,21 +175,21 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
 				proxy := httputil.NewSingleHostReverseProxy(target)
 
+				original := r.Host
+
+				r.Host = target.Host
 				r.URL.Host = target.Host
 				r.URL.Scheme = target.Scheme
-				r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-				r.Host = target.Host
+				r.Header.Set("X-Forwarded-Host", original)
 
-				logger.Println(r.RequestURI)
+				logger.Println(r.Header.Get("Host"), r.RequestURI)
 
 				proxy.ServeHTTP(rw, r)
 			})
 
 			output.Info(fmt.Sprintf("bridge server listening on http://%s:%s", ip, port))
 
-			log.Fatal(http.ListenAndServe(ip+":"+port, nil))
-
-			return nil
+			return http.ListenAndServe(ip+":"+port, nil)
 		},
 	}
 
