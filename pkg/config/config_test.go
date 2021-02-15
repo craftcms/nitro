@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -1146,6 +1147,70 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			}
 			if got := c.ListOfSitesByDirectory(tt.args.home, tt.args.wd); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.ListOfSitesByDirectory() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_AllSitesWithHostnames(t *testing.T) {
+	type fields struct {
+		Containers []Container
+		Blackfire  Blackfire
+		Databases  []Database
+		Services   Services
+		Sites      []Site
+		File       string
+		rw         sync.RWMutex
+	}
+	type args struct {
+		site Site
+		addr string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   map[string][]string
+	}{
+		{
+			name: "can get all of the sites with the address",
+			fields: fields{
+				Sites: []Site{
+					{
+						Hostname: "example.com",
+						Aliases:  []string{"example.net"},
+					},
+					{
+						Hostname: "craftcms.com",
+						Aliases:  []string{"craftcms.net"},
+					},
+				},
+			},
+			args: args{
+				site: Site{
+					Hostname: "example.com",
+					Aliases:  []string{"example.net"},
+				},
+				addr: "127.0.0.1",
+			},
+			want: map[string][]string{
+				"127.0.0.1": {"craftcms.net", "craftcms.com"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{
+				Containers: tt.fields.Containers,
+				Blackfire:  tt.fields.Blackfire,
+				Databases:  tt.fields.Databases,
+				Services:   tt.fields.Services,
+				Sites:      tt.fields.Sites,
+				File:       tt.fields.File,
+				rw:         tt.fields.rw,
+			}
+			if got := c.AllSitesWithHostnames(tt.args.site, tt.args.addr); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Config.AllSitesWithHostnames() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -50,6 +50,23 @@ type Config struct {
 	rw sync.RWMutex
 }
 
+// AllSitesWithHostnames takes the address, which is the nitro-proxy
+// ip address, and the current site and returns a list of all the
+func (c *Config) AllSitesWithHostnames(site Site, addr string) map[string][]string {
+	hostnames := make(map[string][]string)
+	for _, s := range c.Sites {
+		// don't add the current site, since we can use the 127.0.0.1 address
+		if site.Hostname == s.Hostname {
+			continue
+		}
+
+		// add the sites hostname and aliases to the list
+		hostnames[addr] = append(s.Aliases, s.Hostname)
+	}
+
+	return hostnames
+}
+
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
