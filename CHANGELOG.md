@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.5 - 2021-02-16
 
 ### Added
 - Added the `bridge` command, for sharing a site over a local network.
