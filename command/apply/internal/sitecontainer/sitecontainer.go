@@ -26,7 +26,7 @@ var (
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 )
 
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, blackfire config.Blackfire) (string, error) {
+func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Host+"="+site.Hostname)
@@ -39,7 +39,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 	// if there are no containers we need to create one
 	if len(containers) == 0 {
-		return create(ctx, docker, home, networkID, site)
+		return create(ctx, docker, home, networkID, site, cfg)
 	}
 
 	// there is a container, so inspect it and make sure it matched
@@ -58,7 +58,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	}
 
 	// if the container is out of date
-	if !match.Site(home, site, details, blackfire) {
+	if !match.Site(home, site, details, cfg.Blackfire) {
 		fmt.Print("- updating… ")
 
 		// stop container
@@ -71,13 +71,13 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 			return "", err
 		}
 
-		return create(ctx, docker, home, networkID, site)
+		return create(ctx, docker, home, networkID, site, cfg)
 	}
 
 	return container.ID, nil
 }
 
-func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site) (string, error) {
+func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// create the container
 	image := fmt.Sprintf(NginxImage, site.Version)
 
@@ -106,6 +106,15 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	// get the sites environment variables
 	envs := site.AsEnvs("host.docker.internal")
+
+	// does the config have blackfire credentials
+	if cfg.Blackfire.ServerID != "" {
+		envs = append(envs, "BLACKFIRE_SERVER_ID="+cfg.Blackfire.ServerID)
+	}
+
+	if cfg.Blackfire.ServerToken != "" {
+		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+cfg.Blackfire.ServerToken)
+	}
 
 	// set the labels
 	lbls := map[string]string{

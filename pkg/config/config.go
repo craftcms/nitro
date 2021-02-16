@@ -50,6 +50,23 @@ type Config struct {
 	rw sync.RWMutex
 }
 
+// AllSitesWithHostnames takes the address, which is the nitro-proxy
+// ip address, and the current site and returns a list of all the
+func (c *Config) AllSitesWithHostnames(site Site, addr string) map[string][]string {
+	hostnames := make(map[string][]string)
+	for _, s := range c.Sites {
+		// don't add the current site, since we can use the 127.0.0.1 address
+		if site.Hostname == s.Hostname {
+			continue
+		}
+
+		// add the sites hostname and aliases to the list
+		hostnames[addr] = append(s.Aliases, s.Hostname)
+	}
+
+	return hostnames
+}
+
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
@@ -174,6 +191,7 @@ type Site struct {
 	Extensions []string `yaml:"extensions,omitempty"`
 	Webroot    string   `yaml:"webroot"`
 	Xdebug     bool     `yaml:"xdebug"`
+	Blackfire  bool     `yaml:"blackfire"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
@@ -441,6 +459,27 @@ func (c *Config) RemoveSite(site *Site) error {
 	return fmt.Errorf("please use `nitro edit` to manually remove a site for now")
 }
 
+// DisableBlackfire takes a sites hostname and sets the blackfire option
+// to false. If the site cannot be found, it returns an error.
+func (c *Config) DisableBlackfire(site string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	// find the site by the hostname
+	for i, s := range c.Sites {
+		if s.Hostname == site {
+			// only toggle if the setting is true
+			if c.Sites[i].Blackfire {
+				c.Sites[i].Blackfire = false
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown site, %s", site)
+}
+
 // DisableXdebug takes a sites hostname and sets the xdebug option
 // to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableXdebug(site string) error {
@@ -450,7 +489,31 @@ func (c *Config) DisableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
-			c.Sites[i].Xdebug = false
+			// only toggle if the setting is true
+			if c.Sites[i].Xdebug {
+				c.Sites[i].Xdebug = false
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown site, %s", site)
+}
+
+// EnableBlackfire takes a sites hostname and sets the xdebug option
+// to true. If the site cannot be found, it returns an error.
+func (c *Config) EnableBlackfire(site string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	// find the site by the hostname
+	for i, s := range c.Sites {
+		if s.Hostname == site {
+			if !c.Sites[i].Blackfire {
+				c.Sites[i].Blackfire = true
+			}
+
 			return nil
 		}
 	}
@@ -467,7 +530,9 @@ func (c *Config) EnableXdebug(site string) error {
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
-			c.Sites[i].Xdebug = true
+			if !c.Sites[i].Xdebug {
+				c.Sites[i].Xdebug = true
+			}
 
 			return nil
 		}

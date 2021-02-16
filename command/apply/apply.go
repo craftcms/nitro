@@ -36,7 +36,10 @@ import (
 )
 
 var (
+	defaultFile     = "/etc/hosts"
+	hostnames       []string
 	knownContainers = map[string]bool{}
+	isWSL           = false
 )
 
 const exampleText = `  # apply changes from a config
@@ -146,6 +149,15 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
+			if isWSL {
+				output.Info(fmt.Sprintf("For your hostnames to work, add the following to `%s`:", `C:\Windows\System32\Drivers\etc\hosts`))
+				output.Info("---- COPY BELOW ----")
+				output.Info(fmt.Sprintf(`# <nitro>
+%s\t%s
+# </nitro>`, "127.0.0.1", hostnames))
+				output.Info("---- COPY ABOVE ----")
+			}
+
 			output.Info("Nitro is up and running 😃")
 
 			return nil
@@ -158,7 +170,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				// context just in case.
 				ctx = context.Background()
 			}
-			var hostnames []string
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -390,7 +401,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("checking", site.Hostname)
 
 					// start, update or create the site container
-					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg.Blackfire)
+					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg)
 					if err != nil {
 						output.Warning()
 						return err
@@ -431,8 +442,10 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if len(hostnames) > 0 {
+				// is this wsl?
+				_, isWSL = os.LookupEnv("WSLENV")
+
 				// set the hosts file based on the OS
-				defaultFile := "/etc/hosts"
 				if runtime.GOOS == "windows" {
 					defaultFile = `C:\Windows\System32\Drivers\etc\hosts`
 				}

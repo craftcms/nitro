@@ -1,27 +1,26 @@
-package xon
+package blackfire
 
 import (
-	"fmt"
 	"os"
-
-	"github.com/docker/docker/client"
-	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/docker/docker/client"
+	"github.com/spf13/cobra"
 )
 
-const exampleText = `  # example command
-  nitro xon`
+const offText = `  # disable blackfire for a site
+  nitro blackfire off`
 
-// NewCommand returns the command that is used to enable xdebug for a specific site. It will first check
-// if the current working directory or prompt the user for a site.
-func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func offCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "xon",
-		Short:   "Enable xdebug for a site",
-		Example: exampleText,
+		Use:     "off",
+		Short:   "Disable blackfire for a site",
+		Example: offText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return prompt.VerifyInit(cmd, args, home, output)
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, output)
 		},
@@ -57,7 +56,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				site = sites[selected]
 			case 1:
-				output.Info("Enabling xdebug for", sites[0].Hostname)
+				output.Info("Disabling Blackfire for", sites[0].Hostname)
 
 				site = sites[0]
 			default:
@@ -69,21 +68,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[selected]
 			}
 
-			// php 7.0 does not support xdebug
-			if site.Version == "7.0" {
-				return fmt.Errorf("Xdebug with PHP 7.0 is not supported")
-			}
-
-			// if blackfire is set, we need to disable it to profile the site
-			if site.Blackfire {
+			// if xdebug is set, we need to disable it to profile the site
+			if site.Xdebug {
 				// disable blackfire for the sites hostname
-				if err := cfg.DisableBlackfire(site.Hostname); err != nil {
+				if err := cfg.DisableXdebug(site.Hostname); err != nil {
 					return err
 				}
 			}
 
-			// enable xdebug for the sites hostname
-			if err := cfg.EnableXdebug(site.Hostname); err != nil {
+			// disable blackfire for the sites hostname
+			if err := cfg.DisableBlackfire(site.Hostname); err != nil {
 				return err
 			}
 
