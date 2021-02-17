@@ -14,7 +14,7 @@ import (
 // GitHub API using a URL, runtime.GOOS, and runtime.GOSARCH. It will return
 // a Release struct or an error.
 type Finder interface {
-	Find(url, oper, arch string) (*Release, error)
+	Find(url, system, arch string) (*Release, error)
 }
 
 // Downloader takes a URL (to a Github release) and a file path to save the file to.
@@ -107,7 +107,7 @@ type githubReleaseFinder struct {
 	HTTPClient *http.Client
 }
 
-func (r *githubReleaseFinder) Find(url, oper, arch string) (*Release, error) {
+func (r *githubReleaseFinder) Find(url, system, arch string) (*Release, error) {
 	if r.HTTPClient == nil {
 		r.HTTPClient = http.DefaultClient
 	}
@@ -129,20 +129,22 @@ func (r *githubReleaseFinder) Find(url, oper, arch string) (*Release, error) {
 		return nil, fmt.Errorf("unexpected status code from github: %d", resp.StatusCode)
 	}
 
-	releases := githubReleases{}
+	releases := []githubReleases{}
 	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
 		return nil, err
 	}
 
-	version := releases.TagName
+	release := releases[0]
+
+	version := release.TagName
 
 	// find the asset from the download
-	for _, asset := range releases.Assets {
-		if strings.Contains(asset.Name, oper) && strings.Contains(asset.Name, arch) {
+	for _, asset := range release.Assets {
+		if strings.Contains(asset.Name, system) && strings.Contains(asset.Name, arch) {
 			return &Release{
 				URL:             asset.BrowserDownloadURL,
 				ContentType:     asset.ContentType,
-				OperatingSystem: oper,
+				OperatingSystem: system,
 				Version:         version,
 			}, nil
 		}

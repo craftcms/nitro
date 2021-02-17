@@ -20,6 +20,9 @@ import (
 var (
 	// LatestURL is the URL to the github releases
 	LatestURL = "https://api.github.com/repos/craftcms/nitro/releases/latest"
+
+	// ReleasesURL is all releases including preview releases
+	ReleasesURL = "https://api.github.com/repos/craftcms/nitro/releases"
 )
 
 const exampleText = `  # update to the latest version of the nitro CLI
@@ -29,13 +32,17 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "self-update",
 		Short:   "Update nitro to the latest version",
-		Hidden:  true,
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Checking for updates")
 
+			u := LatestURL
+			if cmd.Flag("dev").Value.String() == "true" {
+				u = ReleasesURL
+			}
+
 			// find the latest release
-			release, err := releases.NewFinder().Find(LatestURL, runtime.GOOS, runtime.GOARCH)
+			release, err := releases.NewFinder().Find(u, runtime.GOOS, runtime.GOARCH)
 			if err != nil {
 				return err
 			}
@@ -160,6 +167,8 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool("dev", true, "install the latest beta")
 
 	return cmd
 }
