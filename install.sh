@@ -158,6 +158,7 @@ function getNitro {
       echo "  sudo cp ./$EXECUTABLE_NAME $FINAL_DIR_LOCATION/$EXECUTABLE_NAME"
       echo "  $EXECUTABLE_NAME init"
       echo
+      exit 1
     else
       echo
       echo "Running with sufficient permissions to attempt to move $EXECUTABLE_NAME to $FINAL_DIR_LOCATION"
