@@ -84,7 +84,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			output.Done()
 
 			// find the network
-			// create filters for the development environment
 			networkFilter := filters.NewArgs()
 			networkFilter.Add("name", "nitro-network")
 

@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Changed
+- The `composer` command now uses the `craftcms/cli` docker image and runs in the same network as the nitro sites. [#241](https://github.com/craftcms/nitro/issues/241)
+
 ## 2.0.0-beta.5 - 2021-02-16
 
 ### Added

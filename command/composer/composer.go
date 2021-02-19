@@ -10,6 +10,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -44,34 +45,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Args:               cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var version string
-
-			// get the version from the args
-			var newArgs []string
-			for i, a := range args {
-				// get the version if using =
-				if strings.Contains(a, "--composer-version=") {
-					parts := strings.Split(a, "=")
-					version = parts[len(parts)-1]
-					continue
-				}
-
-				// get the version if using a space
-				if a == "--composer-version" {
-					version = args[i+1]
-					continue
-				}
-
-				// append the new args
-				newArgs = append(newArgs, a)
-			}
-
-			// if the version is not set, use the default
-			if version == "" {
-				version = "2"
-			}
-
-			// reassign the args
-			args = newArgs
+			version, args = versionFromArgs(args)
 
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -111,7 +85,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				output.Done()
 			}
 
-			image := fmt.Sprintf("docker.io/library/%s:%s", "composer", version)
+			image := fmt.Sprintf("docker.io/craftcms/%s:%s-dev", "cli", version)
 
 			// filter for the image ref
 			filter := filters.NewArgs()
@@ -123,9 +97,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				return fmt.Errorf("unable to get a list of images, %w", err)
 			}
 
-			// remove the image ref filter
-			filter.Del("reference", image)
-
 			// if we don't have the image, pull it
 			if len(images) == 0 {
 				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
@@ -136,6 +107,26 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				buf := &bytes.Buffer{}
 				if _, err := buf.ReadFrom(rdr); err != nil {
 					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
+				}
+			}
+
+			// remove the image ref filter
+			filter.Del("reference", image)
+
+			// find the network
+			networkFilter := filters.NewArgs()
+			networkFilter.Add("name", "nitro-network")
+
+			// check if the network needs to be created
+			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: networkFilter})
+			if err != nil {
+				return fmt.Errorf("unable to list the docker networks, %w", err)
+			}
+
+			var networkID string
+			for _, n := range networks {
+				if n.Name == "nitro-network" || strings.TrimLeft(n.Name, "/") == "nitro-network" {
+					networkID = n.ID
 				}
 			}
 
@@ -184,6 +175,13 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				},
 				Volume: &pathVolume,
 				Path:   path,
+				NetworkConfig: &network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						"nitro-network": {
+							NetworkID: networkID,
+						},
+					},
+				},
 			}
 
 			// create the container
@@ -226,7 +224,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	}
 
 	// set flags for the command
-	cmd.Flags().String("composer-version", "2", "which composer version to use")
+	cmd.Flags().String("php-version", "7.4", "which php version to use")
 
 	return cmd
 }
@@ -246,4 +244,33 @@ func name(path, version string) string {
 
 	// remove the first underscore
 	return strings.TrimLeft(n, "_")
+}
+
+func versionFromArgs(args []string) (string, []string) {
+	var version string
+	var newArgs []string
+	for i, a := range args {
+		// get the version if using =
+		if strings.Contains(a, "--php-version=") {
+			parts := strings.Split(a, "=")
+			version = parts[len(parts)-1]
+			continue
+		}
+
+		// get the version if using a space
+		if a == "--php-version" {
+			version = args[i+1]
+			continue
+		}
+
+		// append the new args
+		newArgs = append(newArgs, a)
+	}
+
+	// if the version is not set, use the default
+	if version == "" {
+		version = "7.4"
+	}
+
+	return version, newArgs
 }

@@ -7,16 +7,18 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 )
 
 // Options are used to pass container specific details to the create func
 type Options struct {
-	Image    string
-	Commands []string
-	Labels   map[string]string
-	Volume   *types.Volume
-	Path     string
+	Image         string
+	Commands      []string
+	Labels        map[string]string
+	Volume        *types.Volume
+	Path          string
+	NetworkConfig *network.NetworkingConfig
 }
 
 // CreateContainer will create a new container for running composer with a local path and volume for caching downloads.
@@ -32,7 +34,8 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 			Cmd:    opts.Commands,
 			Tty:    false,
 			Labels: opts.Labels,
-			Env:    []string{"COMPOSER_HOME=/root"},
+			// Env:        []string{"COMPOSER_HOME=/app/.composer/"},
+			Entrypoint: []string{"/usr/bin/composer"},
 		},
 		&container.HostConfig{Mounts: []mount.Mount{
 			{
@@ -47,7 +50,7 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 			},
 		},
 		},
-		nil,
+		opts.NetworkConfig,
 		nil,
 		"",
 	)
