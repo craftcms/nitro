@@ -5,6 +5,9 @@
 ### Changed
 - The `composer` command now uses the `craftcms/cli` docker image and runs in the same network as the nitro sites. [#241](https://github.com/craftcms/nitro/issues/241)
 
+### Fixed
+- Fixed an error where Nitro could not determine a database engine for MariaDB backups.
+
 ### Removed
 - The `--composer-version` flag on the `composer` command has been replaced with `--php-version`.
 
