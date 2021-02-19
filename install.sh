@@ -49,7 +49,7 @@ function checkPlatform {
 
 checkPlatform
 
-version=$(curl -s https://api.github.com/repos/craftcms/nitro/releases | grep -i -m 1 tag_name | head -1 | sed 's/\(\"tag_name\": \"\(.*\)\",\)/\2/' | tr -d '[:space:]')
+version=$(curl -s https://api.github.com/repos/craftcms/nitro/releases | grep -i -m 1 tag_name | head -1 | sed 's/\("tag_name": "\(.*\)",\)/\2/' | tr -d '[:space:]')
 
 if [ ! "$version" ]; then
   echo "There was a problem trying to automatically install Nitro. You can try to install manually:"
