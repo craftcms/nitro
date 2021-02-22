@@ -7,6 +7,7 @@
 
 ### Fixed
 - Fixed an error where Nitro could not determine a database engine for MariaDB backups.
+- Fixed an error where `destroy` would remove containers unrelated to Nitro [#250](https://github.com/craftcms/nitro/issues/250).
 
 ### Removed
 - The `--composer-version` flag on the `composer` command has been replaced with `--php-version`.

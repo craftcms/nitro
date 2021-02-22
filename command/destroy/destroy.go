@@ -68,7 +68,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all related containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{
-				All: true,
+				All:     true,
+				Filters: filter,
 			})
 			if err != nil {
 				return fmt.Errorf("unable to list the containers, %w", err)
