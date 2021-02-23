@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Added the `--output-only` flag on the `trust` command to display the Nitro root certificate without installing it.
+
 ### Changed
 - The `composer` command now uses the `craftcms/cli` docker image and runs in the same network as the nitro sites. [#241](https://github.com/craftcms/nitro/issues/241)
 
