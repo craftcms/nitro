@@ -24,8 +24,11 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # get the root certificate for the proxy
+const (
+	certificatePath = "/data/caddy/pki/authorities/local/root.crt"
+	exampleText     = `  # get the root certificate for the proxy
   nitro trust`
+)
 
 // New returns `trust` to retrieve the certificates from the nitro proxy and install on the
 // host machine. The CA is used to sign certificates for websites and adding the certificate
@@ -67,7 +70,7 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 
 			// verify the file exists in the container
 			for {
-				stat, err := docker.ContainerStatPath(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
+				stat, err := docker.ContainerStatPath(ctx, containerID, certificatePath)
 				if err != nil {
 					continue
 				}
@@ -78,8 +81,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// copy the file from the container
-			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
-			if err != nil || stat.Mode.IsRegular() == false {
+			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, certificatePath)
+			if err != nil || !stat.Mode.IsRegular() {
 				output.Warning()
 				return fmt.Errorf("unable to get the certificate from the container, %w", err)
 			}
@@ -128,6 +131,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool("output-only", false, "show the certificate without importing")
 
 	return cmd
 }
