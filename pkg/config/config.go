@@ -175,7 +175,7 @@ func (d *Database) GetHostname() (string, error) {
 // networking options for these types of services. We plan to support "custom" container options to make local users
 // development even better.
 type Services struct {
-	DynamoDB bool `json:"dynamo_db"`
+	DynamoDB bool `json:"dynamodb"`
 	Mailhog  bool `json:"mailhog"`
 	Minio    bool `json:"minio"`
 	Redis    bool `json:"redis"`
