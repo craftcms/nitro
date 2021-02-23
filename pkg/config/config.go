@@ -10,9 +10,11 @@ import (
 	"sync"
 
 	"github.com/craftcms/nitro/pkg/helpers"
-	"gopkg.in/yaml.v3"
+
+	"sigs.k8s.io/yaml"
 )
 
+// FileName is the default name for the yaml file
 const FileName = "nitro.yaml"
 
 var (
@@ -40,12 +42,12 @@ var (
 
 // Config represents the nitro-dev.yaml users add for local development.
 type Config struct {
-	Containers []Container `yaml:"containers,omitempty"`
-	Blackfire  Blackfire   `yaml:"blackfire,omitempty"`
-	Databases  []Database  `yaml:"databases,omitempty"`
-	Services   Services    `yaml:"services"`
-	Sites      []Site      `yaml:"sites,omitempty"`
-	File       string      `yaml:"-"`
+	Containers []Container `json:"containers,omitempty" yaml:"containers,omitempty"`
+	Blackfire  Blackfire   `json:"blackfire,omitempty" yaml:"blackfire,omitempty"`
+	Databases  []Database  `json:"databases,omitempty" yaml:"databases,omitempty"`
+	Services   Services    `json:"services,omitempty" yaml:"services,omitempty"`
+	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
+	File       string      `json:"-"`
 
 	rw sync.RWMutex
 }
@@ -102,31 +104,31 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
-	ServerID    string `yaml:"server_id,omitempty"`
-	ServerToken string `yaml:"server_token,omitempty"`
+	ServerID    string `json:"server_id,omitempty" yaml:"server_id,omitempty"`
+	ServerToken string `json:"server_token,omitempty" yaml:"server_token,omitempty"`
 }
 
 // Container represents a custom container to add to nitro. Containers can be
 // publicly hosted on Docker Hub.
 type Container struct {
 	// Name is a uniq name, with no spaces or special characters and is used to generate the hostname
-	Name string `yaml:"name"`
+	Name string `json:"name" yaml:"name"`
 
 	// Image the is canonical name of the image to use for the container `docker.elastic.co/elasticsearch/elasticsearch`
-	Image string `yaml:"image"`
+	Image string `json:"image" yaml:"image"`
 
 	// Tag tells Nitro which docker image tag to use, it defaults to latest.
-	Tag string `yaml:"tag,omitempty"`
+	Tag string `json:"tag" yaml:"tag"`
 
 	// Ports is used to expose ports on the host machine to the
 	// containers port in the <host>:<container> syntax
-	Ports []string `yaml:"ports,omitempty"`
+	Ports []string `json:"ports,omitempty" yaml:"ports,omitempty"`
 
 	// Volume stores the volumes we should create and maintain for the container (e.g. <name>_container_<vol>_nitro_volume)
-	Volumes []string `yaml:"volumes,omitempty"`
+	Volumes []string `json:"volumes,omitempty" yaml:"volumes,omitempty"`
 
-	WebGui  int    `yaml:"web,omitempty"`
-	EnvFile string `yaml:"env_file,omitempty"`
+	WebGui  int    `json:"web_gui,omitempty" yaml:"web_gui,omitempty"`
+	EnvFile string `json:"env_file,omitempty" yaml:"env_file,omitempty"`
 }
 
 // AddContainer adds a new container config to an config. It will validate there are no other
@@ -152,9 +154,9 @@ func (c *Config) AddContainer(container Container) error {
 // and version are directly related to the official docker
 // images on the docker hub.
 type Database struct {
-	Engine  string `yaml:"engine,omitempty"`
-	Version string `yaml:"version,omitempty"`
-	Port    string `yaml:"port,omitempty"`
+	Engine  string `json:"engine" yaml:"engine"`
+	Version string `json:"version" yaml:"version"`
+	Port    string `json:"port" yaml:"port"`
 }
 
 // GetHostname returns a friendly and predictable name for a database
@@ -173,25 +175,25 @@ func (d *Database) GetHostname() (string, error) {
 // networking options for these types of services. We plan to support "custom" container options to make local users
 // development even better.
 type Services struct {
-	DynamoDB bool `yaml:"dynamodb"`
-	Mailhog  bool `yaml:"mailhog"`
-	Minio    bool `yaml:"minio"`
-	Redis    bool `yaml:"redis"`
+	DynamoDB bool `json:"dynamo_db"`
+	Mailhog  bool `json:"mailhog"`
+	Minio    bool `json:"minio"`
+	Redis    bool `json:"redis"`
 }
 
 // Site represents a web application. It has a hostname, aliases (which
 // are alternate domains), the local path to the site, additional mounts
 // to add to the container, and the directory the index.php is located.
 type Site struct {
-	Hostname   string   `yaml:"hostname"`
-	Aliases    []string `yaml:"aliases,omitempty"`
-	Path       string   `yaml:"path"`
-	Version    string   `yaml:"version"`
-	PHP        PHP      `yaml:"php,omitempty"`
-	Extensions []string `yaml:"extensions,omitempty"`
-	Webroot    string   `yaml:"webroot"`
-	Xdebug     bool     `yaml:"xdebug"`
-	Blackfire  bool     `yaml:"blackfire"`
+	Hostname   string   `json:"hostname" yaml:"hostname"`
+	Aliases    []string `json:"aliases,omitempty" yaml:"aliases,omitempty"`
+	Path       string   `json:"path" yaml:"path"`
+	Version    string   `json:"version" yaml:"version"`
+	PHP        PHP      `json:"php,omitempty" yaml:"php,omitempty"`
+	Extensions []string `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	Webroot    string   `json:"webroot" yaml:"webroot"`
+	Xdebug     bool     `json:"xdebug" yaml:"xdebug"`
+	Blackfire  bool     `json:"blackfire" yaml:"blackfire"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
@@ -395,16 +397,16 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         bool   `yaml:"display_errors,omitempty"`
-	MaxExecutionTime      int    `yaml:"max_execution_time,omitempty"`
-	MaxInputVars          int    `yaml:"max_input_vars,omitempty"`
-	MaxInputTime          int    `yaml:"max_input_time,omitempty"`
-	MaxFileUpload         string `yaml:"max_file_upload,omitempty"`
-	MemoryLimit           string `yaml:"memory_limit,omitempty"`
-	OpcacheEnable         bool   `yaml:"opcache_enable,omitempty"`
-	OpcacheRevalidateFreq int    `yaml:"opcache_revalidate_freq,omitempty"`
-	PostMaxSize           string `yaml:"post_max_size,omitempty"`
-	UploadMaxFileSize     string `yaml:"upload_max_file_size,omitempty"`
+	DisplayErrors         bool   `json:"display_errors,omitempty"`
+	MaxExecutionTime      int    `json:"max_execution_time,omitempty"`
+	MaxInputVars          int    `json:"max_input_vars,omitempty"`
+	MaxInputTime          int    `json:"max_input_time,omitempty"`
+	MaxFileUpload         string `json:"max_file_upload,omitempty"`
+	MemoryLimit           string `json:"memory_limit,omitempty"`
+	OpcacheEnable         bool   `json:"opcache_enable,omitempty"`
+	OpcacheRevalidateFreq int    `json:"opcache_revalidate_freq,omitempty"`
+	PostMaxSize           string `json:"post_max_size,omitempty"`
+	UploadMaxFileSize     string `json:"upload_max_file_size,omitempty"`
 }
 
 // Load is used to return the unmarshalled config, and
@@ -456,7 +458,17 @@ func (c *Config) AddSite(s Site) error {
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(site *Site) error {
-	return fmt.Errorf("please use `nitro edit` to manually remove a site for now")
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	for i, s := range c.Sites {
+		if site.Hostname == s.Hostname {
+			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown site %q", site.Hostname)
 }
 
 // DisableBlackfire takes a sites hostname and sets the blackfire option
@@ -548,31 +560,22 @@ func (c *Config) Save() error {
 
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
-		// create the .nitro directory if it does not exist
 		dir, _ := filepath.Split(c.File)
-		if err := helpers.MkdirIfNotExists(dir); err != nil {
+
+		if err := c.createFile(dir); err != nil {
 			return err
 		}
-
-		// otherwise create it
-		f, err := os.Create(c.File)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		// try to chown otherwise be quiet
-		_ = f.Chown(os.Geteuid(), os.Getuid())
-	}
-
-	// unmarshal
-	data, err := yaml.Marshal(&c)
-	if err != nil {
-		return err
 	}
 
 	// open the file
-	f, err := os.OpenFile(c.File, os.O_SYNC|os.O_WRONLY, os.ModeAppend)
+	f, err := os.OpenFile(c.File, os.O_TRUNC|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// unmarshal
+	data, err := yaml.Marshal(&c)
 	if err != nil {
 		return err
 	}
@@ -583,6 +586,23 @@ func (c *Config) Save() error {
 	}
 
 	return nil
+}
+
+func (c *Config) createFile(dir string) error {
+	// create the .nitro directory if it does not exist
+	if err := helpers.MkdirIfNotExists(dir); err != nil {
+		return err
+	}
+
+	// otherwise create it
+	f, err := os.Create(c.File)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// try to chown otherwise be quiet
+	return f.Chown(os.Geteuid(), os.Getuid())
 }
 
 // GetFile returns the file location for the config

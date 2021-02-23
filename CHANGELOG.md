@@ -6,6 +6,7 @@
 - The `composer` command now uses the `craftcms/cli` docker image and runs in the same network as the nitro sites. [#241](https://github.com/craftcms/nitro/issues/241)
 
 ### Fixed
+- Fixed an error where `remove` would not remove a site from the config [#238](https://github.com/craftcms/nitro/issues/238).
 - Fixed an error where using relative paths on the `add` command would result in an error.
 - Fixed an error where Nitro could not determine a database engine for MariaDB backups.
 - Fixed an error where `destroy` would remove containers unrelated to Nitro [#250](https://github.com/craftcms/nitro/issues/250).

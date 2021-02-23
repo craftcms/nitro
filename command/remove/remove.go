@@ -28,19 +28,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// get all of the sites
-			var sites []string
+			var options []string
 			for _, s := range cfg.Sites {
 				// add the site to the list
-				sites = append(sites, s.Hostname)
+				options = append(options, s.Hostname)
 			}
 
 			// prompt for the site to remove
-			selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
+			selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 			if err != nil {
 				return err
 			}
 
-			site, err := cfg.FindSiteByHostName(sites[selected])
+			site, err := cfg.FindSiteByHostName(options[selected])
 			if err != nil {
 				return err
 			}
