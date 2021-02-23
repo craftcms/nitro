@@ -105,6 +105,17 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				}
 			}
 
+			// if we are only outputting the certificate to stdout
+			if cmd.Flag("output-only").Value.String() == "true" {
+				output.Done()
+
+				output.Info("Below is the contents of the local root certificate used for sites...\n")
+
+				output.Info(buf.String())
+
+				return nil
+			}
+
 			// create a temp file
 			temp, err := ioutil.TempFile(os.TempDir(), "nitro-local-root-ca")
 			if err != nil {
