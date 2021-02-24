@@ -2,20 +2,16 @@
 
 ## Unreleased
 
-### Added
-- Added the `--output-only` flag on the `trust` command to display the Nitro root certificate without installing it.
-
 ### Changed
-- The `composer` command now uses the `craftcms/cli` docker image and runs in the same network as the nitro sites. [#241](https://github.com/craftcms/nitro/issues/241)
+- The `trust` command now has an `--output-only` flag, which displays the Nitro root certificate without installing it.
+- The `composer` command now uses the `craftcms/cli` Docker image and runs in the same network as the site containers. [#241](https://github.com/craftcms/nitro/issues/241)
+- The `composer` command’s `--composer-version` flag has been renamed to `--php-version`.
 
 ### Fixed
-- Fixed an error where `remove` would not remove a site from the config [#238](https://github.com/craftcms/nitro/issues/238).
-- Fixed an error where using relative paths on the `add` command would result in an error.
-- Fixed an error where Nitro could not determine a database engine for MariaDB backups.
-- Fixed an error where `destroy` would remove containers unrelated to Nitro [#250](https://github.com/craftcms/nitro/issues/250).
-
-### Removed
-- The `--composer-version` flag on the `composer` command has been replaced with `--php-version`.
+- Fixed a bug where the `remove` command wasn’t removing the site from `nitro.yaml`. [#238](https://github.com/craftcms/nitro/issues/238).
+- Fixed an error that could occur when passing a relative path to the `add` command.
+- Fixed a bug where Nitro couldn’t determine the database engine for MariaDB backups.
+- Fixed a bug where the `destroy` command would remove containers unrelated to Nitro. [#250](https://github.com/craftcms/nitro/issues/250).
 
 ## 2.0.0-beta.5 - 2021-02-16
 
