@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.6 - 2021-02-24
 
 ### Changed
 - The `trust` command now has an `--output-only` flag, which displays the Nitro root certificate without installing it.
