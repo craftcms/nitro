@@ -8,7 +8,6 @@ builds:
     main: ./cmd/nitro/main.go
     goos:
       - linux
-      - windows
       - darwin
     goarch:
       - amd64
@@ -22,9 +21,6 @@ archives:
     replacements:
       386: i386
       amd64: x86_64
-    format_overrides:
-      - goos: windows
-        format: zip
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
