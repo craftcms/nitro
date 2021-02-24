@@ -24,8 +24,11 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # get the root certificate for the proxy
+const (
+	certificatePath = "/data/caddy/pki/authorities/local/root.crt"
+	exampleText     = `  # get the root certificate for the proxy
   nitro trust`
+)
 
 // New returns `trust` to retrieve the certificates from the nitro proxy and install on the
 // host machine. The CA is used to sign certificates for websites and adding the certificate
@@ -63,11 +66,11 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			containerID := containers[0].ID
 
 			// get the contents of the certificate from the container
-			output.Pending("getting certificate for Nitro…")
+			output.Pending("getting Nitro’s root site certificate…")
 
 			// verify the file exists in the container
 			for {
-				stat, err := docker.ContainerStatPath(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
+				stat, err := docker.ContainerStatPath(ctx, containerID, certificatePath)
 				if err != nil {
 					continue
 				}
@@ -78,8 +81,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			}
 
 			// copy the file from the container
-			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, "/data/caddy/pki/authorities/local/root.crt")
-			if err != nil || stat.Mode.IsRegular() == false {
+			rdr, stat, err := docker.CopyFromContainer(ctx, containerID, certificatePath)
+			if err != nil || !stat.Mode.IsRegular() {
 				output.Warning()
 				return fmt.Errorf("unable to get the certificate from the container, %w", err)
 			}
@@ -100,6 +103,15 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 				if _, err := buf.ReadFrom(tr); err != nil {
 					return err
 				}
+			}
+
+			// if we are only outputting the certificate to stdout
+			if cmd.Flag("output-only").Value.String() == "true" {
+				output.Done()
+
+				output.Info(buf.String())
+
+				return nil
 			}
 
 			// create a temp file
@@ -128,6 +140,8 @@ func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool("output-only", false, "show the certificate without importing")
 
 	return cmd
 }

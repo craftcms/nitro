@@ -41,7 +41,7 @@ func DetermineEngine(file string) (string, error) {
 		}
 
 		// check if its mysql
-		if strings.Contains(s.Text(), "MySQL") || strings.Contains(s.Text(), "mysqldump") || strings.Contains(s.Text(), "mariadb") {
+		if strings.Contains(s.Text(), "MySQL") || strings.Contains(s.Text(), "mysqldump") || strings.Contains(s.Text(), "mariadb") || strings.Contains(s.Text(), "MariaDB") {
 			engine = "mysql"
 			break
 		}

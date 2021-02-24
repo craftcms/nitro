@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/google/uuid"
@@ -45,7 +46,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var dir string
 			switch len(args) {
 			case 1:
-				dir = filepath.Join(wd, args[0])
+				// check if the path is using the ~
+				if strings.HasPrefix(args[0], "~") {
+					dir = strings.Replace(args[0], "~", home, 1)
+				} else {
+					dir = filepath.Join(args[0])
+				}
 
 				// make sure the directory exists
 				if !pathexists.IsDirectory(dir) {
