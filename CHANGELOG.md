@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- The `trust` command now saves Nitro's root certificate in the `.nitro` directory [#254](https://github.com/craftcms/nitro/issues/254).
+
 ### Fixed
 - Fixed a bug where the hosts file output was not correct on WSL machines [#253](https://github.com/craftcms/nitro/issues/253).
 
