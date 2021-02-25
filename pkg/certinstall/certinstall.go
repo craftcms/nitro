@@ -3,6 +3,7 @@ package certinstall
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -69,6 +70,13 @@ func Install(file, system string) error {
 		// update the ca certs
 		if err := sudo.Run(certTool, certTool); err != nil {
 			return err
+		}
+
+		// is this a wsl machine?
+		if dist, exists := os.LookupEnv("WSL_DISTRO_NAME"); exists {
+			user := os.Getenv("USER")
+			fmt.Println("Users on WSL will need to open a command prompt or terminal on Windows and run the following command:")
+			fmt.Printf(`certutil -addstore -f "Root" \\wsl$\%s\home\%s\.nitro\nitro.crt`, dist, user)
 		}
 	default:
 		// add the certificate to the macOS keychain
