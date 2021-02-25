@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed a bug where the hosts file output was not correct on WSL machines [#253](https://github.com/craftcms/nitro/issues/253).
+
 ## 2.0.0-beta.6 - 2021-02-24
 
 ### Changed

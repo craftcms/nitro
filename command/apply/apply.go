@@ -153,8 +153,8 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Info(fmt.Sprintf("For your hostnames to work, add the following to `%s`:", `C:\Windows\System32\Drivers\etc\hosts`))
 				output.Info("---- COPY BELOW ----")
 				output.Info(fmt.Sprintf(`# <nitro>
-%s\t%s
-# </nitro>`, "127.0.0.1", hostnames))
+%s %s
+# </nitro>`, "127.0.0.1", strings.Join(hostnames, " ")))
 				output.Info("---- COPY ABOVE ----")
 			}
 
