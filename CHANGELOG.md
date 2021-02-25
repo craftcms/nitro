@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.0-beta.7 - 2021-02-25
 
 ### Changed
 - The `trust` command now saves Nitro’s root certificate in the `~/.nitro` directory. ([#254](https://github.com/craftcms/nitro/issues/254))
