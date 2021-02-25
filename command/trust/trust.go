@@ -30,10 +30,10 @@ const (
   nitro trust`
 )
 
-// New returns `trust` to retrieve the certificates from the nitro proxy and install on the
+// NewCommand returns `trust` to retrieve the certificates from the nitro proxy and install on the
 // host machine. The CA is used to sign certificates for websites and adding the certificate
 // to the system allows TLS connections to be considered valid and trusted from the container.
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "trust",
 		Short:   "Trust certificates for environment",
