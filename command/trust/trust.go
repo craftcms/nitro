@@ -137,7 +137,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			defer cert.Close()
 
 			// copy the contents
-			if _, err := io.Copy(cert, temp); err != nil {
+			if _, err := io.Copy(cert, buf); err != nil {
 				return err
 			}
 
