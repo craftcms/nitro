@@ -14,12 +14,15 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// FileName is the default name for the yaml file
-const FileName = "nitro.yaml"
-
 var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
+
+	// ErrEmptyfile is returned when a config file is empty
+	ErrEmptyfile = fmt.Errorf("the config file appears to be empty")
+
+	// FileName is the default name for the yaml file
+	FileName = "nitro.yaml"
 
 	// DefaultEnvs is used to map a config to a known environment variable that is used
 	// on the container instances to their default values
@@ -413,10 +416,9 @@ type PHP struct {
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
 func Load(home string) (*Config, error) {
-	// set the config file
-	file := filepath.Join(home, ".nitro", FileName)
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return nil, ErrNoConfigFile
+	file, err := IsEmpty(home)
+	if err != nil {
+		return nil, err
 	}
 
 	// create the config
@@ -437,6 +439,23 @@ func Load(home string) (*Config, error) {
 
 	// return the config
 	return c, nil
+}
+
+// IsEmpty is used to check if the config file is empty
+func IsEmpty(home string) (string, error) {
+	// verify the file exists
+	file := filepath.Join(home, ".nitro", FileName)
+	stat, err := os.Stat(file)
+	if os.IsNotExist(err) {
+		return "", ErrNoConfigFile
+	}
+
+	// check if the file is empty
+	if stat.Size() == 0 {
+		return "", ErrEmptyfile
+	}
+
+	return file, nil
 }
 
 // AddSite takes a site and adds it to the config
