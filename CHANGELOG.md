@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Added the `--skip-trust` option to the `initialize` command.
+
 ### Changed
 - Nitro displays a friendly error when Docker is not running.
 

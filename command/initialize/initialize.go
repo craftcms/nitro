@@ -3,7 +3,6 @@ package initialize
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -20,6 +19,8 @@ import (
 
 const exampleText = `  # setup nitro
   nitro init`
+
+var skipApply, skipTrust bool
 
 // NewCommand takes a docker client and returns the init command for creating a new environment
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -100,24 +101,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// convert the apply flag to a boolean
-			skipApply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
-			if err != nil {
-				// don't do anything with the error
-				skipApply = false
-			}
-
-			// check if we need to run the
-			if !skipApply {
-				// TODO(jasonmccallister) make this better :)
-				for _, c := range cmd.Root().Commands() {
-					// set the apply command
+			// run the follow up commands
+			for _, c := range cmd.Root().Commands() {
+				// set the apply command
+				if !skipApply {
 					if c.Use == "apply" {
 						if err := c.RunE(c, args); err != nil {
 							return err
 						}
 					}
+				}
 
+				// set the apply command
+				if !skipTrust {
 					// set the trust command
 					if c.Use == "trust" {
 						if err := c.RunE(c, args); err != nil {
@@ -134,7 +130,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	// set flags for the command
-	cmd.Flags().Bool("skip-apply", false, "skip applying changes")
+	cmd.Flags().BoolVar(&skipApply, "skip-apply", false, "skip applying changes")
+	cmd.Flags().BoolVar(&skipTrust, "skip-trust", false, "skip trusting the root certificate")
 
 	return cmd
 }
