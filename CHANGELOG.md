@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Nitro displays a friendly error when Docker is not running.
+
 ### Fixed
 - Fixed a bug where empty config files would prevent commands from running [#256](https://github.com/craftcms/nitro/issues/256).
 - The `trust` command now properly formats output for WSL users [#257](https://github.com/craftcms/nitro/issues/257).

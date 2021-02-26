@@ -56,6 +56,14 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		Use:     "apply",
 		Short:   "Apply changes",
 		Example: exampleText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// is the docker api alive?
+			if _, err := docker.Ping(cmd.Context()); err != nil {
+				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+			}
+
+			return nil
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			// create a filter for the environment
 			filter := filters.NewArgs()

@@ -27,6 +27,14 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		Use:     "start",
 		Short:   "Start all containers",
 		Example: exampleText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// is the docker api alive?
+			if _, err := docker.Ping(cmd.Context()); err != nil {
+				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 

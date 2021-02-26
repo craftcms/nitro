@@ -24,9 +24,18 @@ const exampleText = `  # setup nitro
 // NewCommand takes a docker client and returns the init command for creating a new environment
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "init",
-		Short:   "Setup nitro",
-		Example: exampleText,
+		Use:           "init",
+		Short:         "Setup nitro",
+		Example:       exampleText,
+		SilenceErrors: false,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// is the docker api alive?
+			if _, err := docker.Ping(cmd.Context()); err != nil {
+				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			// check if there is a config file
@@ -99,9 +108,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check if we need to run the
-			if !skipApply && cmd.Parent() != nil {
+			if !skipApply {
 				// TODO(jasonmccallister) make this better :)
-				for _, c := range cmd.Parent().Commands() {
+				for _, c := range cmd.Root().Commands() {
 					// set the apply command
 					if c.Use == "apply" {
 						if err := c.RunE(c, args); err != nil {
