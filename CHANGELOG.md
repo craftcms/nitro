@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Added
-- Added the `--skip-trust` option to the `init` command.
+- Added the `--skip-trust` option to the `init` command to skip importing Nitro's root certificate.
 
 ### Changed
 - Nitro displays a friendly error when Docker is not running.
