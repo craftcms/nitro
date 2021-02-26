@@ -103,7 +103,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// run the follow up commands
 			for _, c := range cmd.Root().Commands() {
-				// set the apply command
+				// should we run the apply command
 				if !skipApply {
 					if c.Use == "apply" {
 						if err := c.RunE(c, args); err != nil {
@@ -112,9 +112,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				// set the apply command
 				if !skipTrust {
-					// set the trust command
+					// should we run the trust command
 					if c.Use == "trust" {
 						if err := c.RunE(c, args); err != nil {
 							return err
