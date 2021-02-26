@@ -21,6 +21,11 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 )
 
+type command struct {
+	Name     string
+	Commands []string
+}
+
 var (
 	// NginxImage is the image used for sites, with the PHP version
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
@@ -165,7 +170,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	// post installation commands
-	commands := map[string][]string{}
+	var commands []command
 
 	// check for a custom root and copt the template to the container
 	if site.Webroot != "web" {
@@ -183,24 +188,24 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			return "", err
 		}
 
-		commands["copy-nginx-file"] = []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}
-		commands["set-nginx-permissions"] = []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}
+		commands = append(commands, command{Commands: []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}})
+		commands = append(commands, command{Commands: []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}})
 	}
 
 	// check if there are custom extensions
 	for _, ext := range site.Extensions {
-		commands["installing-"+ext+"-extension"] = []string{"docker-php-ext-install", ext}
+		commands = append(commands, command{Name: "installing-" + ext + "-extension", Commands: []string{"docker-php-ext-install", ext}})
 	}
 
 	// run the commands
-	for n, c := range commands {
+	for _, c := range commands {
 		// create the exec
 		exec, err := docker.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
 			User:         "root",
 			AttachStdout: true,
 			AttachStderr: true,
 			Tty:          false,
-			Cmd:          c,
+			Cmd:          c.Commands,
 		})
 		if err != nil {
 			return "", err
@@ -216,13 +221,13 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		defer attach.Close()
 
 		// if the option is for a php extension, don't show output
-		if strings.Contains(n, "-extension") {
+		if strings.Contains(c.Name, "-extension") {
 			// read the output to pull the image
-			fmt.Print("installing ", c[len(c)-1], "… ")
+			fmt.Print("installing ", c.Commands[len(c.Commands)-1], "… ")
 
 			buf := &bytes.Buffer{}
 			if _, err := buf.ReadFrom(attach.Reader); err != nil {
-				return "", fmt.Errorf("unable to read output from container exect attach, %w", err)
+				return "", fmt.Errorf("unable to read output from container exec attach, %w", err)
 			}
 		} else {
 			// show the output to stdout and stderr
