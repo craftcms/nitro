@@ -31,6 +31,11 @@ var Version string
 // handle making changes to the Caddy Server via its local API. If no addr is
 // provided, it will set the default addr to http://127.0.0.1:2019
 func NewService(addr string) protob.NitroServer {
+	// set the nitro version on start
+	if env, ok := os.LookupEnv("NITRO_VERSION"); ok {
+		Version = env
+	}
+
 	return &Service{
 		Addr:     addr,
 		HTTP:     http.DefaultClient,
