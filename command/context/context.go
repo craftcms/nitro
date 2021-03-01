@@ -35,7 +35,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return yamlFmt(cfg)
 			}
 
-			output.Info("Craft Nitro", cmd.Parent().Version)
+			output.Info("Craft Nitro", cmd.Root().Version)
 			output.Info("")
 			output.Info("Configuration:\t", cfg.File)
 			output.Info("")
