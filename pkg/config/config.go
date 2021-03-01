@@ -11,7 +11,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/helpers"
 
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -53,7 +53,7 @@ type Config struct {
 	Databases  []Database  `json:"databases,omitempty" yaml:"databases,omitempty"`
 	Services   Services    `json:"services,omitempty" yaml:"services,omitempty"`
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
-	File       string      `json:"-"`
+	File       string      `json:"-" yaml:"-"`
 
 	rw sync.RWMutex
 }

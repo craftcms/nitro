@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/terminal"
