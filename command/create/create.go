@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
+	"github.com/craftcms/nitro/pkg/directory"
 	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/envedit"
 	"github.com/craftcms/nitro/pkg/pathexists"
@@ -68,7 +69,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			// check if the directory already exists
-			if exists := pathexists.IsDirectory(dir); exists {
+			if pathexists.IsDirectory(dir) && !directory.IsEmpty(dir) {
 				return fmt.Errorf("directory %q already exists", dir)
 			}
 
