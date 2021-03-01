@@ -19,7 +19,7 @@ build-linux-arm:
 upx: build
 	upx --brute nitro
 
-beta: beta-macos beta-macos-arm beta-win beta-linux beta-linux-arm
+beta: beta-macos beta-macos-arm beta-linux beta-linux-arm
 beta-macos: build-macos
 	tar -cvzf nitro_darwin_x84_64.tar.gz nitro
 	rm nitro
