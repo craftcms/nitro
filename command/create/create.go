@@ -37,7 +37,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, true, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default

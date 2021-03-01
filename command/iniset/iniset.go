@@ -32,7 +32,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Change PHP setting",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
