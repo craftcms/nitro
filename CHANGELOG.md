@@ -7,6 +7,7 @@
 
 ### Changed
 - The `create` command now uses `composer create-project` to allow `post-create-project-cmd` scripts.
+- The `create` command can now use existing directories that are empty.
 - Nitro displays a friendly error when Docker is not running.
 
 ### Fixed
