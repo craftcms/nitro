@@ -241,7 +241,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var envFile string
 			if createEnvfile {
 				// create the file
-				file := filepath.Join(home, ".nitro", "."+name)
+				file := filepath.Join(home, config.DirectoryName, "."+name)
 				if _, err := os.Create(file); err != nil {
 					output.Warning()
 

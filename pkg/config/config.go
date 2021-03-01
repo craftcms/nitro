@@ -9,12 +9,16 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/helpers"
 
 	"sigs.k8s.io/yaml"
 )
 
 var (
+	// DirectoryName is the name of the directory to store nitro configs
+	DirectoryName = ".nitro"
+
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
 
@@ -444,7 +448,7 @@ func Load(home string) (*Config, error) {
 // IsEmpty is used to check if the config file is empty
 func IsEmpty(home string) (string, error) {
 	// verify the file exists
-	file := filepath.Join(home, ".nitro", FileName)
+	file := filepath.Join(home, config.DirectoryName, FileName)
 	stat, err := os.Stat(file)
 	if os.IsNotExist(err) {
 		return "", ErrNoConfigFile

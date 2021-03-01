@@ -36,7 +36,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 	if container.EnvFile != "" {
 		customEnvs := make(map[string]string)
 
-		content, err := ioutil.ReadFile(filepath.Join(home, ".nitro", "."+container.Name))
+		content, err := ioutil.ReadFile(filepath.Join(home, config.DirectoryName, "."+container.Name))
 		if err != nil {
 			return ErrEnvFileNotFound
 		}

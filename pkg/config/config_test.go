@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 func TestSite_AsEnvs(t *testing.T) {
@@ -277,7 +279,7 @@ func TestLoad(t *testing.T) {
 				home: testdir,
 			},
 			want: &Config{
-				File: filepath.Join(testdir, ".nitro", FileName),
+				File: filepath.Join(testdir, config.DirectoryName, FileName),
 				Blackfire: Blackfire{
 					ServerID:    "my-id",
 					ServerToken: "my-token",
@@ -1241,7 +1243,7 @@ func TestConfig_IsEmpty(t *testing.T) {
 				home: filepath.Clean("testdata"),
 			},
 			wantErr:  false,
-			wantFile: filepath.Join("testdata", ".nitro", "nitro.yaml"),
+			wantFile: filepath.Join("testdata", config.DirectoryName, "nitro.yaml"),
 		},
 	}
 	for _, tt := range tests {

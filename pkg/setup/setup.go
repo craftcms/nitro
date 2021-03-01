@@ -22,7 +22,7 @@ var (
 // disk space in version 2 as that is defined and managed at the docker
 // level. If anything fails, we return an error.
 func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
-	c := config.Config{File: filepath.Join(home, ".nitro", config.FileName)}
+	c := config.Config{File: filepath.Join(home, config.DirectoryName, config.FileName)}
 
 	output.Info("Setting up Nitro…")
 

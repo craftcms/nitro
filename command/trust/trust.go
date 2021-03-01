@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/certinstall"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -130,7 +131,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			output.Done()
 
 			// copy the certificate into the nitro dir
-			cert, err := os.Create(filepath.Join(home, ".nitro", "nitro.crt"))
+			cert, err := os.Create(filepath.Join(home, config.DirectoryName, "nitro.crt"))
 			if err != nil {
 				return err
 			}

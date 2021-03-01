@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/backup"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -91,7 +92,7 @@ func backupCommand(home string, docker client.CommonAPIClient, output terminal.O
 
 			output.Done()
 
-			output.Info("Backup saved in", filepath.Join(opts.Home, ".nitro", "backups", opts.ContainerName), "💾")
+			output.Info("Backup saved in", filepath.Join(opts.Home, config.DirectoryName, "backups", opts.ContainerName), "💾")
 
 			return nil
 		},

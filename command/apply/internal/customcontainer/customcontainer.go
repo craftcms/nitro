@@ -95,7 +95,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	var customEnvs []string
 	if c.EnvFile != "" {
 		// get the file
-		envFilePath := filepath.Join(home, ".nitro", "."+c.Name)
+		envFilePath := filepath.Join(home, config.DirectoryName, "."+c.Name)
 
 		// make sure it exists
 		if !pathexists.IsFile(envFilePath) {

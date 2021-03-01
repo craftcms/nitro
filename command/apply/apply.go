@@ -140,7 +140,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						}
 
 						// show where all backups are saved for this container
-						output.Info("Backups saved in", filepath.Join(home, ".nitro", name), "💾")
+						output.Info("Backups saved in", filepath.Join(home, config.DirectoryName, name), "💾")
 					}
 
 					// stop and remove a container we don't know about

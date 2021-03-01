@@ -162,7 +162,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						}
 
 						// show where all backups are saved for this container
-						output.Info("Backups saved in", filepath.Join(home, ".nitro", name), "💾")
+						output.Info("Backups saved in", filepath.Join(home, config.DirectoryName, name), "💾")
 					}
 
 					// stop the container
