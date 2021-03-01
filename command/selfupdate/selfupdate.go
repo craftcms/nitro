@@ -18,6 +18,9 @@ import (
 )
 
 var (
+	// DevRelease is used to download the latest non-stable release.
+	DevRelease bool
+
 	// LatestURL is the URL to the github releases
 	LatestURL = "https://api.github.com/repos/craftcms/nitro/releases/latest"
 
@@ -28,6 +31,7 @@ var (
 const exampleText = `  # update to the latest version of the nitro CLI
   nitro self-update`
 
+// NewCommand is used to help update a nitro cli using the latest version.
 func NewCommand(output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "self-update",
@@ -37,7 +41,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 			output.Info("Checking for updates")
 
 			u := LatestURL
-			if cmd.Flag("dev").Value.String() == "true" {
+			if DevRelease {
 				u = ReleasesURL
 			}
 
@@ -168,7 +172,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Bool("dev", true, "install the latest beta")
+	cmd.Flags().BoolVar(&DevRelease, "dev", false, "install the latest development release")
 
 	return cmd
 }
