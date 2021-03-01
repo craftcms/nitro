@@ -51,7 +51,7 @@ type Config struct {
 	Containers []Container `json:"containers,omitempty" yaml:"containers,omitempty"`
 	Blackfire  Blackfire   `json:"blackfire,omitempty" yaml:"blackfire,omitempty"`
 	Databases  []Database  `json:"databases,omitempty" yaml:"databases,omitempty"`
-	Services   Services    `json:"services,omitempty" yaml:"services,omitempty"`
+	Services   Services    `json:"services" yaml:"services"`
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
 	File       string      `json:"-" yaml:"-"`
 
