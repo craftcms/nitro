@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/helpers"
 
 	"sigs.k8s.io/yaml"
@@ -448,7 +447,7 @@ func Load(home string) (*Config, error) {
 // IsEmpty is used to check if the config file is empty
 func IsEmpty(home string) (string, error) {
 	// verify the file exists
-	file := filepath.Join(home, config.DirectoryName, FileName)
+	file := filepath.Join(home, DirectoryName, FileName)
 	stat, err := os.Stat(file)
 	if os.IsNotExist(err) {
 		return "", ErrNoConfigFile
