@@ -181,7 +181,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					// run composer install using the new directory
 					// we pass the command itself instead of the parent
 					// command
-					if err := c.RunE(c, []string{"install", "--ignore-platform-reqs"}); err != nil {
+					if err := c.RunE(c, []string{"create-project", "--ignore-platform-reqs"}); err != nil {
 						output.Info(err.Error())
 						break
 					}

@@ -6,9 +6,11 @@
 - Added the `--skip-trust` option to the `init` command to skip importing Nitro's root certificate.
 
 ### Changed
+- The `create` command now uses `composer create-project` to allow `post-create-project-cmd` scripts.
 - Nitro displays a friendly error when Docker is not running.
 
 ### Fixed
+- Fixed a bug where the version would not be returned from the Nitro API.
 - Fixed a bug where empty config files would prevent commands from running [#256](https://github.com/craftcms/nitro/issues/256).
 - The `trust` command now properly formats output for WSL users [#257](https://github.com/craftcms/nitro/issues/257).
 - Fixed a bug where permissions were sometimes not set on the nginx config.
