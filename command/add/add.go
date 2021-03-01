@@ -17,7 +17,7 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # add the current project as a site
+const exampleText = `  # add the current directory as a site
   nitro add
 
   # add a directory as the site
