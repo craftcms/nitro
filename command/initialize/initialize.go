@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -39,6 +40,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+
 			// check if there is a config file
 			_, err := config.Load(home)
 			if errors.Is(err, config.ErrNoConfigFile) {

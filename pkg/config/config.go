@@ -624,7 +624,11 @@ func (c *Config) createFile(dir string) error {
 	defer f.Close()
 
 	// try to chown otherwise be quiet
-	return f.Chown(os.Geteuid(), os.Getuid())
+	if err := f.Chown(os.Geteuid(), os.Getuid()); err != nil {
+		return nil
+	}
+
+	return nil
 }
 
 // GetFile returns the file location for the config
