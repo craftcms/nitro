@@ -3,6 +3,11 @@
 ## 2.0.1 - 2021-03-02
 
 ### Fixed
+- Fixed a bug that could occur when running `nitro add` before `nitro init`.
+
+## 2.0.1 - 2021-03-02
+
+### Fixed
 - Fixed a bug where `self-update` was not updating.
 
 ## 2.0.0 - 2021-03-02
