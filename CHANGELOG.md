@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## 2.0.1 - 2021-03-02
+
+### Fixed
+- Fixed a bug where `self-update` was not updating.
+
 ## 2.0.0 - 2021-03-02
 
 ### Added
