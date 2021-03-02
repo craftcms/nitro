@@ -129,6 +129,29 @@ func (r *githubReleaseFinder) Find(url, system, arch string) (*Release, error) {
 		return nil, fmt.Errorf("unexpected status code from github: %d", resp.StatusCode)
 	}
 
+	if strings.Contains(url, "latest") {
+		found := githubReleases{}
+		if err := json.NewDecoder(resp.Body).Decode(&found); err != nil {
+			return nil, err
+		}
+
+		version := found.TagName
+
+		// find the asset from the download
+		for _, asset := range found.Assets {
+			if strings.Contains(asset.Name, system) && strings.Contains(asset.Name, arch) {
+				return &Release{
+					URL:             asset.BrowserDownloadURL,
+					ContentType:     asset.ContentType,
+					OperatingSystem: system,
+					Version:         version,
+				}, nil
+			}
+		}
+
+		return nil, fmt.Errorf("unable to find the release")
+	}
+
 	releases := []githubReleases{}
 	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
 		return nil, err
