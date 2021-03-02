@@ -59,7 +59,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// parse limit flag
@@ -241,7 +241,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var envFile string
 			if createEnvfile {
 				// create the file
-				file := filepath.Join(home, ".nitro", "."+name)
+				file := filepath.Join(home, config.DirectoryName, "."+name)
 				if _, err := os.Create(file); err != nil {
 					output.Warning()
 

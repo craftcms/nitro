@@ -24,7 +24,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return prompt.VerifyInit(cmd, args, home, output)
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config

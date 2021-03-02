@@ -277,7 +277,7 @@ func TestLoad(t *testing.T) {
 				home: testdir,
 			},
 			want: &Config{
-				File: filepath.Join(testdir, ".nitro", FileName),
+				File: filepath.Join(testdir, DirectoryName, FileName),
 				Blackfire: Blackfire{
 					ServerID:    "my-id",
 					ServerToken: "my-token",
@@ -1212,6 +1212,55 @@ func TestConfig_AllSitesWithHostnames(t *testing.T) {
 			if got := c.AllSitesWithHostnames(tt.args.site, tt.args.addr); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.AllSitesWithHostnames() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestConfig_IsEmpty(t *testing.T) {
+	type args struct {
+		home string
+		file string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantErr  bool
+		wantFile string
+	}{
+		{
+			name: "empty file returns an error",
+			args: args{
+				home: filepath.Clean("testdata"),
+				file: "empty.yaml",
+			},
+			wantErr: true,
+		},
+		{
+			name: "non-empty file returns an error",
+			args: args{
+				home: filepath.Clean("testdata"),
+			},
+			wantErr:  false,
+			wantFile: filepath.Join("testdata", DirectoryName, "nitro.yaml"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.args.file != "" {
+				FileName = tt.args.file
+			}
+
+			file, err := IsEmpty(tt.args.home)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("IsEmpty() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.wantFile != file {
+				t.Errorf("IsEmpty() file = %v, wantFile %v", file, tt.wantFile)
+			}
+
+			// set the filename back to the original
+			FileName = "nitro.yaml"
 		})
 	}
 }

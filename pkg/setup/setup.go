@@ -22,14 +22,18 @@ var (
 // disk space in version 2 as that is defined and managed at the docker
 // level. If anything fails, we return an error.
 func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
-	c := config.Config{File: filepath.Join(home, ".nitro", config.FileName)}
+	c := config.Config{File: filepath.Join(home, config.DirectoryName, config.FileName)}
 
 	output.Info("Setting up Nitro…")
 
 	// if this is running on Apple Silicon, we need to prompt for mariadb instead until this issue is resolved: https://docs.docker.com/docker-for-mac/apple-m1/
 	switch runtime.GOARCH == "arm64" || runtime.GOARCH == "arm" {
 	case true:
-		output.Info("Apple computers with new silicon do not work with mysql images at this time...")
+		if runtime.GOOS == "darwin" {
+			output.Info("Apple computers with new silicon do not work with mysql images at this time...")
+		} else {
+			output.Info("ARM computers do not work with mysql images at this time...")
+		}
 
 		mariadb, err := output.Confirm("Would you like to use MariaDB", true, "?")
 		if err != nil {

@@ -22,7 +22,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Disable xdebug for a site",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config

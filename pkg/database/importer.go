@@ -72,7 +72,7 @@ func (importer *importer) Import(opts *ImportOptions, find func(engine, version 
 		importCommand = []string{fmt.Sprintf("--host=%s", opts.Hostname), "--port=" + opts.Port, "--username=nitro", opts.DatabaseName, "--file=" + opts.File}
 	default:
 		createCommand = []string{"--user=nitro", fmt.Sprintf("--host=%s", opts.Hostname), "-pnitro", fmt.Sprintf(`-e CREATE DATABASE IF NOT EXISTS %s;`, opts.DatabaseName)}
-		// https: //dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html
+		// https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html
 		importCommand = []string{"--user=nitro", fmt.Sprintf("--host=%s", opts.Hostname), "-pnitro", opts.DatabaseName, fmt.Sprintf(`-e source %s`, opts.File)}
 	}
 

@@ -15,7 +15,7 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # execut the craft queue command for a site
+const exampleText = `  # execute the craft queue command for a site
   nitro queue`
 
 // NewCommand returns the command to run queue listen inside of a sites container. It will check if the
@@ -106,12 +106,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// get the container path
-			var cmds []string
+			var commands []string
 			path := site.GetContainerPath()
 			if path != "" {
-				cmds = []string{"php", fmt.Sprintf("%s/%s", path, "craft"), "queue/listen", "--verbose"}
+				commands = []string{"php", fmt.Sprintf("%s/%s", path, "craft"), "queue/listen", "--verbose"}
 			} else {
-				cmds = []string{"php", "craft", "queue/listen", "--verbose"}
+				commands = []string{"php", "craft", "queue/listen", "--verbose"}
 			}
 
 			output.Info("Listening for queue jobs…")
@@ -120,7 +120,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			exec, err := docker.ContainerExecCreate(cmd.Context(), containers[0].ID, types.ExecConfig{
 				AttachStderr: true,
 				AttachStdout: true,
-				Cmd:          cmds,
+				Cmd:          commands,
 			})
 			if err != nil {
 				return err
@@ -133,19 +133,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 			defer resp.Close()
 
-			outputDone := make(chan error)
+			done := make(chan error)
 			go func() {
 				_, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.OutOrStderr(), resp.Reader)
-				outputDone <- err
+				done <- err
 			}()
 
 			select {
-			case err := <-outputDone:
+			case err := <-done:
 				if err != nil {
 					return err
 				}
 				break
-
 			case <-cmd.Context().Done():
 				return cmd.Context().Err()
 			}

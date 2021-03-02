@@ -1,5 +1,6 @@
 /nitro
 /dist
+/docs
 composer.lock
 /.idea
 /demo-site

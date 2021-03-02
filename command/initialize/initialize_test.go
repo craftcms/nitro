@@ -69,7 +69,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				labels.Proxy:        "true",
 				labels.ProxyVersion: "develop",
 			},
-			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro"},
+			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro", "NITRO_VERSION=develop"},
 		},
 		HostConfig: &container.HostConfig{
 			NetworkMode: "default",

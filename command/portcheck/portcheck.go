@@ -7,8 +7,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
+// Hostname is the default hostname to use for portchecks
+var Hostname = "localhost"
+
 const exampleText = `  # check if a port is in use
-  nitro portcheck 8080`
+  nitro portcheck 8080
+
+  # check a port on a specific hostname
+  nitro portcheck 8080 --hostname 192.168.7.241`
 
 // NewCommand returns the command to enable common nitro services. These services are provided as containers
 // and do not require a user to configure the ports/volumes or images.
@@ -19,21 +25,23 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 		Args:    cobra.MinimumNArgs(1),
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			hostname := cmd.Flag("hostname").Value.String()
+			// get the port from the args
+			port := args[0]
 
-			if err := portavail.Check(hostname, args[0]); err != nil {
-				output.Info("Port", args[0], "is already in use...")
+			// check if the port is in use
+			if err := portavail.Check(Hostname, port); err != nil {
+				output.Info("Port", port, "is already in use...")
 
 				return nil
 			}
 
-			output.Info("Port", args[0], "is available!")
+			output.Info("Port", port, "is available!")
 
 			return nil
 		},
 	}
 
-	cmd.Flags().String("hostname", "localhost", "The hostname to use when checking the port")
+	cmd.Flags().StringVar(&Hostname, "hostname", "localhost", "The hostname to use when checking the port")
 
 	return cmd
 }

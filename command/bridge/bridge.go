@@ -37,17 +37,17 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// get all of the interfaces
 			ifaces, err := net.Interfaces()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			// create the options for the prompt
-			var ifaceOptions []string
+			var interfaces []string
 
 			// get the ip addresses
 			for _, i := range ifaces {
 				addrs, err := i.Addrs()
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 
 				for _, addr := range addrs {
@@ -62,20 +62,20 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					// ignore ipv6
 					if isIpv4(ip.String()) {
 						if !strings.Contains(ip.String(), "127.0.0.1") {
-							ifaceOptions = append(ifaceOptions, ip.String())
+							interfaces = append(interfaces, ip.String())
 						}
 					}
 				}
 			}
 
 			// prompt for which interface to use
-			selected, err := output.Select(cmd.InOrStdin(), "Which IP address should we use for the bridge? ", ifaceOptions)
+			selected, err := output.Select(cmd.InOrStdin(), "Which IP address should we use for the bridge? ", interfaces)
 			if err != nil {
 				return err
 			}
 
 			// get the ip for the bridge
-			ip := ifaceOptions[selected]
+			ip := interfaces[selected]
 
 			// get the current working directory
 			wd, err := os.Getwd()

@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/helpers"
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -238,7 +239,7 @@ func Perform(ctx context.Context, docker client.ContainerAPIClient, opts *Option
 	}
 
 	// verify the backup dir exists
-	backupDir := filepath.Join(opts.Home, ".nitro", "backups")
+	backupDir := filepath.Join(opts.Home, config.DirectoryName, "backups")
 	if err := helpers.MkdirIfNotExists(backupDir); err != nil {
 		return err
 	}

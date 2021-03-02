@@ -184,7 +184,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 				labels.Proxy:        "true",
 				labels.ProxyVersion: version.Version,
 			},
-			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro"},
+			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro", "NITRO_VERSION=" + version.Version},
 		},
 		&container.HostConfig{
 			NetworkMode: "default",

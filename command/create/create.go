@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/create/internal/urlgen"
+	"github.com/craftcms/nitro/pkg/directory"
 	"github.com/craftcms/nitro/pkg/downloader"
 	"github.com/craftcms/nitro/pkg/envedit"
 	"github.com/craftcms/nitro/pkg/pathexists"
@@ -37,7 +38,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, true, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the url from args or the default
@@ -68,7 +69,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			// check if the directory already exists
-			if exists := pathexists.IsDirectory(dir); exists {
+			if pathexists.IsDirectory(dir) && !directory.IsEmpty(dir) {
 				return fmt.Errorf("directory %q already exists", dir)
 			}
 
@@ -181,7 +182,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					// run composer install using the new directory
 					// we pass the command itself instead of the parent
 					// command
-					if err := c.RunE(c, []string{"install", "--ignore-platform-reqs"}); err != nil {
+					if err := c.RunE(c, []string{"create-project", "--ignore-platform-reqs"}); err != nil {
 						output.Info(err.Error())
 						break
 					}

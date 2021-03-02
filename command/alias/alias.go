@@ -17,13 +17,14 @@ import (
 const exampleText = `  # add alias domains to a site
   nitro alias`
 
+// NewCommand allows users to set aliases or subdomains on an existing site. Useful for multi-site configurations.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "alias",
 		Short:   "Add alias domains",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return prompt.RunApply(cmd, args, output)
+			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
@@ -50,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var site config.Site
 			switch len(sites) {
 			case 0:
-				// prompt for the site to ssh into
+				// prompt for the site to alias
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
@@ -63,7 +64,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// add the label to get the site
 				site = sites[0]
 			default:
-				// prompt for the site to ssh into
+				// prompt for the site to alias
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err

@@ -3,7 +3,6 @@ package initialize
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -21,12 +20,23 @@ import (
 const exampleText = `  # setup nitro
   nitro init`
 
+var skipApply, skipTrust bool
+
 // NewCommand takes a docker client and returns the init command for creating a new environment
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "init",
-		Short:   "Setup nitro",
-		Example: exampleText,
+		Use:           "init",
+		Short:         "Setup nitro",
+		Example:       exampleText,
+		SilenceErrors: false,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// is the docker api alive?
+			if _, err := docker.Ping(cmd.Context()); err != nil {
+				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			// check if there is a config file
@@ -91,25 +101,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// convert the apply flag to a boolean
-			skipApply, err := strconv.ParseBool(cmd.Flag("skip-apply").Value.String())
-			if err != nil {
-				// don't do anything with the error
-				skipApply = false
-			}
-
-			// check if we need to run the
-			if !skipApply && cmd.Parent() != nil {
-				// TODO(jasonmccallister) make this better :)
-				for _, c := range cmd.Parent().Commands() {
-					// set the apply command
+			// run the follow up commands
+			for _, c := range cmd.Root().Commands() {
+				// should we run the apply command
+				if !skipApply {
 					if c.Use == "apply" {
 						if err := c.RunE(c, args); err != nil {
 							return err
 						}
 					}
+				}
 
-					// set the trust command
+				if !skipTrust {
+					// should we run the trust command
 					if c.Use == "trust" {
 						if err := c.RunE(c, args); err != nil {
 							return err
@@ -125,7 +129,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	// set flags for the command
-	cmd.Flags().Bool("skip-apply", false, "skip applying changes")
+	cmd.Flags().BoolVar(&skipApply, "skip-apply", false, "skip applying changes")
+	cmd.Flags().BoolVar(&skipTrust, "skip-trust", false, "skip trusting the root certificate")
 
 	return cmd
 }

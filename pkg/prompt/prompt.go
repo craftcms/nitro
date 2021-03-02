@@ -286,16 +286,20 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 	return &site, nil
 }
 
-func RunApply(cmd *cobra.Command, args []string, output terminal.Outputer) error {
-	// ask if the apply command should run
-	apply, err := output.Confirm("Apply changes now", true, "?")
-	if err != nil {
-		return err
-	}
+// RunApply will prompt a user to run the apply command. It optionally accepts a "force"
+// option that will not prompt the user and run apply regardless.
+func RunApply(cmd *cobra.Command, args []string, force bool, output terminal.Outputer) error {
+	if !force {
+		// ask if the apply command should run
+		apply, err := output.Confirm("Apply changes now", true, "?")
+		if err != nil {
+			return err
+		}
 
-	// if apply is false return nil
-	if !apply {
-		return nil
+		// if apply is false return nil
+		if !apply {
+			return nil
+		}
 	}
 
 	// run the apply command

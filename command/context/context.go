@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -35,7 +35,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return yamlFmt(cfg)
 			}
 
-			output.Info("Craft Nitro", cmd.Parent().Version)
+			output.Info("Craft Nitro", cmd.Root().Version)
 			output.Info("")
 			output.Info("Configuration:\t", cfg.File)
 			output.Info("")
