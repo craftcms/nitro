@@ -4,6 +4,7 @@
 
 ### Added
 - Added the `--skip-trust` option to the `init` command to skip importing Nitro's root certificate.
+- Added `.deb`, `.rpm`, and `.apk` packages to release artifacts to make it easier for Linux users to install Nitro.
 
 ### Changed
 - The `create` command now uses `composer create-project` to allow `post-create-project-cmd` scripts.
