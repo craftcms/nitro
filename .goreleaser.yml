@@ -1,6 +1,5 @@
 before:
   hooks:
-    - go mod download
     - go test -v ./...
 builds:
   - binary: nitro
