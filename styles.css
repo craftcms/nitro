@@ -153,6 +153,13 @@ pre ::selection {
   height: auto;
 }
 
+.tiny {
+  display: block;
+  margin-left: 1.75rem;
+  font-size: 75%;
+  opacity: 0.5;
+}
+
 @media screen and (max-width: 880px) {
   .container {
     display: block;
