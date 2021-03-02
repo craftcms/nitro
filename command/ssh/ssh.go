@@ -16,6 +16,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
+var (
+	// RootUser is used to tell the container to run as root and not the default user www-data
+	RootUser bool
+
+	// ProxyContainer is used to ssh into the proxy container and is mostly used for troubleshooting
+	ProxyContainer bool
+)
+
 const exampleText = `  # ssh into a container - assuming its the current working directory
   nitro ssh
 
@@ -58,9 +66,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", labels.Nitro)
 
-			// if this is for the proxy, skip the extra details
-			proxy := cmd.Flag("proxy").Value.String()
-			if proxy == "true" {
+			var containerID string
+			switch ProxyContainer {
+			case true:
 				// file by the container name
 				filter.Add("name", proxycontainer.ProxyName)
 
@@ -81,97 +89,95 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				return containerConnect(cmd, output, containers[0].ID)
-			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			// if there are found sites we want to show or connect to the first one, otherwise prompt for
-			// which site to connect to.
-			switch len(sites) {
-			case 0:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
-				}
-
-				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
-			case 1:
-				output.Info("connecting to", sites[0].Hostname)
-
-				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[0].Hostname)
+				containerID = containers[0].ID
 			default:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				// get a context aware list of sites
+				sites := cfg.ListOfSitesByDirectory(home, wd)
+
+				// create the options for the sites
+				var options []string
+				for _, s := range sites {
+					options = append(options, s.Hostname)
+				}
+
+				// if there are found sites we want to show or connect to the first one, otherwise prompt for
+				// which site to connect to.
+				switch len(sites) {
+				case 0:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					// add the label to get the site
+					filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				case 1:
+					output.Info("connecting to", sites[0].Hostname)
+
+					// add the label to get the site
+					filter.Add("label", labels.Host+"="+sites[0].Hostname)
+				default:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					// add the label to get the site
+					filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				}
+
+				// find the containers but limited to the site label
+				containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
 				if err != nil {
 					return err
 				}
 
-				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				// are there any containers??
+				if len(containers) == 0 {
+					return fmt.Errorf("unable to find an matching site")
+				}
+
+				// start the container if its not running
+				if containers[0].State != "running" {
+					if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
+				containerID = containers[0].ID
 			}
 
-			// find the containers but limited to the site label
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
+			// find the docker executable
+			cli, err := exec.LookPath("docker")
 			if err != nil {
 				return err
 			}
 
-			// are there any containers??
-			if len(containers) == 0 {
-				return fmt.Errorf("unable to find an matching site")
+			// check if the root user should be used
+			user := "www-data"
+			if RootUser || ProxyContainer {
+				user = "root"
 			}
 
-			// start the container if its not running
-			if containers[0].State != "running" {
-				if err := docker.ContainerStart(cmd.Context(), containers[0].ID, types.ContainerStartOptions{}); err != nil {
-					return err
-				}
+			// show a notice about changes
+			if user == "root" {
+				output.Info("using root… system changes are ephemeral…")
 			}
 
-			return containerConnect(cmd, output, containers[0].ID)
+			c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")
+
+			c.Stdin = cmd.InOrStdin()
+			c.Stderr = cmd.ErrOrStderr()
+			c.Stdout = cmd.OutOrStdout()
+
+			return c.Run()
 		},
 	}
 
-	cmd.Flags().Bool("root", false, "connect as root user")
-	cmd.Flags().Bool("proxy", false, "connect to proxy container")
+	cmd.Flags().BoolVar(&RootUser, "root", false, "connect as root user")
+	cmd.Flags().BoolVar(&ProxyContainer, "proxy", false, "connect to proxy container")
 
 	return cmd
-}
-
-func containerConnect(cmd *cobra.Command, output terminal.Outputer, containerID string) error {
-	// find the docker executable
-	cli, err := exec.LookPath("docker")
-	if err != nil {
-		return err
-	}
-
-	// check if the root user should be used
-	user := "www-data"
-	if cmd.Flag("root").Value.String() == "true" || cmd.Flag("proxy").Value.String() == "true" {
-		user = "root"
-	}
-
-	// show a notice about changes
-	if user == "root" {
-		output.Info("using root… system changes are ephemeral…")
-	}
-
-	c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")
-
-	c.Stdin = cmd.InOrStdin()
-	c.Stderr = cmd.ErrOrStderr()
-	c.Stdout = cmd.OutOrStdout()
-
-	return c.Run()
 }
