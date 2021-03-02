@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## 2.0.2 - 2021-03-02
+
+### Fixed
+- Fixed a bug that could occur when running `nitro add` before `nitro init`.
+
 ## 2.0.1 - 2021-03-02
 
 ### Fixed

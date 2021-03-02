@@ -33,6 +33,9 @@ var (
 
 // Create is used to create a new proxy container for the nitro development environment.
 func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, networkID string) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro+"=true")
 	filter.Add("reference", ProxyImage)
