@@ -16,35 +16,9 @@ build-linux:
 	GOOS=linux go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
 build-linux-arm:
 	GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
-upx: build
-	upx --brute nitro
-
-beta: beta-macos beta-macos-arm beta-linux beta-linux-arm
-beta-macos: build-macos
-	tar -cvzf nitro_darwin_x84_64.tar.gz nitro
-	rm nitro
-beta-macos-arm: build-macos-arm
-	tar -cvzf nitro_darwin_arm64.tar.gz nitro
-	rm nitro
-beta-win: build-win
-	zip -X nitro_windows_x86_64.zip nitro.exe
-	rm nitro.exe
-beta-linux: build-linux
-	tar -cvzf nitro_linux_x86_64.tar.gz nitro
-	rm nitro
-beta-linux-arm: build-linux-arm
-	tar -cvzf nitro_linux_arm64.tar.gz nitro
-	rm nitro
 
 mod:
 	go mod tidy && go mod verify
-
-upx-macos:
-	upx --brute nitro
-upx-win:
-	upx --brute nitro.exe
-upx-linux:
-	upx --brute nitro
 
 docker:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
