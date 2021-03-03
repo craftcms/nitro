@@ -403,16 +403,16 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         bool   `json:"display_errors,omitempty"`
-	MaxExecutionTime      int    `json:"max_execution_time,omitempty"`
-	MaxInputVars          int    `json:"max_input_vars,omitempty"`
-	MaxInputTime          int    `json:"max_input_time,omitempty"`
-	MaxFileUpload         string `json:"max_file_upload,omitempty"`
-	MemoryLimit           string `json:"memory_limit,omitempty"`
-	OpcacheEnable         bool   `json:"opcache_enable,omitempty"`
-	OpcacheRevalidateFreq int    `json:"opcache_revalidate_freq,omitempty"`
-	PostMaxSize           string `json:"post_max_size,omitempty"`
-	UploadMaxFileSize     string `json:"upload_max_file_size,omitempty"`
+	DisplayErrors         bool   `json:"display_errors,omitempty" yaml:"display_errors,omitempty"`
+	MaxExecutionTime      int    `json:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
+	MaxInputVars          int    `json:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
+	MaxInputTime          int    `json:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
+	MaxFileUpload         string `json:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
+	MemoryLimit           string `json:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
+	OpcacheEnable         bool   `json:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
+	OpcacheRevalidateFreq int    `json:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
+	PostMaxSize           string `json:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
+	UploadMaxFileSize     string `json:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
 }
 
 // Load is used to return the unmarshalled config, and

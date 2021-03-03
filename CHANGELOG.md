@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## 2.0.3 - 2021-03-03
+
+### Fixed
+- Fixed a bug where the `iniset` command was not updating PHP settings for sites [#268](https://github.com/craftcms/nitro/issues/268).
+
 ## 2.0.2 - 2021-03-02
 
 ### Fixed
