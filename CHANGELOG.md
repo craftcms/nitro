@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.4 - 2021-03-04
 
 ### Changed
 - Nitro will now verify and start containers if not running.
