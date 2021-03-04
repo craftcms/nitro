@@ -93,7 +93,7 @@ func findLinuxDistribution(description string) (string, error) {
 		return "arch", nil
 	}
 
-	if strings.Contains(description, "Ubuntu") {
+	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") {
 		return "debian", nil
 	}
 
