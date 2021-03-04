@@ -88,7 +88,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// find the containers but limited to the site label
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
 				return err
 			}
