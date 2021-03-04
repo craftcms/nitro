@@ -41,7 +41,7 @@ func Find(path string) (string, error) {
 		}
 
 		// if the directory is considered a web root
-		if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" {
+		if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" || info.Name() == "html" {
 			root = info.Name()
 		}
 
