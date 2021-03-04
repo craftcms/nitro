@@ -23,7 +23,7 @@ import (
 
 // CreateDatabase is used to interactively walk a user through creating a new database. It will return true if the user created a database along
 // with the hostname, database, port, and driver for the database container.
-func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer) (bool, string, string, string, string, error) {
+func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output terminal.Outputer) (bool, string, string, string, string, error) {
 	confirm, err := output.Confirm("Add a database for the site", true, "")
 	if err != nil {
 		return false, "", "", "", "", err
@@ -33,13 +33,19 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 		return false, "", "", "", "", nil
 	}
 
+	// make sure the context is not nil
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	// add filters to show only the environment and database containers
 	filter := filters.NewArgs()
 	filter.Add("label", labels.Nitro)
 	filter.Add("label", labels.Type+"=database")
 
 	// get a list of all the databases
-	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
+	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 	if err != nil {
 		return false, "", "", "", "", err
 	}
@@ -54,8 +60,12 @@ func CreateDatabase(ctx context.Context, docker client.CommonAPIClient, output t
 	for _, c := range containers {
 		// start the container if not running
 		if c.State != "running" {
-			if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-				return false, "", "", "", "", err
+			for _, command := range cmd.Root().Commands() {
+				if command.Use == "start" {
+					if err := command.RunE(cmd, []string{}); err != nil {
+						return false, "", "", "", "", err
+					}
+				}
 			}
 		}
 
