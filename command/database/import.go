@@ -2,6 +2,7 @@ package database
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -90,15 +91,15 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 				// determine the database engine
 				detected, err = database.DetermineEngine(path)
-				if err != nil {
+				if errors.Is(err, database.ErrUnknownDatabaseEngine) {
 					output.Warning()
 
-					return err
+					output.Info(strings.Title(err.Error()))
+				} else {
+					output.Done()
+
+					output.Info("Detected", detected, "backup")
 				}
-
-				output.Done()
-
-				output.Info("Detected", detected, "backup")
 			}
 
 			// add filters to show only the environment and database containers

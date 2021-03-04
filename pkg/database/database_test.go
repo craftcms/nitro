@@ -15,6 +15,12 @@ func TestDetermineEngine(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name:    "can detect mysql database backup files from phpmyadmin",
+			args:    args{file: "./testdata/phpmyadmin-backup.sql"},
+			want:    "mysql",
+			wantErr: false,
+		},
+		{
 			name:    "can detect mysql database backup files",
 			args:    args{file: "./testdata/mysql-backup.sql"},
 			want:    "mysql",

@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed an error that could occur when Nitro is unable to detect the database engine from a backup [#269](https://github.com/craftcms/nitro/issues/269).
+
 ## 2.0.3 - 2021-03-03
 
 ### Fixed
