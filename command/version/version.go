@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
 )
@@ -18,12 +19,15 @@ var Version = "develop"
 
 var exampleText = `nitro version`
 
-// New is used to show the cli and gRPC API client version
-func New(client client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
+// NewCommand is used to show the cli and gRPC API client version
+func NewCommand(home string, client client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "version",
 		Short:   "Show version info",
 		Example: exampleText,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return prompt.VerifyInit(cmd, args, home, output)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var vers string
 			nitro, err := nitrod.Version(cmd.Context(), &protob.VersionRequest{})
