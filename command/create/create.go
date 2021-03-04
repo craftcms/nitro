@@ -118,7 +118,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			//  prompt for a new database
-			database, dbhost, dbname, port, driver, err := prompt.CreateDatabase(cmd.Context(), docker, output)
+			database, dbhost, dbname, port, driver, err := prompt.CreateDatabase(cmd, docker, output)
 			if err != nil {
 				return err
 			}
