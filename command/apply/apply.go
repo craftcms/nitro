@@ -82,8 +82,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			for _, c := range containers {
 				// start the container if not running
 				if c.State != "running" {
-					if err := docker.ContainerStart(cmd.Context(), c.ID, types.ContainerStartOptions{}); err != nil {
-						return err
+					for _, command := range cmd.Root().Commands() {
+						if command.Use == "start" {
+							if err := command.RunE(cmd, []string{}); err != nil {
+								return err
+							}
+						}
 					}
 				}
 

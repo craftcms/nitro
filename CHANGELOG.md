@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Nitro will now verify and auto start containers if it detects Nitro is not running.
+
 ### Fixed
 - Fixed an error that could occur when running `version` before `init` [#270](https://github.com/craftcms/nitro/issues/270).
 - Fixed an error that could occur when Nitro is unable to detect the database engine from a backup [#269](https://github.com/craftcms/nitro/issues/269).
