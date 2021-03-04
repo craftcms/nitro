@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Changed
-- Nitro will now verify and auto start containers if it detects Nitro is not running.
+- Nitro will now verify and start containers if not running.
 
 ### Fixed
 - Fixed an error that could occur when running `version` before `init` [#270](https://github.com/craftcms/nitro/issues/270).
