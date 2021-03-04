@@ -2,6 +2,7 @@ package database
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -90,15 +91,15 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 				// determine the database engine
 				detected, err = database.DetermineEngine(path)
-				if err != nil {
+				if errors.Is(err, database.ErrUnknownDatabaseEngine) {
 					output.Warning()
 
-					return err
+					output.Info(strings.Title(err.Error()))
+				} else {
+					output.Done()
+
+					output.Info("Detected", detected, "backup")
 				}
-
-				output.Done()
-
-				output.Info("Detected", detected, "backup")
 			}
 
 			// add filters to show only the environment and database containers
@@ -115,7 +116,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			}
 
 			// get a list of all the databases
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
+			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
 				return err
 			}
@@ -129,8 +130,12 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			var options []string
 			for _, c := range containers {
 				if c.State != "running" {
-					if err := docker.ContainerStart(cmd.Context(), c.ID, types.ContainerStartOptions{}); err != nil {
-						return err
+					for _, command := range cmd.Root().Commands() {
+						if command.Use == "start" {
+							if err := command.RunE(cmd, []string{}); err != nil {
+								return err
+							}
+						}
 					}
 				}
 

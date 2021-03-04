@@ -17,6 +17,9 @@ import (
 	"github.com/docker/docker/pkg/archive"
 )
 
+// ErrUnknownDatabaseEngine is returned when we are unable to determine the engine type from a database backup file.
+var ErrUnknownDatabaseEngine = fmt.Errorf("unknown database engine detected from file")
+
 // DetermineEngine takes a file and will check if the
 // content of the file is for mysql or postgres db
 // imports. It will return the engine "mysql" or
@@ -34,14 +37,16 @@ func DetermineEngine(file string) (string, error) {
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
+		txt := s.Text()
+
 		// check if its postgres
-		if strings.Contains(s.Text(), "PostgreSQL") || strings.Contains(s.Text(), "pg_dump") {
+		if strings.Contains(txt, "PostgreSQL") || strings.Contains(txt, "pg_dump") {
 			engine = "postgres"
 			break
 		}
 
 		// check if its mysql
-		if strings.Contains(s.Text(), "MySQL") || strings.Contains(s.Text(), "mysqldump") || strings.Contains(s.Text(), "mariadb") || strings.Contains(s.Text(), "MariaDB") {
+		if strings.Contains(txt, "MySQL") || strings.Contains(txt, "mysqldump") || strings.Contains(txt, "mariadb") || strings.Contains(txt, "MariaDB") || strings.Contains(txt, "ENGINE=InnoDB") {
 			engine = "mysql"
 			break
 		}
@@ -55,7 +60,7 @@ func DetermineEngine(file string) (string, error) {
 
 	// final check for empty engine
 	if engine == "" {
-		return "", errors.New("unknown database engine detected from file")
+		return "", ErrUnknownDatabaseEngine
 	}
 
 	return engine, nil

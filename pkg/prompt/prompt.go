@@ -232,10 +232,7 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 	output.Success("adding site", site.Path)
 
 	// get the web directory
-	found, err := webroot.Find(dir)
-	if err != nil {
-		return nil, err
-	}
+	found, _ := webroot.Find(dir)
 
 	// if the root is still empty, we fall back to the default
 	if found == "" {

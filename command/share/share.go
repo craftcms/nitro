@@ -106,7 +106,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// find the containers but limited to the site label
-			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
 				return err
 			}
@@ -118,8 +118,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// start the container if its not running
 			if containers[0].State != "running" {
-				if err := docker.ContainerStart(ctx, containers[0].ID, types.ContainerStartOptions{}); err != nil {
-					return err
+				for _, command := range cmd.Root().Commands() {
+					if command.Use == "start" {
+						if err := command.RunE(cmd, []string{}); err != nil {
+							return err
+						}
+					}
 				}
 			}
 
