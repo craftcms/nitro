@@ -256,13 +256,16 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 func name(path, version string) string {
 	// combine the path and version
-	n := fmt.Sprintf("%s_%s_%s", path, "npm", version)
+	n := fmt.Sprintf("%s_%s_%s", path, "composer", version)
 
 	// make it lower case
 	n = strings.ToLower(n)
 
 	// replace path separators with underscores
 	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
+
+	// replace spaces with underscores
+	n = strings.Replace(n, " ", "_", -1)
 
 	// remove : to prevent error on windows
 	n = strings.Replace(n, ":", "_", -1)
