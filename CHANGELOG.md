@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed an error that could occur when paths include spaces [#277](https://github.com/craftcms/nitro/issues/277).
+
 ## 2.0.4 - 2021-03-04
 
 ### Changed
