@@ -20,6 +20,7 @@ import (
 	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/volumename"
 )
 
 var (
@@ -141,7 +142,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// set the volume name
-			volumeName := name(path, version)
+			volumeName := volumename.FromPath(strings.Join([]string{path, version}, string(os.PathSeparator)))
 
 			var pathVolume types.Volume
 			switch len(volumes.Volumes) {
@@ -227,26 +228,6 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	cmd.Flags().String("php-version", "7.4", "which php version to use")
 
 	return cmd
-}
-
-func name(path, version string) string {
-	// combine the path and version
-	n := fmt.Sprintf("%s_%s_%s", path, "composer", version)
-
-	// make it lower case
-	n = strings.ToLower(n)
-
-	// replace path separators with underscores
-	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
-
-	// replace spaces with underscores
-	n = strings.Replace(n, " ", "_", -1)
-
-	// remove : to prevent error on windows
-	n = strings.Replace(n, ":", "_", -1)
-
-	// remove the first underscore
-	return strings.TrimLeft(n, "_")
 }
 
 func versionFromArgs(args []string) (string, []string) {
