@@ -243,17 +243,17 @@ func waitForMySQLContainer(ctx context.Context, docker client.CommonAPIClient, c
 	time.Sleep(wait)
 
 	// setup the commands
-	commands := map[string][]string{
-		"create localhost user": {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY 'nitro';`, "nitro", "localhost")},
-		"grant wildcard":        {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")},
-		"grant localhost":       {"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "localhost")},
-		"flush privileges":      {"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
+	commands := [][]string{
+		{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e CREATE USER IF NOT EXISTS '%s'@'%s' IDENTIFIED BY 'nitro';`, "nitro", "localhost")},
+		{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "%")},
+		{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e GRANT ALL PRIVILEGES ON *.* TO '%s'@'%s' WITH GRANT OPTION;`, "nitro", "localhost")},
+		{"mysql", "-uroot", "-pnitro", `-e FLUSH PRIVILEGES;`},
 	}
 
 	// for mysql 8.0 images
 	// ALTER USER ‘username’@‘ip_address’ IDENTIFIED WITH mysql_native_password BY ‘password’
 	if strings.Contains(d.Version, "8.0") {
-		commands["alter user"] = []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e ALTER USER '%s'@'%s' IDENTIFIED WITH mysql_native_password BY 'nitro';`, "nitro", "%")}
+		commands = append(commands, []string{"mysql", "-uroot", "-pnitro", fmt.Sprintf(`-e ALTER USER '%s'@'%s' IDENTIFIED WITH mysql_native_password BY 'nitro';`, "nitro", "%")})
 	}
 
 	for _, c := range commands {
