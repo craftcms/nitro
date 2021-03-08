@@ -21,6 +21,7 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/wsl"
 
 	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/hostedit"
@@ -455,7 +456,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(hostnames) > 0 {
 				// is this wsl?
-				_, isWSL = os.LookupEnv("WSLENV")
+				isWSL = wsl.IsWSL()
 
 				// set the hosts file based on the OS
 				if runtime.GOOS == "windows" {
