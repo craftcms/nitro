@@ -89,7 +89,7 @@ func Install(file, system string) error {
 }
 
 func findLinuxDistribution(description string) (string, error) {
-	if strings.Contains(description, "Manjaro") {
+	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") {
 		return "arch", nil
 	}
 
