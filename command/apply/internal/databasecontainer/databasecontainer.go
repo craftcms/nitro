@@ -171,6 +171,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	}
 
 	hostConfig := &container.HostConfig{
+		CapAdd: []string{"SYS_NICE"},
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeVolume,
