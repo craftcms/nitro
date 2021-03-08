@@ -8,6 +8,7 @@
 ### Fixed
 - Fixed an error where mysql permissions were not being set properly [#275](https://github.com/craftcms/nitro/issues/275).
 - Fixed an error that could occur when paths include spaces [#277](https://github.com/craftcms/nitro/issues/277).
+- Fixed certificate installations for POP!_OS Linux.
 
 ## 2.0.4 - 2021-03-04
 
