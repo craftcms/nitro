@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.5 - 2021-03-09
 
 ### Added
 - Added the `php` command to execute PHP commands in a site container [#276](https://github.com/craftcms/nitro/issues/276).
