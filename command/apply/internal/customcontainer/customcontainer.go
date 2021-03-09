@@ -10,7 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -25,8 +25,8 @@ import (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, c config.Container) (hostname string, err error) {
 	// set filters for the container
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro+"=true")
-	filter.Add("label", labels.NitroContainer+"="+c.Name)
+	filter.Add("label", containerlabels.Nitro+"=true")
+	filter.Add("label", containerlabels.NitroContainer+"="+c.Name)
 
 	// look for a container for the site
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -114,15 +114,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
-	lbls := map[string]string{
-		labels.Nitro:          "true",
-		labels.Type:           "custom",
-		labels.NitroContainer: c.Name,
-	}
+	labels := containerlabels.ForCustomContainer(c)
 
 	config := &container.Config{
 		Image:  image,
-		Labels: lbls,
+		Labels: labels,
 	}
 
 	if len(customEnvs) > 0 {
@@ -147,7 +143,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			}
 
 			if len(resp.Volumes) == 0 {
-				vol, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: name, Labels: lbls})
+				vol, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: name, Labels: labels})
 				if err != nil {
 					return "", err
 				}

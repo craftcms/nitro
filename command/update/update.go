@@ -14,7 +14,7 @@ import (
 
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -109,7 +109,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for nitro containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
+			filter.Add("label", containerlabels.Nitro)
 
 			// get a list of containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -120,7 +120,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// check all of the containers
 			for _, container := range containers {
 				// is this a database, service, composer, or node container?
-				if container.Labels[labels.Type] == "dynamodb" || container.Labels[labels.Type] == "mailhog" || container.Labels[labels.Type] == "minio" || container.Labels[labels.Type] == "redis" || container.Labels[labels.Type] == "database" {
+				if container.Labels[containerlabels.Type] == "dynamodb" || container.Labels[containerlabels.Type] == "mailhog" || container.Labels[containerlabels.Type] == "minio" || container.Labels[containerlabels.Type] == "redis" || container.Labels[containerlabels.Type] == "database" {
 					continue
 				}
 

@@ -17,7 +17,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/certinstall"
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -51,8 +51,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// find the nitro proxy for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			filter.Add("label", labels.Proxy+"=true")
+			filter.Add("label", containerlabels.Nitro)
+			filter.Add("label", containerlabels.Proxy+"=true")
 
 			// find the container, should only be one
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})

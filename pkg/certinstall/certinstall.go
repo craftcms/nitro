@@ -21,6 +21,8 @@ var (
 	}
 )
 
+// Install is responsible for taking a path to a root certificate and the runtime.GOOS as the system
+// and finding the distribution and tools to install a root certificate.
 func Install(file, system string) error {
 	switch system {
 	case "linux":
@@ -46,7 +48,7 @@ func Install(file, system string) error {
 		}
 
 		// find the linux distro
-		dist, err := findLinuxDistribution(buf.String())
+		dist, err := findDistro(buf.String())
 		if err != nil {
 			return err
 		}
@@ -88,11 +90,13 @@ func Install(file, system string) error {
 	return nil
 }
 
-func findLinuxDistribution(description string) (string, error) {
-	if strings.Contains(description, "Manjaro") {
+func findDistro(description string) (string, error) {
+	// detect arch systems
+	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") {
 		return "arch", nil
 	}
 
+	// detect debian systems
 	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") {
 		return "debian", nil
 	}

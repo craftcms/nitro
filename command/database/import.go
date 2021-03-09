@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/database"
 	"github.com/craftcms/nitro/pkg/filetype"
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/validate"
@@ -104,15 +104,15 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			filter.Add("label", labels.Type+"=database")
+			filter.Add("label", containerlabels.Nitro)
+			filter.Add("label", containerlabels.Type+"=database")
 
 			// if we detected the engine type, add the compatibility label to the filter
 			switch detected {
 			case "mysql":
-				filter.Add("label", labels.DatabaseCompatibility+"=mysql")
+				filter.Add("label", containerlabels.DatabaseCompatibility+"=mysql")
 			case "postgres":
-				filter.Add("label", labels.DatabaseCompatibility+"=postgres")
+				filter.Add("label", containerlabels.DatabaseCompatibility+"=postgres")
 			}
 
 			// get a list of all the databases
@@ -170,9 +170,9 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			}
 
 			// get the database compatability from the container labelsmake l
-			detected = info.Config.Labels[labels.DatabaseCompatibility]
+			detected = info.Config.Labels[containerlabels.DatabaseCompatibility]
 			hostname := strings.TrimLeft(info.Name, "/")
-			version := info.Config.Labels[labels.DatabaseVersion]
+			version := info.Config.Labels[containerlabels.DatabaseVersion]
 
 			var port string
 			// get the port from the container info

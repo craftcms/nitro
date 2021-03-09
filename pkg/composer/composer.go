@@ -30,11 +30,10 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 	return docker.ContainerCreate(
 		ctx,
 		&container.Config{
-			Image:  opts.Image,
-			Cmd:    opts.Commands,
-			Tty:    false,
-			Labels: opts.Labels,
-			// Env:        []string{"COMPOSER_HOME=/app/.composer/"},
+			Image:      opts.Image,
+			Cmd:        opts.Commands,
+			Tty:        false,
+			Labels:     opts.Labels,
 			Entrypoint: []string{"/usr/bin/composer"},
 		},
 		&container.HostConfig{Mounts: []mount.Mount{

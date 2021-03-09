@@ -21,10 +21,11 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/wsl"
 
 	"github.com/craftcms/nitro/pkg/datetime"
 	"github.com/craftcms/nitro/pkg/hostedit"
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/svc/dynamodb"
@@ -67,7 +68,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro+"=true")
+			filter.Add("label", containerlabels.Nitro+"=true")
 
 			// look for a container for the site
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
@@ -93,7 +94,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 				if _, ok := knownContainers[c.ID]; !ok {
 					// don't remove the proxy container
-					if c.Labels[labels.Proxy] != "" {
+					if c.Labels[containerlabels.Proxy] != "" {
 						continue
 					}
 
@@ -103,9 +104,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("removing", name)
 
 					// only perform a backup if the container is for databases
-					if c.Labels[labels.DatabaseEngine] != "" {
+					if c.Labels[containerlabels.DatabaseEngine] != "" {
 						// get all of the databases
-						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[labels.DatabaseCompatibility])
+						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
 						if err != nil {
 							output.Warning()
 							output.Info("Unable to get the databases from", name, err.Error())
@@ -124,7 +125,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							}
 
 							// create the backup command based on the compatibility type
-							switch c.Labels[labels.DatabaseCompatibility] {
+							switch c.Labels[containerlabels.DatabaseCompatibility] {
 							case "postgres":
 								opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 							default:
@@ -191,7 +192,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro+"=true")
+			filter.Add("label", containerlabels.Nitro+"=true")
 
 			// add the filter for the network name
 			filter.Add("name", "nitro-network")
@@ -455,7 +456,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(hostnames) > 0 {
 				// is this wsl?
-				_, isWSL = os.LookupEnv("WSLENV")
+				isWSL = wsl.IsWSL()
 
 				// set the hosts file based on the OS
 				if runtime.GOOS == "windows" {

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/setup"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -87,8 +87,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					Driver:     "bridge",
 					Attachable: true,
 					Labels: map[string]string{
-						labels.Nitro:   "true",
-						labels.Network: "true",
+						containerlabels.Nitro:   "true",
+						containerlabels.Network: "true",
 					},
 				})
 				if err != nil {

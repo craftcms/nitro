@@ -15,8 +15,8 @@ import (
 	"github.com/docker/docker/client"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/helpers"
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -72,7 +72,7 @@ func Prompt(ctx context.Context, reader io.Reader, docker client.ContainerAPICli
 	// get the selected container details
 	name := containers[selected].Names[0]
 	id := containers[selected].ID
-	compatibility := containers[selected].Labels[labels.DatabaseCompatibility]
+	compatibility := containers[selected].Labels[containerlabels.DatabaseCompatibility]
 
 	// get all of the databases based on the engine
 	databases, err := Databases(ctx, docker, id, compatibility)

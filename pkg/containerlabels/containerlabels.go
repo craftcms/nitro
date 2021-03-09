@@ -1,4 +1,10 @@
-package labels
+package containerlabels
+
+import (
+	"strings"
+
+	"github.com/craftcms/nitro/pkg/config"
+)
 
 const (
 	// Nitro is used to label a container as "for nitro"
@@ -46,3 +52,30 @@ const (
 	// Type is used to identity the type of container
 	Type = "com.craftcms.nitro.type"
 )
+
+// ForSite takes a site and returns labels to use on the sites container.
+func ForSite(s config.Site) map[string]string {
+	labels := map[string]string{
+		Nitro: "true",
+		Host:  s.Hostname,
+	}
+
+	// if there are extensions, add them as comma separated
+	if len(s.Extensions) > 0 {
+		labels[Extensions] = strings.Join(s.Extensions, ",")
+	}
+
+	return labels
+}
+
+// ForCustomContainer takes a custom container configuration and
+// applies the labels for the container.
+func ForCustomContainer(c config.Container) map[string]string {
+	labels := map[string]string{
+		Nitro:          "true",
+		Type:           "custom",
+		NitroContainer: c.Name,
+	}
+
+	return labels
+}

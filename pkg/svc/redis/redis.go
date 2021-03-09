@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -32,8 +32,8 @@ const (
 func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID string, output terminal.Outputer) (string, string, error) {
 	// add the filter
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro+"=true")
-	filter.Add("label", labels.Type+"="+Label)
+	filter.Add("label", containerlabels.Nitro+"=true")
+	filter.Add("label", containerlabels.Type+"="+Label)
 
 	// get a list of containers
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
@@ -72,8 +72,8 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		containerConfig := &container.Config{
 			Image: Image,
 			Labels: map[string]string{
-				labels.Nitro: "true",
-				labels.Type:  Label,
+				containerlabels.Nitro: "true",
+				containerlabels.Type:  Label,
 			},
 			ExposedPorts: nat.PortSet{
 				httpPortNat: struct{}{},
@@ -130,8 +130,8 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 func VerifyRemoved(ctx context.Context, cli client.CommonAPIClient, output terminal.Outputer) error {
 	// add the filter
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro+"=true")
-	filter.Add("label", labels.Type+"="+Label)
+	filter.Add("label", containerlabels.Nitro+"=true")
+	filter.Add("label", containerlabels.Type+"="+Label)
 
 	// get a list of containers
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{

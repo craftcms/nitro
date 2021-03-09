@@ -16,8 +16,8 @@ import (
 
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/datetime"
-	"github.com/craftcms/nitro/pkg/labels"
 	"github.com/craftcms/nitro/pkg/sudo"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -64,7 +64,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
+			filter.Add("label", containerlabels.Nitro)
 
 			// get all related containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{
@@ -112,7 +112,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					name := strings.TrimLeft(c.Names[0], "/")
 
 					// only perform a backup if the container is for databases
-					if c.Labels[labels.DatabaseEngine] != "" {
+					if c.Labels[containerlabels.DatabaseEngine] != "" {
 						// this container needs to be running before we can backup the system
 						if c.State != "running" {
 							if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
@@ -122,7 +122,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						}
 
 						// get all of the databases
-						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[labels.DatabaseCompatibility])
+						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
 						if err != nil {
 							output.Info("unable to get the databases from", name, err.Error())
 
@@ -141,7 +141,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							}
 
 							// create the backup command based on the compatibility type
-							switch c.Labels[labels.DatabaseCompatibility] {
+							switch c.Labels[containerlabels.DatabaseCompatibility] {
 							case "postgres":
 								opts.Commands = []string{"pg_dump", "--username=nitro", db, "-f", "/tmp/" + opts.BackupName}
 							default:

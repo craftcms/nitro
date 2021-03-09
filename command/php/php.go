@@ -1,13 +1,13 @@
-package queue
+package php
 
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -15,16 +15,20 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # execute the craft queue command for a site
-  nitro queue`
+const exampleText = `  # run php version
+  nitro php -v
 
-// NewCommand returns the command to run queue listen inside of a sites container. It will check if the
-// current working directory is a known site and auto-select or prompt a user for a list of sites.
+  # view php info
+  nitro php -i`
+
+// NewCommand returns the php command which allows users to pass php specific commands to a sites
+// container. Its context aware and will prompt the user for the site if its not in a directory.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "queue",
-		Short:   "Run a queue worker",
-		Example: exampleText,
+		Use:                "php",
+		Short:              "Run PHP commands",
+		Example:            exampleText,
+		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
 			wd, err := os.Getwd()
@@ -32,6 +36,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// load the config
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
@@ -50,7 +55,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				options = append(options, s.Hostname)
 			}
 
-			// check if we found a site
 			var site config.Site
 			switch len(sites) {
 			case 0:
@@ -109,58 +113,40 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			// create the command for running the craft console
+			cmds := []string{"exec", "-it", containers[0].ID}
+
 			// get the container path
-			var commands []string
 			path := site.GetContainerPath()
 			if path != "" {
-				commands = []string{"php", fmt.Sprintf("%s/%s", path, "craft"), "queue/listen", "--verbose"}
+				cmds = append(cmds, fmt.Sprintf("%s/%s", path, "php"))
 			} else {
-				commands = []string{"php", "craft", "queue/listen", "--verbose"}
+				cmds = append(cmds, "php")
 			}
 
-			output.Info("Listening for queue jobs…")
+			// append the provided args to the command
+			if len(args) == 0 {
+				cmds = append(cmds, "-v")
+			} else {
+				cmds = append(cmds, args...)
+			}
 
-			// create an exec
-			exec, err := docker.ContainerExecCreate(cmd.Context(), containers[0].ID, types.ExecConfig{
-				AttachStderr: true,
-				AttachStdout: true,
-				Cmd:          commands,
-			})
+			// find the docker executable
+			cli, err := exec.LookPath("docker")
 			if err != nil {
 				return err
 			}
 
-			// attach to the exec
-			resp, err := docker.ContainerExecAttach(cmd.Context(), exec.ID, types.ExecStartCheck{})
-			if err != nil {
+			// create the command
+			c := exec.Command(cli, cmds...)
+
+			c.Stdin = cmd.InOrStdin()
+			c.Stderr = cmd.ErrOrStderr()
+			c.Stdout = cmd.OutOrStdout()
+
+			if err := c.Run(); err != nil {
 				return err
 			}
-			defer resp.Close()
-
-			done := make(chan error)
-			go func() {
-				_, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.OutOrStderr(), resp.Reader)
-				done <- err
-			}()
-
-			select {
-			case err := <-done:
-				if err != nil {
-					return err
-				}
-				break
-			case <-cmd.Context().Done():
-				return cmd.Context().Err()
-			}
-
-			// get the exit code
-			exit, err := docker.ContainerExecInspect(cmd.Context(), exec.ID)
-			if err != nil {
-				return err
-			}
-
-			// do something with the exit code
-			output.Info(fmt.Sprintf("%d", exit.ExitCode))
 
 			return nil
 		},

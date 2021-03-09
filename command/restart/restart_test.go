@@ -5,9 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/docker/docker/api/types"
-
-	"github.com/craftcms/nitro/pkg/labels"
 )
 
 func TestRestart(t *testing.T) {
@@ -18,14 +17,14 @@ func TestRestart(t *testing.T) {
 			ID:    "testing-restart",
 			Names: []string{"/testing-restart"},
 			Labels: map[string]string{
-				labels.Proxy: "testing-restart",
+				containerlabels.Proxy: "testing-restart",
 			},
 		},
 		{
 			ID:    "testing-restart-hostname",
 			Names: []string{"/testing-restart-hostname"},
 			Labels: map[string]string{
-				labels.Proxy: "true",
+				containerlabels.Proxy: "true",
 			},
 		},
 	}

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 )
@@ -254,7 +254,7 @@ func TestSite(t *testing.T) {
 					Config: &container.Config{
 						Image: "docker.io/craftcms/nginx:7.4-dev",
 						Labels: map[string]string{
-							labels.Host: "newname",
+							containerlabels.Host: "newname",
 						},
 					},
 					Mounts: []types.MountPoint{
@@ -279,7 +279,7 @@ func TestSite(t *testing.T) {
 					Config: &container.Config{
 						Image: "docker.io/craftcms/nginx:7.4-dev",
 						Labels: map[string]string{
-							labels.Host: "oldname",
+							containerlabels.Host: "oldname",
 						},
 					},
 				},

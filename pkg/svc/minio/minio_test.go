@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -64,8 +64,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=minio"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=minio"},
 				),
 			},
 			wantSpyImagePullImage: "docker.io/minio/minio:latest",
@@ -74,8 +74,8 @@ func TestVerifyCreated(t *testing.T) {
 				Config: &container.Config{
 					Image: "docker.io/minio/minio:latest",
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "minio",
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "minio",
 					},
 					ExposedPorts: nat.PortSet{
 						"9000/tcp": struct{}{},
@@ -123,8 +123,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=minio"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=minio"},
 				),
 			},
 			wantSpyImagePullImage: "docker.io/minio/minio:latest",
@@ -133,8 +133,8 @@ func TestVerifyCreated(t *testing.T) {
 				Config: &container.Config{
 					Image: "docker.io/minio/minio:latest",
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "minio",
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "minio",
 					},
 					ExposedPorts: nat.PortSet{
 						"9000/tcp": struct{}{},
@@ -182,8 +182,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=minio"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=minio"},
 				),
 			},
 			wantSpyContainerStartID: "existing-container-id",
@@ -202,8 +202,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=minio"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=minio"},
 				),
 			},
 			wantID:       "",

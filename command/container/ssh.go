@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -25,8 +25,8 @@ func sshCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			filter.Add("label", labels.Type+"=custom")
+			filter.Add("label", containerlabels.Nitro)
+			filter.Add("label", containerlabels.Type+"=custom")
 
 			// get a list of all the containers
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})

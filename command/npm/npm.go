@@ -19,9 +19,10 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
+	"github.com/craftcms/nitro/pkg/volumename"
 )
 
 var (
@@ -132,8 +133,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// add filters for the volume
-			filter.Add("label", labels.Type+"=npm")
-			filter.Add("label", labels.Path+"="+path)
+			filter.Add("label", containerlabels.Type+"=npm")
+			filter.Add("label", containerlabels.Path+"="+path)
 
 			// check if there is an existing volume
 			volumes, err := docker.VolumeList(ctx, filter)
@@ -143,7 +144,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 
 			// set the volume name
 			// TODO(jasonmccallister) remove this hardcoded version
-			volumeName := name(path, "14")
+			volumeName := volumename.FromPath(strings.Join([]string{path, "14"}, string(os.PathSeparator)))
 
 			var pathVolume types.Volume
 			switch len(volumes.Volumes) {
@@ -155,8 +156,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Driver: "local",
 					Name:   volumeName,
 					Labels: map[string]string{
-						labels.Type: "npm",
-						labels.Path: path,
+						containerlabels.Type: "npm",
+						containerlabels.Path: path,
 					},
 				})
 				if err != nil {
@@ -186,9 +187,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Cmd:   commands,
 					Tty:   false,
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "npm",
-						labels.Path:  path,
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "npm",
+						containerlabels.Path:  path,
 					},
 					WorkingDir: "/home/node/app",
 				},
@@ -252,21 +253,4 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 	cmd.Flags().String("version", "14", "which node version to use")
 
 	return cmd
-}
-
-func name(path, version string) string {
-	// combine the path and version
-	n := fmt.Sprintf("%s_%s_%s", path, "npm", version)
-
-	// make it lower case
-	n = strings.ToLower(n)
-
-	// replace path separators with underscores
-	n = strings.Replace(n, string(os.PathSeparator), "_", -1)
-
-	// remove : to prevent error on windows
-	n = strings.Replace(n, ":", "_", -1)
-
-	// remove the first underscore
-	return strings.TrimLeft(n, "_")
 }

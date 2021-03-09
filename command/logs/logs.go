@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -48,7 +48,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
+			filter.Add("label", containerlabels.Nitro)
 
 			// get a context aware list of sites
 			sites := cfg.ListOfSitesByDirectory(home, wd)
@@ -66,18 +66,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			case 1:
 				output.Info("show logs for", sites[0].Hostname)
 
-				filter.Add("label", labels.Host+"="+sites[0].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
 			default:
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
 					return err
 				}
 
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			}
 
 			// find all of the containers, there should only be one if we are in a known directory

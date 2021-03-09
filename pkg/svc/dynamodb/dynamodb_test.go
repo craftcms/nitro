@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -63,8 +63,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=dynamodb"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=dynamodb"},
 				),
 			},
 			wantSpyImagePullImage: "docker.io/amazon/dynamodb-local:latest",
@@ -73,8 +73,8 @@ func TestVerifyCreated(t *testing.T) {
 				Config: &container.Config{
 					Image: "docker.io/amazon/dynamodb-local:latest",
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "dynamodb",
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "dynamodb",
 					},
 					ExposedPorts: nat.PortSet{
 						"8000/tcp": struct{}{},
@@ -121,8 +121,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=dynamodb"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=dynamodb"},
 				),
 			},
 			wantSpyImagePullImage: "docker.io/amazon/dynamodb-local:latest",
@@ -131,8 +131,8 @@ func TestVerifyCreated(t *testing.T) {
 				Config: &container.Config{
 					Image: "docker.io/amazon/dynamodb-local:latest",
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "dynamodb",
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "dynamodb",
 					},
 					ExposedPorts: nat.PortSet{
 						"8000/tcp": struct{}{},
@@ -179,8 +179,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=dynamodb"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=dynamodb"},
 				),
 			},
 			wantSpyContainerStartID: "existing-container-id",
@@ -199,8 +199,8 @@ func TestVerifyCreated(t *testing.T) {
 			wantSpyContainerListOptions: types.ContainerListOptions{
 				All: true,
 				Filters: filters.NewArgs(
-					filters.KeyValuePair{Key: "label", Value: labels.Nitro + "=true"},
-					filters.KeyValuePair{Key: "label", Value: labels.Type + "=dynamodb"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Nitro + "=true"},
+					filters.KeyValuePair{Key: "label", Value: containerlabels.Type + "=dynamodb"},
 				),
 			},
 			wantID:       "",

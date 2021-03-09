@@ -9,7 +9,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -41,7 +41,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
+			filter.Add("label", containerlabels.Nitro)
 
 			// get all of the container
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -59,7 +59,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			// start each environment container
 			for _, c := range containers {
 				// don't start composer or npm containers
-				if c.Labels[labels.Type] == "composer" || c.Labels[labels.Type] == "npm" {
+				if c.Labels[containerlabels.Type] == "composer" || c.Labels[containerlabels.Type] == "npm" {
 					continue
 				}
 

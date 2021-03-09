@@ -9,7 +9,7 @@ import (
 	volumetypes "github.com/docker/docker/api/types/volume"
 
 	"github.com/craftcms/nitro/command/version"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -37,7 +37,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		ctx = context.Background()
 	}
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro+"=true")
+	filter.Add("label", containerlabels.Nitro+"=true")
 	filter.Add("reference", ProxyImage)
 
 	// check for the proxy image
@@ -93,8 +93,8 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 			Driver: "local",
 			Name:   "nitro",
 			Labels: map[string]string{
-				labels.Nitro:  "true",
-				labels.Volume: "nitro",
+				containerlabels.Nitro:  "true",
+				containerlabels.Volume: "nitro",
 			},
 		})
 		if err != nil {
@@ -110,7 +110,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 	filter.Del("reference", ProxyImage)
 
 	// create a filter for the nitro proxy
-	filter.Add("label", labels.Proxy+"=true")
+	filter.Add("label", containerlabels.Proxy+"=true")
 
 	// check if there is an existing container for the nitro-proxy
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
@@ -182,10 +182,10 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 				apiPortNat:   struct{}{},
 			},
 			Labels: map[string]string{
-				labels.Nitro:        "true",
-				labels.Type:         "proxy",
-				labels.Proxy:        "true",
-				labels.ProxyVersion: version.Version,
+				containerlabels.Nitro:        "true",
+				containerlabels.Type:         "proxy",
+				containerlabels.Proxy:        "true",
+				containerlabels.ProxyVersion: version.Version,
 			},
 			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro", "NITRO_VERSION=" + version.Version},
 		},
@@ -248,7 +248,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 func FindAndStart(ctx context.Context, docker client.ContainerAPIClient) (types.Container, error) {
 	// create the filters for the proxy
 	f := filters.NewArgs()
-	f.Add("label", labels.Type+"=proxy")
+	f.Add("label", containerlabels.Type+"=proxy")
 
 	// check if there is an existing container for the nitro-proxy
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: f, All: true})
