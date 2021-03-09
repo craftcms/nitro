@@ -10,7 +10,7 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -34,7 +34,7 @@ var (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Host+"="+site.Hostname)
+	filter.Add("label", containerlabels.Host+"="+site.Hostname)
 
 	// look for a container for the site
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -122,22 +122,14 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	// set the labels
-	lbls := map[string]string{
-		labels.Nitro: "true",
-		labels.Host:  site.Hostname,
-	}
-
-	// if there are extensions a
-	if len(site.Extensions) > 0 {
-		lbls[labels.Extensions] = strings.Join(site.Extensions, ",")
-	}
+	labels := containerlabels.ForSite(site)
 
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
 		&container.Config{
 			Image:  image,
-			Labels: lbls,
+			Labels: labels,
 			Env:    envs,
 		},
 		&container.HostConfig{
