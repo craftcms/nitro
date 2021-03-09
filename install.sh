@@ -83,7 +83,7 @@ function hasDocker {
 function checkHash {
   sha_cmd="sha256sum"
   fileName=nitro_$2_checksums.txt
-  filePath=$(pwd)/$TEMP_FOLDER/$fileName
+  filePath="$(pwd)/$TEMP_FOLDER/$fileName"
   checksumUrl=https://github.com/craftcms/nitro/releases/download/$version/$fileName
   targetFile=$3/$fileName
 
@@ -97,7 +97,7 @@ function checkHash {
     (curl -sLS "$checksumUrl" --output "$targetFile")
 
     # Run the sha command against the zip and grab the hash from the first segment.
-    zipHash="$($shaCmd $1 | cut -d' ' -f1 | tr -d '[:space:]')"
+    zipHash="$($shaCmd "$1" | cut -d' ' -f1 | tr -d '[:space:]')"
 
     # See if the has we calculated matches a result in the checksum file.
     checkResultFileName=$(sed -n "s/^$zipHash  //p" "$filePath")
@@ -115,16 +115,16 @@ function checkHash {
 }
 
 function getNitro {
-  # create our temp folder
-  if [ ! -d $(pwd)/$TEMP_FOLDER ]; then
-    mkdir $(pwd)/$TEMP_FOLDER
-  fi
-
   targetTempFolder="$(pwd)/$TEMP_FOLDER"
+
+  # create our temp folder
+  if [ ! -d "$targetTempFolder" ]; then
+    mkdir "$targetTempFolder"
+  fi
 
   fileName=nitro$DOWNLOAD_SUFFIX$DOWNLOAD_ARCH$DOWNLOAD_ZIP_EXTENSION
   packageUrl=https://github.com/craftcms/nitro/releases/download/$version/"$fileName"
-  targetZipFile="$targetTempFolder"/$fileName
+  targetZipFile="$targetTempFolder/$fileName"
 
   echo "Downloading package $packageUrl to $targetZipFile"
   echo
