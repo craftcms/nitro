@@ -6,14 +6,13 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
-
-	"github.com/craftcms/nitro/pkg/labels"
 )
 
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
@@ -39,8 +38,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			Driver:     "bridge",
 			Attachable: true,
 			Labels: map[string]string{
-				labels.Nitro:   "true",
-				labels.Network: "true",
+				containerlabels.Nitro:   "true",
+				containerlabels.Network: "true",
 			},
 		},
 		Name: "nitro-network",
@@ -50,8 +49,8 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 		Driver: "local",
 		Name:   "nitro",
 		Labels: map[string]string{
-			labels.Nitro:  "true",
-			labels.Volume: "nitro",
+			containerlabels.Nitro:  "true",
+			containerlabels.Volume: "nitro",
 		},
 	}
 	// set the container create request
@@ -64,10 +63,10 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 				"5000/tcp": struct{}{},
 			},
 			Labels: map[string]string{
-				labels.Nitro:        "true",
-				labels.Type:         "proxy",
-				labels.Proxy:        "true",
-				labels.ProxyVersion: "develop",
+				containerlabels.Nitro:        "true",
+				containerlabels.Type:         "proxy",
+				containerlabels.Proxy:        "true",
+				containerlabels.ProxyVersion: "develop",
 			},
 			Env: []string{"PGPASSWORD=nitro", "PGUSER=nitro", "NITRO_VERSION=develop"},
 		},

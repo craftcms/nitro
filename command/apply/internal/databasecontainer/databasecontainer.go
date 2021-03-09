@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -32,10 +32,10 @@ var (
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID string, db config.Database, output terminal.Outputer) (string, string, error) {
 	// create the filters for the database
 	filter := filters.NewArgs()
-	filter.Add("label", labels.DatabaseEngine+"="+db.Engine)
-	filter.Add("label", labels.DatabaseVersion+"="+db.Version)
-	filter.Add("label", labels.DatabasePort+"="+db.Port)
-	filter.Add("label", labels.Type+"=database")
+	filter.Add("label", containerlabels.DatabaseEngine+"="+db.Engine)
+	filter.Add("label", containerlabels.DatabaseVersion+"="+db.Version)
+	filter.Add("label", containerlabels.DatabasePort+"="+db.Port)
+	filter.Add("label", containerlabels.Type+"=database")
 
 	hostname, err := db.GetHostname()
 	if err != nil {
@@ -44,9 +44,9 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	// set the container database compatibility
 	if db.Engine == "mariadb" || db.Engine == "mysql" {
-		filter.Add("label", labels.DatabaseCompatibility+"=mysql")
+		filter.Add("label", containerlabels.DatabaseCompatibility+"=mysql")
 	} else {
-		filter.Add("label", labels.DatabaseCompatibility+"=postgres")
+		filter.Add("label", containerlabels.DatabaseCompatibility+"=postgres")
 	}
 
 	// get the containers for the database
@@ -69,29 +69,29 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 	}
 
 	// create the database labels for the new container
-	lbls := map[string]string{
-		labels.Nitro:           "true",
-		labels.DatabaseEngine:  db.Engine,
-		labels.DatabaseVersion: db.Version,
-		labels.Type:            "database",
-		labels.DatabasePort:    db.Port,
+	labels := map[string]string{
+		containerlabels.Nitro:           "true",
+		containerlabels.DatabaseEngine:  db.Engine,
+		containerlabels.DatabaseVersion: db.Version,
+		containerlabels.Type:            "database",
+		containerlabels.DatabasePort:    db.Port,
 	}
 
 	// if the database is mysql or mariadb, mark them as
 	// mysql compatible (used for importing backups)
 	if db.Engine == "mariadb" || db.Engine == "mysql" {
-		lbls[labels.DatabaseCompatibility] = "mysql"
+		labels[containerlabels.DatabaseCompatibility] = "mysql"
 	}
 
 	// if the database is postgres, mark it as compatible
 	// with postgres. This is not needed but a place holder
 	// if cockroachdb is ever supported by craft.
 	if db.Engine == "postgres" {
-		lbls[labels.DatabaseCompatibility] = "postgres"
+		labels[containerlabels.DatabaseCompatibility] = "postgres"
 	}
 
 	// create the volume
-	volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: hostname, Labels: lbls})
+	volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{Driver: "local", Name: hostname, Labels: labels})
 	if err != nil {
 		return "", "", fmt.Errorf("unable to create the volume, %w", err)
 	}
@@ -158,7 +158,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, networkID
 
 	containerConfig := &container.Config{
 		Image:  image,
-		Labels: lbls,
+		Labels: labels,
 		ExposedPorts: nat.PortSet{
 			port: struct{}{},
 		},

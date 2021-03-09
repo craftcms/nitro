@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -27,7 +27,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all of the containers for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro+"=true")
+			filter.Add("label", containerlabels.Nitro+"=true")
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return err
@@ -37,7 +37,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			toRemove := []types.Container{}
 			for _, c := range containers {
 				// we should remove the container if it is a composer or npm container
-				if c.Labels[labels.Type] == "composer" || c.Labels[labels.Type] == "npm" {
+				if c.Labels[containerlabels.Type] == "composer" || c.Labels[containerlabels.Type] == "npm" {
 					toRemove = append(toRemove, c)
 				}
 			}

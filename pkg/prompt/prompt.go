@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/validate"
@@ -41,8 +41,8 @@ func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output te
 
 	// add filters to show only the environment and database containers
 	filter := filters.NewArgs()
-	filter.Add("label", labels.Nitro)
-	filter.Add("label", labels.Type+"=database")
+	filter.Add("label", containerlabels.Nitro)
+	filter.Add("label", containerlabels.Type+"=database")
 
 	// get a list of all the databases
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
@@ -81,7 +81,7 @@ func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output te
 
 	// set the container id and db engine
 	containerID = containers[selected].ID
-	databaseEngine = containers[selected].Labels[labels.DatabaseCompatibility]
+	databaseEngine = containers[selected].Labels[containerlabels.DatabaseCompatibility]
 	if containerID == "" {
 		return false, "", "", "", "", fmt.Errorf("unable to get the container")
 	}
@@ -192,7 +192,7 @@ func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output te
 
 	// set the driver for the database
 	driver := "mysql"
-	if containers[selected].Labels[labels.DatabaseCompatibility] == "postgres" {
+	if containers[selected].Labels[containerlabels.DatabaseCompatibility] == "postgres" {
 		driver = "pgsql"
 	}
 

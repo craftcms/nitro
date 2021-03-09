@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/validate"
 	"github.com/craftcms/nitro/protob"
@@ -30,8 +30,8 @@ func addCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
-			filter.Add("label", labels.Type+"=database")
+			filter.Add("label", containerlabels.Nitro)
+			filter.Add("label", containerlabels.Type+"=database")
 
 			// get a list of all the databases
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
@@ -79,9 +79,9 @@ func addCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output
 			}
 
 			// get the containers details
-			engine := info.Config.Labels[labels.DatabaseCompatibility]
+			engine := info.Config.Labels[containerlabels.DatabaseCompatibility]
 			hostname := strings.TrimLeft(info.Name, "/")
-			version := info.Config.Labels[labels.DatabaseVersion]
+			version := info.Config.Labels[containerlabels.DatabaseVersion]
 			var port string
 			// get the port from the container info
 			for p, bind := range info.HostConfig.PortBindings {

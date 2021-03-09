@@ -67,3 +67,15 @@ func ForSite(s config.Site) map[string]string {
 
 	return labels
 }
+
+// ForCustomContainer takes a custom container configuration and
+// applies the labels for the container.
+func ForCustomContainer(c config.Container) map[string]string {
+	labels := map[string]string{
+		Nitro:          "true",
+		Type:           "custom",
+		NitroContainer: c.Name,
+	}
+
+	return labels
+}

@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/composer"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/volumename"
@@ -132,8 +132,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// add filters for the volume
-			filter.Add("label", labels.Type+"=composer")
-			filter.Add("label", labels.Path+"="+path)
+			filter.Add("label", containerlabels.Type+"=composer")
+			filter.Add("label", containerlabels.Path+"="+path)
 
 			// check if there is an existing volume
 			volumes, err := docker.VolumeList(ctx, filter)
@@ -154,8 +154,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Driver: "local",
 					Name:   volumeName,
 					Labels: map[string]string{
-						labels.Type: "composer",
-						labels.Path: path,
+						containerlabels.Type: "composer",
+						containerlabels.Path: path,
 					},
 				})
 				if err != nil {
@@ -170,9 +170,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				Image:    image,
 				Commands: args,
 				Labels: map[string]string{
-					labels.Nitro: "true",
-					labels.Type:  "composer",
-					labels.Path:  path,
+					containerlabels.Nitro: "true",
+					containerlabels.Type:  "composer",
+					containerlabels.Path:  path,
 				},
 				Volume: &pathVolume,
 				Path:   path,

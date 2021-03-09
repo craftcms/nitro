@@ -19,7 +19,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/volumename"
@@ -133,8 +133,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// add filters for the volume
-			filter.Add("label", labels.Type+"=npm")
-			filter.Add("label", labels.Path+"="+path)
+			filter.Add("label", containerlabels.Type+"=npm")
+			filter.Add("label", containerlabels.Path+"="+path)
 
 			// check if there is an existing volume
 			volumes, err := docker.VolumeList(ctx, filter)
@@ -156,8 +156,8 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Driver: "local",
 					Name:   volumeName,
 					Labels: map[string]string{
-						labels.Type: "npm",
-						labels.Path: path,
+						containerlabels.Type: "npm",
+						containerlabels.Path: path,
 					},
 				})
 				if err != nil {
@@ -187,9 +187,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 					Cmd:   commands,
 					Tty:   false,
 					Labels: map[string]string{
-						labels.Nitro: "true",
-						labels.Type:  "npm",
-						labels.Path:  path,
+						containerlabels.Nitro: "true",
+						containerlabels.Type:  "npm",
+						containerlabels.Path:  path,
 					},
 					WorkingDir: "/home/node/app",
 				},

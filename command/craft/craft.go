@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -48,7 +48,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("label", labels.Nitro)
+			filter.Add("label", containerlabels.Nitro)
 
 			// get a context aware list of sites
 			sites := cfg.ListOfSitesByDirectory(home, wd)
@@ -72,7 +72,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[selected]
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			case 1:
 				output.Info("connecting to", sites[0].Hostname)
 
@@ -80,7 +80,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[0]
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[0].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
 			default:
 				// prompt for the site to ssh into
 				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
@@ -92,7 +92,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				site = sites[selected]
 
 				// add the label to get the site
-				filter.Add("label", labels.Host+"="+sites[selected].Hostname)
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			}
 
 			// find the containers but limited to the site label

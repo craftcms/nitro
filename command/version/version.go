@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/protob"
@@ -45,7 +45,7 @@ func NewCommand(home string, client client.CommonAPIClient, nitrod protob.NitroC
 					return err
 				}
 
-				vers = details.Config.Labels[labels.ProxyVersion]
+				vers = details.Config.Labels[containerlabels.ProxyVersion]
 			}
 
 			ver, err := client.ServerVersion(cmd.Context())

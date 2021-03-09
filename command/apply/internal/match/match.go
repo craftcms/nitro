@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/api/types"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/labels"
+	"github.com/craftcms/nitro/pkg/containerlabels"
 )
 
 var (
@@ -29,7 +29,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 	}
 
 	// check the name has been changed
-	if details.Config.Labels[labels.NitroContainer] != container.Name {
+	if details.Config.Labels[containerlabels.NitroContainer] != container.Name {
 		return ErrMisMatchedLabel
 	}
 
@@ -76,7 +76,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 	}
 
 	// check the sites hostname using the label
-	if container.Config.Labels[labels.Host] != site.Hostname {
+	if container.Config.Labels[containerlabels.Host] != site.Hostname {
 		return false
 	}
 
@@ -101,11 +101,11 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 	// TODO(jasonmccallister) check the labels for php extensions and write tests
 	switch len(site.Extensions) > 0 {
 	case false:
-		if container.Config.Labels[labels.Extensions] != "" {
+		if container.Config.Labels[containerlabels.Extensions] != "" {
 			return false
 		}
 	default:
-		if container.Config.Labels[labels.Extensions] != strings.Join(site.Extensions, ",") {
+		if container.Config.Labels[containerlabels.Extensions] != strings.Join(site.Extensions, ",") {
 			return false
 		}
 	}
