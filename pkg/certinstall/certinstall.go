@@ -97,7 +97,7 @@ func findDistro(description string) (string, error) {
 	}
 
 	// detect debian systems
-	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") {
+	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") {
 		return "debian", nil
 	}
 
