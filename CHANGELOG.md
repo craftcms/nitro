@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed an output error for Windows users when using the `trust` command [#291](https://github.com/craftcms/nitro/issues/291).
+
 ## 2.0.5 - 2021-03-09
 
 ### Added
