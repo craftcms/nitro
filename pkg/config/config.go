@@ -236,17 +236,10 @@ func (s *Site) GetContainerPath() string {
 func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
-	if addr == "" {
-		addr = "host.docker.internal"
-	}
-
 	// set the php vars
 	envs = append(envs, phpVars(s.PHP, s.Version)...)
 
-	// get the xdebug vars
-	envs = append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, s.Hostname, addr)...)
-
-	return envs
+	return append(envs, xdebugVars(s.PHP, s.Xdebug, s.Version, s.Hostname, addr)...)
 }
 
 // SetPHPBoolSetting is used to set php settings that are bool. It will look
