@@ -2,7 +2,6 @@ package completion
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -19,12 +18,12 @@ var zshCompletionCommand = &cobra.Command{
 $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
 # To load completions for each session, execute once:
-$ nitro complete zsh > "${fpath[1]}/_nitro"
+$ nitro completion zsh > "${fpath[1]}/_nitro"
 
 # You will need to start a new shell for this setup to take effect.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.GenZshCompletion(os.Stdout)
+		err := cmd.GenZshCompletion(cmd.OutOrStdout())
 		if err != nil {
 			fmt.Println(err)
 		}
