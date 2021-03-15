@@ -48,7 +48,7 @@ func Install(file, system string) error {
 		}
 
 		// find the linux distro
-		dist, err := findDistro(buf.String())
+		dist, err := identify(buf.String())
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func Install(file, system string) error {
 	return nil
 }
 
-func findDistro(description string) (string, error) {
+func identify(description string) (string, error) {
 	// detect arch systems
 	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") {
 		return "arch", nil

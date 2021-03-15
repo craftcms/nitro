@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -107,6 +109,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
 	for _, s := range site.Aliases {
 		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", s, "127.0.0.1"))
+	}
+
+	// check if this is linux specific
+	if runtime.GOOS == "linux" && !wsl.IsWSL() {
+		extraHosts = append(extraHosts, fmt.Sprintf("%s:%s", "host.docker.internal", "host-gateway"))
 	}
 
 	// get the sites environment variables
