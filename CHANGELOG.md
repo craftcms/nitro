@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Fixed
+- Fixed an error preventing Linux users for using xdebug [#288](https://github.com/docker/for-linux/issues/288).
 - Fixed an output error for Windows users when using the `trust` command [#291](https://github.com/craftcms/nitro/issues/291).
 
 ## 2.0.5 - 2021-03-09
