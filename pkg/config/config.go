@@ -236,10 +236,6 @@ func (s *Site) GetContainerPath() string {
 func (s *Site) AsEnvs(addr string) []string {
 	var envs []string
 
-	if addr == "" {
-		addr = "host.docker.internal"
-	}
-
 	// set the php vars
 	envs = append(envs, phpVars(s.PHP, s.Version)...)
 

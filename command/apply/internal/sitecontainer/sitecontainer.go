@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/dockerhost"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -110,7 +112,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	// get the sites environment variables
-	envs := site.AsEnvs("host.docker.internal")
+	envs := site.AsEnvs(dockerhost.Determine(runtime.GOOS))
 
 	// does the config have blackfire credentials
 	if cfg.Blackfire.ServerID != "" {
