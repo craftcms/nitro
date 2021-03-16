@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Fixed
-- Fixed an error preventing Linux users for using Xdebug [#288](https://github.com/docker/for-linux/issues/288).
+- Fixed an error preventing Linux users from using Xdebug [#288](https://github.com/docker/for-linux/issues/288).
 - Fixed a display error for Windows users when using the `trust` command [#291](https://github.com/craftcms/nitro/issues/291).
 - Fixed a bug where command completion was not working in a zsh shell. [#295](https://github.com/craftcms/nitro/issues/295).
 
