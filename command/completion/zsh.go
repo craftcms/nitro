@@ -23,7 +23,10 @@ $ nitro completion zsh > "${fpath[1]}/_nitro"
 # You will need to start a new shell for this setup to take effect.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Gross, but fixes a ZSH completion bug where Cobra generates the completion script using the command name.
+		cmd.Use = "nitro"
 		err := cmd.GenZshCompletion(cmd.OutOrStdout())
+		cmd.Use = "zsh"
 		if err != nil {
 			fmt.Println(err)
 		}
