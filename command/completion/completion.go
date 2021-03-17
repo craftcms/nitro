@@ -45,6 +45,11 @@ func New() *cobra.Command {
 		ValidArgs: []string{"bash", "zsh"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// print the help if not defined
+			if len(args) == 0 {
+				return cmd.Help()
+			}
+
 			switch args[0] {
 			case "zsh":
 				return cmd.Root().GenZshCompletion(os.Stdout)
