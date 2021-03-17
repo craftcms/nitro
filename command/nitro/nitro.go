@@ -79,11 +79,6 @@ func NewCommand() *cobra.Command {
 		log.Fatal(err)
 	}
 
-	// if _, err := docker.Ping(contextpkg.Background()); err != nil {
-	// 	fmt.Println("Unable to talk to Docker, it appears it is not running…")
-	// 	os.Exit(2)
-	// }
-
 	// get the port for the nitrod API
 	apiPort := "5000"
 	if os.Getenv("NITRO_API_PORT") != "" {
