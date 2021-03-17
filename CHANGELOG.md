@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.6 - 2021-03-17
 
 ### Fixed
 - Fixed an error where `initset` was not updating opcache settings. [#298](https://github.com/craftcms/nitro/issues/298)
