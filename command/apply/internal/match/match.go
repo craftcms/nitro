@@ -161,7 +161,7 @@ func checkEnvs(site config.Site, blackfire config.Blackfire, envs []string) bool
 					return false
 				}
 			case "PHP_OPCACHE_ENABLE":
-				if site.PHP.OpcacheEnable && val == config.DefaultEnvs[env] {
+				if (site.PHP.OpcacheEnable && val == config.DefaultEnvs[env]) || (!site.PHP.OpcacheEnable && val != config.DefaultEnvs[env]) {
 					return false
 				}
 			case "PHP_OPCACHE_REVALIDATE_FREQ":

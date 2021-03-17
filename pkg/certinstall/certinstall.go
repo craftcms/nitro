@@ -48,7 +48,7 @@ func Install(file, system string) error {
 		}
 
 		// find the linux distro
-		dist, err := findDistro(buf.String())
+		dist, err := identify(buf.String())
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func Install(file, system string) error {
 		if dist, exists := os.LookupEnv("WSL_DISTRO_NAME"); exists {
 			user := os.Getenv("USER")
 			fmt.Println("Users on WSL will need to open an elevated (run as administrator) Command Prompt or terminal on Windows and run the following command:")
-			fmt.Printf(`certutil -addstore -f "Root" \\wsl$\%s\home\%s\.nitro\nitro.crt\n`, dist, user)
+			fmt.Println(fmt.Printf(`certutil -addstore -f "Root" \\wsl$\%s\home\%s\.nitro\nitro.crt`, dist, user))
 		}
 	default:
 		// add the certificate to the macOS keychain
@@ -90,14 +90,14 @@ func Install(file, system string) error {
 	return nil
 }
 
-func findDistro(description string) (string, error) {
+func identify(description string) (string, error) {
 	// detect arch systems
 	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") {
 		return "arch", nil
 	}
 
 	// detect debian systems
-	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") {
+	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") {
 		return "debian", nil
 	}
 

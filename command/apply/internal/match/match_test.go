@@ -117,6 +117,20 @@ func Test_checkEnvs(t *testing.T) {
 			want: false,
 		},
 		{
+			name: "opcache_disable returns false",
+			args: args{
+				site: config.Site{
+					PHP: config.PHP{
+						OpcacheEnable: false,
+					},
+				},
+				envs: []string{
+					"PHP_OPCACHE_ENABLE=1",
+				},
+			},
+			want: false,
+		},
+		{
 			name: "opcache_enable returns false",
 			args: args{
 				site: config.Site{

@@ -2,13 +2,9 @@ package completion
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
-)
-
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("not implemented")
 )
 
 const exampleText = `To load completions:
@@ -36,18 +32,29 @@ $ nitro completion zsh > "${fpath[1]}/_nitro"
 # You will need to start a new shell for this setup to take effect.
 `
 
-// New is used for scaffolding new commands
-func New() *cobra.Command {
+// NewCommand returns the command used for generating completion shells
+func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "completion",
-		Short:   "Enable shell completion",
-		Example: exampleText,
+		Use:       "completion",
+		Short:     "Enable shell completion",
+		ValidArgs: []string{"bash", "zsh"},
+		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
+			// print the help if not defined
+			if len(args) == 0 {
+				return cmd.Help()
+			}
+
+			switch args[0] {
+			case "zsh":
+				return cmd.Root().GenZshCompletion(os.Stdout)
+			case "bash":
+				return cmd.Root().GenBashCompletion(os.Stdout)
+			}
+
+			return fmt.Errorf("unknown shell requested")
 		},
 	}
-
-	cmd.AddCommand(bashCompletionCommand, zshCompletionCommand)
 
 	return cmd
 }

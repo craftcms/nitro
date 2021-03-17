@@ -79,11 +79,6 @@ func NewCommand() *cobra.Command {
 		log.Fatal(err)
 	}
 
-	// if _, err := docker.Ping(contextpkg.Background()); err != nil {
-	// 	fmt.Println("Unable to talk to Docker, it appears it is not running…")
-	// 	os.Exit(2)
-	// }
-
 	// get the port for the nitrod API
 	apiPort := "5000"
 	if os.Getenv("NITRO_API_PORT") != "" {
@@ -110,7 +105,7 @@ func NewCommand() *cobra.Command {
 		blackfire.NewCommand(home, docker, term),
 		bridge.NewCommand(home, docker, term),
 		clean.NewCommand(home, docker, term),
-		completion.New(),
+		completion.NewCommand(),
 		composer.NewCommand(docker, term),
 		container.NewCommand(home, docker, term),
 		context.NewCommand(home, docker, term),
