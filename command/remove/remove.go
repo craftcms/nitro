@@ -17,6 +17,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "remove",
 		Short:   "Remove a site",
 		Example: exampleText,
+		Aliases: []string{"rm"},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},

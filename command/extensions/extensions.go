@@ -29,6 +29,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "extensions",
 		Short:   "Add PHP extensions to a site",
 		Example: exampleText,
+		Aliases: []string{"ext"},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
