@@ -110,7 +110,7 @@ func NewCommand() *cobra.Command {
 		blackfire.NewCommand(home, docker, term),
 		bridge.NewCommand(home, docker, term),
 		clean.NewCommand(home, docker, term),
-		completion.New(),
+		completion.NewCommand(),
 		composer.NewCommand(docker, term),
 		container.NewCommand(home, docker, term),
 		context.NewCommand(home, docker, term),

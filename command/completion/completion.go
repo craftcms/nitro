@@ -7,11 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("not implemented")
-)
-
 const exampleText = `To load completions:
 
 Bash:
@@ -37,8 +32,8 @@ $ nitro completion zsh > "${fpath[1]}/_nitro"
 # You will need to start a new shell for this setup to take effect.
 `
 
-// New is used for scaffolding new commands
-func New() *cobra.Command {
+// NewCommand returns the command used for generating completion shells
+func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "completion",
 		Short:     "Enable shell completion",
