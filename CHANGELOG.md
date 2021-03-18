@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Changed
+- Added the `--name` flag to `db import` to bypass the name prompt [#293](https://github.com/craftcms/nitro/issues/293).
+
 ## 2.0.6 - 2021-03-17
 
 ### Fixed

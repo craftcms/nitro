@@ -35,6 +35,8 @@ var importExampleText = `  # import a sql file into a database
   # use an absolute path
   nitro db import /Users/oli/Desktop/backup.sql`
 
+var nameFlag string
+
 // importCommand is the command for creating new development environments
 func importCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -155,10 +157,34 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				return fmt.Errorf("unable to get the container")
 			}
 
-			// ask the user for the database to create
-			db, err := output.Ask("Enter the database name", "", ":", &validate.DatabaseName{})
-			if err != nil {
-				return err
+			validator := &validate.DatabaseName{}
+
+			var db string
+			switch nameFlag == "" {
+			case false:
+				// validate the flag value
+				err := validator.Validate(nameFlag)
+				if err != nil {
+					// ask the user for the database to import because the flag was not valid
+					input, err := output.Ask("Enter the database name", "", ":", validator)
+					if err != nil {
+						return err
+					}
+
+					db = input
+					break
+				}
+
+				// the flag value is valid, so assign it
+				db = nameFlag
+			default:
+				// ask the user for the database to import
+				input, err := output.Ask("Enter the database name", "", ":", validator)
+				if err != nil {
+					return err
+				}
+
+				db = input
 			}
 
 			output.Info("Preparing import…")
@@ -313,6 +339,8 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVar(&nameFlag, "name", "", "The database name to import into")
 
 	return cmd
 }
