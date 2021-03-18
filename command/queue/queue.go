@@ -22,9 +22,10 @@ const exampleText = `  # execute the craft queue command for a site
 // current working directory is a known site and auto-select or prompt a user for a list of sites.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "queue",
-		Short:   "Run a queue worker",
-		Example: exampleText,
+		Use:                "queue",
+		Short:              "Run a queue worker",
+		DisableFlagParsing: true,
+		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
 			wd, err := os.Getwd()

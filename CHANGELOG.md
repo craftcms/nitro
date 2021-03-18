@@ -8,6 +8,9 @@
 ### Changed
 - Added the `--name` flag to `db import` to bypass the name prompt [#293](https://github.com/craftcms/nitro/issues/293).
 
+### Fixed
+- Fixed an error where commands would not accept flag arguments [#301](https://github.com/craftcms/nitro/issues/301).
+
 ## 2.0.6 - 2021-03-17
 
 ### Fixed

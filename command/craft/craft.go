@@ -30,9 +30,10 @@ const exampleText = `  # run craft console command in a sites container
 // container. Its context aware and will prompt the user for the site if its not in a directory.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "craft",
-		Short:   "Run Craft console commands",
-		Example: exampleText,
+		Use:                "craft",
+		Short:              "Run Craft console commands",
+		DisableFlagParsing: true,
+		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
 			wd, err := os.Getwd()
