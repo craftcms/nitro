@@ -39,7 +39,7 @@ func lsCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 			})
 
 			// print the table headers
-			tbl := table.New("Hostname", "External Port", "Internal Port", "Username/Password")
+			tbl := table.New("Hostname", "External Port", "Internal Port", "Username/Password", "State")
 			tbl.WithWriter(cmd.OutOrStdout())
 
 			// generate a list of engines for the prompt
@@ -55,10 +55,22 @@ func lsCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 					}
 				}
 
-				external := c.Ports[0].PublicPort
-				internal := c.Ports[0].PrivatePort
+				// if there is more than one port, grab the first one
+				var external, internal uint16
+				switch len(c.Ports) {
+				case 1:
+					external = c.Ports[0].PublicPort
+					internal = c.Ports[0].PrivatePort
+				default:
+					for _, p := range c.Ports {
+						if p.PublicPort != 0 {
+							external = p.PublicPort
+							internal = p.PrivatePort
+						}
+					}
+				}
 
-				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), external, internal, "nitro/nitro")
+				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), external, internal, "nitro/nitro", c.State)
 			}
 
 			tbl.Print()
