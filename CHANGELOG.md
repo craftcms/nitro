@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Added the `db ls` command to print hostnames, ports, and username and password.
+
 ### Changed
 - Added the `--name` flag to `db import` to bypass the name prompt [#293](https://github.com/craftcms/nitro/issues/293).
 

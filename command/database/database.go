@@ -32,6 +32,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		importCommand(home, docker, nitrod, output),
 		backupCommand(home, docker, output),
 		addCommand(docker, nitrod, output),
+		lsCommand(home, docker, output),
 		sshCommand(home, docker, output),
 		removeCommand(docker, nitrod, output),
 		newCommand(home, docker, output),
