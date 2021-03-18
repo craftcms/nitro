@@ -33,6 +33,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd.AddCommand(
 		newCommand(home, docker, output),
 		sshCommand(home, docker, output),
+		removeCommand(home, docker, output),
 	)
 
 	return cmd

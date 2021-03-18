@@ -75,6 +75,18 @@ func (c *Config) AllSitesWithHostnames(site Site, addr string) map[string][]stri
 	return hostnames
 }
 
+// FindContainerByName takes a name and returns the container if name matches.
+func (c *Config) FindContainerByName(name string) (*Container, error) {
+	// find the site by the hostname
+	for _, c := range c.Containers {
+		if c.Name == name {
+			return &c, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find container with name %s", name)
+}
+
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
@@ -84,7 +96,7 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("unable to find the site using the hostname %s", hostname)
+	return nil, fmt.Errorf("unable to find site with hostname %s", hostname)
 }
 
 // ListOfSitesByDirectory takes the users home directory and the current
@@ -468,6 +480,22 @@ func (c *Config) AddSite(s Site) error {
 	c.Sites = append(c.Sites, s)
 
 	return nil
+}
+
+// RemoveContainer takes a name and will remove the container by its
+// name from the config file.
+func (c *Config) RemoveContainer(container *Container) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	for k, v := range c.Containers {
+		if container.Name == v.Name {
+			c.Containers = append(c.Containers[:k], c.Containers[k+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown container %q", container.Name)
 }
 
 // RemoveSite takes a hostname and will remove the site by its

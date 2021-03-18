@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Added the `container remove` command to remove custom containers [#303](https://github.com/craftcms/nitro/issues/303).
 - Added the `db ls` command to print hostnames, ports, and username and password.
 
 ### Changed
