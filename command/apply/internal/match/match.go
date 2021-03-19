@@ -43,7 +43,9 @@ func Container(home string, container config.Container, details types.ContainerJ
 
 		for _, line := range strings.Split(string(content), "\n") {
 			parts := strings.Split(line, "=")
-			customEnvs[parts[0]] = parts[1]
+			if len(parts) > 2 {
+				customEnvs[parts[0]] = parts[1]
+			}
 		}
 
 		// check the containers env against the file and merge
