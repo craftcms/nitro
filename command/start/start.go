@@ -34,17 +34,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return nil, cobra.ShellCompDirectiveDefault
 			}
 
-			site, err := cfg.FindSiteByHostName(toComplete)
-			if err != nil {
-				var options []string
-				for _, s := range cfg.Sites {
-					options = append(options, s.Hostname)
-				}
-
-				return options, cobra.ShellCompDirectiveNoFileComp
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
 			}
 
-			return []string{site.Hostname}, cobra.ShellCompDirectiveNoFileComp
+			return options, cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
