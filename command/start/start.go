@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -22,11 +23,29 @@ const exampleText = `  # start all containers
   nitro start`
 
 // NewCommand returns the command used to start all of the containers for an environment.
-func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
 		Short:   "Start all containers",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			site, err := cfg.FindSiteByHostName(toComplete)
+			if err != nil {
+				var options []string
+				for _, s := range cfg.Sites {
+					options = append(options, s.Hostname)
+				}
+
+				return options, cobra.ShellCompDirectiveNoFileComp
+			}
+
+			return []string{site.Hostname}, cobra.ShellCompDirectiveNoFileComp
+		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
 			if _, err := docker.Ping(cmd.Context()); err != nil {
