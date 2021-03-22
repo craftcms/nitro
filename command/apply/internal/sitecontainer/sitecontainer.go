@@ -16,7 +16,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
@@ -140,13 +139,19 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Env:    envs,
 		},
 		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: path,
-					Target: "/app",
-				},
-			},
+			Binds: []string{fmt.Sprintf("%s:/app:rw", path)},
+			// Mounts: []mount.Mount{
+			// 	{
+			// 		Type:        mount.TypeBind,
+			// 		Source:      path,
+			// 		Target:      "/app",
+			// 		ReadOnly:    false,
+			// 		Consistency: mount.ConsistencyCached,
+			// 		BindOptions: &mount.BindOptions{
+			// 			Propagation: mount.PropagationRShared,
+			// 		},
+			// 	},
+			// },
 			ExtraHosts: extraHosts,
 		},
 		&network.NetworkingConfig{

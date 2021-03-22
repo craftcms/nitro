@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -193,17 +195,26 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check if the root user should be used
-			user := "www-data"
+			containerUser := "www-data"
 			if RootUser || ProxyContainer {
-				user = "root"
+				containerUser = "root"
+			}
+
+			if runtime.GOOS == "linux" {
+				user, err := user.Current()
+				if err != nil {
+					return err
+				}
+
+				containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
 			}
 
 			// show a notice about changes
-			if user == "root" {
+			if containerUser == "root" {
 				output.Info("using root… system changes are ephemeral…")
 			}
 
-			c := exec.Command(cli, "exec", "-u", user, "-it", containerID, "sh")
+			c := exec.Command(cli, "exec", "-u", containerUser, "-it", containerID, "sh")
 
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()
