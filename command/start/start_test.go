@@ -20,10 +20,14 @@ func TestStartSuccess(t *testing.T) {
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
 	expectedOutput := []string{"Starting Nitro…\n", "Nitro started 👍\n"}
+	home, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Act
-	cmd := NewCommand(mock, output)
-	err := cmd.RunE(cmd, os.Args)
+	cmd := NewCommand(home, mock, output)
+	err = cmd.RunE(cmd, os.Args)
 
 	// Assert
 	if err != nil {
@@ -52,10 +56,14 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
 	expectedOutputSuccess := []string{"  ✓ testing-start ready\n"}
+	home, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Act
-	cmd := NewCommand(mock, output)
-	err := cmd.RunE(cmd, os.Args)
+	cmd := NewCommand(home, mock, output)
+	err = cmd.RunE(cmd, os.Args)
 
 	// Assert
 	if err != nil {
@@ -73,10 +81,14 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 func TestStartErrorsWhenThereAreNoContainers(t *testing.T) {
 	// Arrange
 	mock := newMockDockerClient(nil, nil, nil)
+	home, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Act
-	cmd := NewCommand(mock, &spyOutputer{})
-	err := cmd.RunE(cmd, os.Args)
+	cmd := NewCommand(home, mock, &spyOutputer{})
+	err = cmd.RunE(cmd, os.Args)
 
 	// Assert
 	if err == nil {
