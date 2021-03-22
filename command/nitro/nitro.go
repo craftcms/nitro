@@ -133,7 +133,7 @@ func NewCommand() *cobra.Command {
 		share.NewCommand(home, docker, term),
 		ssh.NewCommand(home, docker, term),
 		start.NewCommand(home, docker, term),
-		stop.New(docker, term),
+		stop.NewCommand(home, docker, term),
 		trust.NewCommand(home, docker, term),
 		update.NewCommand(home, docker, term),
 		validate.NewCommand(home, docker, term),

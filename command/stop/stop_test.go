@@ -21,11 +21,15 @@ func TestStopSuccess(t *testing.T) {
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
 	expectedOutput := []string{"Stopping Nitro…\n", "Nitro shutdown 😴\n"}
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Act
-	cmd := New(mock, output)
+	cmd := NewCommand(wd, mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
-	err := cmd.RunE(cmd, os.Args)
+	err = cmd.RunE(cmd, []string{})
 	if err != nil {
 		t.Errorf("expected the error to be nil")
 	}
@@ -44,11 +48,15 @@ func TestStopErrorsWhenThereAreNoContainers(t *testing.T) {
 	environmentName := "testing-stop"
 	mock := newMockDockerClient(nil, nil, nil)
 	output := &spyOutputer{}
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Act
-	cmd := New(mock, output)
+	cmd := NewCommand(wd, mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
-	err := cmd.RunE(cmd, os.Args)
+	err = cmd.RunE(cmd, []string{})
 
 	// Assert
 	if err == nil {

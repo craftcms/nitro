@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -40,7 +41,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "ssh",
 		Short:   "SSH into a container",
 		Example: exampleText,
-		Args:    cobra.NoArgs,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveNoFileComp
+		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
 			if _, err := docker.Ping(cmd.Context()); err != nil {
@@ -60,6 +73,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
+			}
+
+			var site string
+			if len(args) > 0 {
+				site = strings.TrimSpace(args[0])
 			}
 
 			// create a filter for the environment
@@ -104,32 +122,43 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					options = append(options, s.Hostname)
 				}
 
-				// if there are found sites we want to show or connect to the first one, otherwise prompt for
-				// which site to connect to.
-				switch len(sites) {
-				case 0:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
+				// did they ask for a specific site?
+				switch site != "" {
+				case true:
+					for k, v := range options {
+						if site == v {
+							// add the label to get the site
+							filter.Add("label", containerlabels.Host+"="+sites[k].Hostname)
+							break
+						}
 					}
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-				case 1:
-					output.Info("connecting to", sites[0].Hostname)
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
 				default:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
+					// if there are found sites we want to show or connect to the first one, otherwise prompt for which site to connect to.
+					switch len(sites) {
+					case 0:
+						// prompt for the site to ssh into
+						selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+						if err != nil {
+							return err
+						}
 
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+						// add the label to get the site
+						filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+					case 1:
+						output.Info("connecting to", sites[0].Hostname)
+
+						// add the label to get the site
+						filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
+					default:
+						// prompt for the site to ssh into
+						selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+						if err != nil {
+							return err
+						}
+
+						// add the label to get the site
+						filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+					}
 				}
 
 				// find the containers but limited to the site label
