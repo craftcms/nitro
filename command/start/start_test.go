@@ -27,7 +27,7 @@ func TestStartSuccess(t *testing.T) {
 
 	// Act
 	cmd := NewCommand(home, mock, output)
-	err = cmd.RunE(cmd, os.Args)
+	err = cmd.RunE(cmd, []string{})
 
 	// Assert
 	if err != nil {
@@ -63,7 +63,7 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 
 	// Act
 	cmd := NewCommand(home, mock, output)
-	err = cmd.RunE(cmd, os.Args)
+	err = cmd.RunE(cmd, []string{})
 
 	// Assert
 	if err != nil {
