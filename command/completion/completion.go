@@ -15,7 +15,7 @@ $ source <(nitro completion bash)
 
 # To load completions for each session, execute once:
 Linux:
-  $ nitro completion bash > /etc/bash_completion.d/nitro
+  $ nitro completion bash | sudo tee -a /etc/bash_completion.d/nitro >/dev/null
 MacOS:
   $ nitro completion bash > /usr/local/etc/bash_completion.d/nitro
 
