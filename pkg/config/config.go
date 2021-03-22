@@ -163,6 +163,10 @@ func (c *Config) AddContainer(container Container) error {
 
 	c.Containers = append(c.Containers, container)
 
+	sort.SliceStable(c.Containers, func(i, j int) bool {
+		return c.Containers[i].Name < c.Containers[j].Name
+	})
+
 	return nil
 }
 
@@ -478,6 +482,10 @@ func (c *Config) AddSite(s Site) error {
 
 	// add the site to the list
 	c.Sites = append(c.Sites, s)
+
+	sort.SliceStable(c.Sites, func(i, j int) bool {
+		return c.Sites[i].Hostname < c.Sites[j].Hostname
+	})
 
 	return nil
 }
