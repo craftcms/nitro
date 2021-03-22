@@ -33,7 +33,7 @@ func TestRestart(t *testing.T) {
 	ids := []string{"testing-restart", "testing-restart-hostname"}
 
 	// Act
-	cmd := New(mock, spyOutputer{})
+	cmd := NewCommand("", mock, spyOutputer{})
 	err := cmd.RunE(cmd, os.Args)
 	if err != nil {
 		t.Error(err)
@@ -54,7 +54,7 @@ func TestRestartWithNoContainersDoesNoWork(t *testing.T) {
 	mock := newMockDockerClient(nil, nil, nil)
 
 	// Act
-	cmd := New(mock, spyOutputer{})
+	cmd := NewCommand("", mock, spyOutputer{})
 	err := cmd.RunE(cmd, os.Args)
 
 	if err == nil {

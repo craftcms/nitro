@@ -128,7 +128,7 @@ func NewCommand() *cobra.Command {
 		portcheck.NewCommand(term),
 		queue.NewCommand(home, docker, term),
 		remove.NewCommand(home, docker, term),
-		restart.New(docker, term),
+		restart.NewCommand(home, docker, term),
 		selfupdate.NewCommand(term),
 		share.NewCommand(home, docker, term),
 		ssh.NewCommand(home, docker, term),
