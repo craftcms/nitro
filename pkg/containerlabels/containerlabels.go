@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/docker/docker/api/types"
 )
 
 const (
@@ -71,11 +72,27 @@ func ForSite(s config.Site) map[string]string {
 // ForCustomContainer takes a custom container configuration and
 // applies the labels for the container.
 func ForCustomContainer(c config.Container) map[string]string {
-	labels := map[string]string{
+	return map[string]string{
 		Nitro:          "true",
 		Type:           "custom",
 		NitroContainer: c.Name,
 	}
+}
 
-	return labels
+// Identify takes an existing container and examines the
+// labels to determine the type of container.
+func Identify(c types.Container) string {
+	if c.Labels[DatabaseEngine] != "" {
+		return "database"
+	}
+
+	if c.Labels[NitroContainer] != "" {
+		return "custom"
+	}
+
+	if c.Labels[Proxy] != "" {
+		return "proxy"
+	}
+
+	return "site"
 }
