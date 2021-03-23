@@ -185,14 +185,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				containerUser = "root"
 			}
 
-			if runtime.GOOS == "linux" {
-				user, err := user.Current()
-				if err != nil {
-					return err
-				}
-
-				containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
+			user, err := user.Current()
+			if err != nil {
+				return err
 			}
+
+			containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
 
 			// show a notice about changes
 			if containerUser == "root" {

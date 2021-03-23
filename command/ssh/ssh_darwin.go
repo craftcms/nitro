@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
-	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -183,15 +181,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			containerUser := "www-data"
 			if RootUser || ProxyContainer {
 				containerUser = "root"
-			}
-
-			if runtime.GOOS == "linux" {
-				user, err := user.Current()
-				if err != nil {
-					return err
-				}
-
-				containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
 			}
 
 			// show a notice about changes
