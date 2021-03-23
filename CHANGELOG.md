@@ -11,7 +11,7 @@
 - Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
 
 ### Fixed
-- Greatly improved support for Linux users and file permissions (#308)[https://github.com/craftcms/nitro/issues/308] (#280)[https://github.com/craftcms/nitro/issues/280] (#264)[https://github.com/craftcms/nitro/issues/264].
+- Greatly improved support for Linux users and file permissions. (#308)[https://github.com/craftcms/nitro/issues/308] (#280)[https://github.com/craftcms/nitro/issues/280] (#264)[https://github.com/craftcms/nitro/issues/264]
 - Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
 
 ## 2.0.6 - 2021-03-17
