@@ -1,4 +1,5 @@
 // +build linux, !darwin
+
 package ssh
 
 import (
