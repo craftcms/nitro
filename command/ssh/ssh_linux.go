@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
