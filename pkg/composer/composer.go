@@ -49,7 +49,7 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 			User:       containerUser,
 		},
 		&container.HostConfig{
-			Binds: []string{fmt.Sprintf("%s:/app:Z", opts.Path)},
+			Binds: []string{fmt.Sprintf("%s:/app:rw", opts.Path)},
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeVolume,

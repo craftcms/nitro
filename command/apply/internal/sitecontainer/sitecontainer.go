@@ -129,7 +129,6 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	// set the labels
 	labels := containerlabels.ForSite(site)
-
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
@@ -139,19 +138,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Env:    envs,
 		},
 		&container.HostConfig{
-			Binds: []string{fmt.Sprintf("%s:/app:rw", path)},
-			// Mounts: []mount.Mount{
-			// 	{
-			// 		Type:        mount.TypeBind,
-			// 		Source:      path,
-			// 		Target:      "/app",
-			// 		ReadOnly:    false,
-			// 		Consistency: mount.ConsistencyCached,
-			// 		BindOptions: &mount.BindOptions{
-			// 			Propagation: mount.PropagationRShared,
-			// 		},
-			// 	},
-			// },
+			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
 			ExtraHosts: extraHosts,
 		},
 		&network.NetworkingConfig{
