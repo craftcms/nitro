@@ -26,7 +26,7 @@ func (v *DatabaseName) Validate(input string) error {
 	}
 
 	// check for special characters
-	if strings.ContainsAny(input, "!@#$%^&*()-") {
+	if strings.ContainsAny(input, "!@#$%^&*()-.") {
 		return fmt.Errorf("database must not include any special characters except underscores")
 	}
 
