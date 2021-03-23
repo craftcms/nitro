@@ -24,7 +24,7 @@ LABEL org.opencontainers.image.documentation=https://craftcms.com/docs/nitro
 LABEL org.opencontainers.image.vendor="Craft CMS"
 LABEL org.opencontainers.image.source="https://github.com/craftcms/nitro"
 
-RUN apk --no-cache add ca-certificates nss-tools supervisor postgresql-client mysql-client
+RUN apk --no-cache add ca-certificates nss-tools supervisor postgresql-client mysql-client jq
 RUN mkdir --parents /var/www/html
 RUN mkdir --parents /etc/caddy/
 RUN mkdir --parents /config
@@ -41,4 +41,4 @@ VOLUME /data
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
-EXPOSE 443 80 5000
+EXPOSE 443 80 5000 3000 3001
