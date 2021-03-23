@@ -179,7 +179,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check if the root user should be used
-			containerUser := "www-data"
+			var containerUser string
 			if RootUser || ProxyContainer {
 				containerUser = "root"
 			} else {
