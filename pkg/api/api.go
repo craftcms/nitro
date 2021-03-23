@@ -122,13 +122,19 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		}
 
 		// create the route for each of the sites
-		routes = append(routes, caddy.ServerRoute{
+		route := caddy.ServerRoute{
 			Handle: []caddy.RouteHandle{
 				{
 					Handler: "reverse_proxy",
 					Upstreams: []caddy.Upstream{
 						{
 							Dial: fmt.Sprintf("%s:%d", k, site.GetPort()),
+						},
+						{
+							Dial: fmt.Sprintf("%s:%d", k, 3000),
+						},
+						{
+							Dial: fmt.Sprintf("%s:%d", k, 3001),
 						},
 					},
 				},
@@ -139,7 +145,10 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 				},
 			},
 			Terminal: true,
-		})
+		}
+
+		// add the route
+		routes = append(routes, route)
 	}
 
 	update := caddy.UpdateRequest{}
@@ -152,7 +161,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 
 	// set the default welcome server
 	update.HTTP = caddy.Server{
-		Listen: []string{":80"},
+		Listen: []string{":80", ":3000", ":3001"},
 		Routes: append(routes, caddy.ServerRoute{
 			Handle: []caddy.RouteHandle{
 				{
