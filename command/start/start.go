@@ -94,7 +94,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// if the container is already running
 				if c.State == "running" {
-					output.Success(hostname, "ready")
+					output.Success(hostname)
 					continue
 				}
 
