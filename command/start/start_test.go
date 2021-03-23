@@ -55,7 +55,7 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	expectedContainerID := ""
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
-	expectedOutputSuccess := []string{"  ✓ testing-start ready\n"}
+	expectedOutputSuccess := []string{"  ✓ testing-start\n"}
 	home, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
