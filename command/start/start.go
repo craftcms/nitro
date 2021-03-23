@@ -52,6 +52,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
+			var site string
+			if len(args) > 0 {
+				site = args[0]
+			}
+
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
@@ -77,19 +82,27 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					continue
 				}
 
-				n := strings.TrimLeft(c.Names[0], "/")
+				// identify the type of container
+				containerType := containerlabels.Identify(c)
 
-				// if the container is already running
-				if c.State == "running" {
-					output.Success(n, "ready")
+				hostname := strings.TrimLeft(c.Names[0], "/")
+
+				// if the user wants a single site only, skip all of the other sites
+				if site != "" && hostname != site && containerType == "site" {
 					continue
 				}
 
-				output.Pending("starting", n)
+				// if the container is already running
+				if c.State == "running" {
+					output.Success(hostname, "ready")
+					continue
+				}
+
+				output.Pending("starting", hostname)
 
 				// start the container
 				if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-					return fmt.Errorf("unable to start container %s: %w", n, err)
+					return fmt.Errorf("unable to start container %s: %w", hostname, err)
 				}
 
 				output.Done()

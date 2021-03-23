@@ -74,8 +74,7 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 			NetworkMode: "default",
 			Mounts: []mount.Mount{
 				{
-					Type: mount.TypeVolume,
-					// TODO(jasonmccallister) fix the mock to return, or filter, volumes
+					Type:   mount.TypeVolume,
 					Source: "",
 					Target: "/data",
 				},

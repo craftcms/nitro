@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -19,22 +20,48 @@ var (
 	ErrNoContainers = fmt.Errorf("there are no running containers")
 )
 
-const exampleText = `  # restart containers
-  nitro restart`
+const exampleText = `  # restart all containers
+  nitro restart
+
+  # restart specific site
+  nitro restart tutorial.nitro`
 
 // New returns the command to restart all of an environments containers
-func New(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "restart",
 		Short:   "Restart all containers",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
+			var site string
+			if len(args) > 0 {
+				site = strings.TrimSpace(args[0])
+			}
 
 			// get all the containers using a filter, we only want to restart containers which
 			// have the label com.craftcms.nitro.environment=name
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
+
+			if site != "" {
+				// add the label to get the site
+				filter.Add("label", containerlabels.Host+"="+site)
+			}
 
 			// get all of the containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})

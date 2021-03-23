@@ -96,6 +96,15 @@
             "args": ["ssh"]
         },
         {
+            "name": "nitro ssh example.nitro",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "args": ["ssh", "example.nitro"]
+        },
+        {
             "name": "nitro self-update",
             "type": "go",
             "request": "launch",
@@ -113,5 +122,13 @@
             "env": {},
             "args": ["update"]
         },
+         {
+             "name": "test",
+             "type": "go",
+             "request": "launch",
+             "mode": "auto",
+             "program": "${workspaceFolder}/cmd/test/main.go",
+             "env": {}
+         },
     ]
 }

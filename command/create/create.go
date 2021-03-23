@@ -157,7 +157,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					}
 					defer f.Close()
 
-					// trunacte the file
+					// truncate the file
 					if err := f.Truncate(0); err != nil {
 						return err
 					}
@@ -168,6 +168,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					}
 
 					output.Info(".env updated!")
+
+					output.Info("Preparing composer...")
 				}
 			}
 

@@ -59,7 +59,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// generate a list of engines for the prompt
 				for _, c := range containers {
-					tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), getContainerType(c), c.Status)
+					tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), c.Status)
 				}
 
 				tbl.Print()
@@ -71,7 +71,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				var showCustom, showDatabases, showSites bool
 				for _, c := range containers {
 					// get the container type
-					containerType := getContainerType(c)
+					containerType := containerlabels.Identify(c)
 
 					// get information based on the container type
 					switch containerType {
@@ -139,20 +139,4 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd.Flags().BoolVar(&flagVerbose, "verbose", false, "Show extended information")
 
 	return cmd
-}
-
-func getContainerType(c types.Container) string {
-	if c.Labels[containerlabels.DatabaseEngine] != "" {
-		return "database"
-	}
-
-	if c.Labels[containerlabels.NitroContainer] != "" {
-		return "custom"
-	}
-
-	if c.Labels[containerlabels.Proxy] != "" {
-		return "proxy"
-	}
-
-	return "site"
 }

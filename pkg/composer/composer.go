@@ -3,6 +3,8 @@ package composer
 import (
 	"context"
 	"fmt"
+	"os/user"
+	"runtime"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -27,6 +29,15 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 		return container.ContainerCreateCreatedBody{}, fmt.Errorf("invalid options provided to create the composer container")
 	}
 
+	containerUser := "www-data"
+	if runtime.GOOS == "linux" {
+		user, err := user.Current()
+		if err != nil {
+			return container.ContainerCreateCreatedBody{}, err
+		}
+		containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
+	}
+
 	return docker.ContainerCreate(
 		ctx,
 		&container.Config{
@@ -35,19 +46,17 @@ func CreateContainer(ctx context.Context, docker client.CommonAPIClient, opts *O
 			Tty:        false,
 			Labels:     opts.Labels,
 			Entrypoint: []string{"/usr/bin/composer"},
+			User:       containerUser,
 		},
-		&container.HostConfig{Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeVolume,
-				Source: opts.Volume.Name,
-				Target: "/root",
+		&container.HostConfig{
+			Binds: []string{fmt.Sprintf("%s:/app:rw", opts.Path)},
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: opts.Volume.Name,
+					Target: "/tmp",
+				},
 			},
-			{
-				Type:   mount.TypeBind,
-				Source: opts.Path,
-				Target: "/app",
-			},
-		},
 		},
 		opts.NetworkConfig,
 		nil,
