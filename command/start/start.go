@@ -26,7 +26,7 @@ const exampleText = `  # start all containers
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
-		Short:   "Start all containers",
+		Short:   "Start containers",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			cfg, err := config.Load(home)
@@ -39,7 +39,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				options = append(options, s.Hostname)
 			}
 
-			return options, cobra.ShellCompDirectiveNoFileComp
+			return options, cobra.ShellCompDirectiveDefault
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
