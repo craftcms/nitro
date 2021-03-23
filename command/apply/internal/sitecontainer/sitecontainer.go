@@ -32,6 +32,7 @@ var (
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 )
 
+// StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
