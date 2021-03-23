@@ -157,6 +157,18 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		apiPort = os.Getenv("NITRO_API_PORT")
 	}
 
+	// check the first node port
+	nodePort := "3000"
+	if _, defined := os.LookupEnv("NITRO_NODE_PORT"); defined {
+		nodePort = os.Getenv("NITRO_NODE_PORT")
+	}
+
+	// check the second node port
+	secondNodePort := "3001"
+	if _, defined := os.LookupEnv("NITRO_SECOND_NODE_PORT"); defined {
+		secondNodePort = os.Getenv("NITRO_SECOND_NODE_PORT")
+	}
+
 	httpPortNat, err := nat.NewPort("tcp", "80")
 	if err != nil {
 		return fmt.Errorf("unable to set the HTTP port, %w", err)
@@ -172,14 +184,26 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		return fmt.Errorf("unable to set the API port, %w", err)
 	}
 
+	nodePortNat, err := nat.NewPort("tcp", "3000")
+	if err != nil {
+		return fmt.Errorf("unable to set the node port, %w", err)
+	}
+
+	secondNodePortNat, err := nat.NewPort("tcp", "3001")
+	if err != nil {
+		return fmt.Errorf("unable to set the second node port, %w", err)
+	}
+
 	// create a container
 	resp, err := docker.ContainerCreate(ctx,
 		&container.Config{
 			Image: ProxyImage,
 			ExposedPorts: nat.PortSet{
-				httpPortNat:  struct{}{},
-				httpsPortNat: struct{}{},
-				apiPortNat:   struct{}{},
+				httpPortNat:       struct{}{},
+				httpsPortNat:      struct{}{},
+				apiPortNat:        struct{}{},
+				nodePortNat:       struct{}{},
+				secondNodePortNat: struct{}{},
 			},
 			Labels: map[string]string{
 				containerlabels.Nitro:        "true",
@@ -215,6 +239,18 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: apiPort,
+					},
+				},
+				nodePortNat: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: nodePort,
+					},
+				},
+				secondNodePortNat: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: secondNodePort,
 					},
 				},
 			},
