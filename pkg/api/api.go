@@ -113,7 +113,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	}
 
 	// convert each of the sites into a route
-	routes := []caddy.ServerRoute{}
+	var routes, nodeRoutes []caddy.ServerRoute
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
@@ -130,6 +130,25 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 						{
 							Dial: fmt.Sprintf("%s:%d", k, site.GetPort()),
 						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+			Terminal: true,
+		}
+
+		// add the HTTP route
+		routes = append(routes, route)
+
+		nodeRoute := caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
 						{
 							Dial: fmt.Sprintf("%s:%d", k, 3000),
 						},
@@ -147,8 +166,8 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 			Terminal: true,
 		}
 
-		// add the route
-		routes = append(routes, route)
+		// add the node routes
+		nodeRoutes = append(nodeRoutes, nodeRoute)
 	}
 
 	update := caddy.UpdateRequest{}
@@ -159,23 +178,28 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		Routes: routes,
 	}
 
+	httpRoutes := append(routes, caddy.ServerRoute{
+		Handle: []caddy.RouteHandle{
+			{
+				Handler: "vars",
+				Root:    "/var/www/html",
+			},
+			{
+				Handler: "file_server",
+				Root:    "/var/www/html",
+				Hide:    []string{"/etc/caddy/Caddyfile"},
+			},
+		},
+		Terminal: true,
+	})
+
+	// append the node routes
+	httpRoutes = append(httpRoutes, nodeRoutes...)
+
 	// set the default welcome server
 	update.HTTP = caddy.Server{
 		Listen: []string{":80", ":3000", ":3001"},
-		Routes: append(routes, caddy.ServerRoute{
-			Handle: []caddy.RouteHandle{
-				{
-					Handler: "vars",
-					Root:    "/var/www/html",
-				},
-				{
-					Handler: "file_server",
-					Root:    "/var/www/html",
-					Hide:    []string{"/etc/caddy/Caddyfile"},
-				},
-			},
-			Terminal: true,
-		}),
+		Routes: httpRoutes,
 	}
 
 	content, err := json.Marshal(&update)
