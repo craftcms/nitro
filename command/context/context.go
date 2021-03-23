@@ -20,10 +20,9 @@ const exampleText = `  # view all resources for the environment
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:        "context",
-		Short:      "View environment information",
-		Deprecated: "use the `ls` command instead.\n",
-		Example:    exampleText,
+		Use:     "context",
+		Short:   "View environment information",
+		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config file
 			cfg, err := config.Load(home)
