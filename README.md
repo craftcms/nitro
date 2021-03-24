@@ -10,11 +10,11 @@ Learn more at [craftcms.com/docs/nitro](https://craftcms.com/docs/nitro/).
 
 ## Building from Source
 
-If you’d like to build Nitro directly from source to test a PR or unreleased feature, you’ll need `golang` and `make` in order to build a CLI binary for your OS.
+If you’d like to build Nitro directly from source to test a PR or unreleased feature, you’ll need `go` and `make` in order to build a CLI binary for your OS.
 
 If you’re on macOS running [Homebrew](https://brew.sh/) and the [Apple developer tools](https://developer.apple.com/xcode/resources/) that come with Xcode, it should be quick and straightforward:
 
-1. Run `brew install golang`.
+1. Run `brew install go`.
 2. Check out this repository and `cd /path/to/your/checkout`.
 3. Run `make local`.
 
