@@ -15,10 +15,16 @@ import (
 )
 
 const exampleText = `  # view information about your nitro environment
-  nitro ls`
+  nitro ls
+
+  # show only databases
+  nitro ls --databases
+
+  # show only sites
+  nitro ls --sites`
 
 var (
-	flagCustom, flagDatabases, flagProxy, flagServices, flagSites, flagVerbose bool
+	flagCustom, flagDatabases, flagProxy, flagServices, flagSites bool
 )
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
