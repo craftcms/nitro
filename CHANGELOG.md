@@ -6,7 +6,7 @@
 - The `bridge`, `restart`, `share`, `ssh`, `start`, `stop` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283))
 - Added the `container remove` command to remove custom containers. ([#303](https://github.com/craftcms/nitro/issues/303))
 - Added the `ls` command to show useful information about Nitro.
-- Added `opcache_validate_timestamps` to `initset`. ([#302](https://github.com/craftcms/nitro/issues/302))
+- Added `opcache_validate_timestamps` to `iniset`. ([#302](https://github.com/craftcms/nitro/issues/302))
 
 ### Changed
 - Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
