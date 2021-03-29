@@ -170,6 +170,11 @@ func checkEnvs(site config.Site, blackfire config.Blackfire, envs []string) bool
 				if (site.PHP.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (site.PHP.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(site.PHP.OpcacheRevalidateFreq)) {
 					return false
 				}
+			case "PHP_OPCACHE_VALIDATE_TIMESTAMPS":
+				// if there is a custom value
+				if !site.PHP.OpcacheValidateTimestamps && val != config.DefaultEnvs[env] {
+					return false
+				}
 			case "XDEBUG_MODE":
 				if site.Xdebug && val == config.DefaultEnvs[env] {
 					return false

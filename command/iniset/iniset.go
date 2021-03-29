@@ -127,6 +127,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				"memory_limit",
 				"opcache_enable",
 				"opcache_revalidate_freq",
+				"opcache_validate_timestamps",
 				"post_max_size",
 				"upload_max_file_size",
 			}
@@ -225,6 +226,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			case "opcache_enable":
 				value, err := output.Ask("Should we enable OPCache", "false", "?", &validate.IsBoolean{})
+				if err != nil {
+					return err
+				}
+
+				// convert to bool
+				display, err := strconv.ParseBool(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPBoolSetting(hostname, setting, display); err != nil {
+					return err
+				}
+			case "opcache_validate_timestamps":
+				value, err := output.Ask("Should we validate timestamps with OPCache", "false", "?", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}

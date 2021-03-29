@@ -30,19 +30,20 @@ var (
 	// DefaultEnvs is used to map a config to a known environment variable that is used
 	// on the container instances to their default values
 	DefaultEnvs = map[string]string{
-		"PHP_DISPLAY_ERRORS":          "on",
-		"PHP_MEMORY_LIMIT":            "512M",
-		"PHP_MAX_EXECUTION_TIME":      "5000",
-		"PHP_UPLOAD_MAX_FILESIZE":     "512M",
-		"PHP_MAX_INPUT_VARS":          "5000",
-		"PHP_POST_MAX_SIZE":           "512M",
-		"PHP_OPCACHE_ENABLE":          "0",
-		"PHP_OPCACHE_REVALIDATE_FREQ": "0",
-		"XDEBUG_MODE":                 "off",
-		"XDEBUG_SESSION":              "PHPSTORM",
-		"XDEBUG_CONFIG":               "",
-		"BLACKFIRE_SERVER_ID":         "",
-		"BLACKFIRE_SERVER_TOKEN":      "",
+		"PHP_DISPLAY_ERRORS":              "on",
+		"PHP_MEMORY_LIMIT":                "512M",
+		"PHP_MAX_EXECUTION_TIME":          "5000",
+		"PHP_UPLOAD_MAX_FILESIZE":         "512M",
+		"PHP_MAX_INPUT_VARS":              "5000",
+		"PHP_POST_MAX_SIZE":               "512M",
+		"PHP_OPCACHE_ENABLE":              "0",
+		"PHP_OPCACHE_REVALIDATE_FREQ":     "0",
+		"PHP_OPCACHE_VALIDATE_TIMESTAMPS": "0",
+		"XDEBUG_MODE":                     "off",
+		"XDEBUG_SESSION":                  "PHPSTORM",
+		"XDEBUG_CONFIG":                   "",
+		"BLACKFIRE_SERVER_ID":             "",
+		"BLACKFIRE_SERVER_TOKEN":          "",
 	}
 )
 
@@ -273,6 +274,10 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 				c.Sites[i].PHP.OpcacheEnable = value
 
 				return nil
+			case "opcache_validate_timestamps":
+				c.Sites[i].PHP.OpcacheValidateTimestamps = value
+
+				return nil
 			default:
 				return fmt.Errorf("unknown php setting %s", setting)
 			}
@@ -412,16 +417,17 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         bool   `json:"display_errors,omitempty" yaml:"display_errors,omitempty"`
-	MaxExecutionTime      int    `json:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
-	MaxInputVars          int    `json:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
-	MaxInputTime          int    `json:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
-	MaxFileUpload         string `json:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
-	MemoryLimit           string `json:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
-	OpcacheEnable         bool   `json:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
-	OpcacheRevalidateFreq int    `json:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
-	PostMaxSize           string `json:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
-	UploadMaxFileSize     string `json:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
+	DisplayErrors             bool   `json:"display_errors,omitempty" yaml:"display_errors,omitempty"`
+	MaxExecutionTime          int    `json:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
+	MaxInputVars              int    `json:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
+	MaxInputTime              int    `json:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
+	MaxFileUpload             string `json:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
+	MemoryLimit               string `json:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
+	OpcacheEnable             bool   `json:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
+	OpcacheRevalidateFreq     int    `json:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
+	OpcacheValidateTimestamps bool   `json:"opcache_validate_timestamps,omitempty" yaml:"opcache_validate_timestamps,omitempty"`
+	PostMaxSize               string `json:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
+	UploadMaxFileSize         string `json:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
 }
 
 // Load is used to return the unmarshalled config, and
