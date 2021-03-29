@@ -1,6 +1,7 @@
 {
     local_certs
     admin 0.0.0.0:2019
+    disable_redirects true
 }
 
 :80 {
