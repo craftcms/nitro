@@ -724,7 +724,12 @@ func phpVars(php PHP, version string) []string {
 		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ="+DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"])
 	} else {
 		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", php.OpcacheRevalidateFreq))
+	}
 
+	if php.OpcacheValidateTimestamps {
+		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
+	} else {
+		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
 	}
 
 	return envs
