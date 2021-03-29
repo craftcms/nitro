@@ -27,7 +27,7 @@ var skipApply, skipTrust bool
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "init",
-		Short:         "Perform Nitro’s initial setup.",
+		Short:         "Performs Nitro’s initial setup.",
 		Example:       exampleText,
 		SilenceErrors: false,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
