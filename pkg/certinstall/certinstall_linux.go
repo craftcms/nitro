@@ -73,9 +73,6 @@ func Install(file, system string) error {
 		return fmt.Errorf("unable to find the certificate tool for %s", dist)
 	}
 
-	fmt.Println(certTool)
-	fmt.Println(certPath)
-
 	if err := sudo.Run("mv", "mv", file, fmt.Sprintf("%s%s.crt", certPath, "nitro")); err != nil {
 		return fmt.Errorf("unable to move the certificate, %w", err)
 	}
