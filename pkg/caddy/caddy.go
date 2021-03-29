@@ -1,13 +1,21 @@
 package caddy
 
 type UpdateRequest struct {
-	HTTPS Server `json:"https,omitempty"`
-	HTTP  Server `json:"http,omitempty"`
+	HTTPS   Server `json:"https,omitempty"`
+	HTTP    Server `json:"http,omitempty"`
+	Node    Server `json:"node,omitempty"`
+	NodeAlt Server `json:"node_alt,omitempty"`
 }
 
 type Server struct {
-	Listen []string      `json:"listen"`
-	Routes []ServerRoute `json:"routes"`
+	Listen         []string       `json:"listen"`
+	Routes         []ServerRoute  `json:"routes"`
+	AutomaticHTTPS AutomaticHTTPS `json:"automatic_https"`
+}
+
+type AutomaticHTTPS struct {
+	Disable          bool `json:"disable,omitempty"`
+	DisableRedirects bool `json:"disable_redirects"`
 }
 
 type ServerRoute struct {

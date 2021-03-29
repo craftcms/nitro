@@ -9,6 +9,7 @@
 
 ### Changed
 - Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
+- The proxy now exposes ports `3000` and `3001` to allow for webpack dev server routes.
 
 ### Fixed
 - Greatly improved support for Linux users and file permissions. (#308)[https://github.com/craftcms/nitro/issues/308] (#280)[https://github.com/craftcms/nitro/issues/280] (#264)[https://github.com/craftcms/nitro/issues/264]
