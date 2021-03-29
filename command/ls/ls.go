@@ -32,14 +32,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "ls",
 		Short:   "Show Nitro info",
 		Example: exampleText,
-		// Aliases: []string{"context"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
-
-			// TODO(jasonmccallister) apply filters based on the flags provided
 
 			// get a list of all the databases
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
