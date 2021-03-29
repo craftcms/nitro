@@ -55,6 +55,38 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					status = "stopped"
 				}
 
+				// if we only want databases
+				if cmd.Flag("databases").Value.String() == "true" {
+					if c.Labels[containerlabels.Type] != "database" {
+						continue
+					}
+				}
+
+				// show sites
+				if cmd.Flag("sites").Value.String() == "true" {
+					if c.Labels[containerlabels.Host] == "" {
+						continue
+					}
+				}
+
+				if cmd.Flag("services").Value.String() == "true" {
+					if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis" {
+						continue
+					}
+				}
+
+				if cmd.Flag("custom").Value.String() == "true" {
+					if c.Labels[containerlabels.Type] != "custom" {
+						continue
+					}
+				}
+
+				if cmd.Flag("proxy").Value.String() == "true" {
+					if c.Labels[containerlabels.Type] != "proxy" {
+						continue
+					}
+				}
+
 				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), status)
 			}
 
