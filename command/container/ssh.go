@@ -20,7 +20,7 @@ var sshExampleText = `  # ssh into a custom container
 func sshCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "ssh",
-		Short:   "SSH into custom container",
+		Short:   "Opens a shell in a custom container.",
 		Example: sshExampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// add filters to show only the environment and database containers

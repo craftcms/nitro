@@ -17,7 +17,7 @@ const exampleText = `  # enable blackfire for a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "blackfire",
-		Short:   "Manage Blackfire credentials",
+		Short:   "Manages Blackfire credentials.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

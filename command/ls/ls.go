@@ -30,7 +30,7 @@ var (
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "ls",
-		Short:   "Show Nitro info",
+		Short:   "Lists details for Nitro’s containers.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 

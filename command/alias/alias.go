@@ -21,7 +21,7 @@ const exampleText = `  # add alias domains to a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "alias",
-		Short:   "Add alias domains",
+		Short:   "Adds alias domains.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)

@@ -55,8 +55,8 @@ import (
 
 var rootCommand = &cobra.Command{
 	Use:   "nitro",
-	Short: "Local Craft CMS dev made easy",
-	Long: `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.
+	Short: "Speedy local dev environment for Craft CMS.",
+	Long: `Nitro is a console-based tool that manages Docker for local PHP development.
 
 Version: ` + version.Version,
 	RunE:         rootMain,

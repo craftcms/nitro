@@ -16,7 +16,7 @@ const offText = `  # disable blackfire for a site
 func offCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "off",
-		Short:   "Disable blackfire for a site",
+		Short:   "Disables Blackfire for a site.",
 		Example: offText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

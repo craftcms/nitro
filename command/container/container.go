@@ -20,7 +20,7 @@ const exampleText = `  # manage custom containers
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "container",
-		Short:   "Manage custom containers",
+		Short:   "Manages custom containers.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

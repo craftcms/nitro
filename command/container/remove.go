@@ -14,7 +14,7 @@ import (
 func removeCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove",
-		Short: "Remove custom container",
+		Short: "Removes a custom container.",
 		Example: `  # remove a custom container from the config
   nitro container remove`,
 		Aliases: []string{"rm"},

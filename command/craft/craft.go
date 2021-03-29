@@ -31,7 +31,7 @@ const exampleText = `  # run craft console command in a sites container
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                "craft",
-		Short:              "Run Craft console commands",
+		Short:              "Runs a Craft console command.",
 		DisableFlagParsing: true,
 		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {

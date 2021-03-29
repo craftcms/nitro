@@ -21,7 +21,7 @@ const exampleText = `  # view all resources for the environment
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "context",
-		Short:   "View environment information",
+		Short:   "Displays environment information.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config file

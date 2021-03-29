@@ -25,7 +25,7 @@ var addExampleTest = `  # add a new database
 func addCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
-		Short:   "Add a new database",
+		Short:   "Adds a new database.",
 		Example: addExampleTest,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// add filters to show only the environment and database containers
