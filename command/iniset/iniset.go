@@ -62,48 +62,60 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get all of the sites
-			var sites, found []string
-			for _, s := range cfg.Sites {
-				p, _ := s.GetAbsPath(home)
-
-				// check if the path matches a sites path, then we are in a known site
-				if strings.Contains(wd, p) {
-					found = append(found, s.Hostname)
-				}
-
-				// add the site to the list in case we cannot find the directory
-				sites = append(sites, s.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
-			// if there are found sites we want to show or connect to the first one, otherwise prompt for
-			// which site to connect to.
-			switch len(found) {
-			case 0:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
-				if err != nil {
-					return err
-				}
+			var site string
+			if len(args) > 0 {
+				site = strings.TrimSpace(args[0])
+			}
 
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected])
-			case 1:
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+found[0])
+			// did they ask for a specific site?
+			switch site != "" {
+			case true:
+				for k, v := range options {
+					if site == v {
+						// add the label to get the site
+						filter.Add("label", containerlabels.Host+"="+sites[k].Hostname)
+						break
+					}
+				}
 			default:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
-				if err != nil {
-					return err
-				}
+				// if there are found sites we want to show or connect to the first one, otherwise prompt for which site to connect to.
+				switch len(sites) {
+				case 0:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
 
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+found[selected])
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+				case 1:
+					output.Info("connecting to", sites[0].Hostname)
+
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
+				default:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+				}
 			}
 
 			// find the containers but limited to the site label
