@@ -23,6 +23,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "alias",
 		Short:   "Adds alias domains.",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveDefault
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -39,48 +52,54 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// check for a site arg
+			var siteArg string
+			if len(args) > 0 {
+				siteArg = strings.TrimSpace(args[0])
+			}
+
 			// get a context aware list of sites
 			sites := cfg.ListOfSitesByDirectory(home, wd)
 
-			// create the options for the sites
 			var options []string
 			for _, s := range sites {
 				options = append(options, s.Hostname)
 			}
 
-			var site config.Site
-			switch len(sites) {
-			case 0:
-				// prompt for the site to alias
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
+			// did they ask for a specific site?
+			var site *config.Site
+			switch siteArg == "" {
+			case true:
+				switch len(options) {
+				case 1:
+					output.Info("adding aliases to", options[0])
+
+					// add the label to get the site
+					site, _ = cfg.FindSiteByHostName(options[0])
+				default:
+					// prompt for the site to alias
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site, _ = cfg.FindSiteByHostName(options[selected])
 				}
 
-				site = sites[selected]
-			case 1:
-				output.Info("adding aliases to", sites[0].Hostname)
-
-				// add the label to get the site
-				site = sites[0]
+				// show aliases if they exist
+				if len(site.Aliases) > 0 {
+					output.Info("The following aliases are set for", site.Hostname)
+					for _, a := range site.Aliases {
+						output.Info("  ", a)
+					}
+				} else {
+					output.Info("No existing aliases are set for", site.Hostname)
+				}
 			default:
-				// prompt for the site to alias
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				site, err = cfg.FindSiteByHostName(siteArg)
 				if err != nil {
 					return err
 				}
-
-				site = sites[selected]
-			}
-
-			// show aliases if they exist
-			if len(site.Aliases) > 0 {
-				output.Info("The following aliases are set for", site.Hostname)
-				for _, a := range site.Aliases {
-					output.Info("  ", a)
-				}
-			} else {
-				output.Info("No existing aliases are set for", site.Hostname)
 			}
 
 			// prompt the user to add new alias
