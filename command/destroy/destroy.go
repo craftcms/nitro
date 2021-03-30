@@ -42,7 +42,7 @@ const exampleText = `  # remove all resources (networks, containers, and volumes
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "destroy",
-		Short:   "Destroy resources",
+		Short:   "Destroys Nitro’s Docker resources.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

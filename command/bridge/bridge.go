@@ -31,7 +31,7 @@ const exampleText = `  # bridge your network ip to share nitro on the local netw
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "bridge",
-		Short:   "Share sites on your local network",
+		Short:   "Shares sites on your local network.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			cfg, err := config.Load(home)

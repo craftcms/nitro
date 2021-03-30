@@ -36,7 +36,7 @@ $ nitro completion zsh > "${fpath[1]}/_nitro"
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "completion",
-		Short:     "Enable shell completion",
+		Short:     "Enables shell completion.",
 		ValidArgs: []string{"bash", "zsh"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -43,7 +43,7 @@ const exampleText = `  # run npm install in a current directory
 func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "npm",
-		Short:   "Run npm commands",
+		Short:   "Runs an npm command.",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

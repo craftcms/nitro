@@ -18,7 +18,7 @@ const exampleText = `  # validate a config file
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "validate",
-		Short:   "Validate the config",
+		Short:   "Validates the Nitro config file.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load(home)

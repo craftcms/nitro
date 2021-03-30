@@ -20,7 +20,7 @@ const exampleText = `  # modify hosts file to match sites and aliases
 func NewCommand(home string, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "hosts",
-		Short:   "Modify your hosts file",
+		Short:   "Modifies hosts file.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			hosts := cmd.Flag("hostnames").Value.String()

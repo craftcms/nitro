@@ -63,7 +63,7 @@ var files = []file{
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "permissions",
-		Short:   "Fix Craft permissions",
+		Short:   "Fixes Craft permissions.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			cfg, err := config.Load(home)

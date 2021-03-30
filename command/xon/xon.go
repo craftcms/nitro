@@ -20,7 +20,7 @@ const exampleText = `  # example command
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "xon",
-		Short:   "Enable xdebug for a site",
+		Short:   "Enables Xdebug for a site.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)

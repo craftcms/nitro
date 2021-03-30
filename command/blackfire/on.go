@@ -17,7 +17,7 @@ const onTest = `  # enable blackfire for a site
 func onCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "on",
-		Short:   "Enable blackfire for a site",
+		Short:   "Enables Blackfire for a site.",
 		Example: onTest,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

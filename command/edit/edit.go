@@ -17,7 +17,7 @@ const exampleText = `  # edit the config file
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "edit",
-		Short:   "Edit the nitro config",
+		Short:   "Opens Nitro’s config in the default editor.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load(home)

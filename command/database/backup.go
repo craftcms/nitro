@@ -27,7 +27,7 @@ var backupExampleText = `  # backup a database
 func backupCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "backup",
-		Short:   "Backup a database",
+		Short:   "Backs up a database.",
 		Example: backupExampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
