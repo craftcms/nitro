@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Added
-- The `bridge`, `restart`, `share`, `ssh`, `start`, `stop` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283))
+- The `blackfire`, `bridge`, `iniset`, `restart`, `share`, `ssh`, `start`, `stop` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283))
 - Added the `container remove` command to remove custom containers. ([#303](https://github.com/craftcms/nitro/issues/303))
 - Added the `ls` command to show useful information about Nitro.
 - Added `opcache_validate_timestamps` to `iniset`. ([#302](https://github.com/craftcms/nitro/issues/302))
