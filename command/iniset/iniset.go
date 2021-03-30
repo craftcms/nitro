@@ -29,7 +29,7 @@ const exampleText = `  # change PHP settings for a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "iniset",
-		Short:   "Change PHP setting",
+		Short:   "Changes a site’s PHP setting.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)

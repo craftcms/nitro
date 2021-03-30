@@ -55,7 +55,7 @@ const exampleText = `  # apply changes from a config
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
-		Short:   "Apply changes",
+		Short:   "Applies changes.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?

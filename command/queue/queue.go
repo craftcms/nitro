@@ -23,7 +23,7 @@ const exampleText = `  # execute the craft queue command for a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                "queue",
-		Short:              "Run a queue worker",
+		Short:              "Runs a queue worker.",
 		DisableFlagParsing: true,
 		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {

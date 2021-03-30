@@ -21,7 +21,7 @@ import (
 func newCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "new",
-		Short: "Add a new custom container",
+		Short: "Adds a new custom container.",
 		Example: `  # add a new custom container
   nitro container new
 

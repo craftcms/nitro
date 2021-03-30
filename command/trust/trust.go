@@ -38,7 +38,7 @@ const (
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "trust",
-		Short:   "Trust certificates for environment",
+		Short:   "Trusts Nitro certificates on the host machine.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()

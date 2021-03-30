@@ -21,7 +21,7 @@ const exampleText = `  # check if a port is in use
 func NewCommand(output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "portcheck",
-		Short:   "Check a local port",
+		Short:   "Checks whether a local port is available.",
 		Args:    cobra.MinimumNArgs(1),
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {

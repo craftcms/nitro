@@ -35,7 +35,7 @@ const exampleText = `  # enable services
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
-		Short: "Enable services",
+		Short: "Enables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())

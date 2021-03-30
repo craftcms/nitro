@@ -30,7 +30,7 @@ const exampleText = `  # share a local site with ngrok
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "share",
-		Short:   "Share a local site",
+		Short:   "Shares a local site.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			cfg, err := config.Load(home)

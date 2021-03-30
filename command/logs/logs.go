@@ -31,7 +31,7 @@ const exampleText = `  # show logs from a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "logs",
-		Short:   "View container logs",
+		Short:   "Displays container logs.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory

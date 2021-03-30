@@ -23,7 +23,7 @@ var exampleText = `nitro version`
 func NewCommand(home string, client client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "version",
-		Short:   "Show version info",
+		Short:   "Displays version info.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

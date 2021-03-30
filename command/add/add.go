@@ -27,7 +27,7 @@ const exampleText = `  # add the current directory as a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
-		Short:   "Add a site",
+		Short:   "Adds a site.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
