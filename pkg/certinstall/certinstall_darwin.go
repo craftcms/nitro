@@ -3,11 +3,7 @@
 package certinstall
 
 import (
-	"bytes"
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/craftcms/nitro/pkg/sudo"
 )
