@@ -334,7 +334,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 			output.Done()
 
-			output.Info(fmt.Sprintf("%s, took %.2f seconds 💪...", reply.Message, time.Since(start).Seconds()))
+			output.Info(fmt.Sprintf("%s, took %.2f seconds 💪", reply.Message, time.Since(start).Seconds()))
 
 			return nil
 		},
