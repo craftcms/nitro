@@ -68,7 +68,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			containerID := containers[0].ID
 
 			// get the contents of the certificate from the container
-			output.Pending("getting Nitro’s root site certificate…")
+			output.Pending("getting Nitro’s root site certificate")
 
 			// verify the file exists in the container
 			for {
