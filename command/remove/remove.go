@@ -1,6 +1,9 @@
 package remove
 
 import (
+	"os"
+	"strings"
+
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -17,6 +20,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "remove",
 		Short:   "Remove a site",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveDefault
+		},
 		Aliases: []string{"rm"},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
@@ -28,23 +44,55 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// get all of the sites
+			// get the current working directory
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
+			// create the options for the sites
 			var options []string
-			for _, s := range cfg.Sites {
-				// add the site to the list
+			for _, s := range sites {
 				options = append(options, s.Hostname)
 			}
 
-			// prompt for the site to remove
-			selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-			if err != nil {
-				return err
+			var siteArg string
+			if len(args) > 0 {
+				siteArg = strings.TrimSpace(args[0])
 			}
 
-			site, err := cfg.FindSiteByHostName(options[selected])
-			if err != nil {
-				return err
+			var site *config.Site
+			switch siteArg == "" {
+			case true:
+				switch len(sites) {
+				case 0:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				case 1:
+					site = &sites[0]
+				default:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				}
+			default:
+				site, err = cfg.FindSiteByHostName(siteArg)
+				if err != nil {
+					return err
+				}
 			}
+
+			output.Info("Removing", sites[0].Hostname)
 
 			// remove the site
 			if err := cfg.RemoveSite(site); err != nil {
