@@ -92,7 +92,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info("Removing", sites[0].Hostname)
+			output.Info("Removing", site.Hostname)
 
 			// remove the site
 			if err := cfg.RemoveSite(site); err != nil {
