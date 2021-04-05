@@ -30,7 +30,7 @@ const exampleText = `  # restart all containers
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "restart",
-		Short:   "Restart all containers",
+		Short:   "Restarts all containers.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			cfg, err := config.Load(home)
