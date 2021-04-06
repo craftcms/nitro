@@ -3,19 +3,22 @@
 ## Unreleased
 
 ### Added
-- The `blackfire`, `bridge`, `iniset`, `restart`, `share`, `ssh`, `start`, `stop` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283))
+- The `blackfire`, `bridge`, `iniset`, `remove`, `restart`, `share`, `ssh`, `start`, `stop`, `xoff`, and `xon` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283), [#320](https://github.com/craftcms/nitro/issues/320))
 - Added the `container remove` command to remove custom containers. ([#303](https://github.com/craftcms/nitro/issues/303))
 - Added the `ls` command to show useful information about Nitro.
 - Added `opcache_validate_timestamps` to `iniset`. ([#302](https://github.com/craftcms/nitro/issues/302))
 - Added support for local certificates on Fedora, CentOS, and RHEL distributions.
+- Added readme instructions for building from source.
 
 ### Changed
 - Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
 - The proxy now exposes ports `3000` and `3001` to allow for webpack dev server routes.
+- Revised command descriptions and miscellaneous output. ([#316](https://github.com/craftcms/nitro/issues/316), [#322](https://github.com/craftcms/nitro/issues/322))
 
 ### Fixed
 - Greatly improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
 - Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
+- Fixed an error where changing a sites webroot would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
 
 ## 2.0.6 - 2021-03-17
 

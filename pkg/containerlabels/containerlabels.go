@@ -52,13 +52,17 @@ const (
 
 	// Type is used to identity the type of container
 	Type = "com.craftcms.nitro.type"
+
+	// Webroot is used to label a container with the webroot for the site
+	Webroot = "com.craftcms.nitro.webroot"
 )
 
 // ForSite takes a site and returns labels to use on the sites container.
 func ForSite(s config.Site) map[string]string {
 	labels := map[string]string{
-		Nitro: "true",
-		Host:  s.Hostname,
+		Nitro:   "true",
+		Host:    s.Hostname,
+		Webroot: s.Webroot,
 	}
 
 	// if there are extensions, add them as comma separated

@@ -256,6 +256,59 @@ func TestSite(t *testing.T) {
 		want bool
 	}{
 		{
+			name: "containers without webroot label returns false",
+			args: args{
+				home: "testdata/example-site",
+				site: config.Site{
+					Hostname: "newname",
+					Path:     "testdata/example-site",
+					Version:  "7.4",
+					Webroot:  "web",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Labels: map[string]string{
+							containerlabels.Host: "newname",
+						},
+					},
+					Mounts: []types.MountPoint{
+						{
+							Source: filepath.Join(wd, "testdata", "example-site"),
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "mismatched webroot returns false",
+			args: args{
+				home: "testdata/example-site",
+				site: config.Site{
+					Hostname: "newname",
+					Path:     "testdata/example-site",
+					Version:  "7.4",
+					Webroot:  "web",
+				},
+				container: types.ContainerJSON{
+					Config: &container.Config{
+						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Labels: map[string]string{
+							containerlabels.Host:    "newname",
+							containerlabels.Webroot: "public",
+						},
+					},
+					Mounts: []types.MountPoint{
+						{
+							Source: filepath.Join(wd, "testdata", "example-site"),
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
 			name: "mismatched paths return false",
 			args: args{
 				home: "testdata/example-site",

@@ -3,6 +3,7 @@ package xon
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -22,6 +23,19 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "xon",
 		Short:   "Enables Xdebug for a site.",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveDefault
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -47,26 +61,39 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				options = append(options, s.Hostname)
 			}
 
-			var site config.Site
-			switch len(sites) {
-			case 0:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
+			var siteArg string
+			if len(args) > 0 {
+				siteArg = strings.TrimSpace(args[0])
+			}
+
+			var site *config.Site
+			switch siteArg == "" {
+			case true:
+				switch len(sites) {
+				case 0:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				case 1:
+					output.Info("Enabling xdebug for", sites[0].Hostname)
+
+					site = &sites[0]
+				default:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
 				}
-
-				site = sites[selected]
-			case 1:
-				output.Info("Enabling xdebug for", sites[0].Hostname)
-
-				site = sites[0]
 			default:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				site, err = cfg.FindSiteByHostName(siteArg)
 				if err != nil {
 					return err
 				}
-
-				site = sites[selected]
 			}
 
 			// php 7.0 does not support xdebug
