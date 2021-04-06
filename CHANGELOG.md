@@ -18,6 +18,7 @@
 ### Fixed
 - Greatly improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
 - Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
+- Fixed an error where changing a sites webroot would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
 
 ## 2.0.6 - 2021-03-17
 
