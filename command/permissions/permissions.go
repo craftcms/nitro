@@ -185,6 +185,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			output.Info("Permssions modified on", site.Hostname, "🔓")
+
 			return nil
 		},
 	}
