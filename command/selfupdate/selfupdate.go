@@ -151,7 +151,7 @@ func NewCommand(output terminal.Outputer) *cobra.Command {
 						if file.Name == "nitro.exe" {
 							output.Done()
 
-							output.Info("Updating to Nitro", release.Version+"!")
+							output.Info("Updated to Nitro", release.Version+"!")
 
 							// read the file
 							f, err := os.Open(file.FileInfo().Name())

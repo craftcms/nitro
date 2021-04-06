@@ -113,7 +113,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	}
 
 	// convert each of the sites into a route
-	routes := []caddy.ServerRoute{}
+	var siteRoutes, nodeRoutes, nodeAltRoutes []caddy.ServerRoute
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
@@ -122,7 +122,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		}
 
 		// create the route for each of the sites
-		routes = append(routes, caddy.ServerRoute{
+		siteRoutes = append(siteRoutes, caddy.ServerRoute{
 			Handle: []caddy.RouteHandle{
 				{
 					Handler: "reverse_proxy",
@@ -140,33 +140,95 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 			},
 			Terminal: true,
 		})
+
+		// add the node routes
+		nodeRoutes = append(nodeRoutes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", k, 3000),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+			Terminal: true,
+		})
+
+		nodeAltRoutes = append(nodeAltRoutes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", k, 3001),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+			Terminal: true,
+		})
 	}
 
 	update := caddy.UpdateRequest{}
 
-	// add the routes to the first server
-	update.HTTPS = caddy.Server{
-		Listen: []string{":443"},
-		Routes: routes,
+	httpRoutes := append(siteRoutes, caddy.ServerRoute{
+		Handle: []caddy.RouteHandle{
+			{
+				Handler: "vars",
+				Root:    "/var/www/html",
+			},
+			{
+				Handler: "file_server",
+				Root:    "/var/www/html",
+				Hide:    []string{"/etc/caddy/Caddyfile"},
+			},
+		},
+		Terminal: true,
+	})
+
+	update.Node = caddy.Server{
+		Listen: []string{":3000"},
+		Routes: nodeRoutes,
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+
+	update.NodeAlt = caddy.Server{
+		Listen: []string{":3001"},
+		Routes: nodeAltRoutes,
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
 	}
 
 	// set the default welcome server
 	update.HTTP = caddy.Server{
 		Listen: []string{":80"},
-		Routes: append(routes, caddy.ServerRoute{
-			Handle: []caddy.RouteHandle{
-				{
-					Handler: "vars",
-					Root:    "/var/www/html",
-				},
-				{
-					Handler: "file_server",
-					Root:    "/var/www/html",
-					Hide:    []string{"/etc/caddy/Caddyfile"},
-				},
-			},
-			Terminal: true,
-		}),
+		Routes: httpRoutes,
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			DisableRedirects: true,
+		},
+	}
+
+	// add the routes to the first server
+	update.HTTPS = caddy.Server{
+		Listen: []string{":443"},
+		Routes: siteRoutes,
 	}
 
 	content, err := json.Marshal(&update)

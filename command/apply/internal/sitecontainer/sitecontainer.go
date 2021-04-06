@@ -16,7 +16,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
@@ -33,6 +32,7 @@ var (
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
 )
 
+// StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// set filters for the container
 	filter := filters.NewArgs()
@@ -130,7 +130,6 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	// set the labels
 	labels := containerlabels.ForSite(site)
-
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
@@ -140,13 +139,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Env:    envs,
 		},
 		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: path,
-					Target: "/app",
-				},
-			},
+			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
 			ExtraHosts: extraHosts,
 		},
 		&network.NetworkingConfig{

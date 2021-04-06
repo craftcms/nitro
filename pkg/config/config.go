@@ -30,19 +30,20 @@ var (
 	// DefaultEnvs is used to map a config to a known environment variable that is used
 	// on the container instances to their default values
 	DefaultEnvs = map[string]string{
-		"PHP_DISPLAY_ERRORS":          "on",
-		"PHP_MEMORY_LIMIT":            "512M",
-		"PHP_MAX_EXECUTION_TIME":      "5000",
-		"PHP_UPLOAD_MAX_FILESIZE":     "512M",
-		"PHP_MAX_INPUT_VARS":          "5000",
-		"PHP_POST_MAX_SIZE":           "512M",
-		"PHP_OPCACHE_ENABLE":          "0",
-		"PHP_OPCACHE_REVALIDATE_FREQ": "0",
-		"XDEBUG_MODE":                 "off",
-		"XDEBUG_SESSION":              "PHPSTORM",
-		"XDEBUG_CONFIG":               "",
-		"BLACKFIRE_SERVER_ID":         "",
-		"BLACKFIRE_SERVER_TOKEN":      "",
+		"PHP_DISPLAY_ERRORS":              "on",
+		"PHP_MEMORY_LIMIT":                "512M",
+		"PHP_MAX_EXECUTION_TIME":          "5000",
+		"PHP_UPLOAD_MAX_FILESIZE":         "512M",
+		"PHP_MAX_INPUT_VARS":              "5000",
+		"PHP_POST_MAX_SIZE":               "512M",
+		"PHP_OPCACHE_ENABLE":              "0",
+		"PHP_OPCACHE_REVALIDATE_FREQ":     "0",
+		"PHP_OPCACHE_VALIDATE_TIMESTAMPS": "0",
+		"XDEBUG_MODE":                     "off",
+		"XDEBUG_SESSION":                  "PHPSTORM",
+		"XDEBUG_CONFIG":                   "",
+		"BLACKFIRE_SERVER_ID":             "",
+		"BLACKFIRE_SERVER_TOKEN":          "",
 	}
 )
 
@@ -75,6 +76,18 @@ func (c *Config) AllSitesWithHostnames(site Site, addr string) map[string][]stri
 	return hostnames
 }
 
+// FindContainerByName takes a name and returns the container if name matches.
+func (c *Config) FindContainerByName(name string) (*Container, error) {
+	// find the site by the hostname
+	for _, c := range c.Containers {
+		if c.Name == name {
+			return &c, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find container with name %s", name)
+}
+
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
@@ -84,7 +97,7 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("unable to find the site using the hostname %s", hostname)
+	return nil, fmt.Errorf("unable to find site with hostname %s", hostname)
 }
 
 // ListOfSitesByDirectory takes the users home directory and the current
@@ -150,6 +163,10 @@ func (c *Config) AddContainer(container Container) error {
 	}
 
 	c.Containers = append(c.Containers, container)
+
+	sort.SliceStable(c.Containers, func(i, j int) bool {
+		return c.Containers[i].Name < c.Containers[j].Name
+	})
 
 	return nil
 }
@@ -255,6 +272,10 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 				return nil
 			case "opcache_enable":
 				c.Sites[i].PHP.OpcacheEnable = value
+
+				return nil
+			case "opcache_validate_timestamps":
+				c.Sites[i].PHP.OpcacheValidateTimestamps = value
 
 				return nil
 			default:
@@ -396,16 +417,17 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 // PHP is nested in a configuration and allows setting environment variables
 // for sites to override in the local development environment.
 type PHP struct {
-	DisplayErrors         bool   `json:"display_errors,omitempty" yaml:"display_errors,omitempty"`
-	MaxExecutionTime      int    `json:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
-	MaxInputVars          int    `json:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
-	MaxInputTime          int    `json:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
-	MaxFileUpload         string `json:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
-	MemoryLimit           string `json:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
-	OpcacheEnable         bool   `json:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
-	OpcacheRevalidateFreq int    `json:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
-	PostMaxSize           string `json:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
-	UploadMaxFileSize     string `json:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
+	DisplayErrors             bool   `json:"display_errors,omitempty" yaml:"display_errors,omitempty"`
+	MaxExecutionTime          int    `json:"max_execution_time,omitempty" yaml:"max_execution_time,omitempty"`
+	MaxInputVars              int    `json:"max_input_vars,omitempty" yaml:"max_input_vars,omitempty"`
+	MaxInputTime              int    `json:"max_input_time,omitempty" yaml:"max_input_time,omitempty"`
+	MaxFileUpload             string `json:"max_file_upload,omitempty" yaml:"max_file_upload,omitempty"`
+	MemoryLimit               string `json:"memory_limit,omitempty" yaml:"memory_limit,omitempty"`
+	OpcacheEnable             bool   `json:"opcache_enable,omitempty" yaml:"opcache_enable,omitempty"`
+	OpcacheRevalidateFreq     int    `json:"opcache_revalidate_freq,omitempty" yaml:"opcache_revalidate_freq,omitempty"`
+	OpcacheValidateTimestamps bool   `json:"opcache_validate_timestamps,omitempty" yaml:"opcache_validate_timestamps,omitempty"`
+	PostMaxSize               string `json:"post_max_size,omitempty" yaml:"post_max_size,omitempty"`
+	UploadMaxFileSize         string `json:"upload_max_file_size,omitempty" yaml:"upload_max_file_size,omitempty"`
 }
 
 // Load is used to return the unmarshalled config, and
@@ -467,7 +489,27 @@ func (c *Config) AddSite(s Site) error {
 	// add the site to the list
 	c.Sites = append(c.Sites, s)
 
+	sort.SliceStable(c.Sites, func(i, j int) bool {
+		return c.Sites[i].Hostname < c.Sites[j].Hostname
+	})
+
 	return nil
+}
+
+// RemoveContainer takes a name and will remove the container by its
+// name from the config file.
+func (c *Config) RemoveContainer(container *Container) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
+	for k, v := range c.Containers {
+		if container.Name == v.Name {
+			c.Containers = append(c.Containers[:k], c.Containers[k+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown container %q", container.Name)
 }
 
 // RemoveSite takes a hostname and will remove the site by its
@@ -682,7 +724,12 @@ func phpVars(php PHP, version string) []string {
 		envs = append(envs, "PHP_OPCACHE_REVALIDATE_FREQ="+DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"])
 	} else {
 		envs = append(envs, fmt.Sprintf("PHP_OPCACHE_REVALIDATE_FREQ=%d", php.OpcacheRevalidateFreq))
+	}
 
+	if php.OpcacheValidateTimestamps {
+		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
+	} else {
+		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
 	}
 
 	return envs

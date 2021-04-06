@@ -35,11 +35,13 @@ var importExampleText = `  # import a sql file into a database
   # use an absolute path
   nitro db import /Users/oli/Desktop/backup.sql`
 
+var nameFlag string
+
 // importCommand is the command for creating new development environments
 func importCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import a database",
+		Short: "Imports a database dump.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -155,10 +157,34 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				return fmt.Errorf("unable to get the container")
 			}
 
-			// ask the user for the database to create
-			db, err := output.Ask("Enter the database name", "", ":", &validate.DatabaseName{})
-			if err != nil {
-				return err
+			validator := &validate.DatabaseName{}
+
+			var db string
+			switch nameFlag == "" {
+			case false:
+				// validate the flag value
+				err := validator.Validate(nameFlag)
+				if err != nil {
+					// ask the user for the database to import because the flag was not valid
+					input, err := output.Ask("Enter the database name", "", ":", validator)
+					if err != nil {
+						return err
+					}
+
+					db = input
+					break
+				}
+
+				// the flag value is valid, so assign it
+				db = nameFlag
+			default:
+				// ask the user for the database to import
+				input, err := output.Ask("Enter the database name", "", ":", validator)
+				if err != nil {
+					return err
+				}
+
+				db = input
 			}
 
 			output.Info("Preparing import…")
@@ -308,11 +334,13 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 
 			output.Done()
 
-			output.Info(fmt.Sprintf("%s, took %.2f seconds 💪...", reply.Message, time.Since(start).Seconds()))
+			output.Info(fmt.Sprintf("%s in %.2f seconds 💪", reply.Message, time.Since(start).Seconds()))
 
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVar(&nameFlag, "name", "", "The database name to import into")
 
 	return cmd
 }

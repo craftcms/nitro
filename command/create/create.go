@@ -34,7 +34,7 @@ const exampleText = `  # create a new default craft project (similar to "compose
 func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Getter, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
-		Short:   "Create project",
+		Short:   "Creates a site from a Composer project.",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		PostRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					}
 					defer f.Close()
 
-					// trunacte the file
+					// truncate the file
 					if err := f.Truncate(0); err != nil {
 						return err
 					}
@@ -168,6 +168,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 					}
 
 					output.Info(".env updated!")
+
+					output.Info("Preparing composer...")
 				}
 			}
 

@@ -29,8 +29,21 @@ const exampleText = `  # change PHP settings for a site
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "iniset",
-		Short:   "Change PHP setting",
+		Short:   "Changes a site’s PHP setting.",
 		Example: exampleText,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveDefault
+		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -49,48 +62,60 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get all of the sites
-			var sites, found []string
-			for _, s := range cfg.Sites {
-				p, _ := s.GetAbsPath(home)
-
-				// check if the path matches a sites path, then we are in a known site
-				if strings.Contains(wd, p) {
-					found = append(found, s.Hostname)
-				}
-
-				// add the site to the list in case we cannot find the directory
-				sites = append(sites, s.Hostname)
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
-			// if there are found sites we want to show or connect to the first one, otherwise prompt for
-			// which site to connect to.
-			switch len(found) {
-			case 0:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", sites)
-				if err != nil {
-					return err
-				}
+			var site string
+			if len(args) > 0 {
+				site = strings.TrimSpace(args[0])
+			}
 
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected])
-			case 1:
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+found[0])
+			// did they ask for a specific site?
+			switch site != "" {
+			case true:
+				for k, v := range options {
+					if site == v {
+						// add the label to get the site
+						filter.Add("label", containerlabels.Host+"="+sites[k].Hostname)
+						break
+					}
+				}
 			default:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", found)
-				if err != nil {
-					return err
-				}
+				// if there are found sites we want to show or connect to the first one, otherwise prompt for which site to connect to.
+				switch len(sites) {
+				case 0:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
 
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+found[selected])
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+				case 1:
+					output.Info("connecting to", sites[0].Hostname)
+
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
+				default:
+					// prompt for the site to ssh into
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					// add the label to get the site
+					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+				}
 			}
 
 			// find the containers but limited to the site label
@@ -127,6 +152,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				"memory_limit",
 				"opcache_enable",
 				"opcache_revalidate_freq",
+				"opcache_validate_timestamps",
 				"post_max_size",
 				"upload_max_file_size",
 			}
@@ -225,6 +251,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			case "opcache_enable":
 				value, err := output.Ask("Should we enable OPCache", "false", "?", &validate.IsBoolean{})
+				if err != nil {
+					return err
+				}
+
+				// convert to bool
+				display, err := strconv.ParseBool(value)
+				if err != nil {
+					return err
+				}
+
+				// change the value because its validated
+				if err := cfg.SetPHPBoolSetting(hostname, setting, display); err != nil {
+					return err
+				}
+			case "opcache_validate_timestamps":
+				value, err := output.Ask("Should we validate timestamps with OPCache", "false", "?", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}

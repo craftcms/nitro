@@ -26,7 +26,7 @@ const exampleText = `  # run php version
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                "php",
-		Short:              "Run PHP commands",
+		Short:              "Runs PHP commands.",
 		Example:            exampleText,
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -39,6 +39,9 @@ brews:
       name: homebrew-nitro
     folder: Formula
     homepage: https://getnitro.sh/
+    caveats: |
+      Initialize Nitro by running
+        nitro init
     description: Nitro is a speedy Docker-based local development environment tuned for Craft CMS
     license: MIT
     test: |
@@ -48,6 +51,7 @@ brews:
 nfpms:
   - vendor: Craft CMS
     homepage: https://getnitro.sh
+    maintainer: Jason McCallister <jason@craftcms.com>
     description: Nitro is a speedy Docker-based local development environment tuned for Craft CMS
     license: MIT
     formats:

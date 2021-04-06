@@ -3,6 +3,7 @@ package blackfire
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/prompt"
@@ -17,8 +18,21 @@ const onTest = `  # enable blackfire for a site
 func onCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "on",
-		Short:   "Enable blackfire for a site",
+		Short:   "Enables Blackfire for a site.",
 		Example: onTest,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveDefault
+		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
 		},
@@ -79,26 +93,40 @@ func onCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 				options = append(options, s.Hostname)
 			}
 
-			var site config.Site
-			switch len(sites) {
-			case 0:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
+			var siteArg string
+			if len(args) > 0 {
+				siteArg = strings.TrimSpace(args[0])
+			}
+
+			// did they ask for a specific site?
+			var site *config.Site
+			switch siteArg == "" {
+			case true:
+				switch len(sites) {
+				case 0:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				case 1:
+					output.Info("Enabling Blackfire for", sites[0].Hostname)
+
+					site = &sites[0]
+				default:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
 				}
-
-				site = sites[selected]
-			case 1:
-				output.Info("Enabling Blackfire for", sites[0].Hostname)
-
-				site = sites[0]
 			default:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				site, err = cfg.FindSiteByHostName(siteArg)
 				if err != nil {
 					return err
 				}
-
-				site = sites[selected]
 			}
 
 			// if xdebug is set, we need to disable it to profile the site

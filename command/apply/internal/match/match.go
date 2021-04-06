@@ -43,7 +43,9 @@ func Container(home string, container config.Container, details types.ContainerJ
 
 		for _, line := range strings.Split(string(content), "\n") {
 			parts := strings.Split(line, "=")
-			customEnvs[parts[0]] = parts[1]
+			if len(parts) > 2 {
+				customEnvs[parts[0]] = parts[1]
+			}
 		}
 
 		// check the containers env against the file and merge
@@ -72,6 +74,11 @@ func Container(home string, container config.Container, details types.ContainerJ
 func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
+		return false
+	}
+
+	// check the webroot is defined and they match
+	if container.Config.Labels[containerlabels.Webroot] != site.Webroot {
 		return false
 	}
 
@@ -166,6 +173,11 @@ func checkEnvs(site config.Site, blackfire config.Blackfire, envs []string) bool
 				}
 			case "PHP_OPCACHE_REVALIDATE_FREQ":
 				if (site.PHP.OpcacheRevalidateFreq == 0 && val != config.DefaultEnvs[env]) || (site.PHP.OpcacheRevalidateFreq != 0 && val != strconv.Itoa(site.PHP.OpcacheRevalidateFreq)) {
+					return false
+				}
+			case "PHP_OPCACHE_VALIDATE_TIMESTAMPS":
+				// if there is a custom value
+				if !site.PHP.OpcacheValidateTimestamps && val != config.DefaultEnvs[env] {
 					return false
 				}
 			case "XDEBUG_MODE":

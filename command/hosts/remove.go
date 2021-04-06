@@ -16,7 +16,7 @@ import (
 func removeCommand(home string, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove",
-		Short: "Remove nitro entries from hosts file",
+		Short: "Removes Nitro entries from hosts file.",
 		Example: `  # remove nitro entries from your hosts file
   nitro hosts remove`,
 		RunE: func(cmd *cobra.Command, args []string) error {

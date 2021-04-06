@@ -27,6 +27,7 @@ import (
 	"github.com/craftcms/nitro/command/iniset"
 	"github.com/craftcms/nitro/command/initialize"
 	"github.com/craftcms/nitro/command/logs"
+	"github.com/craftcms/nitro/command/ls"
 	"github.com/craftcms/nitro/command/npm"
 	"github.com/craftcms/nitro/command/php"
 	"github.com/craftcms/nitro/command/portcheck"
@@ -53,8 +54,8 @@ import (
 
 var rootCommand = &cobra.Command{
 	Use:   "nitro",
-	Short: "Local Craft CMS dev made easy",
-	Long: `Nitro is a command-line tool focused on making local Craft CMS development quick and easy.
+	Short: "Speedy local dev environment for Craft CMS.",
+	Long: `Nitro is a console-based tool that manages Docker for local PHP development.
 
 Version: ` + version.Version,
 	RunE:         rootMain,
@@ -121,17 +122,18 @@ func NewCommand() *cobra.Command {
 		iniset.NewCommand(home, docker, term),
 		initialize.NewCommand(home, docker, term),
 		logs.NewCommand(home, docker, term),
+		ls.NewCommand(home, docker, term),
 		npm.NewCommand(docker, term),
 		php.NewCommand(home, docker, term),
 		portcheck.NewCommand(term),
 		queue.NewCommand(home, docker, term),
 		remove.NewCommand(home, docker, term),
-		restart.New(docker, term),
+		restart.NewCommand(home, docker, term),
 		selfupdate.NewCommand(term),
 		share.NewCommand(home, docker, term),
 		ssh.NewCommand(home, docker, term),
-		start.NewCommand(docker, term),
-		stop.New(docker, term),
+		start.NewCommand(home, docker, term),
+		stop.NewCommand(home, docker, term),
 		trust.NewCommand(home, docker, term),
 		update.NewCommand(home, docker, term),
 		validate.NewCommand(home, docker, term),

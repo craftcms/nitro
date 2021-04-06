@@ -21,7 +21,8 @@ const exampleText = `  # import a database from a backup
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "db",
-		Short:   "Manage databases",
+		Short:   "Manages databases.",
+		Aliases: []string{"database"},
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

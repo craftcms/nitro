@@ -1,21 +1,41 @@
 # Release Notes for Craft Nitro
 
+## 2.0.7 - 2021-04-06
+
+### Added
+- The `blackfire`, `bridge`, `iniset`, `remove`, `restart`, `share`, `ssh`, `start`, `stop`, `xoff`, and `xon` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283), [#320](https://github.com/craftcms/nitro/issues/320))
+- Added the `container remove` command to remove custom containers. ([#303](https://github.com/craftcms/nitro/issues/303))
+- Added the `ls` command to show useful information about Nitro.
+- Added `opcache_validate_timestamps` to `iniset`. ([#302](https://github.com/craftcms/nitro/issues/302))
+- Added support for local certificates on Fedora, CentOS, and RHEL distributions.
+- Added readme instructions for building from source.
+
+### Changed
+- Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
+- The proxy now exposes ports `3000` and `3001` to allow for webpack dev server routes.
+- Revised command descriptions and miscellaneous output. ([#316](https://github.com/craftcms/nitro/issues/316), [#322](https://github.com/craftcms/nitro/issues/322))
+
+### Fixed
+- Greatly improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
+- Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
+- Fixed an error where changing a sites webroot would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
+
 ## 2.0.6 - 2021-03-17
 
 ### Fixed
-- Fixed an error where `initset` was not updating opcache settings. [#298](https://github.com/craftcms/nitro/issues/298)
-- Fixed an error preventing Linux users from using Xdebug. [#288](https://github.com/docker/for-linux/issues/288)
-- Fixed a display error for Windows users when using the `trust` command. [#291](https://github.com/craftcms/nitro/issues/291)
-- Fixed a bug where command completion was not working in a zsh shell. [#295](https://github.com/craftcms/nitro/issues/295)
+- Fixed an error where `initset` was not updating opcache settings. ([#298](https://github.com/craftcms/nitro/issues/298))
+- Fixed an error preventing Linux users from using Xdebug. ([#288](https://github.com/docker/for-linux/issues/288))
+- Fixed a display error for Windows users when using the `trust` command. ([#291](https://github.com/craftcms/nitro/issues/291))
+- Fixed a bug where command completion was not working in a zsh shell. ([#295](https://github.com/craftcms/nitro/issues/295))
 
 ## 2.0.5 - 2021-03-09
 
 ### Added
-- Added the `php` command to execute PHP commands in a site container. [#276](https://github.com/craftcms/nitro/issues/276)
+- Added the `php` command to execute PHP commands in a site container. ([#276](https://github.com/craftcms/nitro/issues/276))
 
 ### Fixed
-- Fixed an error where mysql permissions were not being set properly. [#275](https://github.com/craftcms/nitro/issues/275)
-- Fixed an error that could occur when paths included spaces. [#277](https://github.com/craftcms/nitro/issues/277)
+- Fixed an error where mysql permissions were not being set properly. ([#275](https://github.com/craftcms/nitro/issues/275))
+- Fixed an error that could occur when paths included spaces. ([#277](https://github.com/craftcms/nitro/issues/277))
 - Fixed certificate installations for POP!_OS Linux.
 
 ## 2.0.4 - 2021-03-04
@@ -24,13 +44,13 @@
 - Nitro will now verify and start containers if not running.
 
 ### Fixed
-- Fixed an error that could occur when running `version` before `init`. [#270](https://github.com/craftcms/nitro/issues/270)
-- Fixed an error that could occur when Nitro is unable to detect the database engine from a backup. [#269](https://github.com/craftcms/nitro/issues/269)
+- Fixed an error that could occur when running `version` before `init`. ([#270](https://github.com/craftcms/nitro/issues/270))
+- Fixed an error that could occur when Nitro is unable to detect the database engine from a backup. ([#269](https://github.com/craftcms/nitro/issues/269))
 
 ## 2.0.3 - 2021-03-03
 
 ### Fixed
-- Fixed a bug where the `iniset` command was not updating PHP settings for sites. [#268](https://github.com/craftcms/nitro/issues/268)
+- Fixed a bug where the `iniset` command was not updating PHP settings for sites. ([#268](https://github.com/craftcms/nitro/issues/268))
 
 ## 2.0.2 - 2021-03-02
 

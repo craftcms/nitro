@@ -15,7 +15,7 @@ $ source <(nitro completion bash)
 
 # To load completions for each session, execute once:
 Linux:
-  $ nitro completion bash > /etc/bash_completion.d/nitro
+  $ nitro completion bash | sudo tee -a /etc/bash_completion.d/nitro >/dev/null
 MacOS:
   $ nitro completion bash > /usr/local/etc/bash_completion.d/nitro
 
@@ -36,7 +36,7 @@ $ nitro completion zsh > "${fpath[1]}/_nitro"
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "completion",
-		Short:     "Enable shell completion",
+		Short:     "Enables shell completion.",
 		ValidArgs: []string{"bash", "zsh"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {

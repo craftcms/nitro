@@ -55,7 +55,7 @@ const exampleText = `  # apply changes from a config
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "apply",
-		Short:   "Apply changes",
+		Short:   "Applies changes.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
@@ -216,8 +216,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// if the network is not found
 			if network.ID == "" {
-				output.Info("No network was found…\nrun `nitro init` to get started")
-				return nil
+				return fmt.Errorf("No network was found…\nrun `nitro init` to get started")
 			}
 
 			// remove the filter

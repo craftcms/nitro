@@ -38,7 +38,7 @@ const (
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "trust",
-		Short:   "Trust certificates for environment",
+		Short:   "Trusts Nitro certificates on the host machine.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -68,7 +68,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			containerID := containers[0].ID
 
 			// get the contents of the certificate from the container
-			output.Pending("getting Nitro’s root site certificate…")
+			output.Pending("getting Nitro’s root site certificate")
 
 			// verify the file exists in the container
 			for {

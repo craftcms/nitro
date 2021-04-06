@@ -18,7 +18,7 @@ var newExampleTest = `  # add a new database engine
 func newCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "new",
-		Short:   "Add a database engine",
+		Short:   "Adds a database engine.",
 		Example: newExampleTest,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)

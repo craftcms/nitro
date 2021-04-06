@@ -24,8 +24,9 @@ var removeExampleText = `  # remove a database
 func removeCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "remove",
-		Short:   "Remove a database",
+		Short:   "Removes a database.",
 		Example: removeExampleText,
+		Aliases: []string{"rm"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
