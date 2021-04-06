@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.7 - 2021-04-06
 
 ### Added
 - The `blackfire`, `bridge`, `iniset`, `remove`, `restart`, `share`, `ssh`, `start`, `stop`, `xoff`, and `xon` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283), [#320](https://github.com/craftcms/nitro/issues/320))
