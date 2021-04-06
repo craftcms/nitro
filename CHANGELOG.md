@@ -3,49 +3,48 @@
 ## 2.0.7 - 2021-04-06
 
 ### Added
-- The `blackfire`, `bridge`, `iniset`, `remove`, `restart`, `share`, `ssh`, `start`, `stop`, `xoff`, and `xon` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283), [#320](https://github.com/craftcms/nitro/issues/320))
-- Added the `container remove` command to remove custom containers. ([#303](https://github.com/craftcms/nitro/issues/303))
-- Added the `ls` command to show useful information about Nitro.
-- Added `opcache_validate_timestamps` to `iniset`. ([#302](https://github.com/craftcms/nitro/issues/302))
+- Added the `container remove` command. ([#303](https://github.com/craftcms/nitro/issues/303))
+- Added the `ls` command, which outputs useful information about Nitro.
 - Added support for local certificates on Fedora, CentOS, and RHEL distributions.
-- Added readme instructions for building from source.
 
 ### Changed
-- Added the `--name` flag to `db import` to bypass the name prompt. ([#293](https://github.com/craftcms/nitro/issues/293))
-- The proxy now exposes ports `3000` and `3001` to allow for webpack dev server routes.
-- Revised command descriptions and miscellaneous output. ([#316](https://github.com/craftcms/nitro/issues/316), [#322](https://github.com/craftcms/nitro/issues/322))
+- The `blackfire`, `bridge`, `iniset`, `remove`, `restart`, `share`, `ssh`, `start`, `stop`, `xoff`, and `xon` commands now accept a site argument. ([#283](https://github.com/craftcms/nitro/issues/283), [#320](https://github.com/craftcms/nitro/issues/320))
+- The `iniset` command now supports the `opcache_validate_timestamps` setting. ([#302](https://github.com/craftcms/nitro/issues/302))
+- The `db import` command now accepts a `--name` flag. ([#293](https://github.com/craftcms/nitro/issues/293))
+- The proxy container now exposes ports `3000` and `3001`, for webpack dev server routes.
+- Improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
+- Improved various commands’ output. ([#316](https://github.com/craftcms/nitro/issues/316), [#322](https://github.com/craftcms/nitro/issues/322))
 
 ### Fixed
-- Greatly improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
-- Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
-- Fixed an error where changing a site’s web root would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
+- Fixed a bug where the `craft` and `queue` commands weren’t forwarding command flags to Craft. ([#301](https://github.com/craftcms/nitro/issues/301))
+- Fixed a bug where sites’ Nginx configs weren’t getting updated when their web root was changed in `nitro.yaml`. ([#326](https://github.com/craftcms/nitro/issues/326))
 
 ## 2.0.6 - 2021-03-17
 
 ### Fixed
-- Fixed an error where `initset` was not updating opcache settings. ([#298](https://github.com/craftcms/nitro/issues/298))
-- Fixed an error preventing Linux users from using Xdebug. ([#288](https://github.com/docker/for-linux/issues/288))
-- Fixed a display error for Windows users when using the `trust` command. ([#291](https://github.com/craftcms/nitro/issues/291))
-- Fixed a bug where command completion was not working in a zsh shell. ([#295](https://github.com/craftcms/nitro/issues/295))
+- Fixed a bug where the `initset` command wasn’t updating OPcache settings. ([#298](https://github.com/craftcms/nitro/issues/298))
+- Fixed an error that was preventing Linux users from using Xdebug. ([#288](https://github.com/docker/for-linux/issues/288))
+- Fixed a bug where the `trust` command output was mangled for Windows users. ([#291](https://github.com/craftcms/nitro/issues/291))
+- Fixed a bug where command completion wasn’t working for ZSH shells. ([#295](https://github.com/craftcms/nitro/issues/295))
 
 ## 2.0.5 - 2021-03-09
 
 ### Added
-- Added the `php` command to execute PHP commands in a site container. ([#276](https://github.com/craftcms/nitro/issues/276))
+- Added the `php` command, for executing PHP commands within a site container. ([#276](https://github.com/craftcms/nitro/issues/276))
 
 ### Fixed
-- Fixed an error where mysql permissions were not being set properly. ([#275](https://github.com/craftcms/nitro/issues/275))
+- Fixed a bug where MySQL permissions weren’t getting set properly. ([#275](https://github.com/craftcms/nitro/issues/275))
 - Fixed an error that could occur when paths included spaces. ([#277](https://github.com/craftcms/nitro/issues/277))
-- Fixed certificate installations for POP!_OS Linux.
+- Fixed certificate installation for POP!_OS Linux.
 
 ## 2.0.4 - 2021-03-04
 
 ### Changed
-- Nitro will now verify and start containers if not running.
+- Nitro will now verify and start containers automatically if not running.
 
 ### Fixed
-- Fixed an error that could occur when running `version` before `init`. ([#270](https://github.com/craftcms/nitro/issues/270))
-- Fixed an error that could occur when Nitro is unable to detect the database engine from a backup. ([#269](https://github.com/craftcms/nitro/issues/269))
+- Fixed an error that could occur when the `version` command was executed before `init`. ([#270](https://github.com/craftcms/nitro/issues/270))
+- Fixed an error that could occur if Nitro wasn’t able to detect the database engine from a backup. ([#269](https://github.com/craftcms/nitro/issues/269))
 
 ## 2.0.3 - 2021-03-03
 
@@ -55,12 +54,12 @@
 ## 2.0.2 - 2021-03-02
 
 ### Fixed
-- Fixed a bug that could occur when running `nitro add` before `nitro init`.
+- Fixed a bug that could occur when executing the `nitro add` command before `nitro init`.
 
 ## 2.0.1 - 2021-03-02
 
 ### Fixed
-- Fixed a bug where `self-update` was not updating.
+- Fixed a bug where the `self-update` command was not updating.
 
 ## 2.0.0 - 2021-03-02
 
