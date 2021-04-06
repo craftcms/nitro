@@ -99,7 +99,7 @@ func identify(description string) (string, error) {
 	}
 
 	// detect debian systems
-	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") {
+	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") || strings.Contains(description, "elementary") {
 		return "debian", nil
 	}
 
