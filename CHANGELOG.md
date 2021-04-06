@@ -18,7 +18,7 @@
 ### Fixed
 - Greatly improved support for Linux users and file permissions. ([#308](https://github.com/craftcms/nitro/issues/308), [#280](https://github.com/craftcms/nitro/issues/280), [#264](https://github.com/craftcms/nitro/issues/264))
 - Fixed an error where commands would not accept flag arguments. ([#301](https://github.com/craftcms/nitro/issues/301))
-- Fixed an error where changing a sites webroot would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
+- Fixed an error where changing a site’s web root would not update the site. ([#326](https://github.com/craftcms/nitro/issues/326))
 
 ## 2.0.6 - 2021-03-17
 
@@ -275,7 +275,7 @@ Improved Composer performance when run from inside the virtual machine. ([#186](
 ### Fixed
 - Fixed a bug where the `self-update` command would non-interactively prompt to initialize the primary machine. ([#115](https://github.com/craftcms/nitro/issues/115))
 - Fixed a bug where `import --help` didn’t show the required SQL file argument in the usage example. ([#124](https://github.com/craftcms/nitro/issues/124))
-- Fixed a bug where the `apply` command wasn’t applying changes to sites’ webroots. ([#113](https://github.com/craftcms/nitro/issues/113))
+- Fixed a bug where the `apply` command wasn’t applying changes to sites’ web roots. ([#113](https://github.com/craftcms/nitro/issues/113))
 
 ## 1.0.0-beta.2 - 2020-05-06
 
