@@ -2,9 +2,11 @@ package permissions
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"os/user"
 	"runtime"
+	"strings"
 
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -60,6 +62,8 @@ var files = []file{
 	},
 }
 
+// NewCommand is the permissions command that sets the proper permissions for files and directories in a container for a site.
+// It is primarily used on Linux as Docker Desktop handles permissions for mounts on macOS and Windows.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "permissions",
@@ -81,6 +85,62 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// get the current working directory
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
+			}
+
+			var siteArg string
+			if len(args) > 0 {
+				siteArg = strings.TrimSpace(args[0])
+			}
+
+			var site *config.Site
+			switch siteArg == "" {
+			case true:
+				switch len(sites) {
+				case 0:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				case 1:
+					site = &sites[0]
+				default:
+					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+					if err != nil {
+						return err
+					}
+
+					site = &sites[selected]
+				}
+			default:
+				site, err = cfg.FindSiteByHostName(siteArg)
+				if err != nil {
+					return err
+				}
+			}
+
+			output.Info("Setting permissions for", site.Hostname)
+
 			// find the docker executable
 			cli, err := exec.LookPath("docker")
 			if err != nil {
@@ -88,7 +148,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			for _, f := range files {
-				stat, _ := docker.ContainerStatPath(ctx, "tutorial.nitro", f.path)
+				stat, _ := docker.ContainerStatPath(ctx, site.Hostname, f.path)
 
 				if stat.Name != "" {
 					fmt.Println("setting permissions on", f.path)
@@ -102,7 +162,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 						containerUser = fmt.Sprintf("%s:%s", user.Uid, user.Gid)
 					}
 
-					cmds := []string{"exec", "-it", "--user", containerUser, "tutorial.nitro"}
+					cmds := []string{"exec", "-it", "--user", containerUser, site.Hostname}
 
 					if f.directory {
 						cmds = append(cmds, "chmod", "-R", "777", f.path)
