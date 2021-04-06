@@ -151,7 +151,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				stat, _ := docker.ContainerStatPath(ctx, site.Hostname, f.path)
 
 				if stat.Name != "" {
-					fmt.Println("setting permissions on", f.path)
+					output.Pending("modifying", f.path)
 
 					containerUser := "www-data"
 					if runtime.GOOS == "linux" {
@@ -180,6 +180,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					if err := c.Run(); err != nil {
 						fmt.Println("error setting permissions on", f.path)
 					}
+
+					output.Done()
 				}
 			}
 
