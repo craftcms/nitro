@@ -217,6 +217,7 @@ type Site struct {
 	Webroot    string   `json:"webroot" yaml:"webroot"`
 	Xdebug     bool     `json:"xdebug" yaml:"xdebug"`
 	Blackfire  bool     `json:"blackfire" yaml:"blackfire"`
+	ForceHTTPS bool     `json:"force_https,omitempty" yaml:"force_https,omitempty"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
