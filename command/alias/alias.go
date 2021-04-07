@@ -103,7 +103,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt the user to add new alias
-			alias, err := output.Ask("Enter the alias domain for the site (use commas to enter multiple)", "", ":", &validate.HostnameValidator{})
+			alias, err := output.Ask("Enter the alias domain for the site (use commas to enter multiple)", "", ":", &multipleHostnameValidator{})
 			if err != nil {
 				return err
 			}
@@ -114,6 +114,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Info("Adding aliases:")
 
 				for _, a := range parts {
+					a = strings.TrimSpace(a)
 					output.Info("  ", a)
 
 					// set the alias
@@ -140,4 +141,20 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	return cmd
+}
+
+// multipleHostnameValidator validates a comma separated list of hostnames
+type multipleHostnameValidator struct{}
+
+func (v *multipleHostnameValidator) Validate(input string) error {
+	hosts := strings.Split(input, ",")
+	hostV := &validate.HostnameValidator{}
+
+	for _, h := range hosts {
+		h := strings.TrimSpace(h)
+		if err := hostV.Validate(h); err != nil {
+			return err
+		}
+	}
+	return nil
 }

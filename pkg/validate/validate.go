@@ -48,7 +48,7 @@ func (v *HostnameValidator) Validate(input string) error {
 	}
 
 	// check for special characters
-	if strings.ContainsAny(input, "!@#$%^&*()") {
+	if strings.ContainsAny(input, "!@#$%^&*(),") {
 		return fmt.Errorf("hostname must not include any special characters")
 	}
 
@@ -63,7 +63,7 @@ func (v *PHPVersionValidator) Validate(input string) error {
 		return nil
 	}
 
-	return fmt.Errorf("the PHP inputrsion %q is not valid", input)
+	return fmt.Errorf("the PHP version %q is not valid", input)
 }
 
 type IsBoolean struct{}
