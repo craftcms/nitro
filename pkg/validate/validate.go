@@ -55,6 +55,29 @@ func (v *HostnameValidator) Validate(input string) error {
 	return nil
 }
 
+// MultipleHostnameValidator validates a comma separated list of hostnames
+type MultipleHostnameValidator struct{}
+
+func (v *MultipleHostnameValidator) Validate(input string) error {
+	_, err := v.Parse(input)
+	return err
+}
+
+func (v *MultipleHostnameValidator) Parse(input string) ([]string, error) {
+	rawHosts := strings.Split(input, ",")
+	hostV := &HostnameValidator{}
+	var hosts []string
+
+	for _, h := range rawHosts {
+		h := strings.TrimSpace(h)
+		if err := hostV.Validate(h); err != nil {
+			return nil, err
+		}
+		hosts = append(hosts, h)
+	}
+	return hosts, nil
+}
+
 type PHPVersionValidator struct{}
 
 func (v *PHPVersionValidator) Validate(input string) error {
@@ -82,8 +105,7 @@ func (v *IsMegabyte) Validate(input string) error {
 	return isMegabytes(input)
 }
 
-type MaxExecutionTime struct {
-}
+type MaxExecutionTime struct{}
 
 func (v *MaxExecutionTime) Validate(input string) error {
 	return maxExecutionTime(input)
