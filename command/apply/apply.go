@@ -519,6 +519,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 			Hostname: s.Hostname,
 			Aliases:  strings.Join(s.Aliases, ","),
 			Port:     8080,
+			Force:    s.ForceHTTPS,
 		}
 	}
 

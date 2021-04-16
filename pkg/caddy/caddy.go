@@ -14,8 +14,9 @@ type Server struct {
 }
 
 type AutomaticHTTPS struct {
-	Disable          bool `json:"disable,omitempty"`
-	DisableRedirects bool `json:"disable_redirects"`
+	Disable          bool     `json:"disable,omitempty"`
+	DisableRedirects bool     `json:"disable_redirects"`
+	Skip             []string `json:"skip"`
 }
 
 type ServerRoute struct {

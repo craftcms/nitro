@@ -41,6 +41,7 @@ message Site {
     string hostname = 1;
     string aliases = 2;
     int32 port = 3;
+    bool force = 4;
 }
 
 message DatabaseInfo {

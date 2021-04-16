@@ -210,10 +210,14 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	update.NodeAlt = caddy.Server{
 		Listen: []string{":3001"},
 		Routes: nodeAltRoutes,
-		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			Disable:          true,
-			DisableRedirects: true,
-		},
+	}
+
+	// get sites that do not have the force https option to mark as skipped
+	var skip []string
+	for _, s := range request.Sites {
+		if !s.Force {
+			skip = append(skip, s.GetHostname())
+		}
 	}
 
 	// set the default welcome server
@@ -221,7 +225,9 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		Listen: []string{":80"},
 		Routes: httpRoutes,
 		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			DisableRedirects: true,
+			Disable:          false,
+			DisableRedirects: false,
+			Skip:             skip,
 		},
 	}
 
