@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Added
+- Added the config option to allow sites to always redirect to HTTPS. ([#327](https://github.com/craftcms/nitro/issues/327))
+
 ## 2.0.7 - 2021-04-06
 
 ### Added
