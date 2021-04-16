@@ -554,6 +554,9 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		return nil
 	}
 
+	// TODO(jasonmccallister) add a timeout context for 1 minute
+	// timeout := context.WithTimeout(ctx, time.Minute*3, nil)
+
 	// wait for the api to be ready
 	for {
 		_, err := nitrod.Ping(ctx, &protob.PingRequest{})

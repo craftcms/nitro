@@ -1,8 +1,8 @@
 package caddy
 
 type UpdateRequest struct {
-	HTTPS   Server `json:"https,omitempty"`
 	HTTP    Server `json:"http,omitempty"`
+	HTTPS   Server `json:"https,omitempty"`
 	Node    Server `json:"node,omitempty"`
 	NodeAlt Server `json:"node_alt,omitempty"`
 }

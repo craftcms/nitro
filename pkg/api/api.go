@@ -113,7 +113,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	}
 
 	// convert each of the sites into a route
-	var siteRoutes, nodeRoutes, nodeAltRoutes []caddy.ServerRoute
+	var httpRoutes, httpsRoutes, nodeRoutes, nodeAltRoutes []caddy.ServerRoute
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
@@ -121,8 +121,31 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 			hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
 		}
 
+		// create the http route if the site is not forcing HTTPS
+		if !site.GetForce() {
+			// create the route for each of the sites
+			httpRoutes = append(httpRoutes, caddy.ServerRoute{
+				Handle: []caddy.RouteHandle{
+					{
+						Handler: "reverse_proxy",
+						Upstreams: []caddy.Upstream{
+							{
+								Dial: fmt.Sprintf("%s:%d", k, site.GetPort()),
+							},
+						},
+					},
+				},
+				Match: []caddy.Match{
+					{
+						Host: hosts,
+					},
+				},
+				Terminal: true,
+			})
+		}
+
 		// create the route for each of the sites
-		siteRoutes = append(siteRoutes, caddy.ServerRoute{
+		httpsRoutes = append(httpsRoutes, caddy.ServerRoute{
 			Handle: []caddy.RouteHandle{
 				{
 					Handler: "reverse_proxy",
@@ -183,26 +206,41 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 
 	update := caddy.UpdateRequest{}
 
-	httpRoutes := append(siteRoutes, caddy.ServerRoute{
-		Handle: []caddy.RouteHandle{
-			{
-				Handler: "vars",
-				Root:    "/var/www/html",
+	// add any specific http routes with the default handler
+	update.HTTP = caddy.Server{
+		Listen: []string{":80"},
+		Routes: append(httpRoutes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "vars",
+					Root:    "/var/www/html",
+				},
+				{
+					Handler: "file_server",
+					Root:    "/var/www/html",
+					Hide:    []string{"/etc/caddy/Caddyfile"},
+				},
 			},
-			{
-				Handler: "file_server",
-				Root:    "/var/www/html",
-				Hide:    []string{"/etc/caddy/Caddyfile"},
-			},
+			Terminal: true,
+		}),
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Skip: []string{"localhost", "127.0.0.1"},
 		},
-		Terminal: true,
-	})
+	}
+
+	// add routes for https
+	update.HTTPS = caddy.Server{
+		Listen: []string{":443"},
+		Routes: httpsRoutes,
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Skip: []string{"localhost", "127.0.0.1"},
+		},
+	}
 
 	update.Node = caddy.Server{
 		Listen: []string{":3000"},
 		Routes: nodeRoutes,
 		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			Disable:          true,
 			DisableRedirects: true,
 		},
 	}
@@ -210,31 +248,9 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	update.NodeAlt = caddy.Server{
 		Listen: []string{":3001"},
 		Routes: nodeAltRoutes,
-	}
-
-	// get sites that do not have the force https option to mark as skipped
-	var skip []string
-	for _, s := range request.Sites {
-		if !s.Force {
-			skip = append(skip, s.GetHostname())
-		}
-	}
-
-	// set the default welcome server
-	update.HTTP = caddy.Server{
-		Listen: []string{":80"},
-		Routes: httpRoutes,
 		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			Disable:          false,
-			DisableRedirects: false,
-			Skip:             skip,
+			DisableRedirects: true,
 		},
-	}
-
-	// add the routes to the first server
-	update.HTTPS = caddy.Server{
-		Listen: []string{":443"},
-		Routes: siteRoutes,
 	}
 
 	content, err := json.Marshal(&update)

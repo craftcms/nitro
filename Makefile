@@ -56,3 +56,6 @@ win-home:
 
 proto:
 	protoc protob/nitrod.proto --go_out=plugins=grpc:.
+
+proxy:
+	docker container rm -f proxy & docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
