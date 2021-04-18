@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/craftcms/nitro/pkg/helpers"
 
@@ -56,7 +55,7 @@ type Config struct {
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
 	File       string      `json:"-" yaml:"-"`
 
-	rw sync.RWMutex
+	// rw sync.RWMutex
 }
 
 // AllSitesWithHostnames takes the address, which is the nitro-proxy
@@ -499,9 +498,6 @@ func (c *Config) AddSite(s Site) error {
 // RemoveContainer takes a name and will remove the container by its
 // name from the config file.
 func (c *Config) RemoveContainer(container *Container) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	for k, v := range c.Containers {
 		if container.Name == v.Name {
 			c.Containers = append(c.Containers[:k], c.Containers[k+1:]...)
@@ -515,9 +511,6 @@ func (c *Config) RemoveContainer(container *Container) error {
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(site *Site) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	for i, s := range c.Sites {
 		if site.Hostname == s.Hostname {
 			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
@@ -531,9 +524,6 @@ func (c *Config) RemoveSite(site *Site) error {
 // DisableBlackfire takes a sites hostname and sets the blackfire option
 // to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableBlackfire(site string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -552,9 +542,6 @@ func (c *Config) DisableBlackfire(site string) error {
 // DisableXdebug takes a sites hostname and sets the xdebug option
 // to false. If the site cannot be found, it returns an error.
 func (c *Config) DisableXdebug(site string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -573,9 +560,6 @@ func (c *Config) DisableXdebug(site string) error {
 // EnableBlackfire takes a sites hostname and sets the xdebug option
 // to true. If the site cannot be found, it returns an error.
 func (c *Config) EnableBlackfire(site string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -593,9 +577,6 @@ func (c *Config) EnableBlackfire(site string) error {
 // EnableXdebug takes a sites hostname and sets the xdebug option
 // to true. If the site cannot be found, it returns an error.
 func (c *Config) EnableXdebug(site string) error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	// find the site by the hostname
 	for i, s := range c.Sites {
 		if s.Hostname == site {
@@ -612,9 +593,6 @@ func (c *Config) EnableXdebug(site string) error {
 
 // Save takes a file path and marshals the config into a file.
 func (c *Config) Save() error {
-	c.rw.Lock()
-	defer c.rw.Unlock()
-
 	// make sure the file exists
 	if _, err := os.Stat(c.File); os.IsNotExist(err) {
 		dir, _ := filepath.Split(c.File)
@@ -629,7 +607,6 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
 	// unmarshal
 	data, err := yaml.Marshal(&c)
@@ -642,7 +619,7 @@ func (c *Config) Save() error {
 		return err
 	}
 
-	return nil
+	return f.Close()
 }
 
 func (c *Config) createFile(dir string) error {

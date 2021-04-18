@@ -177,12 +177,6 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
-			if ctx == nil {
-				// when we call commands from other commands (e.g. init)
-				// the context could be nil, so we set it to the parent
-				// context just in case.
-				ctx = context.Background()
-			}
 
 			// load the config
 			cfg, err := config.Load(home)

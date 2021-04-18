@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -1164,7 +1163,6 @@ func TestConfig_AllSitesWithHostnames(t *testing.T) {
 		Services   Services
 		Sites      []Site
 		File       string
-		rw         sync.RWMutex
 	}
 	type args struct {
 		site Site
@@ -1211,7 +1209,6 @@ func TestConfig_AllSitesWithHostnames(t *testing.T) {
 				Services:   tt.fields.Services,
 				Sites:      tt.fields.Sites,
 				File:       tt.fields.File,
-				rw:         tt.fields.rw,
 			}
 			if got := c.AllSitesWithHostnames(tt.args.site, tt.args.addr); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.AllSitesWithHostnames() = %v, want %v", got, tt.want)
