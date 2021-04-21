@@ -249,18 +249,18 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 		found = "web"
 	}
 
-	// set the webroot
+	// set the web root
 	site.Webroot = found
 
-	// prompt for the webroot
-	root, err := output.Ask("Enter the webroot for the site", site.Webroot, ":", nil)
+	// prompt for the web root
+	root, err := output.Ask("Enter the web root for the site", site.Webroot, ":", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	site.Webroot = root
 
-	output.Success("using webroot", site.Webroot)
+	output.Success("using web root", site.Webroot)
 
 	// prompt for the php version
 	versions := phpversions.Versions

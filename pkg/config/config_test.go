@@ -1010,7 +1010,7 @@ func TestSite_GetContainerPath(t *testing.T) {
 			want: "another-site",
 		},
 		{
-			name: "default webroots with a trailing slash return the correct value",
+			name: "default web roots with a trailing slash return the correct value",
 			fields: fields{
 				Webroot: "web/",
 			},

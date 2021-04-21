@@ -133,7 +133,7 @@ function getNitro {
   if [ "$?" = "0" ]; then
 
     # unzip
-    tar xvzf "$targetZipFile" -C "$targetTempFolder"
+    tar xzf "$targetZipFile" -C "$targetTempFolder"
 
     # verify
     checkHash "$targetZipFile" "$version" "$targetTempFolder" "$fileName"

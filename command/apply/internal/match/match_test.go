@@ -256,7 +256,7 @@ func TestSite(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "containers without webroot label returns false",
+			name: "containers without web root label returns false",
 			args: args{
 				home: "testdata/example-site",
 				site: config.Site{
@@ -282,7 +282,7 @@ func TestSite(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "mismatched webroot returns false",
+			name: "mismatched web root returns false",
 			args: args{
 				home: "testdata/example-site",
 				site: config.Site{
