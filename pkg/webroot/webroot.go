@@ -36,7 +36,7 @@ func Find(path string) (string, error) {
 		}
 
 		// if the dir is in the vendor dir, we want to ignore it
-		if strings.Contains(dir, fmt.Sprintf("vendor%c", os.PathSeparator)) {
+		if strings.Contains(dir, fmt.Sprintf("vendor%c", os.PathSeparator)) || strings.Contains(dir, fmt.Sprintf("node_modules%c", os.PathSeparator)) {
 			return nil
 		}
 
