@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Changed
+- Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
+
 ## 2.0.7 - 2021-04-06
 
 ### Added
