@@ -77,7 +77,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 		return false
 	}
 
-	// check the webroot is defined and they match
+	// check the web root is defined and they match
 	if container.Config.Labels[containerlabels.Webroot] != site.Webroot {
 		return false
 	}

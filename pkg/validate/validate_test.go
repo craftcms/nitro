@@ -44,7 +44,7 @@ func TestHostnameValidator_Validate(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "valide hostnames do not return an err",
+			name: "valid hostnames do not return an err",
 			args: args{
 				input: "validhostname.tld",
 			},
@@ -68,6 +68,13 @@ func TestHostnameValidator_Validate(t *testing.T) {
 			name: "less than 3 chars returns an err",
 			args: args{
 				input: "12",
+			},
+			wantErr: true,
+		},
+		{
+			name: "comma separated list returns an err",
+			args: args{
+				input: "host1.tld,host.tld",
 			},
 			wantErr: true,
 		},

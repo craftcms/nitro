@@ -226,7 +226,7 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 }
 
 // GetContainerPath is responsible for looking at the
-// sites webroot and determing the correct path in the
+// site’s web root and determing the correct path in the
 // container. This is used for the craft and queue
 // commands to identify the location of the "craft"
 // executable.
