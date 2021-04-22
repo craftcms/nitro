@@ -6,6 +6,9 @@
 - Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
 - The `stop` command no longer returns an error code when no containers are running. ([#336](https://github.com/craftcms/nitro/issues/336))
 
+### Deprecated
+- Deprecated the `clean` command. `apply` will automatically cleanup unused containers.
+
 ## 2.0.7 - 2021-04-06
 
 ### Added
