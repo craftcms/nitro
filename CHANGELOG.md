@@ -8,6 +8,7 @@
 
 ### Deprecated
 - Deprecated the `clean` command. `apply` will automatically cleanup unused containers.
+- Deprecated the `validate` command. Nitro will automatically validate config files.
 
 ## 2.0.7 - 2021-04-06
 
