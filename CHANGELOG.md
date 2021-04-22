@@ -7,7 +7,7 @@
 - The `stop` command no longer returns an error code when no containers are running. ([#336](https://github.com/craftcms/nitro/issues/336))
 
 ### Deprecated
-- Deprecated the `clean` command. `apply` will automatically cleanup unused containers.
+- Deprecated the `clean` command. `apply` will automatically remove unused containers.
 - Deprecated the `validate` command. Nitro will automatically validate config files.
 
 ## 2.0.7 - 2021-04-06
