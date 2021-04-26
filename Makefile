@@ -56,3 +56,13 @@ win-home:
 
 proto:
 	protoc protob/nitrod.proto --go_out=plugins=grpc:.
+
+development:
+	containers=($(docker ps --filter=label=com.craftcms.nitro.host --format {{.ID}}))
+	for i in "${containers[@]}"; do docker container rm --force $i; done
+	docker image rm -f craftcms/nginx:8.0-dev
+	docker image rm -f craftcms/nginx:7.4-dev
+	docker image rm -f craftcms/nginx:7.3-dev
+	docker image rm -f craftcms/nginx:7.2-dev
+	docker image rm -f craftcms/nginx:7.1-dev
+	docker image rm -f craftcms/nginx:7.0-dev
