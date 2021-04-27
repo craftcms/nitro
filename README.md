@@ -42,4 +42,4 @@ Nitro will pull Docker images that have been released. If you also need to test 
 6. In the same terminal session you used for the previous step, run `nitro apply`.
 
 
-*: This will build everything for each architecture. If you’d rather, you can run build containers individually by running `make local PHP_VERSION=X`, substituting `X` for the version of a single PHP image you’d like to build.
+*: This will build everything for each architecture. If you’d rather, you can build containers individually by running `make local PHP_VERSION=X`, substituting `X` for the version of a single PHP image you’d like to build.
