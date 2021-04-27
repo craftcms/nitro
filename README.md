@@ -41,5 +41,4 @@ Nitro will pull Docker images that have been released. If you also need to test 
 5. Run `export NITRO_DEVELOPMENT=true` in your terminal or add it to your shell profile so Nitro knows which images to pull.
 6. In the same terminal session you used for the previous step, run `nitro apply`.
 
-
-*: This will build everything for each architecture. If you’d rather, you can build containers individually by running `make local PHP_VERSION=X`, substituting `X` for the version of a single PHP image you’d like to build.
+*: This will build everything for each architecture. If you’d rather, you can build containers individually for amd64 by running `make local PHP_VERSION=X`, substituting `X` for the version of a single PHP image you’d like to build.
