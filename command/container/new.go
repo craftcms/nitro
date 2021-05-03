@@ -136,7 +136,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			exposesUI, err := output.Confirm("Does the image contain a web based UI", true, "?")
+			exposesUI, err := output.Confirm("Does the image contain a web-based UI", true, "?")
 			if err != nil {
 				return err
 			}
