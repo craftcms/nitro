@@ -40,6 +40,7 @@ import (
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
 	"github.com/craftcms/nitro/command/trust"
+	"github.com/craftcms/nitro/command/ui"
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
@@ -135,6 +136,7 @@ func NewCommand() *cobra.Command {
 		start.NewCommand(home, docker, term),
 		stop.NewCommand(home, docker, term),
 		trust.NewCommand(home, docker, term),
+		ui.NewCommand(home, docker, term),
 		update.NewCommand(home, docker, term),
 		validate.NewCommand(home, docker, term),
 		version.NewCommand(home, docker, nitrod, term),
