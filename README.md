@@ -28,17 +28,3 @@ $ which nitro
 ```
 
 If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` so that the system uses the freshly-built binary instead. (To go back to using the Homebrew Nitro binary, use `brew link --overwrite nitro`.)
-
-### Testing Docker Images
-
-Nitro will pull Docker images that have been released. If you also need to test Docker changes, you’ll want to build those as well:
-
-1. Delete Nitro’s site and proxy containers.
-2. Check out https://github.com/craftcms/docker.
-3. From the Docker project checkout, run `make setup` and `make build`. (It’ll take a while*.)
-    > 💡 You only need to run `make setup` once locally even if you run `make build` again later.
-4. If you’re testing the latest Nitro proxy image, `cd` to your Nitro project checkout and run `make docker` to build images from the local Dockerfile.
-5. Run `export NITRO_DEVELOPMENT=true` in your terminal or add it to your shell profile so Nitro knows which images to pull.
-6. In the same terminal session you used for the previous step, run `nitro apply`.
-
-*: This will build everything for each architecture. If you’d rather, you can build containers individually for amd64 by running `make local PHP_VERSION=X`, substituting `X` for the version of a single PHP image you’d like to build.
