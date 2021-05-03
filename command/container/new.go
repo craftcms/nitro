@@ -222,7 +222,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				_, envFile = filepath.Split(file)
 
-				output.Info(fmt.Sprintf("Created environment variables file at %q...", file))
+				output.Info(fmt.Sprintf("Created environment variables file at %q.", file))
 			}
 
 			container.EnvFile = envFile
