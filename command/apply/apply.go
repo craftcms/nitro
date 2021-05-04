@@ -37,10 +37,9 @@ import (
 )
 
 var (
-	defaultFile     = "/etc/hosts"
-	hostnames       []string
-	knownContainers = map[string]bool{}
-	isWSL           = false
+	defaultFile = "/etc/hosts"
+	hostnames   []string
+	isWSL       = false
 )
 
 const exampleText = `  # apply changes from a config
@@ -66,6 +65,31 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			return nil
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// store all of the known container names
+			var names map[string]bool
+
+			// get all of the sites as hostnames
+			for _, s := range cfg.Sites {
+				names[s.Hostname] = true
+			}
+
+			// get the containers as hostnames
+			for _, c := range cfg.Containers {
+				names[fmt.Sprintf("%s%s", c.Name, customcontainer.Suffix)] = true
+			}
+
+			// get all of the databases
+			for _, d := range cfg.Databases {
+				h, _ := d.GetHostname()
+				names[h] = true
+			}
+
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro+"=true")
@@ -92,14 +116,17 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 				}
 
-				if _, ok := knownContainers[c.ID]; !ok {
-					// don't remove the proxy container
-					if c.Labels[containerlabels.Proxy] != "" {
-						continue
-					}
+				// skip the proxy container
+				if c.Labels[containerlabels.Proxy] != "" {
+					continue
+				}
 
-					// set the container name
-					name := strings.TrimLeft(c.Names[0], "/")
+				// set the container name
+				name := strings.TrimLeft(c.Names[0], "/")
+
+				// check if this is a known container
+				if _, ok := names[name]; !ok {
+					// don't remove the proxy container
 
 					output.Pending("removing", name)
 
@@ -243,14 +270,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking", n)
 
 				// start or create the database
-				id, hostname, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db, output)
+				_, hostname, err := databasecontainer.StartOrCreate(ctx, docker, network.ID, db, output)
 				if err != nil {
 					output.Warning()
 					return err
 				}
-
-				// set the container as known
-				knownContainers[id] = true
 
 				// add the hostname to the hosts files
 				hostnames = append(hostnames, hostname)
@@ -274,13 +298,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			default:
 				output.Pending("checking dynamodb service")
 
-				id, hostname, err := dynamodb.VerifyCreated(ctx, docker, network.ID, output)
+				_, hostname, err := dynamodb.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
 					return err
-				}
-
-				if id != "" {
-					knownContainers[id] = true
 				}
 
 				if hostname != "" {
@@ -305,13 +325,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking mailhog service")
 
 				// verify the mailhog container is created
-				id, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
+				_, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
 					return err
-				}
-
-				if id != "" {
-					knownContainers[id] = true
 				}
 
 				if hostname != "" {
@@ -333,13 +349,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				output.Pending("checking minio service")
 
 				// verify the minio container is created
-				id, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
+				_, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
 					return err
-				}
-
-				if id != "" {
-					knownContainers[id] = true
 				}
 
 				if hostname != "" {
@@ -362,13 +374,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			default:
 				output.Pending("checking redis service")
 
-				id, hostname, err := redis.VerifyCreated(ctx, docker, network.ID, output)
+				_, hostname, err := redis.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
 					return err
-				}
-
-				if id != "" {
-					knownContainers[id] = true
 				}
 
 				if hostname != "" {
@@ -386,13 +394,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("checking", fmt.Sprintf("%s.containers.nitro", c.Name))
 
 					// start, update or create the custom container
-					id, err := customcontainer.StartOrCreate(ctx, docker, home, network.ID, c)
+					_, err := customcontainer.StartOrCreate(ctx, docker, home, network.ID, c)
 					if err != nil {
 						output.Warning()
 						return err
 					}
-
-					knownContainers[id] = true
 
 					output.Done()
 				}
@@ -407,13 +413,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					output.Pending("checking", site.Hostname)
 
 					// start, update or create the site container
-					id, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg)
+					_, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg)
 					if err != nil {
 						output.Warning()
 						return err
 					}
-
-					knownContainers[id] = true
 
 					output.Done()
 				}
