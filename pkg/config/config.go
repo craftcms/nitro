@@ -508,6 +508,22 @@ func (c *Config) RemoveContainer(container *Container) error {
 	return fmt.Errorf("unknown container %q", container.Name)
 }
 
+// RemoveDatabase is used to destroy or remove a database
+// engine from the config.
+func (c *Config) RemoveDatabase(database Database) error {
+	hostname, _ := database.GetHostname()
+
+	for k, v := range c.Databases {
+		h, _ := v.GetHostname()
+		if hostname == h {
+			c.Databases = append(c.Databases[:k], c.Databases[k+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown database %q", hostname)
+}
+
 // RemoveSite takes a hostname and will remove the site by its
 // hostname from the config file.
 func (c *Config) RemoveSite(site *Site) error {

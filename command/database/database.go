@@ -36,6 +36,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		sshCommand(home, docker, output),
 		removeCommand(docker, nitrod, output),
 		newCommand(home, docker, output),
+		destroyCommand(home, docker, output),
 	)
 
 	return cmd

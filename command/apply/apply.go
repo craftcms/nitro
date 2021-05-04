@@ -223,7 +223,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
+			ctx := cmd.Root().Context()
 
 			// load the config
 			cfg, err := config.Load(home)

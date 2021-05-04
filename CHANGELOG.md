@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Added the `db destroy` command to remove database engines. ([#325](https://github.com/craftcms/nitro/issues/325))
+
 ### Changed
 - Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
 - The `stop` command no longer returns an error code when no containers are running. ([#336](https://github.com/craftcms/nitro/issues/336))
