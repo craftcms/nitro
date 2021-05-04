@@ -72,7 +72,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// store all of the known container names
-			var names map[string]bool
+			names := map[string]bool{}
 
 			// get all of the sites as hostnames
 			for _, s := range cfg.Sites {
@@ -88,6 +88,26 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			for _, d := range cfg.Databases {
 				h, _ := d.GetHostname()
 				names[h] = true
+			}
+
+			// is dynamodb enabled
+			if cfg.Services.DynamoDB {
+				names[dynamodb.Host] = true
+			}
+
+			// is mailhog enabled
+			if cfg.Services.Mailhog {
+				names[mailhog.Host] = true
+			}
+
+			// is minio enabled
+			if cfg.Services.Minio {
+				names[minio.Host] = true
+			}
+
+			// is redis enabled
+			if cfg.Services.Redis {
+				names[redis.Host] = true
 			}
 
 			// create a filter for the environment
