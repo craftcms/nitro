@@ -55,6 +55,17 @@ func (v *HostnameValidator) Validate(input string) error {
 	return nil
 }
 
+// IntegerValidator validates if the input is a valid integer
+type IntegerValidator struct{}
+
+func (v *IntegerValidator) Validate(input string) error {
+	if _, err := strconv.Atoi(input); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // MultipleHostnameValidator validates a comma separated list of hostnames
 type MultipleHostnameValidator struct{}
 
