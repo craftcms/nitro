@@ -65,6 +65,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			return nil
 		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+			if ctx == nil {
+				c, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+				defer cancel()
+				ctx = c
+			}
+
 			// load the config
 			cfg, err := config.Load(home)
 			if err != nil {
@@ -115,7 +122,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			filter.Add("label", containerlabels.Nitro+"=true")
 
 			// look for a container for the site
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return fmt.Errorf("error getting a list of containers")
 			}
@@ -153,7 +160,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// only perform a backup if the container is for databases
 					if c.Labels[containerlabels.DatabaseEngine] != "" {
 						// get all of the databases
-						databases, err := backup.Databases(cmd.Context(), docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
+						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
 						if err != nil {
 							output.Warning()
 							output.Info("Unable to get the databases from", name, err.Error())
@@ -182,7 +189,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 							output.Pending("creating backup", opts.BackupName)
 
 							// backup the container
-							if err := backup.Perform(cmd.Context(), docker, opts); err != nil {
+							if err := backup.Perform(ctx, docker, opts); err != nil {
 								output.Warning()
 								output.Info("Unable to backup database", db, err.Error())
 								break
@@ -196,12 +203,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// stop and remove a container we don't know about
-					if err := docker.ContainerStop(cmd.Context(), c.ID, nil); err != nil {
+					if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
 						return err
 					}
 
 					// remove container
-					if err := docker.ContainerRemove(cmd.Context(), c.ID, types.ContainerRemoveOptions{}); err != nil {
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
 						return err
 					}
 
