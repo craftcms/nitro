@@ -170,7 +170,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					uiPort = p
 				default:
 					// ask for the tag (default to latest)
-					ask, err := output.Ask("Which port should we use for the UI?", "", "?", &validate.IntegerValidator{})
+					ask, err := output.Ask("Which port should we use for the UI", "", "?", &validate.IntegerValidator{})
 					if err != nil {
 						return err
 					}
