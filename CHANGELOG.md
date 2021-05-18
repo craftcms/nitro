@@ -4,12 +4,12 @@
 
 ### Added
 - Added the `db destroy` command to remove database engines. ([#325](https://github.com/craftcms/nitro/issues/325))
-- Added the ability to extend the Nginx configuration using a `nitro.conf`. ([#18](https://github.com/craftcms/nitro/issues/18))
+- Added the ability to extend the nginx configuration using a `nitro.conf`. ([#18](https://github.com/craftcms/nitro/issues/18))
 
 ### Changed
-- Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
+- Added support for validating multiple hostnames with the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
 - The `stop` command no longer returns an error code when no containers are running. ([#336](https://github.com/craftcms/nitro/issues/336))
-- The `add` and `create` command now sets the `DB_USER` and `DB_PASSWORD` for the `.env` file by default. ([#310](https://github.com/craftcms/nitro/issues/310))
+- The `add` and `create` commands now set `DB_USER` and `DB_PASSWORD` variables in the `.env` file. ([#310](https://github.com/craftcms/nitro/issues/310))
 - The `ls` command now outputs the internal and external ports for containers.
 
 ### Deprecated
@@ -17,7 +17,7 @@
 - Deprecated the `validate` command.
 
 ### Fixed
-- Fixed an issue where the `apply` command had to be run twice to cleanup. ([#321](https://github.com/craftcms/nitro/issues/321))
+- Fixed an issue where the `apply` command would not remove unused containers unless run twice. ([#321](https://github.com/craftcms/nitro/issues/321))
 - Fixed an issue where `container new` would not allow entering a port. ([#318](https://github.com/craftcms/nitro/issues/318))
 
 ## 2.0.7 - 2021-04-06
