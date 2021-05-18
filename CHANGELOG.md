@@ -4,6 +4,7 @@
 
 ### Added
 - Added the `db destroy` command to remove database engines. ([#325](https://github.com/craftcms/nitro/issues/325))
+- Added the ability to extend the Nginx configuration using a `nitro.conf`. ([#18](https://github.com/craftcms/nitro/issues/18))
 
 ### Changed
 - Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
