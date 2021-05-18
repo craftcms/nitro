@@ -43,3 +43,31 @@ func Edit(file string, updates map[string]string) (string, error) {
 
 	return strings.Join(lines, "\n"), nil
 }
+
+// EnvExists takes an existing env file and key and checks if the env var has already been defined. If it has been defined
+// it will return true otherwise it will return false. If the file does not exist, it will return false.
+func EnvExists(file, key string) bool {
+	// make sure the file exists
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+
+	// read the file
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		return false
+	}
+
+	// split the file into multiple lines
+	lines := strings.Split(string(f), "\n")
+	for _, txt := range lines {
+		// split using =
+		sp := strings.Split(txt, "=")
+
+		if sp[0] == key && sp[1] != "" {
+			return true
+		}
+	}
+
+	return false
+}

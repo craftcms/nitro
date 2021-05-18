@@ -8,6 +8,7 @@
 ### Changed
 - Added support for validating mutliple hostnames on the `alias` command. ([#341](https://github.com/craftcms/nitro/issues/341))
 - The `stop` command no longer returns an error code when no containers are running. ([#336](https://github.com/craftcms/nitro/issues/336))
+- The `add` and `create` command now sets the `DB_USER` and `DB_PASSWORD` for the `.env` file by default. ([#310](https://github.com/craftcms/nitro/issues/310))
 
 ### Deprecated
 - Deprecated the `clean` command. `apply` will automatically remove unused containers.

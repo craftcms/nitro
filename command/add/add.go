@@ -97,27 +97,37 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
+			// always set default environment variables
+			envVars := map[string]string{
+				"DB_USER":     "nitro",
+				"DB_PASSWORD": "nitro",
+			}
+
+			// if the user selected a database, add that information
+			if database {
+				envVars["DB_SERVER"] = dbhost
+				envVars["DB_PORT"] = port
+				envVars["DB_DATABASE"] = dbname
+				envVars["DB_DRIVER"] = driver
+			}
+
 			// if the wanted a new database edit the env
-			if database && pathexists.IsFile(envFilePath) {
+			if pathexists.IsFile(envFilePath) {
 				// ask the user if we should update the .env?
 				updateEnv, err := output.Confirm("Should we update the env file?", false, "")
 				if err != nil {
 					return err
 				}
 
+				// the user wants to update the env file
 				if updateEnv {
-					key := uuid.New()
+					// check if the security key is already set
+					if !envedit.EnvExists(envFilePath, "SECURITY_KEY") {
+						envVars["SECURITY_KEY"] = uuid.New().String()
+					}
 
 					// update the env
-					update, err := envedit.Edit(envFilePath, map[string]string{
-						"SECURITY_KEY": key.String(),
-						"DB_SERVER":    dbhost,
-						"DB_DATABASE":  dbname,
-						"DB_PORT":      port,
-						"DB_DRIVER":    driver,
-						"DB_USER":      "nitro",
-						"DB_PASSWORD":  "nitro",
-					})
+					update, err := envedit.Edit(envFilePath, envVars)
 					if err != nil {
 						output.Info("unable to edit the env")
 					}
