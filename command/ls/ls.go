@@ -1,6 +1,7 @@
 package ls
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -50,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			})
 
 			// define the table headers
-			tbl := table.New("Hostname", "Type", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(10)
+			tbl := table.New("Hostname", "Type", "Internal Ports", "External Ports", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(10)
 
 			for _, c := range containers {
 				status := "running"
@@ -90,7 +91,43 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), status)
+				// get the ports
+				var intPorts, extPorts []string
+
+				// get ports for the non-site containers
+				switch c.Labels[containerlabels.Host] == "" {
+				case false:
+					intPorts = append(intPorts, "8080", "3000", "3001")
+					extPorts = append(extPorts, "n/a")
+				default:
+					for _, p := range c.Ports {
+						// get the external ports and assign if not 0
+						e := p.PublicPort
+						if e != 0 {
+							extPorts = append(extPorts, fmt.Sprintf("%d", e))
+						}
+
+						// get the internal ports and assign if not 0
+						pr := p.PrivatePort
+						if e != 0 {
+							intPorts = append(intPorts, fmt.Sprintf("%d", pr))
+						}
+					}
+				}
+
+				// sort the ports
+				sort.Slice(intPorts, func(i, j int) bool {
+					return intPorts[i] < intPorts[j]
+				})
+
+				sort.Slice(extPorts, func(i, j int) bool {
+					return extPorts[i] < extPorts[j]
+				})
+
+				internalPorts := strings.Join(intPorts, ",")
+				externalPorts := strings.Join(extPorts, ",")
+
+				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), internalPorts, externalPorts, status)
 			}
 
 			tbl.Print()
