@@ -18,7 +18,7 @@ var conf = `server {
     include     craftcms/security.conf;
 
     # include custom conf files
-    include     /app/nitro.conf;
+    include     /app/*nitro.conf;
 
     # index.php
     index       index.php;
