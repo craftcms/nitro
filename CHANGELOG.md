@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.8 - 2021-05-18
 
 ### Added
 - Added the `db destroy` command, for removing database engines. ([#325](https://github.com/craftcms/nitro/issues/325))
