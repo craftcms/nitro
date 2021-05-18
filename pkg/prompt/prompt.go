@@ -313,7 +313,13 @@ func RunApply(cmd *cobra.Command, args []string, force bool, output terminal.Out
 	for _, c := range cmd.Root().Commands() {
 		// set the apply command
 		if c.Use == "apply" {
-			return c.RunE(c, args)
+			// run the apply command
+			if err := c.RunE(c, args); err != nil {
+				return err
+			}
+
+			// call the post run command to cleanup
+			return c.PostRunE(c, args)
 		}
 	}
 

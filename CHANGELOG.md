@@ -11,10 +11,11 @@
 
 ### Deprecated
 - Deprecated the `clean` command. `apply` will automatically remove unused containers.
-- Deprecated the `validate` command. Nitro will automatically validate config files.
+- Deprecated the `validate` command.
 
-## Fixed
+### Fixed
 - Fixed an issue where the `apply` command had to be run twice to cleanup. ([#321](https://github.com/craftcms/nitro/issues/321))
+- Fixed an issue where `container new` would not allow entering a port. ([#318](https://github.com/craftcms/nitro/issues/318))
 
 ## 2.0.7 - 2021-04-06
 
