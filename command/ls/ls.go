@@ -51,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			})
 
 			// define the table headers
-			tbl := table.New("Hostname", "Type", "Internal Ports", "External Ports", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(10)
+			tbl := table.New("Hostname", "Type", "Internal Ports", "External Ports", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(2)
 
 			for _, c := range containers {
 				status := "running"
@@ -98,7 +98,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				switch c.Labels[containerlabels.Host] == "" {
 				case false:
 					intPorts = append(intPorts, "8080", "3000", "3001")
-					extPorts = append(extPorts, "n/a")
+					extPorts = append(extPorts, "(uses proxy ports)")
 				default:
 					for _, p := range c.Ports {
 						// get the external ports and assign if not 0
