@@ -48,11 +48,45 @@ func (v *HostnameValidator) Validate(input string) error {
 	}
 
 	// check for special characters
-	if strings.ContainsAny(input, "!@#$%^&*()") {
+	if strings.ContainsAny(input, "!@#$%^&*(),") {
 		return fmt.Errorf("hostname must not include any special characters")
 	}
 
 	return nil
+}
+
+// IntegerValidator validates if the input is a valid integer
+type IntegerValidator struct{}
+
+func (v *IntegerValidator) Validate(input string) error {
+	if _, err := strconv.Atoi(input); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MultipleHostnameValidator validates a comma separated list of hostnames
+type MultipleHostnameValidator struct{}
+
+func (v *MultipleHostnameValidator) Validate(input string) error {
+	_, err := v.Parse(input)
+	return err
+}
+
+func (v *MultipleHostnameValidator) Parse(input string) ([]string, error) {
+	rawHosts := strings.Split(input, ",")
+	hostV := &HostnameValidator{}
+	var hosts []string
+
+	for _, h := range rawHosts {
+		h := strings.TrimSpace(h)
+		if err := hostV.Validate(h); err != nil {
+			return nil, err
+		}
+		hosts = append(hosts, h)
+	}
+	return hosts, nil
 }
 
 type PHPVersionValidator struct{}
@@ -63,7 +97,7 @@ func (v *PHPVersionValidator) Validate(input string) error {
 		return nil
 	}
 
-	return fmt.Errorf("the PHP inputrsion %q is not valid", input)
+	return fmt.Errorf("the PHP version %q is not valid", input)
 }
 
 type IsBoolean struct{}
@@ -82,8 +116,7 @@ func (v *IsMegabyte) Validate(input string) error {
 	return isMegabytes(input)
 }
 
-type MaxExecutionTime struct {
-}
+type MaxExecutionTime struct{}
 
 func (v *MaxExecutionTime) Validate(input string) error {
 	return maxExecutionTime(input)

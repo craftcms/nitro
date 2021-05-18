@@ -17,9 +17,10 @@ const exampleText = `  # remove unused containers
 // environment. It will also perform the backup for database containers.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "clean",
-		Short:   "Removes unused containers.",
-		Example: exampleText,
+		Use:        "clean",
+		Deprecated: "Use the `apply` command instead",
+		Short:      "Removes unused containers.",
+		Example:    exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output.Info("Cleaning up…")
 

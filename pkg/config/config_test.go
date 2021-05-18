@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -1010,7 +1009,7 @@ func TestSite_GetContainerPath(t *testing.T) {
 			want: "another-site",
 		},
 		{
-			name: "default webroots with a trailing slash return the correct value",
+			name: "default web roots with a trailing slash return the correct value",
 			fields: fields{
 				Webroot: "web/",
 			},
@@ -1164,7 +1163,6 @@ func TestConfig_AllSitesWithHostnames(t *testing.T) {
 		Services   Services
 		Sites      []Site
 		File       string
-		rw         sync.RWMutex
 	}
 	type args struct {
 		site Site
@@ -1211,7 +1209,6 @@ func TestConfig_AllSitesWithHostnames(t *testing.T) {
 				Services:   tt.fields.Services,
 				Sites:      tt.fields.Sites,
 				File:       tt.fields.File,
-				rw:         tt.fields.rw,
 			}
 			if got := c.AllSitesWithHostnames(tt.args.site, tt.args.addr); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.AllSitesWithHostnames() = %v, want %v", got, tt.want)

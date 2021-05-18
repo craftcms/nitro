@@ -83,3 +83,38 @@ DB_TABLE_PREFIX=
 		})
 	}
 }
+
+func TestEnvExists(t *testing.T) {
+	type args struct {
+		file string
+		key  string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "existing env var in file returns true",
+			args: args{file: "testdata/env-example-golden", key: "ENVIRONMENT"},
+			want: true,
+		},
+		{
+			name: "missing env var in file returns false",
+			args: args{file: "testdata/env-example-golden", key: "MISSING"},
+			want: false,
+		},
+		{
+			name: "missing files returns false",
+			args: args{file: "testdata/env-example-not-here", key: "MISSING"},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := EnvExists(tt.args.file, tt.args.key); got != tt.want {
+				t.Errorf("EnvExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

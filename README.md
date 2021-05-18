@@ -28,10 +28,3 @@ $ which nitro
 ```
 
 If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` so that the system uses the freshly-built binary instead. (To go back to using the Homebrew Nitro binary, use `brew link --overwrite nitro`.)
-
-### Testing Docker Images
-
-Nitro will pull Docker images that have been released. If you also need to test Docker changes, you’ll want to build those as well:
-
-1. Run `make docker` to build images from the local Dockerfile.
-2. Run `export NITRO_DEVELOPMENT=true` in your terminal or add it to your shell profile so Nitro knows which images to pull.

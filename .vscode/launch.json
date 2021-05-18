@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "nitro apply",
             "type": "go",
@@ -85,6 +86,16 @@
             "env": {},
             "internalConsoleOptions": "openOnSessionStart",
             "args": ["remove"]
+        },
+        {
+            "name": "nitro remove tutorial.nitro",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {},
+            "internalConsoleOptions": "openOnSessionStart",
+            "args": ["remove", "tutorial.nitro"]
         },
         {
             "name": "nitro ssh",

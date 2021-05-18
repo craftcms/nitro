@@ -88,15 +88,18 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	// create the container
 	image := fmt.Sprintf(NginxImage, site.Version)
 
-	// pull the image
-	rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-	if err != nil {
-		return "", fmt.Errorf("unable to pull the image, %w", err)
-	}
+	// pull the image if we are not in a development environment
+	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
+	if !dev {
+		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
+		if err != nil {
+			return "", fmt.Errorf("unable to pull the image, %w", err)
+		}
 
-	buf := &bytes.Buffer{}
-	if _, err := buf.ReadFrom(rdr); err != nil {
-		return "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		buf := &bytes.Buffer{}
+		if _, err := buf.ReadFrom(rdr); err != nil {
+			return "", fmt.Errorf("unable to read output from pulling image %s, %w", image, err)
+		}
 	}
 
 	// get the sites path

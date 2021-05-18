@@ -136,7 +136,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			exposesUI, err := output.Confirm("Does the image contain a web based UI", true, "?")
+			exposesUI, err := output.Confirm("Does the image contain a web-based UI", true, "?")
 			if err != nil {
 				return err
 			}
@@ -150,22 +150,40 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					opts = append(opts, p[len(p)-1])
 				}
 
-				// prompt the user for the port
-				selected, err := output.Select(cmd.InOrStdin(), "Which port should we use for the UI?", opts)
-				if err != nil {
-					return err
+				switch len(opts) == 0 {
+				case false:
+					// prompt the user for the port
+					selected, err := output.Select(cmd.InOrStdin(), "Which port should we use for the UI?", opts)
+					if err != nil {
+						return err
+					}
+
+					clean := strings.Split(ports[selected], ":")
+
+					// get the container port not the host port
+					p, err := strconv.Atoi(clean[1])
+					if err != nil {
+						return err
+					}
+
+					// assign the port
+					uiPort = p
+				default:
+					// ask for the tag (default to latest)
+					ask, err := output.Ask("Which port should we use for the UI", "", "?", &validate.IntegerValidator{})
+					if err != nil {
+						return err
+					}
+
+					// convert the port to an int
+					p, err := strconv.Atoi(ask)
+					if err != nil {
+						return err
+					}
+
+					// assign the ui port
+					uiPort = p
 				}
-
-				clean := strings.Split(ports[selected], ":")
-
-				// get the container port not the host port
-				p, err := strconv.Atoi(clean[1])
-				if err != nil {
-					return err
-				}
-
-				// assign the port
-				uiPort = p
 			}
 
 			// inspect the images volumes
@@ -222,7 +240,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				_, envFile = filepath.Split(file)
 
-				output.Info(fmt.Sprintf("Created environment variables file at %q...", file))
+				output.Info(fmt.Sprintf("Created environment variables file at %q.", file))
 			}
 
 			container.EnvFile = envFile

@@ -22,6 +22,8 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+const Suffix = ".containers.nitro"
+
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, c config.Container) (hostname string, err error) {
 	// set filters for the container
 	filter := filters.NewArgs()
@@ -203,7 +205,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			},
 		},
 		nil,
-		fmt.Sprintf("%s.containers.nitro", c.Name),
+		fmt.Sprintf("%s%s", c.Name, Suffix),
 	)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the container, %w", err)

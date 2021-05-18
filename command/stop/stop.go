@@ -14,11 +14,6 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrNoContainers is returned when no containers are running for an environment
-	ErrNoContainers = fmt.Errorf("there are no running containers")
-)
-
 const exampleText = `  # stop all containers
   nitro stop
 
@@ -66,7 +61,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// if there are no containers, were done
 			if len(containers) == 0 {
-				return ErrNoContainers
+				output.Info("there are no running containers")
+				return nil
 			}
 
 			output.Info("Stopping Nitro…")

@@ -16,7 +16,7 @@ func TestFind(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "find the webroot",
+			name: "find the web root",
 			args: args{
 				path: filepath.Join("testdata", "no-vendor"),
 			},

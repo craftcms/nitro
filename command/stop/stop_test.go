@@ -43,7 +43,7 @@ func TestStopSuccess(t *testing.T) {
 	}
 }
 
-func TestStopErrorsWhenThereAreNoContainers(t *testing.T) {
+func TestStopDoesNotErrorWhenThereAreNoContainers(t *testing.T) {
 	// Arrange
 	environmentName := "testing-stop"
 	mock := newMockDockerClient(nil, nil, nil)
@@ -59,7 +59,7 @@ func TestStopErrorsWhenThereAreNoContainers(t *testing.T) {
 	err = cmd.RunE(cmd, []string{})
 
 	// Assert
-	if err == nil {
-		t.Errorf("expected the error to not be nil")
+	if err != nil {
+		t.Errorf("expected the error to be nil")
 	}
 }
