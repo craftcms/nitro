@@ -29,6 +29,7 @@ import (
 	"github.com/craftcms/nitro/command/logs"
 	"github.com/craftcms/nitro/command/ls"
 	"github.com/craftcms/nitro/command/npm"
+	"github.com/craftcms/nitro/command/permissions"
 	"github.com/craftcms/nitro/command/php"
 	"github.com/craftcms/nitro/command/portcheck"
 	"github.com/craftcms/nitro/command/queue"
@@ -124,6 +125,7 @@ func NewCommand() *cobra.Command {
 		logs.NewCommand(home, docker, term),
 		ls.NewCommand(home, docker, term),
 		npm.NewCommand(docker, term),
+		permissions.NewCommand(home, docker, term),
 		php.NewCommand(home, docker, term),
 		portcheck.NewCommand(term),
 		queue.NewCommand(home, docker, term),
