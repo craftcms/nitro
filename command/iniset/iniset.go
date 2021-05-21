@@ -250,7 +250,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_enable":
-				value, err := output.Ask("Should we enable OPCache", "false", "?", &validate.IsBoolean{})
+				value, err := output.Ask("Should we enable OPcache", "false", "?", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}
@@ -266,7 +266,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_validate_timestamps":
-				value, err := output.Ask("Should we validate timestamps with OPCache", "false", "?", &validate.IsBoolean{})
+				value, err := output.Ask("Should we validate timestamps with OPcache", "false", "?", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}
@@ -282,7 +282,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_revalidate_freq":
-				value, err := output.Ask("What should the OPCache revalidate frequency be", config.DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"], "?", &validate.MaxExecutionTime{})
+				value, err := output.Ask("What should the OPcache revalidate frequency be", config.DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"], "?", &validate.MaxExecutionTime{})
 				if err != nil {
 					return err
 				}
