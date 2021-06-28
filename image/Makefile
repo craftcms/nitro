@@ -1,16 +1,16 @@
 IMAGE_USER ?= nitro
-VERSION ?= 2.1.0
+VERSION ?= 3.0.0
 IMAGE ?= craftcms/nitro:${VERSION}
 
 build:
 	docker build --build-arg IMAGE_USER=${IMAGE_USER} --tag ${IMAGE} .
 local:
-	docker build --build-arg IMAGE_USER=${IMAGE_USER} --tag testing:local .
+	docker build --build-arg IMAGE_USER=${IMAGE_USER} --tag nitro:local .
 bash: build
-	docker run --name testing --rm -it testing:local bash
+	docker run --name nitro --rm -it nitro:local bash
 run: build
-	docker run --name testing -p 8080:80 --rm -it testing:local
+	docker run --name nitro -p 8080:80 --rm -it nitro:local
 exec:
-	docker exec -it testing bash
+	docker exec -it nitro bash
 exec-root:
 	docker exec -it --user root testing bash
