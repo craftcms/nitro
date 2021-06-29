@@ -30,6 +30,8 @@ type command struct {
 var (
 	// NginxImage is the image used for sites, with the PHP version
 	NginxImage = "docker.io/craftcms/nginx:%s-dev"
+
+	SiteImage = "craftcms/nitro:%s"
 )
 
 // StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
@@ -86,7 +88,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// create the container
-	image := fmt.Sprintf(NginxImage, site.Version)
+	image := fmt.Sprintf(SiteImage, site.Version)
 
 	// pull the image if we are not in a development environment
 	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
