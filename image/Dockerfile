@@ -60,7 +60,9 @@ WORKDIR /app
 
 # install nvm
 RUN export XDG_CONFIG_HOME=/home/${IMAGE_USER} && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash && \
+    echo ". /home/${IMAGE_USER}/nvm/nvm.sh" >> /home/${IMAGE_USER}/.bashrc && \
+    chown -R ${IMAGE_USER}:${IMAGE_USER} /home/${IMAGE_USER}
 
 # supervisor config
 
