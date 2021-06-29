@@ -1,5 +1,5 @@
 # grab the caddy binary
-FROM caddy:2.3.0-alpine AS caddy
+FROM caddy:2.4.3-alpine AS caddy
 
 # build the api
 FROM golang:1.16-alpine AS builder
@@ -10,7 +10,7 @@ COPY . .
 RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/pkg/api/api.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
-FROM alpine:3.12
+FROM alpine:3.14
 
 # See https://caddyserver.com/docs/conventions#file-locations for details
 ENV XDG_CONFIG_HOME /config
