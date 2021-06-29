@@ -21,6 +21,7 @@ RUN apt-get update && \
     php${PHP_VERSION}-bcmath \
     php${PHP_VERSION}-cli \
     php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-dom \
     php${PHP_VERSION}-gd \
     php${PHP_VERSION}-fpm \
     php${PHP_VERSION}-iconv \
