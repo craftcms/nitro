@@ -139,9 +139,10 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	resp, err := docker.ContainerCreate(
 		ctx,
 		&container.Config{
-			Image:  image,
-			Labels: labels,
-			Env:    envs,
+			Image:    image,
+			Labels:   labels,
+			Env:      envs,
+			Hostname: site.Hostname,
 		},
 		&container.HostConfig{
 			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
