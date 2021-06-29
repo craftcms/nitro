@@ -1,5 +1,5 @@
 IMAGE_USER ?= nitro
-VERSION ?= 3.0.0
+VERSION ?= 8.0
 IMAGE ?= craftcms/nitro:${VERSION}
 
 build:
