@@ -3,52 +3,63 @@ FROM ubuntu:20.04
 ARG IMAGE_USER
 ENV IMAGE_USER=${IMAGE_USER}
 
-ARG DEFAULT_PHP_VERSION=8.0
-ENV DEFAULT_PHP_VERSION=${DEFAULT_PHP_VERSION}
+ARG PHP_VERSION=8.0
+ENV PHP_VERSION=${PHP_VERSION}
+
+ARG NVM_VERSION=0.38.0
+ENV NVM_VERSION=${NVM_VERSION}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y \
-    supervisor \
-    software-properties-common && \
+RUN apt-get update && \
+    apt-get install -y curl git nano supervisor software-properties-common unzip vim && \
     add-apt-repository ppa:ondrej/php && \
     add-apt-repository ppa:nginx/stable && \
     apt-get update && \
     apt-get remove -y software-properties-common && \
     apt-get install -y \
-    php${DEFAULT_PHP_VERSION}-bcmath \
-    php${DEFAULT_PHP_VERSION}-cli \
-    php${DEFAULT_PHP_VERSION}-curl \
-    php${DEFAULT_PHP_VERSION}-gd \
-    php${DEFAULT_PHP_VERSION}-fpm \
-    php${DEFAULT_PHP_VERSION}-iconv \
-    php${DEFAULT_PHP_VERSION}-imagick \
-    php${DEFAULT_PHP_VERSION}-intl \
-    php${DEFAULT_PHP_VERSION}-mbstring \
-    php${DEFAULT_PHP_VERSION}-mysql \
-    php${DEFAULT_PHP_VERSION}-opcache \
-    php${DEFAULT_PHP_VERSION}-pgsql \
-    php${DEFAULT_PHP_VERSION}-redis \
-    php${DEFAULT_PHP_VERSION}-soap \
-    php${DEFAULT_PHP_VERSION}-xdebug \
-    php${DEFAULT_PHP_VERSION}-zip \
-    php${DEFAULT_PHP_VERSION}-fpm \
+    php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-cli \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-fpm \
+    php${PHP_VERSION}-iconv \
+    php${PHP_VERSION}-imagick \
+    php${PHP_VERSION}-intl \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-mysql \
+    php${PHP_VERSION}-opcache \
+    php${PHP_VERSION}-pgsql \
+    php${PHP_VERSION}-redis \
+    php${PHP_VERSION}-soap \
+    php${PHP_VERSION}-xdebug \
+    php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-fpm \
     jpegoptim \
     nginx && \
-    apt upgrade -y && \
+    apt-get upgrade -y && \
     apt-get autoremove -y
 
 # install database tools
 RUN apt-get install -y --no-install-recommends mysql-client postgresql-client
 
+# install composer
+RUN cd /tmp && curl -sS https://getcomposer.org/installer -o composer-setup.php && \
+    HASH=`curl -sS https://composer.github.io/installer.sig` && \
+    php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
 # create the user and home directory
 RUN mkdir /app && \
     addgroup ${IMAGE_USER} --gid 1000 && \
-    adduser ${IMAGE_USER} --home /app --uid 1000 --gid 1000 --no-create-home && \
+    adduser ${IMAGE_USER} --uid 1000 --gid 1000 && \
     chown -R ${IMAGE_USER}:${IMAGE_USER} /app
 
 WORKDIR /app
+
+# install nvm
+RUN export XDG_CONFIG_HOME=/home/${IMAGE_USER} && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
 
 # supervisor config
 
@@ -78,10 +89,10 @@ RUN chown -R ${IMAGE_USER}:${IMAGE_USER} /etc/nginx/conf.d/ && \
 # php-fpm config
 
 # set permissions for the user on the php logs
-RUN touch /var/log/php${DEFAULT_PHP_VERSION}-fpm.log && chown -R ${IMAGE_USER}:${IMAGE_USER} /var/log/php${DEFAULT_PHP_VERSION}-fpm.log
+RUN touch /var/log/php${PHP_VERSION}-fpm.log && chown -R ${IMAGE_USER}:${IMAGE_USER} /var/log/php${PHP_VERSION}-fpm.log
 # set permissions on php-fpm directories
-RUN mkdir -p /run/php/ && touch /run/php/php${DEFAULT_PHP_VERSION}-fpm.sock && chown -R ${IMAGE_USER}:${IMAGE_USER} /run/php/php${DEFAULT_PHP_VERSION}-fpm.sock
-RUN touch /run/php/php${DEFAULT_PHP_VERSION}-fpm.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/php/php${DEFAULT_PHP_VERSION}-fpm.pid
+RUN mkdir -p /run/php/ && touch /run/php/php${PHP_VERSION}-fpm.sock && chown -R ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.sock
+RUN touch /run/php/php${PHP_VERSION}-fpm.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.pid
 # use our php-fpm conf
 COPY www.conf /etc/php/8.0/fpm/pool.d/www.conf
 
