@@ -101,6 +101,6 @@ COPY www.conf /etc/php/8.0/fpm/pool.d/www.conf
 
 USER ${IMAGE_USER}
 
-EXPOSE 80 443
+EXPOSE 80 443 3000 3001
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
