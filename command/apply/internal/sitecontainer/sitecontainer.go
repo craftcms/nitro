@@ -12,10 +12,12 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
@@ -28,10 +30,8 @@ type command struct {
 }
 
 var (
-	// NginxImage is the image used for sites, with the PHP version
-	NginxImage = "docker.io/craftcms/nginx:%s-dev"
-
-	SiteImage = "craftcms/nitro:%s"
+	// Image is the image used for sites, with the PHP version
+	Image = "craftcms/nitro:%s"
 )
 
 // StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
@@ -88,7 +88,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// create the container
-	image := fmt.Sprintf(SiteImage, site.Version)
+	image := fmt.Sprintf(Image, site.Version)
 
 	// pull the image if we are not in a development environment
 	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
@@ -147,6 +147,13 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		&container.HostConfig{
 			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
 			ExtraHosts: extraHosts,
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: proxycontainer.VolumeName,
+					Target: proxycontainer.VolumeTarget,
+				},
+			},
 		},
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{

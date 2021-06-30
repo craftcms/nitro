@@ -20,6 +20,14 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+const (
+	// VolumeName is the name of the volume the proxy container will create and store certificates.
+	VolumeName = "nitro"
+
+	// VolumeTarget is the location where the volume should be mounted in the proxy container.
+	VolumeTarget = "/data"
+)
+
 var (
 	// ProxyImage is the docker hub image with the current CLI version
 	ProxyImage = fmt.Sprintf("craftcms/nitro-proxy:%s", version.Version)
@@ -75,7 +83,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 	var skipVolume bool
 	var volume *types.Volume
 	for _, v := range volumes.Volumes {
-		if v.Name == "nitro" {
+		if v.Name == VolumeName {
 			skipVolume = true
 			volume = v
 		}
@@ -91,10 +99,10 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 		// create a volume with the same name of the machine
 		resp, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
 			Driver: "local",
-			Name:   "nitro",
+			Name:   VolumeName,
 			Labels: map[string]string{
 				containerlabels.Nitro:  "true",
-				containerlabels.Volume: "nitro",
+				containerlabels.Volume: VolumeName,
 			},
 		})
 		if err != nil {
@@ -219,7 +227,7 @@ func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.
 				{
 					Type:   mount.TypeVolume,
 					Source: volume.Name,
-					Target: "/data",
+					Target: VolumeTarget,
 				},
 			},
 			PortBindings: map[nat.Port][]nat.PortBinding{
