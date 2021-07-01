@@ -314,7 +314,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// check dynamodb service
 			switch cfg.Services.DynamoDB {
 			case false:
-				output.Pending("checking dynamodb service")
+				output.Pending("checking dynamodb")
 
 				if err := dynamodb.VerifyRemoved(ctx, docker, output); err != nil {
 					output.Warning()
@@ -323,7 +323,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 				output.Done()
 			default:
-				output.Pending("checking dynamodb service")
+				output.Pending("checking dynamodb")
 
 				_, hostname, err := dynamodb.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
@@ -340,7 +340,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// check mailhog service
 			switch cfg.Services.Mailhog {
 			case false:
-				output.Pending("checking mailhog service")
+				output.Pending("checking mailhog")
 
 				// make sure the service container is removed
 				if err := mailhog.VerifyRemoved(ctx, docker, output); err != nil {
@@ -349,7 +349,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 				output.Done()
 			default:
-				output.Pending("checking mailhog service")
+				output.Pending("checking mailhog")
 
 				// verify the mailhog container is created
 				_, hostname, err := mailhog.VerifyCreated(ctx, docker, network.ID, output)
@@ -373,7 +373,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					return err
 				}
 			default:
-				output.Pending("checking minio service")
+				output.Pending("checking minio")
 
 				// verify the minio container is created
 				_, hostname, err := minio.VerifyCreated(ctx, docker, network.ID, output)
@@ -391,7 +391,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			// check redis service
 			switch cfg.Services.Redis {
 			case false:
-				output.Pending("checking redis service")
+				output.Pending("checking redis")
 
 				if err := redis.VerifyRemoved(ctx, docker, output); err != nil {
 					return err
@@ -399,7 +399,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 				output.Done()
 			default:
-				output.Pending("checking redis service")
+				output.Pending("checking redis")
 
 				_, hostname, err := redis.VerifyCreated(ctx, docker, network.ID, output)
 				if err != nil {
