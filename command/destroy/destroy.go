@@ -184,7 +184,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all the volumes
 			if len(volumes.Volumes) > 0 {
-				output.Info("Removing Volumes…")
+				output.Info("Removing volumes…")
 
 				for _, v := range volumes.Volumes {
 					output.Pending("removing", v.Name)
