@@ -111,7 +111,7 @@ func offCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 					site = &sites[selected]
 				case 1:
-					output.Info("Enabling Blackfire for", sites[0].Hostname)
+					output.Info("Disabling Blackfire for", sites[0].Hostname)
 
 					site = &sites[0]
 				default:

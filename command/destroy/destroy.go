@@ -52,7 +52,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt the user for confirmation
-			confirm, err := output.Confirm("Are you sure (this will remove all containers, volumes, and networks)", false, "")
+			confirm, err := output.Confirm("Are you sure? (This will remove all containers, volumes, and networks.)", false, "")
 			if err != nil {
 				return err
 			}
@@ -184,7 +184,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// get all the volumes
 			if len(volumes.Volumes) > 0 {
-				output.Info("Removing Volumes…")
+				output.Info("Removing volumes…")
 
 				for _, v := range volumes.Volumes {
 					output.Pending("removing", v.Name)

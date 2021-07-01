@@ -24,7 +24,7 @@ import (
 // CreateDatabase is used to interactively walk a user through creating a new database. It will return true if the user created a database along
 // with the hostname, database, port, and driver for the database container.
 func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output terminal.Outputer) (bool, string, string, string, string, error) {
-	confirm, err := output.Confirm("Add a database for the site", true, "")
+	confirm, err := output.Confirm("Add a database for the site?", true, "")
 	if err != nil {
 		return false, "", "", "", "", err
 	}
@@ -298,7 +298,7 @@ func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error
 func RunApply(cmd *cobra.Command, args []string, force bool, output terminal.Outputer) error {
 	if !force {
 		// ask if the apply command should run
-		apply, err := output.Confirm("Apply changes now", true, "?")
+		apply, err := output.Confirm("Apply changes now?", true, "")
 		if err != nil {
 			return err
 		}
@@ -334,14 +334,14 @@ func VerifyInit(cmd *cobra.Command, args []string, home string, output terminal.
 		output.Info("Warning:", err.Error())
 
 		// ask if the init command should run
-		init, err := output.Confirm("Run `nitro init` now to create the config", true, "?")
+		init, err := output.Confirm("Run `nitro init` now to create the config?", true, "")
 		if err != nil {
 			return err
 		}
 
 		// if init is false return nil
 		if !init {
-			return fmt.Errorf("You must run `nitro init` in order to add a site...")
+			return fmt.Errorf("You must run `nitro init` in order to add a site.")
 		}
 
 		// run the init command
