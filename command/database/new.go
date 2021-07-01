@@ -43,7 +43,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt for the engine
-			selection, err := output.Select(cmd.InOrStdin(), "Which database engine should we use", options)
+			selection, err := output.Select(cmd.InOrStdin(), "Which database engine should we use?", options)
 			if err != nil {
 				return err
 			}
