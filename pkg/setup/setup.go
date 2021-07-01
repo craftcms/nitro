@@ -30,9 +30,9 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 	switch runtime.GOARCH == "arm64" || runtime.GOARCH == "arm" {
 	case true:
 		if runtime.GOOS == "darwin" {
-			output.Info("Apple computers with new silicon do not work with mysql images at this time...")
+			output.Info("Apple computers with new silicon do not work with MySQL images.")
 		} else {
-			output.Info("ARM computers do not work with mysql images at this time...")
+			output.Info("ARM computers do not work with MySQL images.")
 		}
 
 		mariadb, err := output.Confirm("Would you like to use MariaDB?", true, "")
