@@ -415,7 +415,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(cfg.Containers) > 0 {
 				// get all of the containers
-				output.Info("Checking containers...")
+				output.Info("Checking containers…")
 
 				for _, c := range cfg.Containers {
 					output.Pending("checking", fmt.Sprintf("%s.containers.nitro", c.Name))
