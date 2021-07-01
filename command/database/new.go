@@ -52,7 +52,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			engine := options[selection]
 
 			// ask for the version
-			version, err := output.Ask("Which version should we use", "", "?", nil)
+			version, err := output.Ask("Which version should we use?", "", "", nil)
 			if err != nil {
 				return err
 			}
@@ -73,7 +73,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// confirm the port to use
-			port, err := output.Ask("Which port should we use for "+engine, p, "?", nil)
+			port, err := output.Ask("Which port should we use for "+engine+"?", p, "", nil)
 			if err != nil {
 				return err
 			}

@@ -35,7 +35,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 			output.Info("ARM computers do not work with mysql images at this time...")
 		}
 
-		mariadb, err := output.Confirm("Would you like to use MariaDB", true, "?")
+		mariadb, err := output.Confirm("Would you like to use MariaDB?", true, "")
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		if mariadb {
 			// prompt for the version
 			opts := []string{"10.5", "10.4", "10.3", "10.2", "10.1", "10"}
-			selected, err := output.Select(os.Stdin, "Select the version of MariaDB ", opts)
+			selected, err := output.Select(os.Stdin, "Select MariaDB version: ", opts)
 			if err != nil {
 				return err
 			}
@@ -71,7 +71,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 			})
 		}
 	default:
-		mysql, err := output.Confirm("Would you like to use MySQL", true, "?")
+		mysql, err := output.Confirm("Would you like to use MySQL?", true, "")
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		if mysql {
 			// prompt for the version
 			opts := []string{"8.0", "5.7", "5.6"}
-			selected, err := output.Select(os.Stdin, "Select the version of MySQL ", opts)
+			selected, err := output.Select(os.Stdin, "Select MySQL version: ", opts)
 			if err != nil {
 				return err
 			}
@@ -108,7 +108,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		}
 	}
 
-	postgres, err := output.Confirm("Would you like to use PostgreSQL", true, "?")
+	postgres, err := output.Confirm("Would you like to use PostgreSQL?", true, "")
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 	if postgres {
 		// prompt for the version
 		opts := []string{"13", "12", "11", "10", "9"}
-		selected, err := output.Select(os.Stdin, "Select the version of PostgreSQL ", opts)
+		selected, err := output.Select(os.Stdin, "Select PostgreSQL version: ", opts)
 		if err != nil {
 			return err
 		}
@@ -144,7 +144,7 @@ func FirstTime(home string, reader io.Reader, output terminal.Outputer) error {
 		})
 	}
 
-	redis, err := output.Confirm("Would you like to use Redis", true, "?")
+	redis, err := output.Confirm("Would you like to use Redis?", true, "")
 	if err != nil {
 		return err
 	}
