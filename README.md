@@ -28,3 +28,14 @@ $ which nitro
 ```
 
 If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` so that the system uses the freshly-built binary instead. (To go back to using the Homebrew Nitro binary, use `brew link --overwrite nitro`.)
+
+---
+
+## Building the Image
+
+Nitro ships with its own container image for sites. To build the image locally you can run the following commands:
+
+1. Change directory to `image` with `cd image`
+2. Build the container image with `make build`. You can optionally set the PHP version for the build using `make build VERSION=7.4`
+3. Build the Nitro binary following the steps under **Building from Source**.
+4. Nitro will now use the `craftcms/nitro:8.0` image built locally.

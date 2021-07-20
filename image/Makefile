@@ -3,7 +3,7 @@ VERSION ?= 8.0
 IMAGE ?= craftcms/nitro:${VERSION}
 
 build:
-	docker build --build-arg IMAGE_USER=${IMAGE_USER} --tag ${IMAGE} .
+	docker build --build-arg PHP_VERSION=${VERSION} --build-arg IMAGE_USER=${IMAGE_USER} --tag ${IMAGE} .
 local:
 	docker build --build-arg IMAGE_USER=${IMAGE_USER} --tag nitro:local .
 bash: build
