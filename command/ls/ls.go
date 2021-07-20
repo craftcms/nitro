@@ -97,7 +97,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// get ports for the non-site containers
 				switch c.Labels[containerlabels.Host] == "" {
 				case false:
-					intPorts = append(intPorts, "8080", "3000", "3001")
+					intPorts = append(intPorts, "80", "443", "3000", "3001")
 					extPorts = append(extPorts, "(uses proxy ports)")
 				default:
 					for _, p := range c.Ports {
