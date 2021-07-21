@@ -1,8 +1,4 @@
-name: Release
-on:
-  push:
-    tags:
-      - "*.*.*"
+name: Workflow
 jobs:
   tests:
     name: Run Tests
@@ -75,7 +71,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
   release:
+    name: Build Release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [proxy, image]
     steps:
       - name: Check out code
