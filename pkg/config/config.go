@@ -667,7 +667,7 @@ func (c *Config) GetFile() string {
 func phpVars(php PHP, version string) []string {
 	// set the composer home so we can install plugins and
 	// updates from the control panel
-	envs := []string{"COMPOSER_HOME=/tmp"}
+	var envs []string
 
 	// if they do not specify the error... false means on
 	if !php.DisplayErrors {
