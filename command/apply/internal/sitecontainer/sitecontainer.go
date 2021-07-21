@@ -199,7 +199,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	// check if there are custom extensions
 	for _, ext := range site.Extensions {
-		commands = append(commands, command{Name: "installing-" + ext + "-extension", Commands: []string{"docker-php-ext-install", ext}})
+		c := command{
+			Name:     "installing-" + ext + "-extension",
+			Commands: []string{"apt", "install", "--yes", "–no-install-recommends", fmt.Sprintf("php%s-%s", site.Version, ext)},
+		}
+		commands = append(commands, c)
 	}
 
 	// run the commands
