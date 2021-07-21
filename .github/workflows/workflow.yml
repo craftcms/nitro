@@ -75,7 +75,7 @@ jobs:
     name: Build Release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [proxy, image, tests]
+    needs: [proxy, images, tests]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
