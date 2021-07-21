@@ -73,7 +73,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 // match whats expected.
 func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
 	// check if the image does not match - this uses the image name, not ref
-	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
+	if fmt.Sprintf("craftcms/nitro:%s", site.Version) != container.Config.Image {
 		return false
 	}
 
