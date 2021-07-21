@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -133,6 +134,22 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+cfg.Blackfire.ServerToken)
 	}
 
+	// look for an existing volume with the sites hostname, otherwise create it
+	filter := filters.NewArgs()
+	filter.Add("name", site.Hostname)
+	volumeResp, err := docker.VolumeList(ctx, filter)
+	if err != nil {
+		return "", err
+	}
+
+	if len(volumeResp.Volumes) == 0 {
+		labels := containerlabels.ForSiteVolume(site)
+
+		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: site.Hostname, Labels: labels}); err != nil {
+			return "", err
+		}
+	}
+
 	// set the labels
 	labels := containerlabels.ForSite(site)
 	// create the container
@@ -152,6 +169,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 					Type:   mount.TypeVolume,
 					Source: proxycontainer.VolumeName,
 					Target: proxycontainer.VolumeTarget,
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: site.Hostname,
+					Target: "/home/nitro",
 				},
 			},
 		},
