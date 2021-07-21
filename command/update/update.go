@@ -20,13 +20,13 @@ import (
 
 var (
 	DockerImages = map[string]string{
-		"nginx:8.0-dev":                  "docker.io/craftcms/nginx:8.0-dev",
-		"nginx:7.4-dev":                  "docker.io/craftcms/nginx:7.4-dev",
-		"nginx:7.3-dev":                  "docker.io/craftcms/nginx:7.3-dev",
-		"nginx:7.2-dev":                  "docker.io/craftcms/nginx:7.2-dev",
-		"nginx:7.1-dev":                  "docker.io/craftcms/nginx:7.1-dev",
-		"nginx:7.0-dev":                  "docker.io/craftcms/nginx:7.0-dev",
-		"nitro-proxy:" + version.Version: "docker.io/craftcms/nitro-proxy:" + version.Version,
+		"nitro:8.0":                      "craftcms/nitro:8.0",
+		"nitro:7.4":                      "craftcms/nitro:7.4",
+		"nitro:7.3":                      "craftcms/nitro:7.3",
+		"nitro:7.2":                      "craftcms/nitro:7.2",
+		"nitro:7.1":                      "craftcms/nitro:7.1",
+		"nitro:7.0":                      "craftcms/nitro:7.0",
+		"nitro-proxy:" + version.Version: "craftcms/nitro-proxy:" + version.Version,
 	}
 	runApply bool
 )
