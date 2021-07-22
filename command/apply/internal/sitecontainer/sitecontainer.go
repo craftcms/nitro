@@ -150,6 +150,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
+	// look for an existing volume with the sites hostname + nginx, otherwise create it
+	nginxFilter := filters.NewArgs()
+	nginxFilter.Add("name", fmt.Sprintf("%s-nginx", site.Hostname))
+	nginxVol, err := docker.VolumeList(ctx, nginxFilter)
+	if err != nil {
+		return "", err
+	}
+
+	if len(nginxVol.Volumes) == 0 {
+		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: fmt.Sprintf("%s-nginx", site.Hostname)}); err != nil {
+			return "", err
+		}
+	}
+
 	// set the labels
 	labels := containerlabels.ForSite(site)
 	// create the container
@@ -174,6 +188,11 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 					Type:   mount.TypeVolume,
 					Source: site.Hostname,
 					Target: "/home/nitro",
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: fmt.Sprintf("%s-nginx", site.Hostname),
+					Target: "/etc/nginx/sites-available/",
 				},
 			},
 		},
