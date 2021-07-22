@@ -123,7 +123,7 @@ func NewCommand() *cobra.Command {
 		initialize.NewCommand(home, docker, term),
 		logs.NewCommand(home, docker, term),
 		ls.NewCommand(home, docker, term),
-		npm.NewCommand(docker, term),
+		npm.NewCommand(home, docker, term),
 		php.NewCommand(home, docker, term),
 		portcheck.NewCommand(term),
 		queue.NewCommand(home, docker, term),
