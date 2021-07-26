@@ -12,7 +12,7 @@ ENV NVM_VERSION=${NVM_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y curl git nano supervisor software-properties-common unzip vim && \
+    apt-get install -y build-essential curl git nano supervisor software-properties-common unzip vim && \
     add-apt-repository ppa:ondrej/php && \
     add-apt-repository ppa:nginx/stable && \
     apt-get update && \
