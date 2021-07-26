@@ -3,6 +3,7 @@ package update
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,16 +21,27 @@ import (
 
 var (
 	DockerImages = map[string]string{
-		"nitro:8.0":                      "craftcms/nitro:8.0",
-		"nitro:7.4":                      "craftcms/nitro:7.4",
-		"nitro:7.3":                      "craftcms/nitro:7.3",
-		"nitro:7.2":                      "craftcms/nitro:7.2",
-		"nitro:7.1":                      "craftcms/nitro:7.1",
-		"nitro:7.0":                      "craftcms/nitro:7.0",
+		"nitro:8.0":                      fmt.Sprintf("%s:%s", Image, "8.0"),
+		"nitro:7.4":                      fmt.Sprintf("%s:%s", Image, "7.4"),
+		"nitro:7.3":                      fmt.Sprintf("%s:%s", Image, "7.3"),
+		"nitro:7.2":                      fmt.Sprintf("%s:%s", Image, "7.2"),
+		"nitro:7.1":                      fmt.Sprintf("%s:%s", Image, "7.1"),
+		"nitro:7.0":                      fmt.Sprintf("%s:%s", Image, "7.0"),
 		"nitro-proxy:" + version.Version: "craftcms/nitro-proxy:" + version.Version,
 	}
+
+	// Image is the image used for sites, with the PHP version
+	Image = "docker.io/craftcms/nitro"
+
 	runApply bool
 )
+
+func init() {
+	// check if nitro development is defined and override the image
+	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
+		Image = "craftcms/nitro"
+	}
+}
 
 // New returns the update command for updating images on the local machine as well as the nitro-proxy container.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
