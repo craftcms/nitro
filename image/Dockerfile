@@ -98,7 +98,6 @@ RUN mkdir -p /run/php/ && touch /run/php/php${PHP_VERSION}-fpm.sock && chown -R 
 RUN touch /run/php/php${PHP_VERSION}-fpm.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.pid
 # use our php-fpm conf
 COPY www.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-# copy the ini file
 # copy custom.ini settings
 COPY php/nitro.ini /etc/php/${PHP_VERSION}/cli/conf.d
 COPY php/nitro.ini /etc/php/${PHP_VERSION}/fpm/conf.d
