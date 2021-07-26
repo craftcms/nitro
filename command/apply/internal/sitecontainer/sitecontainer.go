@@ -32,8 +32,15 @@ type command struct {
 
 var (
 	// Image is the image used for sites, with the PHP version
-	Image = "craftcms/nitro:%s"
+	Image = "docker.io/craftcms/nitro:%s"
 )
+
+func init() {
+	// check if nitro development is defined and override the image
+	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
+		Image = "craftcms/nitro:%s"
+	}
+}
 
 // StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
