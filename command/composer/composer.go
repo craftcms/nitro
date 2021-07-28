@@ -2,7 +2,6 @@ package composer
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/composer"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/volumename"
@@ -45,16 +45,9 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		DisableFlagParsing: true,
 		Args:               cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := contextor.New(cmd.Context())
 			var version string
 			version, args = versionFromArgs(args)
-
-			ctx := cmd.Context()
-			if ctx == nil {
-				// when we call commands from other commands (e.g. create)
-				// the context could be nil, so we set it to the parent
-				// context just in case.
-				ctx = context.Background()
-			}
 
 			// get the path from args or current directory
 			var path string
