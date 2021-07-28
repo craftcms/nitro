@@ -11,6 +11,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
@@ -50,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
+			ctx := contextor.New(cmd.Context())
 
 			var site string
 			if len(args) > 0 {
