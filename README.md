@@ -16,6 +16,7 @@ If you’re on macOS running [Homebrew](https://brew.sh/) and the [Apple develop
 
 1. Run `brew install golang`.
 2. Check out this repository and `cd /path/to/your/checkout`.
+3. Make sure there is a `NITRO_DEVELOPMENT` environment variable set to true. On macOS, you can run `export NITRO_DEVELOPMENT=true`.
 3. Run `make local`.
 
 Nitro’s dependencies will be downloaded automatically, and the built binary will be moved to `/usr/local/bin/nitro`.
@@ -31,11 +32,14 @@ If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` 
 
 ---
 
-## Building the Image
+## Building the Proxy
 
-Nitro ships with its own container image for sites. To build the image locally you can run the following commands:
+1. From the root of the repository, run `make proxy`.
+---
+
+## Building the Images
+
+Nitro ships with its own container images for sites. To build images locally you can run the following commands:
 
 1. Change directory to `image` with `cd image`
-2. Build the container image with `make build`. You can optionally set the PHP version for the build using `make build VERSION=7.4`
-3. Build the Nitro binary following the steps under **Building from Source**.
-4. Nitro will now use the `craftcms/nitro:8.0` image built locally.
+2. Build the container image with `make build`, which will default to PHP 8.0. You can build other PHP images by running `make build VERSION=7.4`.

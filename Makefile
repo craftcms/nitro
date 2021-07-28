@@ -20,8 +20,9 @@ build-linux-arm:
 mod:
 	go mod tidy && go mod verify
 
-docker:
+proxy:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
+
 docs:
 	go run cmd/docs/main.go
 
