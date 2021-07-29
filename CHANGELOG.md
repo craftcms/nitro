@@ -3,8 +3,12 @@
 ## Unreleased
 
 ### Added
-- Sites now expose ports 3000-3005 for miscellanous use.
-- Added the `keys` command to copy ssh keys into a sites container
+
+- Sites now expose ports 3000-3005 for miscellaneous use.
+- Added the `keys` command to copy SSH keys from the host machine into a sites container.
+- The default shell is now bash and not sh, allowing common scripts.
+- Site containers now include common image processing libraries.
+- Added common Linux build tools such as make to the site containers.
 
 ### Changed
 - The site containers now use Ubuntu based images
@@ -12,6 +16,7 @@
 - The sites user's home directory is now persisted through container updates and version changes.
 - Added support for private composer packages and git cloning.
 - The nginx site is now  fallback and users can completely override the nginx config.
+- Custom Nginx configurations will now persist container recreation.
 
 ### Fixed
 - Fixed an error where users were unable to setup mysql databases.

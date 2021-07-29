@@ -15,7 +15,7 @@ import (
 
 var (
 	// ErrExample is used when we want to share an error
-	ErrExample = fmt.Errorf("some example error")
+	ErrExample = fmt.Errorf("not yet implemented")
 )
 
 const exampleText = `  # keys command
