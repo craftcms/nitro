@@ -104,6 +104,6 @@ COPY php/nitro.ini /etc/php/${PHP_VERSION}/fpm/conf.d
 
 USER ${IMAGE_USER}
 
-EXPOSE 80 443 3000 3001
+EXPOSE 80 443 3000-3005
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
