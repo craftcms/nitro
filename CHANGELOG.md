@@ -17,6 +17,7 @@
 - Added support for private composer packages and git cloning.
 - The nginx site is now  fallback and users can completely override the nginx config.
 - Custom Nginx configurations will now persist container recreation.
+- Removed the `context` command in favor of the `ls` commmand.
 
 ### Fixed
 - Fixed an error where users were unable to setup mysql databases.

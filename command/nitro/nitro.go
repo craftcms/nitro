@@ -14,7 +14,6 @@ import (
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/container"
-	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/craft"
 	"github.com/craftcms/nitro/command/create"
 	"github.com/craftcms/nitro/command/database"
@@ -110,7 +109,6 @@ func NewCommand() *cobra.Command {
 		completion.NewCommand(),
 		composer.NewCommand(docker, term),
 		container.NewCommand(home, docker, term),
-		context.NewCommand(home, docker, term),
 		craft.NewCommand(home, docker, term),
 		create.NewCommand(home, docker, downloader, term),
 		database.NewCommand(home, docker, nitrod, term),
