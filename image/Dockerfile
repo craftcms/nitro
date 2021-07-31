@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM debian:buster
 
 ARG IMAGE_USER
 ENV IMAGE_USER=${IMAGE_USER}
@@ -12,9 +12,9 @@ ENV NVM_VERSION=${NVM_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y build-essential curl git nano supervisor software-properties-common unzip vim && \
-    add-apt-repository ppa:ondrej/php && \
-    add-apt-repository ppa:nginx/stable && \
+    apt-get install -y apt-transport-https build-essential ca-certificates curl git lsb-release nano supervisor software-properties-common unzip vim wget nginx && \
+    wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
+    sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' && \
     apt-get update && \
     apt-get remove -y software-properties-common && \
     apt-get install -y \
@@ -42,7 +42,7 @@ RUN apt-get update && \
     apt-get autoremove -y
 
 # install database tools
-RUN apt-get install -y --no-install-recommends mysql-client postgresql-client
+RUN apt-get install -y --no-install-recommends mariadb-client postgresql-client
 
 # install composer
 RUN cd /tmp && curl -sS https://getcomposer.org/installer -o composer-setup.php && \
