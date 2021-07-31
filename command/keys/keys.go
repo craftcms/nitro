@@ -45,6 +45,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return nil
 			}
 
+			var opts []string
+			for k, _ := range keys {
+				opts = append(opts, k)
+			}
+
+			_, err = output.Select(os.Stdin, "Which key should we import?", opts)
+			if err != nil {
+				return err
+			}
+
 			return ErrExample
 		},
 	}

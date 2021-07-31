@@ -10,7 +10,7 @@ import (
 func Find(path string) (map[string]string, error) {
 	keys := make(map[string]string)
 	if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() || info.Name() == "known_hosts" || strings.Contains(info.Name(), ".pem") || info.Name() == "config" {
+		if info.IsDir() || info.Name() == "known_hosts" || strings.Contains(info.Name(), ".pem") || info.Name() == "config" || info.Name() == ".DS_Store" {
 			return nil
 		}
 
