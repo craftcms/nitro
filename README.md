@@ -41,5 +41,5 @@ If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` 
 
 Nitro ships with its own container images for sites. To build images locally you can run the following commands:
 
-1. Change directory to `image` with `cd image`
-2. Build the container image with `make build`, which will default to PHP 8.0. You can build other PHP images by running `make build VERSION=7.4`.
+1. In the repository, run the command `make images` to build `craftcms/nitro:<PHP_VERSION>` images.
+2. Set the environment variable `export NITRO_DEVELOPMENT=true` in your shell (this prevents Nitro from pulling images from docker.io and uses your local image instead).
