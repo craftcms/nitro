@@ -50,6 +50,12 @@ RUN cd /tmp && curl -sS https://getcomposer.org/installer -o composer-setup.php 
     php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
+# copy the blackfire script
+COPY scripts/blackfire-install.sh /tmp/blackfire-install.sh
+
+# run the installation script
+RUN set -ex && sh /tmp/blackfire-install.sh && rm -rf /tmp/blackfire*
+
 # create the user and home directory
 RUN mkdir /app && \
     addgroup ${IMAGE_USER} --gid 1000 && \
