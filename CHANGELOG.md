@@ -22,6 +22,7 @@
 
 ### Fixed
 - Fixed an error where users were unable to setup mysql databases.
+- Fixed an error when creating a backup with `db backup` was not including the drop tables command.
 
 ## 2.0.8 - 2021-05-18
 
