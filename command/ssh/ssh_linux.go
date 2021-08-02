@@ -196,7 +196,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Info("using root… system changes are ephemeral…")
 			}
 
-			c := exec.Command(cli, "exec", "-u", containerUser, "-it", containerID, "sh")
+			c := exec.Command(cli, "exec", "-u", containerUser, "-it", containerID, "bash")
 
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()
