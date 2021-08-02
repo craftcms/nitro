@@ -25,6 +25,9 @@ proxy:
 
 docs:
 	go run cmd/docs/main.go
+	
+images:
+	cd image && $(MAKE) all
 
 local: build
 	mv nitro /usr/local/bin/nitro
