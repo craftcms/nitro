@@ -47,7 +47,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					output.Info("  aliases:\t", strings.Join(site.Aliases, ", "))
 				}
 				output.Info("  php:\t", site.Version)
-				output.Info("  web root:\t", site.Webroot)
+				output.Info("  webroot:\t", site.Webroot)
 				output.Info("  path:\t", site.Path)
 				output.Info("  ---")
 			}
