@@ -113,7 +113,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 	}
 
 	// convert each of the sites into a route
-	var siteRoutes, nodeRoutes, nodeAltRoutes []caddy.ServerRoute
+	var siteRoutes, altRoutes []caddy.ServerRoute
 	for k, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
@@ -141,48 +141,33 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 			Terminal: true,
 		})
 
-		// add the node routes
-		nodeRoutes = append(nodeRoutes, caddy.ServerRoute{
-			Handle: []caddy.RouteHandle{
-				{
-					Handler: "reverse_proxy",
-					Upstreams: []caddy.Upstream{
-						{
-							Dial: fmt.Sprintf("%s:%d", k, 3000),
+		altPorts := []int{3000, 3001, 3002, 3003, 3004, 3005}
+		for _, p := range altPorts {
+			// add the alt routes
+			altRoutes = append(altRoutes, caddy.ServerRoute{
+				Handle: []caddy.RouteHandle{
+					{
+						Handler: "reverse_proxy",
+						Upstreams: []caddy.Upstream{
+							{
+								Dial: fmt.Sprintf("%s:%d", k, p),
+							},
 						},
 					},
 				},
-			},
-			Match: []caddy.Match{
-				{
-					Host: hosts,
-				},
-			},
-			Terminal: true,
-		})
-
-		nodeAltRoutes = append(nodeAltRoutes, caddy.ServerRoute{
-			Handle: []caddy.RouteHandle{
-				{
-					Handler: "reverse_proxy",
-					Upstreams: []caddy.Upstream{
-						{
-							Dial: fmt.Sprintf("%s:%d", k, 3001),
-						},
+				Match: []caddy.Match{
+					{
+						Host: hosts,
 					},
 				},
-			},
-			Match: []caddy.Match{
-				{
-					Host: hosts,
-				},
-			},
-			Terminal: true,
-		})
+				Terminal: true,
+			})
+		}
 	}
 
 	update := caddy.UpdateRequest{}
 
+	// define the http routes
 	httpRoutes := append(siteRoutes, caddy.ServerRoute{
 		Handle: []caddy.RouteHandle{
 			{
@@ -198,18 +183,10 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		Terminal: true,
 	})
 
-	update.Node = caddy.Server{
-		Listen: []string{":3000"},
-		Routes: nodeRoutes,
-		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			Disable:          true,
-			DisableRedirects: true,
-		},
-	}
-
-	update.NodeAlt = caddy.Server{
-		Listen: []string{":3001"},
-		Routes: nodeAltRoutes,
+	// set the alternate ports
+	update.Alt = caddy.Server{
+		Listen: []string{":3000", ":3001", ":3002", ":3003", ":3004", ":3005"},
+		Routes: altRoutes,
 		AutomaticHTTPS: caddy.AutomaticHTTPS{
 			Disable:          true,
 			DisableRedirects: true,
