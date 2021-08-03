@@ -245,13 +245,17 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		commands = append(commands, command{Commands: []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}})
 	}
 
-	// check if there are custom extensions
+	restart := false
+	// check if there are custom extensions, NOTE: extensions require a container restart
 	for _, ext := range site.Extensions {
 		c := command{
 			Name:     "installing-" + ext + "-extension",
 			Commands: []string{"apt", "install", "--yes", "–no-install-recommends", fmt.Sprintf("php%s-%s", site.Version, ext)},
 		}
 		commands = append(commands, c)
+
+		// we need to restart the container
+		restart = true
 	}
 
 	// run the commands
@@ -312,6 +316,13 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		// start the container
 		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 			return "", fmt.Errorf("unable to start the container, %w", err)
+		}
+	}
+
+	// restart the container if there is a custom extension
+	if restart {
+		if err := docker.ContainerRestart(ctx, resp.ID, nil); err != nil {
+			return "", err
 		}
 	}
 

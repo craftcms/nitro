@@ -16,11 +16,6 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrUnknownExtension is used when an unknown service is requested
-	ErrUnknownExtension = fmt.Errorf("unknown extension requested")
-)
-
 const exampleText = `  # enable PHP extensions for a site
   nitro extensions`
 
@@ -126,6 +121,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				"imap",
 				"interbase",
 				"ldap",
+				"mongo",
 				"mysqli",
 				"oci8",
 				"odbc",
