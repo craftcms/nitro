@@ -106,17 +106,39 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	for _, s := range c.Sites {
 		p, _ := s.GetAbsPath(home)
 
-		// check if the path matches a sites path, then we are in a known site
+		// if the working directory contains the current site `path`,
+		// assume we’re in a known site
 		if strings.Contains(wd, p) {
 			found = append(found, s)
 		}
 	}
 
-	// if we found any matching sites, return those
+	// return a subset of matching sites if we have it
 	if len(found) > 0 {
+		var maxMatchSegments = 0
+		var best Site
+
+		// loop through subset to see if we can be more specific based on the container path
+		for _, s := range found {
+			containerPath := s.GetContainerPath()
+			segments := strings.Split(containerPath, "/")
+
+			// does our working directory contain this site’s container path?
+			if (strings.Contains(wd, containerPath)) && (len(segments) > maxMatchSegments) {
+				maxMatchSegments = len(segments)
+				best = s
+			}
+		}
+
+		// return the most specific found item
+		if best.Hostname != "" {
+			return []Site{best}
+		}
+
 		return found
 	}
 
+	// otherwise just return all the sites
 	return c.Sites
 }
 
