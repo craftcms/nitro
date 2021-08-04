@@ -29,9 +29,8 @@ func TestGenerate(t *testing.T) {
 }
 
 var defaultConf = `server {
-    listen      8080 default_server;
-    listen      [::]:8080 default_server;
-    server_name _;
+    listen      80;
+    listen      [::]:80;
     set         $base /app;
     root        $base/web;
 
@@ -41,7 +40,7 @@ var defaultConf = `server {
     fastcgi_read_timeout 240s;
 
     # security
-    include     craftcms/security.conf;
+    include     nitro/security.conf;
 
     # include custom conf files
     include     /app/*nitro.conf;
@@ -55,11 +54,11 @@ var defaultConf = `server {
     }
 
     # additional config
-    include craftcms/general.conf;
+    include nitro/general.conf;
 
     # handle .php
     location ~ \.php$ {
-        include craftcms/php_fastcgi.conf;
+        include nitro/php_fastcgi.conf;
     }
 
     # Allow fpm ping and status from localhost

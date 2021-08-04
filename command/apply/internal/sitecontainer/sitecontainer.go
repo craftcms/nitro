@@ -222,16 +222,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		return "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	restart := false
+
 	// post installation commands
 	var commands []command
-
-	// check for a custom root and copt the template to the container
+	// check for a custom root and copy the template to the container
 	if site.Webroot != "web" {
+		// we need to restart the container to take effect
+		restart = true
+
 		// create the nginx file
 		conf := nginx.Generate(site.Webroot)
 
 		// create the temp file
-		tr, err := archive.Generate("default.conf", conf)
+		tr, err := archive.Generate(site.Hostname, conf)
 		if err != nil {
 			return "", err
 		}
@@ -241,21 +245,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			return "", err
 		}
 
-		commands = append(commands, command{Commands: []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}})
-		commands = append(commands, command{Commands: []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}})
+		commands = append(commands, command{Commands: []string{"cp", fmt.Sprintf("/tmp/%s", site.Hostname), fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
+		commands = append(commands, command{Commands: []string{"chmod", "0644", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
+		commands = append(commands, command{Commands: []string{"ln", "-s", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname), "/etc/nginx/sites-enabled/"}})
 	}
 
-	restart := false
 	// check if there are custom extensions, NOTE: extensions require a container restart
 	for _, ext := range site.Extensions {
-		c := command{
-			Name:     "installing-" + ext + "-extension",
-			Commands: []string{"apt", "install", "--yes", "–no-install-recommends", fmt.Sprintf("php%s-%s", site.Version, ext)},
-		}
-		commands = append(commands, c)
-
 		// we need to restart the container
 		restart = true
+
+		commands = append(commands, command{
+			Name:     "installing-" + ext + "-extension",
+			Commands: []string{"apt", "install", "--yes", "–no-install-recommends", fmt.Sprintf("php%s-%s", site.Version, ext)},
+		})
 	}
 
 	// run the commands
