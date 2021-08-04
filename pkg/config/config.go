@@ -99,7 +99,7 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	return nil, fmt.Errorf("unable to find site with hostname %s", hostname)
 }
 
-// ListOfSitesByDirectory takes the users home directory and the current
+// ListOfSitesByDirectory takes the user’s home directory and the current
 // working directory and returns a list of sites that are "context-aware".
 func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	var found []Site
@@ -234,7 +234,7 @@ func (s *Site) GetContainerPath() string {
 	// trim trailing slashes
 	webroot := strings.TrimRight(s.Webroot, "/")
 
-	// is there a path seperator?
+	// is there a path separator?
 	if strings.Contains(webroot, "/") {
 		parts := strings.Split(webroot, "/")
 
