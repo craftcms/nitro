@@ -131,7 +131,7 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 		}
 
 		// return the most specific found item
-		if best.Hostname != "" {
+		if best.Path != "" {
 			return []Site{best}
 		}
 

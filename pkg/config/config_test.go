@@ -1056,89 +1056,140 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 		want   []Site
 	}{
 		{
-			name: "all sites are returned if nothing is found",
+			name: "all sites are suggested in lieu of a match",
 			args: args{
 				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home", "site-three"),
-			},
-			fields: fields{
-				Sites: []Site{
-					{
-						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
-					},
-					{
-						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
-					},
-				},
-			},
-			want: []Site{
-				{
-					Webroot: "public",
-					Path:    filepath.Join(wd, "testdata", "home", "site-one"),
-				},
-				{
-					Webroot: "public",
-					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
-				},
-			},
-		},
-		{
-			name: "multiple sites are presented when the working directory is the container directory",
-			args: args{
-				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home"),
+				// we don’t have a site for `home/sites/broccoli`
+				wd: filepath.Join(wd, "testdata", "home", "sites", "broccoli"),
 			},
 			fields: fields{
 				Sites: []Site{
 					{
 						Webroot: "web",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
-						Webroot: "site-one/public",
-						Path:    filepath.Join(wd, "testdata", "home"),
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
 					},
 					{
-						Webroot: "site-two/public",
-						Path:    filepath.Join(wd, "testdata", "home"),
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+					},
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
 					},
 				},
 			},
 			want: []Site{
 				{
-					Path:    filepath.Join(wd, "testdata", "home"),
-					Webroot: "site-one/public",
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 				},
 				{
-					Path:    filepath.Join(wd, "testdata", "home"),
-					Webroot: "site-two/public",
+					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+				},
+				{
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+				},
+				{
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
 				},
 			},
 		},
 		{
-			name: "a single site is presented when the working directory is the site path",
+			name: "multiple sites are suggested when the working directory is the container directory",
 			args: args{
 				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home", "site-two"),
+				wd:   filepath.Join(wd, "testdata", "home", "sites"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "web",
+						// this site’s path is *not* the working directory, so we won’t expect it as a suggestion
+						Path: filepath.Join(wd, "testdata", "home", "sites", "apple"),
+					},
+					{
+						Webroot: "apple/public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "banana/public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					Webroot: "apple/public",
+				},
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					Webroot: "banana/public",
+				},
+			},
+		},
+		{
+			name: "a single site is suggested when the working directory is site path",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "banana"),
 			},
 			fields: fields{
 				Sites: []Site{
 					{
 						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
 						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
 					},
 				},
 			},
 			want: []Site{
 				{
-					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
 					Webroot: "public",
+				},
+			},
+		},
+		{
+			name: "a single site is suggested when multiple paths match and site container directory is unique",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "apple/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "banana/public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/dragonfruit/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					Webroot: "cherry/web",
 				},
 			},
 		},
