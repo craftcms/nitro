@@ -100,38 +100,54 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 }
 
 // ListOfSitesByDirectory takes the user’s home directory and the current
-// working directory and returns a list of sites that are "context-aware".
+// working directory and returns a list of sites within that context.
 func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	var found []Site
-	for _, s := range c.Sites {
-		p, _ := s.GetAbsPath(home)
 
-		// if the working directory contains the current site `path`,
-		// assume we’re in a known site
-		if strings.Contains(wd, p) {
+	// get any sites whose container paths are within the working directory
+	for _, s := range c.Sites {
+		p, _ := s.GetAbsContainerPath(home)
+
+		if strings.Contains(p, wd) {
 			found = append(found, s)
 		}
 	}
 
-	// return a subset of matching sites if we have it
+	// if we found a subset of sites, let’s see if we can narrow and return it
 	if len(found) > 0 {
-		var maxMatchSegments = 0
+		// require at least one segment match if we’re being more specific
+		var maxMatchSegments = 1
+		var exactMatches = 0
+		var bestMatches = 0
 		var best Site
+		var exact Site
 
 		// loop through subset to see if we can be more specific based on the container path
 		for _, s := range found {
 			containerPath := s.GetContainerPath()
+			absContainerPath, _ := s.GetAbsContainerPath(home)
 			segments := strings.Split(containerPath, "/")
+
+			if wd == absContainerPath {
+				exactMatches += 1
+				exact = s
+			}
 
 			// does our working directory contain this site’s container path?
 			if (strings.Contains(wd, containerPath)) && (len(segments) > maxMatchSegments) {
 				maxMatchSegments = len(segments)
+				bestMatches += 1
 				best = s
 			}
 		}
 
-		// return the most specific found item
-		if best.Path != "" {
+		// return a single, exact container path match to the working directory
+		if exactMatches == 1 {
+			return []Site{exact}
+		}
+
+		// return the single, most specific found item
+		if bestMatches == 1 {
 			return []Site{best}
 		}
 
@@ -245,6 +261,12 @@ type Site struct {
 // container.
 func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
+}
+
+// GetAbsContainerPath gets the directory for a site’s
+// container path.
+func (s *Site) GetAbsContainerPath(home string) (string, error) {
+	return cleanPath(home, s.Path+"/"+s.GetContainerPath())
 }
 
 // GetContainerPath is responsible for looking at the

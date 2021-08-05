@@ -1056,7 +1056,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 		want   []Site
 	}{
 		{
-			name: "all sites are suggested in lieu of a match",
+			name: "all sites suggested in lieu of match",
 			args: args{
 				home: filepath.Join(wd),
 				// we don’t have a site for `home/sites/broccoli`
@@ -1080,6 +1080,10 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 						Webroot: "web",
 						Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
 					},
+					{
+						Webroot: "",
+						Path:    filepath.Join(wd, "testdata", "home", "plugins", "thinginator"),
+					},
 				},
 			},
 			want: []Site{
@@ -1099,10 +1103,14 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 					Webroot: "web",
 					Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
 				},
+				{
+					Webroot: "",
+					Path:    filepath.Join(wd, "testdata", "home", "plugins", "thinginator"),
+				},
 			},
 		},
 		{
-			name: "multiple sites are suggested when the working directory is the container directory",
+			name: "multiple sites suggested when working directory is top-level path",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites"),
@@ -1111,32 +1119,42 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 				Sites: []Site{
 					{
 						Webroot: "web",
-						// this site’s path is *not* the working directory, so we won’t expect it as a suggestion
-						Path: filepath.Join(wd, "testdata", "home", "sites", "apple"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
-						Webroot: "apple/public",
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					},
+					// this site is an exact path match, but our working directory is too vague
+					// for it to be the only suggestion
+					{
+						Webroot: "cherry/web",
 						Path:    filepath.Join(wd, "testdata", "home", "sites"),
 					},
+					// this site is in a different top-level directory and should not be a suggestion
 					{
-						Webroot: "banana/public",
-						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+						Webroot: "",
+						Path:    filepath.Join(wd, "testdata", "home", "plugins"),
 					},
 				},
 			},
 			want: []Site{
 				{
-					Path:    filepath.Join(wd, "testdata", "home", "sites"),
-					Webroot: "apple/public",
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 				},
 				{
+					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+				},
+				{
+					Webroot: "cherry/web",
 					Path:    filepath.Join(wd, "testdata", "home", "sites"),
-					Webroot: "banana/public",
 				},
 			},
 		},
 		{
-			name: "a single site is suggested when the working directory is site path",
+			name: "single site suggested when working directory is site path",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites", "banana"),
@@ -1144,7 +1162,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			fields: fields{
 				Sites: []Site{
 					{
-						Webroot: "public",
+						Webroot: "web",
 						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
@@ -1161,7 +1179,40 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "a single site is suggested when multiple paths match and site container directory is unique",
+			name: "single site suggested when working directory is single exact match to container path",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
+					},
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					},
+					{
+						Webroot: "cherry/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/dragonfruit/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Webroot: "cherry/web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+				},
+			},
+		},
+		{
+			name: "single site suggested when multiple paths match unique container directory",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
