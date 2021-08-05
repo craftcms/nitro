@@ -11,8 +11,8 @@
 - Yarn is now installed by default.
 
 ### Changed
-- The site containers now use Ubuntu based images
-- Node and npm are now included with nvm in the images
+- The site containers now use Debian based images.
+- Node and npm are now included with nvm in the images.
 - The sites user's home directory is now persisted through container updates and version changes.
 - Added support for private composer packages and git cloning.
 - The nginx site is now  fallback and users can completely override the nginx config.
