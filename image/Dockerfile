@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM debian:buster-slim
 
 ARG IMAGE_USER
 ENV IMAGE_USER=${IMAGE_USER}
