@@ -1110,7 +1110,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "multiple sites suggested when working directory is top-level path",
+			name: "multiple suggestions when working directory is top-level path",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites"),
@@ -1154,7 +1154,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "single site suggested when working directory is site path",
+			name: "single suggestion when working directory is site path",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites", "banana"),
@@ -1179,7 +1179,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "single site suggested when working directory is single exact match to container path",
+			name: "single suggestion when working directory is single exact match to site container path",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
@@ -1212,7 +1212,7 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 			},
 		},
 		{
-			name: "single site suggested when multiple paths match unique container directory",
+			name: "single suggestion when path values match but container directory is unique",
 			args: args{
 				home: filepath.Join(wd),
 				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
@@ -1241,6 +1241,55 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 				{
 					Path:    filepath.Join(wd, "testdata", "home", "sites"),
 					Webroot: "cherry/web",
+				},
+			},
+		},
+		{
+			name: "multiple suggestions when sites use same directory",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot:  "apple/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "apple.nitro",
+					},
+					{
+						Webroot:  "banana/public",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "banana.nitro",
+					},
+					{
+						Webroot:  "cherry/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "cherry.nitro",
+					},
+					{
+						Webroot:  "cherry/dragonfruit/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "dragonfruit.nitro",
+					},
+					// this site uses the exact same path as cherry.nitro
+					{
+						Webroot:  "cherry/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "doppelganger.nitro",
+					},
+				},
+			},
+			want: []Site{
+				{
+					Webroot:  "cherry/web",
+					Path:     filepath.Join(wd, "testdata", "home", "sites"),
+					Hostname: "cherry.nitro",
+				},
+				{
+					Webroot:  "cherry/web",
+					Path:     filepath.Join(wd, "testdata", "home", "sites"),
+					Hostname: "doppelganger.nitro",
 				},
 			},
 		},

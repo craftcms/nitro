@@ -117,10 +117,9 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	if len(found) > 0 {
 		// require at least one segment match if we’re being more specific
 		var maxMatchSegments = 1
-		var exactMatches = 0
+		var exactMatches []Site
 		var bestMatches = 0
 		var best Site
-		var exact Site
 
 		// loop through subset to see if we can be more specific based on the container path
 		for _, s := range found {
@@ -129,8 +128,7 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 			segments := strings.Split(containerPath, "/")
 
 			if wd == absContainerPath {
-				exactMatches += 1
-				exact = s
+				exactMatches = append(exactMatches, s)
 			}
 
 			// does our working directory contain this site’s container path?
@@ -141,9 +139,9 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 			}
 		}
 
-		// return a single, exact container path match to the working directory
-		if exactMatches == 1 {
-			return []Site{exact}
+		// return sites whose container path match the working directory
+		if len(exactMatches) > 0 {
+			return exactMatches
 		}
 
 		// return the single, most specific found item
