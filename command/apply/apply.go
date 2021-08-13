@@ -208,7 +208,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// remove container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 						return err
 					}
 
