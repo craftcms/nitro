@@ -138,13 +138,25 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt the user for their selected key
-			_, err = output.Select(os.Stdin, "Which key should we import?", options)
+			selected, err := output.Select(os.Stdin, "Which key should we add to the site?", options)
 			if err != nil {
 				return err
 			}
 
+			// key use a map for the keys, so we have this loop
+			var count int
+			var key string
+			for k, _ := range found {
+				if count == selected {
+					key = k
+					break
+				}
+
+				count++
+			}
+
 			// verify the key (using the docker stat path API) does not already exist in /home/nitro/.ssh/<key>
-			stat, err := docker.ContainerStatPath(cmd.Context(), container.ID, fmt.Sprintf("/home/nitro/.ssh/%s", "known_hosts"))
+			stat, err := docker.ContainerStatPath(cmd.Context(), container.ID, fmt.Sprintf("/home/nitro/.ssh/%s", found[key]))
 			if err != nil {
 				// the docker sdk does not return an error, so we have to check the error output
 				if !strings.Contains(err.Error(), "No such container:path") {
@@ -155,6 +167,15 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// check if the file exists
 			if stat.Name != "" {
 				// prompt the user to confirm overwriting the file
+				confirm, err := output.Confirm("The key appears to exist in the site, should we overwrite", true, "?")
+				if err != nil {
+					return err
+				}
+
+				if !confirm {
+					output.Info("Skipping")
+					return nil
+				}
 			}
 
 			// import the key into the container
