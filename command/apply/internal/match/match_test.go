@@ -267,7 +267,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Image: "craftcms/nitro:7.4",
 						Labels: map[string]string{
 							containerlabels.Host: "newname",
 						},
@@ -293,7 +293,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Image: "craftcms/nitro:7.4",
 						Labels: map[string]string{
 							containerlabels.Host:    "newname",
 							containerlabels.Webroot: "public",
@@ -319,7 +319,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Image: "craftcms/nitro:7.4",
 						Labels: map[string]string{
 							containerlabels.Host: "newname",
 						},
@@ -344,7 +344,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Image: "craftcms/nitro:7.4",
 						Labels: map[string]string{
 							containerlabels.Host: "oldname",
 						},
@@ -363,7 +363,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.4-dev",
+						Image: "craftcms/nitro:7.4",
 					},
 				},
 			},
@@ -377,7 +377,7 @@ func TestSite(t *testing.T) {
 				},
 				container: types.ContainerJSON{
 					Config: &container.Config{
-						Image: "docker.io/craftcms/nginx:7.3-dev",
+						Image: "craftcms/nitro:7.3",
 					},
 				},
 			},

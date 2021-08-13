@@ -8,8 +8,8 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-const exampleText = `  # import a database from a backup
-  nitro db import mybackup.sql
+const exampleText = `  # restore a database from a backup
+  nitro db restore mybackup.sql
 
   # backup a database
   nitro db backup
@@ -17,7 +17,7 @@ const exampleText = `  # import a database from a backup
   # add a new database
   nitro db add`
 
-// NewCommand returns the db commands for importing, backing up, and adding databases
+// NewCommand returns the db commands for restoring, backing up, and adding databases
 func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "db",
@@ -30,7 +30,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 	}
 
 	cmd.AddCommand(
-		importCommand(home, docker, nitrod, output),
+		restoreCommand(home, docker, nitrod, output),
 		backupCommand(home, docker, output),
 		addCommand(docker, nitrod, output),
 		sshCommand(home, docker, output),

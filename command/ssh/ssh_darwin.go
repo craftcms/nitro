@@ -178,7 +178,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// check if the root user should be used
-			containerUser := "www-data"
+			containerUser := "nitro"
 			if RootUser || ProxyContainer {
 				containerUser = "root"
 			}
@@ -188,7 +188,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Info("using root… system changes are ephemeral…")
 			}
 
-			c := exec.Command(cli, "exec", "-u", containerUser, "-it", containerID, "sh")
+			shell := "bash"
+			if ProxyContainer {
+				shell = "sh"
+			}
+
+			c := exec.Command(cli, "exec", "-u", containerUser, "-it", containerID, shell)
 
 			c.Stdin = cmd.InOrStdin()
 			c.Stderr = cmd.ErrOrStderr()

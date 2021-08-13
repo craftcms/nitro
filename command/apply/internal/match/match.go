@@ -19,7 +19,16 @@ var (
 	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
 	ErrEnvFileNotFound  = fmt.Errorf("unable to find the containers env file")
 	ErrMisMatchedEnvVar = fmt.Errorf("container environment variables do not match")
+	// SiteImage is the image used for sites, with the PHP version
+	SiteImage = "docker.io/craftcms/nitro:%s"
 )
+
+func init() {
+	// check if nitro development is defined and override the image
+	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
+		SiteImage = "craftcms/nitro:%s"
+	}
+}
 
 // Container checks if a custom container is up to date with the configuration
 func Container(home string, container config.Container, details types.ContainerJSON) error {
@@ -73,7 +82,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 // match whats expected.
 func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
 	// check if the image does not match - this uses the image name, not ref
-	if fmt.Sprintf("docker.io/craftcms/nginx:%s-dev", site.Version) != container.Config.Image {
+	if fmt.Sprintf(SiteImage, site.Version) != container.Config.Image {
 		return false
 	}
 

@@ -56,13 +56,17 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 	// set the container create request
 	containerCreateReq := types.ContainerCreateConfig{
 		Config: &container.Config{
-			Image: "craftcms/nitro-proxy:develop",
+			Image: "docker.io/craftcms/nitro-proxy:develop",
 			ExposedPorts: nat.PortSet{
 				"80/tcp":   struct{}{},
 				"443/tcp":  struct{}{},
 				"5000/tcp": struct{}{},
 				"3000/tcp": struct{}{},
 				"3001/tcp": struct{}{},
+				"3002/tcp": struct{}{},
+				"3003/tcp": struct{}{},
+				"3004/tcp": struct{}{},
+				"3005/tcp": struct{}{},
 			},
 			Labels: map[string]string{
 				containerlabels.Nitro:        "true",
@@ -110,6 +114,30 @@ func TestInitFromFreshCreatesNewResources(t *testing.T) {
 					{
 						HostIP:   "127.0.0.1",
 						HostPort: "3001",
+					},
+				},
+				"3002/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "3002",
+					},
+				},
+				"3003/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "3003",
+					},
+				},
+				"3004/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "3004",
+					},
+				},
+				"3005/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: "3005",
 					},
 				},
 			},

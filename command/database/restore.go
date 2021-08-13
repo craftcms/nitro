@@ -26,22 +26,22 @@ import (
 	"github.com/craftcms/nitro/protob"
 )
 
-var importExampleText = `  # import a sql file into a database
-  nitro db import filename.sql
+var restoreExampleText = `  # restore a sql file into a database
+  nitro db restore filename.sql
 
   # use a relative path
-  nitro db import ~/Desktop/backup.sql
+  nitro db restore ~/Desktop/backup.sql
 
   # use an absolute path
-  nitro db import /Users/oli/Desktop/backup.sql`
+  nitro db restore /Users/oli/Desktop/backup.sql`
 
 var nameFlag string
 
-// importCommand is the command for creating new development environments
-func importCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
+// restoreCommand is the command for creating new development environments
+func restoreCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import",
-		Short: "Imports a database dump.",
+		Use:   "restore",
+		Short: "Restores a database dump.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -54,7 +54,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return []string{"sql", "gz", "zip"}, cobra.ShellCompDirectiveFilterFileExt
 		},
-		Example: importExampleText,
+		Example: restoreExampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// make sure the file exists
 			if exists := pathexists.IsFile(args[0]); !exists {
@@ -144,7 +144,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				options = append(options, strings.TrimLeft(c.Names[0], "/"))
 			}
 
-			// prompt the user for the engine to import the backup into
+			// prompt the user for the engine to restore the backup into
 			var containerID string
 			selected, err := output.Select(os.Stdin, "Select a database engine: ", options)
 			if err != nil {
@@ -165,7 +165,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				// validate the flag value
 				err := validator.Validate(nameFlag)
 				if err != nil {
-					// ask the user for the database to import because the flag was not valid
+					// ask the user for the database to restore because the flag was not valid
 					input, err := output.Ask("Enter the database name", "", ":", validator)
 					if err != nil {
 						return err
@@ -178,7 +178,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				// the flag value is valid, so assign it
 				db = nameFlag
 			default:
-				// ask the user for the database to import
+				// ask the user for the database to restore
 				input, err := output.Ask("Enter the database name", "", ":", validator)
 				if err != nil {
 					return err
@@ -187,7 +187,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				db = input
 			}
 
-			output.Info("Preparing import…")
+			output.Info("Preparing restore…")
 
 			// get the containers info
 			info, err := docker.ContainerInspect(cmd.Context(), containers[selected].ID)
@@ -241,7 +241,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 				return err
 			}
 
-			// create a request with the database information to populate the database info for the import
+			// create a request with the database information to populate the database info for the restore
 			err = stream.Send(&protob.ImportDatabaseRequest{
 				Payload: &protob.ImportDatabaseRequest_Database{
 					Database: &protob.DatabaseInfo{
@@ -298,7 +298,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 			buffer := make([]byte, 1024*20)
 			reader := bufio.NewReader(file)
 
-			output.Pending(fmt.Sprintf("importing database %q into %q", db, hostname))
+			output.Pending(fmt.Sprintf("restoring database %q into %q", db, hostname))
 
 			// stream to backup file to the api
 			for {
@@ -340,7 +340,7 @@ func importCommand(home string, docker client.CommonAPIClient, nitrod protob.Nit
 		},
 	}
 
-	cmd.Flags().StringVar(&nameFlag, "name", "", "The database name to import into")
+	cmd.Flags().StringVar(&nameFlag, "name", "", "The database name to restore backup into")
 
 	return cmd
 }

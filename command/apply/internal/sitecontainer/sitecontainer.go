@@ -12,11 +12,14 @@ import (
 	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -28,9 +31,16 @@ type command struct {
 }
 
 var (
-	// NginxImage is the image used for sites, with the PHP version
-	NginxImage = "docker.io/craftcms/nginx:%s-dev"
+	// Image is the image used for sites, with the PHP version
+	Image = "docker.io/craftcms/nitro:%s"
 )
+
+func init() {
+	// check if nitro development is defined and override the image
+	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
+		Image = "craftcms/nitro:%s"
+	}
+}
 
 // StartOrCreate is responsible for finding a sites existing container or creating a new one based on the values from the configuration file.
 func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
@@ -86,7 +96,7 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 
 func create(ctx context.Context, docker client.CommonAPIClient, home, networkID string, site config.Site, cfg *config.Config) (string, error) {
 	// create the container
-	image := fmt.Sprintf(NginxImage, site.Version)
+	image := fmt.Sprintf(Image, site.Version)
 
 	// pull the image if we are not in a development environment
 	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
@@ -131,19 +141,67 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+cfg.Blackfire.ServerToken)
 	}
 
+	// look for an existing volume with the sites hostname, otherwise create it
+	filter := filters.NewArgs()
+	filter.Add("name", site.Hostname)
+	volumeResp, err := docker.VolumeList(ctx, filter)
+	if err != nil {
+		return "", err
+	}
+
+	if len(volumeResp.Volumes) == 0 {
+		labels := containerlabels.ForSiteVolume(site)
+
+		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: site.Hostname, Labels: labels}); err != nil {
+			return "", err
+		}
+	}
+
+	// look for an existing volume with the sites hostname + nginx, otherwise create it
+	nginxFilter := filters.NewArgs()
+	nginxFilter.Add("name", fmt.Sprintf("%s-nginx", site.Hostname))
+	nginxVol, err := docker.VolumeList(ctx, nginxFilter)
+	if err != nil {
+		return "", err
+	}
+
+	if len(nginxVol.Volumes) == 0 {
+		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: fmt.Sprintf("%s-nginx", site.Hostname)}); err != nil {
+			return "", err
+		}
+	}
+
 	// set the labels
 	labels := containerlabels.ForSite(site)
 	// create the container
 	resp, err := docker.ContainerCreate(
 		ctx,
 		&container.Config{
-			Image:  image,
-			Labels: labels,
-			Env:    envs,
+			Image:    image,
+			Labels:   labels,
+			Env:      envs,
+			Hostname: site.Hostname,
 		},
 		&container.HostConfig{
 			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
 			ExtraHosts: extraHosts,
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: proxycontainer.VolumeName,
+					Target: proxycontainer.VolumeTarget,
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: site.Hostname,
+					Target: "/home/nitro",
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: fmt.Sprintf("%s-nginx", site.Hostname),
+					Target: "/etc/nginx/sites-available/",
+				},
+			},
 		},
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
@@ -164,16 +222,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		return "", fmt.Errorf("unable to start the container, %w", err)
 	}
 
+	restart := false
+
 	// post installation commands
 	var commands []command
-
-	// check for a custom root and copt the template to the container
+	// check for a custom root and copy the template to the container
 	if site.Webroot != "web" {
+		// we need to restart the container to take effect
+		restart = true
+
 		// create the nginx file
 		conf := nginx.Generate(site.Webroot)
 
 		// create the temp file
-		tr, err := archive.Generate("default.conf", conf)
+		tr, err := archive.Generate(site.Hostname, conf)
 		if err != nil {
 			return "", err
 		}
@@ -183,13 +245,20 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			return "", err
 		}
 
-		commands = append(commands, command{Commands: []string{"cp", "/tmp/default.conf", "/etc/nginx/conf.d/default.conf"}})
-		commands = append(commands, command{Commands: []string{"chmod", "0644", "/etc/nginx/conf.d/default.conf"}})
+		commands = append(commands, command{Commands: []string{"cp", fmt.Sprintf("/tmp/%s", site.Hostname), fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
+		commands = append(commands, command{Commands: []string{"chmod", "0644", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
+		commands = append(commands, command{Commands: []string{"ln", "-s", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname), "/etc/nginx/sites-enabled/"}})
 	}
 
-	// check if there are custom extensions
+	// check if there are custom extensions, NOTE: extensions require a container restart
 	for _, ext := range site.Extensions {
-		commands = append(commands, command{Name: "installing-" + ext + "-extension", Commands: []string{"docker-php-ext-install", ext}})
+		// we need to restart the container
+		restart = true
+
+		commands = append(commands, command{
+			Name:     "installing-" + ext + "-extension",
+			Commands: []string{"apt", "install", "--yes", "–no-install-recommends", fmt.Sprintf("php%s-%s", site.Version, ext)},
+		})
 	}
 
 	// run the commands
@@ -250,6 +319,13 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		// start the container
 		if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 			return "", fmt.Errorf("unable to start the container, %w", err)
+		}
+	}
+
+	// restart the container if there is a custom extension
+	if restart {
+		if err := docker.ContainerRestart(ctx, resp.ID, nil); err != nil {
+			return "", err
 		}
 	}
 

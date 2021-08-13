@@ -208,7 +208,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					}
 
 					// remove container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 						return err
 					}
 
@@ -543,7 +543,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		sites[s.Hostname] = &protob.Site{
 			Hostname: s.Hostname,
 			Aliases:  strings.Join(s.Aliases, ","),
-			Port:     8080,
+			Port:     80,
 		}
 	}
 

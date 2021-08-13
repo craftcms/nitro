@@ -1,6 +1,6 @@
 .PHONY: docker docs
 
-VERSION ?= 2.0.8
+VERSION ?= 3.0.0
 
 build:
 	go build -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
@@ -20,10 +20,14 @@ build-linux-arm:
 mod:
 	go mod tidy && go mod verify
 
-docker:
+proxy:
 	docker build --build-arg NITRO_VERSION=${VERSION} -t craftcms/nitro-proxy:${VERSION} .
+
 docs:
 	go run cmd/docs/main.go
+	
+images:
+	cd image && $(MAKE) all
 
 local: build
 	mv nitro /usr/local/bin/nitro

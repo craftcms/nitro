@@ -1,5 +1,30 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Added
+- Sites now expose ports 3000-3005 for miscellaneous use.
+- Added the `keys` command to copy SSH keys from the host machine into a sites container.
+- The default shell is now bash and not sh, allowing common scripts.
+- Site containers now include common image processing libraries.
+- Added common Linux build tools such as make to the site containers.
+- Yarn is now installed by default.
+
+### Changed
+- The site containers now use Debian based images.
+- Node and npm are now included with nvm in the images.
+- The sites user's home directory is now persisted through container updates and version changes.
+- Added support for private composer packages and git cloning.
+- The nginx site is now  fallback and users can completely override the nginx config.
+- Custom Nginx configurations will now persist container recreation.
+- Removed the `context` command in favor of the `ls` commmand.
+- Renamed the `db import` to `db restore` to match the Craft CLI.
+
+### Fixed
+- Fixed an error where users were unable to setup mysql databases.
+- Fixed an error when creating a backup with `db backup` was not including the drop tables command.
+- Fixed an error when installing extensions would not reflect in the site container.
+
 ## 2.0.8 - 2021-05-18
 
 ### Added

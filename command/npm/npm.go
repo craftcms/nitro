@@ -1,28 +1,19 @@
 package npm
 
 import (
-	"bytes"
-	"context"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/docker/docker/api/types/network"
-	volumetypes "github.com/docker/docker/api/types/volume"
+	"os/exec"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
-	"github.com/craftcms/nitro/pkg/pathexists"
+	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/terminal"
-	"github.com/craftcms/nitro/pkg/volumename"
 )
 
 var (
@@ -40,217 +31,142 @@ const exampleText = `  # run npm install in a current directory
   nitro npm run dev`
 
 // NewCommand is the command used to run npm commands in a container.
-func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "npm",
 		Short:   "Runs an npm command.",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-			if ctx == nil {
-				// when we call commands from other commands (e.g. create)
-				// the context could be nil, so we set it to the parent
-				// context just in case.
-				ctx = context.Background()
-			}
-			version := cmd.Flag("version").Value.String()
-
-			var path string
+			ctx := contextor.New(cmd.Context())
+			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
-				return fmt.Errorf("unable to get the current directory, %w", err)
-			}
-
-			path, err = filepath.Abs(wd)
-			if err != nil {
-				return fmt.Errorf("unable to find the absolute path, %w", err)
+				return err
 			}
 
 			// determine the command
-			action := args[0]
+			action := args
 
-			// get the full file path
-			nodePath := filepath.Join(path, "package.json")
-
-			output.Pending("checking", nodePath)
-
-			// make sure the file exists
-			// see if the file exists
-			if exists := pathexists.IsFile(nodePath); !exists {
-				output.Warning()
-				return fmt.Errorf("unable to find file %s", nodePath)
-			}
-
-			output.Done()
-
-			// find the network
-			networkFilter := filters.NewArgs()
-			networkFilter.Add("name", "nitro-network")
-
-			// check if the network needs to be created
-			networks, err := docker.NetworkList(ctx, types.NetworkListOptions{Filters: networkFilter})
+			// load the config
+			cfg, err := config.Load(home)
 			if err != nil {
-				return fmt.Errorf("unable to list the docker networks, %w", err)
+				return err
 			}
 
-			var networkID string
-			for _, n := range networks {
-				if n.Name == "nitro-network" || strings.TrimLeft(n.Name, "/") == "nitro-network" {
-					networkID = n.ID
-				}
-			}
-
-			image := fmt.Sprintf("docker.io/library/%s:%s-alpine", "node", version)
-
+			// create a filter for the environment
 			filter := filters.NewArgs()
-			filter.Add("reference", image)
+			filter.Add("label", containerlabels.Nitro)
 
-			// look for the image
-			images, err := docker.ImageList(ctx, types.ImageListOptions{Filters: filter})
-			if err != nil {
-				return fmt.Errorf("unable to get a list of images, %w", err)
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
 			}
 
-			// remove the image ref filter
-			filter.Del("reference", image)
-
-			// if we don't have the image, pull it
-			if len(images) == 0 {
-				output.Pending("pulling", image)
-
-				rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
-				if err != nil {
-					return fmt.Errorf("unable to pull docker image, %w", err)
-				}
-
-				buf := &bytes.Buffer{}
-				if _, err := buf.ReadFrom(rdr); err != nil {
-					return fmt.Errorf("unable to read the output from pulling the image, %w", err)
-				}
-
-				output.Done()
-			}
-
-			// add filters for the volume
-			filter.Add("label", containerlabels.Type+"=npm")
-			filter.Add("label", containerlabels.Path+"="+path)
-
-			// check if there is an existing volume
-			volumes, err := docker.VolumeList(ctx, filter)
-			if err != nil {
-				return err
-			}
-
-			// set the volume name
-			// TODO(jasonmccallister) remove this hardcoded version
-			volumeName := volumename.FromPath(strings.Join([]string{path, "14"}, string(os.PathSeparator)))
-
-			var pathVolume types.Volume
-			switch len(volumes.Volumes) {
-			case 1:
-				pathVolume = *volumes.Volumes[0]
+			var site config.Site
+			switch len(sites) {
 			case 0:
-				// create the volume if it does not exist
-				volume, err := docker.VolumeCreate(ctx, volumetypes.VolumeCreateBody{
-					Driver: "local",
-					Name:   volumeName,
-					Labels: map[string]string{
-						containerlabels.Type: "npm",
-						containerlabels.Path: path,
-					},
-				})
+				// prompt for the site
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
 				if err != nil {
-					return fmt.Errorf("unable to create the volume, %w", err)
+					return err
 				}
 
-				pathVolume = volume
-			}
+				// set the site we selected
+				site = sites[selected]
 
-			commands := append([]string{"npm"}, args...)
+				// add the label to get the site
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+			case 1:
+				output.Info("connecting to", sites[0].Hostname)
 
-			networkConfig := &network.NetworkingConfig{}
-			if networkID != "" {
-				networkConfig = &network.NetworkingConfig{
-					EndpointsConfig: map[string]*network.EndpointSettings{
-						"nitro-network": {
-							NetworkID: networkID,
-						},
-					},
+				// set the site we selected
+				site = sites[0]
+
+				// add the label to get the site
+				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
+			default:
+				// prompt for the site to ssh into
+				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				if err != nil {
+					return err
 				}
+
+				// set the site we selected
+				site = sites[selected]
+
+				// add the label to get the site
+				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			}
 
-			// create the container
-			resp, err := docker.ContainerCreate(ctx,
-				&container.Config{
-					Image: image,
-					Cmd:   commands,
-					Tty:   false,
-					Labels: map[string]string{
-						containerlabels.Nitro: "true",
-						containerlabels.Type:  "npm",
-						containerlabels.Path:  path,
-					},
-					WorkingDir: "/home/node/app",
-				},
-
-				&container.HostConfig{
-					Mounts: []mount.Mount{
-						{
-							Type:   mount.TypeVolume,
-							Source: pathVolume.Name,
-							Target: "/root",
-						},
-						{
-							Type:   "bind",
-							Source: path,
-							Target: "/home/node/app",
-						},
-					},
-				},
-				networkConfig,
-				nil,
-				"")
+			// find the containers but limited to the site label
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
-				return fmt.Errorf("unable to create container\n%w", err)
-			}
-
-			output.Info("Running npm", action)
-
-			// attach to the container
-			stream, err := docker.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
-				Stream: true,
-				Stdout: true,
-				Stderr: true,
-				Logs:   true,
-			})
-			if err != nil {
-				return fmt.Errorf("unable to attach to container, %w", err)
-			}
-			defer stream.Close()
-
-			// run the container
-			if err := docker.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-				return fmt.Errorf("unable to start the container, %w", err)
-			}
-
-			// copy the stream to stdout
-			if _, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.ErrOrStderr(), stream.Reader); err != nil {
-				return fmt.Errorf("unable to copy the output of the container logs, %w", err)
-			}
-
-			output.Info("npm", action, "complete 🤘")
-
-			if err := docker.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{}); err != nil {
 				return err
 			}
+
+			// are there any containers??
+			if len(containers) == 0 {
+				return fmt.Errorf("unable to find an matching site")
+			}
+
+			// start the container if its not running
+			if containers[0].State != "running" {
+				for _, command := range cmd.Root().Commands() {
+					if command.Use == "start" {
+						if err := command.RunE(cmd, []string{}); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			// create the command for running the craft console
+			cmds := []string{"exec", "-it", containers[0].ID, "npm"}
+
+			// get the container path
+			path := site.GetContainerPath()
+			if path != "" {
+				cmds = append(cmds, fmt.Sprintf("%s/%s", path, action))
+			} else {
+				cmds = append(cmds, action...)
+			}
+
+			switch len(args) == 0 {
+			case true:
+				// no args were provided, use the help command
+				cmds = append(cmds, "help")
+			default:
+				// append the provided args to the command
+				cmds = append(cmds, args...)
+			}
+
+			// find the docker executable
+			cli, err := exec.LookPath("docker")
+			if err != nil {
+				return err
+			}
+
+			// create the command
+			c := exec.Command(cli, cmds...)
+
+			c.Stdin = cmd.InOrStdin()
+			c.Stderr = cmd.ErrOrStderr()
+			c.Stdout = cmd.OutOrStdout()
+
+			if err := c.Run(); err != nil {
+				return err
+			}
+
+			output.Info(fmt.Sprintf("npm command %q complete 🤘", action))
 
 			return nil
 		},
 	}
-
-	// set flags for the command
-	cmd.Flags().String("version", "14", "which node version to use")
 
 	return cmd
 }

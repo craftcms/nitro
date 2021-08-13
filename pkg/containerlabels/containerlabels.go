@@ -73,6 +73,14 @@ func ForSite(s config.Site) map[string]string {
 	return labels
 }
 
+// ForSiteVolume takes a site and returns labels to use on the sites home volume.
+func ForSiteVolume(s config.Site) map[string]string {
+	return map[string]string{
+		Nitro: "true",
+		Host:  s.Hostname,
+	}
+}
+
 // ForCustomContainer takes a custom container configuration and
 // applies the labels for the container.
 func ForCustomContainer(c config.Container) map[string]string {

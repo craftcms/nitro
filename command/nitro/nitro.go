@@ -14,7 +14,6 @@ import (
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/container"
-	"github.com/craftcms/nitro/command/context"
 	"github.com/craftcms/nitro/command/craft"
 	"github.com/craftcms/nitro/command/create"
 	"github.com/craftcms/nitro/command/database"
@@ -26,6 +25,7 @@ import (
 	"github.com/craftcms/nitro/command/hosts"
 	"github.com/craftcms/nitro/command/iniset"
 	"github.com/craftcms/nitro/command/initialize"
+	"github.com/craftcms/nitro/command/keys"
 	"github.com/craftcms/nitro/command/logs"
 	"github.com/craftcms/nitro/command/ls"
 	"github.com/craftcms/nitro/command/npm"
@@ -109,7 +109,6 @@ func NewCommand() *cobra.Command {
 		completion.NewCommand(),
 		composer.NewCommand(docker, term),
 		container.NewCommand(home, docker, term),
-		context.NewCommand(home, docker, term),
 		craft.NewCommand(home, docker, term),
 		create.NewCommand(home, docker, downloader, term),
 		database.NewCommand(home, docker, nitrod, term),
@@ -121,9 +120,10 @@ func NewCommand() *cobra.Command {
 		hosts.NewCommand(home, term),
 		iniset.NewCommand(home, docker, term),
 		initialize.NewCommand(home, docker, term),
+		keys.NewCommand(home, docker, term),
 		logs.NewCommand(home, docker, term),
 		ls.NewCommand(home, docker, term),
-		npm.NewCommand(docker, term),
+		npm.NewCommand(home, docker, term),
 		php.NewCommand(home, docker, term),
 		portcheck.NewCommand(term),
 		queue.NewCommand(home, docker, term),
