@@ -1,10 +1,14 @@
 package keys
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+// ErrNoKeysFound is returned when there are no keys present
+var ErrNoKeysFound = fmt.Errorf("Unable to find keys to import")
 
 // Find all the key pairs in a directory
 func Find(path string) (map[string]string, error) {
@@ -27,6 +31,11 @@ func Find(path string) (map[string]string, error) {
 		return nil
 	}); err != nil {
 		return nil, err
+	}
+
+	// if there are no keys, return an error
+	if len(keys) == 0 {
+		return nil, ErrNoKeysFound
 	}
 
 	return keys, nil
