@@ -3,6 +3,7 @@ package keys
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/archive"
 	"github.com/spf13/cobra"
 )
 
@@ -146,7 +148,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// key use a map for the keys, so we have this loop
 			var count int
 			var key string
-			for k, _ := range found {
+			for k := range found {
 				if count == selected {
 					key = k
 					break
@@ -159,7 +161,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			stat, err := docker.ContainerStatPath(cmd.Context(), container.ID, fmt.Sprintf("/home/nitro/.ssh/%s", found[key]))
 			if err != nil {
 				// the docker sdk does not return an error, so we have to check the error output
-				if !strings.Contains(err.Error(), "No such container:path") {
+				if strings.Contains(err.Error(), "Error: No such container:path") {
+					// do nothing
+				} else {
 					return err
 				}
 			}
@@ -178,8 +182,22 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			// import the key into the container
-			fmt.Println(stat)
+			content, err := ioutil.ReadFile(filepath.Join(path, found[key]))
+			if err != nil {
+				return err
+			}
+
+			// create the temp file
+			tr, err := archive.Generate(string(content))
+			if err != nil {
+				return err
+			}
+
+			// copy the file into the container
+			if err := docker.CopyToContainer(cmd.Context(), container.ID, "/home/nitro/.ssh/"+found[key], tr, types.CopyToContainerOptions{AllowOverwriteDirWithFile: false}); err != nil {
+				fmt.Println("OOPS")
+				return err
+			}
 
 			return nil
 		},
