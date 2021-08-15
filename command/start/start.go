@@ -21,9 +21,12 @@ var (
 )
 
 const exampleText = `  # start all containers
-  nitro start`
+  nitro start
 
-// NewCommand returns the command used to start all of the containers for an environment.
+  # start a specific site
+  nitro start my-site.nitro`
+
+// NewCommand returns the command used to start all the containers for an environment.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
@@ -63,7 +66,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get all of the container
+			// get all the containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of the containers, %w", err)
@@ -88,7 +91,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				hostname := strings.TrimLeft(c.Names[0], "/")
 
-				// if the user wants a single site only, skip all of the other sites
+				// if the user wants a single site only, skip all the other sites
 				if site != "" && hostname != site && containerType == "site" {
 					continue
 				}
