@@ -2,7 +2,6 @@ package start
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/docker/docker/api/types"
@@ -58,12 +57,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
 			// is there a site as the first arg?
 			if len(args) > 0 {
 				site, err = cfg.FindSiteByHostName(args[0])
@@ -73,23 +66,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				return nil
 			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			// prompt for the site to ssh into
-			selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-			if err != nil {
-				return err
-			}
-
-			site = &sites[selected]
 
 			return nil
 		},
