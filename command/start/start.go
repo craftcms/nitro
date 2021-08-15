@@ -2,8 +2,10 @@ package start
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -26,7 +28,9 @@ const exampleText = `  # start all containers
   # start a specific site
   nitro start my-site.nitro`
 
-// NewCommand returns the command used to start all the containers for an environment.
+var site *config.Site
+
+// NewCommand returns the command used to start containers.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "start",
@@ -51,15 +55,54 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
 			}
 
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// get the current working directory
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
+			// is there a site as the first arg?
+			if len(args) > 0 {
+				site, err = cfg.FindSiteByHostName(args[0])
+				if err != nil {
+					return err
+				}
+
+				return nil
+			}
+
+			// get a context aware list of sites
+			sites := cfg.ListOfSitesByDirectory(home, wd)
+
+			// create the options for the sites
+			var options []string
+			for _, s := range sites {
+				options = append(options, s.Hostname)
+			}
+
+			// prompt for the site to ssh into
+			selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+			if err != nil {
+				return err
+			}
+
+			site = &sites[selected]
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := contextor.New(cmd.Context())
 
-			var site string
-			if len(args) > 0 {
-				site = args[0]
-			}
+			//cfg, err := config.Load(home)
+			//if err != nil {
+			//	return err
+			//}
 
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
@@ -79,6 +122,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Info("Starting Nitro…")
 
+			// start the proxy container
+			if err := docker.ContainerStart(ctx, proxycontainer.ProxyName, types.ContainerStartOptions{}); err != nil {
+				return fmt.Errorf("unable to start the proxy container")
+			}
+
 			// start each environment container
 			for _, c := range containers {
 				// don't start composer or npm containers
@@ -92,7 +140,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				hostname := strings.TrimLeft(c.Names[0], "/")
 
 				// if the user wants a single site only, skip all the other sites
-				if site != "" && hostname != site && containerType == "site" {
+				if (site != nil) && hostname != site.Hostname && containerType == "site" {
 					continue
 				}
 
