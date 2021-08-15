@@ -3,16 +3,13 @@ package start
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -99,65 +96,96 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := contextor.New(cmd.Context())
 
-			//cfg, err := config.Load(home)
-			//if err != nil {
-			//	return err
-			//}
-
-			// get all the containers using a filter, we only want to stop containers which
-			// have the environment label
-			filter := filters.NewArgs()
-			filter.Add("label", containerlabels.Nitro)
-
-			// get all the containers
-			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
+			cfg, err := config.Load(home)
 			if err != nil {
-				return fmt.Errorf("unable to get a list of the containers, %w", err)
-			}
-
-			// if there are no containers, were done
-			if len(containers) == 0 {
-				return ErrNoContainers
+				return err
 			}
 
 			output.Info("Starting Nitro…")
 
-			// start the proxy container
-			if err := docker.ContainerStart(ctx, proxycontainer.ProxyName, types.ContainerStartOptions{}); err != nil {
-				return fmt.Errorf("unable to start the proxy container")
+			// inspect the container
+			info, err := docker.ContainerInspect(ctx, proxycontainer.ProxyName)
+			if err != nil {
+				return err
 			}
 
-			// start each environment container
-			for _, c := range containers {
-				// don't start composer or npm containers
-				if c.Labels[containerlabels.Type] == "composer" || c.Labels[containerlabels.Type] == "npm" {
-					continue
-				}
+			// if the container is already running
+			switch info.State.Status == "running" {
+			case false:
+				output.Pending("starting", proxycontainer.ProxyName)
 
-				// identify the type of container
-				containerType := containerlabels.Identify(c)
-
-				hostname := strings.TrimLeft(c.Names[0], "/")
-
-				// if the user wants a single site only, skip all the other sites
-				if (site != nil) && hostname != site.Hostname && containerType == "site" {
-					continue
-				}
-
-				// if the container is already running
-				if c.State == "running" {
-					output.Success(hostname)
-					continue
-				}
-
-				output.Pending("starting", hostname)
-
-				// start the container
-				if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
-					return fmt.Errorf("unable to start container %s: %w", hostname, err)
+				// start the proxy container
+				if err := docker.ContainerStart(ctx, proxycontainer.ProxyName, types.ContainerStartOptions{}); err != nil {
+					return fmt.Errorf("unable to start the proxy container")
 				}
 
 				output.Done()
+			default:
+				output.Success(proxycontainer.ProxyName)
+			}
+
+			// start the databases
+			for _, db := range cfg.Databases {
+				name, err := db.GetHostname()
+				if err != nil {
+					return err
+				}
+
+				// inspect the container
+				info, err := docker.ContainerInspect(ctx, name)
+				if err != nil {
+					return err
+				}
+
+				// if the container is already running
+				switch info.State.Status == "running" {
+				case false:
+					output.Pending("starting", name)
+
+					// start the proxy container
+					if err := docker.ContainerStart(ctx, name, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the database container: err %w", err)
+					}
+
+					output.Done()
+				default:
+					output.Success(name)
+				}
+			}
+
+			// start each environment container
+			for _, s := range cfg.Sites {
+				// if the user wants a single site only, skip all the other sites
+				if (site != nil) && s.Hostname != site.Hostname {
+					continue
+				}
+
+				// make sure the site is not disabled
+				if s.Disabled {
+					output.Info(fmt.Sprintf("%s is disabled, skipping", s.Hostname))
+					continue
+				}
+
+				// inspect the container
+				info, err := docker.ContainerInspect(ctx, s.Hostname)
+				if err != nil {
+					return err
+				}
+
+				// if the container is already running
+				switch info.State.Status == "running" {
+				case false:
+					output.Pending("starting", s.Hostname)
+
+					// start the proxy container
+					if err := docker.ContainerStart(ctx, s.Hostname, types.ContainerStartOptions{}); err != nil {
+						return fmt.Errorf("unable to start the database container: err %w", err)
+					}
+
+					output.Done()
+				default:
+					output.Success(s.Hostname)
+				}
 			}
 
 			output.Info("Nitro started 👍")
