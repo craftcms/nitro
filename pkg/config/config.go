@@ -212,6 +212,7 @@ type Site struct {
 	Path       string   `json:"path" yaml:"path"`
 	Version    string   `json:"version" yaml:"version"`
 	PHP        PHP      `json:"php,omitempty" yaml:"php,omitempty"`
+	Enabled    bool     `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 	Extensions []string `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	Webroot    string   `json:"webroot" yaml:"webroot"`
 	Xdebug     bool     `json:"xdebug" yaml:"xdebug"`
