@@ -25,7 +25,7 @@ const exampleText = `  # view information about your nitro environment
   nitro ls --sites`
 
 var (
-	flagCustom, flagDatabases, flagProxy, flagServices, flagSites bool
+	flagCustom, flagDatabases, flagHide, flagProxy, flagServices, flagSites bool
 )
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -97,7 +97,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// get ports for the non-site containers
 				switch c.Labels[containerlabels.Host] == "" {
 				case false:
-					intPorts = append(intPorts, "80", "443", "3000", "3001")
+					intPorts = append(intPorts, "80", "443", "3000-3005")
 					extPorts = append(extPorts, "(uses proxy ports)")
 				default:
 					for _, p := range c.Ports {
@@ -127,7 +127,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				internalPorts := strings.Join(intPorts, ",")
 				externalPorts := strings.Join(extPorts, ",")
 
-				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), internalPorts, externalPorts, status)
+				// get the name of the container or hide if the flag is provided
+				name := c.Names[0]
+				if flagHide {
+					name = "********************"
+				}
+
+				tbl.AddRow(strings.TrimLeft(name, "/"), containerlabels.Identify(c), internalPorts, externalPorts, status)
 			}
 
 			tbl.Print()
@@ -137,6 +143,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	cmd.Flags().BoolVarP(&flagDatabases, "databases", "d", false, "show only databases")
+	cmd.Flags().BoolVarP(&flagHide, "hide", "", false, "hide container names")
 	cmd.Flags().BoolVarP(&flagSites, "sites", "s", false, "show only sites")
 	cmd.Flags().BoolVarP(&flagServices, "services", "v", false, "show only services")
 	cmd.Flags().BoolVarP(&flagCustom, "custom", "c", false, "show only custom containers")

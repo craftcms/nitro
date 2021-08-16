@@ -9,6 +9,7 @@
 - Site containers now include common image processing libraries.
 - Added common Linux build tools such as make to the site containers.
 - Yarn is now installed by default.
+- Add the `--hide` flag to `nitro ls` to hide site hostnames in the output.
 
 ### Changed
 - The site containers now use Debian based images.
