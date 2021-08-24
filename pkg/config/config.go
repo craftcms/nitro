@@ -264,7 +264,7 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 // GetAbsContainerPath gets the directory for a site’s
 // container path.
 func (s *Site) GetAbsContainerPath(home string) (string, error) {
-	return cleanPath(home, s.Path+"/"+s.GetContainerPath())
+	return cleanPath(home, s.Path+string(os.PathSeparator)+s.GetContainerPath())
 }
 
 // GetContainerPath is responsible for looking at the
