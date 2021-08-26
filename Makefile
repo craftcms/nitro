@@ -31,18 +31,8 @@ images:
 
 local: build
 	mv nitro /usr/local/bin/nitro
-local-win: build-win
-	mv nitro.exe "${HOME}"/Nitro/nitro.exe
 local-linux: build
 	sudo mv nitro /usr/local/bin/nitro
-local-prod: build upx
-	mv nitro /usr/local/bin/nitro
-
-dev: rm docker init
-rm:
-	docker container rm -f nitro-v2
-init:
-	nitro init
 
 test:
 	go test -v ./...
@@ -54,9 +44,6 @@ vet:
 
 releaser:
 	goreleaser --skip-publish --rm-dist --skip-validate
-
-win-home:
-	mkdir "${HOME}"/Nitro
 
 proto:
 	protoc protob/nitrod.proto --go_out=plugins=grpc:.
