@@ -38,7 +38,13 @@ RUN apt-get update && \
     php${PHP_VERSION}-xdebug \
     php${PHP_VERSION}-zip \
     php${PHP_VERSION}-fpm \
+    # image processing utils
+    gifsicle \
+    libjpeg-turbo-progs \
+    libwebp6 \
     jpegoptim \
+    optipng \
+    pngquant && \
     apt-get upgrade -y && \
     apt-get autoremove -y
 
