@@ -39,7 +39,6 @@ RUN apt-get update && \
     php${PHP_VERSION}-zip \
     php${PHP_VERSION}-fpm \
     jpegoptim \
-    nginx && \
     apt-get upgrade -y && \
     apt-get autoremove -y
 
