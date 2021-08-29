@@ -31,8 +31,7 @@ func TestGenerate(t *testing.T) {
 var defaultConf = `server {
     listen      80;
     listen      [::]:80;
-    set         $base /app;
-    root        $base/web;
+    root        /app/web;
 
     proxy_send_timeout 240s;
     proxy_read_timeout 240s;
