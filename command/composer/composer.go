@@ -33,6 +33,8 @@ const exampleText = `  # run composer install in a sites container
   # use composer (without local installation) to create a new project
   nitro composer create-project craftcms/craft my-project`
 
+var showHelp bool
+
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run
 // all the commands in a disposable docker container.
@@ -56,10 +58,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			return options, cobra.ShellCompDirectiveNoFileComp
 		},
-		// PreRunE: func(cmd *cobra.Command, args []string) error {
-		// 	return nil
-		// },
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// check if the first arg is the help command/flag
+			if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
+				return cmd.Help()
+			}
+
 			ctx := contextor.New(cmd.Context())
 
 			// load the configuration
