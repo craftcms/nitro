@@ -91,8 +91,8 @@ COPY nitro/general.conf /etc/nginx/nitro/
 COPY nitro/php_fastcgi.conf /etc/nginx/nitro/
 COPY nitro/security.conf /etc/nginx/nitro/
 RUN rm -rf /etc/nginx/sites-available/default && rm -rf /etc/nginx/sites-enabled/default
-COPY nginx/zz_default.conf /etc/nginx/sites-available/zz_default
-RUN ln -s /etc/nginx/sites-available/zz_default /etc/nginx/sites-enabled/
+COPY nginx/zz.conf /etc/nginx/sites-available/zz.conf
+RUN ln -s /etc/nginx/sites-available/zz.conf /etc/nginx/sites-enabled/
 # comment out the nginx user from the config
 RUN sed -i "s/user www-data;.*/#user www-data;/g" /etc/nginx/nginx.conf
 # create the pid for the nginx config
