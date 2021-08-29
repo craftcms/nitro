@@ -64,6 +64,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return cmd.Help()
 			}
 
+			// get the context
 			ctx := contextor.New(cmd.Context())
 
 			// load the configuration
@@ -78,58 +79,59 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// if there is a container name
 			if command.Container != "" {
 				// make sure its a valid site
 				if _, err := cfg.FindSiteByHostName(command.Container); err != nil {
 					return err
 				}
-			}
 
-			// create a filter for the environment
-			filter := filters.NewArgs()
-			filter.Add("label", containerlabels.Nitro)
+				// create a filter for the environment
+				filter := filters.NewArgs()
+				filter.Add("label", containerlabels.Nitro)
+				filter.Add("label", containerlabels.Host+"="+command.Container)
 
-			// find the containers but limited to the site label
-			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
-			if err != nil {
-				return err
-			}
-
-			// are there any containers??
-			if len(containers) == 0 {
-				return fmt.Errorf("unable to find an matching site")
-			}
-
-			// make sure the container is started
-			// start the container if its not running
-			if containers[0].State != "running" {
-				if err := docker.ContainerStart(ctx, command.Container, types.ContainerStartOptions{}); err != nil {
+				// find the containers but limited to the site label
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
+				if err != nil {
 					return err
 				}
+
+				// are there any containers??
+				if len(containers) == 0 {
+					return fmt.Errorf("unable to find an matching site")
+				}
+
+				// start the container if its not running
+				if containers[0].State != "running" {
+					if err := docker.ContainerStart(ctx, command.Container, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
+				// create the command for running the craft console
+				cmds := []string{"exec", "-it", command.Container, "composer"}
+				cmds = append(cmds, command.Args...)
+
+				// find the docker executable
+				cli, err := exec.LookPath("docker")
+				if err != nil {
+					return err
+				}
+
+				// create the command
+				c := exec.Command(cli, cmds...)
+				c.Stdin = cmd.InOrStdin()
+				c.Stderr = cmd.ErrOrStderr()
+				c.Stdout = cmd.OutOrStdout()
+
+				if err := c.Run(); err != nil {
+					return err
+				}
+
+				output.Info("composer", command.Args[0], "completed 🤘")
+
+				return nil
 			}
-
-			// create the command for running the craft console
-			cmds := []string{"exec", "-it", command.Container, "composer"}
-			cmds = append(cmds, command.Args...)
-
-			// find the docker executable
-			cli, err := exec.LookPath("docker")
-			if err != nil {
-				return err
-			}
-
-			// create the command
-			c := exec.Command(cli, cmds...)
-			c.Stdin = cmd.InOrStdin()
-			c.Stderr = cmd.ErrOrStderr()
-			c.Stdout = cmd.OutOrStdout()
-
-			if err := c.Run(); err != nil {
-				return err
-			}
-
-			output.Info("composer", command.Args[0], "completed 🤘")
 
 			return nil
 		},
