@@ -11,6 +11,7 @@
 - Yarn is now installed by default.
 
 ### Changed
+- The `composer` command now accepts site arguments. ([#364](https://github.com/craftcms/nitro/issues/364))
 - The site containers now use Debian based images.
 - Node and npm are now included with nvm in the images.
 - The sites user's home directory is now persisted through container updates and version changes.
