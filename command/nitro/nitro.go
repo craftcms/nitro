@@ -107,7 +107,7 @@ func NewCommand() *cobra.Command {
 		bridge.NewCommand(home, docker, term),
 		clean.NewCommand(home, docker, term),
 		completion.NewCommand(),
-		composer.NewCommand(docker, term),
+		composer.NewCommand(home, docker, term),
 		container.NewCommand(home, docker, term),
 		craft.NewCommand(home, docker, term),
 		create.NewCommand(home, docker, downloader, term),

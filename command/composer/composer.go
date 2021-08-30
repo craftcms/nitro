@@ -4,82 +4,142 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
-	volumetypes "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/composer"
+	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/containerargs"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/contextor"
-	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/craftcms/nitro/pkg/volumename"
+	volumetypes "github.com/docker/docker/api/types/volume"
 )
 
-var (
-	// ErrNoComposerFile is returned when there is no composer.json file in a directory
-	ErrNoComposerFile = fmt.Errorf("no composer.json or composer.lock was found")
-)
+const exampleText = `  # run composer install in a sites container
+  nitro composer sitename.nitro -- install
 
-const exampleText = `  # run composer install in a current directory using a container
+  # require a plugin for a site
+  nitro composer sitename.nitro -- require craftcms/contact-form
+
+  # run composer install in the current directory using a new container
   nitro composer install
 
   # use composer (without local installation) to create a new project
   nitro composer create-project craftcms/craft my-project`
 
+var showHelp bool
+
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run
 // all the commands in a disposable docker container.
-func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                "composer",
 		Short:              "Runs a Composer command.",
 		Example:            exampleText,
 		DisableFlagParsing: true,
 		Args:               cobra.MinimumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// check if the first arg is the help command/flag
+			if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
+				return cmd.Help()
+			}
+
+			// get the context
 			ctx := contextor.New(cmd.Context())
-			var version string
-			version, args = versionFromArgs(args)
 
-			// get the path from args or current directory
-			var path string
-			wd, err := os.Getwd()
+			// load the configuration
+			cfg, err := config.Load(home)
 			if err != nil {
-				return fmt.Errorf("unable to get the current directory, %w", err)
+				return err
 			}
 
-			path, err = filepath.Abs(wd)
+			// parse the args for the container
+			command, err := containerargs.Parse(args)
 			if err != nil {
-				return fmt.Errorf("unable to find the absolute path, %w", err)
+				return err
 			}
 
-			// determine the default action
-			action := args[0]
-			// if this is not a create project request, check for a composer.json
-			if action != "create-project" {
-				// get the full file path
-				composerPath := filepath.Join(path, "composer.json")
-
-				output.Pending("checking", composerPath)
-
-				// see if the file exists
-				if exists := pathexists.IsFile(composerPath); !exists {
-					output.Warning()
-					return fmt.Errorf("unable to find file %s", composerPath)
+			// if the container was defined
+			if command.Container != "" {
+				// make sure its a valid site
+				if _, err := cfg.FindSiteByHostName(command.Container); err != nil {
+					return err
 				}
 
-				output.Done()
+				// create a filter for the environment
+				filter := filters.NewArgs()
+				filter.Add("label", containerlabels.Nitro)
+				filter.Add("label", containerlabels.Host+"="+command.Container)
+
+				// find the containers but limited to the site label
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
+				if err != nil {
+					return err
+				}
+
+				// are there any containers??
+				if len(containers) == 0 {
+					return fmt.Errorf("unable to find an matching site")
+				}
+
+				// start the container if its not running
+				if containers[0].State != "running" {
+					if err := docker.ContainerStart(ctx, command.Container, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
+				// create the command for running the craft console
+				cmds := []string{"exec", "-it", command.Container, "composer"}
+				cmds = append(cmds, command.Args...)
+
+				// find the docker executable
+				cli, err := exec.LookPath("docker")
+				if err != nil {
+					return err
+				}
+
+				// create the command
+				c := exec.Command(cli, cmds...)
+				c.Stdin = cmd.InOrStdin()
+				c.Stderr = cmd.ErrOrStderr()
+				c.Stdout = cmd.OutOrStdout()
+
+				if err := c.Run(); err != nil {
+					return err
+				}
+
+				output.Info("composer", command.Args[0], "completed 🤘")
+
+				return nil
 			}
 
-			image := fmt.Sprintf("docker.io/craftcms/%s:%s-dev", "cli", version)
+			// fallback to the stand alone container
+			image := "docker.io/composer"
 
 			// filter for the image ref
 			filter := filters.NewArgs()
@@ -124,6 +184,16 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				}
 			}
 
+			wd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("unable to get the current directory, %w", err)
+			}
+
+			path, err := filepath.Abs(wd)
+			if err != nil {
+				return fmt.Errorf("unable to find the absolute path, %w", err)
+			}
+
 			// add filters for the volume
 			filter.Add("label", containerlabels.Type+"=composer")
 			filter.Add("label", containerlabels.Path+"="+path)
@@ -135,7 +205,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 			}
 
 			// set the volume name
-			volumeName := volumename.FromPath(strings.Join([]string{path, version}, string(os.PathSeparator)))
+			volumeName := volumename.FromPath(path)
 
 			var pathVolume types.Volume
 			switch len(volumes.Volumes) {
@@ -206,7 +276,7 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 				return fmt.Errorf("unable to copy the output of the container logs, %w", err)
 			}
 
-			output.Info("composer", action, "completed 🤘")
+			output.Info("composer command completed 🤘")
 
 			// remove the container
 			if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
@@ -217,37 +287,5 @@ func NewCommand(docker client.CommonAPIClient, output terminal.Outputer) *cobra.
 		},
 	}
 
-	// set flags for the command
-	cmd.Flags().String("php-version", "7.4", "which php version to use")
-
 	return cmd
-}
-
-func versionFromArgs(args []string) (string, []string) {
-	var version string
-	var newArgs []string
-	for i, a := range args {
-		// get the version if using =
-		if strings.Contains(a, "--php-version=") {
-			parts := strings.Split(a, "=")
-			version = parts[len(parts)-1]
-			continue
-		}
-
-		// get the version if using a space
-		if a == "--php-version" {
-			version = args[i+1]
-			continue
-		}
-
-		// append the new args
-		newArgs = append(newArgs, a)
-	}
-
-	// if the version is not set, use the default
-	if version == "" {
-		version = "7.4"
-	}
-
-	return version, newArgs
 }
