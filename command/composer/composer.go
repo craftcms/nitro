@@ -37,8 +37,6 @@ const exampleText = `  # run composer install in a sites container
   # use composer (without local installation) to create a new project
   nitro composer create-project craftcms/craft my-project`
 
-var showHelp bool
-
 // NewCommand returns a new command that runs composer install or update for a directory.
 // This command allows users to skip installing composer on the host machine and will run
 // all the commands in a disposable docker container.

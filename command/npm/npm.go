@@ -11,17 +11,19 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/containerargs"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrNoPackageFile is returned when there is no package.json or package-lock.json file in a directory
-	ErrNoPackageFile = fmt.Errorf("no package.json or package-lock.json was found")
-)
+const exampleText = `  # run npm install in a sites container
+  nitro npm sitename.nitro -- install
 
-const exampleText = `  # run npm install in a current directory
+  # run build steps in a sites container
+  nitro npm sitename.nitro -- run dev
+
+  # run npm install in the current directory using a new container
   nitro npm install
 
   # run npm update
@@ -37,8 +39,95 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Runs an npm command.",
 		Example: exampleText,
 		Args:    cobra.MinimumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			cfg, err := config.Load(home)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
+
+			var options []string
+			for _, s := range cfg.Sites {
+				options = append(options, s.Hostname)
+			}
+
+			return options, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// check if the first arg is the help command/flag
+			if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
+				return cmd.Help()
+			}
+
+			// get the context
 			ctx := contextor.New(cmd.Context())
+
+			// load the configuration
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// parse the args for the container
+			command, err := containerargs.Parse(args)
+			if err != nil {
+				return err
+			}
+
+			// if there was a container passed into the args
+			if command.Container != "" {
+				// make sure its a valid site
+				if _, err := cfg.FindSiteByHostName(command.Container); err != nil {
+					return err
+				}
+
+				// create a filter for the environment
+				filter := filters.NewArgs()
+				filter.Add("label", containerlabels.Nitro)
+				filter.Add("label", containerlabels.Host+"="+command.Container)
+
+				// find the containers but limited to the site label
+				containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
+				if err != nil {
+					return err
+				}
+
+				// are there any containers??
+				if len(containers) == 0 {
+					return fmt.Errorf("unable to find an matching site")
+				}
+
+				// start the container if its not running
+				if containers[0].State != "running" {
+					if err := docker.ContainerStart(ctx, command.Container, types.ContainerStartOptions{}); err != nil {
+						return err
+					}
+				}
+
+				// create the command for running the craft console
+				cmds := []string{"exec", "-it", command.Container, "npm"}
+				cmds = append(cmds, command.Args...)
+
+				// find the docker executable
+				cli, err := exec.LookPath("docker")
+				if err != nil {
+					return err
+				}
+
+				// create the command
+				c := exec.Command(cli, cmds...)
+				c.Stdin = cmd.InOrStdin()
+				c.Stderr = cmd.ErrOrStderr()
+				c.Stdout = cmd.OutOrStdout()
+
+				if err := c.Run(); err != nil {
+					return err
+				}
+
+				output.Info("npm", command.Args[0], "completed 🤘")
+
+				return nil
+			}
+
 			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
@@ -47,12 +136,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// determine the command
 			action := args
-
-			// load the config
-			cfg, err := config.Load(home)
-			if err != nil {
-				return err
-			}
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
