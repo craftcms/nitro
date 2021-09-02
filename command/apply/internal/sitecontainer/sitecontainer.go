@@ -245,9 +245,8 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			return "", err
 		}
 
-		commands = append(commands, command{Commands: []string{"cp", fmt.Sprintf("/tmp/%s", site.Hostname), fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
-		commands = append(commands, command{Commands: []string{"chmod", "0644", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname)}})
-		commands = append(commands, command{Commands: []string{"ln", "-s", fmt.Sprintf("/etc/nginx/sites-available/%s", site.Hostname), "/etc/nginx/sites-enabled/"}})
+		commands = append(commands, command{Commands: []string{"cp", fmt.Sprintf("/tmp/%s", site.Hostname), "/etc/nginx/sites-available/default"}})
+		commands = append(commands, command{Commands: []string{"chmod", "0644", "/etc/nginx/sites-available/default"}})
 	}
 
 	// check if there are custom extensions, NOTE: extensions require a container restart

@@ -1,4 +1,4 @@
-.PHONY: docker docs
+.PHONY: proxy docs
 
 VERSION ?= 3.0.0
 
