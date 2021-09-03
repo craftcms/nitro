@@ -174,7 +174,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 
 					// remove the container
-					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+					if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
 						return fmt.Errorf("unable to remove the container, %w", err)
 					}
 
