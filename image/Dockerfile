@@ -90,7 +90,7 @@ RUN touch /run/supervisord.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/supervi
 COPY nitro/general.conf /etc/nginx/nitro/
 COPY nitro/php_fastcgi.conf /etc/nginx/nitro/
 COPY nitro/security.conf /etc/nginx/nitro/
-COPY nginx/default.conf /etc/nginx/sites-available/default
+COPY nginx/zz.conf /etc/nginx/sites-available/zz
 # comment out the nginx user from the config
 RUN sed -i "s/user www-data;.*/#user www-data;/g" /etc/nginx/nginx.conf
 # create the pid for the nginx config
@@ -101,6 +101,8 @@ RUN mkdir -p /var/lib/nginx/body && chown -R ${IMAGE_USER}:${IMAGE_USER} /var/li
 # set the permissions for the user on nginx directories
 RUN chown -R ${IMAGE_USER}:${IMAGE_USER} /etc/nginx/conf.d/ && \
     chown -R ${IMAGE_USER}:${IMAGE_USER} /var/log/nginx
+# remove the default config
+RUN rm /etc/nginx/sites-available/default
 
 # php-fpm config
 
