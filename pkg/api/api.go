@@ -143,6 +143,13 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 
 		altPorts := []int{3000, 3001, 3002, 3003, 3004, 3005}
 		for _, p := range altPorts {
+
+			// be explicit on the alt hosts name to include the port
+			var altHosts []string
+			for _, h := range hosts {
+				altHosts = append(altHosts, fmt.Sprintf("%s:%d", h, p))
+			}
+
 			// add the alt routes
 			altRoutes = append(altRoutes, caddy.ServerRoute{
 				Handle: []caddy.RouteHandle{
@@ -157,7 +164,7 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 				},
 				Match: []caddy.Match{
 					{
-						Host: hosts,
+						Host: altHosts,
 					},
 				},
 				Terminal: true,
