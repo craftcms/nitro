@@ -209,6 +209,10 @@ func (c *Config) AddContainer(container Container) error {
 func (c *Config) GetBlackfireCredentials() ([]string, error) {
 	var envs []string
 
+	if c.Blackfire.ServerID == "" || c.Blackfire.ServerToken == "" {
+		return nil, fmt.Errorf("no blackfire credentials provided")
+	}
+
 	envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
 	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
 

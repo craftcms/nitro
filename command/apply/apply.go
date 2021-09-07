@@ -98,6 +98,11 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				names[h] = true
 			}
 
+			// is blackfire enabled
+			if cfg.Services.Blackfire {
+				names[blackfire.Host] = true
+			}
+
 			// is dynamodb enabled
 			if cfg.Services.DynamoDB {
 				names[dynamodb.Host] = true
