@@ -134,9 +134,16 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 
 	// does the config have blackfire credentials
 	if site.Blackfire {
-		// TODO(jasonmccallister) get the client id
-		envs = append(envs, "BLACKFIRE_CLIENT_ID=")
-		envs = append(envs, "BLACKFIRE_CLIENT_TOKEN=")
+		// grab the credentials from the config
+		credentials, err := cfg.GetBlackfireClientCredentials()
+		if err != nil {
+			return "", err
+		}
+
+		// add the client credentials
+		envs = append(envs, credentials...)
+
+		// set the agent socket to use the service container
 		envs = append(envs, "BLACKFIRE_AGENT_SOCKET=tcp://blackfire.service.nitro:8307")
 	}
 

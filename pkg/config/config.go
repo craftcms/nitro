@@ -156,6 +156,8 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
+	ClientID    string `json:"client_id,omitempty" yaml:"client_id,omitempty"`
+	ClientToken string `json:"client_token,omitempty" yaml:"client_token,omitempty"`
 	ServerID    string `json:"server_id,omitempty" yaml:"server_id,omitempty"`
 	ServerToken string `json:"server_token,omitempty" yaml:"server_token,omitempty"`
 }
@@ -204,9 +206,24 @@ func (c *Config) AddContainer(container Container) error {
 	return nil
 }
 
-// GetBlackfireCredentials is used to return the blackfire credentials from
+// GetBlackfireClientCredentials is used to return the blackfire credentials from
 // the config
-func (c *Config) GetBlackfireCredentials() ([]string, error) {
+func (c *Config) GetBlackfireClientCredentials() ([]string, error) {
+	var envs []string
+
+	if c.Blackfire.ClientID == "" || c.Blackfire.ClientToken == "" {
+		return nil, fmt.Errorf("no blackfire client credentials provided")
+	}
+
+	envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
+	envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
+
+	return envs, nil
+}
+
+// GetBlackfireServerCredentials is used to return the blackfire credentials from
+// the config
+func (c *Config) GetBlackfireServerCredentials() ([]string, error) {
 	var envs []string
 
 	if c.Blackfire.ServerID == "" || c.Blackfire.ServerToken == "" {

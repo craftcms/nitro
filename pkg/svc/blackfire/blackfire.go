@@ -54,7 +54,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			return "", "", fmt.Errorf("unable to read output while pulling image, %w", err)
 		}
 
-		credentials, err := cfg.GetBlackfireCredentials()
+		credentials, err := cfg.GetBlackfireServerCredentials()
 		if err != nil {
 			return "", "", err
 		}
