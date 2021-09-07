@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -14,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 )
 
 const (
@@ -59,6 +61,17 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			return "", "", err
 		}
 
+		// set the nitro env overrides
+		httpPort := "8307"
+		if os.Getenv("NITRO_BLACKFIRE_PORT") != "" {
+			httpPort = os.Getenv("NITRO_BLACKFIRE_PORT")
+		}
+
+		httpPortNat, err := nat.NewPort("tcp", "8307")
+		if err != nil {
+			return "", "", fmt.Errorf("unable to create the port, %w", err)
+		}
+
 		containerConfig := &container.Config{
 			Image: Image,
 			Labels: map[string]string{
@@ -66,6 +79,17 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 				containerlabels.Type:  Label,
 			},
 			Env: credentials,
+		}
+
+		hostConfig := &container.HostConfig{
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				httpPortNat: {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: httpPort,
+					},
+				},
+			},
 		}
 
 		networkConfig := &network.NetworkingConfig{
@@ -77,7 +101,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 		}
 
 		// create the container
-		resp, err := cli.ContainerCreate(ctx, containerConfig, nil, networkConfig, nil, Host)
+		resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, Host)
 		if err != nil {
 			return "", "", fmt.Errorf("unable to create the container, %w", err)
 		}

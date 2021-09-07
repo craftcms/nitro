@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -88,7 +89,16 @@ func TestVerifyCreated(t *testing.T) {
 						"BLACKFIRE_SERVER_TOKEN=servertoken",
 					},
 				},
-				HostConfig: nil,
+				HostConfig: &container.HostConfig{
+					PortBindings: map[nat.Port][]nat.PortBinding{
+						"8307/tcp": {
+							{
+								HostIP:   "127.0.0.1",
+								HostPort: "8307",
+							},
+						},
+					},
+				},
 				NetworkingConfig: &network.NetworkingConfig{
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"nitro-network": {
