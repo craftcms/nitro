@@ -209,12 +209,11 @@ func (c *Config) AddContainer(container Container) error {
 // GetBlackfireClientCredentials is used to return the blackfire credentials from
 // the config
 func (c *Config) GetBlackfireClientCredentials() ([]string, error) {
-	var envs []string
-
 	if c.Blackfire.ClientID == "" || c.Blackfire.ClientToken == "" {
 		return nil, fmt.Errorf("no blackfire client credentials provided")
 	}
 
+	var envs []string
 	envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
 	envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
 
@@ -224,12 +223,11 @@ func (c *Config) GetBlackfireClientCredentials() ([]string, error) {
 // GetBlackfireServerCredentials is used to return the blackfire credentials from
 // the config
 func (c *Config) GetBlackfireServerCredentials() ([]string, error) {
-	var envs []string
-
 	if c.Blackfire.ServerID == "" || c.Blackfire.ServerToken == "" {
-		return nil, fmt.Errorf("no blackfire credentials provided")
+		return nil, fmt.Errorf("no blackfire server credentials provided")
 	}
 
+	var envs []string
 	envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
 	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
 
