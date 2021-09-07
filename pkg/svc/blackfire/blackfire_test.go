@@ -123,6 +123,20 @@ func TestVerifyCreated(t *testing.T) {
 							State: "not-running",
 						},
 					},
+					containerInspectResponse: types.ContainerJSON{
+						Config: &container.Config{
+							Env: []string{
+								"BLACKFIRE_SERVER_ID=123",
+								"BLACKFIRE_SERVER_TOKEN=123",
+							},
+						},
+					},
+				},
+				cfg: config.Config{
+					Blackfire: config.Blackfire{
+						ServerID:    "123",
+						ServerToken: "123",
+					},
 				},
 				networkID: "some-network-id",
 			},
@@ -354,6 +368,9 @@ type mockClient struct {
 	containerCreateResponse container.ContainerCreateCreatedBody
 	containerCreateError    error
 
+	// container inspect
+	containerInspectResponse types.ContainerJSON
+
 	// mock start
 	containerStartID      string
 	containerStartOptions types.ContainerStartOptions
@@ -398,6 +415,10 @@ func (c *mockClient) ContainerCreate(ctx context.Context, config *container.Conf
 	}
 
 	return c.containerCreateResponse, c.containerCreateError
+}
+
+func (c *mockClient) ContainerInspect(ctx context.Context, id string) (types.ContainerJSON, error) {
+	return c.containerInspectResponse, nil
 }
 
 func (c *mockClient) ContainerStart(ctx context.Context, container string, options types.ContainerStartOptions) error {

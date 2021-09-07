@@ -57,6 +57,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// enable the service
 			switch args[0] {
 			case "blackfire":
+				// TODO(jasonmccallister) verify the credentials are set
 				cfg.Services.Blackfire = true
 			case "dynamodb":
 				cfg.Services.DynamoDB = true
