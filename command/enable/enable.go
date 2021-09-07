@@ -45,7 +45,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			return nil
 		},
-		ValidArgs: []string{"dynamodb", "mailhog", "minio", "redis"},
+		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the configuration
@@ -56,6 +56,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// enable the service
 			switch args[0] {
+			case "blackfire":
+				cfg.Services.Blackfire = true
 			case "dynamodb":
 				cfg.Services.DynamoDB = true
 			case "mailhog":

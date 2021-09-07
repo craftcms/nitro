@@ -204,6 +204,17 @@ func (c *Config) AddContainer(container Container) error {
 	return nil
 }
 
+// GetBlackfireCredentials is used to return the blackfire credentials from
+// the config
+func (c *Config) GetBlackfireCredentials() ([]string, error) {
+	var envs []string
+
+	envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
+	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
+
+	return envs, nil
+}
+
 // Database is the struct used to represent a database engine
 // that is a combination of a engine (e.g. mariadb, mysql, or
 // postgres), the version number, and the port. The engine
@@ -231,10 +242,11 @@ func (d *Database) GetHostname() (string, error) {
 // networking options for these types of services. We plan to support "custom" container options to make local users
 // development even better.
 type Services struct {
-	DynamoDB bool `json:"dynamodb"`
-	Mailhog  bool `json:"mailhog"`
-	Minio    bool `json:"minio"`
-	Redis    bool `json:"redis"`
+	Blackfire bool `json:"blackfire"`
+	DynamoDB  bool `json:"dynamodb"`
+	Mailhog   bool `json:"mailhog"`
+	Minio     bool `json:"minio"`
+	Redis     bool `json:"redis"`
 }
 
 // Site represents a web application. It has a hostname, aliases (which

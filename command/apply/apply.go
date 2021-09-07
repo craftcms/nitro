@@ -28,6 +28,7 @@ import (
 	"github.com/craftcms/nitro/pkg/hostedit"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/sudo"
+	"github.com/craftcms/nitro/pkg/svc/blackfire"
 	"github.com/craftcms/nitro/pkg/svc/dynamodb"
 	"github.com/craftcms/nitro/pkg/svc/mailhog"
 	"github.com/craftcms/nitro/pkg/svc/minio"
@@ -310,6 +311,32 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			output.Info("Checking services…")
+
+			// check blackfire service
+			output.Pending("checking blackfire")
+
+			switch cfg.Services.Blackfire {
+			case false:
+				// verify the blackfire container is removed
+				if err := blackfire.VerifyRemoved(ctx, docker, output); err != nil {
+					output.Warning()
+					return err
+				}
+
+				output.Done()
+			default:
+				// ensure blackfire is created
+				_, hostname, err := blackfire.VerifyCreated(ctx, docker, network.ID, *cfg, output)
+				if err != nil {
+					return err
+				}
+
+				if hostname != "" {
+					hostnames = append(hostnames, hostname)
+				}
+
+				output.Done()
+			}
 
 			// check dynamodb service
 			switch cfg.Services.DynamoDB {
