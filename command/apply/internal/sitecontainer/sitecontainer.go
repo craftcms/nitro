@@ -133,12 +133,18 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	envs := site.AsEnvs("host.docker.internal")
 
 	// does the config have blackfire credentials
-	if cfg.Blackfire.ServerID != "" {
-		envs = append(envs, "BLACKFIRE_SERVER_ID="+cfg.Blackfire.ServerID)
-	}
+	if site.Blackfire {
+		// grab the credentials from the config
+		credentials, err := cfg.GetBlackfireClientCredentials()
+		if err != nil {
+			return "", err
+		}
 
-	if cfg.Blackfire.ServerToken != "" {
-		envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+cfg.Blackfire.ServerToken)
+		// add the client credentials
+		envs = append(envs, credentials...)
+
+		// set the agent socket to use the service container
+		envs = append(envs, "BLACKFIRE_AGENT_SOCKET=tcp://blackfire.service.nitro:8307")
 	}
 
 	// look for an existing volume with the sites hostname, otherwise create it
