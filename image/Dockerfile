@@ -35,6 +35,7 @@ RUN apt-get update && \
     php${PHP_VERSION}-pgsql \
     php${PHP_VERSION}-redis \
     php${PHP_VERSION}-soap \
+    php${PHP_VERSION}-sqlite3 \
     php${PHP_VERSION}-xdebug \
     php${PHP_VERSION}-zip \
     php${PHP_VERSION}-fpm \
