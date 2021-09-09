@@ -270,7 +270,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// if the network is not found
 			if network.ID == "" {
-				return fmt.Errorf("No network was found…\nrun `nitro init` to get started")
+				return fmt.Errorf("No network found.\nrun `nitro init` to get started")
 			}
 
 			// remove the filter
@@ -285,7 +285,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			if errors.Is(err, proxycontainer.ErrNoProxyContainer) {
 				// create the proxy
 				if err := proxycontainer.Create(ctx, docker, output, network.ID); err != nil {
-					output.Info("unable to find the nitro proxy…\n run `nitro init` to resolve")
+					output.Info("Unable to find proxy.\n run `nitro init` to resolve")
 					return err
 				}
 			}
