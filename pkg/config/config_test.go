@@ -1052,89 +1052,240 @@ func TestConfig_ListOfSitesByDirectory(t *testing.T) {
 		want   []Site
 	}{
 		{
-			name: "all sites are returned if nothing is found",
+			name: "all sites suggested in lieu of match",
 			args: args{
 				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home", "site-three"),
-			},
-			fields: fields{
-				Sites: []Site{
-					{
-						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
-					},
-					{
-						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
-					},
-				},
-			},
-			want: []Site{
-				{
-					Webroot: "public",
-					Path:    filepath.Join(wd, "testdata", "home", "site-one"),
-				},
-				{
-					Webroot: "public",
-					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
-				},
-			},
-		},
-		{
-			name: "multiple sites are presented when the working directory is the container directory",
-			args: args{
-				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home"),
+				// we don’t have a site for `home/sites/broccoli`
+				wd: filepath.Join(wd, "testdata", "home", "sites", "broccoli"),
 			},
 			fields: fields{
 				Sites: []Site{
 					{
 						Webroot: "web",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
-						Webroot: "site-one/public",
-						Path:    filepath.Join(wd, "testdata", "home"),
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
 					},
 					{
-						Webroot: "site-two/public",
-						Path:    filepath.Join(wd, "testdata", "home"),
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+					},
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
+					},
+					{
+						Webroot: "",
+						Path:    filepath.Join(wd, "testdata", "home", "plugins", "thinginator"),
 					},
 				},
 			},
 			want: []Site{
 				{
-					Path:    filepath.Join(wd, "testdata", "home"),
-					Webroot: "site-one/public",
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 				},
 				{
-					Path:    filepath.Join(wd, "testdata", "home"),
-					Webroot: "site-two/public",
+					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+				},
+				{
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+				},
+				{
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "cherry", "dragonfruit"),
+				},
+				{
+					Webroot: "",
+					Path:    filepath.Join(wd, "testdata", "home", "plugins", "thinginator"),
 				},
 			},
 		},
 		{
-			name: "a single site is presented when the working directory is the site path",
+			name: "multiple suggestions when working directory is top-level path",
 			args: args{
 				home: filepath.Join(wd),
-				wd:   filepath.Join(wd, "testdata", "home", "site-two"),
+				wd:   filepath.Join(wd, "testdata", "home", "sites"),
 			},
 			fields: fields{
 				Sites: []Site{
 					{
-						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-one"),
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
 					},
 					{
 						Webroot: "public",
-						Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					},
+					// this site is an exact path match, but our working directory is too vague
+					// for it to be the only suggestion
+					{
+						Webroot: "cherry/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					// this site is in a different top-level directory and should not be a suggestion
+					{
+						Webroot: "",
+						Path:    filepath.Join(wd, "testdata", "home", "plugins"),
 					},
 				},
 			},
 			want: []Site{
 				{
-					Path:    filepath.Join(wd, "testdata", "home", "site-two"),
+					Webroot: "web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
+				},
+				{
 					Webroot: "public",
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+				},
+				{
+					Webroot: "cherry/web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+				},
+			},
+		},
+		{
+			name: "single suggestion when working directory is site path",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "banana"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
+					},
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					Webroot: "public",
+				},
+			},
+		},
+		{
+			name: "single suggestion when working directory is single exact match to site container path",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "apple"),
+					},
+					{
+						Webroot: "public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites", "banana"),
+					},
+					{
+						Webroot: "cherry/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/dragonfruit/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Webroot: "cherry/web",
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+				},
+			},
+		},
+		{
+			name: "single suggestion when path values match but container directory is unique",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot: "apple/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "banana/public",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+					{
+						Webroot: "cherry/dragonfruit/web",
+						Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					},
+				},
+			},
+			want: []Site{
+				{
+					Path:    filepath.Join(wd, "testdata", "home", "sites"),
+					Webroot: "cherry/web",
+				},
+			},
+		},
+		{
+			name: "multiple suggestions when sites use same directory",
+			args: args{
+				home: filepath.Join(wd),
+				wd:   filepath.Join(wd, "testdata", "home", "sites", "cherry"),
+			},
+			fields: fields{
+				Sites: []Site{
+					{
+						Webroot:  "apple/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "apple.nitro",
+					},
+					{
+						Webroot:  "banana/public",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "banana.nitro",
+					},
+					{
+						Webroot:  "cherry/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "cherry.nitro",
+					},
+					{
+						Webroot:  "cherry/dragonfruit/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "dragonfruit.nitro",
+					},
+					// this site uses the exact same path as cherry.nitro
+					{
+						Webroot:  "cherry/web",
+						Path:     filepath.Join(wd, "testdata", "home", "sites"),
+						Hostname: "doppelganger.nitro",
+					},
+				},
+			},
+			want: []Site{
+				{
+					Webroot:  "cherry/web",
+					Path:     filepath.Join(wd, "testdata", "home", "sites"),
+					Hostname: "cherry.nitro",
+				},
+				{
+					Webroot:  "cherry/web",
+					Path:     filepath.Join(wd, "testdata", "home", "sites"),
+					Hostname: "doppelganger.nitro",
 				},
 			},
 		},

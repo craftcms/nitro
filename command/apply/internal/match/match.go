@@ -23,13 +23,6 @@ var (
 	SiteImage = "docker.io/craftcms/nitro:%s"
 )
 
-func init() {
-	// check if nitro development is defined and override the image
-	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
-		SiteImage = "craftcms/nitro:%s"
-	}
-}
-
 // Container checks if a custom container is up to date with the configuration
 func Container(home string, container config.Container, details types.ContainerJSON) error {
 	// check if the image does not match - this uses the image name, not ref
@@ -81,6 +74,11 @@ func Container(home string, container config.Container, details types.ContainerJ
 // Site takes the home directory, site, and a container to determine if they
 // match whats expected.
 func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
+	// check if nitro development is defined and override the image
+	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
+		SiteImage = "craftcms/nitro:%s"
+	}
+
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf(SiteImage, site.Version) != container.Config.Image {
 		return false

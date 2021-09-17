@@ -5,8 +5,7 @@ import "fmt"
 var conf = `server {
     listen      80;
     listen      [::]:80;
-    set         $base /app;
-    root        $base/%s;
+    root        /app/%s;
 
     proxy_send_timeout 240s;
     proxy_read_timeout 240s;

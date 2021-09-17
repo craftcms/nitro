@@ -12,19 +12,21 @@
 - Add the `--hide` flag to `nitro ls` to hide site hostnames in the output.
 
 ### Changed
+- The `composer` command now accepts site arguments. ([#364](https://github.com/craftcms/nitro/issues/364))
 - The site containers now use Debian based images.
 - Node and npm are now included with nvm in the images.
 - The sites user's home directory is now persisted through container updates and version changes.
 - Added support for private composer packages and git cloning.
 - The nginx site is now  fallback and users can completely override the nginx config.
 - Custom Nginx configurations will now persist container recreation.
-- Removed the `context` command in favor of the `ls` commmand.
+- Removed the `context` command in favor of the `ls` command.
 - Renamed the `db import` to `db restore` to match the Craft CLI.
 
 ### Fixed
 - Fixed an error where users were unable to setup mysql databases.
 - Fixed an error when creating a backup with `db backup` was not including the drop tables command.
 - Fixed an error when installing extensions would not reflect in the site container.
+- The `destroy` command will now remove container volumes.
 
 ## 2.0.8 - 2021-05-18
 

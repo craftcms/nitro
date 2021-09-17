@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 ARG IMAGE_USER
 ENV IMAGE_USER=${IMAGE_USER}
@@ -35,11 +35,17 @@ RUN apt-get update && \
     php${PHP_VERSION}-pgsql \
     php${PHP_VERSION}-redis \
     php${PHP_VERSION}-soap \
+    php${PHP_VERSION}-sqlite3 \
     php${PHP_VERSION}-xdebug \
     php${PHP_VERSION}-zip \
     php${PHP_VERSION}-fpm \
+    # image processing utils
+    gifsicle \
+    libjpeg-turbo-progs \
+    libwebp6 \
     jpegoptim \
-    nginx && \
+    optipng \
+    pngquant && \
     apt-get upgrade -y && \
     apt-get autoremove -y
 
@@ -85,7 +91,7 @@ RUN touch /run/supervisord.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/supervi
 COPY nitro/general.conf /etc/nginx/nitro/
 COPY nitro/php_fastcgi.conf /etc/nginx/nitro/
 COPY nitro/security.conf /etc/nginx/nitro/
-COPY nginx/zz_default.conf /etc/nginx/sites-available/default
+COPY nginx/default.conf /etc/nginx/sites-available/default
 # comment out the nginx user from the config
 RUN sed -i "s/user www-data;.*/#user www-data;/g" /etc/nginx/nginx.conf
 # create the pid for the nginx config
@@ -105,7 +111,7 @@ RUN touch /var/log/php${PHP_VERSION}-fpm.log && chown -R ${IMAGE_USER}:${IMAGE_U
 RUN mkdir -p /run/php/ && touch /run/php/php${PHP_VERSION}-fpm.sock && chown -R ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.sock
 RUN touch /run/php/php${PHP_VERSION}-fpm.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.pid
 # use our php-fpm conf
-COPY www.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+COPY php/www.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 # copy custom.ini settings
 COPY php/nitro.ini /etc/php/${PHP_VERSION}/cli/conf.d
 COPY php/nitro.ini /etc/php/${PHP_VERSION}/fpm/conf.d

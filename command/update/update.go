@@ -36,15 +36,13 @@ var (
 	runApply bool
 )
 
-func init() {
+// New returns the update command for updating images on the local machine as well as the nitro-proxy container.
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	// check if nitro development is defined and override the image
 	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
 		Image = "craftcms/nitro"
 	}
-}
 
-// New returns the update command for updating images on the local machine as well as the nitro-proxy container.
-func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Updates Nitro containers and proxy.",

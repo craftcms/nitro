@@ -78,6 +78,38 @@ func onCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 				}
 			}
 
+			// ensure the blackfire credentials are set
+			if cfg.Blackfire.ClientID == "" {
+				// ask for the server token
+				token, err := output.Ask("Enter your Blackfire Client ID", "", ":", nil)
+				if err != nil {
+					return err
+				}
+
+				cfg.Blackfire.ClientID = token
+
+				// save the config file
+				if err := cfg.Save(); err != nil {
+					return fmt.Errorf("unable to save config, %w", err)
+				}
+			}
+
+			// ensure the blackfire credentials are set
+			if cfg.Blackfire.ClientToken == "" {
+				// ask for the server token
+				token, err := output.Ask("Enter your Blackfire Client Token", "", ":", nil)
+				if err != nil {
+					return err
+				}
+
+				cfg.Blackfire.ClientToken = token
+
+				// save the config file
+				if err := cfg.Save(); err != nil {
+					return fmt.Errorf("unable to save config, %w", err)
+				}
+			}
+
 			// get the current working directory
 			wd, err := os.Getwd()
 			if err != nil {
