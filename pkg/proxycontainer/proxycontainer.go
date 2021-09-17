@@ -40,16 +40,14 @@ var (
 	ErrNoProxyContainer = fmt.Errorf("unable to locate the proxy container")
 )
 
-func init() {
+// Create is used to create a new proxy container for the nitro development environment.
+func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, networkID string) error {
+	ctx = contextor.New(ctx)
+
 	// check if nitro development is defined and override the image
 	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
 		ProxyImage = "craftcms/nitro-proxy:%s"
 	}
-}
-
-// Create is used to create a new proxy container for the nitro development environment.
-func Create(ctx context.Context, docker client.CommonAPIClient, output terminal.Outputer, networkID string) error {
-	ctx = contextor.New(ctx)
 
 	image := fmt.Sprintf(ProxyImage, version.Version)
 
