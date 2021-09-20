@@ -18,8 +18,17 @@ func FromDir(path string, excludes []string) []string {
 
 	// loop over each file/dir in provided directory
 	for _, d := range dirs {
-		// TODO(jasonmccallister) add support for excludes
-		mounts = append(mounts, filepath.Join(path, d.Name()))
+		var excluded bool
+		for _, e := range excludes {
+			if d.Name() == e {
+				excluded = true
+				break
+			}
+		}
+
+		if !excluded {
+			mounts = append(mounts, filepath.Join(path, d.Name()))
+		}
 	}
 
 	return mounts
