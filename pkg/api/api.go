@@ -112,23 +112,75 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		svc.Addr = "http://127.0.0.1:2019"
 	}
 
+	// create the http and https server
+	web := caddy.Server{
+		Listen: []string{":80", ":443"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			DisableRedirects: true,
+		},
+	}
+
+	// create the alt server for ports 3000-3005
+	altOne := caddy.Server{
+		Listen: []string{":3000"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+	altTwo := caddy.Server{
+		Listen: []string{":3001"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+	altThree := caddy.Server{
+		Listen: []string{":3002"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+	altFour := caddy.Server{
+		Listen: []string{":3003"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+	altFive := caddy.Server{
+		Listen: []string{":3004"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+	altSix := caddy.Server{
+		Listen: []string{":3005"},
+		AutomaticHTTPS: caddy.AutomaticHTTPS{
+			Disable:          true,
+			DisableRedirects: true,
+		},
+	}
+
 	// convert each of the sites into a route
-	var siteRoutes, altRoutes []caddy.ServerRoute
-	for k, site := range request.GetSites() {
+	for _, site := range request.GetSites() {
 		// get all of the host names for the site
 		hosts := []string{site.GetHostname()}
 		if site.GetAliases() != "" {
 			hosts = append(hosts, strings.Split(site.GetAliases(), ",")...)
 		}
 
-		// create the route for each of the sites
-		siteRoutes = append(siteRoutes, caddy.ServerRoute{
+		// create the http and https routes
+		web.Routes = append(web.Routes, caddy.ServerRoute{
+			// handle the http and https routes
 			Handle: []caddy.RouteHandle{
 				{
 					Handler: "reverse_proxy",
 					Upstreams: []caddy.Upstream{
 						{
-							Dial: fmt.Sprintf("%s:%d", k, site.GetPort()),
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), site.GetPort()),
 						},
 					},
 				},
@@ -138,44 +190,120 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 					Host: hosts,
 				},
 			},
-			Terminal: true,
 		})
 
-		altPorts := []int{3000, 3001, 3002, 3003, 3004, 3005}
-		for _, p := range altPorts {
-
-			// be explicit on the alt hosts name to include the port
-			var altHosts []string
-			for _, h := range hosts {
-				altHosts = append(altHosts, fmt.Sprintf("%s:%d", h, p))
-			}
-
-			// add the alt routes
-			altRoutes = append(altRoutes, caddy.ServerRoute{
-				Handle: []caddy.RouteHandle{
-					{
-						Handler: "reverse_proxy",
-						Upstreams: []caddy.Upstream{
-							{
-								Dial: fmt.Sprintf("%s:%d", k, p),
-							},
+		// add the site alt ports
+		altOne.Routes = append(altOne.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3000),
 						},
 					},
 				},
-				Match: []caddy.Match{
-					{
-						Host: altHosts,
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+
+		altTwo.Routes = append(altTwo.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3001),
+						},
 					},
 				},
-				Terminal: true,
-			})
-		}
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+
+		altThree.Routes = append(altThree.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3002),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+
+		altFour.Routes = append(altFour.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3003),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+
+		altFive.Routes = append(altFive.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3004),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
+
+		altSix.Routes = append(altSix.Routes, caddy.ServerRoute{
+			Handle: []caddy.RouteHandle{
+				{
+					Handler: "reverse_proxy",
+					Upstreams: []caddy.Upstream{
+						{
+							Dial: fmt.Sprintf("%s:%d", site.GetHostname(), 3005),
+						},
+					},
+				},
+			},
+			Match: []caddy.Match{
+				{
+					Host: hosts,
+				},
+			},
+		})
 	}
 
-	update := caddy.UpdateRequest{}
-
-	// define the http routes
-	httpRoutes := append(siteRoutes, caddy.ServerRoute{
+	// define the route for getting started
+	web.Routes = append(web.Routes, caddy.ServerRoute{
 		Handle: []caddy.RouteHandle{
 			{
 				Handler: "vars",
@@ -190,31 +318,18 @@ func (svc *Service) Apply(ctx context.Context, request *protob.ApplyRequest) (*p
 		Terminal: true,
 	})
 
-	// set the alternate ports
-	update.Alt = caddy.Server{
-		Listen: []string{":3000", ":3001", ":3002", ":3003", ":3004", ":3005"},
-		Routes: altRoutes,
-		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			Disable:          true,
-			DisableRedirects: true,
-		},
+	// create the update request
+	update := caddy.UpdateRequest{
+		HTTP:     web,
+		AltOne:   altOne,
+		AltTwo:   altTwo,
+		AltThree: altThree,
+		AltFour:  altFour,
+		AltFive:  altFive,
+		AltSix:   altSix,
 	}
 
-	// set the default welcome server
-	update.HTTP = caddy.Server{
-		Listen: []string{":80"},
-		Routes: httpRoutes,
-		AutomaticHTTPS: caddy.AutomaticHTTPS{
-			DisableRedirects: true,
-		},
-	}
-
-	// add the routes to the first server
-	update.HTTPS = caddy.Server{
-		Listen: []string{":443"},
-		Routes: siteRoutes,
-	}
-
+	// convert to json
 	content, err := json.Marshal(&update)
 	if err != nil {
 		return nil, err

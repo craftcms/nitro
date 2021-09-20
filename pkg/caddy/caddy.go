@@ -1,9 +1,13 @@
 package caddy
 
 type UpdateRequest struct {
-	HTTPS Server `json:"https,omitempty"`
-	HTTP  Server `json:"http,omitempty"`
-	Alt   Server `json:"alt,omitempty"`
+	HTTP     Server `json:"nitro,omitempty"`
+	AltOne   Server `json:"alt_one,omitempty"`
+	AltTwo   Server `json:"alt_two,omitempty"`
+	AltThree Server `json:"alt_three,omitempty"`
+	AltFour  Server `json:"alt_four,omitempty"`
+	AltFive  Server `json:"alt_five,omitempty"`
+	AltSix   Server `json:"alt_six,omitempty"`
 }
 
 type Server struct {
