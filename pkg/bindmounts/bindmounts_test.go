@@ -38,6 +38,29 @@ func TestFromDir(t *testing.T) {
 				filepath.Join(base, "project-with-composer-deps", "vendor"),
 			},
 		},
+		{
+			name: "returns the correct number of bind mounts from a directory with no excludes",
+			args: args{
+				path:     filepath.Join(base, "project-with-composer-deps"),
+				excludes: []string{"node_modules", "vendor"},
+			},
+			want: []string{
+				filepath.Join(base, "project-with-composer-deps", "app"),
+				filepath.Join(base, "project-with-composer-deps", "config"),
+			},
+		},
+		{
+			name: "no excludes returns all directories",
+			args: args{
+				path: filepath.Join(base, "project-with-composer-deps"),
+			},
+			want: []string{
+				filepath.Join(base, "project-with-composer-deps", "app"),
+				filepath.Join(base, "project-with-composer-deps", "config"),
+				filepath.Join(base, "project-with-composer-deps", "node_modules"),
+				filepath.Join(base, "project-with-composer-deps", "vendor"),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
