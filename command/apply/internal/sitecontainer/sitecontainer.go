@@ -175,6 +175,12 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
+	// determine if the site has any excludes
+	binds, err := site.GetBindMounts(home)
+	if err != nil {
+		return "", err
+	}
+
 	// set the labels
 	labels := containerlabels.ForSite(site)
 	// create the container
@@ -187,7 +193,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Hostname: site.Hostname,
 		},
 		&container.HostConfig{
-			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
+			Binds:      binds,
 			ExtraHosts: extraHosts,
 			Mounts: []mount.Mount{
 				{
