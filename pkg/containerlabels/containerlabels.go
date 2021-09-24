@@ -94,16 +94,24 @@ func ForCustomContainer(c config.Container) map[string]string {
 // Identify takes an existing container and examines the
 // labels to determine the type of container.
 func Identify(c types.Container) string {
+	// is it a database?
 	if c.Labels[DatabaseEngine] != "" {
 		return "database"
 	}
 
+	// is this a custom container
 	if c.Labels[NitroContainer] != "" {
 		return "custom"
 	}
 
+	// is this a proxy container
 	if c.Labels[Proxy] != "" {
 		return "proxy"
+	}
+
+	// check if this is a service
+	if c.Labels[Type] == "blackfire" || c.Labels[Type] == "redis" || c.Labels[Type] == "dynamodb" || c.Labels[Type] == "minio" {
+		return "service"
 	}
 
 	return "site"
