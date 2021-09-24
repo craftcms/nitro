@@ -9,6 +9,7 @@
 - Site containers now include common image processing libraries.
 - Added common Linux build tools such as make to the site containers.
 - Yarn is now installed by default.
+- Added the ability to exclude directories from a site bind mounts to improve performance.
 
 ### Changed
 - The `composer` command now accepts site arguments. ([#364](https://github.com/craftcms/nitro/issues/364))
