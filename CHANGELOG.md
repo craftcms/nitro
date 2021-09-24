@@ -4,7 +4,7 @@
 
 ### Added
 - Sites now expose ports 3000-3005 for miscellaneous use.
-- Added the `keys` command to copy SSH keys from the host machine into a sites container.
+- Added the `keys` command to copy SSH keys from the host machine into a sites' container.
 - The default shell is now bash and not sh, allowing common scripts.
 - Site containers now include common image processing libraries.
 - Added common Linux build tools such as make to the site containers.
