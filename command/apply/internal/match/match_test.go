@@ -326,6 +326,7 @@ func TestSite(t *testing.T) {
 					},
 					Mounts: []types.MountPoint{
 						{
+							Type: "bind",
 							Source: filepath.Join(wd, "testdata", "new-path"),
 						},
 					},

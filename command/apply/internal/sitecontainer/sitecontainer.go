@@ -110,12 +110,6 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
-	// get the sites path
-	path, err := site.GetAbsPath(home)
-	if err != nil {
-		return "", err
-	}
-
 	// add the site itself and any aliases to the extra hosts
 	extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
 	for _, s := range site.Aliases {
