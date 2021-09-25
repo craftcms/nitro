@@ -40,7 +40,8 @@ func shellCommand(home string, docker client.CommonAPIClient, output terminal.Ou
 			})
 
 			// generate a list of engines for the prompt
-			var containerList []string
+			var containerNameList []string
+			var containerEngineList []string
 			for _, c := range containers {
 				// start the container if not running
 				if c.State != "running" {
@@ -53,32 +54,37 @@ func shellCommand(home string, docker client.CommonAPIClient, output terminal.Ou
 					}
 				}
 
-				containerList = append(containerList, strings.TrimLeft(c.Names[0], "/"))
+				containerName := strings.TrimLeft(c.Names[0], "/")
+				containerEngine := c.Labels[containerlabels.DatabaseEngine]
+
+				containerNameList = append(containerNameList, containerName)
+				containerEngineList = append(containerEngineList, containerEngine)
 			}
 
 			// prompt for the container to ssh into
-			selected, err := output.Select(cmd.InOrStdin(), "Select a database to connect to: ", containerList)
+			selected, err := output.Select(cmd.InOrStdin(), "Select a database to connect to: ", containerNameList)
 			if err != nil {
 				return err
 			}
 
-			container := containerList[selected]
+			container := containerNameList[selected]
+			engine := containerEngineList[selected]
 
-			return databaseInteractiveShellConnect(output, container)
+			return databaseInteractiveShellConnect(output, container, engine)
 		},
 	}
 
 	return cmd
 }
 
-func databaseInteractiveShellConnect(output terminal.Outputer, containerName string) error {
+func databaseInteractiveShellConnect(output terminal.Outputer, containerName string, containerEngine string) error {
 	// find the docker executable
 	cli, err := exec.LookPath("docker")
 	if err != nil {
 		return err
 	}
 
-  c := exec.Command(cli, "exec", "-u", "root", "-it", containerName, "mysql", "-h", "localhost", "-u", "nitro", "-pnitro")
+  c := exec.Command(cli, "exec", "-u", "root", "-it", containerName, containerEngine, "-h", "localhost", "-u", "nitro", "-pnitro")
 
 	c.Stdin = os.Stdin
 	c.Stderr = os.Stderr
