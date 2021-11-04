@@ -53,6 +53,7 @@ type Config struct {
 	Databases  []Database  `json:"databases,omitempty" yaml:"databases,omitempty"`
 	Services   Services    `json:"services" yaml:"services"`
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
+	Apps       []App       `json:"apps,omitempty" yaml:"apps,omitempty"`
 	File       string      `json:"-" yaml:"-"`
 
 	// rw sync.RWMutex
