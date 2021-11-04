@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/bindmounts"
 	"github.com/craftcms/nitro/pkg/helpers"
 
 	"gopkg.in/yaml.v3"
@@ -282,6 +283,7 @@ type Site struct {
 	Webroot    string   `json:"webroot" yaml:"webroot"`
 	Xdebug     bool     `json:"xdebug" yaml:"xdebug"`
 	Blackfire  bool     `json:"blackfire" yaml:"blackfire"`
+	Excludes   []string `json:"excludes,omitempty" yaml:"excludes,omitempty"`
 }
 
 // GetAbsPath gets the directory for a site.Path,
@@ -289,6 +291,31 @@ type Site struct {
 // container.
 func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
+}
+
+// GetBindMounts takes the users home directory and will return a
+// list of bind mounts that checks the excludes on the site.
+func (s *Site) GetBindMounts(home string) ([]string, error) {
+	// get the abs path for the site
+	path, err := s.GetAbsPath(home)
+	if err != nil {
+		return nil, err
+	}
+
+	// are there files or directories we should exclude?
+	if len(s.Excludes) > 0 {
+		var binds []string
+		for _, v := range bindmounts.FromDir(path, s.Excludes) {
+			_, f := filepath.Split(v)
+
+			binds = append(binds, fmt.Sprintf("%s:/app/%s:rw", v, f))
+		}
+
+		return binds, nil
+	}
+
+	// return the entire directory as the bind mount
+	return []string{fmt.Sprintf("%s:/app:rw", path)}, nil
 }
 
 // GetAbsContainerPath gets the directory for a site’s

@@ -23,6 +23,8 @@ const exampleText = `  # add the current directory as a site
   # add a directory as the site
   nitro add my-project`
 
+var flagExcludeDependencies bool
+
 // NewCommand returns the command to add a site to the nitro config.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -63,7 +65,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Info("Adding site…")
 
-			if _, err := prompt.CreateSite(home, dir, output); err != nil {
+			if _, err := prompt.CreateSite(home, dir, flagExcludeDependencies, output); err != nil {
 				return err
 			}
 
@@ -158,6 +160,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVar(&flagExcludeDependencies, "exclude-deps", false, "Ignore node_modules and vendor directories when creating the container.")
 
 	return cmd
 }

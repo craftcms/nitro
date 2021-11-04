@@ -14,6 +14,9 @@ import (
 	"github.com/craftcms/nitro/pkg/containerlabels"
 )
 
+// DEFAULT_MOUNTS is the number of mounts for a standard container
+const DEFAULT_MOUNTS = 3
+
 var (
 	ErrMisMatchedImage  = fmt.Errorf("container image does not match")
 	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
@@ -23,7 +26,7 @@ var (
 	SiteImage = "docker.io/craftcms/nitro:%s"
 )
 
-// Container checks if a custom container is up to date with the configuration
+// Container checks if a custom container is up-to-date with the configuration
 func Container(home string, container config.Container, details types.ContainerJSON) error {
 	// check if the image does not match - this uses the image name, not ref
 	if fmt.Sprintf("%s:%s", container.Image, container.Tag) != details.Config.Image {
@@ -50,7 +53,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 			}
 		}
 
-		// check the containers env against the file and merge
+		// check the containers' env against the file and merge
 		for _, e := range details.Config.Env {
 			parts := strings.Split(e, "=")
 			env := parts[0]
@@ -72,7 +75,7 @@ func Container(home string, container config.Container, details types.ContainerJ
 }
 
 // Site takes the home directory, site, and a container to determine if they
-// match whats expected.
+// match what's expected.
 func Site(home string, site config.Site, container types.ContainerJSON, blackfire config.Blackfire) bool {
 	// check if nitro development is defined and override the image
 	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
@@ -89,7 +92,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 		return false
 	}
 
-	// check the sites hostname using the label
+	// check the sites' hostname using the label
 	if container.Config.Labels[containerlabels.Host] != site.Hostname {
 		return false
 	}
@@ -105,9 +108,24 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 		return false
 	}
 
-	// check the path
-	if len(container.Mounts) > 0 {
-		if path != container.Mounts[0].Source {
+	// check the bind mounts for the site
+	mounts, err := site.GetBindMounts(home)
+	if err != nil {
+		return false
+	}
+
+	// if there are more than 1 mount - the site is using excludes
+	switch len(mounts) == 1 {
+	case true:
+		for _, mount := range container.Mounts {
+			// make sure the only bind mount matches the path
+			if (mount.Type == "bind") && path != mount.Source {
+				return false
+			}
+		}
+	default:
+		// check the number of binds matches the number of container binds (we exclude the user home, certs, and nginx configs since they are volumes)
+		if len(mounts) != len(container.Mounts)-DEFAULT_MOUNTS {
 			return false
 		}
 	}
@@ -145,7 +163,7 @@ func checkEnvs(site config.Site, blackfire config.Blackfire, envs []string) bool
 		}
 
 		// show only the environment variables we know about/support
-		if _, ok := config.DefaultEnvs[sp[0]]; ok {
+		if _, ok := config.DefaultEnvs[env]; ok {
 			// check the value of each environment variable we want to ensure the php config is not the "default" value and that the
 			// current value from the container match
 			switch env {

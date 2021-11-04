@@ -110,12 +110,6 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
-	// get the sites path
-	path, err := site.GetAbsPath(home)
-	if err != nil {
-		return "", err
-	}
-
 	// add the site itself and any aliases to the extra hosts
 	extraHosts := []string{fmt.Sprintf("%s:%s", site.Hostname, "127.0.0.1")}
 	for _, s := range site.Aliases {
@@ -175,6 +169,12 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 		}
 	}
 
+	// determine if the site has any excludes
+	binds, err := site.GetBindMounts(home)
+	if err != nil {
+		return "", err
+	}
+
 	// set the labels
 	labels := containerlabels.ForSite(site)
 	// create the container
@@ -187,7 +187,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 			Hostname: site.Hostname,
 		},
 		&container.HostConfig{
-			Binds:      []string{fmt.Sprintf("%s:/app:rw", path)},
+			Binds:      binds,
 			ExtraHosts: extraHosts,
 			Mounts: []mount.Mount{
 				{
