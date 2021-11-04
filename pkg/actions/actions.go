@@ -12,22 +12,22 @@ import (
 // AppToContainerConfig takes an app and returns the corresponding
 // container configuration which is used to pass to the Docker API.
 func AppToContainerConfig(app config.App) *container.Config {
-	// check for custom dockerfile
-	image := fmt.Sprintf("craftcms/nitro:%s", app.PHPVersion)
-	if app.Dockerfile {
-		image = fmt.Sprintf("%s:local", app.GetHostname())
-	}
-
 	// get the hostname
 	hostname := app.GetHostname()
 
 	// create the labels
 	labels := map[string]string{
-		containerlabels.Nitro:      "true",
-		containerlabels.Host:       hostname,
-		containerlabels.Webroot:    app.Webroot,
-		containerlabels.Type:       "app",
-		containerlabels.Dockerfile: "true",
+		containerlabels.Nitro:   "true",
+		containerlabels.Host:    hostname,
+		containerlabels.Webroot: app.Webroot,
+		containerlabels.Type:    "app",
+	}
+
+	// check for custom dockerfile
+	image := fmt.Sprintf("craftcms/nitro:%s", app.PHPVersion)
+	if app.Dockerfile {
+		image = fmt.Sprintf("%s:local", app.GetHostname())
+		labels[containerlabels.Dockerfile] = "true"
 	}
 
 	// get the environment variables for the app
