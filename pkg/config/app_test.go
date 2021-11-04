@@ -30,27 +30,27 @@ func TestApp_GetHostname(t *testing.T) {
 			Engine  string `yaml:"engine,omitempty"`
 			Version string `yaml:"version,omitempty"`
 		}
-	}
-	type args struct {
-		home string
+		HomeDir string
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		args   args
 		want   string
 	}{
 		{
-			name:   "Can get the hostname from the app config",
-			fields: fields{Hostname: "mysite.nitro"},
-			want:   "mysite.nitro",
+			name: "Can get the hostname from the app config",
+			fields: fields{
+				Hostname: "mysite.nitro",
+				HomeDir:  home,
+			},
+			want: "mysite.nitro",
 		},
 		{
 			name: "Can get the hostname from the config file path",
 			fields: fields{
-				Config: "~/path-with-config/nitro.yaml",
+				Config:  "~/path-with-config/nitro.yaml",
+				HomeDir: home,
 			},
-			args: args{home: home},
 			want: "custom-hostname-from-file.nitro",
 		},
 	}
@@ -67,8 +67,9 @@ func TestApp_GetHostname(t *testing.T) {
 				Xdebug:     tt.fields.Xdebug,
 				Blackfire:  tt.fields.Blackfire,
 				Database:   tt.fields.Database,
+				HomeDir:    tt.fields.HomeDir,
 			}
-			if got := a.GetHostname(tt.args.home); got != tt.want {
+			if got := a.GetHostname(); got != tt.want {
 				t.Errorf("GetHostname() = %v, want %v", got, tt.want)
 			}
 		})
