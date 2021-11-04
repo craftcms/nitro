@@ -9,7 +9,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 )
 
-// AppToContainerConfig
+// AppToContainerConfig takes an app and returns the corresponding
+// container configuration which is used to pass to the Docker API.
 func AppToContainerConfig(app config.App) *container.Config {
 	// check for custom dockerfile
 	image := fmt.Sprintf("craftcms/nitro:%s", app.PHPVersion)
