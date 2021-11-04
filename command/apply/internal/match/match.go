@@ -14,6 +14,9 @@ import (
 	"github.com/craftcms/nitro/pkg/containerlabels"
 )
 
+// DEFAULT_MOUNTS is the number of mounts for a standard container
+const DEFAULT_MOUNTS = 3
+
 var (
 	ErrMisMatchedImage  = fmt.Errorf("container image does not match")
 	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
@@ -122,7 +125,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 		}
 	default:
 		// check the number of binds matches the number of container binds (we exclude the user home, certs, and nginx configs since they are volumes)
-		if len(mounts) != len(container.Mounts)-3 {
+		if len(mounts) != len(container.Mounts)-DEFAULT_MOUNTS {
 			return false
 		}
 	}
