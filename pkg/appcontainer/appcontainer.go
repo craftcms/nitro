@@ -35,10 +35,6 @@ func Exists(ctx context.Context, docker client.CommonAPIClient, app config.App, 
 	return false, nil
 }
 
-func Start(ctx context.Context, docker client.CommonAPIClient, containerId string) (string, error) {
-
-}
-
 func StartOrCreate(
 	ctx context.Context,
 	docker client.CommonAPIClient,

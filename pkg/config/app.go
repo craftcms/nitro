@@ -18,7 +18,7 @@ type App struct {
 	Extensions []string `yaml:"extensions,omitempty"`
 	Xdebug     bool     `yaml:"xdebug,omitempty"`
 	Blackfire  bool     `yaml:"blackfire,omitempty"`
-	Disabled   bool     `yaml:"disable,omitempty"`
+	Suspended  bool     `yaml:"suspended,omitempty"`
 	Database   struct {
 		Engine  string `yaml:"engine,omitempty"`
 		Version string `yaml:"version,omitempty"`
