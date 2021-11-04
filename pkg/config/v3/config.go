@@ -95,18 +95,17 @@ type Container struct {
 	EnvFile string   `yaml:"env_file,omitempty"`
 }
 
-// GetAppHostName
 func (c Config) GetAppHostName(hostname string) (string, error) {
-	for _, global := range c.Apps {
-		// is there a global hostname defined and does it match?
-		if (global.Hostname != "") && global.Hostname == hostname {
-			return global.Hostname, nil
+	for _, user := range c.Apps {
+		// is there a user hostname defined and does it match?
+		if user.Hostname == hostname {
+			return user.Hostname, nil
 		}
 
-		// is global hostname not defined and a config file is present?
-		if global.Hostname == "" && global.Config != "" {
+		// is user hostname not defined and a config file is present?
+		if user.Hostname == "" && user.Config != "" {
 			// is there a config?
-			p, _ := cleanPath(c.HomeDir, global.Config)
+			p, _ := cleanPath(c.HomeDir, user.Config)
 
 			local, err := unmarshalAppConfigFrom(p)
 			if err != nil {

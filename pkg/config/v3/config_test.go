@@ -9,7 +9,7 @@ import (
 func TestConfig_GetAppHostName(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
-	t.Fatal(err)
+		t.Fatal(err)
 	}
 
 	homeDir := filepath.Join(wd, "testdata")
@@ -44,7 +44,8 @@ func TestConfig_GetAppHostName(t *testing.T) {
 				},
 				HomeDir: homeDir,
 			},
-			want: "custom-hostname-from-file.nitro",
+			want:    "custom-hostname-from-file.nitro",
+			wantErr: false,
 		},
 		{
 			name: "apps with top-level config keys take precedence",
@@ -58,7 +59,22 @@ func TestConfig_GetAppHostName(t *testing.T) {
 				},
 				HomeDir: homeDir,
 			},
-			want: "mysite.nitro",
+			want:    "mysite.nitro",
+			wantErr: false,
+		},
+		{
+			name: "apps with no hostname return an error",
+			args: args{hostname: "missing.nitro"},
+			fields: fields{
+				Apps: []App{
+					{
+						PHPVersion: "8.0",
+					},
+				},
+				HomeDir: homeDir,
+			},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
