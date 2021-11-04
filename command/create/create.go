@@ -29,6 +29,8 @@ const exampleText = `  # create a new default craft project (similar to "compose
   # you can also provide shorthand urls for github
   nitro create craftcms/demo my-project`
 
+var flagExcludeDependencies bool
+
 // NewCommand returns the create command to automate the process of setting up a new Craft project.
 // It also allows you to pass an option argument that is a URL to your own github repo.
 func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Getter, output terminal.Outputer) *cobra.Command {
@@ -112,7 +114,7 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			}
 
 			// walk the user through the site
-			_, err := prompt.CreateSite(home, dir, output)
+			_, err := prompt.CreateSite(home, dir, flagExcludeDependencies, output)
 			if err != nil {
 				return err
 			}
@@ -194,6 +196,8 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVar(&flagExcludeDependencies, "exclude-deps", false, "Ignore node_modules and vendor directories when creating the container.")
 
 	return cmd
 }

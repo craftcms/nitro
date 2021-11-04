@@ -10,7 +10,7 @@ COPY . .
 RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/pkg/api/api.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
-FROM alpine:3.14
+FROM alpine:3
 
 # See https://caddyserver.com/docs/conventions#file-locations for details
 ENV XDG_CONFIG_HOME /config

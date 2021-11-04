@@ -51,7 +51,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			})
 
 			// define the table headers
-			tbl := table.New("Hostname", "Type", "Internal Ports", "External Ports", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(2)
+			tbl := table.New("Hostname", "Type", "External Ports", "Internal Ports", "Status").WithWriter(cmd.OutOrStdout()).WithPadding(2)
 
 			for _, c := range containers {
 				status := "running"
@@ -74,7 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				if cmd.Flag("services").Value.String() == "true" {
-					if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis" {
+					if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis"  && c.Labels[containerlabels.Type] != "blackfire" {
 						continue
 					}
 				}
@@ -97,7 +97,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				// get ports for the non-site containers
 				switch c.Labels[containerlabels.Host] == "" {
 				case false:
-					intPorts = append(intPorts, "80", "443", "3000", "3001")
+					intPorts = append(intPorts, "80", "443", "3000-3005")
 					extPorts = append(extPorts, "(uses proxy ports)")
 				default:
 					for _, p := range c.Ports {
@@ -115,19 +115,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				// sort the ports
-				sort.Slice(intPorts, func(i, j int) bool {
-					return intPorts[i] < intPorts[j]
-				})
-
-				sort.Slice(extPorts, func(i, j int) bool {
-					return extPorts[i] < extPorts[j]
-				})
-
 				internalPorts := strings.Join(intPorts, ",")
 				externalPorts := strings.Join(extPorts, ",")
 
-				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), internalPorts, externalPorts, status)
+				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c),externalPorts, internalPorts, status)
 			}
 
 			tbl.Print()

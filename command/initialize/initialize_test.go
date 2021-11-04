@@ -16,6 +16,16 @@ import (
 )
 
 func TestInitFromFreshCreatesNewResources(t *testing.T) {
+	// check if the development variable is set when running tests locally
+	k, defined := os.LookupEnv("NITRO_DEVELOPMENT")
+	if defined {
+		// unset for the test
+		os.Unsetenv("NITRO_DEVELOPMENT")
+
+		// set the value again
+		defer os.Setenv("NITRO_DEVELOPMENT", k)
+	}
+
 	// Arrange
 	mock := newMockDockerClient(nil, nil, nil)
 	mock.networkCreateResponse = types.NetworkCreateResponse{

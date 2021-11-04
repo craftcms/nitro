@@ -201,9 +201,14 @@ func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output te
 
 // CreateSite takes the users home directory and the site path and walked the user
 // through adding a site to the config.
-func CreateSite(home, dir string, output terminal.Outputer) (*config.Site, error) {
+func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*config.Site, error) {
 	// create a new site
 	site := config.Site{}
+
+	// are we excluding the defaults?
+	if exclude {
+		site.Excludes = append(site.Excludes, "node_modules", "vendor")
+	}
 
 	// get the hostname from the directory
 	// p := filepath.Join(dir)

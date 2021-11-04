@@ -9,6 +9,7 @@ import (
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 )
 
 func Test_checkEnvs(t *testing.T) {
@@ -326,6 +327,7 @@ func TestSite(t *testing.T) {
 					},
 					Mounts: []types.MountPoint{
 						{
+							Type: mount.TypeBind,
 							Source: filepath.Join(wd, "testdata", "new-path"),
 						},
 					},
