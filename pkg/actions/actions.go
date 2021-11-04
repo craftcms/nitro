@@ -9,7 +9,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 )
 
-func AppToContainerConfig(home string, app config.App) *container.Config {
+// AppToContainerConfig
+func AppToContainerConfig(app config.App) *container.Config {
 	// check for custom dockerfile
 	image := fmt.Sprintf("craftcms/nitro:%s", app.PHPVersion)
 	if app.Dockerfile {

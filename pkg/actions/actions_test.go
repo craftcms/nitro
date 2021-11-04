@@ -10,8 +10,7 @@ import (
 
 func TestAppToContainerConfig(t *testing.T) {
 	type args struct {
-		home string
-		app  config.App
+		app config.App
 	}
 	tests := []struct {
 		name string
@@ -21,7 +20,6 @@ func TestAppToContainerConfig(t *testing.T) {
 		{
 			name: "uses the default container images",
 			args: args{
-				home: "",
 				app: config.App{
 					Hostname:   "mysite.nitro",
 					PHPVersion: "8.0",
@@ -66,7 +64,7 @@ func TestAppToContainerConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := AppToContainerConfig(tt.args.home, tt.args.app); !reflect.DeepEqual(got, tt.want) {
+			if got := AppToContainerConfig(tt.args.app); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("AppToContainerConfig() = \ngot:\n%v\n\nwant:\n%v", got, tt.want)
 			}
 		})
