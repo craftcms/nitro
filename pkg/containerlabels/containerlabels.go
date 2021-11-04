@@ -29,6 +29,9 @@ const (
 	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
 
+	// Dockerfile is used to identify a container that uses a custom dockerfile for its image
+	Dockerfile = "com.craftcms.nitro.dockerfile"
+
 	// Extensions is used for a list of comma seperated extensions for a site
 	Extensions = "com.craftcms.nitro.extensions"
 

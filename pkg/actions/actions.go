@@ -22,10 +22,11 @@ func AppToContainerConfig(app config.App) *container.Config {
 
 	// create the labels
 	labels := map[string]string{
-		containerlabels.Nitro:   "true",
-		containerlabels.Host:    hostname,
-		containerlabels.Webroot: app.Webroot,
-		containerlabels.Type:    "app",
+		containerlabels.Nitro:      "true",
+		containerlabels.Host:       hostname,
+		containerlabels.Webroot:    app.Webroot,
+		containerlabels.Type:       "app",
+		containerlabels.Dockerfile: "true",
 	}
 
 	// get the environment variables for the app
