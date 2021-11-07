@@ -1,0 +1,4 @@
+hostname: team-site-name-from-config.nitro
+php_version: "7.4"
+webroot: web
+

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/craftcms/nitro/pkg/paths"
 	"gopkg.in/yaml.v3"
@@ -73,14 +74,59 @@ type Services struct {
 	Redis     bool `yaml:"redis"`
 }
 
-func Load() (Config, error) {
-	c := Config{}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return c, err
+// Load is responsible for loading the nitro.yaml config file.
+// It takes an optional home arg (for testing) and if the
+// home arg is not provided it will use os.UserHomeDir to
+// find the users home directory
+func Load(home string) (*Config, error) {
+	var h string
+	if home == "" {
+		var err error
+		h, err = os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		h = home
 	}
 
-	c.HomeDir = home
+	// create the config and read from the file
+	c := &Config{}
+	f, err := ioutil.ReadFile(filepath.Join(h, ".nitro", "nitro.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(f, c); err != nil {
+		return nil, err
+	}
+
+	// set the home directory in case we need it later
+	c.HomeDir = h
+
+	// load each of the apps
+	for i, global := range c.Apps {
+		// if there is a config file, load it
+		if global.Config != "" {
+			// load the file
+			p, err := paths.Clean(c.HomeDir, global.Config)
+			if err != nil {
+				return nil, err
+			}
+
+			// read the local app config file
+			local, err := unmarshalAppConfigFrom(p)
+			if err != nil {
+				return nil, err
+			}
+
+			// parse the values but global values override the local config
+			if global.Hostname != "" {
+				c.Apps[i].Hostname = global.Hostname
+			} else {
+				c.Apps[i].Hostname = local.Hostname
+			}
+		}
+	}
 
 	return c, nil
 }
