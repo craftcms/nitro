@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/paths"
 	"gopkg.in/yaml.v3"
 )
 

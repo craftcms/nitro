@@ -88,6 +88,7 @@ func TestConfig_GetAppHostName(t *testing.T) {
 				HomeDir:    tt.fields.HomeDir,
 				ConfigFile: tt.fields.ConfigFile,
 			}
+
 			got, err := c.GetAppHostName(tt.args.hostname)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAppHostName() error = %v, wantErr %v", err, tt.wantErr)
