@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/craftcms/nitro/pkg/paths"
 	"gopkg.in/yaml.v3"
@@ -105,7 +104,10 @@ func (c Config) GetAppHostName(hostname string) (string, error) {
 		// is user hostname not defined and a config file is present?
 		if user.Hostname == "" && user.Config != "" {
 			// is there a config?
-			p, _ := cleanPath(c.HomeDir, user.Config)
+			p, err := paths.Clean(c.HomeDir, user.Config)
+			if err != nil {
+				return "", err
+			}
 
 			local, err := unmarshalAppConfigFrom(p)
 			if err != nil {
@@ -117,20 +119,6 @@ func (c Config) GetAppHostName(hostname string) (string, error) {
 	}
 
 	return "", fmt.Errorf("unable to find app with hostname %q", hostname)
-}
-
-func cleanPath(home, path string) (string, error) {
-	p := path
-	if strings.Contains(p, "~") {
-		p = strings.Replace(p, "~", home, -1)
-	}
-
-	abs, err := filepath.Abs(p)
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Clean(abs), nil
 }
 
 func unmarshalAppConfigFrom(path string) (App, error) {
