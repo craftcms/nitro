@@ -133,7 +133,9 @@ func TestLoad(t *testing.T) {
 					{
 						Config:     "~/team-site-with-config/nitro.yaml",
 						Hostname:   "team-site-name-from-config.nitro",
+						Aliases:    []string{"my-local-app.test"},
 						PHPVersion: "8.0",
+						Webroot:    "public",
 					},
 				},
 				HomeDir: home,
