@@ -40,6 +40,7 @@ func TestLoad(t *testing.T) {
 						Hostname:   "team-site-name-from-config.nitro",
 						Aliases:    []string{"my-local-app.test"},
 						PHPVersion: "8.0",
+						Extensions: []string{"grpc"},
 						Webroot:    "public",
 					},
 				},

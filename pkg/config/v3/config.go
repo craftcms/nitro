@@ -156,7 +156,7 @@ func Load(home string) (*Config, error) {
 				c.Apps[i].Dockerfile = local.Dockerfile
 			}
 
-			// todo check the php settings
+			// TODO(jasonmccallister) check the php settings
 
 			// check the php extensions
 			if global.Extensions != nil {

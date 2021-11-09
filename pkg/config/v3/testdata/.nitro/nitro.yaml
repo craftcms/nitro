@@ -7,3 +7,5 @@ apps:
     aliases:
       - my-local-app.test
     php_version: "8.0"
+    extensions:
+      - grpc
