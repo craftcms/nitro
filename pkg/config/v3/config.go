@@ -251,33 +251,6 @@ type Container struct {
 	EnvFile string   `yaml:"env_file,omitempty"`
 }
 
-func (c Config) GetAppHostName(hostname string) (string, error) {
-	for _, user := range c.Apps {
-		// is there a user hostname defined and does it match?
-		if user.Hostname == hostname {
-			return user.Hostname, nil
-		}
-
-		// is user hostname not defined and a config file is present?
-		if user.Hostname == "" && user.Config != "" {
-			// is there a config?
-			p, err := paths.Clean(c.HomeDir, user.Config)
-			if err != nil {
-				return "", err
-			}
-
-			local, err := unmarshalAppConfigFrom(p)
-			if err != nil {
-				return "", err
-			}
-
-			return local.Hostname, nil
-		}
-	}
-
-	return "", fmt.Errorf("unable to find app with hostname %q", hostname)
-}
-
 func unmarshalAppConfigFrom(path string) (App, error) {
 	var app App
 	f, err := ioutil.ReadFile(path)
