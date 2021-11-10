@@ -27,10 +27,12 @@ func Find(path string) (string, error) {
 			continue
 		}
 
+		// is this a known webroot?
 		if info.Name() == "web" || info.Name() == "public" || info.Name() == "public_html" || info.Name() == "html" {
 			return info.Name(), nil
 		}
 	}
 
-	return "", ErrNotFound
+	// always return web if we can't find anything here
+	return "web", nil
 }
