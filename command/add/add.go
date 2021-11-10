@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/paths"
+	"github.com/craftcms/nitro/pkg/validate"
+	"github.com/craftcms/nitro/pkg/webroot"
 	"github.com/docker/docker/client"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -17,19 +21,19 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # add the current directory as a site
+const exampleText = `  # add the current working directory as an app
   nitro add
 
-  # add a directory as the site
+  # add the specified directory as the app directory
   nitro add my-project`
 
 var flagExcludeDependencies bool
 
-// NewCommand returns the command to add a site to the nitro config.
+// NewCommand returns the command to add an app to the nitro config.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add",
-		Short:   "Adds a site.",
+		Short:   "Adds an app.",
 		Example: exampleText,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
@@ -48,9 +52,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var dir string
 			switch len(args) {
 			case 1:
-				// check if the path is using the ~
+				// check if the arg is using a relative path ~
 				if strings.HasPrefix(args[0], "~") {
-					dir = strings.Replace(args[0], "~", home, 1)
+					dir, err = paths.Clean(home, args[0])
+					if err != nil {
+						return fmt.Errorf("unable to locate the directory, err: %s", err)
+					}
 				} else {
 					dir = filepath.Join(args[0])
 				}
@@ -63,15 +70,76 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				dir = filepath.Clean(wd)
 			}
 
-			output.Info("Adding site…")
+			output.Info("Adding app…")
 
-			if _, err := prompt.CreateSite(home, dir, flagExcludeDependencies, output); err != nil {
+			app := config.App{}
+
+			// are we excluding any dependencies?
+			if flagExcludeDependencies {
+				app.Excludes = []string{"node_modules", "vendor"}
+			}
+
+			// generate a hostname for the app using the directory
+			sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
+			app.Hostname = sp[len(sp)-1]
+			// append the nitro domain if there are no periods in the hostname
+			if !strings.Contains(app.Hostname, ".") {
+				// set the default tld
+				tld := "nitro"
+				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+					tld = os.Getenv("NITRO_DEFAULT_TLD")
+				}
+
+				app.Hostname = fmt.Sprintf("%s.%s", app.Hostname, tld)
+			}
+
+			// prompt the user to validate the hostname
+			hostname, err := output.Ask("Enter the hostname", app.Hostname, ":", &validate.HostnameValidator{})
+			if err != nil {
+				return err
+			}
+			output.Success("setting the app hostname to", hostname)
+
+			// set the apps path and replace the full path with a relative using ~
+			abs, err := filepath.Abs(dir)
+			if err != nil {
+				return fmt.Errorf("unable to find the absolute path to the app, err: %s", err)
+			}
+			app.Path = strings.Replace(abs, home, "~", 1)
+			output.Success("adding app", app.Path)
+
+			// find the apps webroot from the directory
+			found, err := webroot.Find(dir)
+			if err != nil {
+				return fmt.Errorf("unable to find the webroot for the app, err: %s", err)
+			}
+
+			// prompt for the web root
+			root, err := output.Ask("Enter the web root for the app", found, ":", nil)
+			if err != nil {
+				return err
+			}
+			app.Webroot = root
+			output.Success("using web root", app.Webroot)
+
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// add the app
+			if err := cfg.AddApp(app); err != nil {
+				return err
+			}
+
+			// save the config
+			if err := cfg.Save(); err != nil {
 				return err
 			}
 
 			exampleEnv := filepath.Join(dir, ".env.example")
 			envFilePath := filepath.Join(dir, ".env")
-
 			// check if the directory has a .env-example
 			if pathexists.IsFile(exampleEnv) && !pathexists.IsFile(envFilePath) {
 				// open the example
@@ -113,7 +181,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				envVars["DB_DRIVER"] = driver
 			}
 
-			// if the wanted a new database edit the env
+			// if they wanted a new database edit the env
 			if pathexists.IsFile(envFilePath) {
 				// ask the user if we should update the .env?
 				updateEnv, err := output.Confirm("Should we update the env file?", false, "")
@@ -155,13 +223,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info("New site added! 🎉")
+			output.Info("New app", app.Hostname, "added! 🎉")
 
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&flagExcludeDependencies, "exclude-deps", false, "Ignore node_modules and vendor directories when creating the container.")
+	cmd.Flags().BoolVar(&flagExcludeDependencies, "exclude-deps", false, "Ignore node_modules and vendor directories when creating the app container.")
 
 	return cmd
 }
