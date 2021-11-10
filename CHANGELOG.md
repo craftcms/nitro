@@ -29,6 +29,9 @@
 - The `destroy` command will now remove container volumes.
 - Fixed an error when the webroot would return an incorrect directory.
 
+### Removed
+- Removed the deprecated `clean` command.
+
 ## 2.0.8 - 2021-05-18
 
 ### Added

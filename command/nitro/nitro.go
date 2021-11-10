@@ -10,7 +10,6 @@ import (
 	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/blackfire"
 	"github.com/craftcms/nitro/command/bridge"
-	"github.com/craftcms/nitro/command/clean"
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/container"
@@ -98,14 +97,13 @@ func NewCommand() *cobra.Command {
 	// create the downloaded for creating projects
 	downloader := downloader.NewDownloader()
 
-	// register all of the commands
+	// register the commands
 	commands := []*cobra.Command{
 		add.NewCommand(home, docker, term),
 		alias.NewCommand(home, docker, term),
 		apply.NewCommand(home, docker, nitrod, term),
 		blackfire.NewCommand(home, docker, term),
 		bridge.NewCommand(home, docker, term),
-		clean.NewCommand(home, docker, term),
 		completion.NewCommand(),
 		composer.NewCommand(home, docker, term),
 		container.NewCommand(home, docker, term),
