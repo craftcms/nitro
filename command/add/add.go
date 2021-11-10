@@ -21,12 +21,6 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # add the current working directory as an app
-  nitro add
-
-  # add the specified directory as the app directory
-  nitro add my-project`
-
 var flagExcludeDependencies bool
 
 // NewCommand returns the command to add an app to the nitro config.
@@ -34,7 +28,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd := &cobra.Command{
 		Use:     "add",
 		Short:   "Adds an app.",
-		Example: exampleText,
+		Example: `  # add the current working directory as an app
+  nitro add
+
+  # add the specified directory as the app directory
+  nitro add my-project`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
 		},
