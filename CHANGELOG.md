@@ -12,6 +12,7 @@
 - Added the ability to exclude directories from a site bind mounts to improve performance.
 
 ### Changed
+- Renamed sites to apps and updated the commands. ([#420](https://github.com/craftcms/nitro/issues/420))
 - The `composer` command now accepts site arguments. ([#364](https://github.com/craftcms/nitro/issues/364))
 - The site containers now use Debian based images.
 - Node and npm are now included with nvm in the images.
