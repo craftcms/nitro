@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/craftcms/nitro/pkg/helpers"
 	"github.com/craftcms/nitro/pkg/paths"
 	"gopkg.in/yaml.v3"
 )
@@ -30,6 +31,7 @@ type App struct {
 	Webroot    string   `yaml:"webroot,omitempty"`
 	PHPVersion string   `yaml:"php_version,omitempty"`
 	Dockerfile bool     `yaml:"dockerfile,omitempty"`
+	Excludes   []string `yaml:"excludes,omitempty"`
 	PHP        struct {
 		DisplayErrors             bool   `yaml:"display_errors,omitempty"`
 		MaxExecutionTime          int    `yaml:"max_execution_time,omitempty"`
@@ -74,6 +76,63 @@ type Services struct {
 	Redis     bool `yaml:"redis"`
 }
 
+func (c *Config) AddApp(app App) error {
+	c.Apps = append(c.Apps, app)
+	return nil
+}
+
+// Save takes a file path and marshals the config into a file.
+func (c *Config) Save() error {
+	// make sure the file exists
+	if _, err := os.Stat(c.ConfigFile); os.IsNotExist(err) {
+		dir, _ := filepath.Split(c.ConfigFile)
+
+		if err := c.createFile(dir); err != nil {
+			return err
+		}
+	}
+
+	// open the file
+	f, err := os.OpenFile(c.ConfigFile, os.O_TRUNC|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+
+	// unmarshal
+	data, err := yaml.Marshal(&c)
+	if err != nil {
+		return err
+	}
+
+	// write the content
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return f.Close()
+}
+
+func (c *Config) createFile(dir string) error {
+	// create the .nitro directory if it does not exist
+	if err := helpers.MkdirIfNotExists(dir); err != nil {
+		return err
+	}
+
+	// otherwise create it
+	f, err := os.Create(c.ConfigFile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// try to chown otherwise be quiet
+	if err := f.Chown(os.Geteuid(), os.Getuid()); err != nil {
+		return nil
+	}
+
+	return nil
+}
+
 // Load is responsible for loading the nitro.yaml config file.
 // It takes an optional home arg (for testing) and if the
 // home arg is not provided it will use os.UserHomeDir to
@@ -90,9 +149,13 @@ func Load(home string) (*Config, error) {
 		h = home
 	}
 
+	// find the file path
+	file := filepath.Join(h, ".nitro", "nitro.yaml")
+
 	// create the config and read from the file
-	c := &Config{}
-	f, err := ioutil.ReadFile(filepath.Join(h, ".nitro", "nitro.yaml"))
+	c := &Config{ConfigFile: file}
+
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
