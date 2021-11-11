@@ -11,6 +11,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	// ConfigDirectory the name of the directory
+	ConfigDirectory = ".nitro"
+
+	// ConfigFile is the name of the yaml file
+	ConfigFile = "nitro.yaml"
+)
+
 type Config struct {
 	Containers []Container `yaml:"containers,omitempty"`
 	Blackfire  Blackfire   `yaml:"blackfire,omitempty"`
@@ -66,6 +74,18 @@ type Database struct {
 	Engine  string `yaml:"engine"`
 	Version string `yaml:"version"`
 	Port    string `yaml:"port"`
+}
+
+// GetHostname returns a friendly and predictable name for a database
+// container. It is used for accessing a database by hostname. For
+// example, mysql-8.0-3306 would be the hostname to use in the .env
+// for DB_HOST.
+func (d *Database) GetHostname() (string, error) {
+	if d.Engine == "" || d.Version == "" || d.Port == "" {
+		return "", fmt.Errorf("the engine, version, and port must be defined for the database")
+	}
+
+	return fmt.Sprintf("%s-%s-%s.database.nitro", d.Engine, d.Version, d.Port), nil
 }
 
 type Services struct {
@@ -150,7 +170,7 @@ func Load(home string) (*Config, error) {
 	}
 
 	// find the file path
-	file := filepath.Join(h, ".nitro", "nitro.yaml")
+	file := filepath.Join(h, ConfigDirectory, ConfigFile)
 
 	// create the config and read from the file
 	c := &Config{ConfigFile: file}
