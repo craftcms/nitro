@@ -165,19 +165,7 @@ type App struct {
 	PHPVersion string   `yaml:"php_version,omitempty"`
 	Dockerfile bool     `yaml:"dockerfile,omitempty"`
 	Excludes   []string `yaml:"excludes,omitempty"`
-	PHP        struct {
-		DisplayErrors             bool   `yaml:"display_errors,omitempty"`
-		MaxExecutionTime          int    `yaml:"max_execution_time,omitempty"`
-		MaxInputVars              int    `yaml:"max_input_vars,omitempty"`
-		MaxInputTime              int    `yaml:"max_input_time,omitempty"`
-		MaxFileUpload             string `yaml:"max_file_upload,omitempty"`
-		MemoryLimit               string `yaml:"memory_limit,omitempty"`
-		OpcacheEnable             bool   `yaml:"opcache_enable,omitempty"`
-		OpcacheRevalidateFreq     int    `yaml:"opcache_revalidate_freq,omitempty"`
-		OpcacheValidateTimestamps bool   `yaml:"opcache_validate_timestamps,omitempty"`
-		PostMaxSize               string `yaml:"post_max_size,omitempty"`
-		UploadMaxFileSize         string `yaml:"upload_max_file_size,omitempty"`
-	} `yaml:"php,omitempty"`
+	PHP        PHP      `yaml:"php,omitempty"`
 	Extensions []string `yaml:"extensions,omitempty"`
 	Xdebug     bool     `yaml:"xdebug,omitempty"`
 	Blackfire  bool     `yaml:"blackfire,omitempty"`
@@ -636,7 +624,6 @@ func Load(home string) (*Config, error) {
 			}
 		}
 	}
-
 
 	// return the config
 	return c, nil

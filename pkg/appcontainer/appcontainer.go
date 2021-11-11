@@ -12,6 +12,7 @@ import (
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/envvars"
+	"github.com/craftcms/nitro/pkg/match"
 	"github.com/craftcms/nitro/pkg/nginx"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
@@ -33,7 +34,7 @@ type command struct {
 	Commands []string
 }
 
-func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
+func StartOrCreate(home string, ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
 	// check if nitro development is defined and override the image
 	if _, ok := os.LookupEnv("NITRO_DEVELOPMENT"); ok {
 		Image = "craftcms/nitro:%s"
@@ -50,11 +51,43 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, cfg *conf
 	}
 
 	// if there are no containers, create one
-	if len(containers) > 0 {
-		return "", fmt.Errorf("not yet handling starting containers")
+	if len(containers) == 0 {
+		return create(ctx, docker, cfg, app, networkID)
 	}
 
-	return create(ctx, docker, cfg, app, networkID)
+	// there is a container so get the first one
+	c := containers[0]
+	if c.State != "running" {
+		if err := docker.ContainerStart(ctx, c.ID, types.ContainerStartOptions{}); err != nil {
+			return "", err
+		}
+	}
+
+	// get the containers details that include environment variables
+	details, err := docker.ContainerInspect(ctx, c.ID)
+	if err != nil {
+		return "", err
+	}
+
+	// if the container is out of date
+	if !match.App(home, app, details, cfg.Blackfire) {
+		fmt.Print("- updating… ")
+
+		// stop container
+		if err := docker.ContainerStop(ctx, c.ID, nil); err != nil {
+			return "", err
+		}
+
+		// remove container
+		if err := docker.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{}); err != nil {
+			return "", err
+		}
+
+		return create(ctx, docker, cfg, app, networkID)
+	}
+
+	return c.ID, nil
+
 }
 
 func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {

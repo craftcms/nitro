@@ -2,7 +2,7 @@
 FROM caddy:2.4.3-alpine AS caddy
 
 # build the api
-FROM golang:1.16-alpine AS builder
+FROM golang:alpine AS builder
 ARG NITRO_VERSION
 ENV NITRO_VERSION=${NITRO_VERSION}
 WORKDIR /go/src/github.com/craftcms/nitro
