@@ -1,9 +1,20 @@
 package bindmounts
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
+
+	config "github.com/craftcms/nitro/pkg/config/v3"
 )
+
+func ForApp(app config.App) ([]string, error) {
+	if len(app.Excludes) > 0 {
+
+	}
+
+	return nil, fmt.Errorf("we are not done")
+}
 
 // FromDir takes a directory path and a list of directories to exclude and returns the
 // absolute path to each directory and file that should be bind mounted into a container.
