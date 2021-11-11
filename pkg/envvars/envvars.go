@@ -27,7 +27,7 @@ var (
 	}
 )
 
-func BlackfireCredentials(c config.Config) ([]string, error) {
+func GetBlackfireClientCredentials(c config.Config) ([]string, error) {
 	if c.Blackfire.ClientID == "" || c.Blackfire.ClientToken == "" {
 		return nil, fmt.Errorf("no blackfire client credentials provided")
 	}
@@ -35,6 +35,19 @@ func BlackfireCredentials(c config.Config) ([]string, error) {
 	var envs []string
 	envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
 	envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
+
+	return envs, nil
+}
+
+// GetBlackfireServerCredentials is used to return the blackfire credentials from the config
+func GetBlackfireServerCredentials(c config.Config) ([]string, error) {
+	if c.Blackfire.ServerID == "" || c.Blackfire.ServerToken == "" {
+		return nil, fmt.Errorf("no blackfire server credentials provided")
+	}
+
+	var envs []string
+	envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
+	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
 
 	return envs, nil
 }

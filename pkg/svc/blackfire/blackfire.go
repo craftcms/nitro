@@ -62,7 +62,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			}
 
 			// get the blackfire server credentials from the config
-			credentials, err := envvars.BlackfireCredentials(cfg)
+			credentials, err := envvars.GetBlackfireServerCredentials(cfg)
 			if err != nil {
 				return "", "", err
 			}
@@ -122,7 +122,7 @@ func create(ctx context.Context, cli client.CommonAPIClient, networkID string, c
 		return "", "", fmt.Errorf("unable to read output while pulling image, %w", err)
 	}
 
-	credentials, err := envvars.BlackfireCredentials(cfg)
+	credentials, err := envvars.GetBlackfireServerCredentials(cfg)
 	if err != nil {
 		return "", "", err
 	}

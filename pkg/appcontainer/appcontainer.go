@@ -95,7 +95,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Conf
 	// does the config have blackfire credentials
 	if app.Blackfire {
 		// grab the credentials from the config
-		credentials, err := envvars.BlackfireCredentials(*cfg)
+		credentials, err := envvars.GetBlackfireClientCredentials(*cfg)
 		if err != nil {
 			return "", err
 		}
