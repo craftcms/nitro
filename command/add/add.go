@@ -9,6 +9,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/paths"
+	"github.com/craftcms/nitro/pkg/phpversions"
 	"github.com/craftcms/nitro/pkg/validate"
 	"github.com/craftcms/nitro/pkg/webroot"
 	"github.com/docker/docker/client"
@@ -96,6 +97,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if err != nil {
 				return err
 			}
+			if app.Hostname != hostname {
+				app.Hostname = hostname
+			}
 			output.Success("setting the app hostname to", hostname)
 
 			// set the apps path and replace the full path with a relative using ~
@@ -119,6 +123,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 			app.Webroot = root
 			output.Success("using web root", app.Webroot)
+
+			// prompt for the php version
+			versions := phpversions.Versions
+			selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
+			if err != nil {
+				return err
+			}
+
+			// set the version of php
+			app.PHPVersion = versions[selected]
 
 			// load the config
 			cfg, err := config.Load(home)
