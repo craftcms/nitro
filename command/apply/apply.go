@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/craftcms/nitro/pkg/appcontainer"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -18,9 +19,8 @@ import (
 
 	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
 	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
-	"github.com/craftcms/nitro/command/apply/internal/sitecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
-	"github.com/craftcms/nitro/pkg/config"
+	config "github.com/craftcms/nitro/pkg/config/v3"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/wsl"
 
@@ -60,7 +60,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
 			if _, err := docker.Ping(cmd.Context()); err != nil {
-				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+				return fmt.Errorf("couldn’t connect to Docker; please make sure Docker is running")
 			}
 
 			return nil
@@ -79,12 +79,12 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				return err
 			}
 
-			// store all of the known container names
+			// store the known container names
 			names := map[string]bool{}
 
-			// get all of the sites as hostnames
-			for _, s := range cfg.Sites {
-				names[s.Hostname] = true
+			// get the apps as hostnames
+			for _, a := range cfg.Apps {
+				names[a.Hostname] = true
 			}
 
 			// get the containers as hostnames
@@ -92,7 +92,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				names[fmt.Sprintf("%s%s", c.Name, customcontainer.Suffix)] = true
 			}
 
-			// get all of the databases
+			// get the databases
 			for _, d := range cfg.Databases {
 				h, _ := d.GetHostname()
 				names[h] = true
@@ -127,7 +127,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro+"=true")
 
-			// look for a container for the site
+			// look for a container for the app
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return fmt.Errorf("error getting a list of containers")
@@ -165,7 +165,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 					// only perform a backup if the container is for databases
 					if c.Labels[containerlabels.DatabaseEngine] != "" {
-						// get all of the databases
+						// get the databases
 						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
 						if err != nil {
 							output.Warning()
@@ -446,7 +446,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			if len(cfg.Containers) > 0 {
-				// get all of the containers
+				// get all containers
 				output.Info("Checking containers…")
 
 				for _, c := range cfg.Containers {
@@ -463,16 +463,16 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				}
 			}
 
-			if len(cfg.Sites) > 0 {
-				// get all of the sites, their local path, the php version, and the type of project (nginx or PHP-FPM)
+			if len(cfg.Apps) > 0 {
+				// get all apps, their local path, the php version, and the type of project (nginx or PHP-FPM)
 				output.Info("Checking sites…")
 
 				// get the envs for the sites
-				for _, site := range cfg.Sites {
-					output.Pending("checking", site.Hostname)
+				for _, app := range cfg.Apps {
+					output.Pending("checking", app.Hostname)
 
 					// start, update or create the site container
-					_, err := sitecontainer.StartOrCreate(ctx, docker, home, network.ID, site, cfg)
+					_, err := appcontainer.StartOrCreate(ctx, docker, cfg, app, network.ID)
 					if err != nil {
 						output.Warning()
 						return err
@@ -500,9 +500,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// get all possible hostnames
-			for _, s := range cfg.Sites {
-				hostnames = append(hostnames, s.Hostname)
-				hostnames = append(hostnames, s.Aliases...)
+			for _, a := range cfg.Apps {
+				hostnames = append(hostnames, a.Hostname)
+				hostnames = append(hostnames, a.Aliases...)
 			}
 
 			// get custom container hostnames
@@ -519,7 +519,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					defaultFile = `C:\Windows\System32\Drivers\etc\hosts`
 				}
 
-				// check if hosts is already up to date
+				// check if hosts is already up-to-date
 				updated, err := hostedit.IsUpdated(defaultFile, "127.0.0.1", hostnames...)
 				if err != nil {
 					return err
@@ -536,7 +536,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 					// run the hosts command
 					switch runtime.GOOS {
 					case "windows":
-						// windows users should be running as admin, so just execute the hosts command
+						// Windows users should be running as admin, so just execute the hosts command
 						// as is
 						c := exec.Command(nitro, "hosts", "--hostnames="+strings.Join(hostnames, ","))
 
@@ -569,19 +569,19 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg *config.Config) error {
 	// convert the sites into the gRPC API Apply request
-	sites := make(map[string]*protob.Site)
-	for _, s := range cfg.Sites {
+	apps := make(map[string]*protob.Site)
+	for _, a := range cfg.Apps {
 		// create the site
-		sites[s.Hostname] = &protob.Site{
-			Hostname: s.Hostname,
-			Aliases:  strings.Join(s.Aliases, ","),
+		apps[a.Hostname] = &protob.Site{
+			Hostname: a.Hostname,
+			Aliases:  strings.Join(a.Aliases, ","),
 			Port:     80,
 		}
 	}
 
 	// check the mailhog service
 	if cfg.Services.Mailhog {
-		sites["mailhog.service.nitro"] = &protob.Site{
+		apps["mailhog.service.nitro"] = &protob.Site{
 			Hostname: "mailhog.service.nitro",
 			Port:     8025,
 		}
@@ -589,7 +589,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 
 	// check the minio service
 	if cfg.Services.Minio {
-		sites["minio.service.nitro"] = &protob.Site{
+		apps["minio.service.nitro"] = &protob.Site{
 			Hostname: "minio.service.nitro",
 			Port:     9000,
 		}
@@ -597,16 +597,16 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 
 	// add any custom containers that need to be proxied
 	for _, c := range cfg.Containers {
-		if c.WebGui != 0 {
-			sites[fmt.Sprintf("%s.containers.nitro", c.Name)] = &protob.Site{
+		if c.WebUI != 0 {
+			apps[fmt.Sprintf("%s.containers.nitro", c.Name)] = &protob.Site{
 				Hostname: fmt.Sprintf("%s.containers.nitro", c.Name),
-				Port:     int32(c.WebGui),
+				Port:     int32(c.WebUI),
 			}
 		}
 	}
 
 	// if there are no sites, we are done
-	if len(sites) == 0 {
+	if len(apps) == 0 {
 		return nil
 	}
 
@@ -619,7 +619,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 	}
 
 	// configure the proxy with the sites
-	resp, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: sites})
+	resp, err := nitrod.Apply(ctx, &protob.ApplyRequest{Sites: apps})
 	if err != nil {
 		return err
 	}
