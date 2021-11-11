@@ -26,23 +26,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "ssh",
 		Short:   "Opens a shell in a container.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveNoFileComp
-		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
 			if _, err := docker.Ping(cmd.Context()); err != nil {
-				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+				return fmt.Errorf("couldn’t connect to Docker; please make sure Docker is running")
 			}
 
 			return nil
