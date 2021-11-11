@@ -465,7 +465,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			if len(cfg.Apps) > 0 {
 				// get all apps, their local path, the php version, and the type of project (nginx or PHP-FPM)
-				output.Info("Checking sites…")
+				output.Info("Checking apps…")
 
 				// get the envs for the sites
 				for _, app := range cfg.Apps {

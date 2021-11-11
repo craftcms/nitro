@@ -115,7 +115,7 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 	}
 
 	// check the bind mounts for the site
-	mounts, err := bindmounts.ForApp(app)
+	mounts, err := bindmounts.ForApp(app, home)
 	if err != nil {
 		return false
 	}

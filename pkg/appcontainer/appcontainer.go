@@ -87,7 +87,6 @@ func StartOrCreate(home string, ctx context.Context, docker client.CommonAPIClie
 	}
 
 	return c.ID, nil
-
 }
 
 func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
@@ -171,7 +170,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Conf
 	}
 
 	// determine if the site has any excludes
-	binds, err := bindmounts.ForApp(app)
+	binds, err := bindmounts.ForApp(app, cfg.HomeDirectory)
 	if err != nil {
 		return "", err
 	}

@@ -6,17 +6,31 @@ import (
 	"path/filepath"
 
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/paths"
 )
 
-func ForApp(app config.App) ([]string, error) {
-	if len(app.Excludes) > 0 {
-
+func ForApp(app config.App, home string) ([]string, error) {
+	path, err := paths.Clean(home, app.Path)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, fmt.Errorf("we are not done")
+	if len(app.Excludes) > 0 {
+		var binds []string
+		for _, v := range FromDir(path, app.Excludes) {
+			_, f := filepath.Split(v)
+
+			binds = append(binds, fmt.Sprintf("%s:/app/%s:rw", v, f))
+		}
+
+		return binds, nil
+	}
+
+	// return the entire directory as the bind mount
+	return []string{fmt.Sprintf("%s:/app:rw", path)}, nil
 }
 
-func ForSite(s config.Site, home string) ([]string, error)  {
+func ForSite(s config.Site, home string) ([]string, error) {
 	// get the abs path for the site
 	path, err := s.GetAbsPath(home)
 	if err != nil {
@@ -37,7 +51,6 @@ func ForSite(s config.Site, home string) ([]string, error)  {
 
 	// return the entire directory as the bind mount
 	return []string{fmt.Sprintf("%s:/app:rw", path)}, nil
-
 }
 
 // FromDir takes a directory path and a list of directories to exclude and returns the
