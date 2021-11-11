@@ -605,7 +605,7 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 		}
 	}
 
-	// if there are no sites, we are done
+	// if there are no apps, we are done
 	if len(apps) == 0 {
 		return nil
 	}

@@ -51,12 +51,12 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	}
 
 	// get the containers details that include environment variables
-	details, err := docker.ContainerInspect(ctx, container.ID)
+	_, err = docker.ContainerInspect(ctx, container.ID)
 	if err != nil {
 		return "", err
 	}
 
-	return "", fmt.Errorf("not yet implemented", details)
+	return "", fmt.Errorf("not yet implemented")
 
 	// if the container is out of date
 	// if err := match.Container(home, c, details); err != nil {
