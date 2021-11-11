@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"

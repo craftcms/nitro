@@ -3,7 +3,7 @@ package envvars
 import (
 	"fmt"
 
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 	}
 )
 
-func BlackfireCredentials(c *config.Config) ([]string, error)  {
+func BlackfireCredentials(c config.Config) ([]string, error) {
 	if c.Blackfire.ClientID == "" || c.Blackfire.ClientToken == "" {
 		return nil, fmt.Errorf("no blackfire client credentials provided")
 	}

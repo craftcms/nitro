@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/bindmounts"
 	"github.com/docker/docker/api/types"
 
 	"github.com/craftcms/nitro/pkg/config"
@@ -109,7 +110,7 @@ func Site(home string, site config.Site, container types.ContainerJSON, blackfir
 	}
 
 	// check the bind mounts for the site
-	mounts, err := site.GetBindMounts(home)
+	mounts, err := bindmounts.ForSite(site, home)
 	if err != nil {
 		return false
 	}

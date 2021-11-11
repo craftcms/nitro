@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/pkg/bindmounts"
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/envvars"
 	"github.com/craftcms/nitro/pkg/nginx"
@@ -95,7 +95,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Conf
 	// does the config have blackfire credentials
 	if app.Blackfire {
 		// grab the credentials from the config
-		credentials, err := envvars.BlackfireCredentials(cfg)
+		credentials, err := envvars.BlackfireCredentials(*cfg)
 		if err != nil {
 			return "", err
 		}

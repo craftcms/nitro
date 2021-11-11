@@ -19,7 +19,7 @@ import (
 
 	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
 	"github.com/craftcms/nitro/pkg/backup"
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/databasecontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
@@ -205,7 +205,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						}
 
 						// show where all backups are saved for this container
-						output.Info("Backups saved in", filepath.Join(home, config.ConfigDirectory, name), "💾")
+						output.Info("Backups saved in", filepath.Join(home, config.DirectoryName, name), "💾")
 					}
 
 					// stop and remove a container we don't know about
@@ -597,10 +597,10 @@ func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod p
 
 	// add any custom containers that need to be proxied
 	for _, c := range cfg.Containers {
-		if c.WebUI != 0 {
+		if c.WebGui != 0 {
 			apps[fmt.Sprintf("%s.containers.nitro", c.Name)] = &protob.Site{
 				Hostname: fmt.Sprintf("%s.containers.nitro", c.Name),
-				Port:     int32(c.WebUI),
+				Port:     int32(c.WebGui),
 			}
 		}
 	}

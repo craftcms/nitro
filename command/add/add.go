@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/paths"
 	"github.com/craftcms/nitro/pkg/validate"
 	"github.com/craftcms/nitro/pkg/webroot"
@@ -26,8 +26,8 @@ var flagExcludeDependencies bool
 // NewCommand returns the command to add an app to the nitro config.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "add",
-		Short:   "Adds an app.",
+		Use:   "add",
+		Short: "Adds an app.",
 		Example: `  # add the current working directory as an app
   nitro add
 

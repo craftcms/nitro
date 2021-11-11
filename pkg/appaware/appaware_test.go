@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 func TestDetect(t *testing.T) {

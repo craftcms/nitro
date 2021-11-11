@@ -3,7 +3,7 @@ package appaware
 import (
 	"fmt"
 
-	config "github.com/craftcms/nitro/pkg/config/v3"
+	"github.com/craftcms/nitro/pkg/config"
 )
 
 func Detect(cfg config.Config, dir string) (*config.App, error)  {

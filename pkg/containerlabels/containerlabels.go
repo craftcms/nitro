@@ -3,8 +3,7 @@ package containerlabels
 import (
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/config"
-	v3 "github.com/craftcms/nitro/pkg/config/v3"
+	 "github.com/craftcms/nitro/pkg/config"
 	"github.com/docker/docker/api/types"
 )
 
@@ -62,7 +61,7 @@ const (
 )
 
 // ForApp takes an app and returns labels to use on the app container.
-func ForApp(a v3.App) map[string]string {
+func ForApp(a config.App) map[string]string {
 	labels := map[string]string{
 		Nitro:   "true",
 		Host:    a.Hostname,
@@ -79,19 +78,20 @@ func ForApp(a v3.App) map[string]string {
 }
 
 // ForAppVolume takes a site and returns labels to use on the sites home volume.
-func ForAppVolume(a v3.App) map[string]string {
+func ForAppVolume(a config.App) map[string]string {
 	return map[string]string{
 		Nitro: "true",
 		Host:  a.Hostname,
 	}
 }
 
-// ForSite takes a site and returns labels to use on the site container.
+// ForSite takes an app and returns labels to use on the app container.
 func ForSite(s config.Site) map[string]string {
 	labels := map[string]string{
 		Nitro:   "true",
 		Host:    s.Hostname,
 		Webroot: s.Webroot,
+		Type:    "app",
 	}
 
 	// if there are extensions, add them as comma separated
