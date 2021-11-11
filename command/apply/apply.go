@@ -18,10 +18,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
-	"github.com/craftcms/nitro/command/apply/internal/databasecontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	config "github.com/craftcms/nitro/pkg/config/v3"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/databasecontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 
 	"github.com/craftcms/nitro/pkg/datetime"
@@ -205,7 +205,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						}
 
 						// show where all backups are saved for this container
-						output.Info("Backups saved in", filepath.Join(home, config.DirectoryName, name), "💾")
+						output.Info("Backups saved in", filepath.Join(home, config.ConfigDirectory, name), "💾")
 					}
 
 					// stop and remove a container we don't know about
