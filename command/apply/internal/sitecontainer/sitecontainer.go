@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
-	"github.com/craftcms/nitro/command/apply/internal/nginx"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/nginx"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
