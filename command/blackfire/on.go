@@ -21,7 +21,7 @@ func onCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 		Short:   "Enables Blackfire for a site.",
 		Example: onTest,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -41,7 +41,7 @@ func onCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}

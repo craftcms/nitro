@@ -515,7 +515,7 @@ type PHP struct {
 // Load is used to return the unmarshalled config, and
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
-func Load(home string) (*Config, error) {
+func Load(home string, preload bool) (*Config, error) {
 	file, err := IsEmpty(home)
 	if err != nil {
 		return nil, err
@@ -538,101 +538,103 @@ func Load(home string) (*Config, error) {
 		return nil, err
 	}
 
-	// load each of the apps
-	for i, global := range c.Apps {
-		// if there is a config file, load it
-		if global.Config != "" {
-			// load the file
-			p, err := paths.Clean(c.HomeDirectory, global.Config)
-			if err != nil {
-				return nil, err
-			}
+	if preload {
+		// load each of the apps
+		for i, global := range c.Apps {
+			// if there is a config file, load it
+			if global.Config != "" {
+				// load the file
+				p, err := paths.Clean(c.HomeDirectory, global.Config)
+				if err != nil {
+					return nil, err
+				}
 
-			// read the local app config file
-			local, err := unmarshalAppConfigFrom(p)
-			if err != nil {
-				return nil, err
-			}
+				// read the local app config file
+				local, err := unmarshalAppConfigFrom(p)
+				if err != nil {
+					return nil, err
+				}
 
-			// parse the values but global values override the global config if present
+				// parse the values but global values override the global config if present
 
-			// check the hostname
-			if hostname, err := parseStringValue(global, local, "hostname"); err == nil {
-				c.Apps[i].Hostname = hostname
-			} else if err != nil {
-				return c, err
-			}
+				// check the hostname
+				if hostname, err := parseStringValue(global, local, "hostname"); err == nil {
+					c.Apps[i].Hostname = hostname
+				} else if err != nil {
+					return c, err
+				}
 
-			// check the aliases
-			if global.Aliases != nil {
-				c.Apps[i].Aliases = global.Aliases
-			} else if local.Aliases != nil {
-				c.Apps[i].Aliases = local.Aliases
-			}
+				// check the aliases
+				if global.Aliases != nil {
+					c.Apps[i].Aliases = global.Aliases
+				} else if local.Aliases != nil {
+					c.Apps[i].Aliases = local.Aliases
+				}
 
-			// check the webroot
-			if webroot, err := parseStringValue(global, local, "webroot"); err == nil {
-				c.Apps[i].Webroot = webroot
-			} else if err != nil {
-				return c, err
-			}
+				// check the webroot
+				if webroot, err := parseStringValue(global, local, "webroot"); err == nil {
+					c.Apps[i].Webroot = webroot
+				} else if err != nil {
+					return c, err
+				}
 
-			// check the php_version
-			if phpVersion, err := parseStringValue(global, local, "php_version"); err == nil {
-				c.Apps[i].PHPVersion = phpVersion
-			} else if err != nil {
-				return c, err
-			}
+				// check the php_version
+				if phpVersion, err := parseStringValue(global, local, "php_version"); err == nil {
+					c.Apps[i].PHPVersion = phpVersion
+				} else if err != nil {
+					return c, err
+				}
 
-			// check the dockerfile
-			if global.Dockerfile != local.Dockerfile {
-				c.Apps[i].Dockerfile = global.Dockerfile
-			} else {
-				c.Apps[i].Dockerfile = local.Dockerfile
-			}
+				// check the dockerfile
+				if global.Dockerfile != local.Dockerfile {
+					c.Apps[i].Dockerfile = global.Dockerfile
+				} else {
+					c.Apps[i].Dockerfile = local.Dockerfile
+				}
 
-			// TODO(jasonmccallister) check the php settings
+				// TODO(jasonmccallister) check the php settings
 
-			// check the php extensions
-			if global.Extensions != nil {
-				c.Apps[i].Extensions = global.Extensions
-			} else if local.Extensions != nil {
-				c.Apps[i].Extensions = local.Extensions
-			}
+				// check the php extensions
+				if global.Extensions != nil {
+					c.Apps[i].Extensions = global.Extensions
+				} else if local.Extensions != nil {
+					c.Apps[i].Extensions = local.Extensions
+				}
 
-			// check xdebug
-			if global.Xdebug != local.Xdebug {
-				c.Apps[i].Xdebug = global.Xdebug
-			} else {
-				c.Apps[i].Xdebug = local.Xdebug
-			}
+				// check xdebug
+				if global.Xdebug != local.Xdebug {
+					c.Apps[i].Xdebug = global.Xdebug
+				} else {
+					c.Apps[i].Xdebug = local.Xdebug
+				}
 
-			// check blackfire
-			if global.Blackfire != local.Blackfire {
-				c.Apps[i].Blackfire = global.Blackfire
-			} else {
-				c.Apps[i].Blackfire = local.Blackfire
-			}
+				// check blackfire
+				if global.Blackfire != local.Blackfire {
+					c.Apps[i].Blackfire = global.Blackfire
+				} else {
+					c.Apps[i].Blackfire = local.Blackfire
+				}
 
-			// check suspend
-			if global.Suspended != local.Suspended {
-				c.Apps[i].Suspended = global.Suspended
-			} else {
-				c.Apps[i].Suspended = local.Suspended
-			}
+				// check suspend
+				if global.Suspended != local.Suspended {
+					c.Apps[i].Suspended = global.Suspended
+				} else {
+					c.Apps[i].Suspended = local.Suspended
+				}
 
-			// check the database engine
-			if global.Database.Engine != "" {
-				c.Apps[i].Database.Engine = global.Database.Engine
-			} else if local.Database.Engine != "" {
-				c.Apps[i].Database.Engine = local.Database.Engine
-			}
+				// check the database engine
+				if global.Database.Engine != "" {
+					c.Apps[i].Database.Engine = global.Database.Engine
+				} else if local.Database.Engine != "" {
+					c.Apps[i].Database.Engine = local.Database.Engine
+				}
 
-			// check the database version
-			if global.Database.Version != "" {
-				c.Apps[i].Database.Version = global.Database.Version
-			} else if local.Database.Version != "" {
-				c.Apps[i].Database.Version = local.Database.Version
+				// check the database version
+				if global.Database.Version != "" {
+					c.Apps[i].Database.Version = global.Database.Version
+				} else if local.Database.Version != "" {
+					c.Apps[i].Database.Version = local.Database.Version
+				}
 			}
 		}
 	}

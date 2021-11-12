@@ -24,7 +24,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Adds alias domains.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -47,7 +47,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// load the configuration
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}

@@ -38,7 +38,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// load the configuration
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}

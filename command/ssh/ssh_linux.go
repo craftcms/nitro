@@ -29,7 +29,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Opens a shell in a container.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -57,7 +57,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// load the config
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}

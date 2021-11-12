@@ -18,6 +18,7 @@ func TestLoad(t *testing.T) {
 
 	type args struct {
 		home string
+		preload bool
 	}
 	tests := []struct {
 		name    string
@@ -29,6 +30,7 @@ func TestLoad(t *testing.T) {
 			name: "can load a config file",
 			args: args{
 				home: testdir,
+				preload: true,
 			},
 			want: &Config{
 				File: filepath.Join(testdir, DirectoryName, FileName),
@@ -78,7 +80,7 @@ func TestLoad(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Load(tt.args.home)
+			got, err := Load(tt.args.home, tt.args.preload)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Load() error = %v, wantErr %v", err, tt.wantErr)
 				return

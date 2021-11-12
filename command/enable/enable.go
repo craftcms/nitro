@@ -49,7 +49,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Example:   exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the configuration
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}

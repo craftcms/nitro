@@ -280,7 +280,7 @@ func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*conf
 	output.Success("setting PHP version", site.Version)
 
 	// load the config
-	cfg, err := config.Load(home)
+	cfg, err := config.Load(home, false)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +334,7 @@ func RunApply(cmd *cobra.Command, args []string, force bool, output terminal.Out
 // VerifyInit is used to verify the init command has been run by checking if a config file exists.
 func VerifyInit(cmd *cobra.Command, args []string, home string, output terminal.Outputer) error {
 	// verify the config exists
-	_, err := config.Load(home)
+	_, err := config.Load(home, false)
 	if errors.Is(err, config.ErrNoConfigFile) {
 		output.Info("Warning:", err.Error())
 

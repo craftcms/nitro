@@ -135,7 +135,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			app.PHPVersion = versions[selected]
 
 			// load the config
-			cfg, err := config.Load(home)
+			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}
