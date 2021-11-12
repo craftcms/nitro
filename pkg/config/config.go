@@ -89,6 +89,18 @@ func (c *Config) FindContainerByName(name string) (*Container, error) {
 	return nil, fmt.Errorf("unable to find container with name %s", name)
 }
 
+// FindAppByHostname takes a hostname and returns the site if the hostnames match.
+func (c *Config) FindAppByHostname(hostname string) (*App, error) {
+	// find the site by the hostname
+	for _, a := range c.Apps {
+		if a.Hostname == hostname {
+			return &a, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find app with hostname %s", hostname)
+}
+
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	// find the site by the hostname
