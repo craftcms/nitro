@@ -45,6 +45,7 @@ import (
 	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
 	"github.com/craftcms/nitro/pkg/downloader"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/client"
 	"github.com/mitchellh/go-homedir"
@@ -142,6 +143,9 @@ func NewCommand() *cobra.Command {
 
 	// add the commands
 	rootCommand.AddCommand(commands...)
+
+	// add the global app flag
+	rootCommand.PersistentFlags().StringVar(&flags.AppName, "app", "", "the app to use for the command")
 
 	return rootCommand
 }
