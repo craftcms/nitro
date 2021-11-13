@@ -145,7 +145,7 @@ func NewCommand() *cobra.Command {
 	rootCommand.AddCommand(commands...)
 
 	// add the global app flag
-	rootCommand.PersistentFlags().StringVar(&flags.AppName, "app", "", "the app to use for the command")
+	rootCommand.PersistentFlags().StringVarP(&flags.AppName, "app", "a", "", "the app to use for the command")
 
 	return rootCommand
 }
