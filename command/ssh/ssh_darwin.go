@@ -21,6 +21,11 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
+var (
+	cfg     *config.Config
+	appName string
+)
+
 // NewCommand returns the ssh command to get a shell in a container. The command is context aware and if
 // it is not in a known project directory, it will provide a list of known sites to the user.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -34,17 +39,31 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("couldn’t connect to Docker; please make sure Docker is running")
 			}
 
+			// assign the flag for the app name to a local variable
+			appName = flags.AppName
+
+			// load the config
+			c, err := config.Load(home, false)
+			if err != nil {
+				return err
+			}
+
+			// assign the config as a local variable
+			cfg = c
+
+			if appName != "" {
+				// find the app by the hostname and only return an error if it's not found
+				_, err := cfg.FindAppByHostname(appName)
+				if err != nil {
+					return err
+				}
+			}
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get the current working directory
 			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			// load the config
-			cfg, err := config.Load(home, false)
 			if err != nil {
 				return err
 			}
@@ -95,15 +114,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				containerID = containers[0].ID
 			default:
 				// is there a global flag for the app?
-				if flags.AppName != "" {
-					// find the app by the hostname
-					app, err :=cfg.FindAppByHostname(flags.AppName)
-					if err != nil {
-						return err
-					}
-
+				if appName != "" {
 					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+app.Hostname)
+					filter.Add("label", containerlabels.Host+"="+appName)
 
 					// find the containers but limited to the app label
 					containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
