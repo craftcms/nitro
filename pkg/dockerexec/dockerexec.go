@@ -15,7 +15,7 @@ func Connect(r io.Reader, w io.Writer, user, container, shell string) error {
 		return err
 	}
 
-	c := exec.Command(p, "exec", "--user", user, "--interactive", "--tty", container, shell)
+	c := exec.Command(p, "exec", "--env", "TERM=xterm-256color", "--user", user, "--interactive", "--tty", container, shell)
 
 	c.Stdin = r
 	c.Stderr = w
