@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 	testdir := filepath.Join(wd, "testdata")
 
 	type args struct {
-		home string
+		home    string
 		preload bool
 	}
 	tests := []struct {
@@ -29,7 +29,7 @@ func TestLoad(t *testing.T) {
 		{
 			name: "can load a config file",
 			args: args{
-				home: testdir,
+				home:    testdir,
 				preload: true,
 			},
 			want: &Config{
@@ -59,6 +59,21 @@ func TestLoad(t *testing.T) {
 					},
 					{
 						Config:     "~/team-site-with-config/nitro.yaml",
+						Aliases:    []string{"my-local-app.test"},
+						PHPVersion: "8.0",
+						Extensions: []string{"grpc"},
+					},
+				},
+				ParsedApps: []App{
+					{
+						Hostname:   "mysite.nitro",
+						Path:       "~/mysite",
+						PHPVersion: "7.4",
+						Webroot:    "web",
+					},
+					{
+						Config:     "~/team-site-with-config/nitro.yaml",
+						Path:       "~/team-site-with-config",
 						Hostname:   "team-site-name-from-config.nitro",
 						Aliases:    []string{"my-local-app.test"},
 						PHPVersion: "8.0",
@@ -107,7 +122,15 @@ func TestLoad(t *testing.T) {
 					t.Errorf("Load() = \ngot:\n%v,\nwant\n%v", got.Sites, tt.want.Sites)
 				}
 
-				t.Errorf("Load() = \ngot\n%v,\nwant\n%v", got, tt.want)
+				// check apps
+				if !reflect.DeepEqual(got.Apps, tt.want.Apps) {
+					t.Errorf("Load() apps = \ngot:\n%v,\nwant\n%v", got.Apps, tt.want.Apps)
+				}
+
+				// check parsed apps
+				if !reflect.DeepEqual(got.ParsedApps, tt.want.ParsedApps) {
+					t.Errorf("Load() parsed apps = \ngot:\n%v,\nwant\n%v", got.ParsedApps, tt.want.ParsedApps)
+				}
 			}
 		})
 	}

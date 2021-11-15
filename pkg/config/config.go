@@ -56,6 +56,8 @@ type Config struct {
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
 	Apps       []App       `yaml:"apps,omitempty"`
 
+	// ParsedApps is the representation of the apps loading from config files
+	ParsedApps    []App  `yaml:"-"`
 	File          string `json:"-" yaml:"-"`
 	HomeDirectory string `yaml:"-"`
 }
@@ -538,105 +540,118 @@ func Load(home string, preload bool) (*Config, error) {
 		return nil, err
 	}
 
-	if preload {
-		// load each of the apps
-		for i, global := range c.Apps {
-			// if there is a config file, load it
-			if global.Config != "" {
-				// load the file
-				p, err := paths.Clean(c.HomeDirectory, global.Config)
-				if err != nil {
-					return nil, err
-				}
+	// copy the user config into the parsed apps as a starting point
+	c.ParsedApps = make([]App, len(c.Apps))
 
-				// read the local app config file
-				local, err := unmarshalAppConfigFrom(p)
-				if err != nil {
-					return nil, err
-				}
+	// load each of the apps
+	for i, global := range c.Apps {
+		// if there is a config file, load it
+		if global.Config != "" {
+			// set the config
+			c.ParsedApps[i].Config = global.Config
 
-				// parse the values but global values override the global config if present
-
-				// check the hostname
-				if hostname, err := parseStringValue(global, local, "hostname"); err == nil {
-					c.Apps[i].Hostname = hostname
-				} else if err != nil {
-					return c, err
-				}
-
-				// check the aliases
-				if global.Aliases != nil {
-					c.Apps[i].Aliases = global.Aliases
-				} else if local.Aliases != nil {
-					c.Apps[i].Aliases = local.Aliases
-				}
-
-				// check the webroot
-				if webroot, err := parseStringValue(global, local, "webroot"); err == nil {
-					c.Apps[i].Webroot = webroot
-				} else if err != nil {
-					return c, err
-				}
-
-				// check the php_version
-				if phpVersion, err := parseStringValue(global, local, "php_version"); err == nil {
-					c.Apps[i].PHPVersion = phpVersion
-				} else if err != nil {
-					return c, err
-				}
-
-				// check the dockerfile
-				if global.Dockerfile != local.Dockerfile {
-					c.Apps[i].Dockerfile = global.Dockerfile
-				} else {
-					c.Apps[i].Dockerfile = local.Dockerfile
-				}
-
-				// TODO(jasonmccallister) check the php settings
-
-				// check the php extensions
-				if global.Extensions != nil {
-					c.Apps[i].Extensions = global.Extensions
-				} else if local.Extensions != nil {
-					c.Apps[i].Extensions = local.Extensions
-				}
-
-				// check xdebug
-				if global.Xdebug != local.Xdebug {
-					c.Apps[i].Xdebug = global.Xdebug
-				} else {
-					c.Apps[i].Xdebug = local.Xdebug
-				}
-
-				// check blackfire
-				if global.Blackfire != local.Blackfire {
-					c.Apps[i].Blackfire = global.Blackfire
-				} else {
-					c.Apps[i].Blackfire = local.Blackfire
-				}
-
-				// check suspend
-				if global.Suspended != local.Suspended {
-					c.Apps[i].Suspended = global.Suspended
-				} else {
-					c.Apps[i].Suspended = local.Suspended
-				}
-
-				// check the database engine
-				if global.Database.Engine != "" {
-					c.Apps[i].Database.Engine = global.Database.Engine
-				} else if local.Database.Engine != "" {
-					c.Apps[i].Database.Engine = local.Database.Engine
-				}
-
-				// check the database version
-				if global.Database.Version != "" {
-					c.Apps[i].Database.Version = global.Database.Version
-				} else if local.Database.Version != "" {
-					c.Apps[i].Database.Version = local.Database.Version
-				}
+			// load the file
+			p, err := paths.Clean(c.HomeDirectory, global.Config)
+			if err != nil {
+				return nil, err
 			}
+
+			// lots of things rely on the app path, so get the path from the config file and set it
+			path, _ := filepath.Split(p)
+			c.ParsedApps[i].Path = paths.MakeRelative(home, path, true)
+
+			// read the local app config file
+			local, err := unmarshalAppConfigFrom(p)
+			if err != nil {
+				return nil, err
+			}
+
+			// parse the values but global values override the global config if present
+
+			// check the hostname
+			if hostname, err := parseStringValue(global, local, "hostname"); err == nil {
+				c.ParsedApps[i].Hostname = hostname
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the aliases
+			if global.Aliases != nil {
+				c.ParsedApps[i].Aliases = global.Aliases
+			} else if local.Aliases != nil {
+				c.ParsedApps[i].Aliases = local.Aliases
+			}
+
+			// check the webroot
+			if webroot, err := parseStringValue(global, local, "webroot"); err == nil {
+				c.ParsedApps[i].Webroot = webroot
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the php_version
+			if phpVersion, err := parseStringValue(global, local, "php_version"); err == nil {
+				c.ParsedApps[i].PHPVersion = phpVersion
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the dockerfile
+			if global.Dockerfile != local.Dockerfile {
+				c.ParsedApps[i].Dockerfile = global.Dockerfile
+			} else {
+				c.ParsedApps[i].Dockerfile = local.Dockerfile
+			}
+
+			// TODO(jasonmccallister) check the php settings
+
+			// check the php extensions
+			if global.Extensions != nil {
+				c.ParsedApps[i].Extensions = global.Extensions
+			} else if local.Extensions != nil {
+				c.ParsedApps[i].Extensions = local.Extensions
+			}
+
+			// check xdebug
+			if global.Xdebug != local.Xdebug {
+				c.ParsedApps[i].Xdebug = global.Xdebug
+			} else {
+				c.ParsedApps[i].Xdebug = local.Xdebug
+			}
+
+			// check blackfire
+			if global.Blackfire != local.Blackfire {
+				c.ParsedApps[i].Blackfire = global.Blackfire
+			} else {
+				c.ParsedApps[i].Blackfire = local.Blackfire
+			}
+
+			// check suspend
+			if global.Suspended != local.Suspended {
+				c.ParsedApps[i].Suspended = global.Suspended
+			} else {
+				c.ParsedApps[i].Suspended = local.Suspended
+			}
+
+			// check the database engine
+			if global.Database.Engine != "" {
+				c.ParsedApps[i].Database.Engine = global.Database.Engine
+			} else if local.Database.Engine != "" {
+				c.ParsedApps[i].Database.Engine = local.Database.Engine
+			}
+
+			// check the database version
+			if global.Database.Version != "" {
+				c.ParsedApps[i].Database.Version = global.Database.Version
+			} else if local.Database.Version != "" {
+				c.ParsedApps[i].Database.Version = local.Database.Version
+			}
+
+			break
 		}
+
+		// assign what we found
+		c.ParsedApps[i] = c.Apps[i]
 	}
 
 	// return the config
