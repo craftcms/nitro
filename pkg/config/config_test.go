@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 	testdir := filepath.Join(wd, "testdata")
 
 	type args struct {
-		home    string
+		home string
 	}
 	tests := []struct {
 		name    string
@@ -28,7 +28,7 @@ func TestLoad(t *testing.T) {
 		{
 			name: "can load a config file",
 			args: args{
-				home:    testdir,
+				home: testdir,
 			},
 			want: &Config{
 				File: filepath.Join(testdir, DirectoryName, FileName),
@@ -82,6 +82,12 @@ func TestLoad(t *testing.T) {
 				HomeDirectory: testdir,
 			},
 			wantErr: false,
+		},
+		{
+			name:    "configs with sites return an error",
+			args:    args{home: filepath.Join(testdir, "nitro2-home")},
+			want:    nil,
+			wantErr: true,
 		},
 		{
 			name: "missing file returns an error",

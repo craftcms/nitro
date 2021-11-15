@@ -540,6 +540,11 @@ func Load(home string) (*Config, error) {
 		return nil, err
 	}
 
+	// does the config contain sites?
+	if len(c.Sites) > 0 {
+		return nil, fmt.Errorf("sites are deprecated in Nitro version 3.0. See the upgrade guide https://craftcms.com/docs/nitro/3.x/upgrade.html ")
+	}
+
 	// copy the user config into the parsed apps as a starting point
 	c.ParsedApps = make([]App, len(c.Apps))
 
