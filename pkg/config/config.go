@@ -24,6 +24,9 @@ var (
 	// ErrEmptyFile is returned when a config file is empty
 	ErrEmptyFile = fmt.Errorf("the config file appears to be empty")
 
+	// ErrDeprecatedConfig is used when a config contains sites
+	ErrDeprecatedConfig = fmt.Errorf("sites are deprecated in v3.0. See the upgrade guide https://craftcms.com/docs/nitro/3.x/upgrade.html")
+
 	// FileName is the default name for the yaml file
 	FileName = "nitro.yaml"
 
@@ -542,7 +545,7 @@ func Load(home string) (*Config, error) {
 
 	// does the config contain sites?
 	if len(c.Sites) > 0 {
-		return nil, fmt.Errorf("Sites are deprecated in Nitro version 3.0. See the upgrade guide https://craftcms.com/docs/nitro/3.x/upgrade.html ")
+		return nil, ErrDeprecatedConfig
 	}
 
 	// copy the user config into the parsed apps as a starting point
