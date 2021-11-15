@@ -24,7 +24,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Enables Xdebug for a site.",
 		Example: exampleText,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -41,7 +41,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

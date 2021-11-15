@@ -20,7 +20,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Opens Nitro’s config in the default editor.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

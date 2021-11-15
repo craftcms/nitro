@@ -16,7 +16,7 @@ func destroyCommand(home string, docker client.CommonAPIClient, output terminal.
 		Example: `  # remove a database engine from the config
   nitro db destroy`,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -34,7 +34,7 @@ func destroyCommand(home string, docker client.CommonAPIClient, output terminal.
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

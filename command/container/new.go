@@ -41,7 +41,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				limit = 10
 			}
 
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

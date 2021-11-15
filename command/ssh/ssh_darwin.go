@@ -43,7 +43,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			appName = flags.AppName
 
 			// load the config
-			c, err := config.Load(home, false)
+			c, err := config.Load(home)
 			if err != nil {
 				return err
 			}

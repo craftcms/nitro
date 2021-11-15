@@ -46,7 +46,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

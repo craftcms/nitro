@@ -23,7 +23,7 @@ func removeCommand(home string, docker client.CommonAPIClient, output terminal.O
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the config
-			cfg, err := config.Load(home, false)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}

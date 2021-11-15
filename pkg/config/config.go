@@ -517,7 +517,7 @@ type PHP struct {
 // Load is used to return the unmarshalled config, and
 // returns an error when trying to get the users home directory or
 // while marshalling the config.
-func Load(home string, preload bool) (*Config, error) {
+func Load(home string) (*Config, error) {
 	file, err := IsEmpty(home)
 	if err != nil {
 		return nil, err

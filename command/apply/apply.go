@@ -74,7 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// load the config
-			cfg, err := config.Load(home, true)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
@@ -239,7 +239,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			ctx := cmd.Root().Context()
 
 			// load the config
-			cfg, err := config.Load(home, true)
+			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
