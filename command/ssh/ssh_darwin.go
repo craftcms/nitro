@@ -126,7 +126,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 					// are there any containers??
 					if len(containers) == 0 {
-						return fmt.Errorf("unable to find an matching site")
+						return fmt.Errorf("unable to find an matching app")
 					}
 
 					// start the container if not running
