@@ -31,7 +31,7 @@ func TestDetect(t *testing.T) {
 			name: "returns an error when there is no app",
 			args: args{
 				cfg: config.Config{
-					Apps: []config.App{
+					ParsedApps: []config.App{
 						{
 							Hostname:   "existing-app.nitro",
 							Path:       "~/existing-app",

@@ -18,7 +18,7 @@ func Detect(cfg config.Config, dir string) (string, error) {
 	}
 
 	// check the apps and try to find the matching app
-	for _, app := range cfg.Apps {
+	for _, app := range cfg.ParsedApps {
 		path, err := paths.Clean(cfg.HomeDirectory, app.Path)
 		if err != nil {
 			return "", err
