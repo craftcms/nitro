@@ -59,7 +59,7 @@ type Config struct {
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
 	Apps       []App       `yaml:"apps,omitempty"`
 
-	// ParsedApps is the representation of the apps loading from config files
+	// ParsedApps is the representation of the apps loading from config files and the users global nitro
 	ParsedApps    []App  `yaml:"-"`
 	File          string `json:"-" yaml:"-"`
 	HomeDirectory string `yaml:"-"`
@@ -96,8 +96,8 @@ func (c *Config) FindContainerByName(name string) (*Container, error) {
 
 // FindAppByHostname takes a hostname and returns the site if the hostnames match.
 func (c *Config) FindAppByHostname(hostname string) (*App, error) {
-	// find the site by the hostname
-	for _, a := range c.Apps {
+	// find the app by the hostname
+	for _, a := range c.ParsedApps {
 		if a.Hostname == hostname {
 			return &a, nil
 		}
