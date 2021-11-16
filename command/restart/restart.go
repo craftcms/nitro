@@ -2,15 +2,18 @@ package restart
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
@@ -23,8 +26,8 @@ var (
 const exampleText = `  # restart all containers
   nitro restart
 
-  # restart specific site
-  nitro restart tutorial.nitro`
+  # restart specific app
+  nitro restart --app tutorial.nitro`
 
 // New returns the command to restart all of an environments containers
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -32,38 +35,37 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "restart",
 		Short:   "Restarts all containers.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveNoFileComp
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
-
-			var site string
-			if len(args) > 0 {
-				site = strings.TrimSpace(args[0])
-			}
 
 			// get all the containers using a filter, we only want to restart containers which
 			// have the label com.craftcms.nitro.environment=name
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			if site != "" {
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+site)
+			if flags.AppName != "" {
+				// add the label to get the app
+				filter.Add("label", containerlabels.Host+"="+flags.AppName)
+			} else {
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				cfg, err := config.Load(home)
+				if err != nil {
+					return err
+				}
+
+				// don't return an error because we should restart all
+				app, _ := appaware.Detect(*cfg, wd)
+				if app != "" {
+					// add the label to get the app
+					filter.Add("label", containerlabels.Host+"="+app)
+				}
 			}
 
-			// get all of the containers
+			// get the containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of the containers, %w", err)
