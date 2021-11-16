@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -31,23 +33,10 @@ const exampleText = `  # bridge your network ip to share nitro on the local netw
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "bridge",
-		Short:   "Shares sites on your local network.",
+		Short:   "Shares apps on your local network.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveNoFileComp
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get all of the interfaces
+			// get all interfaces
 			ifaces, err := net.Interfaces()
 			if err != nil {
 				return err
@@ -90,91 +79,39 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// get the ip for the bridge
 			ip := interfaces[selected]
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
 			// load the config
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
-			var site string
-			if len(args) > 0 {
-				site = strings.TrimSpace(args[0])
+			var appName string
+			switch flags.AppName != "" {
+			case false:
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				// get a context aware list of sites
+				appName, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
+			default:
+				appName = flags.AppName
+			}
+
+			// find the app by hostname
+			app, err := cfg.FindAppByHostname(appName)
+			if err != nil {
+				return err
 			}
 
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var target *url.URL
-			switch site == "" {
-			case false:
-				for k, v := range options {
-					if site == v {
-						target, err = url.Parse(fmt.Sprintf("http://%s", sites[k].Hostname))
-						if err != nil {
-							return err
-						}
-
-						break
-					}
-				}
-			default:
-				switch len(sites) {
-				case 0:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-
-					target, err = url.Parse(fmt.Sprintf("http://%s", sites[selected].Hostname))
-					if err != nil {
-						return err
-					}
-				case 1:
-					output.Info("connecting to", sites[0].Hostname)
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
-
-					target, err = url.Parse(fmt.Sprintf("http://%s", sites[0].Hostname))
-					if err != nil {
-						return err
-					}
-				default:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-
-					target, err = url.Parse(fmt.Sprintf("http://%s", sites[selected].Hostname))
-					if err != nil {
-						return err
-					}
-				}
-			}
 
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
@@ -206,6 +143,13 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+			target, err := url.Parse(fmt.Sprintf("http://%s", app.Hostname))
+			if err != nil {
+				return err
+			}
+
+			output.Info("connecting to",app.Hostname)
 
 			// create the handle
 			http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
