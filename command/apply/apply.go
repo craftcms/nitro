@@ -500,7 +500,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			}
 
 			// get all possible hostnames
-			for _, a := range cfg.Apps {
+			for _, a := range cfg.ParsedApps {
 				hostnames = append(hostnames, a.Hostname)
 				hostnames = append(hostnames, a.Aliases...)
 			}
@@ -570,7 +570,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 func updateProxy(ctx context.Context, docker client.ContainerAPIClient, nitrod protob.NitroClient, cfg *config.Config) error {
 	// convert the sites into the gRPC API Apply request
 	apps := make(map[string]*protob.Site)
-	for _, a := range cfg.Apps {
+	for _, a := range cfg.ParsedApps {
 		// create the site
 		apps[a.Hostname] = &protob.Site{
 			Hostname: a.Hostname,
