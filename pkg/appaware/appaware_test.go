@@ -49,7 +49,7 @@ func TestDetect(t *testing.T) {
 			name: "can find an existing app based on the sub-directory",
 			args: args{
 				cfg: config.Config{
-					Apps: []config.App{
+					ParsedApps: []config.App{
 						{
 							Hostname:   "existing-app.nitro",
 							Path:       "~/existing-app",
@@ -67,7 +67,7 @@ func TestDetect(t *testing.T) {
 			name: "can find an existing app based on the directory",
 			args: args{
 				cfg: config.Config{
-					Apps: []config.App{
+					ParsedApps: []config.App{
 						{
 							Hostname:   "existing-app.nitro",
 							Path:       "~/existing-app",
