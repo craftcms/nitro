@@ -83,7 +83,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 			names := map[string]bool{}
 
 			// get the apps as hostnames
-			for _, a := range cfg.Apps {
+			for _, a := range cfg.ParsedApps {
 				names[a.Hostname] = true
 			}
 
