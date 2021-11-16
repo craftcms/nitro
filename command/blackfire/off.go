@@ -3,36 +3,24 @@ package blackfire
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
 	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 )
 
-const offExampleText = `  # disable blackfire for a site
+const offExampleText = `  # disable blackfire for an app
   nitro blackfire off`
 
 func offCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "off",
-		Short:   "Disables Blackfire for a site.",
+		Short:   "Disables Blackfire for an app.",
 		Example: offExampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveDefault
-		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.VerifyInit(cmd, args, home, output)
 		},
@@ -78,67 +66,39 @@ func offCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var siteArg string
-			if len(args) > 0 {
-				siteArg = strings.TrimSpace(args[0])
-			}
-
-			// did they ask for a specific site?
-			var site *config.Site
-			switch siteArg == "" {
-			case true:
-				switch len(sites) {
-				case 0:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
-				case 1:
-					output.Info("Disabling Blackfire for", sites[0].Hostname)
-
-					site = &sites[0]
-				default:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
-				}
+			var hostname string
+			switch flags.AppName == "" {
+			case false:
+				hostname = flags.AppName
 			default:
-				site, err = cfg.FindSiteByHostName(siteArg)
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				hostname, err = appaware.Detect(*cfg, wd)
 				if err != nil {
 					return err
 				}
 			}
 
-			// if xdebug is set, we need to disable it to profile the site
-			if site.Xdebug {
-				// disable xdebug for the sites hostname
-				if err := cfg.DisableXdebug(site.Hostname); err != nil {
+			// find the app by the hostname
+			app, err := cfg.FindAppByHostname(hostname)
+			if err != nil {
+				return err
+			}
+
+			// if xdebug is set, we need to disable it to profile the app
+			if app.Xdebug {
+				// disable xdebug for the app hostname
+				if err := cfg.DisableXdebug(app.Hostname); err != nil {
 					return err
 				}
 			}
 
-			// disable blackfire for the sites hostname
-			if err := cfg.DisableBlackfire(site.Hostname); err != nil {
+			// disable blackfire for the app hostname
+			if err := cfg.DisableBlackfire(app.Hostname); err != nil {
 				return err
 			}
 

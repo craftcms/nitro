@@ -802,56 +802,56 @@ func (c *Config) DisableBlackfire(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
-// DisableXdebug takes a sites hostname and sets the xdebug option
-// to false. If the site cannot be found, it returns an error.
-func (c *Config) DisableXdebug(site string) error {
+// DisableXdebug takes an apps hostname and sets the xdebug option
+// to false. If the app cannot be found, it returns an error.
+func (c *Config) DisableXdebug(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			// only toggle if the setting is true
-			if c.Sites[i].Xdebug {
-				c.Sites[i].Xdebug = false
+			if c.Apps[i].Xdebug {
+				c.Apps[i].Xdebug = false
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
-// EnableBlackfire takes a sites hostname and sets the xdebug option
-// to true. If the site cannot be found, it returns an error.
-func (c *Config) EnableBlackfire(site string) error {
+// EnableBlackfire takes an app hostname and sets the xdebug option
+// to true. If the app cannot be found, it returns an error.
+func (c *Config) EnableBlackfire(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
-			if !c.Sites[i].Blackfire {
-				c.Sites[i].Blackfire = true
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			if !c.Apps[i].Blackfire {
+				c.Apps[i].Blackfire = true
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
-// EnableXdebug takes a sites hostname and sets the xdebug option
-// to true. If the site cannot be found, it returns an error.
-func (c *Config) EnableXdebug(site string) error {
+// EnableXdebug takes an app hostname and sets the xdebug option
+// to true. If the app cannot be found, it returns an error.
+func (c *Config) EnableXdebug(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
-			if !c.Sites[i].Xdebug {
-				c.Sites[i].Xdebug = true
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			if !c.Apps[i].Xdebug {
+				c.Apps[i].Xdebug = true
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
 // Save takes a file path and marshals the config into a file.
