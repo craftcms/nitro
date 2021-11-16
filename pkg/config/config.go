@@ -374,6 +374,45 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 	return fmt.Errorf("unable to find the site: %s", hostname)
 }
 
+// SetAppAliases is used to add an alias domain to an app. If
+// the app cannot be found or the alias is already set it
+// will return an error.
+func (c *Config) SetAppAliases(hostname, alias string) error {
+
+	// check the parsed apps for the hostname, but set the alias on the app index
+	for i, a := range c.ParsedApps {
+		// if it's not the right hostname
+		if a.Hostname != hostname {
+			continue
+		}
+
+		// check how many aliases are set
+		switch len(c.ParsedApps[i].Aliases) == 0 {
+		case false:
+			for _, a := range c.ParsedApps[i].Aliases {
+				// make sure it's not already set
+				if a == alias {
+					return fmt.Errorf("alias %s is already set for %s", alias, hostname)
+				}
+
+				// add the alias
+				c.Apps[i].Aliases = append(c.Apps[i].Aliases, alias)
+
+				// sort aliases
+				sort.Strings(c.Apps[i].Aliases)
+
+				return nil
+			}
+		default:
+			c.Apps[i].Aliases = append(c.Apps[i].Aliases, alias)
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to find the app %s", hostname)
+}
+
 // SetSiteAlias is used to add an alias domain to a site. If
 // the site cannot be found or the alias is already set it
 // will return an error.

@@ -3,8 +3,9 @@ package alias
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -27,71 +28,37 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
 			// load the configuration
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
-			// check for a site arg
-			var siteArg string
-			if len(args) > 0 {
-				siteArg = strings.TrimSpace(args[0])
-			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			// did they ask for a specific site?
-			var site *config.Site
-			switch siteArg == "" {
+			var appName string
+			switch flags.AppName == "" {
 			case true:
-				switch len(options) {
-				case 1:
-					output.Info("adding aliases to", options[0])
-
-					// add the label to get the site
-					site, _ = cfg.FindSiteByHostName(options[0])
-				default:
-					// prompt for the site to alias
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site, _ = cfg.FindSiteByHostName(options[selected])
-				}
-
-				// show aliases if they exist
-				if len(site.Aliases) > 0 {
-					output.Info("The following aliases are set for", site.Hostname)
-					for _, a := range site.Aliases {
-						output.Info("  ", a)
-					}
-				} else {
-					output.Info("No existing aliases are set for", site.Hostname)
-				}
-			default:
-				site, err = cfg.FindSiteByHostName(siteArg)
+				wd, err := os.Getwd()
 				if err != nil {
 					return err
 				}
+
+				appName, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
+			default:
+				appName = flags.AppName
+			}
+
+			// find the app by the hostname
+			app, err := cfg.FindAppByHostname(appName)
+			if err != nil {
+				return err
 			}
 
 			// prompt the user to add new alias
 			v := validate.MultipleHostnameValidator{}
-			alias, err := output.Ask("Enter the alias domain for the site (use commas to enter multiple)", "", ":", &v)
+			alias, err := output.Ask("Enter the alias domain for the app (use commas to enter multiple)", "", ":", &v)
 			if err != nil {
 				return err
 			}
@@ -109,8 +76,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			for _, a := range parts {
 				output.Info("  ", a)
 
-				// set the alias
-				if err := cfg.SetSiteAlias(site.Hostname, a); err != nil {
+				// set the alias for the app
+				if err := cfg.SetAppAliases(app.Hostname, a); err != nil {
 					return err
 				}
 			}
