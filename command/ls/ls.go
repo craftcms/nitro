@@ -126,6 +126,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			tbl.Print()
 
+			fmt.Println("\nNote: Database containers have the username `nitro` and password `nitro`.")
+			fmt.Println("")
+
 			return nil
 		},
 	}
