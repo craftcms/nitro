@@ -143,5 +143,5 @@ func Identify(c types.Container) string {
 		return "service"
 	}
 
-	return "site"
+	return "app"
 }

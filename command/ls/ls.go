@@ -21,11 +21,11 @@ const exampleText = `  # view information about your nitro environment
   # show only databases
   nitro ls --databases
 
-  # show only sites
-  nitro ls --sites`
+  # show only apps
+  nitro ls --apps`
 
 var (
-	flagCustom, flagDatabases, flagProxy, flagServices, flagSites bool
+	flagCustom, flagDatabases, flagProxy, flagServices, flagApps bool
 )
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -66,8 +66,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					}
 				}
 
-				// show sites
-				if cmd.Flag("sites").Value.String() == "true" {
+				// show apps
+				if cmd.Flag("apps").Value.String() == "true" {
 					if c.Labels[containerlabels.Host] == "" {
 						continue
 					}
@@ -95,11 +95,14 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				var intPorts, extPorts []string
 
 				// get ports for the non-site containers
-				switch c.Labels[containerlabels.Host] == "" {
-				case false:
+				if c.Labels[containerlabels.Host] != "" {
 					intPorts = append(intPorts, "80", "443", "3000-3005")
 					extPorts = append(extPorts, "(uses proxy ports)")
-				default:
+				} else if c.Labels[containerlabels.Proxy] != "" {
+					intPorts = append(intPorts, "80", "443", "3000-3005")
+					// TODO(jasonmccallister) set the external ports from the environment variables
+					extPorts = append(extPorts, "80", "443", "3000-3005")
+				}  else {
 					for _, p := range c.Ports {
 						// get the external ports and assign if not 0
 						e := p.PublicPort
@@ -128,7 +131,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	cmd.Flags().BoolVarP(&flagDatabases, "databases", "d", false, "show only databases")
-	cmd.Flags().BoolVarP(&flagSites, "sites", "s", false, "show only sites")
+	cmd.Flags().BoolVarP(&flagApps, "apps", "A", false, "show only apps")
 	cmd.Flags().BoolVarP(&flagServices, "services", "v", false, "show only services")
 	cmd.Flags().BoolVarP(&flagCustom, "custom", "c", false, "show only custom containers")
 	cmd.Flags().BoolVarP(&flagProxy, "proxy", "p", false, "show only proxy container")
