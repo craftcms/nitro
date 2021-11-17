@@ -350,19 +350,19 @@ func (s *Site) AsEnvs(addr string) []string {
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "display_errors":
-				c.Sites[i].PHP.DisplayErrors = value
+				c.Apps[i].PHP.DisplayErrors = value
 
 				return nil
 			case "opcache_enable":
-				c.Sites[i].PHP.OpcacheEnable = value
+				c.Apps[i].PHP.OpcacheEnable = value
 
 				return nil
 			case "opcache_validate_timestamps":
-				c.Sites[i].PHP.OpcacheValidateTimestamps = value
+				c.Apps[i].PHP.OpcacheValidateTimestamps = value
 
 				return nil
 			default:
@@ -378,7 +378,6 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 // the app cannot be found or the alias is already set it
 // will return an error.
 func (c *Config) SetAppAliases(hostname, alias string) error {
-
 	// check the parsed apps for the hostname, but set the alias on the app index
 	for i, a := range c.ParsedApps {
 		// if it's not the right hostname

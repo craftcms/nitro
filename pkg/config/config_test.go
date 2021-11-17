@@ -406,7 +406,8 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 
 func TestConfig_SetPHPBoolSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -422,7 +423,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "can change a sites php opcache enable setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -438,7 +444,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "can change a sites php post max size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -454,7 +465,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -468,9 +484,9 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "missing site returns an error",
+			name: "missing app returns an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -487,29 +503,30 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPBoolSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPBoolSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "display_errors":
-				if site.PHP.DisplayErrors != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.DisplayErrors)
+				if app.PHP.DisplayErrors != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.DisplayErrors)
 				}
 			case "opcache_enable":
-				if site.PHP.OpcacheEnable != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheEnable)
+				if app.PHP.OpcacheEnable != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.OpcacheEnable)
 				}
 			}
 		})
