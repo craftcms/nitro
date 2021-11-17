@@ -1,0 +1,3 @@
+apps:
+  - hostname: testing-restart
+  - hostname: testing-restart-hostname

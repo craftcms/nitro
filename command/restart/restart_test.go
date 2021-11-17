@@ -2,6 +2,7 @@ package restart
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -32,9 +33,16 @@ func TestRestart(t *testing.T) {
 	// Expected
 	ids := []string{"testing-restart", "testing-restart-hostname"}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	home := filepath.Join(wd, "testdata")
+
 	// Act
-	cmd := NewCommand("", mock, spyOutputer{})
-	err := cmd.RunE(cmd, os.Args)
+	cmd := NewCommand(home, mock, spyOutputer{})
+	err = cmd.RunE(cmd, os.Args)
 	if err != nil {
 		t.Error(err)
 	}
