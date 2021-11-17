@@ -250,7 +250,8 @@ func TestSite_GetAbsPath(t *testing.T) {
 
 func TestConfig_SetPHPStrSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -268,7 +269,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php upload_max_file_size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -284,7 +290,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php post max size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -300,7 +311,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php max file upload setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -316,7 +332,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php memory limit setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -332,7 +353,7 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -349,33 +370,34 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPStrSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPStrSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "memory_limit":
-				if site.PHP.MemoryLimit != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.MemoryLimit)
+				if app.PHP.MemoryLimit != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.MemoryLimit)
 				}
 			case "post_max_size":
-				if site.PHP.PostMaxSize != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.PostMaxSize)
+				if app.PHP.PostMaxSize != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.PostMaxSize)
 				}
 			case "max_file_upload":
-				if site.PHP.MaxFileUpload != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.MaxFileUpload)
+				if app.PHP.MaxFileUpload != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.MaxFileUpload)
 				}
 			}
 		})
@@ -496,7 +518,8 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 
 func TestConfig_SetPHPIntSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -512,7 +535,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_execution_time setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -528,7 +556,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_input_vars setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -544,7 +577,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_input_time setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -560,7 +598,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php opcache_revalidate_freq setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -576,7 +619,7 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -592,7 +635,7 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "missing site returns an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -609,37 +652,38 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPIntSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPIntSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "max_execution_time":
-				if site.PHP.MaxExecutionTime != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxExecutionTime)
+				if app.PHP.MaxExecutionTime != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxExecutionTime)
 				}
 			case "max_input_vars":
-				if site.PHP.MaxInputVars != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxInputVars)
+				if app.PHP.MaxInputVars != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxInputVars)
 				}
 			case "max_input_time":
-				if site.PHP.MaxInputTime != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxInputTime)
+				if app.PHP.MaxInputTime != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxInputTime)
 				}
 			case "opcache_revalidate_freq":
-				if site.PHP.OpcacheRevalidateFreq != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheRevalidateFreq)
+				if app.PHP.OpcacheRevalidateFreq != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.OpcacheRevalidateFreq)
 				}
 			}
 		})

@@ -480,23 +480,23 @@ func (c *Config) SetPHPExtension(hostname, extension string) error {
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "max_execution_time":
-				c.Sites[i].PHP.MaxExecutionTime = value
+				c.Apps[i].PHP.MaxExecutionTime = value
 
 				return nil
 			case "max_input_vars":
-				c.Sites[i].PHP.MaxInputVars = value
+				c.Apps[i].PHP.MaxInputVars = value
 
 				return nil
 			case "max_input_time":
-				c.Sites[i].PHP.MaxInputTime = value
+				c.Apps[i].PHP.MaxInputTime = value
 
 				return nil
 			case "opcache_revalidate_freq":
-				c.Sites[i].PHP.OpcacheRevalidateFreq = value
+				c.Apps[i].PHP.OpcacheRevalidateFreq = value
 
 				return nil
 			default:
@@ -505,30 +505,30 @@ func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // SetPHPStrSetting is used to set php settings that are strings. It will look
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "post_max_size":
-				c.Sites[i].PHP.PostMaxSize = value
+				c.Apps[i].PHP.PostMaxSize = value
 
 				return nil
 			case "max_file_upload":
-				c.Sites[i].PHP.MaxFileUpload = value
+				c.Apps[i].PHP.MaxFileUpload = value
 
 				return nil
 			case "memory_limit":
-				c.Sites[i].PHP.MemoryLimit = value
+				c.Apps[i].PHP.MemoryLimit = value
 
 				return nil
 			case "upload_max_file_size":
-				c.Sites[i].PHP.UploadMaxFileSize = value
+				c.Apps[i].PHP.UploadMaxFileSize = value
 
 				return nil
 			default:
@@ -537,7 +537,7 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // PHP is nested in a configuration and allows setting environment variables
