@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -16,13 +18,16 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # enable PHP extensions for a site
-  nitro extensions`
+const exampleText = `  # enable PHP extensions for the current app
+  nitro extensions
+  
+  # enable php extensions for a specific app
+  nitro ext --app myapp.nitro`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "extensions",
-		Short:   "Enables a PHP extension for a site.",
+		Short:   "Enables a PHP extension for an app.",
 		Example: exampleText,
 		Aliases: []string{"ext"},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
@@ -31,58 +36,35 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
 			// load the configuration
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				appName, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
+			}
+
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
+			output.Info("modifying", appName)
 
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			// if there are found sites we want to show or connect to the first one, otherwise prompt for
-			// which site to connect to.
-			switch len(sites) {
-			case 0:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
-				}
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-			case 1:
-				output.Info("modifiying", sites[0].Hostname)
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
-			default:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
-				}
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-			}
+			// add the label to get the site
+			filter.Add("label", containerlabels.Host+"="+appName)
 
 			// find the containers but limited to the site label
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
@@ -95,7 +77,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to find an matching site")
 			}
 
-			// start the container if its not running
+			// start the container if it's not running
 			if containers[0].State != "running" {
 				for _, command := range cmd.Root().Commands() {
 					if command.Use == "start" {

@@ -454,26 +454,26 @@ func (c *Config) SetSiteAlias(hostname, alias string) error {
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPExtension(hostname, extension string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			// if the extension is already set, we return an error
-			for _, e := range c.Sites[i].Extensions {
+			for _, e := range c.Apps[i].Extensions {
 				if e == extension {
 					return fmt.Errorf("extension %s is already set for %s", extension, hostname)
 				}
 			}
 
 			// add the extension to the list
-			c.Sites[i].Extensions = append(c.Sites[i].Extensions, extension)
+			c.Apps[i].Extensions = append(c.Apps[i].Extensions, extension)
 
 			// sort the extensions by alpha
-			sort.Strings(c.Sites[i].Extensions)
+			sort.Strings(c.Apps[i].Extensions)
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // SetPHPIntSetting is used to set php settings that are ints. It will look
