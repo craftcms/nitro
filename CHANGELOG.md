@@ -33,6 +33,7 @@
 
 ### Removed
 - Removed the deprecated `clean` command.
+- Removed the `validate` command.
 
 ## 2.0.8 - 2021-05-18
 
