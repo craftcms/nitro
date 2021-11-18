@@ -48,6 +48,32 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
+			var appName string
+			if flags.AppName != "" {
+				// add the label to get the app
+				filter.Add("label", containerlabels.Host+"="+flags.AppName)
+
+				appName = flags.AppName
+			} else {
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				cfg, err := config.Load(home)
+				if err != nil {
+					return err
+				}
+
+				// don't return an error because we should start all
+				app, err := appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
+
+				appName = app
+			}
+
 			// get all containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
@@ -57,26 +83,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// if there are no containers, were done
 			if len(containers) == 0 {
 				return ErrNoContainers
-			}
-
-			cfg, err := config.Load(home)
-			if err != nil {
-				return err
-			}
-
-			// get the app
-			appName := flags.AppName
-			if appName == "" {
-				// get the current working directory
-				wd, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-
-				appName, err = appaware.Detect(*cfg, wd)
-				if err != nil {
-					return err
-				}
 			}
 
 			output.Info("Starting Nitro…")
