@@ -2,8 +2,9 @@ package remove
 
 import (
 	"os"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -12,13 +13,13 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # remove a site from the config
+const exampleText = `  # remove an app from the config
   nitro remove`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "remove",
-		Short:   "Removes a site.",
+		Short:   "Removes an app.",
 		Example: exampleText,
 		Aliases: []string{"rm"},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
@@ -31,58 +32,30 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var siteArg string
-			if len(args) > 0 {
-				siteArg = strings.TrimSpace(args[0])
-			}
-
-			var site *config.Site
-			switch siteArg == "" {
-			case true:
-				switch len(sites) {
-				case 0:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
-				case 1:
-					site = &sites[0]
-				default:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
 				}
-			default:
-				site, err = cfg.FindSiteByHostName(siteArg)
+
+				appName, err = appaware.Detect(*cfg, wd)
 				if err != nil {
 					return err
 				}
 			}
 
-			output.Info("Removing", site.Hostname)
+			app, err := cfg.FindAppByHostname(appName)
+			if err != nil {
+				return err
+			}
 
-			// remove the site
-			if err := cfg.RemoveSite(site); err != nil {
+			output.Info("Removing", appName)
+
+			// remove the app
+			if err := cfg.RemoveApp(app); err != nil {
 				return err
 			}
 

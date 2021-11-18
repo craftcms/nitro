@@ -770,17 +770,17 @@ func (c *Config) RemoveDatabase(database Database) error {
 	return fmt.Errorf("unknown database %q", hostname)
 }
 
-// RemoveSite takes a hostname and will remove the site by its
-// hostname from the config file.
-func (c *Config) RemoveSite(site *Site) error {
-	for i, s := range c.Sites {
-		if site.Hostname == s.Hostname {
-			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
+// RemoveApp takes a hostname and will remove the app by its
+// hostname from the config.
+func (c *Config) RemoveApp(app *App) error {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == app.Hostname {
+			c.Apps = append(c.Apps[:i], c.Apps[i+1:]...)
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site %q", site.Hostname)
+	return fmt.Errorf("unknown app %q", app.Hostname)
 }
 
 // DisableBlackfire takes a sites hostname and sets the blackfire option
