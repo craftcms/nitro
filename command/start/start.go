@@ -2,14 +2,17 @@ package start
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
 	"github.com/craftcms/nitro/pkg/contextor"
 	"github.com/craftcms/nitro/pkg/terminal"
@@ -29,23 +32,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "start",
 		Short:   "Starts containers.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveDefault
-		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// is the docker api alive?
 			if _, err := docker.Ping(cmd.Context()); err != nil {
-				return fmt.Errorf("Couldn’t connect to Docker; please make sure Docker is running.")
+				return fmt.Errorf("couldn’t connect to Docker; please make sure Docker is running")
 			}
 
 			return nil
@@ -53,17 +43,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := contextor.New(cmd.Context())
 
-			var site string
-			if len(args) > 0 {
-				site = args[0]
-			}
-
 			// get all the containers using a filter, we only want to stop containers which
 			// have the environment label
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get all of the container
+			// get all containers
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return fmt.Errorf("unable to get a list of the containers, %w", err)
@@ -72,6 +57,26 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// if there are no containers, were done
 			if len(containers) == 0 {
 				return ErrNoContainers
+			}
+
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
+
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+
+				appName, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
 			}
 
 			output.Info("Starting Nitro…")
@@ -88,8 +93,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				hostname := strings.TrimLeft(c.Names[0], "/")
 
-				// if the user wants a single site only, skip all of the other sites
-				if site != "" && hostname != site && containerType == "site" {
+				// if the user wants a single app only, skip other apps
+				if appName != "" && hostname != appName && containerType == "app" {
 					continue
 				}
 
