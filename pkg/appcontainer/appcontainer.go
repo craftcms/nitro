@@ -89,6 +89,22 @@ func StartOrCreate(home string, ctx context.Context, docker client.CommonAPIClie
 	return c.ID, nil
 }
 
+func ContainerPath(app config.App) string {
+	// trim trailing slashes
+	webroot := strings.TrimRight(app.Webroot, "/")
+
+	// is there a path separator?
+	if strings.Contains(webroot, "/") {
+		parts := strings.Split(webroot, "/")
+
+		if len(parts) >= 2 {
+			return strings.Join(parts[:len(parts)-1], "/")
+		}
+	}
+
+	return ""
+}
+
 func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
 	// create the container
 	image := fmt.Sprintf(Image, app.PHPVersion)
