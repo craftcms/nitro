@@ -2,11 +2,8 @@ package stop
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/appaware"
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -38,30 +35,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			var appName string
 			if flags.AppName != "" {
 				// add the label to get the app
 				filter.Add("label", containerlabels.Host+"="+flags.AppName)
-
-				appName = flags.AppName
-			} else {
-				wd, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-
-				cfg, err := config.Load(home)
-				if err != nil {
-					return err
-				}
-
-				// don't return an error because we should start all
-				app, err := appaware.Detect(*cfg, wd)
-				if err != nil {
-					return err
-				}
-
-				appName = app
 			}
 
 			// get all containers
@@ -81,11 +57,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// stop each environment container
 			for _, c := range containers {
 				hostname := strings.TrimLeft(c.Names[0], "/")
-
-				// if the user wants a single app only, skip other apps
-				if appName != "" && hostname != appName {
-					continue
-				}
 
 				output.Pending("stopping", hostname)
 

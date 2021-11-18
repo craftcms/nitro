@@ -2,12 +2,9 @@ package restart
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/craftcms/nitro/pkg/appaware"
-	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -46,23 +43,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			if flags.AppName != "" {
 				// add the label to get the app
 				filter.Add("label", containerlabels.Host+"="+flags.AppName)
-			} else {
-				wd, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-
-				cfg, err := config.Load(home)
-				if err != nil {
-					return err
-				}
-
-				// don't return an error because we should restart all
-				app, _ := appaware.Detect(*cfg, wd)
-				if app != "" {
-					// add the label to get the app
-					filter.Add("label", containerlabels.Host+"="+app)
-				}
 			}
 
 			// get the containers
