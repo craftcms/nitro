@@ -22,7 +22,7 @@ require (
 	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.1
+	github.com/opencontainers/image-spec v1.0.2
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/rodaine/table v1.0.1
 	github.com/sirupsen/logrus v1.7.0 // indirect
