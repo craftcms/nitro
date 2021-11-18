@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/appcontainer"
 	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -36,22 +37,21 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		DisableFlagParsing: true,
 		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			// create a filter for the environment
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
+
+			// load the config
+			cfg, err := config.Load(home)
+			if err != nil {
+				return err
+			}
 
 			var hostname string
 			switch flags.AppName == "" {
 			case true:
 				// get the current working directory
 				wd, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-
-				// load the config
-				cfg, err := config.Load(home)
 				if err != nil {
 					return err
 				}
@@ -95,7 +95,14 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			cmds := []string{"exec", "-it", containers[0].ID, "php"}
 
 			// TODO(jasonmccallister) get the container path
-			cmds = append(cmds, fmt.Sprintf("%s/%s", "/app", "craft"))
+			app, err := cfg.FindAppByHostname(hostname)
+			if err != nil {
+				return err
+			}
+
+			path := appcontainer.ContainerPath(*app)
+			
+			cmds = append(cmds, fmt.Sprintf("%s/%s", path, "craft"))
 
 			switch len(args) == 0 {
 			case true:
