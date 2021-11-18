@@ -40,7 +40,6 @@ import (
 	"github.com/craftcms/nitro/command/stop"
 	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
-	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
