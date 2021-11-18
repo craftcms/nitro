@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -21,7 +22,7 @@ var (
 	execName = "ngrok"
 )
 
-const exampleText = `  # share a local site with ngrok
+const exampleText = `  # share a local app with ngrok
   nitro share`
 
 // NewCommand is used to destroy all resources for an environment. It will prompt for
@@ -32,19 +33,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "share",
 		Short:   "Shares a local site.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveNoFileComp
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -56,15 +44,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// if ngrok is missing, return the error
 			if ngrok == "" {
-				output.Info("Ngrok is required to share sites, download ngrok from https://ngrok.com")
+				output.Info("Ngrok is required to share apps, download ngrok from https://ngrok.com")
 
 				return nil
-			}
-
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
 			}
 
 			// load the config
@@ -77,64 +59,25 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var individual string
-			if len(args) > 0 {
-				individual = strings.TrimSpace(args[0])
-			}
-
-			var site config.Site
-			switch individual == "" {
-			case false:
-				for k, v := range options {
-					if individual == v {
-						filter.Add("label", containerlabels.Host+"="+sites[k].Hostname)
-
-						site = sites[k]
-
-						break
-					}
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
 				}
 
-			default:
-				switch len(sites) {
-				case 0:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-
-					site = sites[selected]
-				case 1:
-					output.Info("connecting to", sites[0].Hostname)
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
-					site = sites[0]
-				default:
-					// prompt for the site to ssh into
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					// add the label to get the site
-					filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-					site = sites[selected]
+				appName, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
 				}
 			}
+
+			output.Info("connecting to", appName)
+
+			// add the label to get the site
+			filter.Add("label", containerlabels.Host+"="+appName)
 
 			// find the containers but limited to the site label
 			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{Filters: filter, All: true})
@@ -158,15 +101,20 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
+			app, err := cfg.FindAppByHostname(appName)
+			if err != nil {
+				return err
+			}
+
 			// parse the flags
 
 			ngrokArgs := []string{"http"}
 
 			// set the main hostname
-			ngrokArgs = append(ngrokArgs, "-host-header="+site.Hostname)
+			ngrokArgs = append(ngrokArgs, "-host-header="+app.Hostname)
 
 			// append the aliases
-			for _, a := range site.Aliases {
+			for _, a := range app.Aliases {
 				ngrokArgs = append(ngrokArgs, "-host-header="+a)
 			}
 
