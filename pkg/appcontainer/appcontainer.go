@@ -102,7 +102,7 @@ func ContainerPath(app config.App) string {
 		}
 	}
 
-	return ""
+	return "/app"
 }
 
 func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {

@@ -101,7 +101,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			path := appcontainer.ContainerPath(*app)
-			
+
 			cmds = append(cmds, fmt.Sprintf("%s/%s", path, "craft"))
 
 			switch len(args) == 0 {
