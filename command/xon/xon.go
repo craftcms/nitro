@@ -3,8 +3,9 @@ package xon
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -23,19 +24,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Use:     "xon",
 		Short:   "Enables Xdebug for a site.",
 		Example: exampleText,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			cfg, err := config.Load(home)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-
-			var options []string
-			for _, s := range cfg.Sites {
-				options = append(options, s.Hostname)
-			}
-
-			return options, cobra.ShellCompDirectiveDefault
-		},
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -46,71 +34,43 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var siteArg string
-			if len(args) > 0 {
-				siteArg = strings.TrimSpace(args[0])
-			}
-
-			var site *config.Site
-			switch siteArg == "" {
-			case true:
-				switch len(sites) {
-				case 0:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
-				case 1:
-					output.Info("Enabling xdebug for", sites[0].Hostname)
-
-					site = &sites[0]
-				default:
-					selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-					if err != nil {
-						return err
-					}
-
-					site = &sites[selected]
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
 				}
-			default:
-				site, err = cfg.FindSiteByHostName(siteArg)
+
+				appName, err = appaware.Detect(*cfg, wd)
 				if err != nil {
 					return err
 				}
 			}
 
-			// php 7.0 does not support xdebug
-			if site.Version == "7.0" {
-				return fmt.Errorf("Xdebug with PHP 7.0 is not supported")
+			app, err := cfg.FindAppByHostname(appName)
+			if err != nil {
+				return err
 			}
 
-			// if blackfire is set, we need to disable it to profile the site
-			if site.Blackfire {
+			output.Info("Disabling xdebug for", app.Hostname)
+
+			// php 7.0 does not support xdebug
+			if app.PHPVersion == "7.0" {
+				return fmt.Errorf("xdebug with PHP 7.0 is not supported")
+			}
+
+			// if blackfire is set, we need to disable it to profile the app
+			if app.Blackfire {
 				// disable blackfire for the sites hostname
-				if err := cfg.DisableBlackfire(site.Hostname); err != nil {
+				if err := cfg.DisableBlackfire(app.Hostname); err != nil {
 					return err
 				}
 			}
 
-			// enable xdebug for the sites hostname
-			if err := cfg.EnableXdebug(site.Hostname); err != nil {
+			// enable xdebug for the app hostname
+			if err := cfg.EnableXdebug(app.Hostname); err != nil {
 				return err
 			}
 
