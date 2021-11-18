@@ -102,7 +102,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				output.Info(ErrNoNetworks.Error())
 			}
 
-			// stop all of the container
+			// stop all containers
 			if len(containers) > 0 {
 				timeout := time.Duration(5000) * time.Millisecond
 
@@ -121,7 +121,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 							}
 						}
 
-						// get all of the databases
+						// get all databases
 						databases, err := backup.Databases(ctx, docker, c.ID, c.Labels[containerlabels.DatabaseCompatibility])
 						if err != nil {
 							output.Info("unable to get the databases from", name, err.Error())

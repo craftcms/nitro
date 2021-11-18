@@ -33,7 +33,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return errors.New("unable to find directory " + path)
 			}
 
-			// find all of the keys
+			// find all keys
 			keys, err := keys.Find(path)
 			if err != nil {
 				return err
