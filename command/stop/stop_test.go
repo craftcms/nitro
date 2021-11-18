@@ -2,6 +2,7 @@ package stop
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -26,12 +27,14 @@ func TestStopSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	home := filepath.Join(wd, "testdata")
+
 	// Act
-	cmd := NewCommand(wd, mock, output)
+	cmd := NewCommand(home, mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err = cmd.RunE(cmd, []string{})
 	if err != nil {
-		t.Errorf("expected the error to be nil")
+		t.Errorf("expected the error to be nil, got %v", err)
 	}
 
 	// Assert
@@ -53,13 +56,15 @@ func TestStopDoesNotErrorWhenThereAreNoContainers(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	home := filepath.Join(wd, "testdata")
+
 	// Act
-	cmd := NewCommand(wd, mock, output)
+	cmd := NewCommand(home, mock, output)
 	cmd.Flags().String("environment", environmentName, "test flag")
 	err = cmd.RunE(cmd, []string{})
 
 	// Assert
 	if err != nil {
-		t.Errorf("expected the error to be nil")
+		t.Errorf("expected the error to be nil, got %v", err)
 	}
 }
