@@ -6,11 +6,11 @@
 - Added support for parsing nitro.yaml files stored in a project repository.
 - Sites now expose ports 3000-3005 for miscellaneous use.
 - Added the `keys` command to copy SSH keys from the host machine into an app container.
-- The default shell is now bash and not sh, allowing common scripts.
+- The default shell is now bash and not sh, allowing common scripts.  ([#384](https://github.com/craftcms/nitro/issues/384))
 - App containers now include common image processing libraries.
-- Added common Linux build tools such as make to the site containers.
+- Added common Linux build tools such as make to the app containers.
 - Yarn is now installed by default.
-- Added the ability to exclude directories from app bind mounts to improve performance.
+- Added the ability to exclude directories from app bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419)) 
 
 ### Changed
 - Renamed sites to apps and updated the commands. ([#420](https://github.com/craftcms/nitro/issues/420))
@@ -19,7 +19,7 @@
 - Node and npm are now included with nvm in the images.
 - The app container user home directory is now persisted through container updates and version changes.
 - Added support for private composer packages and git cloning.
-- The nginx site is now a fallback and users can completely override the nginx config.
+- Users can completely override the nginx config.
 - Custom Nginx configurations will now persist container recreation.
 - Removed the `context` command in favor of the `ls` command.
 - Renamed the `db import` to `db restore` to match the Craft CLI.
