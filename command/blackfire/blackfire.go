@@ -8,10 +8,10 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # enable blackfire for a site
+const exampleText = `  # enable blackfire for an app
   nitro blackfire on
 
-  # disable blackfire for a site
+  # disable blackfire for an app
   nitro blackfire off`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {

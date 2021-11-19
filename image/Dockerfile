@@ -78,6 +78,9 @@ RUN export XDG_CONFIG_HOME=/home/${IMAGE_USER} && \
     echo ". /home/${IMAGE_USER}/nvm/nvm.sh" >> /home/${IMAGE_USER}/.bashrc && \
     chown -R ${IMAGE_USER}:${IMAGE_USER} /home/${IMAGE_USER}
 
+# add the aliases file into the image
+ADD .bash_aliases /home/${IMAGE_USER}/
+
 # supervisor config
 
 # copy the config

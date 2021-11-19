@@ -35,6 +35,7 @@ If you installed Nitro with Homebrew, you might need to run `brew unlink nitro` 
 ## Building the Proxy
 
 1. From the root of the repository, run `make proxy`.
+
 ---
 
 ## Building the Images

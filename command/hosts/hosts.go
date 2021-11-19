@@ -13,10 +13,10 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # modify hosts file to match sites and aliases
+const exampleText = `  # modify hosts file to match apps and app aliases
   nitro hosts`
 
-// New returns a command used to modify the hosts file to point sites to the nitro proxy.
+// NewCommand returns a command used to modify the hosts file to point apps to the nitro proxy.
 func NewCommand(home string, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "hosts",
@@ -57,7 +57,7 @@ func NewCommand(home string, output terminal.Outputer) *cobra.Command {
 
 				return nil
 			} else {
-				output.Info("Adding sites to hosts file…")
+				output.Info("Adding apps to hosts file…")
 			}
 
 			// check if we are the root user

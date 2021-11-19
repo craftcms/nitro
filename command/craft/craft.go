@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/appcontainer"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -35,11 +37,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		DisableFlagParsing: true,
 		Example:            exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
+			// create a filter for the environment
+			filter := filters.NewArgs()
+			filter.Add("label", containerlabels.Nitro)
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -47,56 +47,29 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// create a filter for the environment
-			filter := filters.NewArgs()
-			filter.Add("label", containerlabels.Nitro)
-
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			var site config.Site
-			switch len(sites) {
-			case 0:
-				// prompt for the site
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+			var hostname string
+			switch flags.AppName == "" {
+			case true:
+				// get the current working directory
+				wd, err := os.Getwd()
 				if err != nil {
 					return err
 				}
 
-				// set the site we selected
-				site = sites[selected]
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-			case 1:
-				output.Info("connecting to", sites[0].Hostname)
-
-				// set the site we selected
-				site = sites[0]
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
+				hostname, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
+				}
 			default:
-				// prompt for the site to ssh into
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
-				if err != nil {
-					return err
-				}
-
-				// set the site we selected
-				site = sites[selected]
-
-				// add the label to get the site
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
+				hostname = flags.AppName
 			}
 
-			// find the containers but limited to the site label
+			output.Info("connecting to", hostname)
+
+			// add the label to get the site
+			filter.Add("label", containerlabels.Host+"="+hostname)
+
+			// find the containers but limited to the app label
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter, All: true})
 			if err != nil {
 				return err
@@ -104,10 +77,10 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// are there any containers??
 			if len(containers) == 0 {
-				return fmt.Errorf("unable to find an matching site")
+				return fmt.Errorf("unable to find a matching app")
 			}
 
-			// start the container if its not running
+			// start the container if it's not running
 			if containers[0].State != "running" {
 				for _, command := range cmd.Root().Commands() {
 					if command.Use == "start" {
@@ -121,13 +94,15 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// create the command for running the craft console
 			cmds := []string{"exec", "-it", containers[0].ID, "php"}
 
-			// get the container path
-			path := site.GetContainerPath()
-			if path != "" {
-				cmds = append(cmds, fmt.Sprintf("%s/%s", path, "craft"))
-			} else {
-				cmds = append(cmds, "craft")
+			// TODO(jasonmccallister) get the container path
+			app, err := cfg.FindAppByHostname(hostname)
+			if err != nil {
+				return err
 			}
+
+			path := appcontainer.ContainerPath(*app)
+
+			cmds = append(cmds, fmt.Sprintf("%s/%s", path, "craft"))
 
 			switch len(args) == 0 {
 			case true:
@@ -138,24 +113,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				cmds = append(cmds, args...)
 			}
 
-			// find the docker executable
-			cli, err := exec.LookPath("docker")
+			_, err = execCreate(cmd.Context(), docker, containers[0].ID, cmds, true)
 			if err != nil {
 				return err
 			}
 
-			// create the command
-			c := exec.Command(cli, cmds...)
-
-			c.Stdin = cmd.InOrStdin()
-			c.Stderr = cmd.ErrOrStderr()
-			c.Stdout = cmd.OutOrStdout()
-
-			if err := c.Run(); err != nil {
-				return err
-			}
-
-			// attach
 
 			return nil
 		},

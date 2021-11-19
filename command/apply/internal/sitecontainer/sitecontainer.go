@@ -9,9 +9,11 @@ import (
 	"strings"
 
 	"github.com/craftcms/nitro/command/apply/internal/match"
-	"github.com/craftcms/nitro/command/apply/internal/nginx"
+	"github.com/craftcms/nitro/pkg/bindmounts"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/envvars"
+	"github.com/craftcms/nitro/pkg/nginx"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
@@ -127,7 +129,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	// does the config have blackfire credentials
 	if site.Blackfire {
 		// grab the credentials from the config
-		credentials, err := cfg.GetBlackfireClientCredentials()
+		credentials, err := envvars.GetBlackfireClientCredentials(*cfg)
 		if err != nil {
 			return "", err
 		}
@@ -170,7 +172,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, home, networkID 
 	}
 
 	// determine if the site has any excludes
-	binds, err := site.GetBindMounts(home)
+	binds, err := bindmounts.ForSite(site, home)
 	if err != nil {
 		return "", err
 	}

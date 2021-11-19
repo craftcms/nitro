@@ -10,6 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/envvars"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -61,7 +62,7 @@ func VerifyCreated(ctx context.Context, cli client.CommonAPIClient, networkID st
 			}
 
 			// get the blackfire server credentials from the config
-			credentials, err := cfg.GetBlackfireServerCredentials()
+			credentials, err := envvars.GetBlackfireServerCredentials(cfg)
 			if err != nil {
 				return "", "", err
 			}
@@ -121,7 +122,7 @@ func create(ctx context.Context, cli client.CommonAPIClient, networkID string, c
 		return "", "", fmt.Errorf("unable to read output while pulling image, %w", err)
 	}
 
-	credentials, err := cfg.GetBlackfireServerCredentials()
+	credentials, err := envvars.GetBlackfireServerCredentials(cfg)
 	if err != nil {
 		return "", "", err
 	}

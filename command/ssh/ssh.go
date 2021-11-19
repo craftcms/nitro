@@ -11,8 +11,8 @@ var (
 const exampleText = `  # ssh into a container - assuming its the current working directory
   nitro ssh
 
-  # ssh into a specific site, bypassing the prompt
-  nitro ssh tutorial.nitro
+  # ssh into a specific app
+  nitro --app tutorial.nitro ssh
 
   # ssh into the container as root - changes may not persist after "nitro apply"
   nitro ssh --root

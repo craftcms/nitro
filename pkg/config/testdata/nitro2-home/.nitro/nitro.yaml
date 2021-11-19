@@ -1,0 +1,5 @@
+sites:
+  - hostname: mysite.nitro
+    path: ~/mysite
+    version: "7.4"
+    webroot: web

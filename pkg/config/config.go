@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/bindmounts"
 	"github.com/craftcms/nitro/pkg/helpers"
+	"github.com/craftcms/nitro/pkg/paths"
 
 	"gopkg.in/yaml.v3"
 )
@@ -21,8 +21,11 @@ var (
 	// ErrNoConfigFile is returned when a configuration file cannot be found
 	ErrNoConfigFile = fmt.Errorf("there is no config file for the environment")
 
-	// ErrEmptyfile is returned when a config file is empty
-	ErrEmptyfile = fmt.Errorf("the config file appears to be empty")
+	// ErrEmptyFile is returned when a config file is empty
+	ErrEmptyFile = fmt.Errorf("the config file appears to be empty")
+
+	// ErrDeprecatedConfig is used when a config contains sites
+	ErrDeprecatedConfig = fmt.Errorf("sites are deprecated in v3.0. See the upgrade guide https://craftcms.com/docs/nitro/3.x/upgrade.html")
 
 	// FileName is the default name for the yaml file
 	FileName = "nitro.yaml"
@@ -54,9 +57,12 @@ type Config struct {
 	Databases  []Database  `json:"databases,omitempty" yaml:"databases,omitempty"`
 	Services   Services    `json:"services" yaml:"services"`
 	Sites      []Site      `json:"sites,omitempty" yaml:"sites,omitempty"`
-	File       string      `json:"-" yaml:"-"`
+	Apps       []App       `yaml:"apps,omitempty"`
 
-	// rw sync.RWMutex
+	// ParsedApps is the representation of the apps loading from config files and the users global nitro
+	ParsedApps    []App  `yaml:"-"`
+	File          string `json:"-" yaml:"-"`
+	HomeDirectory string `yaml:"-"`
 }
 
 // AllSitesWithHostnames takes the address, which is the nitro-proxy
@@ -86,6 +92,18 @@ func (c *Config) FindContainerByName(name string) (*Container, error) {
 	}
 
 	return nil, fmt.Errorf("unable to find container with name %s", name)
+}
+
+// FindAppByHostname takes a hostname and returns the site if the hostnames match.
+func (c *Config) FindAppByHostname(hostname string) (*App, error) {
+	// find the app by the hostname
+	for _, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			return &a, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find app with hostname %s", hostname)
 }
 
 // FindSiteByHostName takes a hostname and returns the site if the hostnames match.
@@ -155,6 +173,31 @@ func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	return c.Sites
 }
 
+type App struct {
+	Config     string   `yaml:"config,omitempty"`
+	Hostname   string   `yaml:"hostname,omitempty"`
+	Aliases    []string `yaml:"aliases,omitempty"`
+	Path       string   `yaml:"path,omitempty"`
+	Webroot    string   `yaml:"webroot,omitempty"`
+	PHPVersion string   `yaml:"php_version,omitempty"`
+	Dockerfile bool     `yaml:"dockerfile,omitempty"`
+	Excludes   []string `yaml:"excludes,omitempty"`
+	PHP        PHP      `yaml:"php,omitempty"`
+	Extensions []string `yaml:"extensions,omitempty"`
+	Xdebug     bool     `yaml:"xdebug,omitempty"`
+	Blackfire  bool     `yaml:"blackfire,omitempty"`
+	Suspended  bool     `yaml:"suspended,omitempty"`
+	Database   struct {
+		Engine  string `yaml:"engine,omitempty"`
+		Version string `yaml:"version,omitempty"`
+	} `yaml:"database,omitempty"`
+}
+
+func (c *Config) AddApp(app App) error {
+	c.Apps = append(c.Apps, app)
+	return nil
+}
+
 // Blackfire allows users to setup their containers to use blackfire locally.
 type Blackfire struct {
 	ClientID    string `json:"client_id,omitempty" yaml:"client_id,omitempty"`
@@ -166,7 +209,7 @@ type Blackfire struct {
 // Container represents a custom container to add to nitro. Containers can be
 // publicly hosted on Docker Hub.
 type Container struct {
-	// Name is a uniq name, with no spaces or special characters and is used to generate the hostname
+	// Name is a unique name, with no spaces or special characters and is used to generate the hostname
 	Name string `json:"name" yaml:"name"`
 
 	// Image the is canonical name of the image to use for the container `docker.elastic.co/elasticsearch/elasticsearch`
@@ -205,34 +248,6 @@ func (c *Config) AddContainer(container Container) error {
 	})
 
 	return nil
-}
-
-// GetBlackfireClientCredentials is used to return the blackfire credentials from
-// the config
-func (c *Config) GetBlackfireClientCredentials() ([]string, error) {
-	if c.Blackfire.ClientID == "" || c.Blackfire.ClientToken == "" {
-		return nil, fmt.Errorf("no blackfire client credentials provided")
-	}
-
-	var envs []string
-	envs = append(envs, "BLACKFIRE_CLIENT_ID="+c.Blackfire.ClientID)
-	envs = append(envs, "BLACKFIRE_CLIENT_TOKEN="+c.Blackfire.ClientToken)
-
-	return envs, nil
-}
-
-// GetBlackfireServerCredentials is used to return the blackfire credentials from
-// the config
-func (c *Config) GetBlackfireServerCredentials() ([]string, error) {
-	if c.Blackfire.ServerID == "" || c.Blackfire.ServerToken == "" {
-		return nil, fmt.Errorf("no blackfire server credentials provided")
-	}
-
-	var envs []string
-	envs = append(envs, "BLACKFIRE_SERVER_ID="+c.Blackfire.ServerID)
-	envs = append(envs, "BLACKFIRE_SERVER_TOKEN="+c.Blackfire.ServerToken)
-
-	return envs, nil
 }
 
 // Database is the struct used to represent a database engine
@@ -292,31 +307,6 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
 }
 
-// GetBindMounts takes the users home directory and will return a
-// list of bind mounts that checks the excludes on the site.
-func (s *Site) GetBindMounts(home string) ([]string, error) {
-	// get the abs path for the site
-	path, err := s.GetAbsPath(home)
-	if err != nil {
-		return nil, err
-	}
-
-	// are there files or directories we should exclude?
-	if len(s.Excludes) > 0 {
-		var binds []string
-		for _, v := range bindmounts.FromDir(path, s.Excludes) {
-			_, f := filepath.Split(v)
-
-			binds = append(binds, fmt.Sprintf("%s:/app/%s:rw", v, f))
-		}
-
-		return binds, nil
-	}
-
-	// return the entire directory as the bind mount
-	return []string{fmt.Sprintf("%s:/app:rw", path)}, nil
-}
-
 // GetAbsContainerPath gets the directory for a site’s
 // container path.
 func (s *Site) GetAbsContainerPath(home string) (string, error) {
@@ -324,7 +314,7 @@ func (s *Site) GetAbsContainerPath(home string) (string, error) {
 }
 
 // GetContainerPath is responsible for looking at the
-// site’s web root and determing the correct path in the
+// site’s web root and determining the correct path in the
 // container. This is used for the craft and queue
 // commands to identify the location of the "craft"
 // executable.
@@ -360,19 +350,19 @@ func (s *Site) AsEnvs(addr string) []string {
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "display_errors":
-				c.Sites[i].PHP.DisplayErrors = value
+				c.Apps[i].PHP.DisplayErrors = value
 
 				return nil
 			case "opcache_enable":
-				c.Sites[i].PHP.OpcacheEnable = value
+				c.Apps[i].PHP.OpcacheEnable = value
 
 				return nil
 			case "opcache_validate_timestamps":
-				c.Sites[i].PHP.OpcacheValidateTimestamps = value
+				c.Apps[i].PHP.OpcacheValidateTimestamps = value
 
 				return nil
 			default:
@@ -382,6 +372,44 @@ func (c *Config) SetPHPBoolSetting(hostname, setting string, value bool) error {
 	}
 
 	return fmt.Errorf("unable to find the site: %s", hostname)
+}
+
+// SetAppAliases is used to add an alias domain to an app. If
+// the app cannot be found or the alias is already set it
+// will return an error.
+func (c *Config) SetAppAliases(hostname, alias string) error {
+	// check the parsed apps for the hostname, but set the alias on the app index
+	for i, a := range c.ParsedApps {
+		// if it's not the right hostname
+		if a.Hostname != hostname {
+			continue
+		}
+
+		// check how many aliases are set
+		switch len(c.ParsedApps[i].Aliases) == 0 {
+		case false:
+			for _, a := range c.ParsedApps[i].Aliases {
+				// make sure it's not already set
+				if a == alias {
+					return fmt.Errorf("alias %s is already set for %s", alias, hostname)
+				}
+
+				// add the alias
+				c.Apps[i].Aliases = append(c.Apps[i].Aliases, alias)
+
+				// sort aliases
+				sort.Strings(c.Apps[i].Aliases)
+
+				return nil
+			}
+		default:
+			c.Apps[i].Aliases = append(c.Apps[i].Aliases, alias)
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to find the app %s", hostname)
 }
 
 // SetSiteAlias is used to add an alias domain to a site. If
@@ -425,49 +453,49 @@ func (c *Config) SetSiteAlias(hostname, alias string) error {
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPExtension(hostname, extension string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			// if the extension is already set, we return an error
-			for _, e := range c.Sites[i].Extensions {
+			for _, e := range c.Apps[i].Extensions {
 				if e == extension {
 					return fmt.Errorf("extension %s is already set for %s", extension, hostname)
 				}
 			}
 
 			// add the extension to the list
-			c.Sites[i].Extensions = append(c.Sites[i].Extensions, extension)
+			c.Apps[i].Extensions = append(c.Apps[i].Extensions, extension)
 
 			// sort the extensions by alpha
-			sort.Strings(c.Sites[i].Extensions)
+			sort.Strings(c.Apps[i].Extensions)
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // SetPHPIntSetting is used to set php settings that are ints. It will look
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "max_execution_time":
-				c.Sites[i].PHP.MaxExecutionTime = value
+				c.Apps[i].PHP.MaxExecutionTime = value
 
 				return nil
 			case "max_input_vars":
-				c.Sites[i].PHP.MaxInputVars = value
+				c.Apps[i].PHP.MaxInputVars = value
 
 				return nil
 			case "max_input_time":
-				c.Sites[i].PHP.MaxInputTime = value
+				c.Apps[i].PHP.MaxInputTime = value
 
 				return nil
 			case "opcache_revalidate_freq":
-				c.Sites[i].PHP.OpcacheRevalidateFreq = value
+				c.Apps[i].PHP.OpcacheRevalidateFreq = value
 
 				return nil
 			default:
@@ -476,30 +504,30 @@ func (c *Config) SetPHPIntSetting(hostname, setting string, value int) error {
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // SetPHPStrSetting is used to set php settings that are strings. It will look
 // for the site by its hostname and change the setting. If it cannot find the
 // site or setting it will return an error.
 func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
-	for i, s := range c.Sites {
-		if s.Hostname == hostname {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			switch setting {
 			case "post_max_size":
-				c.Sites[i].PHP.PostMaxSize = value
+				c.Apps[i].PHP.PostMaxSize = value
 
 				return nil
 			case "max_file_upload":
-				c.Sites[i].PHP.MaxFileUpload = value
+				c.Apps[i].PHP.MaxFileUpload = value
 
 				return nil
 			case "memory_limit":
-				c.Sites[i].PHP.MemoryLimit = value
+				c.Apps[i].PHP.MemoryLimit = value
 
 				return nil
 			case "upload_max_file_size":
-				c.Sites[i].PHP.UploadMaxFileSize = value
+				c.Apps[i].PHP.UploadMaxFileSize = value
 
 				return nil
 			default:
@@ -508,7 +536,7 @@ func (c *Config) SetPHPStrSetting(hostname, setting, value string) error {
 		}
 	}
 
-	return fmt.Errorf("unable to find the site: %s", hostname)
+	return fmt.Errorf("unable to find the app: %s", hostname)
 }
 
 // PHP is nested in a configuration and allows setting environment variables
@@ -538,7 +566,8 @@ func Load(home string) (*Config, error) {
 
 	// create the config
 	c := &Config{
-		File: file,
+		File:          file,
+		HomeDirectory: home,
 	}
 
 	// read the file
@@ -550,6 +579,125 @@ func Load(home string) (*Config, error) {
 	// unmarshal
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return nil, err
+	}
+
+	// does the config contain sites?
+	if len(c.Sites) > 0 {
+		return nil, ErrDeprecatedConfig
+	}
+
+	// copy the user config into the parsed apps as a starting point
+	c.ParsedApps = make([]App, len(c.Apps))
+
+	// load each of the apps
+	for i, global := range c.Apps {
+		// if there is a config file, load it
+		if global.Config != "" {
+			// set the config
+			c.ParsedApps[i].Config = global.Config
+
+			// load the file
+			p, err := paths.Clean(c.HomeDirectory, global.Config)
+			if err != nil {
+				return nil, err
+			}
+
+			// lots of things rely on the app path, so get the path from the config file and set it
+			path, _ := filepath.Split(p)
+			c.ParsedApps[i].Path = paths.MakeRelative(home, path, true)
+
+			// read the local app config file
+			local, err := unmarshalAppConfigFrom(p)
+			if err != nil {
+				return nil, err
+			}
+
+			// parse the values but global values override the global config if present
+
+			// check the hostname
+			if hostname, err := parseStringValue(global, local, "hostname"); err == nil {
+				c.ParsedApps[i].Hostname = hostname
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the aliases
+			if global.Aliases != nil {
+				c.ParsedApps[i].Aliases = global.Aliases
+			} else if local.Aliases != nil {
+				c.ParsedApps[i].Aliases = local.Aliases
+			}
+
+			// check the webroot
+			if webroot, err := parseStringValue(global, local, "webroot"); err == nil {
+				c.ParsedApps[i].Webroot = webroot
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the php_version
+			if phpVersion, err := parseStringValue(global, local, "php_version"); err == nil {
+				c.ParsedApps[i].PHPVersion = phpVersion
+			} else if err != nil {
+				return c, err
+			}
+
+			// check the dockerfile
+			if global.Dockerfile != local.Dockerfile {
+				c.ParsedApps[i].Dockerfile = global.Dockerfile
+			} else {
+				c.ParsedApps[i].Dockerfile = local.Dockerfile
+			}
+
+			// TODO(jasonmccallister) check the php settings
+
+			// check the php extensions
+			if global.Extensions != nil {
+				c.ParsedApps[i].Extensions = global.Extensions
+			} else if local.Extensions != nil {
+				c.ParsedApps[i].Extensions = local.Extensions
+			}
+
+			// check xdebug
+			if global.Xdebug != local.Xdebug {
+				c.ParsedApps[i].Xdebug = global.Xdebug
+			} else {
+				c.ParsedApps[i].Xdebug = local.Xdebug
+			}
+
+			// check blackfire
+			if global.Blackfire != local.Blackfire {
+				c.ParsedApps[i].Blackfire = global.Blackfire
+			} else {
+				c.ParsedApps[i].Blackfire = local.Blackfire
+			}
+
+			// check suspend
+			if global.Suspended != local.Suspended {
+				c.ParsedApps[i].Suspended = global.Suspended
+			} else {
+				c.ParsedApps[i].Suspended = local.Suspended
+			}
+
+			// check the database engine
+			if global.Database.Engine != "" {
+				c.ParsedApps[i].Database.Engine = global.Database.Engine
+			} else if local.Database.Engine != "" {
+				c.ParsedApps[i].Database.Engine = local.Database.Engine
+			}
+
+			// check the database version
+			if global.Database.Version != "" {
+				c.ParsedApps[i].Database.Version = global.Database.Version
+			} else if local.Database.Version != "" {
+				c.ParsedApps[i].Database.Version = local.Database.Version
+			}
+
+			break
+		}
+
+		// assign what we found
+		c.ParsedApps[i] = c.Apps[i]
 	}
 
 	// return the config
@@ -567,7 +715,7 @@ func IsEmpty(home string) (string, error) {
 
 	// check if the file is empty
 	if stat.Size() == 0 {
-		return "", ErrEmptyfile
+		return "", ErrEmptyFile
 	}
 
 	return file, nil
@@ -622,17 +770,17 @@ func (c *Config) RemoveDatabase(database Database) error {
 	return fmt.Errorf("unknown database %q", hostname)
 }
 
-// RemoveSite takes a hostname and will remove the site by its
-// hostname from the config file.
-func (c *Config) RemoveSite(site *Site) error {
-	for i, s := range c.Sites {
-		if site.Hostname == s.Hostname {
-			c.Sites = append(c.Sites[:i], c.Sites[i+1:]...)
+// RemoveApp takes a hostname and will remove the app by its
+// hostname from the config.
+func (c *Config) RemoveApp(app *App) error {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == app.Hostname {
+			c.Apps = append(c.Apps[:i], c.Apps[i+1:]...)
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site %q", site.Hostname)
+	return fmt.Errorf("unknown app %q", app.Hostname)
 }
 
 // DisableBlackfire takes a sites hostname and sets the blackfire option
@@ -653,56 +801,56 @@ func (c *Config) DisableBlackfire(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
-// DisableXdebug takes a sites hostname and sets the xdebug option
-// to false. If the site cannot be found, it returns an error.
-func (c *Config) DisableXdebug(site string) error {
+// DisableXdebug takes an apps hostname and sets the xdebug option
+// to false. If the app cannot be found, it returns an error.
+func (c *Config) DisableXdebug(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
 			// only toggle if the setting is true
-			if c.Sites[i].Xdebug {
-				c.Sites[i].Xdebug = false
+			if c.Apps[i].Xdebug {
+				c.Apps[i].Xdebug = false
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
-// EnableBlackfire takes a sites hostname and sets the xdebug option
-// to true. If the site cannot be found, it returns an error.
-func (c *Config) EnableBlackfire(site string) error {
+// EnableBlackfire takes an app hostname and sets the xdebug option
+// to true. If the app cannot be found, it returns an error.
+func (c *Config) EnableBlackfire(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
-			if !c.Sites[i].Blackfire {
-				c.Sites[i].Blackfire = true
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			if !c.Apps[i].Blackfire {
+				c.Apps[i].Blackfire = true
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
-// EnableXdebug takes a sites hostname and sets the xdebug option
-// to true. If the site cannot be found, it returns an error.
-func (c *Config) EnableXdebug(site string) error {
+// EnableXdebug takes an app hostname and sets the xdebug option
+// to true. If the app cannot be found, it returns an error.
+func (c *Config) EnableXdebug(hostname string) error {
 	// find the site by the hostname
-	for i, s := range c.Sites {
-		if s.Hostname == site {
-			if !c.Sites[i].Xdebug {
-				c.Sites[i].Xdebug = true
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			if !c.Apps[i].Xdebug {
+				c.Apps[i].Xdebug = true
 			}
 
 			return nil
 		}
 	}
 
-	return fmt.Errorf("unknown site, %s", site)
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
 // Save takes a file path and marshals the config into a file.
@@ -865,4 +1013,56 @@ func cleanPath(home, path string) (string, error) {
 	}
 
 	return filepath.Clean(abs), nil
+}
+
+func parseStringValue(global, local App, key string) (string, error) {
+	switch key {
+	case "hostname":
+		if global.Hostname != "" {
+			return global.Hostname, nil
+		}
+
+		if local.Hostname != "" {
+			return local.Hostname, nil
+		}
+
+		return "", fmt.Errorf("hostname must be defined for an app")
+	case "php_version":
+		if global.PHPVersion != "" {
+			return global.PHPVersion, nil
+		}
+
+		if local.PHPVersion != "" {
+			return local.PHPVersion, nil
+		}
+
+		return "", fmt.Errorf("php_version must be defined for an app")
+	case "webroot":
+		if global.Webroot != "" {
+			return global.Webroot, nil
+		}
+
+		if local.Webroot != "" {
+			return local.Webroot, nil
+		}
+
+		return "", fmt.Errorf("webroot must be defined for an app")
+	}
+
+	return "", fmt.Errorf("unkown key %q provided", key)
+}
+
+func unmarshalAppConfigFrom(path string) (App, error) {
+	var app App
+	f, err := ioutil.ReadFile(path)
+	if err != nil {
+		return app, fmt.Errorf("unable to read file at %v", path)
+	}
+
+	err = yaml.Unmarshal(f, &app)
+	if err != nil {
+		return app, fmt.Errorf("unable to marshal file, %v", err)
+	}
+
+	return app, nil
 }

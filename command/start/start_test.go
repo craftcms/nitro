@@ -2,6 +2,7 @@ package start
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -12,18 +13,23 @@ func TestStartSuccess(t *testing.T) {
 	// Arrange
 	containers := []types.Container{
 		{
-			ID:    "nitro",
-			Names: []string{"/nitro"},
+			ID:    "testing-start",
+			Names: []string{"/testing-start"},
+			//Labels: map[string]string{
+			//	containerlabels.Host: "nitro",
+			//},
 		},
 	}
-	expectedContainerID := "nitro"
+	expectedContainerID := "testing-start"
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
 	expectedOutput := []string{"Starting Nitro…\n", "Nitro started 👍\n"}
-	home, err := os.Getwd()
+	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	home := filepath.Join(wd, "testdata")
 
 	// Act
 	cmd := NewCommand(home, mock, output)
@@ -31,7 +37,7 @@ func TestStartSuccess(t *testing.T) {
 
 	// Assert
 	if err != nil {
-		t.Errorf("expected the error to be nil")
+		t.Errorf("expected the error to be nil, got %v", err)
 	}
 
 	if mock.containerID != expectedContainerID {
@@ -56,10 +62,12 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 	mock := newMockDockerClient(nil, containers, nil)
 	output := &spyOutputer{}
 	expectedOutputSuccess := []string{"  ✓ testing-start\n"}
-	home, err := os.Getwd()
+	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	home := filepath.Join(wd, "testdata")
 
 	// Act
 	cmd := NewCommand(home, mock, output)
@@ -67,7 +75,7 @@ func TestStartReturnsReadyIfAlreadyRunning(t *testing.T) {
 
 	// Assert
 	if err != nil {
-		t.Errorf("expected the error to be nil")
+		t.Errorf("expected the error to be nil, got %v", err)
 	}
 
 	if mock.containerID != expectedContainerID {

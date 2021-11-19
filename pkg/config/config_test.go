@@ -7,251 +7,6 @@ import (
 	"testing"
 )
 
-func TestSite_AsEnvs(t *testing.T) {
-	type fields struct {
-		Hostname string
-		Aliases  []string
-		Path     string
-		Version  string
-		PHP      PHP
-		Webroot  string
-		Xdebug   bool
-	}
-	type args struct {
-		addr string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   []string
-	}{
-		{
-			name: "xdebug 2 options are set if enabled",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
-				},
-				Version: "7.1",
-				Xdebug:  true,
-			},
-			args: args{
-				addr: "host.docker.internal",
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=off",
-				"PHP_MEMORY_LIMIT=256M",
-				"PHP_MAX_EXECUTION_TIME=3000",
-				"PHP_UPLOAD_MAX_FILESIZE=128M",
-				"PHP_MAX_INPUT_VARS=2000",
-				"PHP_POST_MAX_SIZE=128M",
-				"PHP_OPCACHE_ENABLE=1",
-				"PHP_OPCACHE_REVALIDATE_FREQ=60",
-				"PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
-				"XDEBUG_SESSION=PHPSTORM",
-				"PHP_IDE_CONFIG=serverName=somewebsite.nitro",
-				"XDEBUG_CONFIG=idekey=PHPSTORM remote_host=host.docker.internal profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1",
-				"XDEBUG_MODE=xdebug2",
-			},
-		},
-		{
-			name: "xdebug 3 options are set if enabled",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
-				},
-				Version: "7.4",
-				Xdebug:  true,
-			},
-			args: args{
-				addr: "host.docker.internal",
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=off",
-				"PHP_MEMORY_LIMIT=256M",
-				"PHP_MAX_EXECUTION_TIME=3000",
-				"PHP_UPLOAD_MAX_FILESIZE=128M",
-				"PHP_MAX_INPUT_VARS=2000",
-				"PHP_POST_MAX_SIZE=128M",
-				"PHP_OPCACHE_ENABLE=1",
-				"PHP_OPCACHE_REVALIDATE_FREQ=60",
-				"PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
-				"XDEBUG_SESSION=PHPSTORM",
-				"PHP_IDE_CONFIG=serverName=somewebsite.nitro",
-				"XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003",
-				"XDEBUG_MODE=develop,debug",
-			},
-		},
-		{
-			name: "defaults are overridden when set on the site",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
-				},
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=off",
-				"PHP_MEMORY_LIMIT=256M",
-				"PHP_MAX_EXECUTION_TIME=3000",
-				"PHP_UPLOAD_MAX_FILESIZE=128M",
-				"PHP_MAX_INPUT_VARS=2000",
-				"PHP_POST_MAX_SIZE=128M",
-				"PHP_OPCACHE_ENABLE=1",
-				"PHP_OPCACHE_REVALIDATE_FREQ=60",
-				"PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
-				"XDEBUG_SESSION=PHPSTORM",
-				"PHP_IDE_CONFIG=serverName=somewebsite.nitro",
-				"XDEBUG_MODE=off",
-			},
-		},
-		{
-			name: "can get the defaults that are expected",
-			fields: fields{
-				Hostname: "somewebsite.nitro",
-			},
-			want: []string{
-				"PHP_DISPLAY_ERRORS=on",
-				"PHP_MEMORY_LIMIT=512M",
-				"PHP_MAX_EXECUTION_TIME=5000",
-				"PHP_UPLOAD_MAX_FILESIZE=512M",
-				"PHP_MAX_INPUT_VARS=5000",
-				"PHP_POST_MAX_SIZE=512M",
-				"PHP_OPCACHE_ENABLE=0",
-				"PHP_OPCACHE_REVALIDATE_FREQ=0",
-				"PHP_OPCACHE_VALIDATE_TIMESTAMPS=0",
-				"XDEBUG_SESSION=PHPSTORM",
-				"PHP_IDE_CONFIG=serverName=somewebsite.nitro",
-				"XDEBUG_MODE=off",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Site{
-				Hostname: tt.fields.Hostname,
-				Aliases:  tt.fields.Aliases,
-				Path:     tt.fields.Path,
-				Version:  tt.fields.Version,
-				PHP:      tt.fields.PHP,
-				Webroot:  tt.fields.Webroot,
-				Xdebug:   tt.fields.Xdebug,
-			}
-			if got := s.AsEnvs(tt.args.addr); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Site.AsEnvs() = \ngot:\n%v, \nwant:\n%v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestSite_cleanPath(t *testing.T) {
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	type args struct {
-		home string
-		path string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{
-			name: "can get the full path using a tilde",
-			args: args{
-				home: wd,
-				path: "~/testdata",
-			},
-			want:    filepath.Join(wd, "testdata"),
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := cleanPath(tt.args.home, tt.args.path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Site.cleanPath() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Site.cleanPath() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDatabase_GetHostname(t *testing.T) {
-	type fields struct {
-		Engine    string
-		Version   string
-		Port      string
-		Ephemeral bool
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		wantErr bool
-	}{
-		{
-			name:    "can get the hostname for a database container",
-			fields:  fields{Engine: "mysql", Version: "5.7", Port: "3306"},
-			want:    "mysql-5.7-3306.database.nitro",
-			wantErr: false,
-		},
-		{
-			name:    "empty values return an error",
-			fields:  fields{Engine: "mysql", Port: "3306"},
-			want:    "",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &Database{
-				Engine:  tt.fields.Engine,
-				Version: tt.fields.Version,
-				Port:    tt.fields.Port,
-			}
-			got, err := d.GetHostname()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Database.GetHostname() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Database.GetHostname() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestLoad(t *testing.T) {
 	// get the working dir for the test path
 	wd, err := os.Getwd()
@@ -293,8 +48,46 @@ func TestLoad(t *testing.T) {
 						Port:    "5432",
 					},
 				},
+				Apps: []App{
+					{
+						Hostname:   "mysite.nitro",
+						Path:       "~/mysite",
+						PHPVersion: "7.4",
+						Webroot:    "web",
+					},
+					{
+						Config:     "~/team-site-with-config/nitro.yaml",
+						Aliases:    []string{"my-local-app.test"},
+						PHPVersion: "8.0",
+						Extensions: []string{"grpc"},
+					},
+				},
+				ParsedApps: []App{
+					{
+						Hostname:   "mysite.nitro",
+						Path:       "~/mysite",
+						PHPVersion: "7.4",
+						Webroot:    "web",
+					},
+					{
+						Config:     "~/team-site-with-config/nitro.yaml",
+						Path:       "~/team-site-with-config",
+						Hostname:   "team-site-name-from-config.nitro",
+						Aliases:    []string{"my-local-app.test"},
+						PHPVersion: "8.0",
+						Extensions: []string{"grpc"},
+						Webroot:    "public",
+					},
+				},
+				HomeDirectory: testdir,
 			},
 			wantErr: false,
+		},
+		{
+			name:    "configs with sites return an error",
+			args:    args{home: filepath.Join(testdir, "nitro2-home")},
+			want:    nil,
+			wantErr: true,
 		},
 		{
 			name: "missing file returns an error",
@@ -333,136 +126,15 @@ func TestLoad(t *testing.T) {
 					t.Errorf("Load() = \ngot:\n%v,\nwant\n%v", got.Sites, tt.want.Sites)
 				}
 
-				t.Errorf("Load() = \ngot\n%v,\nwant\n%v", got, tt.want)
-			}
-		})
-	}
-}
+				// check apps
+				if !reflect.DeepEqual(got.Apps, tt.want.Apps) {
+					t.Errorf("Load() apps = \ngot:\n%v,\nwant\n%v", got.Apps, tt.want.Apps)
+				}
 
-func TestConfig_EnableXdebug(t *testing.T) {
-	type fields struct {
-		Blackfire Blackfire
-		Databases []Database
-		Services  Services
-		Sites     []Site
-		File      string
-	}
-	type args struct {
-		site string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "struct is not modified when xdebug is already true",
-			fields: fields{
-				Sites: []Site{
-					{
-						Hostname: "somesite",
-						Xdebug:   true,
-					},
-					{
-						Hostname: "anothersite",
-						Xdebug:   true,
-					},
-				},
-			},
-			args:    args{site: "somesite"},
-			wantErr: false,
-		},
-		{
-			name: "can enable xdebug for a site",
-			fields: fields{
-				Sites: []Site{
-					{
-						Hostname: "somesite",
-						Xdebug:   false,
-					},
-					{
-						Hostname: "anothersite",
-						Xdebug:   true,
-					},
-				},
-			},
-			args:    args{site: "somesite"},
-			wantErr: false,
-		},
-		{
-			name:    "sites that don't exist return an error",
-			args:    args{site: "idontexist"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Config{
-				Blackfire: tt.fields.Blackfire,
-				Databases: tt.fields.Databases,
-				Services:  tt.fields.Services,
-				Sites:     tt.fields.Sites,
-				File:      tt.fields.File,
-			}
-			if err := c.EnableXdebug(tt.args.site); (err != nil) != tt.wantErr {
-				t.Errorf("Config.EnableXdebug() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestConfig_DisableXdebug(t *testing.T) {
-	type fields struct {
-		Blackfire Blackfire
-		Databases []Database
-		Services  Services
-		Sites     []Site
-		File      string
-	}
-	type args struct {
-		site string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "can enable xdebug for a site",
-			fields: fields{
-				Sites: []Site{
-					{
-						Hostname: "somesite",
-						Xdebug:   false,
-					},
-					{
-						Hostname: "anothersite",
-						Xdebug:   true,
-					},
-				},
-			},
-			args:    args{site: "somesite"},
-			wantErr: false,
-		},
-		{
-			name:    "sites that don't exist return an error",
-			args:    args{site: "idontexist"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Config{
-				Blackfire: tt.fields.Blackfire,
-				Databases: tt.fields.Databases,
-				Services:  tt.fields.Services,
-				Sites:     tt.fields.Sites,
-				File:      tt.fields.File,
-			}
-			if err := c.DisableXdebug(tt.args.site); (err != nil) != tt.wantErr {
-				t.Errorf("Config.DisableXdebug() error = %v, wantErr %v", err, tt.wantErr)
+				// check parsed apps
+				if !reflect.DeepEqual(got.ParsedApps, tt.want.ParsedApps) {
+					t.Errorf("Load() parsed apps = \ngot:\n%v,\nwant\n%v", got.ParsedApps, tt.want.ParsedApps)
+				}
 			}
 		})
 	}
@@ -578,7 +250,8 @@ func TestSite_GetAbsPath(t *testing.T) {
 
 func TestConfig_SetPHPStrSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -596,7 +269,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php upload_max_file_size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -612,7 +290,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php post max size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -628,7 +311,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php max file upload setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -644,7 +332,12 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "can change a sites php memory limit setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -660,7 +353,7 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -677,33 +370,34 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPStrSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPStrSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "memory_limit":
-				if site.PHP.MemoryLimit != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.MemoryLimit)
+				if app.PHP.MemoryLimit != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.MemoryLimit)
 				}
 			case "post_max_size":
-				if site.PHP.PostMaxSize != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.PostMaxSize)
+				if app.PHP.PostMaxSize != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.PostMaxSize)
 				}
 			case "max_file_upload":
-				if site.PHP.MaxFileUpload != tt.args.value {
-					t.Errorf("expected the setting to be %s, got %s", tt.args.value, site.PHP.MaxFileUpload)
+				if app.PHP.MaxFileUpload != tt.args.value {
+					t.Errorf("expected the setting to be %s, got %s", tt.args.value, app.PHP.MaxFileUpload)
 				}
 			}
 		})
@@ -712,7 +406,8 @@ func TestConfig_SetPHPStrSetting(t *testing.T) {
 
 func TestConfig_SetPHPBoolSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -728,7 +423,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "can change a sites php opcache enable setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -744,7 +444,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "can change a sites php post max size setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -760,7 +465,12 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -774,9 +484,9 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "missing site returns an error",
+			name: "missing app returns an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -793,29 +503,30 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPBoolSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPBoolSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "display_errors":
-				if site.PHP.DisplayErrors != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.DisplayErrors)
+				if app.PHP.DisplayErrors != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.DisplayErrors)
 				}
 			case "opcache_enable":
-				if site.PHP.OpcacheEnable != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheEnable)
+				if app.PHP.OpcacheEnable != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.OpcacheEnable)
 				}
 			}
 		})
@@ -824,7 +535,8 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 
 func TestConfig_SetPHPIntSetting(t *testing.T) {
 	type fields struct {
-		Sites []Site
+		Apps       []App
+		ParsedApps []App
 	}
 	type args struct {
 		hostname string
@@ -840,7 +552,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_execution_time setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -856,7 +573,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_input_vars setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -872,7 +594,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php max_input_time setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -888,7 +615,12 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "can change a sites php opcache_revalidate_freq setting",
 			fields: fields{
-				Sites: []Site{
+				Apps: []App{
+					{
+						Hostname: "siteone.nitro",
+					},
+				},
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -904,7 +636,7 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "unknown settings return an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -920,7 +652,7 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 		{
 			name: "missing site returns an error",
 			fields: fields{
-				Sites: []Site{
+				ParsedApps: []App{
 					{
 						Hostname: "siteone.nitro",
 					},
@@ -937,37 +669,38 @@ func TestConfig_SetPHPIntSetting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Config{
-				Sites: tt.fields.Sites,
+				Apps:       tt.fields.Apps,
+				ParsedApps: tt.fields.ParsedApps,
 			}
 
 			if err := c.SetPHPIntSetting(tt.args.hostname, tt.args.setting, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Config.SetPHPIntSetting() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// find the site
-			var site Site
-			for _, s := range c.Sites {
-				if s.Hostname == tt.args.hostname {
-					site = s
+			// find the app
+			var app App
+			for _, a := range c.Apps {
+				if a.Hostname == tt.args.hostname {
+					app = a
 				}
 			}
 
 			switch tt.args.setting {
 			case "max_execution_time":
-				if site.PHP.MaxExecutionTime != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxExecutionTime)
+				if app.PHP.MaxExecutionTime != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxExecutionTime)
 				}
 			case "max_input_vars":
-				if site.PHP.MaxInputVars != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxInputVars)
+				if app.PHP.MaxInputVars != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxInputVars)
 				}
 			case "max_input_time":
-				if site.PHP.MaxInputTime != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.MaxInputTime)
+				if app.PHP.MaxInputTime != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.MaxInputTime)
 				}
 			case "opcache_revalidate_freq":
-				if site.PHP.OpcacheRevalidateFreq != tt.args.value {
-					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheRevalidateFreq)
+				if app.PHP.OpcacheRevalidateFreq != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, app.PHP.OpcacheRevalidateFreq)
 				}
 			}
 		})

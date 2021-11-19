@@ -4,6 +4,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
@@ -25,7 +27,7 @@ const exampleText = `  # show logs from a site
   nitro logs --follow=false`
 
 // NewCommand returns the command to show a containers logs. It will check if the current working
-// directory is a known site and default to that container or provide the user with a list of sites
+// directory is a known app and default to that container or provide the user with a list of sites
 // to view logs from. There are helpful flags such as since, timestamps, and follow that align with
 // the docker logs API flags.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
@@ -34,12 +36,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Displays container logs.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get the current working directory
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
 			// load the config
 			cfg, err := config.Load(home)
 			if err != nil {
@@ -50,37 +46,26 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
-			// get a context aware list of sites
-			sites := cfg.ListOfSitesByDirectory(home, wd)
-
-			// create the options for the sites
-			var options []string
-			for _, s := range sites {
-				options = append(options, s.Hostname)
-			}
-
-			switch len(sites) {
-			case 0:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+			// get the app
+			appName := flags.AppName
+			if appName == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
 				if err != nil {
 					return err
 				}
 
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
-			case 1:
-				output.Info("show logs for", sites[0].Hostname)
-
-				filter.Add("label", containerlabels.Host+"="+sites[0].Hostname)
-			default:
-				selected, err := output.Select(cmd.InOrStdin(), "Select a site: ", options)
+				appName, err = appaware.Detect(*cfg, wd)
 				if err != nil {
 					return err
 				}
-
-				filter.Add("label", containerlabels.Host+"="+sites[selected].Hostname)
 			}
 
-			// find all of the containers, there should only be one if we are in a known directory
+			output.Info("show logs for", appName)
+
+			filter.Add("label", containerlabels.Host+"="+appName)
+
+			// find all containers, there should only be one if we are in a known directory
 			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{Filters: filter})
 			if err != nil {
 				return err
@@ -116,7 +101,9 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// show the output
-			stdcopy.StdCopy(cmd.OutOrStdout(), cmd.ErrOrStderr(), out)
+			if _, err := stdcopy.StdCopy(cmd.OutOrStdout(), cmd.ErrOrStderr(), out); err != nil {
+				return err
+			}
 
 			return nil
 		},

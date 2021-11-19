@@ -10,7 +10,6 @@ import (
 	"github.com/craftcms/nitro/command/apply"
 	"github.com/craftcms/nitro/command/blackfire"
 	"github.com/craftcms/nitro/command/bridge"
-	"github.com/craftcms/nitro/command/clean"
 	"github.com/craftcms/nitro/command/completion"
 	"github.com/craftcms/nitro/command/composer"
 	"github.com/craftcms/nitro/command/container"
@@ -41,11 +40,11 @@ import (
 	"github.com/craftcms/nitro/command/stop"
 	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
-	"github.com/craftcms/nitro/command/validate"
 	"github.com/craftcms/nitro/command/version"
 	"github.com/craftcms/nitro/command/xoff"
 	"github.com/craftcms/nitro/command/xon"
 	"github.com/craftcms/nitro/pkg/downloader"
+	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/craftcms/nitro/pkg/terminal"
 	"github.com/docker/docker/client"
 	"github.com/mitchellh/go-homedir"
@@ -98,14 +97,13 @@ func NewCommand() *cobra.Command {
 	// create the downloaded for creating projects
 	downloader := downloader.NewDownloader()
 
-	// register all of the commands
+	// register the commands
 	commands := []*cobra.Command{
 		add.NewCommand(home, docker, term),
 		alias.NewCommand(home, docker, term),
 		apply.NewCommand(home, docker, nitrod, term),
 		blackfire.NewCommand(home, docker, term),
 		bridge.NewCommand(home, docker, term),
-		clean.NewCommand(home, docker, term),
 		completion.NewCommand(),
 		composer.NewCommand(home, docker, term),
 		container.NewCommand(home, docker, term),
@@ -136,7 +134,6 @@ func NewCommand() *cobra.Command {
 		stop.NewCommand(home, docker, term),
 		trust.NewCommand(home, docker, term),
 		update.NewCommand(home, docker, term),
-		validate.NewCommand(home, docker, term),
 		version.NewCommand(home, docker, nitrod, term),
 		xon.NewCommand(home, docker, term),
 		xoff.NewCommand(home, docker, term),
@@ -144,6 +141,9 @@ func NewCommand() *cobra.Command {
 
 	// add the commands
 	rootCommand.AddCommand(commands...)
+
+	// add the global app flag
+	rootCommand.PersistentFlags().StringVarP(&flags.AppName, "app", "a", "", "the app to use for the command")
 
 	return rootCommand
 }

@@ -3,7 +3,7 @@ package containerlabels
 import (
 	"strings"
 
-	"github.com/craftcms/nitro/pkg/config"
+	 "github.com/craftcms/nitro/pkg/config"
 	"github.com/docker/docker/api/types"
 )
 
@@ -29,13 +29,16 @@ const (
 	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
 
+	// Dockerfile is used to identify a container that uses a custom dockerfile for its image
+	Dockerfile = "com.craftcms.nitro.dockerfile"
+
 	// Extensions is used for a list of comma seperated extensions for a site
 	Extensions = "com.craftcms.nitro.extensions"
 
 	// Host is used to identify a web application by the hostname of the site (e.g demo.nitro)
 	Host = "com.craftcms.nitro.host"
 
-	// PAth is used for containers that mount specific paths such as composer and npm
+	// Path is used for containers that mount specific paths such as composer and npm
 	Path = "com.craftcms.nitro.path"
 
 	// Network is used to label a network for an environment
@@ -57,12 +60,38 @@ const (
 	Webroot = "com.craftcms.nitro.webroot"
 )
 
-// ForSite takes a site and returns labels to use on the sites container.
+// ForApp takes an app and returns labels to use on the app container.
+func ForApp(a config.App) map[string]string {
+	labels := map[string]string{
+		Nitro:   "true",
+		Host:    a.Hostname,
+		Webroot: a.Webroot,
+		Type:    "app",
+	}
+
+	// if there are extensions, add them as comma separated
+	if len(a.Extensions) > 0 {
+		labels[Extensions] = strings.Join(a.Extensions, ",")
+	}
+
+	return labels
+}
+
+// ForAppVolume takes a site and returns labels to use on the sites home volume.
+func ForAppVolume(a config.App) map[string]string {
+	return map[string]string{
+		Nitro: "true",
+		Host:  a.Hostname,
+	}
+}
+
+// ForSite takes an app and returns labels to use on the app container.
 func ForSite(s config.Site) map[string]string {
 	labels := map[string]string{
 		Nitro:   "true",
 		Host:    s.Hostname,
 		Webroot: s.Webroot,
+		Type:    "app",
 	}
 
 	// if there are extensions, add them as comma separated
@@ -114,5 +143,5 @@ func Identify(c types.Container) string {
 		return "service"
 	}
 
-	return "site"
+	return "app"
 }

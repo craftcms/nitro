@@ -3,21 +3,23 @@
 ## Unreleased
 
 ### Added
+- Added support for parsing nitro.yaml files stored in a project repository.
 - Sites now expose ports 3000-3005 for miscellaneous use.
-- Added the `keys` command to copy SSH keys from the host machine into a sites' container.
-- The default shell is now bash and not sh, allowing common scripts. ([#384](https://github.com/craftcms/nitro/issues/384))
-- Site containers now include common image processing libraries.
-- Added common Linux build tools such as make to the site containers.
+- Added the `keys` command to copy SSH keys from the host machine into an app container.
+- The default shell is now bash and not sh, allowing common scripts.  ([#384](https://github.com/craftcms/nitro/issues/384))
+- App containers now include common image processing libraries.
+- Added common Linux build tools such as make to the app containers.
 - Yarn is now installed by default.
-- Added the ability to exclude directories from a site bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419)) 
+- Added the ability to exclude directories from app bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419)) 
 
 ### Changed
+- Renamed sites to apps and updated the commands. ([#420](https://github.com/craftcms/nitro/issues/420))
 - The `composer` command now accepts site arguments. ([#364](https://github.com/craftcms/nitro/issues/364))
-- The site containers now use Debian based images.
+- The app containers now use Debian based images.
 - Node and npm are now included with nvm in the images.
-- The sites user's home directory is now persisted through container updates and version changes.
+- The app container user home directory is now persisted through container updates and version changes.
 - Added support for private composer packages and git cloning.
-- The nginx site is now the fallback and users can completely override the nginx config.
+- Users can completely override the nginx config.
 - Custom Nginx configurations will now persist container recreation.
 - Removed the `context` command in favor of the `ls` command.
 - Renamed the `db import` to `db restore` to match the Craft CLI.
@@ -27,6 +29,11 @@
 - Fixed an error when creating a backup with `db backup` was not including the drop tables command.
 - Fixed an error when installing extensions would not reflect in the site container.
 - The `destroy` command will now remove container volumes.
+- Fixed an error when the webroot would return an incorrect directory.
+
+### Removed
+- Removed the deprecated `clean` command.
+- Removed the `validate` command.
 
 ## 2.0.8 - 2021-05-18
 

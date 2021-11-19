@@ -8,3 +8,14 @@ databases:
   - engine: postgres
     version: "13"
     port: 5432
+apps:
+  - hostname: mysite.nitro
+    path: ~/mysite
+    php_version: "7.4"
+    webroot: web
+  - config: ~/team-site-with-config/nitro.yaml
+    aliases:
+      - my-local-app.test
+    php_version: "8.0"
+    extensions:
+      - grpc
