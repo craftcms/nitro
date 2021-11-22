@@ -1,6 +1,7 @@
 package containerlabels
 
 import (
+	"fmt"
 	"strings"
 
 	 "github.com/craftcms/nitro/pkg/config"
@@ -28,6 +29,9 @@ const (
 
 	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
+
+	// Disabled is used to identify a container that should not be started.
+	Disabled = "com.craftcms.nitro.disabled"
 
 	// Dockerfile is used to identify a container that uses a custom dockerfile for its image
 	Dockerfile = "com.craftcms.nitro.dockerfile"
@@ -67,6 +71,7 @@ func ForApp(a config.App) map[string]string {
 		Host:    a.Hostname,
 		Webroot: a.Webroot,
 		Type:    "app",
+		Disabled: fmt.Sprintf("%v", a.Disabled),
 	}
 
 	// if there are extensions, add them as comma separated

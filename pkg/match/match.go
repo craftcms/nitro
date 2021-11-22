@@ -20,11 +20,11 @@ import (
 const DefaultMounts = 3
 
 var (
-	ErrMisMatchedImage  = fmt.Errorf("container image does not match")
+	ErrMisMatchedImage = fmt.Errorf("container image does not match")
 
-	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
+	ErrMisMatchedLabel = fmt.Errorf("container label does not match")
 
-	ErrEnvFileNotFound  = fmt.Errorf("unable to find the containers env file")
+	ErrEnvFileNotFound = fmt.Errorf("unable to find the containers env file")
 
 	ErrMisMatchedEnvVar = fmt.Errorf("container environment variables do not match")
 
@@ -98,8 +98,13 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 		return false
 	}
 
-	// check the sites' hostname using the label
+	// check the app hostname using the label
 	if container.Config.Labels[containerlabels.Host] != app.Hostname {
+		return false
+	}
+
+	// check the app is disabled
+	if container.Config.Labels[containerlabels.Disabled] != fmt.Sprintf("%v", app.Disabled) {
 		return false
 	}
 

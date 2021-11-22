@@ -186,7 +186,7 @@ type App struct {
 	Extensions []string `yaml:"extensions,omitempty"`
 	Xdebug     bool     `yaml:"xdebug,omitempty"`
 	Blackfire  bool     `yaml:"blackfire,omitempty"`
-	Suspended  bool     `yaml:"suspended,omitempty"`
+	Disabled   bool     `yaml:"disabled,omitempty"`
 	Database   struct {
 		Engine  string `yaml:"engine,omitempty"`
 		Version string `yaml:"version,omitempty"`
@@ -673,10 +673,10 @@ func Load(home string) (*Config, error) {
 			}
 
 			// check suspend
-			if global.Suspended != local.Suspended {
-				c.ParsedApps[i].Suspended = global.Suspended
+			if global.Disabled != local.Disabled {
+				c.ParsedApps[i].Disabled = global.Disabled
 			} else {
-				c.ParsedApps[i].Suspended = local.Suspended
+				c.ParsedApps[i].Disabled = local.Disabled
 			}
 
 			// check the database engine
