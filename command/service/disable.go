@@ -11,8 +11,6 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-// NewCommand returns the command to enable common nitro services. These services are provided as containers
-// and do not require a user to configure the ports/volumes or images.
 func disableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "disable",
