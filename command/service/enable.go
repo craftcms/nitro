@@ -77,7 +77,7 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Successfully enabled", args[0]+"!", "💥")
+			output.Info("Enabled", args[0])
 
 			return nil
 		},

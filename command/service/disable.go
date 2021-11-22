@@ -73,7 +73,7 @@ func disableCommand(home string, docker client.CommonAPIClient, output terminal.
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Successfully disabled", args[0]+"!", "✨")
+			output.Info("Disabled", args[0])
 
 			return nil
 		},
