@@ -16,12 +16,12 @@ import (
 const exampleText = `  # example command
   nitro xoff`
 
-// NewCommand returns the command that is used to disable xdebug for a specific site. It will first check
-// if the current working directory or prompt the user for a site.
+// NewCommand returns the command that is used to disable xdebug for a specific app. It will first check
+// if the current working directory or prompt the user for an app.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "xoff",
-		Short:   "Disables Xdebug for a site.",
+		Short:   "Disables Xdebug for an app.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
@@ -55,7 +55,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			output.Info("Disabling xdebug for", app.Hostname)
 
-			// disable xdebug for the sites hostname
+			// disable xdebug for the app hostname
 			if err := cfg.DisableXdebug(app.Hostname); err != nil {
 				return err
 			}
