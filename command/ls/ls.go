@@ -75,7 +75,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				if cmd.Flag("services").Value.String() == "true" {
-					if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis" && c.Labels[containerlabels.Type] != "blackfire" {
+					if containerlabels.IsServiceContainer(c.Labels) {
 						continue
 					}
 				}

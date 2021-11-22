@@ -50,7 +50,7 @@ func lsCommand(home string, docker client.CommonAPIClient, output terminal.Outpu
 				}
 
 				// show only the service containers
-				if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis" && c.Labels[containerlabels.Type] != "blackfire" {
+				if containerlabels.IsServiceContainer(c.Labels) {
 					continue
 				}
 
