@@ -1,8 +1,9 @@
-package enable
+package service
 
 import (
 	"fmt"
 
+	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -10,32 +11,12 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrUnknownService is used when an unknown service is requested
-	ErrUnknownService = fmt.Errorf("unknown service requested")
-)
-
-const exampleText = `  # enable services
-  nitro enable <service-name>
-
-  # enable mailhog for local email testing
-  nitro enable mailhog
-
-  # enable blackfire for local profiling
-  nitro enable blackfire
-
-  # enable minio for local s3 testing
-  nitro enable minio
-
-  # enable dynamodb for local noSQL
-  nitro enable dynamodb`
-
 // NewCommand returns the command to enable common nitro services. These services are provided as containers
 // and do not require a user to configure the ports/volumes or images.
-func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func disableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enable",
-		Short: "Enables a service.",
+		Use:   "disable",
+		Short: "Disables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -46,7 +27,23 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
-		Example:   exampleText,
+		Example: `  # disable services
+  nitro service disable <service-name>
+
+  # disable blackfire
+  nitro service disable blackfire
+
+  # disable mailhog
+  nitro service disable mailhog
+
+  # disable minio
+  nitro service disable minio
+
+  # disable dynamodb
+  nitro service disable dynamodb`,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return prompt.RunApply(cmd, args, false, output)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the configuration
 			cfg, err := config.Load(home)
@@ -54,19 +51,18 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			// enable the service
+			// disable the service
 			switch args[0] {
 			case "blackfire":
-				// TODO(jasonmccallister) verify the credentials are set
-				cfg.Services.Blackfire = true
+				cfg.Services.Blackfire = false
 			case "dynamodb":
-				cfg.Services.DynamoDB = true
+				cfg.Services.DynamoDB = false
 			case "mailhog":
-				cfg.Services.Mailhog = true
+				cfg.Services.Mailhog = false
 			case "minio":
-				cfg.Services.Minio = true
+				cfg.Services.Minio = false
 			case "redis":
-				cfg.Services.Redis = true
+				cfg.Services.Redis = false
 			default:
 				return ErrUnknownService
 			}
@@ -76,15 +72,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
-				}
-			}
+			output.Info("Successfully disabled", args[0]+"!", "✨")
 
 			return nil
 		},
