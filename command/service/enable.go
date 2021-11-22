@@ -18,8 +18,9 @@ var (
 
 func enableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enable",
-		Short: "Enables a service.",
+		Use:     "enable",
+		Aliases: []string{"en"},
+		Short:   "Enables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -30,7 +31,7 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 			return nil
 		},
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
-		Example:   `  # enable services
+		Example: `  # enable services
   nitro service enable <service-name>
 
   # enable mailhog for local email testing
@@ -76,7 +77,7 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Successfully enabled", args[0] + "!", "💥")
+			output.Info("Successfully enabled", args[0]+"!", "💥")
 
 			return nil
 		},

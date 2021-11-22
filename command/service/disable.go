@@ -15,8 +15,9 @@ import (
 // and do not require a user to configure the ports/volumes or images.
 func disableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "disable",
-		Short: "Disables a service.",
+		Use:     "disable",
+		Aliases: []string{"dis"},
+		Short:   "Disables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())

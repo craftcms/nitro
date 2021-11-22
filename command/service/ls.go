@@ -17,8 +17,9 @@ import (
 
 func lsCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ls",
-		Short: "Lists details for Nitro’s services.",
+		Use:     "ls",
+		Aliases: []string{"l"},
+		Short:   "Lists details for Nitro’s services.",
 		Example: `  # view information about your nitro environment
   nitro service ls`,
 		RunE: func(cmd *cobra.Command, args []string) error {

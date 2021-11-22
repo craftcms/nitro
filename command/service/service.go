@@ -13,6 +13,7 @@ const exampleText = `  # enable blackfire
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "service",
+		Aliases: []string{"svc"},
 		Short:   "Manage services.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
