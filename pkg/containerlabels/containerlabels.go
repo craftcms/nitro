@@ -148,7 +148,7 @@ func Identify(c types.Container) string {
 
 // IsServiceContainer takes a containers labels and returns true if it is for a service container.
 func IsServiceContainer(labels map[string]string) bool {
-	if labels[Type] != "dynamodb" && labels[Type] != "mailhog" && labels[Type] != "redis" && labels[Type] != "blackfire" {
+	if labels[Type] == "dynamodb" || labels[Type] == "mailhog" || labels[Type] == "redis" || labels[Type] == "blackfire" {
 		return true
 	}
 
