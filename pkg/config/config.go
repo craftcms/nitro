@@ -721,26 +721,6 @@ func IsEmpty(home string) (string, error) {
 	return file, nil
 }
 
-// AddSite takes a site and adds it to the config
-func (c *Config) AddSite(s Site) error {
-	// check existing sites
-	for _, e := range c.Sites {
-		// does the hostname match
-		if e.Hostname == s.Hostname {
-			return fmt.Errorf("hostname already exists")
-		}
-	}
-
-	// add the site to the list
-	c.Sites = append(c.Sites, s)
-
-	sort.SliceStable(c.Sites, func(i, j int) bool {
-		return c.Sites[i].Hostname < c.Sites[j].Hostname
-	})
-
-	return nil
-}
-
 // RemoveContainer takes a name and will remove the container by its
 // name from the config file.
 func (c *Config) RemoveContainer(container *Container) error {
@@ -799,6 +779,24 @@ func (c *Config) DisableBlackfire(site string) error {
 	}
 
 	return fmt.Errorf("unknown site, %s", site)
+}
+
+// DisableApp takes an apps hostname and sets the xdebug option
+// to false. If the app cannot be found, it returns an error.
+func (c *Config) DisableApp(hostname string) error {
+	// find the site by the hostname
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			// only toggle if the setting is not true
+			if !c.Apps[i].Disabled {
+				c.Apps[i].Disabled = true
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown app, %s", hostname)
 }
 
 // DisableXdebug takes an apps hostname and sets the xdebug option
