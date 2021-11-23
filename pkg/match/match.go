@@ -16,8 +16,8 @@ import (
 	"github.com/craftcms/nitro/pkg/containerlabels"
 )
 
-// DefaultMounts is the number of mounts for a standard container
-const DefaultMounts = 3
+// DefaultVolumeMounts is the number of volume mounts for a standard app container
+const DefaultVolumeMounts = 3
 
 var (
 	ErrMisMatchedImage = fmt.Errorf("container image does not match")
@@ -135,8 +135,8 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 			}
 		}
 	default:
-		// check the number of binds matches the number of container binds (we exclude the user home, certs, and nginx configs since they are volumes)
-		if len(mounts) != len(container.Mounts)-DefaultMounts {
+		// check the number of binds matches the number of container binds (we add the user home, certs, and nginx configs since they are volumes)
+		if len(mounts)+DefaultVolumeMounts != len(container.Mounts) {
 			return false
 		}
 	}
