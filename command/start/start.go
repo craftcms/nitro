@@ -80,6 +80,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 				// make sure the app is not disabled
 				if c.Labels[containerlabels.Disabled] == "true" {
+					output.Info(fmt.Sprintf("%s is disabled, skipping", hostname))
 					continue
 				}
 
