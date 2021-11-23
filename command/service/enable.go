@@ -1,8 +1,9 @@
-package enable
+package service
 
 import (
 	"fmt"
 
+	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -15,27 +16,11 @@ var (
 	ErrUnknownService = fmt.Errorf("unknown service requested")
 )
 
-const exampleText = `  # enable services
-  nitro enable <service-name>
-
-  # enable mailhog for local email testing
-  nitro enable mailhog
-
-  # enable blackfire for local profiling
-  nitro enable blackfire
-
-  # enable minio for local s3 testing
-  nitro enable minio
-
-  # enable dynamodb for local noSQL
-  nitro enable dynamodb`
-
-// NewCommand returns the command to enable common nitro services. These services are provided as containers
-// and do not require a user to configure the ports/volumes or images.
-func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+func enableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enable",
-		Short: "Enables a service.",
+		Use:     "enable",
+		Aliases: []string{"en"},
+		Short:   "Enables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -46,7 +31,23 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			return nil
 		},
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
-		Example:   exampleText,
+		Example: `  # enable services
+  nitro service enable <service-name>
+
+  # enable mailhog for local email testing
+  nitro service enable mailhog
+
+  # enable blackfire for local profiling
+  nitro service enable blackfire
+
+  # enable minio for local s3 testing
+  nitro service enable minio
+
+  # enable dynamodb for local noSQL
+  nitro service enable dynamodb`,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return prompt.RunApply(cmd, args, false, output)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// load the configuration
 			cfg, err := config.Load(home)
@@ -76,15 +77,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
-				}
-			}
+			output.Info("Enabled", args[0])
 
 			return nil
 		},

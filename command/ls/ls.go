@@ -34,13 +34,14 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Lists details for Nitro’s containers.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
 
 			// add filters to show only the environment and database containers
 			filter := filters.NewArgs()
 			filter.Add("label", containerlabels.Nitro)
 
 			// get a list of all the databases
-			containers, err := docker.ContainerList(cmd.Context(), types.ContainerListOptions{All: true, Filters: filter})
+			containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
 			if err != nil {
 				return err
 			}
@@ -74,7 +75,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				if cmd.Flag("services").Value.String() == "true" {
-					if c.Labels[containerlabels.Type] != "dynamodb" && c.Labels[containerlabels.Type] != "mailhog" && c.Labels[containerlabels.Type] != "redis"  && c.Labels[containerlabels.Type] != "blackfire" {
+					if containerlabels.IsServiceContainer(c.Labels) {
 						continue
 					}
 				}
@@ -102,7 +103,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					intPorts = append(intPorts, "80", "443", "3000-3005")
 					// TODO(jasonmccallister) set the external ports from the environment variables
 					extPorts = append(extPorts, "80", "443", "3000-3005")
-				}  else {
+				} else {
 					for _, p := range c.Ports {
 						// get the external ports and assign if not 0
 						e := p.PublicPort
@@ -121,7 +122,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				internalPorts := strings.Join(intPorts, ",")
 				externalPorts := strings.Join(extPorts, ",")
 
-				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c),externalPorts, internalPorts, status)
+				tbl.AddRow(strings.TrimLeft(c.Names[0], "/"), containerlabels.Identify(c), externalPorts, internalPorts, status)
 			}
 
 			tbl.Print()
