@@ -17,10 +17,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/customcontainer"
 	"github.com/craftcms/nitro/pkg/databasecontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/match"
 	"github.com/craftcms/nitro/pkg/pathexists"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -51,30 +52,28 @@ func StartOrCreate(ctx context.Context, docker client.CommonAPIClient, home, net
 	}
 
 	// get the containers details that include environment variables
-	_, err = docker.ContainerInspect(ctx, container.ID)
+	details, err := docker.ContainerInspect(ctx, container.ID)
 	if err != nil {
 		return "", err
 	}
 
-	return "", fmt.Errorf("not yet implemented")
-
 	// if the container is out of date
-	// if err := match.Container(home, c, details); err != nil {
-	// 	fmt.Println(err)
-	// 	fmt.Print("- updating… ")
+	if err := match.Container(home, c, details); err != nil {
+		fmt.Println(err)
+		fmt.Print("- updating… ")
 
-	// 	// stop container
-	// 	if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {
-	// 		return "", err
-	// 	}
+		// stop container
+		if err := docker.ContainerStop(ctx, container.ID, nil); err != nil {
+			return "", err
+		}
 
-	// 	// remove container
-	// 	if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
-	// 		return "", err
-	// 	}
+		// remove container
+		if err := docker.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
+			return "", err
+		}
 
-	// 	return create(ctx, docker, home, networkID, c)
-	// }
+		return create(ctx, docker, home, networkID, c)
+	}
 
 	return container.ID, nil
 }
