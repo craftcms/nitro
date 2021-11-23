@@ -140,54 +140,6 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestConfig_AddSite(t *testing.T) {
-	type fields struct {
-		Blackfire Blackfire
-		Databases []Database
-		Services  Services
-		Sites     []Site
-		File      string
-	}
-	type args struct {
-		s Site
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "existing hostnames returns an error",
-			fields: fields{
-				Sites: []Site{
-					{
-						Hostname: "example",
-					},
-				},
-			},
-			args: args{
-				s: Site{Hostname: "example"},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Config{
-				Blackfire: tt.fields.Blackfire,
-				Databases: tt.fields.Databases,
-				Services:  tt.fields.Services,
-				Sites:     tt.fields.Sites,
-				File:      tt.fields.File,
-			}
-			if err := c.AddSite(tt.args.s); (err != nil) != tt.wantErr {
-				t.Errorf("Config.AddSite() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestSite_GetAbsPath(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {

@@ -78,6 +78,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					continue
 				}
 
+				// make sure the app is not disabled
+				if c.Labels[containerlabels.Disabled] == "true" {
+					continue
+				}
+
 				output.Pending("starting", hostname)
 
 				// start the container
