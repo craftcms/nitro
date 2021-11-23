@@ -17,12 +17,12 @@ import (
 const exampleText = `  # example command
   nitro xon`
 
-// NewCommand returns the command that is used to enable xdebug for a specific site. It will first check
-// if the current working directory or prompt the user for a site.
+// NewCommand returns the command that is used to enable xdebug for a specific app. It will first check
+// if the current working directory or prompt the user for an app.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "xon",
-		Short:   "Enables Xdebug for a site.",
+		Short:   "Enables Xdebug for an app.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
@@ -63,7 +63,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// if blackfire is set, we need to disable it to profile the app
 			if app.Blackfire {
-				// disable blackfire for the sites hostname
+				// disable blackfire for the app hostname
 				if err := cfg.DisableBlackfire(app.Hostname); err != nil {
 					return err
 				}

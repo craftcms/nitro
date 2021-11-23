@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	 "github.com/craftcms/nitro/pkg/config"
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/docker/docker/api/types"
 )
 
@@ -149,4 +149,13 @@ func Identify(c types.Container) string {
 	}
 
 	return "app"
+}
+
+// IsServiceContainer takes a containers labels and returns true if it is for a service container.
+func IsServiceContainer(labels map[string]string) bool {
+	if labels[Type] == "dynamodb" || labels[Type] == "mailhog" || labels[Type] == "redis" || labels[Type] == "blackfire" {
+		return true
+	}
+
+	return false
 }
