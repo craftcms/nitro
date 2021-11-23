@@ -781,8 +781,8 @@ func (c *Config) DisableBlackfire(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
-// DisableApp takes an apps hostname and sets the xdebug option
-// to false. If the app cannot be found, it returns an error.
+// DisableApp takes an apps hostname and sets the disabled option
+// to true. If the app cannot be found, it returns an error.
 func (c *Config) DisableApp(hostname string) error {
 	// find the site by the hostname
 	for i, a := range c.ParsedApps {
@@ -808,6 +808,24 @@ func (c *Config) DisableXdebug(hostname string) error {
 			// only toggle if the setting is true
 			if c.Apps[i].Xdebug {
 				c.Apps[i].Xdebug = false
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown app, %s", hostname)
+}
+
+// EnableApp takes an apps hostname and sets the disabled option
+// to false. If the app cannot be found, it returns an error.
+func (c *Config) EnableApp(hostname string) error {
+	// find the site by the hostname
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			// only toggle if the setting is true
+			if c.Apps[i].Disabled {
+				c.Apps[i].Disabled = false
 			}
 
 			return nil

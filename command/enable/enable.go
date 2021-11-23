@@ -1,8 +1,11 @@
 package enable
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/flags"
+	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -10,81 +13,54 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrUnknownService is used when an unknown service is requested
-	ErrUnknownService = fmt.Errorf("unknown service requested")
-)
+const exampleText = `  # enable the app in the current directory
+  nitro enable
 
-const exampleText = `  # enable services
-  nitro enable <service-name>
+  # enable a specific app using the global flag
+  nitro --app myapp.nitro enable`
 
-  # enable mailhog for local email testing
-  nitro enable mailhog
-
-  # enable blackfire for local profiling
-  nitro enable blackfire
-
-  # enable minio for local s3 testing
-  nitro enable minio
-
-  # enable dynamodb for local noSQL
-  nitro enable dynamodb`
-
-// NewCommand returns the command to enable common nitro services. These services are provided as containers
-// and do not require a user to configure the ports/volumes or images.
+// NewCommand returns the command to enable an app from automatically starting.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
-		Short: "Enables a service.",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				fmt.Println(cmd.UsageString())
-
-				return fmt.Errorf("service name param missing")
-			}
-
-			return nil
-		},
-		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
+		Short: "Enables an app.",
 		Example:   exampleText,
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return prompt.RunApply(cmd, args, false, output)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// load the configuration
+			// load the config
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
-			// enable the service
-			switch args[0] {
-			case "blackfire":
-				// TODO(jasonmccallister) verify the credentials are set
-				cfg.Services.Blackfire = true
-			case "dynamodb":
-				cfg.Services.DynamoDB = true
-			case "mailhog":
-				cfg.Services.Mailhog = true
-			case "minio":
-				cfg.Services.Minio = true
-			case "redis":
-				cfg.Services.Redis = true
-			default:
-				return ErrUnknownService
-			}
+			// get the app
+			name := flags.AppName
+			if name == "" {
+				// get the current working directory
+				wd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
 
-			// save the config file
-			if err := cfg.Save(); err != nil {
-				return fmt.Errorf("unable to save config, %w", err)
-			}
-
-			// run the apply command
-			for _, c := range cmd.Parent().Commands() {
-				// set the apply command
-				if c.Use == "apply" {
-					if err := c.RunE(c, args); err != nil {
-						return err
-					}
+				name, err = appaware.Detect(*cfg, wd)
+				if err != nil {
+					return err
 				}
 			}
+
+			// disable the app
+			if err := cfg.EnableApp(name); err != nil {
+				return err
+			}
+
+			// save the config
+			if err := cfg.Save(); err != nil {
+				return err
+			}
+
+			output.Info("Enabled", name)
 
 			return nil
 		},
