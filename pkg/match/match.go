@@ -16,15 +16,15 @@ import (
 	"github.com/craftcms/nitro/pkg/containerlabels"
 )
 
-// DefaultMounts is the number of mounts for a standard container
-const DefaultMounts = 3
+// DefaultVolumeMounts is the number of volume mounts for a standard app container
+const DefaultVolumeMounts = 3
 
 var (
-	ErrMisMatchedImage  = fmt.Errorf("container image does not match")
+	ErrMisMatchedImage = fmt.Errorf("container image does not match")
 
-	ErrMisMatchedLabel  = fmt.Errorf("container label does not match")
+	ErrMisMatchedLabel = fmt.Errorf("container label does not match")
 
-	ErrEnvFileNotFound  = fmt.Errorf("unable to find the containers env file")
+	ErrEnvFileNotFound = fmt.Errorf("unable to find the containers env file")
 
 	ErrMisMatchedEnvVar = fmt.Errorf("container environment variables do not match")
 
@@ -98,8 +98,13 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 		return false
 	}
 
-	// check the sites' hostname using the label
+	// check the app hostname using the label
 	if container.Config.Labels[containerlabels.Host] != app.Hostname {
+		return false
+	}
+
+	// check the app is disabled
+	if container.Config.Labels[containerlabels.Disabled] != fmt.Sprintf("%v", app.Disabled) {
 		return false
 	}
 
@@ -130,8 +135,8 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 			}
 		}
 	default:
-		// check the number of binds matches the number of container binds (we exclude the user home, certs, and nginx configs since they are volumes)
-		if len(mounts) != len(container.Mounts)-DefaultMounts {
+		// check the number of binds matches the number of container binds (we add the user home, certs, and nginx configs since they are volumes)
+		if len(mounts)+DefaultVolumeMounts != len(container.Mounts) {
 			return false
 		}
 	}

@@ -186,7 +186,7 @@ type App struct {
 	Extensions []string `yaml:"extensions,omitempty"`
 	Xdebug     bool     `yaml:"xdebug,omitempty"`
 	Blackfire  bool     `yaml:"blackfire,omitempty"`
-	Suspended  bool     `yaml:"suspended,omitempty"`
+	Disabled   bool     `yaml:"disabled,omitempty"`
 	Database   struct {
 		Engine  string `yaml:"engine,omitempty"`
 		Version string `yaml:"version,omitempty"`
@@ -673,10 +673,10 @@ func Load(home string) (*Config, error) {
 			}
 
 			// check suspend
-			if global.Suspended != local.Suspended {
-				c.ParsedApps[i].Suspended = global.Suspended
+			if global.Disabled != local.Disabled {
+				c.ParsedApps[i].Disabled = global.Disabled
 			} else {
-				c.ParsedApps[i].Suspended = local.Suspended
+				c.ParsedApps[i].Disabled = local.Disabled
 			}
 
 			// check the database engine
@@ -719,26 +719,6 @@ func IsEmpty(home string) (string, error) {
 	}
 
 	return file, nil
-}
-
-// AddSite takes a site and adds it to the config
-func (c *Config) AddSite(s Site) error {
-	// check existing sites
-	for _, e := range c.Sites {
-		// does the hostname match
-		if e.Hostname == s.Hostname {
-			return fmt.Errorf("hostname already exists")
-		}
-	}
-
-	// add the site to the list
-	c.Sites = append(c.Sites, s)
-
-	sort.SliceStable(c.Sites, func(i, j int) bool {
-		return c.Sites[i].Hostname < c.Sites[j].Hostname
-	})
-
-	return nil
 }
 
 // RemoveContainer takes a name and will remove the container by its
@@ -801,6 +781,24 @@ func (c *Config) DisableBlackfire(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
+// DisableApp takes an apps hostname and sets the disabled option
+// to true. If the app cannot be found, it returns an error.
+func (c *Config) DisableApp(hostname string) error {
+	// find the site by the hostname
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			// only toggle if the setting is not true
+			if !c.Apps[i].Disabled {
+				c.Apps[i].Disabled = true
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown app, %s", hostname)
+}
+
 // DisableXdebug takes an apps hostname and sets the xdebug option
 // to false. If the app cannot be found, it returns an error.
 func (c *Config) DisableXdebug(hostname string) error {
@@ -810,6 +808,24 @@ func (c *Config) DisableXdebug(hostname string) error {
 			// only toggle if the setting is true
 			if c.Apps[i].Xdebug {
 				c.Apps[i].Xdebug = false
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unknown app, %s", hostname)
+}
+
+// EnableApp takes an apps hostname and sets the disabled option
+// to false. If the app cannot be found, it returns an error.
+func (c *Config) EnableApp(hostname string) error {
+	// find the site by the hostname
+	for i, a := range c.ParsedApps {
+		if a.Hostname == hostname {
+			// only toggle if the setting is true
+			if c.Apps[i].Disabled {
+				c.Apps[i].Disabled = false
 			}
 
 			return nil

@@ -199,52 +199,52 @@ func CreateDatabase(cmd *cobra.Command, docker client.CommonAPIClient, output te
 	return true, hostname, db, port, driver, nil
 }
 
-// CreateSite takes the users home directory and the site path and walked the user
-// through adding a site to the config.
-func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*config.Site, error) {
-	// create a new site
-	site := config.Site{}
+// CreateApp takes the users home directory and the app path and walked the user
+// through adding an app to the config.
+func CreateApp(home, dir string, exclude bool, output terminal.Outputer) (*config.App, error) {
+	// create a new app
+	app := config.App{}
 
 	// are we excluding the defaults?
 	if exclude {
-		site.Excludes = append(site.Excludes, "node_modules", "vendor")
+		app.Excludes = append(app.Excludes, "node_modules", "vendor")
 	}
 
 	// get the hostname from the directory
 	// p := filepath.Join(dir)
 	sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
-	site.Hostname = sp[len(sp)-1]
+	app.Hostname = sp[len(sp)-1]
 
 	// append the test domain if there are no periods
-	if !strings.Contains(site.Hostname, ".") {
+	if !strings.Contains(app.Hostname, ".") {
 		// set the default tld
 		tld := "nitro"
 		if os.Getenv("NITRO_DEFAULT_TLD") != "" {
 			tld = os.Getenv("NITRO_DEFAULT_TLD")
 		}
 
-		site.Hostname = fmt.Sprintf("%s.%s", site.Hostname, tld)
+		app.Hostname = fmt.Sprintf("%s.%s", app.Hostname, tld)
 	}
 
 	// prompt for the hostname
-	hostname, err := output.Ask("Enter the hostname", site.Hostname, ":", &validate.HostnameValidator{})
+	hostname, err := output.Ask("Enter the hostname", app.Hostname, ":", &validate.HostnameValidator{})
 	if err != nil {
 		return nil, err
 	}
 
 	// set the input as the hostname
-	site.Hostname = hostname
+	app.Hostname = hostname
 
-	output.Success("setting hostname to", site.Hostname)
+	output.Success("setting hostname to", app.Hostname)
 
-	// set the sites directory but make the path relative
-	siteAbsPath, err := filepath.Abs(dir)
+	// set the app's directory but make the path relative
+	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
 	}
-	site.Path = strings.Replace(siteAbsPath, home, "~", 1)
+	app.Path = strings.Replace(abs, home, "~", 1)
 
-	output.Success("adding site", site.Path)
+	output.Success("adding site", app.Path)
 
 	// get the web directory
 	found, _ := webroot.Find(dir)
@@ -255,17 +255,17 @@ func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*conf
 	}
 
 	// set the web root
-	site.Webroot = found
+	app.Webroot = found
 
 	// prompt for the web root
-	root, err := output.Ask("Enter the web root for the site", site.Webroot, ":", nil)
+	root, err := output.Ask("Enter the web root for the site", app.Webroot, ":", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	site.Webroot = root
+	app.Webroot = root
 
-	output.Success("using web root", site.Webroot)
+	output.Success("using web root", app.Webroot)
 
 	// prompt for the php version
 	versions := phpversions.Versions
@@ -275,9 +275,9 @@ func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*conf
 	}
 
 	// set the version of php
-	site.Version = versions[selected]
+	app.PHPVersion = versions[selected]
 
-	output.Success("setting PHP version", site.Version)
+	output.Success("setting PHP version", app.PHPVersion)
 
 	// load the config
 	cfg, err := config.Load(home)
@@ -285,8 +285,8 @@ func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*conf
 		return nil, err
 	}
 
-	// add the site to the config
-	if err := cfg.AddSite(site); err != nil {
+	// add the app to the config
+	if err := cfg.AddApp(app); err != nil {
 		return nil, err
 	}
 
@@ -295,7 +295,7 @@ func CreateSite(home, dir string, exclude bool, output terminal.Outputer) (*conf
 		return nil, err
 	}
 
-	return &site, nil
+	return &app, nil
 }
 
 // RunApply will prompt a user to run the apply command. It optionally accepts a "force"

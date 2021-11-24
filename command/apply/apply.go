@@ -17,10 +17,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/craftcms/nitro/command/apply/internal/customcontainer"
 	"github.com/craftcms/nitro/pkg/backup"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/customcontainer"
 	"github.com/craftcms/nitro/pkg/databasecontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 
@@ -471,6 +471,13 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				for _, app := range cfg.ParsedApps {
 					output.Pending("checking", app.Hostname)
 
+					// don't start or create disabled apps
+					if app.Disabled {
+						fmt.Print("- disabled, skipping ")
+						output.Done()
+						continue
+					}
+
 					// start, update or create the site container
 					_, err := appcontainer.StartOrCreate(cfg.HomeDirectory, ctx, docker, cfg, app, network.ID)
 					if err != nil {
@@ -507,7 +514,7 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 
 			// get custom container hostnames
 			for _, c := range cfg.Containers {
-				hostnames = append(hostnames, fmt.Sprintf("%s.containers.nitro", c.Name))
+				hostnames = append(hostnames, fmt.Sprintf("%s%s", c.Name, customcontainer.Suffix))
 			}
 
 			if len(hostnames) > 0 {

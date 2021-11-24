@@ -11,16 +11,11 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-var (
-	// ErrUnknownService is used when an unknown service is requested
-	ErrUnknownService = fmt.Errorf("unknown service requested")
-)
-
+// NewCommand returns the command to enable an app from automatically starting.
 func enableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "enable",
-		Aliases: []string{"en"},
-		Short:   "Enables a service.",
+		Use:   "enable",
+		Short: "Enables an app.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -34,16 +29,16 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 		Example: `  # enable services
   nitro service enable <service-name>
 
-  # enable mailhog for local email testing
-  nitro service enable mailhog
-
-  # enable blackfire for local profiling
+  # enable blackfire
   nitro service enable blackfire
 
-  # enable minio for local s3 testing
+  # enable mailhog
+  nitro service enable mailhog
+
+  # enable minio
   nitro service enable minio
 
-  # enable dynamodb for local noSQL
+  # enable dynamodb
   nitro service enable dynamodb`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
@@ -55,19 +50,18 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return err
 			}
 
-			// enable the service
+			// disable the service
 			switch args[0] {
 			case "blackfire":
-				// TODO(jasonmccallister) verify the credentials are set
-				cfg.Services.Blackfire = true
+				cfg.Services.Blackfire = false
 			case "dynamodb":
-				cfg.Services.DynamoDB = true
+				cfg.Services.DynamoDB = false
 			case "mailhog":
-				cfg.Services.Mailhog = true
+				cfg.Services.Mailhog = false
 			case "minio":
-				cfg.Services.Minio = true
+				cfg.Services.Minio = false
 			case "redis":
-				cfg.Services.Redis = true
+				cfg.Services.Redis = false
 			default:
 				return ErrUnknownService
 			}

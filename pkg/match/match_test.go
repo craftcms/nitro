@@ -78,7 +78,7 @@ func Test_checkEnvs(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "xdebug returns false if disable on the site but not for the container",
+			name: "xdebug returns false if disable on the app but not for the container",
 			args: args{
 				app: config.App{
 					PHPVersion: "7.4",
@@ -91,7 +91,7 @@ func Test_checkEnvs(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "xdebug returns false if enabled on the site",
+			name: "xdebug returns false if enabled on the app",
 			args: args{
 				app: config.App{
 					PHPVersion: "7.4",
@@ -239,7 +239,7 @@ func Test_checkEnvs(t *testing.T) {
 	}
 }
 
-func TestSite(t *testing.T) {
+func TestApp(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -259,10 +259,10 @@ func TestSite(t *testing.T) {
 		{
 			name: "containers without web root label returns false",
 			args: args{
-				home: "testdata/example-site",
+				home: "testdata/example-app",
 				app: config.App{
 					Hostname:   "newname",
-					Path:       "testdata/example-site",
+					Path:       "testdata/example-app",
 					PHPVersion: "7.4",
 					Webroot:    "web",
 				},
@@ -275,7 +275,7 @@ func TestSite(t *testing.T) {
 					},
 					Mounts: []types.MountPoint{
 						{
-							Source: filepath.Join(wd, "testdata", "example-site"),
+							Source: filepath.Join(wd, "testdata", "example-app"),
 						},
 					},
 				},
@@ -285,10 +285,10 @@ func TestSite(t *testing.T) {
 		{
 			name: "mismatched web root returns false",
 			args: args{
-				home: "testdata/example-site",
+				home: "testdata/example-app",
 				app: config.App{
 					Hostname:   "newname",
-					Path:       "testdata/example-site",
+					Path:       "testdata/example-app",
 					PHPVersion: "7.4",
 					Webroot:    "web",
 				},
@@ -302,7 +302,7 @@ func TestSite(t *testing.T) {
 					},
 					Mounts: []types.MountPoint{
 						{
-							Source: filepath.Join(wd, "testdata", "example-site"),
+							Source: filepath.Join(wd, "testdata", "example-app"),
 						},
 					},
 				},
@@ -312,10 +312,10 @@ func TestSite(t *testing.T) {
 		{
 			name: "mismatched paths return false",
 			args: args{
-				home: "testdata/example-site",
+				home: "testdata/example-app",
 				app: config.App{
 					Hostname:   "newname",
-					Path:       "testdata/example-site",
+					Path:       "testdata/example-app",
 					PHPVersion: "7.4",
 				},
 				container: types.ContainerJSON{
@@ -338,10 +338,10 @@ func TestSite(t *testing.T) {
 		{
 			name: "hostname updates return false using labels",
 			args: args{
-				home: "testdata/example-site",
+				home: "testdata/example-app",
 				app: config.App{
 					Hostname:   "newname",
-					Path:       "testdata/example-site",
+					Path:       "testdata/example-app",
 					PHPVersion: "7.4",
 				},
 				container: types.ContainerJSON{
@@ -358,9 +358,9 @@ func TestSite(t *testing.T) {
 		{
 			name: "path mismatches return false",
 			args: args{
-				home: "testdata/example-site",
+				home: "testdata/example-app",
 				app: config.App{
-					Path:       "testdata/new-site",
+					Path:       "testdata/new-app",
 					PHPVersion: "7.4",
 				},
 				container: types.ContainerJSON{
