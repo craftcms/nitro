@@ -11,9 +11,12 @@ import (
 	"github.com/craftcms/nitro/pkg/bindmounts"
 	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/containerlabels"
+	"github.com/craftcms/nitro/pkg/dockerbuild"
+	"github.com/craftcms/nitro/pkg/dockervolume"
 	"github.com/craftcms/nitro/pkg/envvars"
 	"github.com/craftcms/nitro/pkg/match"
 	"github.com/craftcms/nitro/pkg/nginx"
+	"github.com/craftcms/nitro/pkg/paths"
 	"github.com/craftcms/nitro/pkg/proxycontainer"
 	"github.com/craftcms/nitro/pkg/wsl"
 	"github.com/docker/docker/api/types"
@@ -21,7 +24,6 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -43,6 +45,35 @@ func StartOrCreate(home string, ctx context.Context, docker client.CommonAPIClie
 	// create a filter
 	filter := filters.NewArgs()
 	filter.Add("label", containerlabels.Host+"="+app.Hostname)
+
+	// does the app use a custom dockerfile?
+	if app.Dockerfile {
+		// set the image name
+		Image = fmt.Sprintf("%s:local", app.Hostname)
+
+		imageFilter := filters.NewArgs()
+		imageFilter.Add("reference", Image)
+
+		// check if the image exists
+		list, err := docker.ImageList(ctx, types.ImageListOptions{
+			All:     true,
+			Filters: imageFilter,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(list) == 0 {
+			path, err := paths.Clean(home, app.Path)
+			if err != nil {
+				return "", err
+			}
+
+			if err := dockerbuild.Build(os.Stdin, os.Stdout, path, Image); err != nil {
+				return "", err
+			}
+		}
+	}
 
 	// look for the container for the app
 	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: filter})
@@ -108,6 +139,10 @@ func ContainerPath(app config.App) string {
 func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
 	// create the container
 	image := fmt.Sprintf(Image, app.PHPVersion)
+	// if the app uses a dockerfile, make the image based on the hostname
+	if app.Dockerfile {
+		image = fmt.Sprintf("%s:local", app.Hostname)
+	}
 
 	// pull the image if we are not in a development environment
 	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
@@ -155,34 +190,17 @@ func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Conf
 		envs = append(envs, "BLACKFIRE_AGENT_SOCKET=tcp://blackfire.service.nitro:8307")
 	}
 
+	// create labels for the volume
+	volumeLabels := containerlabels.ForAppVolume(app)
+
 	// look for an existing volume with the app hostname, otherwise create it
-	filter := filters.NewArgs()
-	filter.Add("name", app.Hostname)
-	volumeResp, err := docker.VolumeList(ctx, filter)
-	if err != nil {
+	if err := dockervolume.CreateIfEmpty(ctx, docker, app.Hostname, volumeLabels); err != nil {
 		return "", err
-	}
-
-	if len(volumeResp.Volumes) == 0 {
-		labels := containerlabels.ForAppVolume(app)
-
-		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: app.Hostname, Labels: labels}); err != nil {
-			return "", err
-		}
 	}
 
 	// look for an existing volume with the app hostname + nginx, otherwise create it
-	nginxFilter := filters.NewArgs()
-	nginxFilter.Add("name", fmt.Sprintf("%s-nginx", app.Hostname))
-	nginxVol, err := docker.VolumeList(ctx, nginxFilter)
-	if err != nil {
+	if err := dockervolume.CreateIfEmpty(ctx, docker, fmt.Sprintf("%s-nginx", app.Hostname), nil); err != nil {
 		return "", err
-	}
-
-	if len(nginxVol.Volumes) == 0 {
-		if _, err := docker.VolumeCreate(ctx, volume.VolumeCreateBody{Driver: "local", Name: fmt.Sprintf("%s-nginx", app.Hostname)}); err != nil {
-			return "", err
-		}
 	}
 
 	// determine if the site has any excludes
