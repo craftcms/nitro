@@ -67,11 +67,12 @@ const (
 // ForApp takes an app and returns labels to use on the app container.
 func ForApp(a config.App) map[string]string {
 	labels := map[string]string{
-		Nitro:   "true",
-		Host:    a.Hostname,
-		Webroot: a.Webroot,
-		Type:    "app",
+		Nitro:    "true",
+		Host:     a.Hostname,
+		Webroot:  a.Webroot,
+		Type:     "app",
 		Disabled: fmt.Sprintf("%v", a.Disabled),
+		// Dockerfile: fmt.Sprintf("%v", a.Dockerfile),
 	}
 
 	// if there are extensions, add them as comma separated
