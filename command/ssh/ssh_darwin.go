@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/craftcms/nitro/pkg/appaware"
+	"github.com/craftcms/nitro/pkg/containerinspect"
 	"github.com/craftcms/nitro/pkg/dockerexec"
 	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/docker/docker/api/types"
@@ -170,7 +171,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				containerID = containers[0].ID
 			}
 
-			return dockerexec.Connect(cmd.InOrStdin(), cmd.OutOrStdout(), containerUser, containerID, shell)
+			info, err := containerinspect.Inspect(cmd.Context(), docker, containerID)
+			if err != nil {
+				return err
+			}
+
+			return dockerexec.Connect(cmd.InOrStdin(), cmd.OutOrStdout(), info.User, containerID, shell)
 		},
 	}
 
