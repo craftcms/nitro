@@ -10,7 +10,7 @@
 - App containers now include common image processing libraries.
 - Added common Linux build tools such as make to the app containers.
 - Yarn is now installed by default.
-- Added the ability to exclude directories from app bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419)) 
+- Added the ability to exclude directories from app bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419))
 
 ### Changed
 - Renamed sites to apps and updated the commands. ([#420](https://github.com/craftcms/nitro/issues/420))
@@ -23,6 +23,7 @@
 - Custom Nginx configurations will now persist container recreation.
 - Removed the `context` command in favor of the `ls` command.
 - Renamed the `db import` to `db restore` to match the Craft CLI.
+- Nitro `add` will not detect `nitro.yaml` configs in the projects directory.
 
 ### Fixed
 - Fixed an error where users were unable to setup mysql databases.

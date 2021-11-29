@@ -3,6 +3,7 @@ package add
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,66 +74,88 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			app := config.App{}
 
-			// are we excluding any dependencies?
-			if flagExcludeDependencies {
-				app.Excludes = []string{"node_modules", "vendor"}
+			// check for a nitro.yaml in the directory
+			var hasConfig bool
+			files, err := ioutil.ReadDir(filepath.Join(dir))
+			if err != nil {
+				return err
+			}
+			for _, f := range files {
+				if f.Name() == "nitro.yaml" {
+					hasConfig = true
+				}
 			}
 
-			// generate a hostname for the app using the directory
-			sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
-			app.Hostname = sp[len(sp)-1]
-			// append the nitro domain if there are no periods in the hostname
-			if !strings.Contains(app.Hostname, ".") {
-				// set the default tld
-				tld := "nitro"
-				if os.Getenv("NITRO_DEFAULT_TLD") != "" {
-					tld = os.Getenv("NITRO_DEFAULT_TLD")
+			switch hasConfig {
+			case true:
+				// set the config path and bail
+				abs, err := filepath.Abs(filepath.Join(dir, "nitro.yaml"))
+				if err != nil {
+					return fmt.Errorf("unable to find the absolute path to the app, err: %s", err)
+				}
+				app.Config = strings.Replace(abs, home, "~", 1)
+			default:
+				// are we excluding any dependencies?
+				if flagExcludeDependencies {
+					app.Excludes = []string{"node_modules", "vendor"}
 				}
 
-				app.Hostname = fmt.Sprintf("%s.%s", app.Hostname, tld)
-			}
+				// generate a hostname for the app using the directory
+				sp := strings.Split(filepath.Join(dir), string(os.PathSeparator))
+				app.Hostname = sp[len(sp)-1]
+				// append the nitro domain if there are no periods in the hostname
+				if !strings.Contains(app.Hostname, ".") {
+					// set the default tld
+					tld := "nitro"
+					if os.Getenv("NITRO_DEFAULT_TLD") != "" {
+						tld = os.Getenv("NITRO_DEFAULT_TLD")
+					}
 
-			// prompt the user to validate the hostname
-			hostname, err := output.Ask("Enter the hostname", app.Hostname, ":", &validate.HostnameValidator{})
-			if err != nil {
-				return err
-			}
-			if app.Hostname != hostname {
-				app.Hostname = hostname
-			}
-			output.Success("setting the app hostname to", hostname)
+					app.Hostname = fmt.Sprintf("%s.%s", app.Hostname, tld)
+				}
 
-			// set the apps path and replace the full path with a relative using ~
-			abs, err := filepath.Abs(dir)
-			if err != nil {
-				return fmt.Errorf("unable to find the absolute path to the app, err: %s", err)
-			}
-			app.Path = strings.Replace(abs, home, "~", 1)
-			output.Success("adding app", app.Path)
+				// prompt the user to validate the hostname
+				hostname, err := output.Ask("Enter the hostname", app.Hostname, ":", &validate.HostnameValidator{})
+				if err != nil {
+					return err
+				}
+				if app.Hostname != hostname {
+					app.Hostname = hostname
+				}
+				output.Success("setting the app hostname to", hostname)
 
-			// find the apps webroot from the directory
-			found, err := webroot.Find(dir)
-			if err != nil {
-				return fmt.Errorf("unable to find the webroot for the app, err: %s", err)
-			}
+				// set the apps path and replace the full path with a relative using ~
+				abs, err := filepath.Abs(dir)
+				if err != nil {
+					return fmt.Errorf("unable to find the absolute path to the app, err: %s", err)
+				}
+				app.Path = strings.Replace(abs, home, "~", 1)
+				output.Success("adding app", app.Path)
 
-			// prompt for the web root
-			root, err := output.Ask("Enter the web root for the app", found, ":", nil)
-			if err != nil {
-				return err
-			}
-			app.Webroot = root
-			output.Success("using web root", app.Webroot)
+				// find the apps webroot from the directory
+				found, err := webroot.Find(dir)
+				if err != nil {
+					return fmt.Errorf("unable to find the webroot for the app, err: %s", err)
+				}
 
-			// prompt for the php version
-			versions := phpversions.Versions
-			selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
-			if err != nil {
-				return err
-			}
+				// prompt for the web root
+				root, err := output.Ask("Enter the web root for the app", found, ":", nil)
+				if err != nil {
+					return err
+				}
+				app.Webroot = root
+				output.Success("using web root", app.Webroot)
 
-			// set the version of php
-			app.PHPVersion = versions[selected]
+				// prompt for the php version
+				versions := phpversions.Versions
+				selected, err := output.Select(os.Stdin, "Choose a PHP version: ", versions)
+				if err != nil {
+					return err
+				}
+
+				// set the version of php
+				app.PHPVersion = versions[selected]
+			}
 
 			// load the config
 			cfg, err := config.Load(home)
@@ -235,7 +258,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			output.Info("New app", app.Hostname, "added! 🎉")
+			// disply that config path if it has an app config for nitro
+			if hasConfig {
+				output.Info("New app", app.Config, "added! 🎉")
+			} else {
+				output.Info("New app", app.Hostname, "added! 🎉")
+			}
 
 			return nil
 		},
