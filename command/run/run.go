@@ -20,7 +20,10 @@ var (
 )
 
 const exampleText = `  # run one off containers
-  nitro run`
+  nitro run --image node:10 --working-dir /app install
+
+  # run a composer container, mounting the current directory with a shell inside the container
+  nitro run --image composer --working-dir /app bash`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -81,7 +84,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// should the container be interactive
 			if flagInteractive {
-				c.Args = append(c.Args, "--interactive")
+				c.Args = append(c.Args, "-it")
 			}
 
 			// if the working dir is set, grab the current directory and mount it
@@ -92,7 +95,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 
-				c.Args = append(c.Args, "--volume")
+				c.Args = append(c.Args, "-v")
 
 				vol := fmt.Sprintf("%s:%s", current, flagWorkingDir)
 
