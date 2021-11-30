@@ -1,10 +1,13 @@
 package run
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -12,8 +15,8 @@ import (
 )
 
 var (
-	flagImage, flagWorkingDir   string
-	flagInteractive, flagRemove bool
+	flagImage, flagWorkingDir             string
+	flagInteractive, flagPull, flagRemove bool
 )
 
 const exampleText = `  # run one off containers
@@ -25,6 +28,39 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 		Short:   "Runs a container.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			filter := filters.NewArgs()
+			filter.Add("reference", flagImage)
+
+			// look for the image
+			list, err := docker.ImageList(cmd.Context(), types.ImageListOptions{
+				All:     true,
+				Filters: filter,
+			})
+			if err != nil {
+				return err
+			}
+
+			// should we pull the image?
+			if len(list) == 0 || flagPull {
+				fmt.Print("pulling image … ")
+
+				// pull the image
+				r, err := docker.ImagePull(cmd.Context(), flagImage, types.ImagePullOptions{})
+				if err != nil {
+					fmt.Print("\u2717\n")
+					return err
+				}
+				defer r.Close()
+
+				buf := bytes.Buffer{}
+				if _, err := buf.ReadFrom(r); err != nil {
+					fmt.Print("\u2717\n")
+					return err
+				}
+
+				fmt.Print("\u2713\n")
+			}
+
 			// find the docker executable
 			path, err := exec.LookPath("docker")
 			if err != nil {
@@ -38,7 +74,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			c.Stderr = cmd.ErrOrStderr()
 			c.Stdout = cmd.OutOrStdout()
 
-			// should the container bew removed after completion?
+			// should the container be removed after completion?
 			if flagRemove {
 				c.Args = append(c.Args, "--rm")
 			}
@@ -69,8 +105,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// append the args to the container
 			c.Args = append(c.Args, args...)
 
-			fmt.Println(c.Args)
-
 			return c.Run()
 		},
 	}
@@ -80,6 +114,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd.Flags().BoolVar(&flagInteractive, "interactive", true, "should the container be interactive?")
 	cmd.Flags().StringVar(&flagImage, "image", "", "image to use for the container")
 	cmd.Flags().BoolVar(&flagRemove, "persist", true, "persist container after completion")
+	cmd.Flags().BoolVar(&flagPull, "pull", false, "pull the image, even if its been downloaded once")
+
 	cmd.MarkFlagRequired("image")
 
 	return cmd
