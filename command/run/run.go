@@ -92,7 +92,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 
-				c.Args = append(c.Args, "-v")
+				c.Args = append(c.Args, "--volume")
 
 				vol := fmt.Sprintf("%s:%s", current, flagWorkingDir)
 
