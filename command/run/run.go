@@ -81,7 +81,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// should the container be interactive
 			if flagInteractive {
-				c.Args = append(c.Args, "-it")
+				c.Args = append(c.Args, "--interactive")
 			}
 
 			// if the working dir is set, grab the current directory and mount it
