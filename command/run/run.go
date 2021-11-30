@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	flagImage, flagWorkingDir              string
-	flagInteractive, flagPull, flagPersist bool
+	flagEntrypoint, flagImage, flagPublish, flagWorkingDir string
+	flagInteractive, flagPull, flagPersist                 bool
 )
 
 const exampleText = `  # run one off containers
@@ -87,6 +87,16 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				c.Args = append(c.Args, "-it")
 			}
 
+			// should we override the entrypoint
+			if flagEntrypoint != "" {
+				c.Args = append(c.Args, "--entrypoint="+flagEntrypoint)
+			}
+
+			// should we publish all the ports to the host machine?
+			if flagPublish != "" {
+				c.Args = append(c.Args, "--publish="+flagPublish)
+			}
+
 			// if the working dir is set, grab the current directory and mount it
 			if flagWorkingDir != "" {
 				// get the working dir
@@ -113,10 +123,12 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	}
 
 	// set flags for the command
+	cmd.Flags().StringVar(&flagEntrypoint, "entrypoint", "", "override the image entrypoint")
 	cmd.Flags().StringVar(&flagWorkingDir, "working-dir", "", "working directory for the container")
 	cmd.Flags().BoolVar(&flagInteractive, "interactive", true, "should the container be interactive?")
 	cmd.Flags().StringVar(&flagImage, "image", "", "image to use for the container")
 	cmd.Flags().BoolVar(&flagPersist, "persist", true, "persist container after completion")
+	cmd.Flags().StringVar(&flagPublish, "publish", "", "publish a port to the host machine")
 	cmd.Flags().BoolVar(&flagPull, "pull", false, "pull the image, even if its been downloaded once")
 
 	cmd.MarkFlagRequired("image")
