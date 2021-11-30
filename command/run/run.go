@@ -39,7 +39,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			c.Args = append(c.Args, cmd.Flag("image").Value.String())
 
-			// TODO(jasonmccallister) grab the args for the container commands
+			c.Args = append(c.Args, args...)
 
 			return c.Run()
 		},
