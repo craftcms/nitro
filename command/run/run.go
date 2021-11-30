@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	flagImage, flagWorkingDir             string
-	flagInteractive, flagPull, flagRemove bool
+	flagImage, flagWorkingDir              string
+	flagInteractive, flagPull, flagPersist bool
 )
 
 const exampleText = `  # run one off containers
@@ -78,7 +78,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			c.Stdout = cmd.OutOrStdout()
 
 			// should the container be removed after completion?
-			if flagRemove {
+			if flagPersist {
 				c.Args = append(c.Args, "--rm")
 			}
 
@@ -116,7 +116,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd.Flags().StringVar(&flagWorkingDir, "working-dir", "", "working directory for the container")
 	cmd.Flags().BoolVar(&flagInteractive, "interactive", true, "should the container be interactive?")
 	cmd.Flags().StringVar(&flagImage, "image", "", "image to use for the container")
-	cmd.Flags().BoolVar(&flagRemove, "persist", true, "persist container after completion")
+	cmd.Flags().BoolVar(&flagPersist, "persist", true, "persist container after completion")
 	cmd.Flags().BoolVar(&flagPull, "pull", false, "pull the image, even if its been downloaded once")
 
 	cmd.MarkFlagRequired("image")
