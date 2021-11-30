@@ -103,8 +103,8 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 		return false
 	}
 
-	// check the app is disabled
-	if container.Config.Labels[containerlabels.Disabled] != fmt.Sprintf("%v", app.Disabled) {
+	// check the app is suspended
+	if container.Config.Labels[containerlabels.Suspended] != fmt.Sprintf("%v", app.Suspended) {
 		return false
 	}
 

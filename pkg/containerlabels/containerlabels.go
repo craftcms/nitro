@@ -30,9 +30,6 @@ const (
 	// DatabaseVersion is the version of the database the container is running (e.g. 11, 12, 5.7)
 	DatabaseVersion = "com.craftcms.nitro.database-version"
 
-	// Disabled is used to identify a container that should not be started.
-	Disabled = "com.craftcms.nitro.disabled"
-
 	// Dockerfile is used to identify a container that uses a custom dockerfile for its image
 	Dockerfile = "com.craftcms.nitro.dockerfile"
 
@@ -57,6 +54,9 @@ const (
 	// ProxyVersion is used to label a proxy container with a specific version
 	ProxyVersion = "com.craftcms.nitro.proxy-version"
 
+	// Suspended is used to identify a container that should not be started.
+	Suspended = "com.craftcms.nitro.suspended"
+
 	// Type is used to identity the type of container
 	Type = "com.craftcms.nitro.type"
 
@@ -67,11 +67,11 @@ const (
 // ForApp takes an app and returns labels to use on the app container.
 func ForApp(a config.App) map[string]string {
 	labels := map[string]string{
-		Nitro:   "true",
-		Host:    a.Hostname,
-		Webroot: a.Webroot,
-		Type:    "app",
-		Disabled: fmt.Sprintf("%v", a.Disabled),
+		Nitro:     "true",
+		Host:      a.Hostname,
+		Webroot:   a.Webroot,
+		Type:      "app",
+		Suspended: fmt.Sprintf("%v", a.Suspended),
 	}
 
 	// if there are extensions, add them as comma separated

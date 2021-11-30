@@ -1,4 +1,4 @@
-package disable
+package suspend
 
 import (
 	"os"
@@ -13,17 +13,17 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # disable the app in the current directory
-  nitro disable
+const exampleText = `  # suspend the app in the current directory
+  nitro suspend
 
-  # disable a specific app using the global flag
-  nitro --app myapp.nitro disable`
+  # suspend a specific app using the global flag
+  nitro --app myapp.nitro suspend`
 
-// NewCommand returns the command to disable an app from automatically starting.
+// NewCommand returns the command to suspend an app from automatically starting.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "disable",
-		Short:   "Disables an app.",
+		Use:     "suspend",
+		Short:   "Suspends an app.",
 		Example: exampleText,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
@@ -50,8 +50,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			// disable the app
-			if err := cfg.DisableApp(name); err != nil {
+			// suspend the app
+			if err := cfg.SuspendApp(name); err != nil {
 				return err
 			}
 
@@ -60,7 +60,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				return err
 			}
 
-			output.Info("Disabled", name)
+			output.Info("Suspended", name)
 
 			return nil
 		},
