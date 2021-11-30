@@ -1,4 +1,4 @@
-package service
+package disable
 
 import (
 	"fmt"
@@ -11,11 +11,16 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-// NewCommand returns the command to enable an app from automatically starting.
-func enableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+var (
+	// ErrUnknownService is used when an unknown service is requested
+	ErrUnknownService = fmt.Errorf("unknown service requested")
+)
+
+// NewCommand returns the command to disable a service.
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enable",
-		Short: "Enables an app.",
+		Use:   "disable",
+		Short: "Disables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -26,20 +31,20 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 			return nil
 		},
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
-		Example: `  # enable services
-  nitro service enable <service-name>
+		Example: `  # disable services
+  nitro disable <service-name>
 
-  # enable blackfire
-  nitro service enable blackfire
+  # disable blackfire
+  nitro disable blackfire
 
-  # enable mailhog
-  nitro service enable mailhog
+  # disable mailhog
+  nitro disable mailhog
 
-  # enable minio
-  nitro service enable minio
+  # disable minio
+  nitro disable minio
 
-  # enable dynamodb
-  nitro service enable dynamodb`,
+  # disable dynamodb
+  nitro disable dynamodb`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -71,7 +76,7 @@ func enableCommand(home string, docker client.CommonAPIClient, output terminal.O
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Enabled", args[0])
+			output.Info("Disabled", args[0])
 
 			return nil
 		},

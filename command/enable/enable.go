@@ -1,4 +1,4 @@
-package service
+package enable
 
 import (
 	"fmt"
@@ -11,11 +11,16 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-func disableCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
+var (
+	// ErrUnknownService is used when an unknown service is requested
+	ErrUnknownService = fmt.Errorf("unknown service requested")
+)
+
+// NewCommand returns the command to enable an app from automatically starting.
+func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "disable",
-		Aliases: []string{"dis"},
-		Short:   "Disables a service.",
+		Use:   "enable",
+		Short: "Enables a service.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				fmt.Println(cmd.UsageString())
@@ -26,20 +31,20 @@ func disableCommand(home string, docker client.CommonAPIClient, output terminal.
 			return nil
 		},
 		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
-		Example: `  # disable services
-  nitro service disable <service-name>
+		Example: `  # enable services
+  nitro enable <service-name>
 
-  # disable blackfire
-  nitro service disable blackfire
+  # enable blackfire
+  nitro enable blackfire
 
-  # disable mailhog
-  nitro service disable mailhog
+  # enable mailhog
+  nitro enable mailhog
 
-  # disable minio
-  nitro service disable minio
+  # enable minio
+  nitro enable minio
 
-  # disable dynamodb
-  nitro service disable dynamodb`,
+  # enable dynamodb
+  nitro enable dynamodb`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
@@ -50,18 +55,18 @@ func disableCommand(home string, docker client.CommonAPIClient, output terminal.
 				return err
 			}
 
-			// disable the service
+			// enable the service
 			switch args[0] {
 			case "blackfire":
-				cfg.Services.Blackfire = false
+				cfg.Services.Blackfire = true
 			case "dynamodb":
-				cfg.Services.DynamoDB = false
+				cfg.Services.DynamoDB = true
 			case "mailhog":
-				cfg.Services.Mailhog = false
+				cfg.Services.Mailhog = true
 			case "minio":
-				cfg.Services.Minio = false
+				cfg.Services.Minio = true
 			case "redis":
-				cfg.Services.Redis = false
+				cfg.Services.Redis = true
 			default:
 				return ErrUnknownService
 			}
@@ -71,7 +76,7 @@ func disableCommand(home string, docker client.CommonAPIClient, output terminal.
 				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Disabled", args[0])
+			output.Info("Enabled", args[0])
 
 			return nil
 		},
