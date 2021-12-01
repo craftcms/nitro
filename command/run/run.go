@@ -19,7 +19,7 @@ var (
 	flagInteractive, flagPull, flagPersist                 bool
 )
 
-const exampleText = `  # run one off containers
+const exampleText = `  # run one-off containers
   nitro run --image node:10 --working-dir /app install
 
   # run a composer container, mounting the current directory with a shell inside the container
