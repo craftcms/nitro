@@ -24,7 +24,10 @@ const exampleText = `  # run one-off containers
   nitro run --image node:10 --working-dir /app install
 
   # run a composer container, mounting the current directory with a shell inside the container
-  nitro run --image composer --working-dir /app bash`
+  nitro run --image composer --working-dir /app bash
+
+  # run a composer container and pass in commands with special chars
+  nitro run --image composer --working-dir /app --command 'install --ignore-platform-reqs'`
 
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
