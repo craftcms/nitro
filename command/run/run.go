@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -16,8 +15,8 @@ import (
 )
 
 var (
-	flagEntrypoint, flagImage, flagPublish, flagWorkingDir, flagCommand string
-	flagInteractive, flagPull, flagPersist                              bool
+	flagEntrypoint, flagImage, flagPublish, flagWorkingDir string
+	flagInteractive, flagPull, flagPersist                 bool
 )
 
 const exampleText = `  # run one-off containers
@@ -119,11 +118,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// set the image to use, if the image is not found docker will pull it
 			c.Args = append(c.Args, flagImage)
 
-			// optionally use command flag, so we can pass flags without worrying about validating
-			if flagCommand != "" {
-				args = strings.Fields(flagCommand)
-			}
-
 			// append the args to the container
 			c.Args = append(c.Args, args...)
 
@@ -139,7 +133,6 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 	cmd.Flags().BoolVar(&flagPersist, "persist", true, "persist container after completion")
 	cmd.Flags().StringVar(&flagPublish, "publish", "", "publish a port to the host machine")
 	cmd.Flags().BoolVar(&flagPull, "pull", false, "pull the image, even if its been downloaded once")
-	cmd.Flags().StringVar(&flagCommand, "command", "", "command to run in the container")
 
 	cmd.MarkFlagRequired("image")
 
