@@ -478,11 +478,22 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 						continue
 					}
 
-					// start, update or create the site container
-					_, err := appcontainer.StartOrCreate(cfg.HomeDirectory, ctx, docker, cfg, app, network.ID)
-					if err != nil {
-						output.Warning()
-						return err
+					// if the app is using a custom Dockerfile
+					switch app.Dockerfile {
+					case true:
+						// check if there is a
+						_, err := appcontainer.StartOrCreateCustom(cfg.HomeDirectory, ctx, docker, cfg, app, network.ID)
+						if err != nil {
+							output.Warning()
+							return err
+						}
+					default:
+						// start, update or create the site container
+						_, err := appcontainer.StartOrCreate(cfg.HomeDirectory, ctx, docker, cfg, app, network.ID)
+						if err != nil {
+							output.Warning()
+							return err
+						}
 					}
 
 					output.Done()

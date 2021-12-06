@@ -120,6 +120,54 @@ func StartOrCreate(home string, ctx context.Context, docker client.CommonAPIClie
 	return c.ID, nil
 }
 
+func StartOrCreateCustom(home string, ctx context.Context, docker client.CommonAPIClient, cfg *config.Config, app config.App, networkID string) (string, error) {
+	image := fmt.Sprintf("%s:local", app.Hostname)
+
+	filter := filters.NewArgs()
+	filter.Add("reference", image)
+
+	// is there a custom image that already exists?
+	list, err := docker.ImageList(ctx, types.ImageListOptions{
+		All:     true,
+		Filters: filter,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// is there an image?
+	if len(list) == 0 {
+		//  clean the path
+		p, err := paths.Clean(home, app.Path)
+		if err != nil {
+			return "", err
+		}
+
+		// build the image
+		if err := dockerbuild.Build(os.Stdin, os.Stdout, p, image); err != nil {
+			return "", err
+		}
+	}
+
+	// remove the reference from the filter
+	filter.Del("reference", image)
+	filter.Add("label", containerlabels.Nitro)
+	filter.Add("label", containerlabels.Host+"="+app.Hostname)
+
+	// is there an existing container?
+	containers, err := docker.ContainerList(ctx, types.ContainerListOptions{
+		All:     true,
+		Filters: filter,
+	})
+
+	//  if there are no containers, create one
+	if len(containers) == 0 {
+		return create(ctx, docker, cfg, app, networkID)
+	}
+
+	return "", fmt.Errorf("not yet implemented")
+}
+
 func ContainerPath(app config.App) string {
 	// trim trailing slashes
 	webroot := strings.TrimRight(app.Webroot, "/")
@@ -146,7 +194,7 @@ func create(ctx context.Context, docker client.CommonAPIClient, cfg *config.Conf
 
 	// pull the image if we are not in a development environment
 	_, dev := os.LookupEnv("NITRO_DEVELOPMENT")
-	if !dev {
+	if !dev && !app.Dockerfile {
 		rdr, err := docker.ImagePull(ctx, image, types.ImagePullOptions{All: false})
 		if err != nil {
 			return "", fmt.Errorf("unable to pull the image, %w", err)

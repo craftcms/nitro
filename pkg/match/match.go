@@ -100,6 +100,8 @@ func App(home string, app config.App, container types.ContainerJSON, blackfire c
 
 	// check the app hostname using the label
 	if container.Config.Labels[containerlabels.Host] != app.Hostname {
+		fmt.Println(container.Config.Labels[containerlabels.Host])
+		fmt.Println(app.Hostname)
 		return false
 	}
 
