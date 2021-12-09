@@ -18,14 +18,14 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # run craft console command in a sites container
+const exampleText = `  # run craft console command in the current app container
   nitro craft update all
 
   # view craft console help command
   nitro craft
 
-  # enter the craft shell
-  nitro craft shell`
+  # enter the craft shell for a specific app
+  nitro --app myapp.nitro craft shell`
 
 // NewCommand returns the craft command which allows users to pass craft specific commands to a sites
 // container. Its context aware and will prompt the user for the site if its not in a directory.

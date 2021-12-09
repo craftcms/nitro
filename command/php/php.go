@@ -17,11 +17,11 @@ import (
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # run php version
-  nitro php -v
+const exampleText = `  # run php version for the current app
+  nitro php
 
-  # view php info
-  nitro php -i`
+  # get an interactive shell for an app
+  nitro --app myapp.nitro php -- -a`
 
 // NewCommand returns the php command which allows users to pass php specific commands to a sites
 // container. Its context aware and will prompt the user for the site if its not in a directory.
