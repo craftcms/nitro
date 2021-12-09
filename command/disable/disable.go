@@ -1,66 +1,82 @@
 package disable
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/craftcms/nitro/pkg/appaware"
-	"github.com/craftcms/nitro/pkg/config"
-	"github.com/craftcms/nitro/pkg/flags"
 	"github.com/craftcms/nitro/pkg/prompt"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"github.com/craftcms/nitro/pkg/config"
 	"github.com/craftcms/nitro/pkg/terminal"
 )
 
-const exampleText = `  # disable the app in the current directory
-  nitro disable
+var (
+	// ErrUnknownService is used when an unknown service is requested
+	ErrUnknownService = fmt.Errorf("unknown service requested")
+)
 
-  # disable a specific app using the global flag
-  nitro --app myapp.nitro disable`
-
-// NewCommand returns the command to disable an app from automatically starting.
+// NewCommand returns the command to disable a service.
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "disable",
-		Short:   "Disables an app.",
-		Example: exampleText,
+		Use:   "disable",
+		Short: "Disables a service.",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				fmt.Println(cmd.UsageString())
+
+				return fmt.Errorf("service name param missing")
+			}
+
+			return nil
+		},
+		ValidArgs: []string{"blackfire", "dynamodb", "mailhog", "minio", "redis"},
+		Example: `  # disable services
+  nitro disable <service-name>
+
+  # disable blackfire
+  nitro disable blackfire
+
+  # disable mailhog
+  nitro disable mailhog
+
+  # disable minio
+  nitro disable minio
+
+  # disable dynamodb
+  nitro disable dynamodb`,
 		PostRunE: func(cmd *cobra.Command, args []string) error {
 			return prompt.RunApply(cmd, args, false, output)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// load the config
+			// load the configuration
 			cfg, err := config.Load(home)
 			if err != nil {
 				return err
 			}
 
-			// get the app
-			name := flags.AppName
-			if name == "" {
-				// get the current working directory
-				wd, err := os.Getwd()
-				if err != nil {
-					return err
-				}
-
-				name, err = appaware.Detect(*cfg, wd)
-				if err != nil {
-					return err
-				}
+			// disable the service
+			switch args[0] {
+			case "blackfire":
+				cfg.Services.Blackfire = false
+			case "dynamodb":
+				cfg.Services.DynamoDB = false
+			case "mailhog":
+				cfg.Services.Mailhog = false
+			case "minio":
+				cfg.Services.Minio = false
+			case "redis":
+				cfg.Services.Redis = false
+			default:
+				return ErrUnknownService
 			}
 
-			// disable the app
-			if err := cfg.DisableApp(name); err != nil {
-				return err
-			}
-
-			// save the config
+			// save the config file
 			if err := cfg.Save(); err != nil {
-				return err
+				return fmt.Errorf("unable to save config, %w", err)
 			}
 
-			output.Info("Disabled", name)
+			output.Info("Disabled", args[0])
 
 			return nil
 		},

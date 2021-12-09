@@ -11,6 +11,7 @@
 - Added common Linux build tools such as make to the app containers.
 - Yarn is now installed by default.
 - Added the ability to exclude directories from app bind mounts to improve performance. ([#419](https://github.com/craftcms/nitro/issues/419))
+- Added `run` command to run one-off containers in an existing directory.
 
 ### Changed
 - Renamed sites to apps and updated the commands. ([#420](https://github.com/craftcms/nitro/issues/420))

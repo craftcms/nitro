@@ -66,8 +66,8 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				n := strings.TrimLeft(c.Names[0], "/")
 
 				// make sure the app is not disabled
-				if c.Labels[containerlabels.Disabled] == "true" {
-					output.Info(fmt.Sprintf("%s is disabled, skipping", n))
+				if c.Labels[containerlabels.Suspended] == "true" {
+					output.Info(fmt.Sprintf("%s is suspended, skipping", n))
 					continue
 				}
 

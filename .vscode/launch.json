@@ -15,6 +15,17 @@
             "args": ["apply"]
         },
         {
+            "name": "nitro craft",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/nitro/main.go",
+            "env": {
+                "NITRO_DEVELOPMENT": true
+            },
+            "args": ["--app=craftcom.nitro", "craft"]
+        },
+        {
             "name": "nitro bridge",
             "type": "go",
             "request": "launch",

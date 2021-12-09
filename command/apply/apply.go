@@ -471,9 +471,9 @@ func NewCommand(home string, docker client.CommonAPIClient, nitrod protob.NitroC
 				for _, app := range cfg.ParsedApps {
 					output.Pending("checking", app.Hostname)
 
-					// don't start or create disabled apps
-					if app.Disabled {
-						fmt.Print("- disabled, skipping ")
+					// don't start or create suspended apps
+					if app.Suspended {
+						fmt.Print("- suspended, skipping ")
 						output.Done()
 						continue
 					}

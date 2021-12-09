@@ -33,12 +33,14 @@ import (
 	"github.com/craftcms/nitro/command/queue"
 	"github.com/craftcms/nitro/command/remove"
 	"github.com/craftcms/nitro/command/restart"
+	"github.com/craftcms/nitro/command/resume"
+	"github.com/craftcms/nitro/command/run"
 	"github.com/craftcms/nitro/command/selfupdate"
-	"github.com/craftcms/nitro/command/service"
 	"github.com/craftcms/nitro/command/share"
 	"github.com/craftcms/nitro/command/ssh"
 	"github.com/craftcms/nitro/command/start"
 	"github.com/craftcms/nitro/command/stop"
+	"github.com/craftcms/nitro/command/suspend"
 	"github.com/craftcms/nitro/command/trust"
 	"github.com/craftcms/nitro/command/update"
 	"github.com/craftcms/nitro/command/version"
@@ -114,7 +116,8 @@ func NewCommand() *cobra.Command {
 		destroy.NewCommand(home, docker, term),
 		disable.NewCommand(home, docker, term),
 		enable.NewCommand(home, docker, term),
-		service.NewCommand(home, docker, term),
+		suspend.NewCommand(home, docker, term),
+		resume.NewCommand(home, docker, term),
 		edit.NewCommand(home, docker, term),
 		extensions.NewCommand(home, docker, term),
 		hosts.NewCommand(home, term),
@@ -129,6 +132,7 @@ func NewCommand() *cobra.Command {
 		queue.NewCommand(home, docker, term),
 		remove.NewCommand(home, docker, term),
 		restart.NewCommand(home, docker, term),
+		run.NewCommand(home, docker, term),
 		selfupdate.NewCommand(term),
 		share.NewCommand(home, docker, term),
 		ssh.NewCommand(home, docker, term),

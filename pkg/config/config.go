@@ -186,7 +186,7 @@ type App struct {
 	Extensions []string `yaml:"extensions,omitempty"`
 	Xdebug     bool     `yaml:"xdebug,omitempty"`
 	Blackfire  bool     `yaml:"blackfire,omitempty"`
-	Disabled   bool     `yaml:"disabled,omitempty"`
+	Suspended  bool     `yaml:"suspended,omitempty"`
 	Database   struct {
 		Engine  string `yaml:"engine,omitempty"`
 		Version string `yaml:"version,omitempty"`
@@ -673,10 +673,10 @@ func Load(home string) (*Config, error) {
 			}
 
 			// check suspend
-			if global.Disabled != local.Disabled {
-				c.ParsedApps[i].Disabled = global.Disabled
+			if global.Suspended != local.Suspended {
+				c.ParsedApps[i].Suspended = global.Suspended
 			} else {
-				c.ParsedApps[i].Disabled = local.Disabled
+				c.ParsedApps[i].Suspended = local.Suspended
 			}
 
 			// check the database engine
@@ -781,15 +781,15 @@ func (c *Config) DisableBlackfire(site string) error {
 	return fmt.Errorf("unknown site, %s", site)
 }
 
-// DisableApp takes an apps hostname and sets the disabled option
+// SuspendApp takes an apps hostname and sets the disabled option
 // to true. If the app cannot be found, it returns an error.
-func (c *Config) DisableApp(hostname string) error {
+func (c *Config) SuspendApp(hostname string) error {
 	// find the site by the hostname
 	for i, a := range c.ParsedApps {
 		if a.Hostname == hostname {
 			// only toggle if the setting is not true
-			if !c.Apps[i].Disabled {
-				c.Apps[i].Disabled = true
+			if !c.Apps[i].Suspended {
+				c.Apps[i].Suspended = true
 			}
 
 			return nil
@@ -817,15 +817,15 @@ func (c *Config) DisableXdebug(hostname string) error {
 	return fmt.Errorf("unknown app, %s", hostname)
 }
 
-// EnableApp takes an apps hostname and sets the disabled option
+// ResumeApp takes an apps hostname and sets the disabled option
 // to false. If the app cannot be found, it returns an error.
-func (c *Config) EnableApp(hostname string) error {
+func (c *Config) ResumeApp(hostname string) error {
 	// find the site by the hostname
 	for i, a := range c.ParsedApps {
 		if a.Hostname == hostname {
 			// only toggle if the setting is true
-			if c.Apps[i].Disabled {
-				c.Apps[i].Disabled = false
+			if c.Apps[i].Suspended {
+				c.Apps[i].Suspended = false
 			}
 
 			return nil
