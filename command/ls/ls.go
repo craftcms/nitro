@@ -31,7 +31,7 @@ var (
 func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outputer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "ls",
-		Short:   "Lists details for Nitro’s containers.",
+		Short:   "Lists Nitro container details.",
 		Example: exampleText,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -127,7 +127,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			tbl.Print()
 
-			fmt.Println("\nNote: Database containers have the username `nitro` and password `nitro`.")
+			fmt.Println("\n💡 Each database container’s username+password is `nitro`+`nitro`.")
 			fmt.Println("")
 
 			return nil
