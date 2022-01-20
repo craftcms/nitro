@@ -123,47 +123,53 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	var found []Site
 
-	// Collect the broadest-possible options: sites having container paths
+	// Collect the broadest-possible matches: sites having container paths
 	// within the working directory.
 	for _, s := range c.Sites {
 		p, _ := s.GetAbsContainerPath(home)
 
 		if strings.Contains(p, wd) {
 			found = append(found, s)
+
+			fmt.Println(found)
 		}
 	}
 
-	// Narrow matches further if possible and return the subset.
+	// Narrow matches further if possible, then return the subset.
 	if len(found) > 0 {
 		var exactMatches []Site
-		var bestMatches = 0
-		var b Site
-		var m = 0
+		var numCloseMatches = 0
+		var bestMatch Site
+		var maxSegments = 0
 
 		for _, s := range found {
 			containerPath := s.GetContainerPath()
 			p, _ := s.GetAbsContainerPath(home)
-			segments := strings.Split(containerPath, "/")
-			var matchingSegments = len(segments)
+			pathSegments := strings.Split(containerPath, "/")
+			var numPathSegments = len(pathSegments)
 
 			if wd == p {
-				// Append because more than one site *could* use the exact same path.
+				// Working directory matches container path, but we’ll append and
+				// keep looking because more than one site *could* use the exact same path.
 				exactMatches = append(exactMatches, s)
-			} else if matchingSegments > 1 && matchingSegments > m {
-				bestMatches += 1
-				m = matchingSegments
-				b = s
+
+				// TODO: also check webroot before considering exact match?
+			} else if numPathSegments > 1 && numPathSegments > maxSegments {
+				// Not an exact match, but most specific so far makes it our best guess.
+				numCloseMatches += 1
+				maxSegments = numPathSegments
+				bestMatch = s
 			}
 		}
 
-		// Return sites with container path(s) matching the working directory.
+		// Return matches where the container path *is* the working directory.
 		if len(exactMatches) > 0 {
 			return exactMatches
 		}
 
-		// Return the single, most specific found item if we have one.
-		if bestMatches == 1 {
-			return []Site{b}
+		// If we have a single, close match then return that.
+		if numCloseMatches == 1 {
+			return []Site{bestMatch}
 		}
 
 		return found
