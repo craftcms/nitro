@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Added support for PHP 8.1.
 - Added support for parsing nitro.yaml files stored in a project repository.
 - Sites now expose ports 3000-3005 for miscellaneous use.
 - Added the `keys` command to copy SSH keys from the host machine into an app container.

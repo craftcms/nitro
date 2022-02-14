@@ -100,6 +100,13 @@ func TestPHPVersionValidator_Validate(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "8.1 version is valid",
+			args: args{
+				input: "8.1",
+			},
+			wantErr: false,
+		},
+		{
 			name: "8.0 version is valid",
 			args: args{
 				input: "8.0",

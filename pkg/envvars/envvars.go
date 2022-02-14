@@ -128,7 +128,7 @@ func ForApp(app config.App, addr string) ([]string, error) {
 		envs = append(envs, "XDEBUG_MODE=off")
 	} else {
 		switch app.PHPVersion {
-		case "8.0", "7.4", "7.3", "7.2":
+		case "8.1", "8.0", "7.4", "7.3", "7.2":
 			envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
 			envs = append(envs, "XDEBUG_MODE=develop,debug")
 		default:

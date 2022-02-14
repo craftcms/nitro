@@ -21,6 +21,7 @@ import (
 
 var (
 	DockerImages = map[string]string{
+		"nitro:8.1":                      fmt.Sprintf("%s:%s", Image, "8.1"),
 		"nitro:8.0":                      fmt.Sprintf("%s:%s", Image, "8.0"),
 		"nitro:7.4":                      fmt.Sprintf("%s:%s", Image, "7.4"),
 		"nitro:7.3":                      fmt.Sprintf("%s:%s", Image, "7.3"),
