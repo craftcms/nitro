@@ -115,13 +115,13 @@ func removeCommand(docker client.CommonAPIClient, nitrod protob.NitroClient, out
 				output.Warning()
 
 				// ask if the update command should run
-				confirm, err := output.Confirm("The API does not appear to be updated, run `nitro update` now", true, "?")
+				confirm, err := output.Confirm("The API does not appear to be updated. Run `nitro update` now?", true, "")
 				if err != nil {
 					return err
 				}
 
 				if !confirm {
-					output.Info("Skipping the update command, you need to update before using this command")
+					output.Info("Skipping the update command; you need to update before using this command.")
 
 					return nil
 				}

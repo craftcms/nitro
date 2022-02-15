@@ -8,7 +8,6 @@ import (
 	"github.com/craftcms/nitro/command/add"
 	"github.com/craftcms/nitro/command/alias"
 	"github.com/craftcms/nitro/command/apply"
-	"github.com/craftcms/nitro/command/blackfire"
 	"github.com/craftcms/nitro/command/bridge"
 	"github.com/craftcms/nitro/command/clean"
 	"github.com/craftcms/nitro/command/completion"
@@ -103,7 +102,6 @@ func NewCommand() *cobra.Command {
 		add.NewCommand(home, docker, term),
 		alias.NewCommand(home, docker, term),
 		apply.NewCommand(home, docker, nitrod, term),
-		blackfire.NewCommand(home, docker, term),
 		bridge.NewCommand(home, docker, term),
 		clean.NewCommand(home, docker, term),
 		completion.NewCommand(),

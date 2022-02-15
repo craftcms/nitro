@@ -45,7 +45,7 @@ func NewImporter() *importer {
 func (importer *importer) Import(opts *ImportOptions, find func(engine, version string) (string, error)) error {
 	// ensure there are options
 	if opts == nil {
-		return fmt.Errorf("no options were provider")
+		return fmt.Errorf("no options were provided")
 	}
 
 	// validate all of the options
