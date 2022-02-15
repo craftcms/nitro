@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- Added support for PHP 8.1.
+- Added support for more Linux distributions when installing certificates. ([#380](https://github.com/craftcms/nitro/issues/380), [#414](https://github.com/craftcms/nitro/issues/414))
+
 ### Removed
 - Removed the `blackfire` command.
 
