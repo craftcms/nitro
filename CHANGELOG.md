@@ -7,6 +7,9 @@
 ### Added
 - Added support for PHP 8.1.
 
+### Fixed
+- Fixed a bug where the OS was not recognized when installing certificates on Linux machines. ([#380](https://github.com/craftcms/nitro/issues/380))
+
 ## 2.0.8 - 2021-05-18
 
 ### Added
