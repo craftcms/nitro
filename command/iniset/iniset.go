@@ -169,7 +169,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			// prompt the user for the setting to change
 			switch setting {
 			case "display_errors":
-				value, err := output.Ask("Should we display PHP errors", "true", "?", &validate.IsBoolean{})
+				value, err := output.Ask("Should we display PHP errors?", "true", "", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}
@@ -185,7 +185,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "max_execution_time":
-				value, err := output.Ask("What should the max execution time be", config.DefaultEnvs["PHP_MAX_EXECUTION_TIME"], "?", &validate.MaxExecutionTime{})
+				value, err := output.Ask("What should the max execution time be?", config.DefaultEnvs["PHP_MAX_EXECUTION_TIME"], "", &validate.MaxExecutionTime{})
 				if err != nil {
 					return err
 				}
@@ -200,7 +200,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "max_input_vars":
-				value, err := output.Ask("What should the max input vars be", config.DefaultEnvs["PHP_MAX_INPUT_VARS"], "?", &validate.MaxExecutionTime{})
+				value, err := output.Ask("What should the max input vars be?", config.DefaultEnvs["PHP_MAX_INPUT_VARS"], "", &validate.MaxExecutionTime{})
 				if err != nil {
 					return err
 				}
@@ -215,7 +215,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "max_input_time":
-				value, err := output.Ask("What should the max input time be", config.DefaultEnvs["PHP_MAX_INPUT_TIME"], "?", &validate.MaxExecutionTime{})
+				value, err := output.Ask("What should the max input time be?", config.DefaultEnvs["PHP_MAX_INPUT_TIME"], "", &validate.MaxExecutionTime{})
 				if err != nil {
 					return err
 				}
@@ -230,7 +230,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "max_file_upload":
-				value, err := output.Ask("What should the new max file upload be", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "?", &validate.IsMegabyte{})
+				value, err := output.Ask("What should the new max file upload be?", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "", &validate.IsMegabyte{})
 				if err != nil {
 					return err
 				}
@@ -240,7 +240,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "memory_limit":
-				value, err := output.Ask("What should the new memory limit be", config.DefaultEnvs["PHP_MEMORY_LIMIT"], "?", &validate.IsMegabyte{})
+				value, err := output.Ask("What should the new memory limit be?", config.DefaultEnvs["PHP_MEMORY_LIMIT"], "", &validate.IsMegabyte{})
 				if err != nil {
 					return err
 				}
@@ -250,7 +250,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_enable":
-				value, err := output.Ask("Should we enable OPCache", "false", "?", &validate.IsBoolean{})
+				value, err := output.Ask("Should we enable OPcache?", "false", "", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}
@@ -266,7 +266,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_validate_timestamps":
-				value, err := output.Ask("Should we validate timestamps with OPCache", "false", "?", &validate.IsBoolean{})
+				value, err := output.Ask("Should we validate timestamps with OPcache?", "false", "", &validate.IsBoolean{})
 				if err != nil {
 					return err
 				}
@@ -282,7 +282,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "opcache_revalidate_freq":
-				value, err := output.Ask("What should the OPCache revalidate frequency be", config.DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"], "?", &validate.MaxExecutionTime{})
+				value, err := output.Ask("What should the OPcache revalidate frequency be?", config.DefaultEnvs["PHP_OPCACHE_REVALIDATE_FREQ"], "", &validate.MaxExecutionTime{})
 				if err != nil {
 					return err
 				}
@@ -297,7 +297,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "post_max_size":
-				value, err := output.Ask("What should post max size be", config.DefaultEnvs["PHP_POST_MAX_SIZE"], "?", &validate.IsMegabyte{})
+				value, err := output.Ask("What should post max size be?", config.DefaultEnvs["PHP_POST_MAX_SIZE"], "", &validate.IsMegabyte{})
 				if err != nil {
 					return err
 				}
@@ -307,7 +307,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 					return err
 				}
 			case "upload_max_file_size":
-				value, err := output.Ask("What should upload maximum file size be", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "?", &validate.IsMegabyte{})
+				value, err := output.Ask("What should upload maximum file size be?", config.DefaultEnvs["PHP_UPLOAD_MAX_FILESIZE"], "", &validate.IsMegabyte{})
 				if err != nil {
 					return err
 				}

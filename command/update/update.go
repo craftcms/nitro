@@ -20,6 +20,7 @@ import (
 
 var (
 	DockerImages = map[string]string{
+		"nginx:8.1-dev":                  "docker.io/craftcms/nginx:8.1-dev",
 		"nginx:8.0-dev":                  "docker.io/craftcms/nginx:8.0-dev",
 		"nginx:7.4-dev":                  "docker.io/craftcms/nginx:7.4-dev",
 		"nginx:7.3-dev":                  "docker.io/craftcms/nginx:7.3-dev",

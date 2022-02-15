@@ -78,7 +78,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			image := images[selection].Name
 
 			// ask for the tag (default to latest)
-			tag, err := output.Ask("What tag should we use", "latest", "?", nil)
+			tag, err := output.Ask("What tag should we use?", "latest", "", nil)
 			if err != nil {
 				return err
 			}
@@ -126,7 +126,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 
 				// should we prompt for the port to be exposed?
-				add, err := output.Confirm(fmt.Sprintf("Expose port `%s` on host", p), true, "?")
+				add, err := output.Confirm(fmt.Sprintf("Expose port `%s` on host?", p), true, "")
 				if err != nil {
 					return err
 				}
@@ -136,7 +136,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 				}
 			}
 
-			exposesUI, err := output.Confirm("Does the image contain a web-based UI", true, "?")
+			exposesUI, err := output.Confirm("Does the image contain a web-based UI?", true, "")
 			if err != nil {
 				return err
 			}
@@ -190,7 +190,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			var volumes []string
 			for v := range imageSpecs.ContainerConfig.Volumes {
 				// should we create a volume for the volume?
-				add, err := output.Confirm(fmt.Sprintf("Create volume `%q` for container", v), true, "?")
+				add, err := output.Confirm(fmt.Sprintf("Create volume `%q` for container?", v), true, "")
 				if err != nil {
 					return err
 				}
@@ -207,7 +207,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// prompt for the container name
-			name, err := output.Ask("What is the name of the container", suggested, "?", &validate.HostnameValidator{})
+			name, err := output.Ask("What is the name of the container?", suggested, "", &validate.HostnameValidator{})
 			if err != nil {
 				return err
 			}
@@ -223,7 +223,7 @@ func newCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			}
 
 			// setup a custom env file?
-			createEnvfile, err := output.Confirm("Create a file to add environment variables", true, "?")
+			createEnvfile, err := output.Confirm("Create a file to add environment variables?", true, "")
 			if err != nil {
 				return err
 			}

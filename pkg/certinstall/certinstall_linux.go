@@ -1,4 +1,5 @@
-// +build linux, !darwin
+//go:build (linux && ignore) || !darwin
+// +build linux,ignore !darwin
 
 package certinstall
 
@@ -99,7 +100,7 @@ func identify(description string) (string, error) {
 	}
 
 	// detect debian systems
-	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") || strings.Contains(description, "elementary") || strings.Contains(description, "Debian") {
+	if strings.Contains(description, "Ubuntu") || strings.Contains(description, "Pop!_OS") || strings.Contains(description, "Mint") || strings.Contains(description, "elementary") || strings.Contains(description, "Debian") || strings.Contains(description, "Zorin OS") {
 		return "debian", nil
 	}
 

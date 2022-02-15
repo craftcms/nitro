@@ -99,24 +99,58 @@ func (c *Config) FindSiteByHostName(hostname string) (*Site, error) {
 	return nil, fmt.Errorf("unable to find site with hostname %s", hostname)
 }
 
-// ListOfSitesByDirectory takes the users home directory and the current
-// working directory and returns a list of sites that are "context-aware".
+// ListOfSitesByDirectory takes the user’s home directory and the current
+// working directory and returns a list of sites within that context.
 func (c *Config) ListOfSitesByDirectory(home, wd string) []Site {
 	var found []Site
-	for _, s := range c.Sites {
-		p, _ := s.GetAbsPath(home)
 
-		// check if the path matches a sites path, then we are in a known site
-		if strings.Contains(wd, p) {
+	// Collect the broadest-possible options: sites having container paths
+	// within the working directory.
+	for _, s := range c.Sites {
+		p, _ := s.GetAbsContainerPath(home)
+
+		if strings.Contains(p, wd) {
 			found = append(found, s)
 		}
 	}
 
-	// if we found any matching sites, return those
+	// Narrow matches further if possible and return the subset.
 	if len(found) > 0 {
+		var exactMatches []Site
+		var bestMatches = 0
+		var b Site
+		var m = 0
+
+		for _, s := range found {
+			containerPath := s.GetContainerPath()
+			p, _ := s.GetAbsContainerPath(home)
+			segments := strings.Split(containerPath, "/")
+			var matchingSegments = len(segments)
+
+			if wd == p {
+				// Append because more than one site *could* use the exact same path.
+				exactMatches = append(exactMatches, s)
+			} else if matchingSegments > 1 && matchingSegments > m {
+				bestMatches += 1
+				m = matchingSegments
+				b = s
+			}
+		}
+
+		// Return sites with container path(s) matching the working directory.
+		if len(exactMatches) > 0 {
+			return exactMatches
+		}
+
+		// Return the single, most specific found item if we have one.
+		if bestMatches == 1 {
+			return []Site{b}
+		}
+
 		return found
 	}
 
+	// Otherwise just return all the sites.
 	return c.Sites
 }
 
@@ -225,6 +259,12 @@ func (s *Site) GetAbsPath(home string) (string, error) {
 	return cleanPath(home, s.Path)
 }
 
+// GetAbsContainerPath gets the directory for a site’s
+// container path.
+func (s *Site) GetAbsContainerPath(home string) (string, error) {
+	return cleanPath(home, s.Path+string(os.PathSeparator)+s.GetContainerPath())
+}
+
 // GetContainerPath is responsible for looking at the
 // site’s web root and determing the correct path in the
 // container. This is used for the craft and queue
@@ -234,7 +274,7 @@ func (s *Site) GetContainerPath() string {
 	// trim trailing slashes
 	webroot := strings.TrimRight(s.Webroot, "/")
 
-	// is there a path seperator?
+	// is there a path separator?
 	if strings.Contains(webroot, "/") {
 		parts := strings.Split(webroot, "/")
 
@@ -743,13 +783,13 @@ func xdebugVars(php PHP, xdebug bool, version, hostname, addr string) []string {
 	}
 
 	switch version {
-	case "8.0", "7.4", "7.3", "7.2":
-		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
-		envs = append(envs, "XDEBUG_MODE=develop,debug")
-	default:
+	case "7.1", "7.0":
 		// use legacy xdebug settings to support older versions of php
 		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
 		envs = append(envs, "XDEBUG_MODE=xdebug2")
+	default:
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
+		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
 
 	return envs
