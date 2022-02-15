@@ -743,13 +743,13 @@ func xdebugVars(php PHP, xdebug bool, version, hostname, addr string) []string {
 	}
 
 	switch version {
-	case "8.1", "8.0", "7.4", "7.3", "7.2":
-		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
-		envs = append(envs, "XDEBUG_MODE=develop,debug")
-	default:
+	case "7.1", "7.0":
 		// use legacy xdebug settings to support older versions of php
 		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=idekey=PHPSTORM remote_host=%s profiler_enable=1 remote_port=9000 remote_autostart=1 remote_enable=1`, addr))
 		envs = append(envs, "XDEBUG_MODE=xdebug2")
+	default:
+		envs = append(envs, fmt.Sprintf(`XDEBUG_CONFIG=client_host=%s client_port=9003`, addr))
+		envs = append(envs, "XDEBUG_MODE=develop,debug")
 	}
 
 	return envs
