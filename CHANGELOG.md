@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.9 - 2022-02-15
 
 ### Added
 - Added support for PHP 8.1.
