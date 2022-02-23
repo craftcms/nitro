@@ -31,14 +31,15 @@ func TestSite_AsEnvs(t *testing.T) {
 			fields: fields{
 				Hostname: "somewebsite.nitro",
 				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
+					DisplayErrors            : true,
+					MemoryLimit              : "256M",
+					MaxExecutionTime         : 3000,
+					UploadMaxFileSize        : "128M",
+					MaxInputVars             : 2000,
+					PostMaxSize              : "128M",
+					OpcacheEnable            : true,
+					OpcacheRevalidateFreq    : 60,
+					OpcacheValidateTimestamps: false,
 				},
 				Version: "7.1",
 				Xdebug:  true,
@@ -68,14 +69,15 @@ func TestSite_AsEnvs(t *testing.T) {
 			fields: fields{
 				Hostname: "somewebsite.nitro",
 				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
+					DisplayErrors            : true,
+					MemoryLimit              : "256M",
+					MaxExecutionTime         : 3000,
+					UploadMaxFileSize        : "128M",
+					MaxInputVars             : 2000,
+					PostMaxSize              : "128M",
+					OpcacheEnable            : true,
+					OpcacheRevalidateFreq    : 60,
+					OpcacheValidateTimestamps: false,
 				},
 				Version: "7.4",
 				Xdebug:  true,
@@ -105,14 +107,15 @@ func TestSite_AsEnvs(t *testing.T) {
 			fields: fields{
 				Hostname: "somewebsite.nitro",
 				PHP: PHP{
-					DisplayErrors:         true,
-					MemoryLimit:           "256M",
-					MaxExecutionTime:      3000,
-					UploadMaxFileSize:     "128M",
-					MaxInputVars:          2000,
-					PostMaxSize:           "128M",
-					OpcacheEnable:         true,
-					OpcacheRevalidateFreq: 60,
+					DisplayErrors            : true,
+					MemoryLimit              : "256M",
+					MaxExecutionTime         : 3000,
+					UploadMaxFileSize        : "128M",
+					MaxInputVars             : 2000,
+					PostMaxSize              : "128M",
+					OpcacheEnable            : true,
+					OpcacheRevalidateFreq    : 60,
+					OpcacheValidateTimestamps: false,
 				},
 			},
 			want: []string{
@@ -820,6 +823,11 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 			case "opcache_enable":
 				if site.PHP.OpcacheEnable != tt.args.value {
 					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheEnable)
+				}
+			}
+			case "opcache_validate_timestamps":
+				if site.PHP.OpcacheValidateTimestamps != tt.args.value {
+					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheValidateTimestamps)
 				}
 			}
 		})

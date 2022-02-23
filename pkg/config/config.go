@@ -760,7 +760,7 @@ func phpVars(php PHP, version string) []string {
 	}
 
 	if php.OpcacheValidateTimestamps {
-		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
+		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS=1")
 	} else {
 		envs = append(envs, "PHP_OPCACHE_VALIDATE_TIMESTAMPS="+DefaultEnvs["PHP_OPCACHE_VALIDATE_TIMESTAMPS"])
 	}
