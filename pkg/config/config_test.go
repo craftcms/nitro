@@ -824,7 +824,6 @@ func TestConfig_SetPHPBoolSetting(t *testing.T) {
 				if site.PHP.OpcacheEnable != tt.args.value {
 					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheEnable)
 				}
-			}
 			case "opcache_validate_timestamps":
 				if site.PHP.OpcacheValidateTimestamps != tt.args.value {
 					t.Errorf("expected the setting to be %v, got %v", tt.args.value, site.PHP.OpcacheValidateTimestamps)
