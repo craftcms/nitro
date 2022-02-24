@@ -176,8 +176,7 @@ func checkEnvs(site config.Site, blackfire config.Blackfire, envs []string) bool
 					return false
 				}
 			case "PHP_OPCACHE_VALIDATE_TIMESTAMPS":
-				// if there is a custom value
-				if !site.PHP.OpcacheValidateTimestamps && val != config.DefaultEnvs[env] {
+				if (site.PHP.OpcacheValidateTimestamps && val == config.DefaultEnvs[env]) || (!site.PHP.OpcacheValidateTimestamps && val != config.DefaultEnvs[env]) {
 					return false
 				}
 			case "XDEBUG_MODE":

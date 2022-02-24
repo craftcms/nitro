@@ -1,5 +1,10 @@
 # Release Notes for Craft Nitro
 
+## Unreleased
+
+### Fixed
+- Fixed a bug where `opcache_validate_timestamps` isn't correctly set. ([#435](https://github.com/craftcms/nitro/issues/435))
+
 ## 2.0.9 - 2022-02-15
 
 ### Added
