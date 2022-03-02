@@ -110,6 +110,10 @@ RUN chown -R ${IMAGE_USER}:${IMAGE_USER} /etc/nginx/conf.d/ && \
 
 # set permissions for the user on the php logs
 RUN touch /var/log/php${PHP_VERSION}-fpm.log && chown -R ${IMAGE_USER}:${IMAGE_USER} /var/log/php${PHP_VERSION}-fpm.log
+
+# log PHP errors
+RUN sed -i -e "/^error_log = /s#/var/log/php${PHP_VERSION}-fpm.log#/proc/self/fd/2#" /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+
 # set permissions on php-fpm directories
 RUN mkdir -p /run/php/ && touch /run/php/php${PHP_VERSION}-fpm.sock && chown -R ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.sock
 RUN touch /run/php/php${PHP_VERSION}-fpm.pid && chown ${IMAGE_USER}:${IMAGE_USER} /run/php/php${PHP_VERSION}-fpm.pid
