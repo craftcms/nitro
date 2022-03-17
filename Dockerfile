@@ -7,6 +7,7 @@ ARG NITRO_VERSION
 ENV NITRO_VERSION=${NITRO_VERSION}
 WORKDIR /go/src/github.com/craftcms/nitro
 COPY . .
+RUN apk --no-cache add git
 RUN GOOS=linux go build -ldflags="-s -w -X 'github.com/craftcms/nitro/pkg/api/api.Version=${NITRO_VERSION}'" -o nitrod ./cmd/nitrod
 
 # build the final image
