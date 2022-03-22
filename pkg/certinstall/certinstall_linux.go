@@ -95,7 +95,7 @@ func Install(file, system string) error {
 
 func identify(description string) (string, error) {
 	// detect arch systems
-	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") {
+	if strings.Contains(description, "Manjaro") || strings.Contains(description, "Arch Linux") || strings.Contains(description, "Garuda Linux") {
 		return "arch", nil
 	}
 
