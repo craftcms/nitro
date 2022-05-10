@@ -138,13 +138,13 @@ func NewCommand(home string, docker client.CommonAPIClient, getter downloader.Ge
 
 					// update the env
 					update, err := envedit.Edit(envFilePath, map[string]string{
-						"SECURITY_KEY": key.String(),
-						"DB_SERVER":    dbhost,
-						"DB_DATABASE":  dbname,
-						"DB_PORT":      port,
-						"DB_DRIVER":    driver,
-						"DB_USER":      "nitro",
-						"DB_PASSWORD":  "nitro",
+						"CRAFT_SECURITY_KEY": key.String(),
+						"CRAFT_DB_SERVER":    dbhost,
+						"CRAFT_DB_DATABASE":  dbname,
+						"CRAFT_DB_PORT":      port,
+						"CRAFT_DB_DRIVER":    driver,
+						"CRAFT_DB_USER":      "nitro",
+						"CRAFT_DB_PASSWORD":  "nitro",
 					})
 					if err != nil {
 						output.Info("unable to edit the env")

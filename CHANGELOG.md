@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Fixed
+- Fixed a bug where the `create` command was not setting correct environment variables names for Craft 4. ([#464](https://github.com/craftcms/nitro/issues/435))
 - Fixed a bug where `opcache_validate_timestamps` isn't correctly set. ([#435](https://github.com/craftcms/nitro/issues/435))
 
 ## 2.0.9 - 2022-02-15
