@@ -1,6 +1,6 @@
 .PHONY: docker docs
 
-VERSION ?= 2.0.9
+VERSION ?= 2.0.10
 
 build:
 	go build -buildvcs=false -trimpath -ldflags="-s -w -X 'github.com/craftcms/nitro/command/version.Version=${VERSION}'" -o nitro ./cmd/nitro
