@@ -167,7 +167,7 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 
 			// append the aliases
 			for _, a := range site.Aliases {
-				ngrokArgs = append(ngrokArgs, "-host-header="+a)
+				ngrokArgs = append(ngrokArgs, "--host-header="+a)
 			}
 
 			// set the region
