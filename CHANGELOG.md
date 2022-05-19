@@ -1,6 +1,6 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.10 - 2022-05-19
 
 ### Fixed
 - Fixed a bug where the `create` command wasn’t setting correct environment variable names for Craft 4. ([#464](https://github.com/craftcms/nitro/issues/435))
