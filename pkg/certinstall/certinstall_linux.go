@@ -87,7 +87,7 @@ func Install(file, system string) error {
 	if dist, exists := os.LookupEnv("WSL_DISTRO_NAME"); exists {
 		user := os.Getenv("USER")
 		fmt.Println("Users on WSL will need to open an elevated (run as administrator) Command Prompt or terminal on Windows and run the following command:")
-		fmt.Println(fmt.Printf(`certutil -addstore -f "Root" \\wsl$\%s\home\%s\.nitro\nitro.crt`, dist, user))
+		fmt.Printf(`certutil -addstore -f "Root" \\wsl$\%s\home\%s\.nitro\nitro.crt`+"\n", dist, user)
 	}
 
 	return nil
