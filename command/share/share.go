@@ -163,11 +163,11 @@ func NewCommand(home string, docker client.CommonAPIClient, output terminal.Outp
 			ngrokArgs := []string{"http"}
 
 			// set the main hostname
-			ngrokArgs = append(ngrokArgs, "-host-header="+site.Hostname)
+			ngrokArgs = append(ngrokArgs, "--host-header="+site.Hostname)
 
 			// append the aliases
 			for _, a := range site.Aliases {
-				ngrokArgs = append(ngrokArgs, "-host-header="+a)
+				ngrokArgs = append(ngrokArgs, "--host-header="+a)
 			}
 
 			// set the region

@@ -1,6 +1,14 @@
 # Release Notes for Craft Nitro
 
-## Unreleased
+## 2.0.10 - 2022-05-19
+
+### Fixed
+- Fixed a bug where the `create` command wasn’t setting correct environment variable names for Craft 4. ([#464](https://github.com/craftcms/nitro/issues/435))
+- Fixed a bug where `opcache_validate_timestamps` wasn’t getting set correctly. ([#435](https://github.com/craftcms/nitro/issues/435))
+- Fixed a bug where the `share` command wasn’t working with Ngrok 3. ([#466](https://github.com/craftcms/nitro/issues/466))
+- Fixed an error that could occur when executing the `trust` command when using WSL. ([#461](https://github.com/craftcms/nitro/issues/461))
+
+## 2.0.9 - 2022-02-15
 
 ### Added
 - Added support for PHP 8.1.
