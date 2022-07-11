@@ -4,7 +4,8 @@
 
 Nitro is a speedy local development environment that’s tuned for [Craft CMS](https://craftcms.com/), powered by [Docker](https://www.docker.com/).
 
-Learn more at [craftcms.com/docs/nitro](https://craftcms.com/docs/nitro/).
+> **Warning**
+> Nitro has been retired. Read more in our blog post, [Retiring Craft Nitro](https://craftcms.com/blog/retiring-craft-nitro).
 
 ---
 
